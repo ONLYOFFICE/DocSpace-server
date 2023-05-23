@@ -340,7 +340,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
         await _providerInfo.CacheResetAsync(fromFolderId);
         await _providerInfo.CacheResetAsync(_dao.GetId(toFolder));
 
-        return _dao.MakeThirdId(_dao.GetId(folder));
+        return _dao.MakeId(_dao.GetId(folder));
     }
 
     public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, CancellationToken? cancellationToken)
