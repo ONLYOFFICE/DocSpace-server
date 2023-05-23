@@ -474,7 +474,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
             await _providerInfo.CacheResetAsync(parentFolderId);
         }
 
-        return _dao.MakeThirdId(_dao.GetId(thirdFolder));
+        return _dao.MakeId(_dao.GetId(thirdFolder));
     }
 
     public async Task<bool> IsEmptyAsync(string folderId)
