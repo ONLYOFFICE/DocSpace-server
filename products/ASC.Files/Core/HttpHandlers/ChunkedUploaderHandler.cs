@@ -154,6 +154,10 @@ public class ChunkedUploaderHandlerService
                     return;
             }
         }
+        catch (System.Text.Json.JsonException)
+        {
+            throw;
+        }
         catch (FileNotFoundException error)
         {
             _logger.ErrorChunkedUploaderHandlerService(error);
