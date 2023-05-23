@@ -205,6 +205,7 @@ public class File<T> : FileEntry<T>, IFileEntry<T>
         }
     }
 
+    [JsonIgnore]
     public object NativeAccessor { get; set; }
 }
 
