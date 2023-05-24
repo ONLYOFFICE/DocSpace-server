@@ -571,7 +571,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
     {
-        var thirdFileId = Dao.MakeThirdId(_daoSelector.ConvertId(fileId));
+        var thirdFileId = Dao.MakeThirdId(fileId);
 
         var storage = await ProviderInfo.StorageAsync;
         return await storage.GetThumbnailAsync(thirdFileId, width, height);
