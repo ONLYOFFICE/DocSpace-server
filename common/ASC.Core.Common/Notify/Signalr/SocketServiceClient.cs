@@ -38,7 +38,7 @@ public class SocketServiceClient
     private readonly byte[] _sKey;
     private readonly string _url;
 
-    public virtual string Hub { get => "default"; }
+    public virtual string Hub { get => "mail"; }
 
     public SocketServiceClient(
         ILogger<SocketServiceClient> logger,
