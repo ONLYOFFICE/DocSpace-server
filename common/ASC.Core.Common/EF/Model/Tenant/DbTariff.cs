@@ -110,7 +110,6 @@ public static class DbTariffExtension
             entity.Property(e => e.Stamp).HasColumnName("stamp");
 
             entity.Property(e => e.CustomerId)
-                .IsRequired()
                 .HasColumnName("customer_id")
                 .HasMaxLength(255)
                 .HasDefaultValueSql("NULL");

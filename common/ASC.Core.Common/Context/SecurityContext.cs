@@ -244,13 +244,13 @@ public class SecurityContext
             }
 
             // for LDAP users only
-            if (u.Sid != null)
-            {
-                if (!_tenantManager.GetTenantQuota(tenant.Id).Ldap)
-                {
-                    throw new BillingException("Your tariff plan does not support this option.", "Ldap");
-                }
-            }
+            //if (u.Sid != null)
+            //{
+            //    if (!_tenantManager.GetTenantQuota(tenant.Id).Ldap)
+            //    {
+            //        throw new BillingException("Your tariff plan does not support this option.", "Ldap");
+            //    }
+            //}
 
             if (_userManager.IsUserInGroup(u.Id, Users.Constants.GroupAdmin.ID))
             {
