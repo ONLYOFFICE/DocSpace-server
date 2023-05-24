@@ -29,10 +29,44 @@ using MimeMapping = ASC.Common.Web.MimeMapping;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
+public enum ResumableUploadSessionStatus
+{
+    None,
+    Started,
+    Completed,
+    Aborted
+}
+
 [Transient]
 internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, IGoogleDriveItemStorage<DriveFile>, IDisposable
 {
+    private const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
+    private readonly IHttpClientFactory _clientFactory;
+    private readonly ConsumerFactory _consumerFactory;
+    private readonly FileUtility _fileUtility;
+    private readonly ILogger _logger;
+    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
+    private readonly TempStream _tempStream;
+    private DriveService _driveService;
     private OAuth20Token _token;
+
+    public GoogleDriveStorage(
+        ConsumerFactory consumerFactory,
+        FileUtility fileUtility,
+        ILoggerProvider monitor,
+        TempStream tempStream,
+        OAuth20TokenHelper oAuth20TokenHelper,
+        IHttpClientFactory clientFactory)
+    {
+        _consumerFactory = consumerFactory;
+        _fileUtility = fileUtility;
+        _logger = monitor.CreateLogger("ASC.Files");
+        _tempStream = tempStream;
+        _clientFactory = clientFactory;
+        _oAuth20TokenHelper = oAuth20TokenHelper;
+    }
+
+    public bool IsOpened { get; private set; }
 
     private string AccessToken
     {
@@ -51,35 +85,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
             return _token.AccessToken;
         }
     }
-
-    private readonly ILogger _logger;
-    public bool IsOpened { get; private set; }
-
-    private DriveService _driveService;
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly FileUtility _fileUtility;
-    private readonly TempStream _tempStream;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
-
-    public const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
-
-    public GoogleDriveStorage(
-        ConsumerFactory consumerFactory,
-        FileUtility fileUtility,
-        ILoggerProvider monitor,
-        TempStream tempStream,
-        OAuth20TokenHelper oAuth20TokenHelper,
-        IHttpClientFactory clientFactory)
-    {
-        _consumerFactory = consumerFactory;
-        _fileUtility = fileUtility;
-        _logger = monitor.CreateLogger("ASC.Files");
-        _tempStream = tempStream;
-        _clientFactory = clientFactory;
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
-
+    
     public void Open(OAuth20Token token)
     {
         if (IsOpened)
@@ -122,15 +128,192 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
 
         IsOpened = false;
     }
-
-    public string GetRootFolderId()
+    
+    public async Task<bool> CheckAccessAsync()
     {
-        var rootFolder = _driveService.Files.Get("root").Execute();
-
-        return rootFolder.Id;
+        try
+        {
+            var rootFolder = await GetFolderAsync("root");
+            return !string.IsNullOrEmpty(rootFolder.Id);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
     }
 
-    public async Task<DriveFile> GetItemAsync(string itemId)
+    public Task<DriveFile> CreateFileAsync(Stream fileStream, string title, string parentId)
+    {
+        return InsertEntryAsync(fileStream, title, parentId);
+    }
+
+    public Task<DriveFile> CopyFileAsync(string fileId, string newFileName, string toFolderId)
+    {
+        return InternalCopyFileAsync(toFolderId, fileId, newFileName);
+    }
+    
+    public async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream)
+    {
+        var file = await GetFileAsync(fileId);
+        return await SaveStreamAsync(fileId, fileStream, file.Name);
+    }
+
+    public Task<DriveFile> GetFileAsync(string fileId)
+    {
+        return GetItemAsync(fileId);
+    }
+    
+    public Task<Stream> DownloadStreamAsync(DriveFile file, int offset = 0)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        return InternalDownloadStreamAsync(file, offset);
+    }
+    
+    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    {
+        try
+        {
+            var url = $"https://lh3.google.com/u/0/d/{fileId}=w{width}-h{height}-p-k-nu-iv1";
+            var httpClient = _driveService.HttpClient;
+            var response = await httpClient.GetAsync(url);
+            return await response.Content.ReadAsStreamAsync();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+    
+    public Task<DriveFile> RenameFileAsync(string fileId, string newName)
+    {
+        return RenameEntryAsync(fileId, newName);
+    }
+    
+    public Task<DriveFile> MoveFileAsync(string fileId, string newFileName, string toFolderId)
+    {
+        return MoveEntryAsync(fileId, newFileName, toFolderId);
+    }
+    
+    public Task<DriveFile> CreateFolderAsync(string title, string parentId)
+    {
+        return InsertEntryAsync(null, title, parentId, true);
+    }
+
+    public Task<DriveFile> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
+    {
+        return InternalCopyFolderAsync(folderId, newFolderName, toFolderId);
+    }
+    
+    public Task<DriveFile> GetFolderAsync(string folderId)
+    {
+        return GetItemAsync(folderId);
+    }
+    
+    public Task<DriveFile> RenameFolderAsync(string folderId, string newName)
+    {
+        return RenameEntryAsync(folderId, newName);
+    }
+    
+    public Task<DriveFile> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
+    {
+        return MoveEntryAsync(folderId, newFolderName, toFolderId);
+    }
+
+    public Task<List<DriveFile>> GetItemsAsync(string folderId)
+    {
+        return GetItemsInternalAsync(folderId);
+    }
+
+    public Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folders)
+    {
+        return GetItemsInternalAsync(folderId, folders);
+    }
+    
+    public Task DeleteItemAsync(DriveFile entry)
+    {
+        return _driveService.Files.Delete(entry.Id).ExecuteAsync();
+    }
+    
+    public async Task<long> GetMaxUploadSizeAsync()
+    {
+        var request = _driveService.About.Get();
+        request.Fields = "maxUploadSize";
+        var about = await request.ExecuteAsync();
+
+        return about.MaxUploadSize ?? MaxChunkedUploadFileSize;
+    }
+
+    public void Dispose()
+    {
+        if (_driveService != null)
+        {
+            _driveService.Dispose();
+        }
+    }
+
+    public DriveFile FileConstructor(string title = null, string mimeType = null, string folderId = null)
+    {
+        var file = new DriveFile();
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            file.Name = title;
+        }
+
+        if (!string.IsNullOrEmpty(mimeType))
+        {
+            file.MimeType = mimeType;
+        }
+
+        if (!string.IsNullOrEmpty(folderId))
+        {
+            file.Parents = new List<string> { folderId };
+        }
+
+        return file;
+    }
+
+    public Task<ResumableUploadSession> CreateResumableSessionAsync(DriveFile driveFile, long contentLength)
+    {
+        ArgumentNullException.ThrowIfNull(driveFile);
+
+        return InternalCreateResumableSessionAsync(driveFile, contentLength);
+    }
+
+    public Task TransferAsync(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+
+        if (googleDriveSession.Status != ResumableUploadSessionStatus.Started)
+        {
+            throw new InvalidOperationException("Can't upload chunk for given upload session.");
+        }
+
+        return InternalTransferAsync(googleDriveSession, stream, chunkLength, lastChunk);
+    }
+
+    private async Task<DriveFile> InternalCopyFileAsync(string toFolderId, string originEntryId, string newTitle)
+    {
+        var body = FileConstructor(folderId: toFolderId, title: newTitle);
+        try
+        {
+            var request = _driveService.Files.Copy(body, originEntryId);
+            request.Fields = GoogleLoginProvider.FilesFields;
+
+            return await request.ExecuteAsync();
+        }
+        catch (GoogleApiException ex)
+        {
+            if (ex.HttpStatusCode == HttpStatusCode.Forbidden)
+            {
+                throw new SecurityException(ex.Error.Message);
+            }
+            throw;
+        }
+    }
+
+    private async Task<DriveFile> GetItemAsync(string itemId)
     {
         try
         {
@@ -147,31 +330,6 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
             }
             throw;
         }
-    }
-
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
-    {
-        try
-        {
-            var url = $"https://lh3.google.com/u/0/d/{fileId}=w{width}-h{height}-p-k-nu-iv1";
-            var httpClient = _driveService.HttpClient;
-            var response = await httpClient.GetAsync(url);
-            return await response.Content.ReadAsStreamAsync();
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    public Task<List<DriveFile>> GetItemsAsync(string folderId)
-    {
-        return GetItemsInternalAsync(folderId);
-    }
-
-    public Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folders)
-    {
-        return GetItemsInternalAsync(folderId, folders);
     }
 
     private async Task<List<DriveFile>> GetItemsInternalAsync(string folderId, bool? folders = null)
@@ -209,11 +367,97 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         return files;
     }
 
-    public Task<Stream> DownloadStreamAsync(DriveFile file, int offset = 0)
+    private async Task<DriveFile> InsertEntryAsync(Stream fileStream, string title, string parentId, bool folder = false)
     {
-        ArgumentNullException.ThrowIfNull(file);
+        var mimeType = folder ? GoogleLoginProvider.GoogleDriveMimeTypeFolder : MimeMapping.GetMimeMapping(title);
 
-        return InternalDownloadStreamAsync(file, offset);
+        var body = FileConstructor(title, mimeType, parentId);
+
+        if (folder)
+        {
+            var requestFolder = _driveService.Files.Create(body);
+            requestFolder.Fields = GoogleLoginProvider.FilesFields;
+
+            return await requestFolder.ExecuteAsync();
+        }
+
+        var request = _driveService.Files.Create(body, fileStream, mimeType);
+        request.Fields = GoogleLoginProvider.FilesFields;
+
+        var result = await request.UploadAsync();
+        if (result.Exception != null)
+        {
+            if (request.ResponseBody == null)
+            {
+                throw result.Exception;
+            }
+
+            _logger.ErrorWhileTryingToInsertEntity(result.Exception);
+        }
+
+        return request.ResponseBody;
+    }
+
+    private async Task<DriveFile> InternalCopyFolderAsync(string folderId, string newFolderName, string toFolderId)
+    {
+        var newFolder = await InsertEntryAsync(null, newFolderName, toFolderId, true);
+        var items = await GetItemsAsync(folderId);
+
+        foreach (var item in items)
+        {
+            if (item.MimeType == GoogleLoginProvider.GoogleDriveMimeTypeFolder)
+            {
+                await InternalCopyFolderAsync(item.Id, item.Name, newFolder.Id);
+            }
+            else
+            {
+                await InternalCopyFileAsync(newFolder.Id, item.Id, item.Name);
+            }
+        }
+
+        return newFolder;
+    }
+    
+    private async Task<ResumableUploadSession> InternalCreateResumableSessionAsync(DriveFile driveFile, long contentLength)
+    {
+        var fileId = string.Empty;
+        var method = "POST";
+        var body = string.Empty;
+        var folderId = driveFile.Parents.FirstOrDefault();
+
+        if (driveFile.Id != null)
+        {
+            fileId = "/" + driveFile.Id;
+            method = "PATCH";
+        }
+        else
+        {
+            var titleData = !string.IsNullOrEmpty(driveFile.Name) ? $"\"name\":\"{driveFile.Name}\"" : "";
+            var parentData = !string.IsNullOrEmpty(folderId) ? $",\"parents\":[\"{folderId}\"]" : "";
+
+            body = !string.IsNullOrEmpty(titleData + parentData) ? "{" + titleData + parentData + "}" : "";
+        }
+
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable"),
+            Method = new HttpMethod(method)
+        };
+        request.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(driveFile.Name));
+        request.Headers.Add("X-Upload-Content-Length", contentLength.ToString(CultureInfo.InvariantCulture));
+        request.Headers.Add("Authorization", "Bearer " + AccessToken);
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+
+        var httpClient = _clientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+
+        var uploadSession = new ResumableUploadSession(driveFile.Id, folderId, contentLength)
+        {
+            Location = response.Headers.Location.ToString(),
+            Status = ResumableUploadSessionStatus.Started
+        };
+
+        return uploadSession;
     }
 
     private async Task<Stream> InternalDownloadStreamAsync(DriveFile file, int offset = 0)
@@ -257,201 +501,15 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
 
         return tempBuffer;
     }
-
-    public async Task<DriveFile> InsertEntryAsync(Stream fileStream, string title, string parentId, bool folder = false)
+    private Task<DriveFile> MoveEntryAsync(string entryId, string newEntryName, string toFolderId)
     {
-        var mimeType = folder ? GoogleLoginProvider.GoogleDriveMimeTypeFolder : MimeMapping.GetMimeMapping(title);
-
-        var body = FileConstructor(title, mimeType, parentId);
-
-        if (folder)
-        {
-            var requestFolder = _driveService.Files.Create(body);
-            requestFolder.Fields = GoogleLoginProvider.FilesFields;
-
-            return await requestFolder.ExecuteAsync();
-        }
-
-        var request = _driveService.Files.Create(body, fileStream, mimeType);
-        request.Fields = GoogleLoginProvider.FilesFields;
-
-        var result = await request.UploadAsync();
-        if (result.Exception != null)
-        {
-            if (request.ResponseBody == null)
-            {
-                throw result.Exception;
-            }
-
-            _logger.ErrorWhileTryingToInsertEntity(result.Exception);
-        }
-
-        return request.ResponseBody;
-    }
-    public Task DeleteItemAsync(DriveFile entry)
-    {
-        return _driveService.Files.Delete(entry.Id).ExecuteAsync();
-    }
-
-    public DriveFile InsertEntryIntoFolder(DriveFile entry, string folderId)
-    {
-        var request = _driveService.Files.Update(FileConstructor(), entry.Id);
-        request.AddParents = folderId;
-        request.Fields = GoogleLoginProvider.FilesFields;
-
-        return request.Execute();
-    }
-
-    public Task<DriveFile> InsertEntryIntoFolderAsync(DriveFile entry, string folderId)
-    {
-        var request = _driveService.Files.Update(FileConstructor(), entry.Id);
-        request.AddParents = folderId;
+        var request = _driveService.Files.Update(FileConstructor(title: newEntryName), entryId);
+        request.AddParents = toFolderId;
         request.Fields = GoogleLoginProvider.FilesFields;
 
         return request.ExecuteAsync();
     }
-
-    public Task<DriveFile> RemoveEntryFromFolderAsync(DriveFile entry, string folderId)
-    {
-        var request = _driveService.Files.Update(FileConstructor(), entry.Id);
-        request.RemoveParents = folderId;
-        request.Fields = GoogleLoginProvider.FilesFields;
-
-        return request.ExecuteAsync();
-    }
-
-    public async Task<DriveFile> CopyEntryAsync(string toFolderId, string originEntryId, string newTitle)
-    {
-        var body = FileConstructor(folderId: toFolderId, title: newTitle);
-        try
-        {
-            var request = _driveService.Files.Copy(body, originEntryId);
-            request.Fields = GoogleLoginProvider.FilesFields;
-
-            return await request.ExecuteAsync();
-        }
-        catch (GoogleApiException ex)
-        {
-            if (ex.HttpStatusCode == HttpStatusCode.Forbidden)
-            {
-                throw new SecurityException(ex.Error.Message);
-            }
-            throw;
-        }
-    }
-
-    public Task<DriveFile> RenameEntryAsync(string fileId, string newTitle)
-    {
-        var request = _driveService.Files.Update(FileConstructor(newTitle), fileId);
-        request.Fields = GoogleLoginProvider.FilesFields;
-
-        return request.ExecuteAsync();
-    }
-
-    public async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream, string fileTitle)
-    {
-        var mimeType = MimeMapping.GetMimeMapping(fileTitle);
-        var file = FileConstructor(fileTitle, mimeType);
-
-        var request = _driveService.Files.Update(file, fileId, fileStream, mimeType);
-        request.Fields = GoogleLoginProvider.FilesFields;
-        var result = await request.UploadAsync();
-        if (result.Exception != null)
-        {
-            if (request.ResponseBody == null)
-            {
-                throw result.Exception;
-            }
-
-            _logger.ErrorWhileTryingToInsertEntity(result.Exception);
-        }
-
-        return request.ResponseBody;
-    }
-
-    public DriveFile FileConstructor(string title = null, string mimeType = null, string folderId = null)
-    {
-        var file = new DriveFile();
-
-        if (!string.IsNullOrEmpty(title))
-        {
-            file.Name = title;
-        }
-
-        if (!string.IsNullOrEmpty(mimeType))
-        {
-            file.MimeType = mimeType;
-        }
-
-        if (!string.IsNullOrEmpty(folderId))
-        {
-            file.Parents = new List<string> { folderId };
-        }
-
-        return file;
-    }
-
-    public Task<ResumableUploadSession> CreateResumableSessionAsync(DriveFile driveFile, long contentLength)
-    {
-        ArgumentNullException.ThrowIfNull(driveFile);
-
-        return InternalCreateResumableSessionAsync(driveFile, contentLength);
-    }
-
-    private async Task<ResumableUploadSession> InternalCreateResumableSessionAsync(DriveFile driveFile, long contentLength)
-    {
-        var fileId = string.Empty;
-        var method = "POST";
-        var body = string.Empty;
-        var folderId = driveFile.Parents.FirstOrDefault();
-
-        if (driveFile.Id != null)
-        {
-            fileId = "/" + driveFile.Id;
-            method = "PATCH";
-        }
-        else
-        {
-            var titleData = !string.IsNullOrEmpty(driveFile.Name) ? $"\"name\":\"{driveFile.Name}\"" : "";
-            var parentData = !string.IsNullOrEmpty(folderId) ? $",\"parents\":[\"{folderId}\"]" : "";
-
-            body = !string.IsNullOrEmpty(titleData + parentData) ? "{" + titleData + parentData + "}" : "";
-        }
-
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(GoogleLoginProvider.GoogleUrlFileUpload + fileId + "?uploadType=resumable"),
-            Method = new HttpMethod(method)
-        };
-        request.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(driveFile.Name));
-        request.Headers.Add("X-Upload-Content-Length", contentLength.ToString(CultureInfo.InvariantCulture));
-        request.Headers.Add("Authorization", "Bearer " + AccessToken);
-        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
-
-        var httpClient = _clientFactory.CreateClient();
-        using var response = await httpClient.SendAsync(request);
-
-        var uploadSession = new ResumableUploadSession(driveFile.Id, folderId, contentLength)
-        {
-            Location = response.Headers.Location.ToString(),
-            Status = ResumableUploadSessionStatus.Started
-        };
-
-        return uploadSession;
-    }
-
-    public Task TransferAsync(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
-    {
-        ArgumentNullException.ThrowIfNull(stream);
-
-        if (googleDriveSession.Status != ResumableUploadSessionStatus.Started)
-        {
-            throw new InvalidOperationException("Can't upload chunk for given upload session.");
-        }
-
-        return InternalTransferAsync(googleDriveSession, stream, chunkLength, lastChunk);
-    }
-
+    
     private async Task InternalTransferAsync(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
     {
         var request = new HttpRequestMessage
@@ -536,128 +594,39 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         }
     }
 
-    public long GetMaxUploadSize()
+    private Task<DriveFile> RenameEntryAsync(string fileId, string newTitle)
     {
-        var request = _driveService.About.Get();
-        request.Fields = "maxUploadSize";
-        var about = request.Execute();
+        var request = _driveService.Files.Update(FileConstructor(newTitle), fileId);
+        request.Fields = GoogleLoginProvider.FilesFields;
 
-        return about.MaxUploadSize ?? MaxChunkedUploadFileSize;
+        return request.ExecuteAsync();
     }
 
-    public async Task<long> GetMaxUploadSizeAsync()
+    private async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream, string fileTitle)
     {
-        var request = _driveService.About.Get();
-        request.Fields = "maxUploadSize";
-        var about = await request.ExecuteAsync();
+        var mimeType = MimeMapping.GetMimeMapping(fileTitle);
+        var file = FileConstructor(fileTitle, mimeType);
 
-        return about.MaxUploadSize ?? MaxChunkedUploadFileSize;
-    }
-
-    public void Dispose()
-    {
-        if (_driveService != null)
+        var request = _driveService.Files.Update(file, fileId, fileStream, mimeType);
+        request.Fields = GoogleLoginProvider.FilesFields;
+        var result = await request.UploadAsync();
+        if (result.Exception != null)
         {
-            _driveService.Dispose();
+            if (request.ResponseBody == null)
+            {
+                throw result.Exception;
+            }
+
+            _logger.ErrorWhileTryingToInsertEntity(result.Exception);
         }
+
+        return request.ResponseBody;
     }
-
-    public Task<DriveFile> GetFolderAsync(string folderId)
-    {
-        return GetItemAsync(folderId);
-    }
-
-    public Task<DriveFile> GetFileAsync(string fileId)
-    {
-        return GetItemAsync(fileId);
-    }
-
-    public Task<DriveFile> CreateFolderAsync(string title, string parentId)
-    {
-        return InsertEntryAsync(null, title, parentId, true);
-    }
-
-    public Task<DriveFile> CreateFileAsync(Stream fileStream, string title, string parentId)
-    {
-        return InsertEntryAsync(fileStream, title, parentId);
-    }
-
-    public async Task<DriveFile> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
-    {
-        var folder = await GetFileAsync(folderId);
-        var newFolder = await CopyEntryAsync(toFolderId, folderId, newFolderName);
-
-        await DeleteItemAsync(folder);
-        return newFolder;
-    }
-
-    public async Task<DriveFile> MoveFileAsync(string fileId, string newFileName, string toFolderId)
-    {
-        var file = await GetFileAsync(fileId);
-        var newFile = await CopyEntryAsync(toFolderId, fileId, newFileName);
-        
-        await DeleteItemAsync(file);
-        return newFile;
-    }
-
-    public Task<DriveFile> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
-    {
-        return CopyEntryAsync(toFolderId, folderId, newFolderName);
-    }
-
-    public Task<DriveFile> CopyFileAsync(string fileId, string newFileName, string toFolderId)
-    {
-        return CopyEntryAsync(toFolderId, fileId, newFileName);
-    }
-
-    public Task<DriveFile> RenameFolderAsync(string folderId, string newName)
-    {
-        return RenameEntryAsync(folderId, newName);
-    }
-
-    public Task<DriveFile> RenameFileAsync(string fileId, string newName)
-    {
-        return RenameEntryAsync(fileId, newName);
-    }
-
-    public async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream)
-    {
-        var file = await GetFileAsync(fileId);
-        return await SaveStreamAsync(fileId, fileStream, file.Name);
-    }
-
-    public async Task<bool> CheckAccessAsync()
-    {
-        try
-        {
-            var rootFolder = await GetFolderAsync("root");
-            return !string.IsNullOrEmpty(rootFolder.Id);
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return false;
-        }
-    }
-}
-
-public enum ResumableUploadSessionStatus
-{
-    None,
-    Started,
-    Completed,
-    Aborted
 }
 
 [Serializable]
 internal class ResumableUploadSession
 {
-    public long BytesToTransfer { get; set; }
-    public long BytesTransfered { get; set; }
-    public string FileId { get; set; }
-    public string FolderId { get; set; }
-    public ResumableUploadSessionStatus Status { get; set; }
-    public string Location { get; set; }
-
     public ResumableUploadSession(string fileId, string folderId, long bytesToTransfer)
     {
         FileId = fileId;
@@ -665,4 +634,11 @@ internal class ResumableUploadSession
         BytesToTransfer = bytesToTransfer;
         Status = ResumableUploadSessionStatus.None;
     }
+
+    public long BytesToTransfer { get; set; }
+    public long BytesTransfered { get; set; }
+    public string FileId { get; set; }
+    public string FolderId { get; set; }
+    public string Location { get; set; }
+    public ResumableUploadSessionStatus Status { get; set; }
 }
