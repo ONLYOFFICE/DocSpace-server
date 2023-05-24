@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Classes;
-
 namespace ASC.Files.Core.Thirdparty;
 
 [Scope]
@@ -68,11 +66,13 @@ internal class CrossDao //Additional SharpBox
         var tagDao = _serviceProvider.GetService<ITagDao<TFrom>>();
         var globalStore = _serviceProvider.GetService<GlobalStore>();
 
-        var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFile);
-        var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFile);
-        var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
-        var fromFileFavoriteTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Favorite).ToListAsync();
-        var fromFileTemplateTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Template).ToListAsync();
+        var fromFileCopy = (File<TFrom>)fromFile.Clone();
+
+        var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
+        var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
+        var fromFileLockTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var fromFileFavoriteTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Favorite).ToListAsync();
+        var fromFileTemplateTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Template).ToListAsync();
 
         var toFile = _serviceProvider.GetService<File<TTo>>();
 
