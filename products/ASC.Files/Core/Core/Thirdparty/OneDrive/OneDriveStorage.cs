@@ -106,11 +106,6 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
     public static readonly string RootPath = "/drive/root:";
     public static readonly string ApiVersion = "v1.0";
 
-    public static string MakeOneDrivePath(string parentPath, string name)
-    {
-        return (parentPath ?? "") + "/" + (name ?? "");
-    }
-
     public Task<Item> GetItemAsync(string itemId)
     {
         try
@@ -173,12 +168,21 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
     }
 
 
-    public Task<Item> CreateFileAsync(Stream fileStream, string title, string parentPath)
+    public async Task<Item> CreateFileAsync(Stream fileStream, string title, string parentId)
     {
-        return OnedriveClient
+        var parent = await GetFolderAsync(parentId);
+
+        if (parent == null)
+        {
+            return null;
+        }
+
+        var path = $"{parent.ParentReference.Path.Replace(RootPath, string.Empty)}/{parent.Name}/{title}";
+
+        return await OnedriveClient
             .Drive
             .Root
-            .ItemWithPath(MakeOneDrivePath(parentPath, title))
+            .ItemWithPath(path)
             .Content
             .Request()
             .PutAsync<Item>(fileStream);
