@@ -327,7 +327,7 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             requestTitle = requestTitle.Insert(insertIndex, " (1)");
         }
 
-        while (!await isExist(requestTitle, parentFolderId))
+        while (await isExist(requestTitle, parentFolderId))
         {
             requestTitle = re.Replace(requestTitle, MatchEvaluator);
         }
