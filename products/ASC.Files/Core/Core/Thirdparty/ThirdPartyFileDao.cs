@@ -477,7 +477,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
         await ProviderInfo.CacheResetAsync(Dao.GetId(file), true);
         await ProviderInfo.CacheResetAsync(Dao.GetId(toFolder));
-        await ProviderInfo.CacheResetAsync(Dao.GetId(toFolder));
+        await ProviderInfo.CacheResetAsync(fromFolderId);
 
         return Dao.MakeId(Dao.GetId(file));
     }
