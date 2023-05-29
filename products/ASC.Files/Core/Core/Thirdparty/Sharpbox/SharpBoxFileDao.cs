@@ -497,7 +497,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         var newFileId = MakeId(entry);
 
-        await UpdatePathInDBAsync(oldFileId, newFileId);
+        await UpdateIdAsync(oldFileId, newFileId);
 
         return newFileId;
     }
@@ -562,7 +562,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             newFileId = MakeId(entry);
         }
 
-        await UpdatePathInDBAsync(oldFileId, newFileId);
+        await UpdateIdAsync(oldFileId, newFileId);
 
         return newFileId;
     }

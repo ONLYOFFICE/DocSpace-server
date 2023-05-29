@@ -60,6 +60,7 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
 
     public Selector Selector { get; } = Selectors.SharpBox;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.None;
+    public bool MutableEntityId => true;
 
     internal CloudStorage Storage
     {

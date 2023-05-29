@@ -351,7 +351,7 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
 
         var newFolderId = MakeId(entry);
 
-        await UpdatePathInDBAsync(oldFolderId, newFolderId);
+        await UpdateIdAsync(oldFolderId, newFolderId);
 
         return newFolderId;
     }
@@ -456,7 +456,7 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
             }
         }
 
-        await UpdatePathInDBAsync(oldId, newId);
+        await UpdateIdAsync(oldId, newId);
 
         return newId;
     }
