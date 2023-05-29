@@ -86,7 +86,21 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
 
     public string MakeThirdId(object entryId)
     {
-        return Convert.ToString(entryId, CultureInfo.InvariantCulture);
+        var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
+
+        if (string.IsNullOrEmpty(id) || id.StartsWith('/'))
+        {
+            return id;
+        }
+
+        try
+        {
+            return Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(id));
+        }
+        catch
+        {
+            return id;
+        }
     }
 
     public string MakeId(Metadata dropboxItem)
@@ -96,9 +110,12 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
 
     public override string MakeId(string path = null)
     {
-        var p = string.IsNullOrEmpty(path) || path == "/" ? "" : ("-" + path.Replace('/', '|'));
+        if (string.IsNullOrEmpty(path) || path == "/")
+        {
+            return PathPrefix;
+        }
 
-        return $"{PathPrefix}{p}";
+        return path.StartsWith('/') ? $"{PathPrefix}-{WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path))}" : $"{PathPrefix}-{path}";
     }
 
     public string MakeFolderTitle(FolderMetadata dropboxFolder)
