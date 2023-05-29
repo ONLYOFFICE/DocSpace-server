@@ -36,6 +36,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
 {
     public abstract Selector Selector { get; }
     public abstract ProviderFilter ProviderFilter { get; }
+    public virtual bool MutableEntityId => false;
     private readonly DisposableWrapper _wrapper;
     internal readonly ProviderInfoHelper ProviderInfoHelper;
 

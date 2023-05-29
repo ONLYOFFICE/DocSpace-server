@@ -473,13 +473,20 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
         var newTitle = await Dao.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
         var storage = await ProviderInfo.StorageAsync;
-        file = await storage.MoveFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
+        var movedFile = await storage.MoveFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));
 
         await ProviderInfo.CacheResetAsync(Dao.GetId(file), true);
         await ProviderInfo.CacheResetAsync(Dao.GetId(toFolder));
         await ProviderInfo.CacheResetAsync(fromFolderId);
 
-        return Dao.MakeId(Dao.GetId(file));
+        var newId = Dao.MakeId(Dao.GetId(movedFile));
+
+        if (ProviderInfo.MutableEntityId)
+        {
+            await Dao.UpdateIdAsync(Dao.MakeId(file), newId);
+        }
+
+        return newId;
     }
 
     public async Task<File<TTo>> CopyFileAsync<TTo>(string fileId, TTo toFolderId)
@@ -537,7 +544,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
         newTitle = await Dao.GetAvailableTitleAsync(newTitle, Dao.GetParentFolderId(thirdFile), IsExistAsync);
 
         var storage = await ProviderInfo.StorageAsync;
-        thirdFile = await storage.RenameFileAsync(Dao.GetId(thirdFile), newTitle);
+        var renamedThirdFile = await storage.RenameFileAsync(Dao.GetId(thirdFile), newTitle);
 
         await ProviderInfo.CacheResetAsync(Dao.GetId(thirdFile));
         var parentId = Dao.GetParentFolderId(thirdFile);
@@ -546,7 +553,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
             await ProviderInfo.CacheResetAsync(parentId);
         }
 
-        return Dao.MakeId(Dao.GetId(thirdFile));
+        var newId = Dao.MakeId(Dao.GetId(renamedThirdFile));
+
+        if (ProviderInfo.MutableEntityId)
+        {
+            await Dao.UpdateIdAsync(Dao.MakeId(thirdFile), newId);
+        }
+
+        return newId;
     }
 
     public Task<string> UpdateCommentAsync(string fileId, int fileVersion, string comment)

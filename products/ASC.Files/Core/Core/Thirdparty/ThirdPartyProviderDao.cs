@@ -569,6 +569,122 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
             FilterType.ArchiveOnly or
             FilterType.MediaOnly;
     }
+    
+    public async Task UpdateIdAsync(string oldValue, string newValue)
+    {
+        if (oldValue.Equals(newValue))
+        {
+            return;
+        }
+
+        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            using var strategyFilesDbContext = _dbContextFactory.CreateDbContext();
+            using var tx = await strategyFilesDbContext.Database.BeginTransactionAsync();
+            var oldIDs = await Query(strategyFilesDbContext.ThirdpartyIdMapping)
+                .Where(r => r.Id.StartsWith(oldValue))
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            foreach (var oldId in oldIDs)
+            {
+                var oldHashId = await MappingIDAsync(oldId);
+                var newId = oldId.Replace(oldValue, newValue);
+                var newHashId = await MappingIDAsync(newId);
+
+                var mappingForDelete = await Query(strategyFilesDbContext.ThirdpartyIdMapping)
+                    .Where(r => r.HashId == oldHashId)
+                    .ToListAsync();
+
+                var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
+                {
+                    TenantId = m.TenantId,
+                    Id = newId,
+                    HashId = newHashId
+                });
+
+                strategyFilesDbContext.RemoveRange(mappingForDelete);
+                await strategyFilesDbContext.AddRangeAsync(mappingForInsert);
+
+                var securityForDelete = await Query(strategyFilesDbContext.Security)
+                    .Where(r => r.EntryId == oldHashId)
+                    .ToListAsync();
+
+                var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
+                {
+                    TenantId = s.TenantId,
+                    TimeStamp = DateTime.Now,
+                    EntryId = newHashId,
+                    Share = s.Share,
+                    Subject = s.Subject,
+                    EntryType = s.EntryType,
+                    Owner = s.Owner
+                });
+
+                strategyFilesDbContext.RemoveRange(securityForDelete);
+                await strategyFilesDbContext.AddRangeAsync(securityForInsert);
+
+                var linkForDelete = await Query(strategyFilesDbContext.TagLink)
+                    .Where(r => r.EntryId == oldHashId)
+                    .ToListAsync();
+
+                var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
+                {
+                    EntryId = newHashId,
+                    Count = l.Count,
+                    CreateBy = l.CreateBy,
+                    CreateOn = l.CreateOn,
+                    EntryType = l.EntryType,
+                    TagId = l.TagId,
+                    TenantId = l.TenantId
+                });
+
+                strategyFilesDbContext.RemoveRange(linkForDelete);
+                await strategyFilesDbContext.AddRangeAsync(linkForInsert);
+
+
+                var filesSourceForDelete = await Query(strategyFilesDbContext.FilesLink)
+                    .Where(l => l.SourceId == oldHashId)
+                    .ToListAsync();
+
+                var filesSourceForInsert = filesSourceForDelete.Select(l => new DbFilesLink
+                {
+                    TenantId = l.TenantId,
+                    SourceId = newHashId,
+                    LinkedId = l.LinkedId,
+                    LinkedFor = l.LinkedFor,
+                });
+
+                strategyFilesDbContext.RemoveRange(filesSourceForDelete);
+                await strategyFilesDbContext.AddRangeAsync(filesSourceForInsert);
+
+                var filesLinkedForDelete = await Query(strategyFilesDbContext.FilesLink)
+                    .Where(l => l.LinkedId == oldHashId)
+                    .ToListAsync();
+
+                var filesLinkedForInsert = filesLinkedForDelete.Select(l => new DbFilesLink
+                {
+                    TenantId = l.TenantId,
+                    SourceId = l.SourceId,
+                    LinkedId = newHashId,
+                    LinkedFor = l.LinkedFor,
+                });
+
+                strategyFilesDbContext.RemoveRange(filesLinkedForDelete);
+                await strategyFilesDbContext.AddRangeAsync(filesLinkedForInsert);
+
+                await strategyFilesDbContext.SaveChangesAsync();
+
+                await strategyFilesDbContext.ThirdpartyAccount.Where(a => a.FolderId == oldValue)
+                    .ExecuteUpdateAsync(r => r.SetProperty(p => p.FolderId, newValue));
+            }
+
+            await tx.CommitAsync();
+        });
+    }
 
     public abstract string MakeId(string path = null);
 

@@ -334,13 +334,20 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
 
         var newTitle = await _dao.GetAvailableTitleAsync(_dao.GetName(folder), _dao.GetId(toFolder), IsExistAsync);
         var storage = await _providerInfo.StorageAsync;
-        folder = await storage.MoveFolderAsync(_dao.GetId(folder), newTitle, _dao.GetId(toFolder));
+        var movedFolder = await storage.MoveFolderAsync(_dao.GetId(folder), newTitle, _dao.GetId(toFolder));
 
         await _providerInfo.CacheResetAsync(_dao.GetId(folder), false);
         await _providerInfo.CacheResetAsync(fromFolderId);
         await _providerInfo.CacheResetAsync(_dao.GetId(toFolder));
 
-        return _dao.MakeId(_dao.GetId(folder));
+        var newId = _dao.MakeId(_dao.GetId(movedFolder));
+
+        if (_providerInfo.MutableEntityId)
+        {
+            await _dao.UpdateIdAsync(_dao.MakeId(folder), newId);
+        }
+
+        return newId;
     }
 
     public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, CancellationToken? cancellationToken)
@@ -447,6 +454,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
     {
         var thirdFolder = await _dao.GetFolderAsync(folder.Id);
         var parentFolderId = _dao.GetParentFolderId(thirdFolder);
+        var renamedThirdFolder = thirdFolder;
 
         if (_dao.IsRoot(thirdFolder))
         {
@@ -465,7 +473,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
 
             //rename folder
             var storage = await _providerInfo.StorageAsync;
-            thirdFolder = await storage.RenameFolderAsync(_dao.GetId(thirdFolder), newTitle);
+            renamedThirdFolder = await storage.RenameFolderAsync(_dao.GetId(thirdFolder), newTitle);
         }
 
         await _providerInfo.CacheResetAsync(_dao.GetId(thirdFolder));
@@ -474,7 +482,14 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
             await _providerInfo.CacheResetAsync(parentFolderId);
         }
 
-        return _dao.MakeId(_dao.GetId(thirdFolder));
+        var newId = _dao.MakeId(_dao.GetId(renamedThirdFolder));
+
+        if (_providerInfo.MutableEntityId)
+        {
+            await _dao.UpdateIdAsync(_dao.MakeId(thirdFolder), newId);
+        }
+
+        return newId;
     }
 
     public async Task<bool> IsEmptyAsync(string folderId)

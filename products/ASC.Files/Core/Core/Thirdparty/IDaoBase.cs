@@ -53,4 +53,5 @@ internal interface IDaoBase<TFile, TFolder, TItem>
     IQueryable<TSet> Query<TSet>(DbSet<TSet> set) where TSet : class, IDbFile;
     bool CheckInvalidFilter(FilterType filterType);
     Task<string> MappingIDAsync(string id, bool saveIfNotExist = false);
+    Task UpdateIdAsync(string oldValue, string newValue);
 }

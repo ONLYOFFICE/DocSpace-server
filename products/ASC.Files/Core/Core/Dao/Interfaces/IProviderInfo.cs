@@ -45,6 +45,7 @@ public interface IProviderInfo : IDisposable
     void UpdateTitle(string newtitle);
     Selector Selector { get; }
     ProviderFilter ProviderFilter { get; }
+    bool MutableEntityId { get; }
 }
 
 [Transient]
