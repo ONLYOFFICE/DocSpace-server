@@ -223,7 +223,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         return _dropboxClient.Files.DeleteV2Async(dropboxItem.PathDisplay);
     }
 
-    public async Task<FolderMetadata> MoveFolderAsync(string dropboxFolderPath, string dropboxFolderPathTo, string folderName)
+    public async Task<FolderMetadata> MoveFolderAsync(string dropboxFolderPath, string folderName, string dropboxFolderPathTo)
     {
         var pathTo = MakeDropboxPath(dropboxFolderPathTo, folderName);
         var result = await _dropboxClient.Files.MoveV2Async(dropboxFolderPath, pathTo, autorename: true);
@@ -240,7 +240,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         return (FolderMetadata)result.Metadata;
     }
 
-    public async Task<FileMetadata> MoveFileAsync(string dropboxFilePath, string dropboxFolderPathTo, string fileName)
+    public async Task<FileMetadata> MoveFileAsync(string dropboxFilePath, string fileName, string dropboxFolderPathTo)
     {
         var pathTo = MakeDropboxPath(dropboxFolderPathTo, fileName);
         var result = await _dropboxClient.Files.MoveV2Async(dropboxFilePath, pathTo, autorename: true);
@@ -257,7 +257,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         return (FileMetadata)result.Metadata;
     }
 
-    public async Task<FolderMetadata> CopyFolderAsync(string dropboxFolderPath, string dropboxFolderPathTo, string folderName)
+    public async Task<FolderMetadata> CopyFolderAsync(string dropboxFolderPath, string folderName, string dropboxFolderPathTo)
     {
         var pathTo = MakeDropboxPath(dropboxFolderPathTo, folderName);
         var result = await _dropboxClient.Files.CopyV2Async(dropboxFolderPath, pathTo, autorename: true);
@@ -265,7 +265,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         return (FolderMetadata)result.Metadata;
     }
 
-    public async Task<FileMetadata> CopyFileAsync(string dropboxFilePath, string dropboxFolderPathTo, string fileName)
+    public async Task<FileMetadata> CopyFileAsync(string dropboxFilePath, string fileName, string dropboxFolderPathTo)
     {
         var pathTo = MakeDropboxPath(dropboxFolderPathTo, fileName);
         var result = await _dropboxClient.Files.CopyV2Async(dropboxFilePath, pathTo, autorename: true);
