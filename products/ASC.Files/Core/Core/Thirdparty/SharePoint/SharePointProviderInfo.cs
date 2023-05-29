@@ -49,6 +49,7 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
 
     public Selector Selector { get; } = Selectors.SharePoint;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.SharePoint;
+    public bool MutableEntityId => true;
 
     public SharePointProviderInfo(
         ILogger<SharePointProviderInfo> logger,
