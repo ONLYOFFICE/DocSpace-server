@@ -444,14 +444,9 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
                 //var newFolder = SharpBox_providerInfo.Storage.GetFileSystemObject(newTitle, folder.Parent);
                 newId = MakeId(entry);
 
-                if (DocSpaceHelper.IsRoom(SharpBoxProviderInfo.FolderType) && SharpBoxProviderInfo.FolderId != null)
+                if (DocSpaceHelper.IsRoom(folder.FolderType) && SharpBoxProviderInfo.FolderId != null)
                 {
                     await DaoSelector.RenameProviderAsync(SharpBoxProviderInfo, newTitle);
-
-                    if (SharpBoxProviderInfo.FolderId == oldId)
-                    {
-                        await DaoSelector.UpdateProviderFolderId(SharpBoxProviderInfo, newId);
-                    }
                 }
             }
         }
