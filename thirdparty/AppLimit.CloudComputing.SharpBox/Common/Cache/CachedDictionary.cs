@@ -1,8 +1,10 @@
 #if NET6_0_OR_GREATER
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 
 namespace AppLimit.CloudComputing.SharpBox.Common.Cache
 {
@@ -76,27 +78,34 @@ namespace AppLimit.CloudComputing.SharpBox.Common.Cache
                 options.SlidingExpiration = SlidingExpiration;
             }
 
-            if (!MemoryCache.TryGetValue(builtrootkey, out _))
+            if (!MemoryCache.TryGetValue(builtrootkey, out CancellationTokenSource tokenSource))
             {
 #if (DEBUG)
                 Debug.Print("added root key {0}", builtrootkey);
 #endif
                 //Insert root if no present
                 MemoryCache.Remove(builtrootkey);
-                MemoryCache.Set(builtrootkey, DateTime.UtcNow.Ticks, options);
+
+                tokenSource = new CancellationTokenSource();
+
+                using (var entry = MemoryCache.CreateEntry(builtrootkey))
+                {
+                    entry.Value = tokenSource;
+                    entry.SetOptions(options);
+                    entry.RegisterPostEvictionCallback((_, value, _, _) => (value as CancellationTokenSource)?.Cancel());
+                }
 
                 MemoryCache.Remove(BuildKey(key, rootkey));
             }
 
             if (newValue != null)
             {
+                options.AddExpirationToken(new CancellationChangeToken(tokenSource.Token));
+                
                 var buildKey = BuildKey(key, rootkey);
                 MemoryCache.Remove(buildKey);
                 
                 MemoryCache.Set(BuildKey(key, rootkey), newValue, options);
-                //TODO
-                //options.AddExpirationToken(Microsoft.Extensions.Primitives.CancellationChangeToken);
-                //new CacheDependency(null, new[] { _baseKey, builtrootkey }),
             }
             else
             {
