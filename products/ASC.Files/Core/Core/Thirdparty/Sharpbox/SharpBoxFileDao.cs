@@ -517,15 +517,30 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         throw new NotImplementedException();
     }
 
-    public Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
+    public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
     {
         var file = GetFileById(fileId);
-        if (!SharpBoxProviderInfo.Storage.CopyFileSystemEntry(MakePath(fileId), MakePath(toFolderId)))
+        var parentPath = MakePath(toFolderId);
+
+        var parent = GetFolderById(toFolderId);
+        var newFileName = await GetAvailableTitleAsync(file.Name, parent, IsExistAsync);
+
+        if (file.Name == newFileName)
         {
-            throw new Exception("Error while copying");
+            if (!SharpBoxProviderInfo.Storage.CopyFileSystemEntry(MakePath(fileId), parentPath))
+            {
+                throw new Exception("Error while copying");
+            }
+        }
+        else
+        {
+            using var fs = file.GetDataTransferAccessor().GetDownloadStream();
+
+            var createdFile = SharpBoxProviderInfo.Storage.CreateFile(parentPath + '/' + newFileName);
+            createdFile.GetDataTransferAccessor().Transfer(fs, nTransferDirection.nUpload);
         }
 
-        return Task.FromResult(ToFile(GetFolderById(toFolderId).FirstOrDefault(x => x.Name == file.Name)));
+        return ToFile(GetFolderById(toFolderId).FirstOrDefault(x => x.Name == file.Name));
     }
 
     public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
