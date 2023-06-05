@@ -75,7 +75,7 @@ internal class CrossDao //Additional SharpBox
         toFile.Title = fromFile.Title;
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
-        toFile.ThumbnailStatus = fromFile.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
+        toFile.ThumbnailStatus = Thumbnail.Waiting;
 
         fromFile.Id = fromConverter(fromFile.Id);
 
@@ -86,21 +86,6 @@ internal class CrossDao //Additional SharpBox
         {
             toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
             toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
-        }
-
-        if (fromFile.ThumbnailStatus == Thumbnail.Created)
-        {
-            foreach (var size in _thumbnailSettings.Sizes)
-            {
-                await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
-                                      fromFileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
-                                      String.Empty,
-                                      toFileDao.GetUniqThumbnailPath(toFile, size.Width, size.Height));
-            }
-
-            await toFileDao.SetThumbnailStatusAsync(toFile, Thumbnail.Created);
-
-            toFile.ThumbnailStatus = Thumbnail.Created;
         }
 
         if (!deleteSourceFile)
