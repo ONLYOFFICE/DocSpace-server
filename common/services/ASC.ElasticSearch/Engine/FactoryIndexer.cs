@@ -204,7 +204,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         {
             await _indexer.Index(data, immediately);
         }
-        catch (ElasticsearchClientException e)
+        catch (OpenSearchClientException e)
         {
             Logger.ErrorIndex(e);
 
@@ -232,14 +232,14 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
                 }
             }
         }
-        catch (AggregateException e) //ElasticsearchClientException
+        catch (AggregateException e) //OpenSearchClientException
         {
             if (e.InnerExceptions.Count == 0)
             {
                 throw;
             }
 
-            var inner = e.InnerExceptions.OfType<ElasticsearchClientException>().FirstOrDefault();
+            var inner = e.InnerExceptions.OfType<OpenSearchClientException>().FirstOrDefault();
 
 
             if (inner != null)
@@ -290,7 +290,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         {
             await _indexer.IndexAsync(data, immediately).ConfigureAwait(false);
         }
-        catch (ElasticsearchClientException e)
+        catch (OpenSearchClientException e)
         {
             Logger.ErrorIndexAsync(e);
 
@@ -318,14 +318,14 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
                 }
             }
         }
-        catch (AggregateException e) //ElasticsearchClientException
+        catch (AggregateException e) //OpenSearchClientException
         {
             if (e.InnerExceptions.Count == 0)
             {
                 throw;
             }
 
-            var inner = e.InnerExceptions.OfType<ElasticsearchClientException>().FirstOrDefault();
+            var inner = e.InnerExceptions.OfType<OpenSearchClientException>().FirstOrDefault();
 
 
             if (inner != null)

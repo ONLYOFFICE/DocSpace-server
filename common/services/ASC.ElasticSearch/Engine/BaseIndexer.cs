@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.EntityFrameworkCore;
 
 namespace ASC.ElasticSearch;
 
@@ -256,7 +255,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                         {
                             await Index(t, immediately);
                         }
-                        catch (ElasticsearchClientException e)
+                        catch (OpenSearchClientException e)
                         {
                             if (e.Response.HttpStatusCode == 429)
                             {
@@ -358,7 +357,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                         {
                             await Index(t, immediately);
                         }
-                        catch (ElasticsearchClientException e)
+                        catch (OpenSearchClientException e)
                         {
                             if (e.Response.HttpStatusCode == 429)
                             {
@@ -557,7 +556,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         if (data is ISearchItemDocument)
@@ -594,7 +593,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;
@@ -654,7 +653,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;
@@ -732,7 +731,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
         var result = request.Index(IndexName);
         if (immediately)
         {
-            result.Refresh(Elasticsearch.Net.Refresh.True);
+            result.Refresh(OpenSearch.Net.Refresh.True);
         }
 
         return result;

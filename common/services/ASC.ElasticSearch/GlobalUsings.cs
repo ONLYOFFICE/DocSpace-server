@@ -47,17 +47,17 @@ global using ASC.ElasticSearch.Service;
 
 global using Autofac;
 
-global using Elasticsearch.Net;
-
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 
-global using Nest;
-
 global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json;
+
+global using OpenSearch.Client;
+global using OpenSearch.Net;
 
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;

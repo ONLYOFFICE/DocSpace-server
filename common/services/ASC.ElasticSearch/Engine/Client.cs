@@ -29,7 +29,7 @@ namespace ASC.ElasticSearch;
 [Singletone]
 public class Client
 {
-    private static volatile ElasticClient _client;
+    private static volatile OpenSearchClient _client;
     private static readonly object _locker = new object();
     private readonly ILogger _logger;
     private readonly Settings _settings;
@@ -40,7 +40,7 @@ public class Client
         _settings = settings;
     }
 
-    public ElasticClient Instance
+    public OpenSearchClient Instance
     {
         get
         {
@@ -87,7 +87,7 @@ public class Client
 
                 try
                 {
-                    var client = new ElasticClient(settings);
+                    var client = new OpenSearchClient(settings);
                     if (Ping(client))
                     {
                         _client = client;
@@ -114,7 +114,7 @@ public class Client
         return Ping(Instance);
     }
 
-    private bool Ping(ElasticClient elasticClient)
+    private bool Ping(OpenSearchClient elasticClient)
     {
         if (elasticClient == null)
         {
