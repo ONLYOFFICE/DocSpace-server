@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.EF;
 
-[ElasticsearchType(RelationName = Tables.Tree)]
+[OpenSearchType(RelationName = Tables.Tree)]
 public class DbFolderTree : BaseEntity
 {
     public int FolderId { get; set; }

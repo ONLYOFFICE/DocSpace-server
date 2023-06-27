@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.EF;
 
 [Transient]
-[ElasticsearchType(RelationName = Tables.Folder)]
+[OpenSearchType(RelationName = Tables.Folder)]
 public class DbFolder : IDbFile, IDbSearch, ISearchItem
 {
     public int Id { get; set; }
@@ -154,7 +154,7 @@ public static class DbFolderExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId })
                 .HasDatabaseName("parent_id");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
                 .HasDatabaseName("tenant_id_parent_id_title");
 

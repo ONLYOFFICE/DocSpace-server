@@ -36,7 +36,7 @@ public static class Tables
 }
 
 [Transient]
-[ElasticsearchType(RelationName = Tables.File)]
+[OpenSearchType(RelationName = Tables.File)]
 public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
 {
     public int Id { get; set; }
@@ -119,7 +119,7 @@ public static class DbFileExtension
 
             entity.HasIndex(e => e.ModifiedOn)
                 .HasDatabaseName("modified_on");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
                 .HasDatabaseName("tenant_id_folder_id_title");
 
@@ -243,7 +243,7 @@ public static class DbFileExtension
 
             entity.HasIndex(e => e.ModifiedOn)
                 .HasDatabaseName("modified_on_files_file");
-            
+
             entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
                 .HasDatabaseName("tenant_id_folder_id_title");
 

@@ -67,23 +67,23 @@ public class Client
                     .MaximumRetries(10)
                     .ThrowExceptions();
 
-                if (_logger.IsEnabled(LogLevel.Trace))
+                //if (_logger.IsEnabled(LogLevel.Trace))
+                //{
+                settings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                 {
-                    settings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
+                    _logger.Debug(r.DebugInformation);
+
+                    if (r.RequestBodyInBytes != null)
                     {
-                        //Log.Trace(r.DebugInformation);
+                        _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
+                    }
 
-                        //if (r.RequestBodyInBytes != null)
-                        //{
-                        //    Log.TraceFormat("Request: {0}", Encoding.UTF8.GetString(r.RequestBodyInBytes));
-                        //}
-
-                        if (r.HttpStatusCode != null && (r.HttpStatusCode == 403 || r.HttpStatusCode == 500) && r.ResponseBodyInBytes != null)
-                        {
-                            _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
-                        }
-                    });
-                }
+                    if (r.HttpStatusCode != null && (r.HttpStatusCode == 403 || r.HttpStatusCode == 500) && r.ResponseBodyInBytes != null)
+                    {
+                        _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
+                    }
+                });
+                //}
 
                 try
                 {
