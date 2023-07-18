@@ -150,14 +150,14 @@ public class FilesControllerHelper<T> : FilesHelperBase<T>
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public Task<FileDto<T>> CreateHtmlFileAsync(T folderId, string title, string content)
+    public Task<FileDto<T>> CreateHtmlFileAsync(T folderId, string title, string content, bool updateIfExist)
     {
         ArgumentNullException.ThrowIfNull(title);
 
-        return CreateFileAsync(folderId, title, content, ".html");
+        return CreateFileAsync(folderId, title, content, ".html", updateIfExist);
     }
 
-    public Task<FileDto<T>> CreateTextFileAsync(T folderId, string title, string content)
+    public Task<FileDto<T>> CreateTextFileAsync(T folderId, string title, string content, bool updateIfExist)
     {
         ArgumentNullException.ThrowIfNull(title);
 
@@ -171,15 +171,15 @@ public class FilesControllerHelper<T> : FilesHelperBase<T>
             }
         }
 
-        return CreateFileAsync(folderId, title, content, extension);
+        return CreateFileAsync(folderId, title, content, extension, updateIfExist);
     }
 
-    private async Task<FileDto<T>> CreateFileAsync(T folderId, string title, string content, string extension)
+    private async Task<FileDto<T>> CreateFileAsync(T folderId, string title, string content, string extension, bool updateIfExist)
     {
         using var memStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         var file = await _fileUploader.ExecAsync(folderId,
                           title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : (title + extension),
-                          memStream.Length, memStream);
+                          memStream.Length, memStream, updateIfExist);
 
         return await _fileDtoHelper.GetAsync(file);
     }

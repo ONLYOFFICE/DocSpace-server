@@ -223,7 +223,7 @@ public class SettingsController : ApiControllerBase
     [HttpPut("updateifexist")]
     public bool UpdateIfExist(SettingsRequestDto inDto)
     {
-        return _fileStorageServiceString.UpdateIfExist(inDto.Set);
+        return false;
     }
 
     [HttpPut("settings/autocleanup")]

@@ -30,7 +30,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
     public IFormFile File { get; set; }
     public string Title { get; set; }
-    public bool? CreateNewIfExist { get; set; }
+    public bool CreateNewIfExist { get; set; }
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;

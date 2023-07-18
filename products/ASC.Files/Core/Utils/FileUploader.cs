@@ -91,11 +91,6 @@ public class FileUploader
         _socketManager = socketManager;
     }
 
-    public Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data)
-    {
-        return ExecAsync(folderId, title, contentLength, data, !_filesSettingsHelper.UpdateIfExist);
-    }
-
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
         if (contentLength <= 0)
@@ -115,7 +110,7 @@ public class FileUploader
 
         if (_fileConverter.EnableAsUploaded && _fileConverter.MustConvert(file))
         {
-            await _fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus);
+            await _fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }
 
         return file;

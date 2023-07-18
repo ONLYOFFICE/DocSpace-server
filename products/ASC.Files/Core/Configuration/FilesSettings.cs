@@ -41,9 +41,6 @@ public class FilesSettings : ISettings<FilesSettings>
     [JsonPropertyName("KeepNewFileName")]
     public bool KeepNewFileName { get; set; }
 
-    [JsonPropertyName("UpdateIfExist")]
-    public bool UpdateIfExistSetting { get; set; }
-
     [JsonPropertyName("ConvertNotify")]
     public bool ConvertNotifySetting { get; set; }
 
@@ -96,7 +93,6 @@ public class FilesSettings : ISettings<FilesSettings>
             FastDeleteSetting = false,
             EnableThirdpartySetting = true,
             StoreOriginalFilesSetting = true,
-            UpdateIfExistSetting = false,
             ConvertNotifySetting = true,
             DefaultSortedBySetting = SortedByType.DateAndTime,
             DefaultSortedAscSetting = false,
@@ -239,17 +235,6 @@ public class FilesSettingsHelper
     {
         set => _settingsManager.ManageForCurrentUser<FilesSettings>(setting => setting.KeepNewFileName = value);
         get => LoadForCurrentUser().KeepNewFileName;
-    }
-
-    public bool UpdateIfExist
-    {
-        set
-        {
-            var setting = LoadForCurrentUser();
-            setting.UpdateIfExistSetting = value;
-            SaveForCurrentUser(setting);
-        }
-        get => LoadForCurrentUser().UpdateIfExistSetting;
     }
 
     public bool ConvertNotify

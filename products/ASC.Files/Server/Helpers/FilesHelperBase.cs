@@ -61,11 +61,11 @@ public abstract class FilesHelperBase<T>
         _folderDtoHelper = folderDtoHelper;
     }
 
-    public async Task<FileDto<T>> InsertFileAsync(T folderId, Stream file, string title, bool? createNewIfExist, bool keepConvertStatus = false)
+    public async Task<FileDto<T>> InsertFileAsync(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
         try
         {
-            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, createNewIfExist ?? !_filesSettingsHelper.UpdateIfExist, !keepConvertStatus);
+            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
 
             await _socketManager.CreateFileAsync(resultFile);
 

@@ -95,7 +95,7 @@ public abstract class UploadController<T> : ApiControllerBase
     [HttpPost("{folderId}/upload/create_session")]
     public Task<object> CreateUploadSessionAsync(T folderId, SessionRequestDto inDto)
     {
-        return _filesControllerHelper.CreateUploadSessionAsync(folderId, inDto.FileName, inDto.FileSize, inDto.RelativePath, inDto.Encrypted, inDto.CreateOn);
+        return _filesControllerHelper.CreateUploadSessionAsync(folderId, inDto.FileName, inDto.FileSize, inDto.RelativePath, inDto.Encrypted, inDto.CreateOn, inDto.CreateNewIfExist);
     }
 
     [HttpPost("file/{fileId}/edit_session")]

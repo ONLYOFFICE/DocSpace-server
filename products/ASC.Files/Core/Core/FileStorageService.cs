@@ -2171,11 +2171,11 @@ public class FileStorageService<T> //: IFileStorageService
                 {
                     if (sync)
                     {
-                        results = results.Append(await _fileConverter.ExecSynchronouslyAsync(file, fileInfo.Password));
+                        results = results.Append(await _fileConverter.ExecSynchronouslyAsync(file, fileInfo.Password, !fileInfo.CreateNewIfExist));
                     }
                     else
                     {
-                        await _fileConverter.ExecAsynchronouslyAsync(file, false, fileInfo.Password);
+                        await _fileConverter.ExecAsynchronouslyAsync(file, false, !fileInfo.CreateNewIfExist, fileInfo.Password);
                     }
                 }
                 catch (Exception e)
@@ -3148,16 +3148,6 @@ public class FileStorageService<T> //: IFileStorageService
         }
 
         return true;
-    }
-
-    public bool UpdateIfExist(bool set)
-    {
-        ErrorIf(_userManager.IsUser(_authContext.CurrentAccount.ID), FilesCommonResource.ErrorMassage_SecurityException);
-
-        _filesSettingsHelper.UpdateIfExist = set;
-        _messageService.Send(GetHttpHeaders(), MessageAction.DocumentsOverwritingSettingsUpdated);
-
-        return _filesSettingsHelper.UpdateIfExist;
     }
 
     public bool Forcesave(bool set)

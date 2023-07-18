@@ -103,8 +103,10 @@ internal class FileConverterService<T> : BackgroundService
             {
                 converter.Processed = "1";
 
-                var fileId = JsonDocument.Parse(converter.Source).RootElement.GetProperty("id").Deserialize<T>();
-                var fileVersion = JsonDocument.Parse(converter.Source).RootElement.GetProperty("version").Deserialize<int>();
+                var parsed = JsonDocument.Parse(converter.Source).RootElement;
+                var fileId = parsed.GetProperty("id").Deserialize<T>();
+                var fileVersion = parsed.GetProperty("version").Deserialize<int>();
+                var updateIfExist = parsed.GetProperty("updateIfExist").Deserialize<bool>();
 
                 int operationResultProgress;
                 var password = converter.Password;
@@ -213,7 +215,7 @@ internal class FileConverterService<T> : BackgroundService
 
                 try
                 {
-                    newFile = await fileConverter.SaveConvertedFileAsync(file, convertedFileUrl);
+                    newFile = await fileConverter.SaveConvertedFileAsync(file, convertedFileUrl, updateIfExist);
                 }
                 catch (Exception e)
                 {

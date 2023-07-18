@@ -33,4 +33,5 @@ public class CheckConversionRequestDto<T>
     public bool StartConvert { get; set; }
     public int Version { get; set; }
     public string Password { get; set; }
+    public bool CreateNewIfExist { get; set; }
 }

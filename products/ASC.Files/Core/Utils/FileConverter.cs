@@ -47,7 +47,8 @@ public class FileConverterQueue<T>
                         IAccount account,
                         bool deleteAfter,
                         string url,
-                        string serverRootPath)
+                        string serverRootPath,
+                        bool updateIfExist)
     {
         lock (_locker)
         {
@@ -65,7 +66,7 @@ public class FileConverterQueue<T>
 
             var queueResult = new FileConverterOperationResult
             {
-                Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version }),
+                Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version, updateIfExist }),
                 OperationType = FileOperationType.Convert,
                 Error = string.Empty,
                 Progress = 0,
@@ -439,7 +440,7 @@ public class FileConverter
         return new ResponseStream(response);
     }
 
-    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc)
+    public async Task<FileOperationResult> ExecSynchronouslyAsync<T>(File<T> file, string doc, bool updateIfExist)
     {
         var fileDao = _daoFactory.GetFileDao<T>();
 
@@ -468,7 +469,7 @@ public class FileConverter
 
         var operationResult = new FileConverterOperationResult
         {
-            Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version }),
+            Source = JsonSerializer.Serialize(new { id = file.Id, version = file.Version, updateIfExist }),
             OperationType = FileOperationType.Convert,
             Error = string.Empty,
             Progress = 0,
@@ -486,7 +487,7 @@ public class FileConverter
 
         var operationResultError = string.Empty;
 
-        var newFile = await SaveConvertedFileAsync(file, convertUri);
+        var newFile = await SaveConvertedFileAsync(file, convertUri, updateIfExist);
         if (newFile != null)
         {
             await _socketManager.CreateFileAsync(file);
@@ -508,7 +509,7 @@ public class FileConverter
         return operationResult;
     }
 
-    public async Task ExecAsynchronouslyAsync<T>(File<T> file, bool deleteAfter, string password = null)
+    public async Task ExecAsynchronouslyAsync<T>(File<T> file, bool deleteAfter, bool updateIfExist, string password = null)
     {
         if (!MustConvert(file))
         {
@@ -520,7 +521,7 @@ public class FileConverter
         }
 
         await _fileMarker.RemoveMarkAsNewAsync(file);
-        GetFileConverter<T>().Add(file, password, _tenantManager.GetCurrentTenant().Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext != null ? _httpContextAccesor.HttpContext.Request.GetDisplayUrl() : null, _baseCommonLinkUtility.ServerRootPath);
+        GetFileConverter<T>().Add(file, password, _tenantManager.GetCurrentTenant().Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext != null ? _httpContextAccesor.HttpContext.Request.GetDisplayUrl() : null, _baseCommonLinkUtility.ServerRootPath, updateIfExist);
     }
 
     public bool IsConverting<T>(File<T> file)
@@ -547,7 +548,7 @@ public class FileConverter
         }
     }
 
-    public async Task<File<T>> SaveConvertedFileAsync<T>(File<T> file, string convertedFileUrl)
+    public async Task<File<T>> SaveConvertedFileAsync<T>(File<T> file, string convertedFileUrl, bool updateIfExist)
     {
         var fileDao = _daoFactory.GetFileDao<T>();
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -580,7 +581,7 @@ public class FileConverter
                 throw new SecurityException(FilesCommonResource.ErrorMassage_FolderNotFound);
             }
 
-            if (_filesSettingsHelper.UpdateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
+            if (updateIfExist && (parent != null && !folderId.Equals(parent.Id) || !file.ProviderEntry))
             {
                 newFile = await fileDao.GetFileAsync(folderId, newFileTitle);
                 if (newFile != null && await _fileSecurity.CanEditAsync(newFile) && !await _entryManager.FileLockedForMeAsync(newFile.Id) && !_fileTracker.IsEditing(newFile.Id))
