@@ -33,6 +33,8 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
     private readonly TenantManager _tenantManager;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly SecurityContext _securityContext;
+    private readonly IDaoFactory _daoFactory;
+    private readonly FileSecurity _fileSecurity;
 
     public UploadControllerHelper(
         FilesSettingsHelper filesSettingsHelper,
@@ -48,7 +50,9 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
         ChunkedUploadSessionHelper chunkedUploadSessionHelper,
         TenantManager tenantManager,
         IHttpClientFactory httpClientFactory,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity)
         : base(
             filesSettingsHelper,
             fileUploader,
@@ -65,6 +69,8 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
         _tenantManager = tenantManager;
         _httpClientFactory = httpClientFactory;
         _securityContext = securityContext;
+        _daoFactory = daoFactory;
+        _fileSecurity = fileSecurity;
     }
 
     public async Task<object> CreateEditSession(T fileId, long fileSize)
@@ -72,6 +78,34 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
         return await CreateUploadSessionAsync(file, false, default(ApiDateTime), true);
+    }
+
+    public async Task<List<string>> CheckUploadAsync(T folderId, IEnumerable<string> filesTitle)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
+        var toFolder = await folderDao.GetFolderAsync(folderId);
+        if (toFolder == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_FolderNotFound);
+        }
+        if (!await _fileSecurity.CanCreateAsync(toFolder))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+        }
+
+        var result = new List<string>();
+
+        foreach (var title in filesTitle)
+        {
+            var file = await fileDao.GetFileAsync(folderId, title);
+            if (file != null && !file.Encrypted)
+            {
+                result.Add(title);
+            }
+        }
+
+        return result;
     }
 
     public async Task<object> CreateUploadSessionAsync(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)

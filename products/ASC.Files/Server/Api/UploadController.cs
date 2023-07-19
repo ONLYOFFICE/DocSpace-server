@@ -104,6 +104,12 @@ public abstract class UploadController<T> : ApiControllerBase
         return _filesControllerHelper.CreateEditSession(fileId, fileSize);
     }
 
+    [HttpPost("{folderId}/upload/check")]
+    public Task<List<string>> CheckUploadAsync(T folderId, CheckUploadRequestDto model)
+    {
+        return _filesControllerHelper.CheckUploadAsync(folderId, model.FilesTitle);
+    }
+
     /// <summary>
     /// Uploads the file specified with single file upload
     /// </summary>
