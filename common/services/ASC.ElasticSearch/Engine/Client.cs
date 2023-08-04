@@ -67,23 +67,33 @@ public class Client
                     .MaximumRetries(10)
                     .ThrowExceptions();
 
-                //if (_logger.IsEnabled(LogLevel.Trace))
-                //{
-                settings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
+                if (_settings.Authentication != null)
                 {
-                    _logger.Debug(r.DebugInformation);
+                    settings.BasicAuthentication(_settings.Authentication.Username, _settings.Authentication.Password);
+                }
 
-                    if (r.RequestBodyInBytes != null)
-                    {
-                        _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
-                    }
+                if (_settings.ApiKey != null)
+                {
+                    settings.ApiKeyAuthentication(_settings.ApiKey.Id, _settings.ApiKey.Value);
+                }
 
-                    if (r.HttpStatusCode != null && (r.HttpStatusCode == 403 || r.HttpStatusCode == 500) && r.ResponseBodyInBytes != null)
+                if (_logger.IsEnabled(LogLevel.Trace))
+                {
+                    settings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                     {
-                        _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
-                    }
-                });
-                //}
+                        _logger.Debug(r.DebugInformation);
+
+                        if (r.RequestBodyInBytes != null)
+                        {
+                            _logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
+                        }
+
+                        if (r.HttpStatusCode != null && (r.HttpStatusCode == 403 || r.HttpStatusCode == 500) && r.ResponseBodyInBytes != null)
+                        {
+                            _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
+                        }
+                    });
+                }
 
                 try
                 {

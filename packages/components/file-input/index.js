@@ -56,6 +56,7 @@ class FileInput extends Component {
       id,
       onInput, // eslint-disable-line no-unused-vars
       buttonLabel,
+      idButton,
       isLoading,
       ...rest
     } = this.props;
@@ -98,6 +99,7 @@ class FileInput extends Component {
             scale={scale ? 1 : 0}
             hasError={hasError}
             hasWarning={hasWarning}
+            id={idButton}
             isDisabled={isDisabled}
             {...rest}
             {...getRootProps()}
@@ -156,13 +158,13 @@ FileInput.propTypes = {
   placeholder: PropTypes.string,
   /** Supported size of the input fields */
   size: PropTypes.oneOf(["base", "middle", "big", "huge", "large"]),
-  /** Indicates the input field has scale */
+  /** Indicates that the input field has scale */
   scale: PropTypes.bool,
   /** Accepts class */
   className: PropTypes.string,
-  /** Indicates the input field has an error */
+  /** Indicates that the input field has an error */
   hasError: PropTypes.bool,
-  /** Indicates the input field has a warning */
+  /** Indicates that the input field has a warning */
   hasWarning: PropTypes.bool,
   /** Used as HTML `id` property */
   id: PropTypes.string,
@@ -174,9 +176,9 @@ FileInput.propTypes = {
   name: PropTypes.string,
   /** Called when a file is selected */
   onInput: PropTypes.func,
-  /**Specifies files visible for upload */
+  /** Specifies the files visible for upload */
   accept: PropTypes.string,
-  /**Specifies label for upload button */
+  /** Specifies the label for the upload button */
   buttonLabel: PropTypes.string,
 };
 

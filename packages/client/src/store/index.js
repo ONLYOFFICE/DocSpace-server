@@ -34,6 +34,10 @@ import OformsStore from "./OformsStore";
 import AccessRightsStore from "./AccessRightsStore";
 import TableStore from "./TableStore";
 import CreateEditRoomStore from "./CreateEditRoomStore";
+import PublicRoomStore from "./PublicRoomStore";
+
+import WebhooksStore from "./WebhooksStore";
+import ClientLoadingStore from "./ClientLoadingStore";
 
 const oformsStore = new OformsStore(authStore);
 
@@ -50,8 +54,17 @@ const ssoStore = new SsoFormStore();
 
 const tagsStore = new TagsStore();
 
-const treeFoldersStore = new TreeFoldersStore(selectedFolderStore);
-const settingsStore = new SettingsStore(thirdPartyStore, treeFoldersStore);
+const treeFoldersStore = new TreeFoldersStore(selectedFolderStore, authStore);
+
+const publicRoomStore = new PublicRoomStore();
+
+const clientLoadingStore = new ClientLoadingStore(publicRoomStore);
+
+const settingsStore = new SettingsStore(
+  thirdPartyStore,
+  treeFoldersStore,
+  publicRoomStore
+);
 
 const accessRightsStore = new AccessRightsStore(authStore, selectedFolderStore);
 
@@ -61,12 +74,15 @@ const filesStore = new FilesStore(
   treeFoldersStore,
   settingsStore,
   thirdPartyStore,
-  accessRightsStore
+  accessRightsStore,
+  clientLoadingStore,
+  publicRoomStore
 );
 
 const mediaViewerDataStore = new MediaViewerDataStore(
   filesStore,
-  settingsStore
+  settingsStore,
+  publicRoomStore
 );
 const secondaryProgressDataStore = new SecondaryProgressDataStore();
 const primaryProgressDataStore = new PrimaryProgressDataStore();
@@ -107,7 +123,9 @@ const filesActionsStore = new FilesActionsStore(
   settingsStore,
   dialogsStore,
   mediaViewerDataStore,
-  accessRightsStore
+  accessRightsStore,
+  clientLoadingStore,
+  publicRoomStore
 );
 
 const contextOptionsStore = new ContextOptionsStore(
@@ -120,7 +138,8 @@ const contextOptionsStore = new ContextOptionsStore(
   uploadDataStore,
   versionHistoryStore,
   settingsStore,
-  selectedFolderStore
+  selectedFolderStore,
+  publicRoomStore
 );
 
 const hotkeyStore = new HotkeyStore(
@@ -140,6 +159,8 @@ const profileActionsStore = new ProfileActionsStore(
   selectedFolderStore
 );
 
+peopleStore.profileActionsStore = profileActionsStore;
+
 const tableStore = new TableStore(authStore, treeFoldersStore);
 
 authStore.infoPanelStore.authStore = authStore;
@@ -157,8 +178,11 @@ const createEditRoomStore = new CreateEditRoomStore(
   thirdPartyStore,
   authStore.settingsStore,
   authStore.infoPanelStore,
-  authStore.currentQuotaStore
+  authStore.currentQuotaStore,
+  clientLoadingStore
 );
+
+const webhooksStore = new WebhooksStore();
 
 const store = {
   auth: authStore,
@@ -195,6 +219,10 @@ const store = {
 
   accessRightsStore,
   createEditRoomStore,
+
+  webhooksStore,
+  clientLoadingStore,
+  publicRoomStore,
 };
 
 export default store;

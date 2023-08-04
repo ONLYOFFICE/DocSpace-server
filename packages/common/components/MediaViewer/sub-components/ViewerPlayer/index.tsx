@@ -46,8 +46,10 @@ function ViewerPlayer({
   errorTitle,
   isLastImage,
   isFistImage,
+  canDownload,
   isFullScreen,
   panelVisible,
+  thumbnailSrc,
   mobileDetails,
   isPreviewFile,
   isOpenContextMenu,
@@ -266,6 +268,7 @@ function ViewerPlayer({
   const onExitFullScreen = () => {
     if (!document.fullscreenElement) {
       setIsFullScreen(false);
+      handleResize();
     }
   };
 
@@ -562,11 +565,12 @@ function ViewerPlayer({
         >
           <animated.video
             style={lodash.omit(style, ["x", "y"])}
-            src={`${src}#t=0.001`}
+            src={thumbnailSrc ? src : `${src}#t=0.001`}
             playsInline
             ref={videoRef}
             hidden={isAudio}
             preload="metadata"
+            poster={thumbnailSrc && `${thumbnailSrc}&size=1280x720`}
             onClick={handleClickVideo}
             onEnded={handleVideoEnded}
             onDurationChange={handleDurationChange}
@@ -651,6 +655,7 @@ function ViewerPlayer({
                 />
                 {isDesktop && (
                   <PlayerDesktopContextMenu
+                    canDownload={canDownload}
                     isPreviewFile={isPreviewFile}
                     hideContextMenu={hideContextMenu}
                     onDownloadClick={onDownloadClick}

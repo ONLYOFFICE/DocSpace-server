@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { inject, observer } from "mobx-react";
-import { withRouter } from "react-router";
 
 import PaymentsEnterprise from "./Standalone";
 import PaymentsSaaS from "./SaaS";
@@ -18,4 +17,4 @@ export default inject(({ auth }) => {
   return {
     standalone,
   };
-})(withRouter(observer(PaymentsPage)));
+})(observer(PaymentsPage));

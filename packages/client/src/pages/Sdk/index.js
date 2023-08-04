@@ -1,10 +1,11 @@
 import React, { useEffect, useCallback } from "react";
 import { inject, observer } from "mobx-react";
+import { useParams } from "react-router-dom";
 import Button from "@docspace/components/button";
-import { ColorTheme, ThemeType } from "@docspace/common/components/ColorTheme";
+import { ColorTheme, ThemeType } from "@docspace/components/ColorTheme";
 import AppLoader from "@docspace/common/components/AppLoader";
 import RoomSelector from "../../components/RoomSelector";
-import SelectFileDialog from "../../components/panels/SelectFileDialog";
+import FilesSelector from "../../components/FilesSelector";
 import {
   frameCallEvent,
   frameCallbackData,
@@ -29,16 +30,26 @@ const Sdk = ({
     window.addEventListener("message", handleMessage, false);
     return () => {
       window.removeEventListener("message", handleMessage, false);
+      setFrameConfig(null);
     };
   }, [handleMessage]);
 
+  const callCommand = useCallback(
+    () => frameCallCommand("setConfig"),
+    [frameCallCommand]
+  );
+
   useEffect(() => {
     if (window.parent && !frameConfig && isLoaded) {
-      frameCallCommand("setConfig");
+      callCommand("setConfig");
     }
-  }, [frameCallCommand, isLoaded]);
+  }, [callCommand, isLoaded]);
 
-  const { mode } = match.params;
+  const { mode } = useParams();
+
+  const selectorType = new URLSearchParams(window.location.search).get(
+    "selectorType"
+  );
 
   const toRelativeUrl = (data) => {
     try {
@@ -64,7 +75,7 @@ const Sdk = ({
             {
               const requests = await Promise.all([
                 setFrameConfig(data),
-                updateProfileCulture(user?.id, data.locale),
+                user && updateProfileCulture(user.id, data.locale),
               ]);
               res = requests[0];
             }
@@ -123,8 +134,13 @@ const Sdk = ({
 
   const onClose = useCallback(() => {
     frameCallEvent({ event: "onCloseCallback" });
-    setFrameConfig(null);
   }, [frameCallEvent]);
+
+  const onCloseCallback = !!frameConfig?.events.onCloseCallback
+    ? {
+        onClose,
+      }
+    : {};
 
   let component;
 
@@ -141,14 +157,16 @@ const Sdk = ({
       break;
     case "file-selector":
       component = (
-        <SelectFileDialog
+        <FilesSelector
           isPanelVisible={true}
           onSelectFile={onSelectFile}
-          onClose={onClose}
-          filteredType="exceptPrivacyTrashArchiveFolders"
+          filteredType={selectorType}
           withSubfolders={false}
           displayType="aside"
           embedded={true}
+          searchParam={frameConfig?.filter.search}
+          ByExtension
+          {...onCloseCallback}
         />
       );
       break;
@@ -161,13 +179,8 @@ const Sdk = ({
 
 export default inject(({ auth, settingsStore, peopleStore }) => {
   const { login, logout, userStore } = auth;
-  const {
-    theme,
-    setFrameConfig,
-    frameConfig,
-    getSettings,
-    isLoaded,
-  } = auth.settingsStore;
+  const { theme, setFrameConfig, frameConfig, getSettings, isLoaded } =
+    auth.settingsStore;
   const { loadCurrentUser, user } = userStore;
   const { updateProfileCulture } = peopleStore.targetUserStore;
   const { getIcon } = settingsStore;

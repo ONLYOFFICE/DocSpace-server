@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { withRouter } from "react-router";
 import { withTranslation } from "react-i18next";
 import { inject } from "mobx-react";
 import Text from "@docspace/components/text";
@@ -18,13 +17,8 @@ import { EmployeeActivationStatus } from "@docspace/common/constants";
 import { showEmailActivationToast } from "SRC_DIR/helpers/people-helpers";
 
 const PortalDeletion = (props) => {
-  const {
-    t,
-    getPortalOwner,
-    owner,
-    currentColorScheme,
-    sendActivationLink,
-  } = props;
+  const { t, getPortalOwner, owner, currentColorScheme, sendActivationLink } =
+    props;
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [stripeUrl, setStripeUrl] = useState(null);
   const [isDesktopView, setIsDesktopView] = useState(false);
@@ -81,7 +75,7 @@ const PortalDeletion = (props) => {
       <Text className="helper">{t("PortalDeletionHelper")}</Text>
       <ButtonWrapper>
         <Button
-          className="button"
+          className="delete-button button"
           label={t("Common:Delete")}
           primary
           size={isDesktopView ? "small" : "normal"}
@@ -124,7 +118,5 @@ export default inject(({ auth }) => {
     sendActivationLink,
   };
 })(
-  withTranslation(["Settings", "MainBar", "People", "Common"])(
-    withRouter(PortalDeletion)
-  )
+  withTranslation(["Settings", "MainBar", "People", "Common"])(PortalDeletion)
 );

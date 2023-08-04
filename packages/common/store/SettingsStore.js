@@ -31,7 +31,7 @@ const isDesktopEditors = window["AscDesktopEditor"] !== undefined;
 class SettingsStore {
   isLoading = false;
   isLoaded = false;
-  isBurgerLoading = false;
+  isBurgerLoading = true;
 
   checkedMaintenance = false;
   maintenanceExist = false;
@@ -52,6 +52,7 @@ class SettingsStore {
   ipRestrictionEnable = false;
   ipRestrictions = [];
   sessionLifetime = "1440";
+  enabledSessionLifetime = false;
   timezone = "UTC";
   timezones = [];
   tenantAlias = "";
@@ -129,6 +130,7 @@ class SettingsStore {
 
   tenantStatus = null;
   helpLink = null;
+  apiDocsLink = null;
   bookTrainingEmail = null;
   hotkeyPanelVisible = false;
   frameConfig = null;
@@ -154,6 +156,7 @@ class SettingsStore {
   legalTerms = null;
   baseDomain = "onlyoffice.io";
   documentationEmail = null;
+  publicRoomKey = "";
 
   constructor() {
     makeAutoObservable(this);
@@ -287,8 +290,24 @@ class SettingsStore {
     return `${this.helpLink}/administration/docspace-settings.aspx#AutoBackup`;
   }
 
+  get webhooksGuideUrl() {
+    return `${this.helpLink}/administration/docspace-webhooks.aspx`;
+  }
+
+  get sdkLink() {
+    return `${this.apiDocsLink}/docspace/jssdk`;
+  }
+
+  get apiBasicLink() {
+    return `${this.apiDocsLink}/docspace/basic`;
+  }
+
   get wizardCompleted() {
     return this.isLoaded && !this.wizardToken;
+  }
+
+  get isPublicRoom() {
+    return window.location.pathname === "/rooms/share";
   }
 
   setMainBarVisible = (visible) => {
@@ -680,8 +699,15 @@ class SettingsStore {
     return window.firebaseHelper;
   }
 
+  setPublicRoomKey = (key) => {
+    this.publicRoomKey = key;
+  };
+
   get socketHelper() {
-    return new SocketIOHelper(this.socketUrl);
+    const socketUrl =
+      this.isPublicRoom && !this.publicRoomKey ? null : this.socketUrl;
+
+    return new SocketIOHelper(socketUrl, this.publicRoomKey);
   }
 
   getBuildVersionInfo = async () => {
@@ -767,12 +793,18 @@ class SettingsStore {
 
   getSessionLifetime = async () => {
     const res = await api.settings.getCookieSettings();
-    this.sessionLifetime = res;
+
+    this.enabledSessionLifetime = res.enabled;
+    this.sessionLifetime = res.lifeTime;
   };
 
-  setSessionLifetimeSettings = async (lifeTime) => {
-    const res = await api.settings.setCookieSettings(lifeTime);
+  setSessionLifetimeSettings = async (lifeTime, enabled) => {
+    const res = await api.settings.setCookieSettings(lifeTime, enabled);
+
+    this.enabledSessionLifetime = enabled;
     this.sessionLifetime = lifeTime;
+
+    return res;
   };
 
   setIsBurgerLoading = (isBurgerLoading) => {
@@ -786,11 +818,14 @@ class SettingsStore {
   setFrameConfig = async (frameConfig) => {
     runInAction(() => {
       this.frameConfig = frameConfig;
-      this.setTheme(frameConfig?.theme);
     });
 
     if (!!frameConfig) {
-      frameCallEvent({ event: "onAppReady" });
+      this.setTheme(frameConfig?.theme);
+      frameCallEvent({
+        event: "onAppReady",
+        data: { frameId: frameConfig.frameId },
+      });
     }
     return frameConfig;
   };

@@ -7,6 +7,7 @@ interface ViewerPlayerProps {
   isError: boolean;
   audioIcon: string;
   errorTitle: string;
+  canDownload: boolean;
   isLastImage: boolean;
   isFistImage: boolean;
   isFullScreen: boolean;
@@ -14,7 +15,7 @@ interface ViewerPlayerProps {
   isPreviewFile: boolean;
   isOpenContextMenu: boolean;
   mobileDetails: JSX.Element;
-
+  thumbnailSrc?: string;
   onMask: VoidFunction;
   onPrev: VoidFunction;
   onNext: VoidFunction;

@@ -8,6 +8,7 @@ import { inject, observer } from "mobx-react";
 
 import Avatar from "@docspace/components/avatar";
 import Text from "@docspace/components/text";
+import Box from "@docspace/components/box";
 import Link from "@docspace/components/link";
 import ComboBox from "@docspace/components/combobox";
 import IconButton from "@docspace/components/icon-button";
@@ -42,7 +43,7 @@ const MainProfile = (props) => {
     culture,
     helpLink,
     cultureNames,
-    setIsLoading,
+
     setChangeEmailVisible,
     setChangePasswordVisible,
     setChangeNameVisible,
@@ -84,7 +85,7 @@ const MainProfile = (props) => {
     : DefaultUserAvatarMax;
 
   const tooltipLanguage = (
-    <Text fontSize="13px">
+    <Text as="div" fontSize="12px">
       <Trans t={t} i18nKey="NotFoundLanguage" ns="Common">
         "In case you cannot find your language in the list of the available
         ones, feel free to write to us at
@@ -96,15 +97,19 @@ const MainProfile = (props) => {
           {{ supportEmail: documentationEmail }}
         </Link>
         to take part in the translation and get up to 1 year free of charge."
-      </Trans>{" "}
-      <Link
-        color={theme.profileInfo.tooltipLinkColor}
-        isHovered={true}
-        href={`${helpLink}/guides/become-translator.aspx`}
-        target="_blank"
-      >
-        {t("Common:LearnMore")}
-      </Link>
+      </Trans>
+      <Box displayProp="block" marginProp="10px 0 0">
+        <Link
+          isHovered
+          isBold
+          color="#333333"
+          fontSize="13px"
+          href={`${helpLink}/guides/become-translator.aspx`}
+          target="_blank"
+        >
+          {t("Common:LearnMore")}
+        </Link>
+      </Box>
     </Text>
   );
 
@@ -122,13 +127,10 @@ const MainProfile = (props) => {
   const onLanguageSelect = (language) => {
     if (profile.cultureName === language.key) return;
 
-    setIsLoading(true);
     updateProfileCulture(profile.id, language.key)
-      .then(() => setIsLoading(false))
       .then(() => location.reload())
       .catch((error) => {
         toastr.error(error && error.message ? error.message : error);
-        setIsLoading(false);
       });
   };
 
@@ -268,7 +270,7 @@ const MainProfile = (props) => {
             <div className="profile-block-field profile-block-password">
               <Text fontWeight={600}>********</Text>
               <IconButton
-                className="edit-button"
+                className="edit-button password-edit-button"
                 iconName={PencilOutlineReactSvgUrl}
                 size="12"
                 onClick={() => setChangePasswordVisible(true)}
@@ -445,7 +447,6 @@ export default inject(({ auth, peopleStore }) => {
     currentColorScheme,
     documentationEmail,
   } = auth.settingsStore;
-  const { setIsLoading } = peopleStore.loadingStore;
 
   const {
     targetUser: profile,
@@ -462,7 +463,7 @@ export default inject(({ auth, peopleStore }) => {
     profile,
     culture,
     helpLink,
-    setIsLoading,
+
     setChangeEmailVisible,
     setChangePasswordVisible,
     setChangeNameVisible,

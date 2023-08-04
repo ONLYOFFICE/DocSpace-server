@@ -28,13 +28,32 @@ using System.Collections.Concurrent;
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// </summary>
 public class EmployeeDto
 {
+    /// <summary>ID</summary>
+    /// <type>System.Guid, System</type>
     public Guid Id { get; set; }
+
+    /// <summary>Display name</summary>
+    /// <type>System.String, System</type>
     public string DisplayName { get; set; }
+
+    /// <summary>Title</summary>
+    /// <type>System.String, System</type>
     public string Title { get; set; }
+
+    /// <summary>Small avatar</summary>
+    /// <type>System.String, System</type>
     public string AvatarSmall { get; set; }
+
+    /// <summary>Profile URL</summary>
+    /// <type>System.String, System</type>
     public string ProfileUrl { get; set; }
+
+    /// <summary>Specifies if the user has an avatar or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool HasAvatar { get; set; }
 
     public static EmployeeDto GetSample()
@@ -77,11 +96,11 @@ public class EmployeeDtoHelper
         _dictionary = new ConcurrentDictionary<Guid, EmployeeDto>();
     }
 
-    public async Task<EmployeeDto> Get(UserInfo userInfo)
+    public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))
         {
-            employee = await Init(new EmployeeDto(), userInfo);
+            employee = await InitAsync(new EmployeeDto(), userInfo);
 
             _dictionary.AddOrUpdate(userInfo.Id, i => employee, (i, v) => employee);
 
@@ -90,20 +109,20 @@ public class EmployeeDtoHelper
         return employee;
     }
 
-    public async Task<EmployeeDto> Get(Guid userId)
+    public async Task<EmployeeDto> GetAsync(Guid userId)
     {
         try
         {
-            return await Get(_userManager.GetUsers(userId));
+            return await GetAsync(await _userManager.GetUsersAsync(userId));
         }
         catch (Exception e)
         {
             _logger.ErrorWithException(e);
-            return await Get(ASC.Core.Users.Constants.LostUser);
+            return await GetAsync(ASC.Core.Users.Constants.LostUser);
         }
     }
 
-    protected async Task<EmployeeDto> Init(EmployeeDto result, UserInfo userInfo)
+    protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo)
     {
         result.Id = userInfo.Id;
         result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);

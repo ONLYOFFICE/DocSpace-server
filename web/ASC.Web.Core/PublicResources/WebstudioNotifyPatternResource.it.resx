@@ -936,13 +936,6 @@ Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
 $GreenButton
  
-La tua tariffa è STARTUP. È assolutamente gratuita e include:
- 
-* 1 amministratore, 2 utenti esperti
-* Fino a 12 stanze
-* Numero illimitato di utenti in ogni stanza
-* 2 GB di spazio sul disco
- 
 Goditi un nuovo modo di collaborare sui documenti!
  
 Tanti saluti,
@@ -958,13 +951,6 @@ Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
 $GreenButton
  
-La tua tariffa è STARTUP. È assolutamente gratuita e include:
- 
-* 1 amministratore, 2 utenti esperti
-* Fino a 12 stanze
-* Numero illimitato di utenti in ogni stanza
-* 2 GB di spazio sul disco
- 
 Goditi un nuovo modo di collaborare sui documenti!
  
 Tanti saluti,
@@ -979,13 +965,6 @@ Hai appena creato ONLYOFFICE DocSpace, un hub di documenti dove puoi migliorare 
 Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
 $GreenButton
- 
-La tua tariffa è STARTUP. È assolutamente gratuita e include:
- 
-* 1 amministratore, 2 utenti esperti
-* Fino a 12 stanze
-* Numero illimitato di utenti in ogni stanza
-* 2 GB di spazio sul disco
  
 Goditi un nuovo modo di collaborare sui documenti!
  
@@ -1208,7 +1187,7 @@ _Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore �
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Ciao!

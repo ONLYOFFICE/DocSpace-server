@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { withRouter } from "react-router";
+
 import Loaders from "@docspace/common/components/Loaders";
 import VersionRow from "./VersionRow";
 import { inject, observer } from "mobx-react";
@@ -20,8 +20,9 @@ class SectionBodyContent extends React.Component {
   }
 
   componentDidMount() {
-    const { match, setFirstLoad } = this.props;
-    const fileId = match.params.fileId || this.props.fileId;
+    const { setFirstLoad } = this.props;
+
+    const fileId = this.props.fileId;
 
     if (fileId && fileId !== this.props.fileId) {
       this.getFileVersions(fileId, this.props.fileSecurity);
@@ -44,7 +45,7 @@ class SectionBodyContent extends React.Component {
           this.setState({
             isRestoreProcess: restoring,
           }),
-        100
+        100,
       );
     } else {
       clearTimeout(this.timerId);
@@ -113,8 +114,7 @@ class SectionBodyContent extends React.Component {
             itemSize={this.getSize}
             itemCount={versions.length}
             itemData={versions}
-            outerElementType={CustomScrollbarsVirtualList}
-          >
+            outerElementType={CustomScrollbarsVirtualList}>
             {this.renderRow}
           </List>
         </StyledVersionList>
@@ -137,8 +137,12 @@ class SectionBodyContent extends React.Component {
   }
 }
 
-export default inject(({ auth, filesStore, versionHistoryStore }) => {
-  const { setFirstLoad, setIsLoading, isLoading } = filesStore;
+export default inject(({ auth, versionHistoryStore, clientLoadingStore }) => {
+  const {
+    setFirstLoad,
+    isLoading,
+    setIsSectionBodyLoading,
+  } = clientLoadingStore;
   const {
     versions,
     fetchFileVersions,
@@ -153,7 +157,7 @@ export default inject(({ auth, filesStore, versionHistoryStore }) => {
     fileId,
     fileSecurity,
     setFirstLoad,
-    setIsLoading,
+    setIsLoading: setIsSectionBodyLoading,
     fetchFileVersions,
   };
-})(withRouter(observer(SectionBodyContent)));
+})(observer(SectionBodyContent));

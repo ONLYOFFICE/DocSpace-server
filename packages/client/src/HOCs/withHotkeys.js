@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { observer, inject } from "mobx-react";
+import { useNavigate } from "react-router-dom";
 import { Events } from "@docspace/common/constants";
 import toastr from "@docspace/components/toast/toastr";
 import throttle from "lodash/throttle";
@@ -9,7 +10,7 @@ const withHotkeys = (Component) => {
   const WithHotkeys = (props) => {
     const {
       t,
-      history,
+
       setSelected,
       viewAs,
       setViewAs,
@@ -62,6 +63,8 @@ const withHotkeys = (Component) => {
       security,
     } = props;
 
+    const navigate = useNavigate();
+
     const hotkeysFilter = {
       filter: (ev) =>
         ev.target?.type === "checkbox" || ev.target?.tagName !== "INPUT",
@@ -102,7 +105,7 @@ const withHotkeys = (Component) => {
     };
 
     const onCreateRoom = () => {
-      if (!isVisitor && isRoomsFolder) {
+      if (!isVisitor && isRoomsFolder && security?.Create) {
         if (isGracePeriod) {
           setInviteUsersWarningDialogVisible(true);
           return;
@@ -333,7 +336,7 @@ const withHotkeys = (Component) => {
       "Shift+u",
       () => {
         if (folderWithNoAction) return;
-        uploadFile(false, history, t);
+        uploadFile(false, navigate, t);
       },
 
       hotkeysFilter
@@ -411,8 +414,9 @@ const withHotkeys = (Component) => {
 
       const { visible: mediaViewerIsVisible } = mediaViewerDataStore;
       const { setHotkeyPanelVisible } = auth.settingsStore;
-      const { isVisitor } = auth.userStore.user;
       const { isGracePeriod } = auth.currentTariffStatusStore;
+
+      const isVisitor = auth.userStore.user?.isVisitor;
 
       const {
         isFavoritesFolder,

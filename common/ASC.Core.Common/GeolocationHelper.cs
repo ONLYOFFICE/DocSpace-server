@@ -55,35 +55,21 @@ public class GeolocationHelper
         _cache = cache;
     }
 
-    public IPGeolocationInfo GetIPGeolocation(IPAddress address)
+    public async Task<IPGeolocationInfo> GetIPGeolocationAsync(IPAddress address)
     {
         try
         {
-
             var cacheKey = $"ip_geolocation_info_${address}";
             var fromCache = _cache.Get<IPGeolocationInfo>(cacheKey);
 
             if (fromCache != null) return fromCache;
 
-            using var dbContext = _dbContextFactory.CreateDbContext();
+            await using var dbContext = _dbContextFactory.CreateDbContext();
 
             var addrType = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "ipv4" : "ipv6";
 
-            var result = dbContext.DbIPLookup
-                .Where(r => r.AddrType == addrType && r.IPStart.Compare(address.GetAddressBytes()) <= 0)
-                .OrderByDescending(r => r.IPStart)
-                .Select(r => new IPGeolocationInfo
-                {
-                    City = r.City,
-                    IPEnd = new IPAddress(r.IPEnd),
-                    IPStart = new IPAddress(r.IPStart),
-                    Key = r.Country,
-                    TimezoneOffset = r.TimezoneOffset,
-                    TimezoneName = r.TimezoneName,
-                    Continent = r.Continent
-                })
-                .FirstOrDefault();
-
+            var result = await Queries.IpGeolocationInfoAsync(dbContext, addrType, address.GetAddressBytes());
+            
             if (result != null)
             {
                 _cache.Insert(cacheKey, result, TimeSpan.FromSeconds(15));
@@ -99,7 +85,7 @@ public class GeolocationHelper
         return IPGeolocationInfo.Default;
     }
 
-    public IPGeolocationInfo GetIPGeolocationFromHttpContext()
+    public async Task<IPGeolocationInfo> GetIPGeolocationFromHttpContextAsync()
     {
         if (_httpContextAccessor.HttpContext?.Request != null)
         {
@@ -109,10 +95,31 @@ public class GeolocationHelper
             {
                 _logger.TraceRemoteIpAddress(ip.ToString());
 
-                return GetIPGeolocation(ip);
+                return await GetIPGeolocationAsync(ip);
             }
         }
 
         return IPGeolocationInfo.Default;
     }
+}
+
+static file class Queries
+{
+    public static readonly Func<CustomDbContext, string, byte[], Task<IPGeolocationInfo>> IpGeolocationInfoAsync =
+        EF.CompileAsyncQuery(
+            (CustomDbContext ctx, string addrType, byte[] address) =>
+                ctx.DbIPLookup
+                    .Where(r => r.AddrType == addrType && r.IPStart.Compare(address) <= 0)
+                    .OrderByDescending(r => r.IPStart)
+                    .Select(r => new IPGeolocationInfo
+                    {
+                        City = r.City,
+                        IPEnd = new IPAddress(r.IPEnd),
+                        IPStart = new IPAddress(r.IPStart),
+                        Key = r.Country,
+                        TimezoneOffset = r.TimezoneOffset,
+                        TimezoneName = r.TimezoneName,
+                        Continent = r.Continent
+                    })
+                    .FirstOrDefault());
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { inject, observer } from "mobx-react";
-import { withRouter } from "react-router";
+
 import ArticleTeamTrainingAlert from "./article-team-training";
 import ArticlePaymentAlert from "./article-payment-alert";
 import ArticleEnterpriseAlert from "./article-enterprise-alert";
@@ -48,36 +48,31 @@ const ArticleAlerts = ({
   );
 };
 
-export default withRouter(
-  inject(({ auth }) => {
-    const {
-      currentQuotaStore,
-      settingsStore,
-      isPaymentPageAvailable,
-      isTeamTrainingAlertAvailable,
-      currentTariffStatusStore,
-      isEnterprise,
-    } = auth;
-    const { isFreeTariff, isNonProfit, isTrial } = currentQuotaStore;
-    const {
-      isGracePeriod,
-      isLicenseExpiring,
-      isLicenseDateExpired,
-    } = currentTariffStatusStore;
-    const { showText, standalone } = settingsStore;
+export default inject(({ auth }) => {
+  const {
+    currentQuotaStore,
+    settingsStore,
+    isPaymentPageAvailable,
+    isTeamTrainingAlertAvailable,
+    currentTariffStatusStore,
+    isEnterprise,
+  } = auth;
+  const { isFreeTariff, isNonProfit, isTrial } = currentQuotaStore;
+  const { isGracePeriod, isLicenseExpiring, isLicenseDateExpired } =
+    currentTariffStatusStore;
+  const { showText, standalone } = settingsStore;
 
-    return {
-      isEnterprise,
-      showText,
-      isNonProfit,
-      isGracePeriod,
-      isFreeTariff,
-      isPaymentPageAvailable,
-      isTeamTrainingAlertAvailable,
-      isLicenseExpiring,
-      isLicenseDateExpired,
-      isTrial,
-      standalone,
-    };
-  })(observer(ArticleAlerts))
-);
+  return {
+    isEnterprise,
+    showText,
+    isNonProfit,
+    isGracePeriod,
+    isFreeTariff,
+    isPaymentPageAvailable,
+    isTeamTrainingAlertAvailable,
+    isLicenseExpiring,
+    isLicenseDateExpired,
+    isTrial,
+    standalone,
+  };
+})(observer(ArticleAlerts));

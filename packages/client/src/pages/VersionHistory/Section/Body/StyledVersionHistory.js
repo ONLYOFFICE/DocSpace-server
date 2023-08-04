@@ -162,8 +162,9 @@ const StyledVersionRow = styled(Row)`
     display: block;
   }
 
-  .textarea-desktop {
+  .textarea-wrapper {
     margin: 6px 31px 1px -7px;
+    width: 100%;
   }
 
   .version_content-length {
@@ -200,7 +201,11 @@ const StyledVersionRow = styled(Row)`
       margin-top: 5px;
     }
 
-    display: ${(props) => props.showEditPanel && "none"};
+    word-break: break-word;
+    display: ${(props) => (props.showEditPanel ? "none" : "-webkit-box")};
+    display: ${(props) => (props.showEditPanel ? "none" : "-moz-box")};
+    display: ${(props) => (props.showEditPanel ? "none" : "-ms-box")};
+    text-overflow: ellipsis;
     overflow: hidden;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

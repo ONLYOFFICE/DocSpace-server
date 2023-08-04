@@ -1264,7 +1264,7 @@ Voici trois questions simples qui peuvent nous aider à rendre votre expérience
  
 Si vous avez au moins une réponse positive, optez pour le plan tarifaire BUSINESS qui vous permet d'ajouter autant d'adùinistrateurs que vous le souhaitez à ONLYOFFICE DocSpace ainsi que d'appliquer des options de marque blache.
  
-Pour ce faire, veuillez consulter la section "Paiements" : "$PricingPage" de votre ONLYOFFICE DocSpaceE. Vous y trouverez un lien individuel vers le portail client Stripe où vous pourrez facilement gérer tous les détails du paiement.
+Pour ce faire, veuillez consulter la section "Paiements":"$PricingPage" de votre ONLYOFFICE DocSpaceE. Vous y trouverez un lien individuel vers le portail client Stripe où vous pourrez facilement gérer tous les détails du paiement.
  
 _Attention : la personne qui paie l'abonnement devient le payeur. Seul le payeur est en mesure d'apporter des modifications à l'abonnement (ajuster le nombre d'administrateurs). Les utilisateurs n'ont pas accès aux détails des paiements. Le propriétaire du compte ONLYOFFICE DocSpace peut réaffecter le payeur à tout moment par la suite. _
  
@@ -1387,13 +1387,6 @@ Veuillez confirmer votre adresse e-mail (le lien est valable pendant 7 jours) :
  
 $GreenButton
  
-Votre plan tarifaire actuel est STARTUP. Il est totalement gratuit et comprend :
- 
-* 1 administrateur, 2 utilisateurs avancés
-* Jusqu’à 12 salles
-* Nombre illimité d'utilisateurs dans chaque salle
-* 2 Go d'espace de stockage
- 
 Profitez d'un nouveau mode de collaboration documentaire !
  
 Bien à vous,
@@ -1429,13 +1422,6 @@ Vous venez de créer ONLYOFFICE DocSpace, un centre documentaire où vous pouvez
 Veuillez confirmer votre adresse e-mail (le lien est valable pendant 7 jours) :
  
 $GreenButton
- 
-Votre plan tarifaire actuel est STARTUP. Il est totalement gratuit et comprend :
- 
-* 1 administrateur, 2 utilisateurs avancés
-* Jusqu’à 12 salles
-* Nombre illimité d'utilisateurs dans chaque salle
-* 2 Go d'espace de stockage
  
 Profitez d'un nouveau mode de collaboration documentaire !
  
@@ -1784,13 +1770,6 @@ Vous venez de créer ONLYOFFICE DocSpace, un centre documentaire où vous pouvez
 Veuillez confirmer votre adresse e-mail (le lien est valable pendant 7 jours) :
  
 $GreenButton
- 
-Votre plan tarifaire actuel est STARTUP. Il est totalement gratuit et comprend :
- 
-* 1 administrateur, 2 utilisateurs avancés
-* Jusqu’à 12 salles
-* Nombre illimité d'utilisateurs dans chaque salle
-* 2 Go d'espace de stockage
  
 Profitez d'un nouveau mode de collaboration documentaire !
  

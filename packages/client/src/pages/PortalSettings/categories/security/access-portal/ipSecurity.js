@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { withRouter } from "react-router";
+import { useNavigate, useLocation } from "react-router-dom";
 import { withTranslation } from "react-i18next";
 import { inject, observer } from "mobx-react";
 import Text from "@docspace/components/text";
@@ -42,7 +42,7 @@ const MainContainer = styled.div`
 const IpSecurity = (props) => {
   const {
     t,
-    history,
+
     ipRestrictionEnable,
     setIpRestrictionsEnable,
     ipRestrictions,
@@ -50,6 +50,9 @@ const IpSecurity = (props) => {
     initSettings,
     isInit,
   } = props;
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const regexp = /^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/; //check ip valid
 
@@ -110,8 +113,8 @@ const IpSecurity = (props) => {
 
   const checkWidth = () => {
     window.innerWidth > size.smallTablet &&
-      history.location.pathname.includes("ip") &&
-      history.push("/portal-settings/security/access-portal");
+      location.pathname.includes("ip") &&
+      navigate("/portal-settings/security/access-portal");
   };
 
   const onSelectType = (e) => {
@@ -191,10 +194,12 @@ const IpSecurity = (props) => {
         spacing="8px"
         options={[
           {
+            id: "ip-security-disabled",
             label: t("Disabled"),
             value: "disabled",
           },
           {
+            id: "ip-security-enable",
             label: t("Common:Enable"),
             value: "enable",
           },
@@ -212,6 +217,7 @@ const IpSecurity = (props) => {
           onDeleteInput={onDeleteInput}
           onClickAdd={onClickAdd}
           regexp={regexp}
+          classNameAdditional="add-allowed-ip-address"
         />
       )}
 
@@ -240,6 +246,8 @@ const IpSecurity = (props) => {
         displaySettings={true}
         hasScroll={false}
         isSaving={isSaving}
+        additionalClassSaveButton="ip-security-save"
+        additionalClassCancelButton="ip-security-cancel"
       />
     </MainContainer>
   );
@@ -263,4 +271,4 @@ export default inject(({ auth, setup }) => {
     initSettings,
     isInit,
   };
-})(withTranslation(["Settings", "Common"])(withRouter(observer(IpSecurity))));
+})(withTranslation(["Settings", "Common"])(observer(IpSecurity)));

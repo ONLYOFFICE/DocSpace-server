@@ -21,7 +21,7 @@ export default function withBadges(WrappedComponent) {
         item,
         setIsVerHistoryPanel,
         fetchFileVersions,
-        history,
+
         isTrashFolder,
       } = this.props;
       if (isTrashFolder) return;
@@ -163,7 +163,7 @@ export default function withBadges(WrappedComponent) {
         isArchiveFolderRoot,
         theme,
         isAdmin: auth.isAdmin,
-        isVisitor: auth.userStore.user.isVisitor,
+        isVisitor: auth?.userStore?.user?.isVisitor,
         isTrashFolder: isRecycleBinFolder,
         isPrivacyFolder,
         homepage: config.homepage,

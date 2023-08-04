@@ -1,6 +1,6 @@
 import AccessCommentReactSvgUrl from "PUBLIC_DIR/images/access.comment.react.svg?url";
 import RestoreAuthReactSvgUrl from "PUBLIC_DIR/images/restore.auth.react.svg?url";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DownloadReactSvgUrl from "PUBLIC_DIR/images/download.react.svg?url";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
@@ -11,7 +11,6 @@ import Textarea from "@docspace/components/textarea";
 import Button from "@docspace/components/button";
 import ModalDialog from "@docspace/components/modal-dialog";
 import { withTranslation } from "react-i18next";
-import { withRouter } from "react-router";
 import VersionBadge from "./VersionBadge";
 import { StyledVersionRow } from "./StyledVersionHistory";
 import ExternalLinkIcon from "PUBLIC_DIR/images/external.link.react.svg?url";
@@ -55,7 +54,7 @@ const VersionRow = (props) => {
   const [commentValue, setCommentValue] = useState(info.comment);
   const [isSavingComment, setIsSavingComment] = useState(false);
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const versionDate = `${new Date(info.updated).toLocaleString(culture)}`;
   const title = `${Encoder.htmlDecode(info.updatedBy?.displayName)}`;
@@ -69,7 +68,9 @@ const VersionRow = (props) => {
   const onChange = (e) => {
     const value = e.target.value;
 
-    if (value.length > MAX_FILE_COMMENT_LENGTH) return;
+    if (value.length > MAX_FILE_COMMENT_LENGTH) {
+      return setCommentValue(value.slice(0, MAX_FILE_COMMENT_LENGTH));
+    }
 
     setCommentValue(value);
   };
@@ -77,7 +78,7 @@ const VersionRow = (props) => {
   const onUserClick = () => {
     onClose(true);
     setIsVisible(true);
-    openUser(info?.updatedBy, history);
+    openUser(info?.updatedBy, navigate);
   };
 
   const onSaveClick = () => {
@@ -160,6 +161,7 @@ const VersionRow = (props) => {
       isTabletView={isTabletView}
       isSavingComment={isSavingComment}
       isEditing={isEditing}
+      contextTitle={t("Common:Actions")}
     >
       <div className={`version-row_${index}`}>
         <Box displayProp="flex" className="row-header">
@@ -173,6 +175,13 @@ const VersionRow = (props) => {
             versionGroup={info.versionGroup}
             //  {...onClickProp}
             t={t}
+            title={
+              index > 0
+                ? isVersion
+                  ? t("Files:MarkAsRevision")
+                  : t("Files:MarkAsVersion")
+                : ""
+            }
           />
           <Box
             displayProp="flex"
@@ -215,7 +224,7 @@ const VersionRow = (props) => {
             {showEditPanel && (
               <>
                 <Textarea
-                  className="version_edit-comment textarea-desktop"
+                  className="version_edit-comment"
                   onChange={onChange}
                   fontSize={12}
                   heightTextArea={54}
@@ -297,9 +306,7 @@ export default inject(({ auth, versionHistoryStore, selectedFolderStore }) => {
     setIsVisible,
   };
 })(
-  withRouter(
-    withTranslation(["VersionHistory", "Common", "Translations"])(
-      observer(VersionRow)
-    )
+  withTranslation(["VersionHistory", "Common", "Translations"])(
+    observer(VersionRow)
   )
 );

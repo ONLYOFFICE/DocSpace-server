@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { withRouter } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { inject, observer } from "mobx-react";
 import { isMobileOnly } from "react-device-detect";
 
@@ -54,7 +54,7 @@ const Wizard = (props) => {
     isWizardLoaded,
     setIsWizardLoaded,
     wizardToken,
-    history,
+
     getPortalPasswordSettings,
     getMachineName,
     getIsRequiredLicense,
@@ -72,6 +72,8 @@ const Wizard = (props) => {
     licenseUpload,
     resetLicenseUploaded,
   } = props;
+
+  const navigate = useNavigate();
   const { t } = useTranslation(["Wizard", "Common"]);
 
   const [email, setEmail] = useState("");
@@ -153,7 +155,7 @@ const Wizard = (props) => {
 
   useEffect(() => {
     if (!wizardToken)
-      history.push(combineUrl(window.DocSpaceConfig?.proxy?.url, "/"));
+      navigate(combineUrl(window.DocSpaceConfig?.proxy?.url, "/"));
     else fetchData();
   }, []);
 
@@ -252,7 +254,12 @@ const Wizard = (props) => {
         analytics
       );
       setWizardComplete();
-      history.push(combineUrl(window.DocSpaceConfig?.proxy?.url, "/"));
+
+      // navigate(combineUrl(window.DocSpaceConfig?.proxy?.url, "/login"));
+
+      window.location.replace(
+        combineUrl(window.DocSpaceConfig?.proxy?.url, "/login")
+      );
     } catch (error) {
       console.error(error);
       setIsCreated(false);
@@ -529,4 +536,4 @@ export default inject(({ auth, wizard }) => {
     setLicense,
     resetLicenseUploaded,
   };
-})(withRouter(withCultureNames(observer(Wizard))));
+})(withCultureNames(observer(Wizard)));

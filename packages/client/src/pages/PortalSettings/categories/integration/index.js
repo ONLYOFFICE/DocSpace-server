@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Submenu from "@docspace/components/submenu";
-import { withRouter } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { withTranslation } from "react-i18next";
 import { inject, observer } from "mobx-react";
 import { combineUrl } from "@docspace/common/utils";
@@ -9,28 +9,22 @@ import { isMobile } from "react-device-detect";
 
 import SSO from "./SingleSignOn";
 import ThirdParty from "./ThirdPartyServicesSettings";
-import PortalPlugins from "./PortalPlugins";
 
 import AppLoader from "@docspace/common/components/AppLoader";
 import SSOLoader from "./sub-components/ssoLoader";
 import SMTPSettings from "./SMTPSettings";
 
 const IntegrationWrapper = (props) => {
-  const { t, tReady, history, loadBaseInfo, enablePlugins, toDefault } = props;
+  const { t, tReady, loadBaseInfo, enablePlugins, toDefault } = props;
   const [currentTab, setCurrentTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => {
       toDefault();
     };
   }, []);
-
-  const pluginData = {
-    id: "plugins",
-    name: "Plugins",
-    content: <PortalPlugins />,
-  };
 
   const data = [
     {
@@ -50,10 +44,6 @@ const IntegrationWrapper = (props) => {
     },
   ];
 
-  if (!isMobile) {
-    enablePlugins && data.push(pluginData);
-  }
-
   const load = async () => {
     const path = location.pathname;
     const currentTab = data.findIndex((item) => path.includes(item.id));
@@ -68,7 +58,7 @@ const IntegrationWrapper = (props) => {
   }, []);
 
   const onSelect = (e) => {
-    history.push(
+    navigate(
       combineUrl(
         window.DocSpaceConfig?.proxy?.url,
         config.homepage,
@@ -97,6 +87,6 @@ export default inject(({ setup, auth, ssoStore }) => {
   };
 })(
   withTranslation(["Settings", "SingleSignOn", "Translations"])(
-    withRouter(observer(IntegrationWrapper))
+    observer(IntegrationWrapper)
   )
 );

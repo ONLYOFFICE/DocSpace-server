@@ -42,6 +42,7 @@ const Article = ({
 
   isLiveChatAvailable,
 
+  onLogoClickAction,
   theme,
 
   ...rest
@@ -164,7 +165,10 @@ const Article = ({
         correctTabletHeight={correctTabletHeight}
         {...rest}
       >
-        <SubArticleHeader showText={showText}>
+        <SubArticleHeader
+          showText={showText}
+          onLogoClickAction={onLogoClickAction}
+        >
           {articleHeaderContent ? articleHeaderContent.props.children : null}
         </SubArticleHeader>
 

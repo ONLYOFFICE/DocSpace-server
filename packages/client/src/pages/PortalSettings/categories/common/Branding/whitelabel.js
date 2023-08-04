@@ -28,6 +28,7 @@ const WhiteLabel = (props) => {
     isSettingPaid,
     logoText,
     logoUrls,
+    setLogoText,
     restoreWhiteLabelSettings,
     getWhiteLabelLogoUrls,
     setWhiteLabelSettings,
@@ -37,17 +38,18 @@ const WhiteLabel = (props) => {
   } = props;
   const [isLoadedData, setIsLoadedData] = useState(false);
   const [logoTextWhiteLabel, setLogoTextWhiteLabel] = useState("");
-  const [defaultLogoTextWhiteLabel, setDefaultLogoTextWhiteLabel] = useState(
-    ""
-  );
+  const [defaultLogoTextWhiteLabel, setDefaultLogoTextWhiteLabel] =
+    useState("");
 
   const [logoUrlsWhiteLabel, setLogoUrlsWhiteLabel] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const companyNameFromSessionStorage = getFromSessionStorage("companyName");
-
   useEffect(() => {
+    const companyNameFromSessionStorage = getFromSessionStorage("companyName");
+
     if (!companyNameFromSessionStorage) {
+      if (!logoText) return;
+
       setLogoTextWhiteLabel(logoText);
       saveToSessionStorage("companyName", logoText);
     } else {
@@ -182,7 +184,9 @@ const WhiteLabel = (props) => {
       setIsSaving(true);
       await setWhiteLabelSettings(data);
       await getWhiteLabelLogoUrls();
-      await getWhiteLabelLogoUrlsAction(); //TODO: delete duplicate request
+      await getWhiteLabelLogoUrlsAction();
+      setLogoText(data.logoText);
+      //TODO: delete duplicate request
       toastr.success(t("Settings:SuccessfullySaveSettingsMessage"));
     } catch (error) {
       toastr.error(error);
@@ -220,7 +224,7 @@ const WhiteLabel = (props) => {
       <div className="wl-helper">
         <Text className="settings_unavailable">{t("WhiteLabelHelper")}</Text>
         <HelpButton
-          tooltipContent={t("WhiteLabelTooltip")}
+          tooltipContent={<Text fontSize="12px">{t("WhiteLabelTooltip")}</Text>}
           place="right"
           offsetRight={0}
           className="settings_unavailable"
@@ -234,7 +238,7 @@ const WhiteLabel = (props) => {
           className="settings_unavailable"
         >
           <TextInput
-            className="input"
+            className="company-name input"
             value={logoTextWhiteLabel}
             onChange={onChangeCompanyName}
             isDisabled={!isSettingPaid}
@@ -272,6 +276,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[0].path.light}
               imageClass="logo-header background-light"
               inputId="logoUploader_1_light"
+              linkId="link-space-header-light"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -281,6 +286,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[0].path.dark}
               imageClass="logo-header background-dark"
               inputId="logoUploader_1_dark"
+              linkId="link-space-header-dark"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -303,6 +309,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[5].path.light}
               imageClass="border-img logo-compact background-light"
               inputId="logoUploader_6_light"
+              linkId="link-compact-left-menu-light"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -312,6 +319,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[5].path.dark}
               imageClass="border-img logo-compact background-dark"
               inputId="logoUploader_6_dark"
+              linkId="link-compact-left-menu-dark"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -334,6 +342,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[1].path.light}
               imageClass="border-img logo-big background-white"
               inputId="logoUploader_2_light"
+              linkId="link-login-emails-light"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -343,6 +352,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[1].path.dark}
               imageClass="border-img logo-big background-dark"
               inputId="logoUploader_2_dark"
+              linkId="link-login-emails-dark"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -365,6 +375,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[6].path.light}
               imageClass="border-img logo-about background-white"
               inputId="logoUploader_7_light"
+              linkId="link-about-light"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -374,6 +385,7 @@ const WhiteLabel = (props) => {
               src={logoUrlsWhiteLabel[6].path.dark}
               imageClass="border-img logo-about background-dark"
               inputId="logoUploader_7_dark"
+              linkId="link-about-dark"
               onChangeText={t("ChangeLogoButton")}
               onChange={onChangeLogo}
               isSettingPaid={isSettingPaid}
@@ -394,6 +406,7 @@ const WhiteLabel = (props) => {
             src={logoUrlsWhiteLabel[2].path.light}
             imageClass="border-img logo-favicon"
             inputId="logoUploader_3_light"
+            linkId="link-favicon"
             onChangeText={t("ChangeLogoButton")}
             onChange={onChangeLogo}
             isSettingPaid={isSettingPaid}
@@ -413,6 +426,7 @@ const WhiteLabel = (props) => {
             isEditor={true}
             src={logoUrlsWhiteLabel[3].path.light}
             inputId="logoUploader_4_light"
+            linkId="link-editors-header"
             onChangeText={t("ChangeLogoButton")}
             onChange={onChangeLogo}
             isSettingPaid={isSettingPaid}
@@ -432,6 +446,7 @@ const WhiteLabel = (props) => {
             src={logoUrlsWhiteLabel[4].path.light}
             imageClass="border-img logo-embedded-editor background-white"
             inputId="logoUploader_5_light"
+            linkId="link-embedded-editor"
             onChangeText={t("ChangeLogoButton")}
             onChange={onChangeLogo}
             isSettingPaid={isSettingPaid}
@@ -450,6 +465,8 @@ const WhiteLabel = (props) => {
         showReminder={isSettingPaid}
         saveButtonDisabled={isEqualLogo && isEqualText}
         isSaving={isSaving}
+        additionalClassSaveButton="white-label-save"
+        additionalClassCancelButton="white-label-cancel"
       />
     </WhiteLabelWrapper>
   );
@@ -459,6 +476,7 @@ export default inject(({ setup, auth, common }) => {
   const { setWhiteLabelSettings } = setup;
 
   const {
+    setLogoText,
     whiteLabelLogoText,
     getWhiteLabelLogoText,
     whiteLabelLogoUrls,
@@ -472,6 +490,7 @@ export default inject(({ setup, auth, common }) => {
   } = auth.settingsStore;
 
   return {
+    setLogoText,
     theme: auth.settingsStore.theme,
     logoText: whiteLabelLogoText,
     logoUrls: whiteLabelLogoUrls,

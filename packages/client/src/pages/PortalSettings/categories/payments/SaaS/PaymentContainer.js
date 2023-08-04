@@ -1,7 +1,6 @@
 import HelpReactSvgUrl from "PUBLIC_DIR/images/help.react.svg?url";
 import React from "react";
 import styled, { css } from "styled-components";
-import { withRouter } from "react-router";
 import { Trans } from "react-i18next";
 import { inject, observer } from "mobx-react";
 
@@ -108,6 +107,7 @@ const PaymentContainer = (props) => {
     return (
       <>
         <HelpButton
+          className="payment-tooltip"
           offsetRight={0}
           iconName={HelpReactSvgUrl}
           tooltipContent={
@@ -342,11 +342,8 @@ export default inject(({ auth, payments }) => {
   } = auth;
   const { showText: expandArticle } = settingsStore;
 
-  const {
-    isFreeTariff,
-    currentTariffPlanTitle,
-    isNonProfit,
-  } = currentQuotaStore;
+  const { isFreeTariff, currentTariffPlanTitle, isNonProfit } =
+    currentQuotaStore;
 
   const {
     isNotPaidPeriod,
@@ -393,4 +390,4 @@ export default inject(({ auth, payments }) => {
     isNonProfit,
     isPaymentDateValid,
   };
-})(withRouter(observer(PaymentContainer)));
+})(observer(PaymentContainer));

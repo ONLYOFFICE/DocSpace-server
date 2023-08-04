@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import Loaders from "@docspace/common/components/Loaders";
 import { isTablet as isTabletUtils } from "@docspace/components/utils/device";
 import { Link } from "react-router-dom";
 import { isTablet, isMobileOnly } from "react-device-detect";
+import { isMobile } from "@docspace/components/utils/device";
 import { inject, observer } from "mobx-react";
 import {
   StyledArticleHeader,
@@ -17,15 +18,21 @@ const ArticleHeader = ({
   showText,
   children,
   onClick,
+  onLogoClickAction,
   isBurgerLoading,
   whiteLabelLogoUrls,
   theme,
   ...rest
 }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
-  const isTabletView = (isTabletUtils() || isTablet) && !isMobileOnly;
-  const onLogoClick = () => history.push("/");
+  const isTabletView =
+    (isTabletUtils() || isTablet) && !isMobileOnly && !isMobile();
+
+  const onLogoClick = () => {
+    onLogoClickAction && onLogoClickAction();
+    navigate("/");
+  };
 
   const burgerLogo = !theme.isBase
     ? getLogoFromPath(whiteLabelLogoUrls[5].path.dark)
@@ -34,7 +41,7 @@ const ArticleHeader = ({
     ? getLogoFromPath(whiteLabelLogoUrls[0].path.dark)
     : getLogoFromPath(whiteLabelLogoUrls[0].path.light);
 
-  if (isMobileOnly) return <></>;
+  if (isMobileOnly || isMobile()) return <></>;
 
   const isLoadingComponent = isTabletView ? (
     <Loaders.ArticleHeader height="28px" width={showText ? "100%" : "28px"} />

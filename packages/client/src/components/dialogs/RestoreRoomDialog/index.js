@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import { withRouter } from "react-router";
 import ModalDialogContainer from "../ModalDialogContainer";
 import Text from "@docspace/components/text";
 import Button from "@docspace/components/button";
 import ModalDialog from "@docspace/components/modal-dialog";
 import { withTranslation } from "react-i18next";
 import { inject, observer } from "mobx-react";
+import { RoomsType } from "@docspace/common/constants";
 
 const StyledModal = styled(ModalDialogContainer)`
   max-width: 400px;
@@ -27,6 +27,7 @@ const RestoreRoomDialogComponent = (props) => {
     setRestoreAllArchive,
     setArchiveAction,
     items,
+    hasPublicRoom,
   } = props;
 
   useEffect(() => {
@@ -58,6 +59,12 @@ const RestoreRoomDialogComponent = (props) => {
   };
 
   const getDescription = () => {
+    if (hasPublicRoom) {
+      return items.length > 1
+        ? t("Files:WantToRestoreTheRooms")
+        : t("Files:WantToRestoreTheRoom");
+    }
+
     if (restoreAll) return t("ArchiveDialog:RestoreAllRooms");
 
     return items.length > 1
@@ -125,6 +132,9 @@ export default inject(
       ? [bufferSelection]
       : [selectedFolderStore];
 
+    const hasPublicRoom =
+      items.findIndex((i) => i.roomType === RoomsType.PublicRoom) !== -1;
+
     return {
       visible,
       restoreAll,
@@ -132,6 +142,7 @@ export default inject(
       setRestoreAllArchive,
       setArchiveAction,
       items,
+      hasPublicRoom,
     };
   }
-)(withRouter(observer(RestoreRoomDialog)));
+)(observer(RestoreRoomDialog));

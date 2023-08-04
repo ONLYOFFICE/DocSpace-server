@@ -539,6 +539,18 @@ export const getDaysRemaining = (autoDelete) => {
   return "" + daysRemaining;
 };
 
+export const checkFilterInstance = (filterObject, certainClass) => {
+  const isInstance =
+    filterObject.constructor.name === certainClass.prototype.constructor.name;
+
+  if (!isInstance)
+    throw new Error(
+      `Filter ${filterObject.constructor.name} isn't an instance of   ${certainClass.prototype.constructor.name}`
+    );
+
+  return isInstance;
+};
+
 export const getFileExtension = (fileTitle: string) => {
   if (!fileTitle) {
     return "";

@@ -109,6 +109,7 @@ public abstract class BaseStartup
                 .AddBaseDbContextPool<TelegramDbContext>()
                 .AddBaseDbContextPool<FirebaseDbContext>()
                 .AddBaseDbContextPool<CustomDbContext>()
+                .AddBaseDbContextPool<UrlShortenerDbContext>()
                 .AddBaseDbContextPool<WebstudioDbContext>()
                 .AddBaseDbContextPool<InstanceRegistrationContext>()
                 .AddBaseDbContextPool<IntegrationEventLogContext>()
@@ -222,7 +223,7 @@ public abstract class BaseStartup
 
                 options.Events = new JwtBearerEvents
                 {
-                    OnTokenValidated = ctx =>
+                    OnTokenValidated = async ctx =>
                     {
                         using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
@@ -237,9 +238,7 @@ public abstract class BaseStartup
 
                         var userId = new Guid(claimUserId);
 
-                        securityContext.AuthenticateMeWithoutCookie(userId, ctx.Principal.Claims.ToList());
-
-                        return Task.CompletedTask;
+                        await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
                     }
                 };
             })
@@ -308,6 +307,8 @@ public abstract class BaseStartup
             app.UseSession();
         }
 
+        app.UseSynchronizationContextMiddleware();
+
         app.UseAuthentication();
 
         app.UseAuthorization();
@@ -316,9 +317,9 @@ public abstract class BaseStartup
 
         app.UseLoggerMiddleware();
 
-        app.UseEndpoints(async endpoints =>
+        app.UseEndpoints(endpoints =>
         {
-            await endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices);
+            endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions()
             {

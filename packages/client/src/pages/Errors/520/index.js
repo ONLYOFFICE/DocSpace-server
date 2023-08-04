@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { inject, observer } from "mobx-react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import ErrorContainer from "@docspace/common/components/ErrorContainer";
+import { useParams } from "react-router-dom";
 import Link from "@docspace/components/link";
 import { ZendeskAPI } from "@docspace/common/components/Zendesk";
 
@@ -35,6 +36,7 @@ const StyledWrapper = styled.div`
 
 const Error520 = ({ errorLog, currentColorScheme, FirebaseHelper }) => {
   const { t } = useTranslation(["Common"]);
+  const { error } = useParams();
 
   const [reportDialogVisible, setReportDialogVisible] = useState(false);
 

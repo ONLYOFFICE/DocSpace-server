@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { withRouter } from "react-router";
 import { withTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import { isMobile, isMobileOnly } from "react-device-detect";
 
 import { observer, inject } from "mobx-react";
@@ -41,6 +41,7 @@ const SectionBodyContent = (props) => {
     filesList,
     uploaded,
     onClickBack,
+
     movingInProgress,
   } = props;
 
@@ -57,7 +58,6 @@ const SectionBodyContent = (props) => {
       customScrollElm && customScrollElm.scrollTo(0, 0);
     }
 
-    window.addEventListener("popstate", onClickBack);
     window.addEventListener("beforeunload", onBeforeunload);
     window.addEventListener("mousedown", onMouseDown);
     startDrag && window.addEventListener("mouseup", onMouseUp);
@@ -68,7 +68,6 @@ const SectionBodyContent = (props) => {
     document.addEventListener("drop", onDropEvent);
 
     return () => {
-      window.removeEventListener("popstate", onClickBack);
       window.removeEventListener("beforeunload", onBeforeunload);
       window.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
@@ -126,7 +125,8 @@ const SectionBodyContent = (props) => {
         !e.target.closest(".files-item") &&
         !e.target.closest(".not-selectable") &&
         !e.target.closest(".info-panel") &&
-        !e.target.closest(".table-container_group-menu")) ||
+        !e.target.closest(".table-container_group-menu") &&
+        !e.target.closest(".document-catalog")) ||
       e.target.closest(".files-main-button") ||
       e.target.closest(".add-button") ||
       e.target.closest(".search-input-block")
@@ -253,10 +253,12 @@ const SectionBodyContent = (props) => {
 
   if (isEmptyFilesList && movingInProgress) return <></>;
 
+  const isEmptyPage = isEmptyFilesList;
+
   return (
     <Consumer>
       {(context) =>
-        isEmptyFilesList ? (
+        isEmptyPage ? (
           <>
             <EmptyContainer sectionWidth={context.sectionWidth} />
           </>
@@ -306,6 +308,7 @@ export default inject(
       scrollToItem,
       setScrollToItem,
       filesList,
+
       movingInProgress,
     } = filesStore;
     return {
@@ -335,9 +338,7 @@ export default inject(
     };
   }
 )(
-  withRouter(
-    withTranslation(["Files", "Common", "Translations"])(
-      withLoader(withHotkeys(observer(SectionBodyContent)))()
-    )
+  withTranslation(["Files", "Common", "Translations"])(
+    withHotkeys(withLoader(observer(SectionBodyContent))())
   )
 );

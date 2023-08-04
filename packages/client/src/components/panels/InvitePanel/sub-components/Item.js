@@ -28,6 +28,7 @@ const Item = ({
   roomType,
   isOwner,
   inputsRef,
+  setIsOpenItemAccess,
 }) => {
   const { avatar, displayName, email, id, errors, access } = item;
 
@@ -128,10 +129,15 @@ const Item = ({
             size={16}
             color="#F21C0E"
           />
-          <StyledDeleteIcon size="medium" onClick={removeItem} />
+          <StyledDeleteIcon
+            className="delete-icon"
+            size="medium"
+            onClick={removeItem}
+          />
         </>
       ) : (
         <AccessSelector
+          className="user-access"
           t={t}
           roomType={roomType}
           defaultAccess={defaultAccess?.access}
@@ -140,6 +146,7 @@ const Item = ({
           isOwner={isOwner}
           withRemove={true}
           filteredAccesses={filteredAccesses}
+          setIsOpenItemAccess={setIsOpenItemAccess}
         />
       )}
     </>

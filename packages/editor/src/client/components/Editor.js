@@ -15,6 +15,7 @@ import {
   convertFile,
   getReferenceData,
   getSharedUsers,
+  getProtectUsers,
   sendEditorNotify,
 } from "@docspace/common/api/files";
 import { EditorWrapper } from "../components/StyledEditor";
@@ -164,7 +165,8 @@ function Editor({
         url.indexOf("#message/") > -1 &&
         fileInfo &&
         fileInfo?.fileExst &&
-        fileInfo?.viewAccessability?.Convert
+        fileInfo?.viewAccessability?.Convert &&
+        fileInfo?.security?.Convert
       ) {
         showDocEditorMessage(url);
       }
@@ -246,7 +248,7 @@ function Editor({
     if (index) {
       let convertUrl = url.substring(0, index);
 
-      if (fileInfo?.viewAccessability?.Convert) {
+      if (fileInfo?.viewAccessability?.Convert && fileInfo?.security?.Convert) {
         const newUrl = await convertDocumentUrl();
         if (newUrl) {
           convertUrl = newUrl.webUrl;
@@ -448,6 +450,8 @@ function Editor({
     console.log("onDocumentReady", arguments, { docEditor });
     documentIsReady = true;
 
+    config?.errorMessage && docEditor?.showMessage(config.errorMessage);
+
     // if (isSharingAccess) {
     //   loadUsersRightsList(docEditor);
     // }
@@ -542,22 +546,26 @@ function Editor({
     }
   };
 
-  const onSDKRequestUsers = async () => {
+  const onSDKRequestUsers = async (event) => {
     try {
-      const res = await getSharedUsers(fileInfo.id);
+      const c = event?.data?.c;
+      const users = await (c == "protect"
+        ? getProtectUsers(fileInfo.id)
+        : getSharedUsers(fileInfo.id));
 
-      res.map((item) => {
-        return usersInRoom.push({
+      if (c !== "protect") {
+        usersInRoom = users.map((item) => ({
           email: item.email,
           name: item.name,
-        });
-      });
+        }));
+      }
 
       docEditor.setUsers({
-        users: usersInRoom,
+        c,
+        users,
       });
     } catch (e) {
-      console.error(e);
+      docEditor.showMessage(e?.message || "Connection is lost");
     }
   };
 
@@ -596,29 +604,41 @@ function Editor({
 
       let goBack;
       const url = window.location.href;
+      const search = window.location.search;
+      const shareIndex = search.indexOf("share=");
+      const key = search.substring(shareIndex + 6);
 
       if (fileInfo) {
         let backUrl = "";
 
         if (fileInfo.rootFolderType === FolderType.Rooms) {
-          backUrl = `/rooms/shared/${fileInfo.folderId}/filter?folder=${fileInfo.folderId}`;
+          if (key) {
+            backUrl = `/rooms/share?key=${key}`;
+          } else {
+            backUrl = `/rooms/shared/${fileInfo.folderId}/filter?folder=${fileInfo.folderId}`;
+          }
         } else {
           backUrl = `/rooms/personal/filter?folder=${fileInfo.folderId}`;
         }
 
         const origin = url.substring(0, url.indexOf("/doceditor"));
 
-        goBack = {
-          blank: true,
-          requestClose: false,
-          text: t("FileLocation"),
-          url: `${combineUrl(origin, backUrl)}`,
-        };
+        const editorGoBack = new URLSearchParams(search).get("editorGoBack");
+
+        goBack =
+          editorGoBack === "false"
+            ? {}
+            : {
+                blank: true,
+                requestClose: false,
+                text: t("FileLocation"),
+                url: `${combineUrl(origin, backUrl)}`,
+              };
       }
 
       config.editorConfig.customization = {
         ...config.editorConfig.customization,
-        goback: goBack,
+        goback: { ...goBack },
       };
 
       config.editorConfig.customization.uiTheme = getEditorTheme(user?.theme);

@@ -3,7 +3,10 @@ import equal from "fast-deep-equal/react";
 
 import Viewer from "../Viewer";
 import { isSeparator } from "../../helpers";
-import { getCustomToolbar } from "../../helpers/getCustomToolbar";
+import {
+  getCustomToolbar,
+  getPDFToolbar,
+} from "../../helpers/getCustomToolbar";
 import { ContextMenuModel } from "../../types";
 
 import { StyledDropDown } from "../StyledDropDown";
@@ -61,7 +64,20 @@ function ViewerWrapper(props: ViewerWrapperProps) {
       userAccess,
     } = props;
 
-    const customToolbar = getCustomToolbar(onDeleteClick, onDownloadClick);
+    const file = props.targetFile;
+    const isEmptyContextMenu =
+      props.contextModel().filter((item) => !item.disabled).length === 0;
+
+    const customToolbar = props.isPdf
+      ? getPDFToolbar()
+      : file
+      ? getCustomToolbar(
+          file,
+          isEmptyContextMenu,
+          onDeleteClick,
+          onDownloadClick
+        )
+      : [];
 
     const canShare = playlist[playlistPos].canShare;
     const toolbars =
@@ -73,11 +89,13 @@ function ViewerWrapper(props: ViewerWrapperProps) {
 
     return toolbars;
   }, [
+    props.isPdf,
     props.onDeleteClick,
     props.onDownloadClick,
     props.playlist,
     props.playlistPos,
     props.userAccess,
+    props.targetFile,
   ]);
 
   return (
@@ -86,6 +104,7 @@ function ViewerWrapper(props: ViewerWrapperProps) {
       fileUrl={props.fileUrl}
       isAudio={props.isAudio}
       isVideo={props.isVideo}
+      isPdf={props.isPdf}
       visible={props.visible}
       isImage={props.isImage}
       playlist={props.playlist}
@@ -93,6 +112,7 @@ function ViewerWrapper(props: ViewerWrapperProps) {
       audioIcon={props.audioIcon}
       errorTitle={props.errorTitle}
       headerIcon={props.headerIcon}
+      targetFile={props.targetFile}
       toolbar={toolbar}
       playlistPos={props.playlistPos}
       archiveRoom={props.archiveRoom}

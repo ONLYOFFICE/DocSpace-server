@@ -3,11 +3,11 @@ import axios from "axios";
 import FilesFilter from "./filter";
 import { FolderType, RoomSearchArea } from "../../constants";
 import find from "lodash/find";
-import { decodeDisplayName } from "../../utils";
+import { checkFilterInstance, decodeDisplayName } from "../../utils";
 import { getRooms } from "../rooms";
 import RoomsFilter from "../rooms/filter";
 
-export function openEdit(fileId, version, doc, view) {
+export function openEdit(fileId, version, doc, view, shareKey) {
   const params = []; // doc ? `?doc=${doc}` : "";
 
   if (view) {
@@ -20,6 +20,10 @@ export function openEdit(fileId, version, doc, view) {
 
   if (doc) {
     params.push(`doc=${doc}`);
+  }
+
+  if (shareKey) {
+    params.push(`share=${shareKey}`);
   }
 
   const paramsString = params.length > 0 ? `?${params.join("&")}` : "";
@@ -62,14 +66,17 @@ export function getFolderPath(folderId) {
 }
 
 export function getFolder(folderId, filter, signal) {
+  let params = folderId;
+
   if (folderId && typeof folderId === "string") {
     folderId = encodeURIComponent(folderId.replace(/\\\\/g, "\\"));
   }
 
-  const params =
-    filter && filter instanceof FilesFilter
-      ? `${folderId}?${filter.toApiUrlParams()}`
-      : folderId;
+  if (filter) {
+    checkFilterInstance(filter, FilesFilter);
+
+    params = `${folderId}?${filter.toApiUrlParams()}`;
+  }
 
   const options = {
     method: "get",
@@ -558,9 +565,14 @@ export function uploadFile(url, data) {
   return axios.post(url, data);
 }
 
-export function downloadFiles(fileIds, folderIds) {
+export function downloadFiles(fileIds, folderIds, shareKey) {
   const data = { fileIds, folderIds };
-  return request({ method: "put", url: "/files/fileops/bulkdownload", data });
+  const share = shareKey ? `?share=${shareKey}` : "";
+  return request({
+    method: "put",
+    url: `/files/fileops/bulkdownload${share}`,
+    data,
+  });
 }
 
 export function getProgress() {
@@ -575,7 +587,7 @@ export function checkFileConflicts(destFolderId, folderIds, fileIds) {
 
   return request({
     method: "get",
-    url: `/files/fileops/move?destFolderId=${destFolderId}${paramsString}`,
+    url: `/files/fileops/move/full?destFolderId=${destFolderId}${paramsString}`,
   });
 }
 
@@ -966,6 +978,16 @@ export function getSharedUsers(fileId) {
 
   return request(options);
 }
+
+export function getProtectUsers(fileId) {
+  const options = {
+    method: "get",
+    url: `/files/file/${fileId}/protectusers`,
+  };
+
+  return request(options);
+}
+
 export function sendEditorNotify(fileId, actionLink, emails, message) {
   return request({
     method: "post",

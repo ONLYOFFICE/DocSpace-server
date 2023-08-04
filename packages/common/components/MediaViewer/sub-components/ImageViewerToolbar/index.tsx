@@ -21,6 +21,7 @@ import MediaContextMenu from "PUBLIC_DIR/images/vertical-dots.react.svg";
 function ImageViewerToolbar(
   {
     toolbar,
+    className,
     percentValue,
     toolbarEvent,
     generateContextMenu,
@@ -77,6 +78,8 @@ function ImageViewerToolbar(
   }
 
   function renderToolbarItem(item: ToolbarItemType) {
+    if (item.disabled) return null;
+
     if (item.key === "context-menu") {
       return getContextMenu(item);
     }
@@ -103,7 +106,7 @@ function ImageViewerToolbar(
   }
 
   return (
-    <ImageViewerToolbarWrapper>
+    <ImageViewerToolbarWrapper className={className}>
       <ListTools>{toolbar.map((item) => renderToolbarItem(item))}</ListTools>
     </ImageViewerToolbarWrapper>
   );

@@ -1,7 +1,6 @@
 ﻿import CheckWhiteSvgUrl from "PUBLIC_DIR/images/check.white.svg?url";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { withTranslation } from "react-i18next";
-import { withRouter } from "react-router";
 import toastr from "@docspace/components/toast/toastr";
 import { inject, observer } from "mobx-react";
 import Button from "@docspace/components/button";
@@ -108,6 +107,7 @@ const Appearance = (props) => {
   const array_items = useMemo(
     () => [
       {
+        id: "light-theme",
         key: "0",
         title: t("Profile:LightTheme"),
         content: (
@@ -121,6 +121,7 @@ const Appearance = (props) => {
         ),
       },
       {
+        id: "dark-theme",
         key: "1",
         title: t("Profile:DarkTheme"),
         content: (
@@ -734,7 +735,7 @@ const Appearance = (props) => {
 
         <div className="buttons-container">
           <Button
-            className="button"
+            className="save button"
             label={t("Common:SaveButton")}
             onClick={onSave}
             primary
@@ -743,7 +744,7 @@ const Appearance = (props) => {
           />
 
           <Button
-            className="button"
+            className="edit-current-theme button"
             label={t("Settings:EditCurrentTheme")}
             onClick={onClickEdit}
             size="small"
@@ -751,7 +752,7 @@ const Appearance = (props) => {
           />
           {isShowDeleteButton && (
             <Button
-              className="button"
+              className="delete-theme button"
               label={t("Settings:DeleteTheme")}
               onClick={onOpenDialogDelete}
               size="small"
@@ -785,8 +786,4 @@ export default inject(({ auth }) => {
     deleteAppearanceTheme,
     theme,
   };
-})(
-  withTranslation(["Profile", "Common", "Settings"])(
-    withRouter(observer(Appearance))
-  )
-);
+})(withTranslation(["Profile", "Common", "Settings"])(observer(Appearance)));

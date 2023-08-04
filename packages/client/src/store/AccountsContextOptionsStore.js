@@ -18,7 +18,6 @@ import InfoReactSvgUrl from "PUBLIC_DIR/images/info.react.svg?url";
 import { makeAutoObservable } from "mobx";
 import toastr from "@docspace/components/toast/toastr";
 
-import history from "@docspace/common/history";
 import { combineUrl } from "@docspace/common/utils";
 import { EmployeeStatus, FilterSubject } from "@docspace/common/constants";
 import { resendUserInvites } from "@docspace/common/api/people";
@@ -29,7 +28,7 @@ import { showEmailActivationToast } from "SRC_DIR/helpers/people-helpers";
 
 const PROXY_HOMEPAGE_URL = combineUrl(window.DocSpaceConfig?.proxy?.url, "/");
 
-const PROFILE_SELF_URL = combineUrl(PROXY_HOMEPAGE_URL, "/accounts/view/@self");
+const PROFILE_SELF_URL = "/profile";
 
 class AccountsContextOptionsStore {
   authStore = null;
@@ -57,7 +56,7 @@ class AccountsContextOptionsStore {
             key: option,
             icon: ProfileReactSvgUrl,
             label: t("Common:Profile"),
-            onClick: this.onProfileClick,
+            onClick: this.peopleStore.profileActionsStore.onProfileClick,
           };
 
         case "change-name":
@@ -82,7 +81,7 @@ class AccountsContextOptionsStore {
             key: option,
             icon: ChangeSecurityReactSvgUrl,
             label: t("PeopleTranslations:PasswordChangeButton"),
-            onClick: this.toggleChangePasswordDialog,
+            onClick: () => this.toggleChangePasswordDialog(item),
           };
         case "change-owner":
           return {
@@ -179,10 +178,8 @@ class AccountsContextOptionsStore {
       hasUsersToRemove,
       hasFreeUsers,
     } = this.peopleStore.selectionStore;
-    const {
-      setSendInviteDialogVisible,
-      setDeleteDialogVisible,
-    } = this.peopleStore.dialogStore;
+    const { setSendInviteDialogVisible, setDeleteDialogVisible } =
+      this.peopleStore.dialogStore;
 
     const { isOwner } = this.authStore.userStore.user;
 
@@ -305,10 +302,6 @@ class AccountsContextOptionsStore {
     );
   };
 
-  onProfileClick = () => {
-    history.push(PROFILE_SELF_URL);
-  };
-
   toggleChangeNameDialog = () => {
     const { setChangeNameVisible } = this.peopleStore.targetUserStore;
 
@@ -320,8 +313,14 @@ class AccountsContextOptionsStore {
     setChangeEmailVisible(true);
   };
 
-  toggleChangePasswordDialog = () => {
+  toggleChangePasswordDialog = (item) => {
+    const { setDialogData } = this.peopleStore.dialogStore;
     const { setChangePasswordVisible } = this.peopleStore.targetUserStore;
+    const { email } = item;
+
+    setDialogData({
+      email,
+    });
     setChangePasswordVisible(true);
   };
 
@@ -352,11 +351,8 @@ class AccountsContextOptionsStore {
   };
 
   toggleDeleteProfileEverDialog = (item) => {
-    const {
-      setDialogData,
-      setDeleteProfileDialogVisible,
-      closeDialogs,
-    } = this.peopleStore.dialogStore;
+    const { setDialogData, setDeleteProfileDialogVisible, closeDialogs } =
+      this.peopleStore.dialogStore;
     const { id, displayName, userName } = item;
 
     closeDialogs();
@@ -385,10 +381,8 @@ class AccountsContextOptionsStore {
   };
 
   onResetAuth = (item) => {
-    const {
-      setDialogData,
-      setResetAuthDialogVisible,
-    } = this.peopleStore.dialogStore;
+    const { setDialogData, setResetAuthDialogVisible } =
+      this.peopleStore.dialogStore;
 
     setResetAuthDialogVisible(true);
     setDialogData(item.id);

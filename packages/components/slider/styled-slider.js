@@ -3,7 +3,6 @@ import { Base } from "../themes";
 
 const StyledSlider = styled.input.attrs((props) => ({
   type: "range",
-  readOnly: props.isReadOnly,
   disabled: props.isDisabled,
 }))`
   width: ${(props) => props.theme.avatarEditorBody.slider.width};

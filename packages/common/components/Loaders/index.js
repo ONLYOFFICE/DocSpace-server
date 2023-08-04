@@ -36,6 +36,8 @@ import DataBackupLoader from "./DataBackupLoader";
 import AutoBackupLoader from "./AutoBackupLoader";
 import RestoreBackupLoader from "./RestoreBackupLoader";
 import PaymentsLoader from "./PaymentsLoader";
+
+import SelectorBreadCrumbsLoader from "./SelectorBreadCrumbsLoader";
 import PaymentsStandaloneLoader from "./PaymentsStandaloneLoader";
 import SelectorSearchLoader from "./SelectorSearchLoader";
 import SelectorRowLoader from "./SelectorRowLoader";
@@ -48,6 +50,7 @@ import SettingsAdmin from "./SettingsLoader/SettingsAdminLoader";
 import SettingsCommon from "./SettingsLoader/SettingsCommonLoader";
 import SettingsSMTP from "./SettingsLoader/SettingsSMTPLoader";
 import EmptyContainerLoader from "./EmptyContainerLoader/EmptyContainerLoader";
+import ContextMenuLoader from "./ContextMenuLoader";
 
 export default {
   Rectangle,
@@ -87,6 +90,8 @@ export default {
   AutoBackupLoader,
   RestoreBackupLoader,
   PaymentsLoader,
+
+  SelectorBreadCrumbsLoader,
   PaymentsStandaloneLoader,
   SelectorSearchLoader,
   SelectorRowLoader,
@@ -101,4 +106,5 @@ export default {
 
   EmptyContainerLoader,
   Notifications,
+  ContextMenuLoader,
 };
