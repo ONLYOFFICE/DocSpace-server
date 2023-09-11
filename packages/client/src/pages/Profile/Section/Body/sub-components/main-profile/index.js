@@ -228,8 +228,8 @@ const MainProfile = (props) => {
             <div className="email-container">
               <div className="email-edit-container">
                 <Text
-                  data-for="emailTooltip"
-                  data-tip={t("EmailNotVerified")}
+                  data-tooltip-id="emailTooltip"
+                  data-tooltip-content={t("EmailNotVerified")}
                   as="div"
                   className="email-text-container"
                   fontWeight={600}>
@@ -237,11 +237,11 @@ const MainProfile = (props) => {
                 </Text>
                 {withActivationBar && (
                   <Tooltip
+                    float
                     id="emailTooltip"
-                    getContent={(dataTip) => (
-                      <Text fontSize="12px">{dataTip}</Text>
+                    getContent={({ content }) => (
+                      <Text fontSize="12px">{content}</Text>
                     )}
-                    effect="float"
                     place="bottom"
                   />
                 )}
@@ -331,8 +331,8 @@ const MainProfile = (props) => {
               <div className="email-container">
                 <div className="email-edit-container">
                   <Text
-                    data-for="emailTooltip"
-                    data-tip={t("EmailNotVerified")}
+                    data-tooltip-id="emailTooltip"
+                    data-tooltip-content={t("EmailNotVerified")}
                     as="div"
                     className="email-text-container"
                     fontWeight={600}>
@@ -341,11 +341,11 @@ const MainProfile = (props) => {
                 </div>
                 {withActivationBar && (
                   <Tooltip
+                    float
                     id="emailTooltip"
-                    getContent={(dataTip) => (
-                      <Text fontSize="12px">{dataTip}</Text>
+                    getContent={({ content }) => (
+                      <Text fontSize="12px">{content}</Text>
                     )}
-                    effect="float"
                     place="bottom"
                   />
                 )}
