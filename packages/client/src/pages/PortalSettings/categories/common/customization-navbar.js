@@ -27,7 +27,7 @@ const StyledComponent = styled.div`
       padding-bottom: 8px;
       svg {
         padding-bottom: 5px;
-        ${props =>
+        ${(props) =>
           props.theme.interfaceDirection === "rtl" &&
           css`
             transform: scaleX(-1);
@@ -39,7 +39,7 @@ const StyledComponent = styled.div`
         }
         display: flex;
         svg {
-          ${props =>
+          ${(props) =>
             props.theme.interfaceDirection === "rtl" &&
             css`
               transform: scaleX(-1);
@@ -50,14 +50,14 @@ const StyledComponent = styled.div`
     }
 
     .category-item-description {
-      color: ${props => props.theme.client.settings.common.descriptionColor};
+      color: ${(props) => props.theme.client.settings.common.descriptionColor};
       font-size: 13px;
       max-width: 1024px;
       line-height: 20px;
     }
 
     .inherit-title-link {
-      ${props =>
+      ${(props) =>
         props.theme.interfaceDirection === "rtl"
           ? css`
               margin-left: 4px;
@@ -96,7 +96,7 @@ const CustomizationNavbar = ({
     if (isLoadedSetting) setIsLoadedCustomizationNavbar(isLoadedSetting);
   }, [isLoadedSetting]);
 
-  const onClickLink = e => {
+  const onClickLink = (e) => {
     e.preventDefault();
     navigate(e.target.pathname);
   };

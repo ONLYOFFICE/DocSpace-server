@@ -35,7 +35,7 @@ import { isSmallTablet } from "@docspace/components/utils/device";
 import { SSO_LABEL } from "SRC_DIR/helpers/constants";
 import { useTheme } from "styled-components";
 
-const MainProfile = props => {
+const MainProfile = (props) => {
   const { t } = useTranslation(["Profile", "Common"]);
 
   const {
@@ -124,19 +124,18 @@ const MainProfile = props => {
 
   const { cultureName, currentCulture } = profile;
   const language = convertLanguage(cultureName || currentCulture || culture);
-
-  const selectedLanguage = cultureNames.find(item => item.key === language) ||
-    cultureNames.find(item => item.key === culture) || {
+  const selectedLanguage = cultureNames.find((item) => item.key === language) ||
+    cultureNames.find((item) => item.key === culture) || {
       key: language,
       label: "",
     };
 
-  const onLanguageSelect = language => {
+  const onLanguageSelect = (language) => {
     if (profile.cultureName === language.key) return;
 
     updateProfileCulture(profile.id, language.key)
       .then(() => location.reload())
-      .catch(error => {
+      .catch((error) => {
         toastr.error(error && error.message ? error.message : error);
       });
   };
@@ -239,7 +238,7 @@ const MainProfile = props => {
                 {withActivationBar && (
                   <Tooltip
                     id="emailTooltip"
-                    getContent={dataTip => (
+                    getContent={(dataTip) => (
                       <Text fontSize="12px">{dataTip}</Text>
                     )}
                     effect="float"
@@ -343,7 +342,7 @@ const MainProfile = props => {
                 {withActivationBar && (
                   <Tooltip
                     id="emailTooltip"
-                    getContent={dataTip => (
+                    getContent={(dataTip) => (
                       <Text fontSize="12px">{dataTip}</Text>
                     )}
                     effect="float"

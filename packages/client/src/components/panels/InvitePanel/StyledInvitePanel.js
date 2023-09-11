@@ -135,8 +135,7 @@ const StyledDescription = styled(Text)`
   padding-right: 16px;
   color: ${(props) =>
     props.theme.createEditRoomDialog.commonParam.descriptionColor};
-  margin-bottom: 16px;
-
+  margin-bottom: 4px;
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
@@ -412,6 +411,36 @@ const StyledCrossIconMobile = styled(CrossIconMobile)`
   }
 `;
 
+const StyledInviteLanguage = styled.div`
+  padding-left: 16px;
+  padding-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 4px;
+  height: 28px;
+  color: ${(props) =>
+    props.theme.createEditRoomDialog.commonParam.descriptionColor};
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  .link-list {
+    font-size: 13px;
+    color: var(--light-gray-dark);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 15px;
+  }
+  .language-combo-box {
+    .combo-button {
+      padding-left: 6px;
+      padding-right: 0px;
+    }
+  }
+`;
+
 StyledCrossIcon.defaultProps = { theme: Base };
 export {
   StyledBlock,
@@ -436,6 +465,7 @@ export {
   StyledAccessSelector,
   StyledToggleButton,
   StyledDescription,
+  StyledInviteLanguage,
   StyledControlContainer,
   StyledCrossIconMobile,
 };

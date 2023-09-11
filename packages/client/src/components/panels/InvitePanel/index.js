@@ -256,7 +256,6 @@ const InvitePanel = ({
           activeLink={activeLink}
           isMobileView={isMobileView}
         />
-
         <InviteInput
           t={t}
           onClose={onClose}
@@ -340,8 +339,7 @@ const InvitePanel = ({
       id="InvitePanelWrapper"
       hasInvitedUsers={hasInvitedUsers}
       scrollAllPanelContent={scrollAllPanelContent}
-      addUsersPanelVisible={addUsersPanelVisible}
-    >
+      addUsersPanelVisible={addUsersPanelVisible}>
       {isMobileView ? (
         <div className="invite_panel">
           <StyledControlContainer onClick={onClose}>
@@ -362,8 +360,7 @@ const InvitePanel = ({
             visible={visible}
             onClose={onClose}
             withoutBodyScroll
-            zIndex={310}
-          >
+            zIndex={310}>
             {invitePanelNode}
           </Aside>
         </>

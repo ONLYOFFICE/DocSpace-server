@@ -443,8 +443,7 @@ const LanguageAndTimeZone = (props) => {
       <FieldContainer
         id="fieldContainerLanguage"
         labelText={`${t("Common:Language")}`}
-        isVertical={true}
-      >
+        isVertical={true}>
         <ComboBox
           tabIndex={1}
           id="comboBoxLanguage"
@@ -465,8 +464,7 @@ const LanguageAndTimeZone = (props) => {
       <FieldContainer
         id="fieldContainerTimezone"
         labelText={`${t("TimeZone")}`}
-        isVertical={true}
-      >
+        isVertical={true}>
         <ComboBox
           tabIndex={2}
           id="comboBoxTimezone"
@@ -492,8 +490,7 @@ const LanguageAndTimeZone = (props) => {
   ) : (
     <StyledSettingsComponent
       hasScroll={hasScroll}
-      className="category-item-wrapper"
-    >
+      className="category-item-wrapper">
       {isCustomizationView && !isMobileView && (
         <div className="category-item-heading">
           <div className="category-item-title">

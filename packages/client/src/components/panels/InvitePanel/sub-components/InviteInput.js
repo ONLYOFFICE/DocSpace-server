@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import debounce from "lodash.debounce";
 import { inject, observer } from "mobx-react";
 
+import withCultureNames from "@docspace/common/hoc/withCultureNames";
+import ComboBox from "@docspace/components/combobox";
 import Avatar from "@docspace/components/avatar";
 import TextInput from "@docspace/components/text-input";
 import DropDownItem from "@docspace/components/drop-down-item";
@@ -22,27 +24,33 @@ import {
   StyledDropDown,
   SearchItemText,
   StyledDescription,
+  StyledInviteLanguage,
 } from "../StyledInvitePanel";
 
-const InviteInput = ({
-  defaultAccess,
-  getUsersByQuery,
-  hideSelector,
-  inviteItems,
-  onClose,
-  roomId,
-  roomType,
-  setInviteItems,
-  roomUsers,
-  t,
-  isOwner,
-  inputsRef,
-  addUsersPanelVisible,
-  setAddUsersPanelVisible,
-  isMobileView,
-}) => {
+const InviteInput = (props) => {
+  const {
+    defaultAccess,
+    getUsersByQuery,
+    hideSelector,
+    inviteItems,
+    onClose,
+    roomId,
+    roomType,
+    setInviteItems,
+    roomUsers,
+    t,
+    isOwner,
+    inputsRef,
+    addUsersPanelVisible,
+    setAddUsersPanelVisible,
+    isMobileView,
+    culture,
+    cultureNames,
+    i18n,
+  } = props;
   const [inputValue, setInputValue] = useState("");
   const [usersList, setUsersList] = useState([]);
+  const [isChangeLangMail, setIsChangeLangMail] = useState(false);
   const [searchPanelVisible, setSearchPanelVisible] = useState(false);
 
   const [selectedAccess, setSelectedAccess] = useState(defaultAccess);
@@ -148,8 +156,7 @@ const InviteInput = ({
         onClick={addUser}
         disabled={invited}
         height={48}
-        className="list-item"
-      >
+        className="list-item">
         <Avatar size="min" role="user" source={avatar} />
         <div>
           <SearchItemText primary disabled={invited}>
@@ -232,11 +239,36 @@ const InviteInput = ({
 
     event.stopPropagation();
   };
-
   useEffect(() => {
     document.addEventListener("keyup", onKeyPress);
     return () => document.removeEventListener("keyup", onKeyPress);
   });
+  const onLanguageSelect = (language) => {
+    setSelectLang(language);
+    if (language.key !== props.i18n.language) setIsChangeLangMail(true);
+    else setIsChangeLangMail(false);
+  };
+  const onResetLangMail = () => {
+    setSelectLang({
+      key: selectedLanguage.key,
+      label: selectedLanguage.label,
+    });
+    setIsChangeLangMail(false);
+  };
+  const language = props.i18n.language;
+  const selectedLanguage = cultureNames.find((item) => item.key === language) ||
+    cultureNames.find((item) => item.key === culture) || {
+      key: language,
+      label: "",
+    };
+  const [selectedLanguageNew, setSelectLang] = useState({
+    key: selectedLanguage.key,
+    label: selectedLanguage.label,
+  });
+  const cultureNamesNew = cultureNames.map((item) => ({
+    label: item.label,
+    key: item.key,
+  }));
 
   return (
     <>
@@ -248,8 +280,7 @@ const InviteInput = ({
             fontWeight="600"
             type="action"
             isHovered
-            onClick={openUsersPanel}
-          >
+            onClick={openUsersPanel}>
             {t("Translations:ChooseFromList")}
           </StyledLink>
         )}
@@ -260,6 +291,37 @@ const InviteInput = ({
           : t("AddManuallyDescriptionRoom")}
       </StyledDescription>
 
+      <StyledInviteLanguage>
+        Invitation language:
+        <div className="language-combo-box-wrapper">
+          <ComboBox
+            className="language-combo-box"
+            directionY={"both"}
+            options={cultureNamesNew}
+            selectedOption={selectedLanguageNew}
+            onSelect={onLanguageSelect}
+            isDisabled={false}
+            scaled={isMobileView}
+            scaledOptions={false}
+            size="content"
+            showDisabledItems={true}
+            dropDownMaxHeight={364}
+            withBlur={isMobileView}
+            fillIcon={false}
+            modernView={!isMobileView}
+          />
+        </div>
+        {isChangeLangMail && (
+          <StyledLink
+            className="link-list"
+            fontWeight="600"
+            type="action"
+            isHovered
+            onClick={onResetLangMail}>
+            Reset change
+          </StyledLink>
+        )}
+      </StyledInviteLanguage>
       <StyledInviteInputContainer ref={inputsRef}>
         <StyledInviteInput ref={searchRef}>
           <TextInput
@@ -286,8 +348,7 @@ const InviteInput = ({
             showDisabledItems
             clickOutsideAction={closeInviteInputPanel}
             eventTypes="click"
-            {...dropDownMaxHeight}
-          >
+            {...dropDownMaxHeight}>
             {!!usersList.length ? (
               foundUsers
             ) : (
@@ -296,8 +357,7 @@ const InviteInput = ({
                 style={{ width: "inherit" }}
                 textOverflow
                 onClick={addEmail}
-                height={48}
-              >
+                height={48}>
                 {t("Common:AddButton")} «{inputValue}»
               </DropDownItem>
             )}
@@ -341,8 +401,10 @@ export default inject(({ auth, peopleStore, filesStore, dialogsStore }) => {
   const { isOwner } = auth.userStore.user;
   const { getUsersByQuery } = peopleStore.usersStore;
   const { invitePanelOptions, setInviteItems, inviteItems } = dialogsStore;
+  const { targetUser: profile } = peopleStore.targetUserStore;
 
   return {
+    profile,
     setInviteItems,
     inviteItems,
     getUsersByQuery,
@@ -351,4 +413,4 @@ export default inject(({ auth, peopleStore, filesStore, dialogsStore }) => {
     defaultAccess: invitePanelOptions.defaultAccess,
     isOwner,
   };
-})(observer(InviteInput));
+})(withCultureNames(observer(InviteInput)));
