@@ -248,16 +248,25 @@ public class StudioNotifyService
                 TagValues.GreenButton(greenButtonText, confirmationUrl));
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl)
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
     {
         var greenButtonText = WebstudioNotifyPatternResource.ButtonAccept;
+
+        var tags = new List<ITagValue>() {
+            new TagValue(Tags.InviteLink, confirmationUrl),
+                TagValues.GreenButton(greenButtonText, confirmationUrl)
+        };
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
 
         await _client.SendNoticeToAsync(
             Actions.SaasDocSpaceInvite,
                 await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
-                new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.GreenButton(greenButtonText, confirmationUrl));
+                tags.ToArray());
     }
 
     #endregion

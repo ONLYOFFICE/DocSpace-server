@@ -364,7 +364,7 @@ public class UserController : PeopleControllerBase
             var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type);
             var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID);
 
-            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, link);
+            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, link, inDto.Culture);
             _logger.Debug(link);
         }
 
@@ -1782,12 +1782,12 @@ public class UserController : PeopleControllerBase
         var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
-        await foreach(var user in users)
+        await foreach (var user in users)
         {
             counter++;
 
