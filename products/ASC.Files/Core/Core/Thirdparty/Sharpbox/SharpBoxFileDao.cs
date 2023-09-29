@@ -702,7 +702,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         return file;
     }
 
-    public Task SetCustomOrder(string fileId, int order)
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         throw new NotImplementedException();
     }

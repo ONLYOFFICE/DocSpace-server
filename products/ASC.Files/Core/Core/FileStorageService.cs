@@ -1626,7 +1626,7 @@ public class FileStorageService //: IFileStorageService
         var fileDao = _daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
         file.NotFoundIfNull();
-        await fileDao.SetCustomOrder(fileId, order);
+        await fileDao.SetCustomOrder(fileId, file.ParentId, order);
     }
 
     public async Task SetFolderOrder<T>(T folderId, int order)
@@ -1634,7 +1634,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = _daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
         folder.NotFoundIfNull();
-        await folderDao.SetCustomOrder(folderId, order);
+        await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
     }
 
     public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)

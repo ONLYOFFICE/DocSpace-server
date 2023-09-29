@@ -672,7 +672,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string fileId, int order)
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         return Task.CompletedTask;
     }

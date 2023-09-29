@@ -475,7 +475,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         if (isnew)
         {
             await RecalculateFoldersCountAsync(folder.Id);
-            await SetCustomOrder(folder.Id, 1);
+            await SetCustomOrder(folder.Id, folder.ParentId);
         }
 
         return folder.Id;
@@ -1377,25 +1377,9 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return (parentFolders[0].ParentId, parentFolders[0].Title);
     }
 
-    public async Task SetCustomOrder(int folderId, int order)
+    public async Task SetCustomOrder(int folderId, int parentFolderId, int order = 0)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
-        var fileOrder = await Queries.GetFolderOrderAsync(filesDbContext, TenantID, folderId);
-        var currentOrder = fileOrder.Order;
-
-
-        if (currentOrder > order)
-        {
-            await Queries.IncreaseFolderOrderAsync(filesDbContext, TenantID, fileOrder.ParentFolderId, order, currentOrder);
-        }
-        else
-        {
-            await Queries.DecreaseFolderOrderAsync(filesDbContext, TenantID, fileOrder.ParentFolderId, order, currentOrder);
-        }
-
-        fileOrder.Order = order;
-        await filesDbContext.SaveChangesAsync();
+        await SetCustomOrder(folderId, parentFolderId, FileEntryType.Folder, order);
     }
 
     private async IAsyncEnumerable<int> GetTenantsWithFeeds(DateTime fromTime, Expression<Func<DbFolder, bool>> filter, bool includeSecurity)

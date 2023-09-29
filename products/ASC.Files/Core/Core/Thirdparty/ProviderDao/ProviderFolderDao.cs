@@ -545,10 +545,10 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         return folder;
     }
 
-    public async Task SetCustomOrder(string folderId, int order)
+    public async Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
-        await folderDao.SetCustomOrder(folderId, order);
+        await folderDao.SetCustomOrder(folderId, parentFolderId, order);
     }
 }

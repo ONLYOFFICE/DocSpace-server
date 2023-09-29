@@ -497,11 +497,11 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
         return fileDao.GetThumbnailAsync(file, width, height);
     }
 
-    public async Task SetCustomOrder(string fileId, int order)
+    public async Task SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        await fileDao.SetCustomOrder(fileId, order);
+        await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
     #endregion

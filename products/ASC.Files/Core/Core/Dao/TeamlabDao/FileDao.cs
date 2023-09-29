@@ -456,7 +456,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         if (isNew)
         {
             await RecalculateFilesCountAsync(file.ParentId);
-            await SetCustomOrder(file.Id, 1);
+            await SetCustomOrder(file.Id, file.ParentId);
         }
 
         _semaphore.Release();
@@ -1351,24 +1351,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task SetCustomOrder(int fileId, int order)
+    public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
-        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId);
-        var currentOrder = fileOrder.Order;
-
-        if (currentOrder > order)
-        {
-            await Queries.IncreaseFileOrderAsync(filesDbContext, TenantID, fileOrder.ParentFolderId, order, currentOrder);
-        }
-        else
-        {
-            await Queries.DecreaseFileOrderAsync(filesDbContext, TenantID, fileOrder.ParentFolderId, order, currentOrder);
-        }
-
-        fileOrder.Order = order;
-        await filesDbContext.SaveChangesAsync();
+        await SetCustomOrder(fileId, parentFolderId, FileEntryType.File, order);
     }
 
     #endregion
@@ -2150,10 +2135,24 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId) =>
                 ctx.FileOrder
+                    .AsTracking()
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
                     .Where(r => r.EntryType == FileEntryType.File)
                     .FirstOrDefault());
+
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> GetLastFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId) =>
+                ctx.FileOrder
+                    .AsTracking()
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.EntryType == FileEntryType.File)
+                    .OrderBy(r => r.Order)
+                    .Select(r => r.Order)
+                    .LastOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFileOrderAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

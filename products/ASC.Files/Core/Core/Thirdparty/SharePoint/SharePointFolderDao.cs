@@ -446,7 +446,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         return Task.FromResult("tar.gz");
     }
 
-    public Task SetCustomOrder(string folderId, int order)
+    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         return Task.CompletedTask;
     }
