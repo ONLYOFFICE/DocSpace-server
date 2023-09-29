@@ -76,6 +76,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
     public string Color { get; set; }
+    public bool Indexing { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);

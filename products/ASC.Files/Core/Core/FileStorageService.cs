@@ -1621,6 +1621,22 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task SetFileOrder<T>(T fileId, int order)
+    {
+        var fileDao = _daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+        file.NotFoundIfNull();
+        await fileDao.SetCustomOrder(fileId, order);
+    }
+
+    public async Task SetFolderOrder<T>(T folderId, int order)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        folder.NotFoundIfNull();
+        await folderDao.SetCustomOrder(folderId, order);
+    }
+
     public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
     {
         try

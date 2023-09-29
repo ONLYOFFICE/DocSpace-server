@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core.EF;
+
 namespace ASC.Migrations.Core;
 
 public class MigrationContext : DbContext
@@ -98,6 +100,7 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesLink> FilesLink { get; set; }
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
     public DbSet<FilesConverts> FilesConverts { get; set; }
+    public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -161,6 +164,7 @@ public class MigrationContext : DbContext
             .AddWebhooksConfig()
             .AddWebhooksLog()
             .AddShortLinks()
+            .AddDbFileOrder()
             .AddDbFunctions();
     }
 }

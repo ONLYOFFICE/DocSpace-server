@@ -173,7 +173,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -701,6 +701,11 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         return file;
     }
+
+    public Task SetCustomOrder(string fileId, int order)
+    {
+        throw new NotImplementedException();
+    }
     #endregion
 }
 
@@ -721,13 +726,13 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                join ftl in ctx.TagLink.DefaultIfEmpty() on new { TenantId = ft.TenantId, Id = ft.Id } equals new
-                {
-                    TenantId = ftl.TenantId,
-                    Id = ftl.TagId
-                }
-                where ftl == null
-                select ft)
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { TenantId = ft.TenantId, Id = ft.Id } equals new
+                 {
+                     TenantId = ftl.TenantId,
+                     Id = ftl.TagId
+                 }
+                 where ftl == null
+                 select ft)
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteSecuritiesAsync =

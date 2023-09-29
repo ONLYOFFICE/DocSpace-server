@@ -678,6 +678,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
     {
         throw new NotImplementedException();
     }
+
+    public Task SetCustomOrder(string folderId, int order)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 internal abstract class BaseFolderDao

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core;
-
-[EnumExtensions]
-public enum SortedByType
+namespace ASC.Files.Core.ApiModels.RequestDto;
+public class OrderRequestDto
 {
-    DateAndTime,
-    AZ,
-    Size,
-    Author,
-    Type,
-    New,
-    DateAndTimeCreation,
-    RoomType,
-    Tags,
-    Room,
-    Custom
-}
-
-[DebuggerDisplay("{SortedBy} {IsAsc}")]
-public class OrderBy
-{
-    [JsonPropertyName("is_asc")]
-    public bool IsAsc { get; set; }
-
-    [JsonPropertyName("property")]
-    public SortedByType SortedBy { get; set; }
-
-    public OrderBy(SortedByType sortedByType, bool isAsc)
-    {
-        SortedBy = sortedByType;
-        IsAsc = isAsc;
-    }
+    public int Order { get; set; }
 }

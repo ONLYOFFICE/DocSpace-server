@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core.EF;
+
 namespace ASC.Files.Core.Data;
 
 [Scope]
@@ -1374,6 +1376,27 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return (parentFolders[0].ParentId, parentFolders[0].Title);
     }
 
+    public async Task SetCustomOrder(int folderId, int order)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        var fileOrder = await Queries.GetFolderOrderAsync(filesDbContext, TenantID, folderId);
+        var currentOrder = fileOrder.Order;
+
+
+        if (currentOrder > order)
+        {
+            await Queries.IncreaseFolderOrderAsync(filesDbContext, TenantID, fileOrder.ParentFolderId, order, currentOrder);
+        }
+        else
+        {
+            await Queries.DecreaseFolderOrderAsync(filesDbContext, TenantID, fileOrder.ParentFolderId, order, currentOrder);
+        }
+
+        fileOrder.Order = order;
+        await filesDbContext.SaveChangesAsync();
+    }
+
     private async IAsyncEnumerable<int> GetTenantsWithFeeds(DateTime fromTime, Expression<Func<DbFolder, bool>> filter, bool includeSecurity)
     {
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
@@ -1435,38 +1458,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         }
 
         return query;
-    }
-
-    private IQueryable<DbFolder> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, int parentId, FolderType filterByType, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
-        bool excludeSubject, Guid subjectId, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
-    {
-        var q1 = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
-
-        q1 = BuildRoomsQuery(filesDbContext, q1, filterByType, tags, subjectId, searchByTags, withoutTags, searchByFilter, true, excludeSubject, subjectFilter, subjectEntriesIds);
-
-        if (searchByTags)
-        {
-            var q2 = q1.Join(filesDbContext.TagLink, f => f.Id.ToString(), t => t.EntryId, (folder, tagLink) => new { folder, tagLink.TagId })
-                .Join(filesDbContext.Tag, r => r.TagId, t => t.Id, (result, tag) => new { result.folder, tag.Name })
-                .Where(r => tags.Contains(r.Name))
-                .Select(r => r.folder.Id).Distinct();
-
-            return GetFolderQuery(filesDbContext).Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
-                .Where(r => q2.Contains(r.tree.ParentId))
-                .Select(r => r.folder);
-        }
-
-        if (!searchByFilter && !searchByTags && !withoutTags && !excludeSubject)
-        {
-            return GetFolderQuery(filesDbContext)
-                .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
-                .Where(r => r.tree.ParentId == parentId && r.tree.Level != 0)
-                .Select(r => r.folder);
-        }
-
-        return GetFolderQuery(filesDbContext).Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
-                    .Where(r => q1.Select(f => f.Id).Contains(r.tree.ParentId))
-                    .Select(r => r.folder);
     }
 
     private IQueryable<DbFolder> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, IEnumerable<int> roomsIds, FolderType filterByType, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
@@ -1543,7 +1534,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         int roomId, FilesDbContext filesDbContext)
     {
         var tenantId = TenantID;
-        
+
         var q = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
         if (withSubfolders)
@@ -1573,6 +1564,10 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Title) : q.OrderByDescending(r => r.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
+            SortedByType.Custom => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (folder, order) => new { folder, order })
+                                    .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
+                                    .OrderBy(r => r.order.Order)
+                                    .Select(r => r.folder),
             _ => q.OrderBy(r => r.Title),
         };
 
@@ -1592,13 +1587,13 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         if (roomId != default)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
-                {
-                    t.TenantId,
-                    t.Type,
-                    t.Name,
-                    l.EntryId,
-                    l.EntryType
-                }), f => f.Id.ToString(), t => t.EntryId, (folder, tag) => new { folder, tag })
+            {
+                t.TenantId,
+                t.Type,
+                t.Name,
+                l.EntryId,
+                l.EntryType
+            }), f => f.Id.ToString(), t => t.EntryId, (folder, tag) => new { folder, tag })
                 .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.Folder && filesDbContext.Folders.Where(f =>
                         f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
                             .OrderByDescending(t => t.Level)
@@ -1659,7 +1654,7 @@ static file class Queries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
-                    
+
                     .Select(r =>
                         new DbFolderQuery
                         {
@@ -1682,7 +1677,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, string title, int parentId) =>
                 ctx.Folders.Where(r => r.TenantId == tenantId)
                     .Where(r => r.Title == title && r.ParentId == parentId)
-                    
+
                     .OrderBy(r => r.CreateOn)
                     .Select(r =>
                         new DbFolderQuery
@@ -1706,7 +1701,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
-                    
+
                     .Join(ctx.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
                     .Where(r => r.tree.FolderId == folderId)
                     .OrderByDescending(r => r.tree.Level)
@@ -1731,7 +1726,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int folderId) =>
                 ctx.Tree
-                    
+
                     .Where(r => r.FolderId == folderId)
                     .OrderByDescending(r => r.Level)
                     .Select(r => r.ParentId)
@@ -1743,7 +1738,7 @@ static file class Queries
                 ctx.Tree
                     .Where(r => ctx.Files
                         .Where(f => f.TenantId == tenantId)
-                        
+
                         .Where(f => f.Id == fileId && f.CurrentVersion)
                         .Select(f => f.ParentId)
                         .Distinct()
@@ -1758,7 +1753,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, IEnumerable<FolderType> roomTypes) =>
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
-                    
+
                     .Join(ctx.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
                     .Where(r => foldersIds.Contains(r.tree.FolderId))
                     .OrderByDescending(r => r.tree.Level)
@@ -1904,7 +1899,7 @@ static file class Queries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
-                    
+
                     .Select(r => r.Title.ToLower())
                     .FirstOrDefault());
 
@@ -1912,12 +1907,12 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId, int parentId) =>
                 ctx.Folders
-                    
+
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Title.ToLower() == ctx.Folders
                         .Where(r => r.TenantId == tenantId)
                         .Where(r => r.Id == folderId)
-                        
+
                         .Select(r => r.Title.ToLower())
                         .FirstOrDefault()
                     )
@@ -1929,7 +1924,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId, int conflict) =>
                 ctx.Files
-                    
+
                     .Join(ctx.Files, f1 => f1.Title.ToLower(), f2 => f2.Title.ToLower(), (f1, f2) => new { f1, f2 })
                     .Where(r => r.f1.TenantId == tenantId && r.f1.CurrentVersion && r.f1.ParentId == folderId)
                     .Where(r => r.f2.TenantId == tenantId && r.f2.CurrentVersion && r.f2.ParentId == conflict)
@@ -1939,7 +1934,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Folders
-                    
+
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == folderId)
                     .Select(r => r.Id)
@@ -2053,7 +2048,7 @@ static file class Queries
         NodeAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string[] keys) =>
                 ctx.BunchObjects
-                    
+
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => keys.Length > 1 ? keys.Any(a => a == r.RightNode) : r.RightNode == keys[0]));
 
@@ -2116,4 +2111,31 @@ static file class Queries
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbFileOrder>> GetFolderOrderAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int entryId) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.EntryId == entryId)
+                .Where(r => r.EntryType == FileEntryType.Folder)
+                .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFolderOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.Order >= newOrder && r.Order < currentOrder)
+                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order + 1)));
+
+    public static readonly Func<FilesDbContext, int, int, int, int, Task> DecreaseFolderOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.Order <= newOrder && r.Order > currentOrder)
+                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
 }
