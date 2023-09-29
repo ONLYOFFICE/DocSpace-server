@@ -475,6 +475,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         if (isnew)
         {
             await RecalculateFoldersCountAsync(folder.Id);
+            await SetCustomOrder(folder.Id, 1);
         }
 
         return folder.Id;
