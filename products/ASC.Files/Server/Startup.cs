@@ -53,9 +53,7 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<ChunkedUploaderHandlerService>();
         DIHelper.TryAdd<DocuSignHandlerService>();
         DIHelper.TryAdd<ThirdPartyAppHandlerService>();
-
-        services.AddSingleton<DocumentBuilderTaskManager>();
-        services.AddScoped<DocumentBuilderTask<int>>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
 
         NotifyConfigurationExtension.Register(DIHelper);
 

@@ -53,7 +53,8 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
         Id = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{GetType().Name}_{tenantId}_{userId}"));
         Status = DistributedTaskStatus.Created;
 
-        this["ResultFileId"] = string.Empty;
+        this["ResultFileId"] = default(T);
+        this["ResultFileName"] = string.Empty;
         this["ResultFileUrl"] = string.Empty;
     }
 
@@ -69,7 +70,7 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
 
             var scopeClass = scope.ServiceProvider.GetService<DocumentBuilderTaskScope>();
 
-            var (tenantManager, documentServiceConnector, clientFactory, daoFactory, log) = scopeClass;
+            var (tenantManager, documentServiceConnector, clientFactory, daoFactory, filesLinkUtility, log) = scopeClass;
 
             logger = log;
 
@@ -96,8 +97,9 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
 
             file = await SaveFileFromUriAsync(clientFactory, daoFactory, new Uri(fileUri), file);
 
-            this["ResultFileId"] = file.Id.ToString();
-            this["ResultFileUrl"] = file.DownloadUrl;
+            this["ResultFileId"] = file.Id;
+            this["ResultFileName"] = file.Title;
+            this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
 
             Percentage = 100;
 
@@ -187,50 +189,26 @@ public class DocumentBuilderTaskScope
     private readonly DocumentServiceConnector _documentServiceConnector;
     private readonly IHttpClientFactory _clientFactory;
     private readonly IDaoFactory _daoFactory;
+    private readonly FilesLinkUtility _filesLinkUtility;
     private readonly ILogger _logger;
 
-    public DocumentBuilderTaskScope(TenantManager tenantManager, DocumentServiceConnector documentServiceConnector, IHttpClientFactory clientFactory, IDaoFactory daoFactory, ILogger<DocumentBuilderTaskScope> logger)
+    public DocumentBuilderTaskScope(TenantManager tenantManager, DocumentServiceConnector documentServiceConnector, IHttpClientFactory clientFactory, IDaoFactory daoFactory, FilesLinkUtility filesLinkUtility, ILogger<DocumentBuilderTaskScope> logger)
     {
         _tenantManager = tenantManager;
         _documentServiceConnector = documentServiceConnector;
         _clientFactory = clientFactory;
         _daoFactory = daoFactory;
+        _filesLinkUtility = filesLinkUtility;
         _logger = logger;
     }
 
-    public void Deconstruct(out TenantManager tenantManager, out DocumentServiceConnector documentServiceConnector, out IHttpClientFactory clientFactory, out IDaoFactory daoFactory, out ILogger logger)
+    public void Deconstruct(out TenantManager tenantManager, out DocumentServiceConnector documentServiceConnector, out IHttpClientFactory clientFactory, out IDaoFactory daoFactory, out FilesLinkUtility filesLinkUtility, out ILogger logger)
     {
         tenantManager = _tenantManager;
         documentServiceConnector = _documentServiceConnector;
         clientFactory = _clientFactory;
         daoFactory = _daoFactory;
+        filesLinkUtility = _filesLinkUtility;
         logger = _logger;
-    }
-}
-
-public class DocumentBuilderTaskResponseDto
-{
-    public string Id { get; set; }
-    public string Error { get; set; }
-    public int Percentage { get; set; }
-    public bool IsCompleted { get; set; }
-    public DistributedTaskStatus Status { get; set; }
-    public string ResultFileId { get; set; }
-    public string ResultFileUrl { get; set; }
-
-    public static DocumentBuilderTaskResponseDto Get<T>(DocumentBuilderTask<T> task)
-    {
-        return task == null
-            ? null
-            : new DocumentBuilderTaskResponseDto
-            {
-                Id = task.Id,
-                Error = task.Exception?.Message,
-                Percentage = (int)task.Percentage,
-                IsCompleted = task.IsCompleted,
-                Status = task.Status,
-                ResultFileId = task["ResultFileId"].ToString(),
-                ResultFileUrl = task["ResultFileUrl"].ToString()
-            };
     }
 }

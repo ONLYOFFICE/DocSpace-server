@@ -546,7 +546,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
 
 
     [HttpPost("rooms/indexexport/{id}")]
-    public async Task<DocumentBuilderTaskResponseDto> StartRoomIndexExportAsync(T id)
+    public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(T id)
     {
         ErrorIfNotDocSpace();
 
@@ -554,17 +554,17 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
 
         var task = await _fileStorageService.StartRoomIndexExport(folder);
 
-        return DocumentBuilderTaskResponseDto.Get(task);
+        return DocumentBuilderTaskDto.Get(task);
     }
 
     [HttpGet("rooms/indexexport/{taskId}")]
-    public DocumentBuilderTaskResponseDto GetRoomIndexExport(string taskId)
+    public DocumentBuilderTaskDto GetRoomIndexExport(string taskId)
     {
         ErrorIfNotDocSpace();
 
-        var task = _fileStorageService.GetRoomIndexExport<int>(taskId);
+        var task = _fileStorageService.GetRoomIndexExport(taskId);
 
-        return DocumentBuilderTaskResponseDto.Get(task);
+        return DocumentBuilderTaskDto.Get(task);
     }
 
     [HttpDelete("rooms/indexexport/{taskId}")]
@@ -572,7 +572,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     {
         ErrorIfNotDocSpace();
 
-        _fileStorageService.TerminateRoomIndexExport<int>(taskId);
+        _fileStorageService.TerminateRoomIndexExport(taskId);
     }
 
     protected void ErrorIfNotDocSpace()

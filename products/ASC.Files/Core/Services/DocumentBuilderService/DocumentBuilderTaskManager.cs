@@ -42,14 +42,14 @@ public class DocumentBuilderTaskManager
         _serviceProvider = serviceProvider;
     }
 
-    public DocumentBuilderTask<T> GetTask<T>(string taskId)
+    public DistributedTaskProgress GetTask(string taskId)
     {
-        return _queue.PeekTask<DocumentBuilderTask<T>>(taskId);
+        return _queue.PeekTask<DistributedTaskProgress>(taskId);
     }
 
-    public void TerminateTask<T>(string taskId)
+    public void TerminateTask(string taskId)
     {
-        var task = GetTask<T>(taskId);
+        var task = GetTask(taskId);
 
         if (task != null)
         {
@@ -57,11 +57,11 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    private DocumentBuilderTask<T> StartTask<T>(DocumentBuilderTask<T> newTask)
+    private DistributedTaskProgress StartTask<T>(DocumentBuilderTask<T> newTask)
     {
         lock (_synchRoot)
         {
-            var task = GetTask<T>(newTask.Id);
+            var task = GetTask(newTask.Id);
 
             if (task != null && task.IsCompleted)
             {
@@ -79,7 +79,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public DocumentBuilderTask<T> StartRoomIndexExport<T>(int tenantId, Guid userId, Folder<T> room)
+    public DistributedTaskProgress StartRoomIndexExport<T>(int tenantId, Guid userId, Folder<T> room)
     {
         var templateType = DocumentBuilderScriptHelper.TemplateType.RoomIndex;
 
@@ -97,7 +97,7 @@ public class DocumentBuilderTaskManager
 
         task.Init(tenantId, userId, script, tempFileName, outputFileName);
 
-        return StartTask<T>(task);
+        return StartTask(task);
     }
 }
 
