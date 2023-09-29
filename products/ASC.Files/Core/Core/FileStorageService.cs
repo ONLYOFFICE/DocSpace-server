@@ -87,6 +87,7 @@ public class FileStorageService //: IFileStorageService
     private readonly ExternalShare _externalShare;
     private readonly TenantUtil _tenantUtil;
     private readonly RoomLogoManager _roomLogoManager;
+    private readonly DocumentBuilderTaskManager _documentBuilderTaskManager;
 
     public FileStorageService(
         Global global,
@@ -146,7 +147,8 @@ public class FileStorageService //: IFileStorageService
         QuotaSocketManager quotaSocketManager,
         ExternalShare externalShare,
         TenantUtil tenantUtil,
-        RoomLogoManager roomLogoManager)
+        RoomLogoManager roomLogoManager,
+        DocumentBuilderTaskManager documentBuilderTaskManager)
     {
         _global = global;
         _globalStore = globalStore;
@@ -206,6 +208,7 @@ public class FileStorageService //: IFileStorageService
         _externalShare = externalShare;
         _tenantUtil = tenantUtil;
         _roomLogoManager = roomLogoManager;
+        _documentBuilderTaskManager = documentBuilderTaskManager;
     }
 
     public async Task<Folder<T>> GetFolderAsync<T>(T folderId)
@@ -3382,6 +3385,30 @@ public class FileStorageService //: IFileStorageService
     {
         return string.Empty; //TODO: Studio.UserControls.Common.HelpCenter.HelpCenter.RenderControlToString();
     }
+
+
+    #region Export Room Index
+
+    public async Task<DocumentBuilderTask<T>> StartRoomIndexExport<T>(Folder<T> room)
+    {
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var userId = _authContext.CurrentAccount.ID;
+
+        return _documentBuilderTaskManager.StartRoomIndexExport<T>(tenant.Id, userId, room);
+    }
+
+    public DocumentBuilderTask<T> GetRoomIndexExport<T>(string taskId)
+    {
+        return _documentBuilderTaskManager.GetTask<T>(taskId);
+    }
+
+    public void TerminateRoomIndexExport<T>(string taskId)
+    {
+        _documentBuilderTaskManager.TerminateTask<T>(taskId);
+    }
+
+    #endregion
+
 
     private IFolderDao<T> GetFolderDao<T>()
     {

@@ -1,0 +1,30 @@
+
+builder.CreateFile("xlsx");
+
+var mainHeaderFontSize = 24;
+var headerFontSize = 14;
+
+var blackFontColor = Api.CreateColorFromRGB(63, 63, 63);
+var grayFontColor = Api.CreateColorFromRGB(127, 127, 127);
+
+var inputData = ${inputData};
+
+var oWorksheet = Api.GetActiveSheet();
+
+function writeText() {
+    var sRange = oWorksheet.GetRange("B2");
+    sRange.SetFontSize(mainHeaderFontSize);
+    sRange.SetFontColor(blackFontColor);
+    sRange.SetValue(inputData.Title);
+
+    sRange = oWorksheet.GetRange("B3");
+    sRange.SetFontSize(headerFontSize);
+    sRange.SetFontColor(grayFontColor);
+    sRange.SetBold(true);
+    sRange.SetValue(inputData.Description);
+}
+
+writeText();
+
+builder.SaveFile("xlsx", "${outputFileName}");
+builder.CloseFile();
