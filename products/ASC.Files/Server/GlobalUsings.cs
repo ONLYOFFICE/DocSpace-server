@@ -74,6 +74,7 @@ global using ASC.Web.Files.Core.Compress;
 global using ASC.Web.Files.Core.Entries;
 global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.HttpHandlers;
+global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;

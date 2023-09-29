@@ -54,6 +54,9 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<DocuSignHandlerService>();
         DIHelper.TryAdd<ThirdPartyAppHandlerService>();
 
+        services.AddSingleton<DocumentBuilderTaskManager>();
+        services.AddScoped<DocumentBuilderTask<int>>();
+
         NotifyConfigurationExtension.Register(DIHelper);
 
         services.AddBaseDbContextPool<FilesDbContext>();

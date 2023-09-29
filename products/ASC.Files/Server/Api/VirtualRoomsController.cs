@@ -544,6 +544,37 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
+
+    [HttpPost("rooms/indexexport/{id}")]
+    public async Task<DocumentBuilderTaskResponseDto> StartRoomIndexExportAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        var folder = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+
+        var task = await _fileStorageService.StartRoomIndexExport(folder);
+
+        return DocumentBuilderTaskResponseDto.Get(task);
+    }
+
+    [HttpGet("rooms/indexexport/{taskId}")]
+    public DocumentBuilderTaskResponseDto GetRoomIndexExport(string taskId)
+    {
+        ErrorIfNotDocSpace();
+
+        var task = _fileStorageService.GetRoomIndexExport<int>(taskId);
+
+        return DocumentBuilderTaskResponseDto.Get(task);
+    }
+
+    [HttpDelete("rooms/indexexport/{taskId}")]
+    public void TerminateRoomIndexExport(string taskId)
+    {
+        ErrorIfNotDocSpace();
+
+        _fileStorageService.TerminateRoomIndexExport<int>(taskId);
+    }
+
     protected void ErrorIfNotDocSpace()
     {
         if (_coreBaseSettings.DisableDocSpace)
