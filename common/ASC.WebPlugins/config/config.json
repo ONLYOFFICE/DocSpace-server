@@ -1,7 +1,7 @@
 {
   "app": {
     "port": 5014,
-    "appsettings": "../../../../config",
+    "appsettings": "../../../../../build/config",
     "environment": "Development"
   }
 }
