@@ -3394,7 +3394,7 @@ public class FileStorageService //: IFileStorageService
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var userId = _authContext.CurrentAccount.ID;
 
-        return _documentBuilderTaskManager.StartRoomIndexExport(tenant.Id, userId, room);
+        return await _documentBuilderTaskManager.StartRoomIndexExport(tenant.Id, userId, room);
     }
 
     public DistributedTaskProgress GetRoomIndexExport(string taskId)
