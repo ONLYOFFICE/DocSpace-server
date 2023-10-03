@@ -29,23 +29,18 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 [Singletone]
 public class DocumentBuilderScriptHelper
 {
-    public enum TemplateType
-    {
-        RoomIndex
-    }
-
     private static string GetTempFileName()
     {
         return $"temp{DateTime.UtcNow.Ticks}.xlsx";
     }
 
-    private static string ReadTemplateFromEmbeddedResource(TemplateType templateType)
+    private static string ReadTemplateFromEmbeddedResource()
     {
         var assembly = Assembly.GetExecutingAssembly();
 
         var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
 
-        var resourceName = $"{templateNamespace}.ScriptTemplates.{templateType}.docbuilder";
+        var resourceName = $"{templateNamespace}.ScriptTemplates.RoomIndex.docbuilder";
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
 
@@ -59,14 +54,9 @@ public class DocumentBuilderScriptHelper
         return streamReader.ReadToEnd();
     }
 
-    public static (string script, string tempFileName) GetScript(TemplateType templateType, object data)
+    public static (string script, string tempFileName) GetScript(object data)
     {
-        var script = ReadTemplateFromEmbeddedResource(templateType);
-
-        if (script == null)
-        {
-            throw new Exception($"Template not found: {templateType}");
-        }
+        var script = ReadTemplateFromEmbeddedResource() ?? throw new Exception("Template not found");
 
         var tempFileName = GetTempFileName();
 

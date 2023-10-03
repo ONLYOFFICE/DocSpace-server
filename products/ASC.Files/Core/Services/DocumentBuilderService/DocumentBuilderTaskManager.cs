@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.Utility.Settings;
+
+using SixLabors.ImageSharp.PixelFormats;
+
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singletone(Additional = typeof(DocumentBuilderTaskManagerHelperExtention))]
@@ -90,9 +94,19 @@ public class DocumentBuilderTaskManager
 
     public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(int tenantId, Guid userId, Folder<T> room)
     {
-        var templateType = DocumentBuilderScriptHelper.TemplateType.RoomIndex;
-
         var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
+
+        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+
+        var mainBgColor = Color.Parse(selectedColorTheme.Main.Accent).ToPixel<Argb32>();
+        var lightBgColor = Color.FromRgb(
+                (byte)((1 - 0.08) * 255 + 0.08 * mainBgColor.R),
+                (byte)((1 - 0.08) * 255 + 0.08 * mainBgColor.G),
+                (byte)((1 - 0.08) * 255 + 0.08 * mainBgColor.B)
+            ).ToPixel<Argb32>();
+        var mainFontColor = Color.Parse(selectedColorTheme.Text.Accent).ToPixel<Argb32>();
+
         var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
         var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
 
@@ -121,9 +135,9 @@ public class DocumentBuilderTaskManager
             logoSrc = fullAbsoluteLogoPath,
 
             themeColors = new {
-                mainBgColor = new[] { 71, 129, 209 },
-                lightBgColor = new[] { 241, 245, 252 },
-                mainFontColor = new[] { 255, 255, 255 }
+                mainBgColor = new int [] { mainBgColor.R, mainBgColor.G, mainBgColor.B },
+                lightBgColor = new int [] { lightBgColor.R, lightBgColor.G, lightBgColor.B },
+                mainFontColor = new int [] { mainFontColor.R, mainFontColor.G, mainFontColor.B }
             },
 
             info = new {
@@ -195,7 +209,7 @@ public class DocumentBuilderTaskManager
 
         var outputFileName = $"{room.Title}_index.xlsx";
 
-        var (script, tempFileName) = DocumentBuilderScriptHelper.GetScript(templateType, data);
+        var (script, tempFileName) = DocumentBuilderScriptHelper.GetScript(data);
 
         var task = new DocumentBuilderTask<T>(_serviceProvider);
 
