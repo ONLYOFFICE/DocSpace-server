@@ -1,7 +1,12 @@
 {
   "app": {
+<<<<<<< HEAD:common/ASC.TelegramReports/config/config.json
     "port": 5016,
     "appsettings": "../../../../config",
+=======
+    "port": 5014,
+    "appsettings": "../../../../../buildtools/config",
+>>>>>>> master:common/ASC.WebPlugins/config/config.json
     "environment": "Development"
   }
 }
