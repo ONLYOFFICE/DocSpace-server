@@ -150,6 +150,7 @@ public class FileDtoHelper : FileEntryDtoHelper
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly FileUtility _fileUtility;
     private readonly BadgesSettingsHelper _badgesSettingsHelper;
+    private readonly ExternalShare _externalShare;
 
     public FileDtoHelper(
         ApiDateTimeHelper apiDateTimeHelper,
@@ -162,7 +163,8 @@ public class FileDtoHelper : FileEntryDtoHelper
         FilesLinkUtility filesLinkUtility,
         FileUtility fileUtility,
         FileSharingHelper fileSharingHelper,
-        BadgesSettingsHelper badgesSettingsHelper)
+        BadgesSettingsHelper badgesSettingsHelper,
+        ExternalShare externalShare)
         : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity)
     {
         _authContext = authContext;
@@ -172,6 +174,7 @@ public class FileDtoHelper : FileEntryDtoHelper
         _filesLinkUtility = filesLinkUtility;
         _fileUtility = fileUtility;
         _badgesSettingsHelper = badgesSettingsHelper;
+        _externalShare = externalShare;
     }
 
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null)
@@ -232,9 +235,9 @@ public class FileDtoHelper : FileEntryDtoHelper
 
         try
         {
-            result.ViewUrl = _commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl);
+            result.ViewUrl = await _externalShare.GetUrlWithShareAsync(_commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
 
-            result.WebUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id, file.Version));
+            result.WebUrl = await _externalShare.GetUrlWithShareAsync(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id, file.Version)));
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -242,7 +245,9 @@ public class FileDtoHelper : FileEntryDtoHelper
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}"; 
+                result.ThumbnailUrl =
+                    await _externalShare.GetUrlWithShareAsync(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
+                                                              $"&hash={cacheKey}");
             }
         }
         catch (Exception)

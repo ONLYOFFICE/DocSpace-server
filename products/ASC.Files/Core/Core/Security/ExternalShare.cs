@@ -135,7 +135,7 @@ public class ExternalShare
 
         if (string.IsNullOrEmpty(key))
         {
-            key = _httpContextAccessor.HttpContext?.Request.Query.GetRequestValue(FilesLinkUtility.FolderShareKey);
+            key = _httpContextAccessor.HttpContext?.Request.Query.GetRequestValue(FilesLinkUtility.ShareKey);
         }
 
         return string.IsNullOrEmpty(key) ? null : key;
@@ -266,6 +266,28 @@ public class ExternalShare
     public async Task SetAnonymousSessionKeyAsync()
     {
         await _cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
+    }
+    
+    public async Task<string> GetUrlWithShareAsync(string url)
+    {
+        if (string.IsNullOrEmpty(url) || await GetLinkIdAsync() == default)
+        {
+            return url;
+        }
+
+        var key = GetKey();
+
+        if (string.IsNullOrEmpty(key))
+        {
+            return url;
+        }
+
+        var uriBuilder = new UriBuilder(url);
+        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+        query[FilesLinkUtility.ShareKey] = key;
+        uriBuilder.Query = query.ToString() ?? string.Empty;
+
+        return uriBuilder.ToString();
     }
     
     private async Task<string> CreateShareKeyAsync(Guid linkId)
