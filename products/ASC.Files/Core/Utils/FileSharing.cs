@@ -665,7 +665,7 @@ public class FileSharing
 
                 var link = r.SubjectType == SubjectType.InvitationLink
                     ? _invitationLinkService.GetInvitationLink(r.Subject, _authContext.CurrentAccount.ID)
-                    : await _externalShare.GetLinkAsync(r.Subject);
+                    : await _externalShare.GetLinkAsync(entry, r.Subject);
 
                 w.Link = await _urlShortener.GetShortenLinkAsync(link);
                 w.SubjectGroup = true;
@@ -918,7 +918,7 @@ public class FileSharing
         yield return owner;
     }
     
-    private async Task<AceWrapper> ToAceAsync(FileEntry entry, FileShareRecord record, bool canEditAccess)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord record, bool canEditAccess)
     {
         var w = new AceWrapper
         {
@@ -935,7 +935,7 @@ public class FileSharing
         {
             var link = record.SubjectType == SubjectType.InvitationLink ? 
                 _invitationLinkService.GetInvitationLink(record.Subject, _authContext.CurrentAccount.ID) : 
-                await _externalShare.GetLinkAsync(record.Subject);
+                await _externalShare.GetLinkAsync(entry, record.Subject);
             
             w.Link = await _urlShortener.GetShortenLinkAsync(link);
             w.SubjectGroup = true;

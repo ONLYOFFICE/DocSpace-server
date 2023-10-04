@@ -34,6 +34,8 @@ public class ExternalShare
     private readonly CookiesManager _cookiesManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly FilesLinkUtility _filesLinkUtility;
+    private readonly FileUtility _fileUtility;
     private Guid _linkId;
     private Guid _sessionId;
     private string _passwordKey;
@@ -44,20 +46,38 @@ public class ExternalShare
         IDaoFactory daoFactory, 
         CookiesManager cookiesManager,
         IHttpContextAccessor httpContextAccessor,
-        CommonLinkUtility commonLinkUtility)
+        CommonLinkUtility commonLinkUtility, 
+        FilesLinkUtility filesLinkUtility, 
+        FileUtility fileUtility)
     {
         _global = global;
         _daoFactory = daoFactory;
         _cookiesManager = cookiesManager;
         _httpContextAccessor = httpContextAccessor;
         _commonLinkUtility = commonLinkUtility;
+        _filesLinkUtility = filesLinkUtility;
+        _fileUtility = fileUtility;
     }
     
-    public async Task<string> GetLinkAsync(Guid linkId)
+    public async Task<string> GetLinkAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
 
-        return _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}");
+        switch (entry)
+        {
+            case File<T> file:
+                var url = _fileUtility.CanWebView(file.Title)
+                    ? _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id)
+                    : file.DownloadUrl;
+
+                url += $"&{FilesLinkUtility.ShareKey}={key}";
+                
+                return url;
+            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+                return _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}");
+            default:
+                return null;
+        }
     }
     
     public async Task<Status> ValidateAsync(Guid linkId)
