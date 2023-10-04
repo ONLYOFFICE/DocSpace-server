@@ -552,7 +552,11 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
 
         var folder = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
-        var task = await _fileStorageService.StartRoomIndexExport(folder);
+        var startIndex = Convert.ToInt32(_apiContext.StartIndex);
+
+        var items = await _fileStorageService.GetFolderItemsAsync(id, startIndex, Convert.ToInt32(_apiContext.Count), FilterType.None, false, Guid.Empty.ToString(), string.Empty, false, true, null);
+
+        var task = await _fileStorageService.StartRoomIndexExport(folder, items);
 
         return DocumentBuilderTaskDto.Get(task);
     }

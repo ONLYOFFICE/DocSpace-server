@@ -113,7 +113,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Tenant tenant, UserInfo user, Folder<T> room)
+    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Tenant tenant, UserInfo user, Folder<T> room, DataWrapper<T> items)
     {
         var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
         var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
@@ -126,6 +126,35 @@ public class DocumentBuilderTaskManager
 
         var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
         var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
+
+        var entries = new List<object>
+        {
+            new
+            {
+                index = (string)null,
+                name = room.Title,
+                url = "http://onlyoffice.com",
+                type = "Room",
+                pages = (string)null,
+                size = (string)null,
+                author = room.CreateByString,
+                created = room.CreateOnString,
+                modified = room.CreateOnString
+            }
+        };
+
+        entries.AddRange(items.Entries.Select(item => new
+        {
+            index = "1.N",
+            name = item.Title,
+            url = "http://onlyoffice.com",
+            type = item.FileEntryType == FileEntryType.Folder ? "Folder" : Path.GetExtension(item.Title),
+            pages = item.FileEntryType == FileEntryType.Folder ? null : "1",
+            size = item.FileEntryType == FileEntryType.Folder ? null : "1",
+            author = item.CreateByString,
+            created = item.CreateOnString,
+            modified = item.ModifiedOnString
+        }));
 
         var data = new
         {
@@ -148,7 +177,6 @@ public class DocumentBuilderTaskManager
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
             },
 
-            //logoSrc = "data:image/png;base64,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",
             logoSrc = fullAbsoluteLogoPath,
 
             themeColors = new {
@@ -164,64 +192,7 @@ public class DocumentBuilderTaskManager
                 dateGenerated = room.CreateOnString
             },
 
-            data = new[]
-            {
-                new {
-                    index = (string)null,
-                    name = "ONLYOFFICE",
-                    url = "http://onlyoffice.com",
-                    type = "Room",
-                    pages = (string)null,
-                    size = (string)null,
-                    author = "John Smith",
-                    created = room.CreateOnString,
-                    modified = room.CreateOnString
-                },
-                new {
-                    index = "1",
-                    name = "Docspace",
-                    url = "http://onlyoffice.com",
-                    type = "Folder",
-                    pages = (string)null,
-                    size = (string)null,
-                    author = "John Smith",
-                    created = room.CreateOnString,
-                    modified = room.CreateOnString
-                },
-                new {
-                    index = "1.1",
-                    name = "document1",
-                    url = "http://onlyoffice.com",
-                    type = ".docx",
-                    pages = "1",
-                    size = "0.2",
-                    author = "John Smith",
-                    created = room.CreateOnString,
-                    modified = room.CreateOnString
-                },
-                new {
-                    index = "1.2",
-                    name = "document2",
-                    url = "http://onlyoffice.com",
-                    type = ".pdf",
-                    pages = "20",
-                    size = "5.47",
-                    author = "John Smith",
-                    created = room.CreateOnString,
-                    modified = room.CreateOnString
-                },
-                new {
-                    index = "2",
-                    name = "picture1",
-                    url = "http://onlyoffice.com",
-                    type = ".png",
-                    pages = "1",
-                    size = "1.23",
-                    author = "John Smith",
-                    created = room.CreateOnString,
-                    modified = room.CreateOnString
-                }
-            }
+            data = entries
         };
 
         var outputFileName = $"{room.Title}_index.xlsx";

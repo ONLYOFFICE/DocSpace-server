@@ -3389,12 +3389,12 @@ public class FileStorageService //: IFileStorageService
 
     #region Export Room Index
 
-    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Folder<T> room)
+    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Folder<T> room, DataWrapper<T> items)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
 
-        return await _documentBuilderTaskManager.StartRoomIndexExport(tenant, user, room);
+        return await _documentBuilderTaskManager.StartRoomIndexExport(tenant, user, room, items);
     }
 
     public DistributedTaskProgress GetRoomIndexExport(string taskId)
