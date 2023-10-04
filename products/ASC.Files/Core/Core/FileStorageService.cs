@@ -3392,9 +3392,9 @@ public class FileStorageService //: IFileStorageService
     public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Folder<T> room)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var userId = _authContext.CurrentAccount.ID;
+        var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
 
-        return await _documentBuilderTaskManager.StartRoomIndexExport(tenant.Id, userId, room);
+        return await _documentBuilderTaskManager.StartRoomIndexExport(tenant, user, room);
     }
 
     public DistributedTaskProgress GetRoomIndexExport(string taskId)

@@ -38,19 +38,22 @@ public class DocumentBuilderTaskManager
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly SettingsManager _settingsManager;
     private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
+    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
 
     public DocumentBuilderTaskManager(
         IDistributedTaskQueueFactory queueFactory,
         IServiceProvider serviceProvider,
         CommonLinkUtility commonLinkUtility,
         SettingsManager settingsManager,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
+        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+        DisplayUserSettingsHelper displayUserSettingsHelper)
     {
         _queue = queueFactory.CreateQueue(GetType());
         _serviceProvider = serviceProvider;
         _commonLinkUtility = commonLinkUtility;
         _settingsManager = settingsManager;
         _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
+        _displayUserSettingsHelper = displayUserSettingsHelper;
     }
 
     public DistributedTaskProgress GetTask(string taskId)
@@ -110,7 +113,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(int tenantId, Guid userId, Folder<T> room)
+    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Tenant tenant, UserInfo user, Folder<T> room)
     {
         var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
         var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
@@ -155,9 +158,9 @@ public class DocumentBuilderTaskManager
             },
 
             info = new {
-                company = "ONLYOFFICE",
+                company = tenantWhiteLabelSettings.LogoText,
                 room = room.Title,
-                exportAuthor = "John Smith",
+                exportAuthor = user.DisplayUserName(_displayUserSettingsHelper),
                 dateGenerated = room.CreateOnString
             },
 
@@ -227,7 +230,7 @@ public class DocumentBuilderTaskManager
 
         var task = new DocumentBuilderTask<T>(_serviceProvider);
 
-        task.Init(tenantId, userId, script, tempFileName, outputFileName);
+        task.Init(tenant.Id, user.Id, script, tempFileName, outputFileName);
 
         return StartTask(task);
     }
