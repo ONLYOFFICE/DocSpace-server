@@ -336,14 +336,19 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(true);
                             var archiveFolder = await folderDao.GetFolderAsync(archiveId);
+
+                            var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
+                            var virtualRoomsFolder = await folderDao.GetFolderAsync(virtualRoomsId);
+
                             _ = await folderDao.ChangeFolderSizeAsync(archiveFolder, archiveFolder.Counter - file.ContentLength);
+                            _ = await folderDao.ChangeFolderSizeAsync(virtualRoomsFolder, virtualRoomsFolder.Counter + file.ContentLength);
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
                         {
                             var trashFolder = await folderDao.GetFolderAsync(_trashId);
                             _ = await folderDao.ChangeFolderSizeAsync(trashFolder, trashFolder.Counter - file.ContentLength);
                         }
-                        
+
                         if (_headers != null)
                         {
                             if (isNeedSendActions)

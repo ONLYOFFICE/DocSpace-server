@@ -394,6 +394,6 @@ public interface IFolderDao<T>
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
     Task<(int FolderId, FolderType FolderType)> GetParentFolderInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry);
-
+    Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     #endregion
 }

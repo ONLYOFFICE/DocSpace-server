@@ -661,7 +661,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
     {
         throw new NotImplementedException();
     }
-
+    public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        throw new NotImplementedException();
+    }
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();

@@ -249,7 +249,35 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             yield return _mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
     }
+    public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        var fileRootFolders = new List<FolderType>() { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms };
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
+        var result = new FilesStatisticsResultDto() { };
+
+        await foreach (var rootFolder in Queries.FolderTypeUsedSpaceAsync(filesDbContext, fileRootFolders))
+        {
+            switch (rootFolder.FolderType)
+            {
+
+                case FolderType.USER:
+                    result.MyDocumentsUsedSpace = rootFolder.UsedSpace;
+                    break;
+                case FolderType.Archive:
+                    result.ArchiveUsedSpace = rootFolder.UsedSpace;
+                    break;
+                case FolderType.TRASH:
+                    result.TrashUsedSpace = rootFolder.UsedSpace;
+                    break;
+                case FolderType.VirtualRooms:
+                    result.RoomsUsedSpace = rootFolder.UsedSpace;
+                    break;
+            }
+        }
+
+        return result;
+    }
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {
         if (CheckInvalidFilter(filterType))
@@ -626,12 +654,19 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 if (DocSpaceHelper.IsRoom(folder.FolderType))
                 {
                     var archiveFolder = await GetFolderAsync(archiveId);
+
+                    var virtualRoomsId = await GetFolderIDVirtualRooms(false);
+                    var virtualRoomsFolder = await GetFolderAsync(virtualRoomsId);
+
                     if (toFolder.FolderType == FolderType.Archive)
                     {
                         _ = await ChangeFolderSizeAsync(archiveFolder, archiveFolder.Counter + folder.Counter);
-                    }else if (folder.RootId == archiveId)
+                        _ = await ChangeFolderSizeAsync(virtualRoomsFolder, virtualRoomsFolder.Counter - folder.Counter);
+                    }
+                    else if (folder.RootId == archiveId)
                     {
                         _ = await ChangeFolderSizeAsync(archiveFolder, archiveFolder.Counter - folder.Counter);
+                        _ = await ChangeFolderSizeAsync(virtualRoomsFolder, virtualRoomsFolder.Counter + folder.Counter);
                     }
                 }
 
@@ -1733,6 +1768,12 @@ public class ParentIdFolderTypePair
     public FolderType FolderType { get; set; }
 }
 
+public class FolderTypeUsedSpacePair
+{
+    public FolderType FolderType { get; set; }
+    public long UsedSpace { get; set; }
+}
+
 public class ParentRoomPair
 {
     public int FolderId { get; set; }
@@ -2220,4 +2261,14 @@ static file class Queries
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdFolderTypePair { ParentId = r.Tree.ParentId, FolderType = r.Folders.FolderType }));
+
+    public static readonly Func<FilesDbContext, IEnumerable<FolderType>, IAsyncEnumerable<FolderTypeUsedSpacePair>> FolderTypeUsedSpaceAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<FolderType> folderTypes) =>
+                ctx.Folders
+                    .AsNoTracking()
+                    .Where(r => folderTypes.Contains(r.FolderType))
+                    .GroupBy(r => r.FolderType)
+                    .Select(f => new FolderTypeUsedSpacePair { FolderType = f.Select(r => r.FolderType).FirstOrDefault(), UsedSpace = f.Sum(r => r.Counter) }));
+
 }

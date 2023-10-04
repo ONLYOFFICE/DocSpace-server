@@ -523,7 +523,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 if (currentRoom != null)
                 {
+                    var rootRoomsFolder = await folderDao.GetFolderAsync(currentRoom.RootId);
                     await folderDao.ChangeFolderSizeAsync(currentRoom, currentRoom.Counter + file.ContentLength);
+                    await folderDao.ChangeFolderSizeAsync(rootRoomsFolder, rootRoomsFolder.Counter + file.ContentLength);
                 }
                 else
                 {
@@ -714,8 +716,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
         if (roomId != -1)
         {
             var currentRoom = await folderDao.GetFolderAsync(roomId);
+            var rootRoomsFolder = await folderDao.GetFolderAsync(currentRoom.RootId);
 
             await folderDao.ChangeFolderSizeAsync(currentRoom, currentRoom.Counter + file.ContentLength);
+            await folderDao.ChangeFolderSizeAsync(rootRoomsFolder, rootRoomsFolder.Counter + file.ContentLength);
         }
         else
         {
@@ -1130,6 +1134,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
     {
         var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
         var (oldFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+        var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
+        var virtualRoomsFolder = await folderDao.GetFolderAsync(virtualRoomsId);
 
         if (toFolderRoomId != -1)
         {
@@ -1142,7 +1148,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
             {
                 await folderDao.ChangeFolderSizeAsync(toFolder, toFolder.Counter + size);
             }
-
+            await folderDao.ChangeFolderSizeAsync(virtualRoomsFolder, virtualRoomsFolder.Counter + size);
         }
         else
         {
@@ -1167,6 +1173,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
             {
                 await folderDao.ChangeFolderSizeAsync(fromFolder, fromFolder.Counter - size);
             }
+            await folderDao.ChangeFolderSizeAsync(virtualRoomsFolder, virtualRoomsFolder.Counter - size);
         }
         else
         {

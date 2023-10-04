@@ -1585,6 +1585,12 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        var folderDao = _daoFactory.GetFolderDao<int>();
+        return await folderDao.GetFilesUsedSpace();
+    }
+
     public async Task<EntryProperties> SetFileProperties<T>(T fileId, EntryProperties fileProperties)
     {
         var fileDao = GetFileDao<T>();

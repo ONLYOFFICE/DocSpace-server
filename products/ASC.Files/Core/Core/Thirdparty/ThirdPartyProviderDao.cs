@@ -255,7 +255,10 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
-    
+    public Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        throw new NotImplementedException();
+    }
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {

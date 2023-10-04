@@ -237,6 +237,12 @@ public abstract class FoldersController<T> : ApiControllerBase
     {
         return await _foldersControllerHelper.RenameFolderAsync(folderId, inDto.Title);
     }
+
+    [HttpGet("filesusedspace")]
+    public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        return await _fileStorageService.GetFilesUsedSpace();
+    }
 }
 
 public class FoldersControllerCommon : ApiControllerBase
