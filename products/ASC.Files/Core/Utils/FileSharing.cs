@@ -601,7 +601,7 @@ public class FileSharing
             .GroupBy(r => r.Subject)
             .Select(g => g.OrderBy(r => r.Level)
                           .ThenBy(r => r.Level)
-                          .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer()).FirstOrDefault());
+                          .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(entry.RootFolderType)).FirstOrDefault());
 
         foreach (var r in records)
         {

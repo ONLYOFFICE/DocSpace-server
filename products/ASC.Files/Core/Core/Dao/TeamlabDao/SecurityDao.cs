@@ -239,7 +239,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         if (filterType == ShareFilterType.User && entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
         {
-            var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share);
+            var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share, entry.RootFolderType);
 
             var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, 
                 (s, u) => new SecurityUserRecord { Security = s, User = u });
@@ -259,7 +259,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
         else
         {
-            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share);
+            var predicate = ShareCompareHelper.GetCompareExpression<DbFilesSecurity>(s => s.Share, entry.RootFolderType);
             q = q.OrderBy(predicate);
         }
 
@@ -581,7 +581,7 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
         var records = await q.ToAsyncEnumerable()
             .Select(ToFileShareRecord)
             .OrderBy(r => r.Level)
-            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(entry.RootFolderType))
             .ToListAsync();
 
         await DeleteExpiredAsync(records, filesDbContext);

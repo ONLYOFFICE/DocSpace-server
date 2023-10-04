@@ -946,7 +946,7 @@ public class FileSecurity : IFileSecurity
             {
                 ace = shares
                     .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
                     .FirstOrDefault(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.File);
 
                 if (ace == null)
@@ -963,7 +963,7 @@ public class FileSecurity : IFileSecurity
                 ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
                     .OrderBy(r => r, new SubjectComparer(subjects))
                     .ThenBy(r => r.Level)
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
                     .FirstOrDefault();
             }
             
@@ -1333,7 +1333,7 @@ public class FileSecurity : IFileSecurity
         var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (key, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer(currentUserSubjects))
-            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+            .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(FolderType.VirtualRooms))
             .First()
         });
 
@@ -1475,7 +1475,7 @@ public class FileSecurity : IFileSecurity
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (key, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer(subjects))
-               .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+               .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(FolderType.SHARE))
                .First()
         });
 
@@ -1611,7 +1611,7 @@ public class FileSecurity : IFileSecurity
         var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (key, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer(subjects))
-                .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(FolderType.Privacy))
                 .First()
         });
 
