@@ -157,6 +157,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>Portal used space</summary>
     /// <type>System.Double, System</type>
     public double UsedSpace { get; set; }
+    public bool? Shared { get; set; }
 
     /// <summary>Specifies if the user has a custom quota or not.</summary>
     /// <type>System.Boolean, System</type>
@@ -261,6 +262,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         return lambda;
     }
+    
     public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo)
     {
         var result = new EmployeeFullDto
@@ -283,7 +285,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         return result;
     }
 
-    public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo)
+    public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
         var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
 
@@ -304,7 +306,8 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
             IsOwner = userInfo.IsOwner(_context.Tenant),
             IsCollaborator = currentType is EmployeeType.Collaborator,
             IsLDAP = userInfo.IsLDAP(),
-            IsSSO = userInfo.IsSSO()
+            IsSSO = userInfo.IsSSO(),
+            Shared = shared,
         };
 
         await InitAsync(result, userInfo);
@@ -382,6 +385,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         return result;
     }
+
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
         if (!_context.Check("groups") && !_context.Check("department"))

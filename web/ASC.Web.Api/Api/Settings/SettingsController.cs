@@ -62,6 +62,8 @@ public class SettingsController : BaseSettingsController
     private readonly QuotaSyncOperation _quotaSyncOperation;
     private readonly ExternalShare _externalShare;
     private readonly IQuotaService _quotaService;
+    private readonly ConfigurationExtension _configurationExtension;
+    private readonly IMapper _mapper;
 
     public SettingsController(
         ILoggerProvider option,
@@ -98,7 +100,10 @@ public class SettingsController : BaseSettingsController
         QuotaUsageManager quotaUsageManager,
         TenantDomainValidator tenantDomainValidator, 
         ExternalShare externalShare,
-        IQuotaService quotaService) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        ConfigurationExtension configurationExtension,
+        IMapper mapper,
+        IQuotaService quotaService
+        ) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _log = option.CreateLogger("ASC.Api");
         _consumerFactory = consumerFactory;
@@ -131,6 +136,8 @@ public class SettingsController : BaseSettingsController
         _tenantDomainValidator = tenantDomainValidator;
         _externalShare = externalShare;
         _quotaService = quotaService;
+        _configurationExtension = configurationExtension;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -226,6 +233,9 @@ public class SettingsController : BaseSettingsController
             }
 
             settings.Plugins.Allow = _configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+
+            var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
+            settings.FormGallery = _mapper.Map<FormGalleryDto>(formGallerySettings);
         }
         else
         {

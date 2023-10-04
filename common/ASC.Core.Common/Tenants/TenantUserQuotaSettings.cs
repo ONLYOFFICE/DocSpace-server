@@ -26,7 +26,6 @@
 
 namespace ASC.Core.Tenants;
 
-[Serializable]
 public class TenantUserQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantUserQuotaSettings>
 {
 

@@ -45,6 +45,7 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FilesCount { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    public string Color { get; set; }
     public long Quota { get; set; }
     public long Counter { get; set; }
 
@@ -147,6 +148,12 @@ public static class DbFolderExtension
                 .HasDefaultValueSql("'0'");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+
+            entity.Property(e => e.Color)
+                .HasColumnName("color")
+                .HasColumnType("char(6)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")

@@ -472,16 +472,16 @@ public class EntryManager
             var folderDao = _daoFactory.GetFolderDao<T>();
             var fileDao = _daoFactory.GetFileDao<T>();
 
-            var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);
-            var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject);
+            var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId);
+            var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, roomId);
 
-            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count)
+            var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId)
                 .ToListAsync();
 
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount)
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId)
                 .ToListAsync();
 
             entries = new List<FileEntry>(folders.Count + files.Count);
@@ -1327,7 +1327,7 @@ public class EntryManager
 
                     await _socketManager.CreateFolderAsync(folder);
 
-                    _ = _filesMessageService.SendAsync(folder, MessageInitiator.DocsService, MessageAction.FolderCreated, folder.Title);
+                    _ = _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, MessageInitiator.DocsService, folder.Title);
                 }
 
                 folderId = folder.Id;
@@ -1352,7 +1352,7 @@ public class EntryManager
                 submitFile = await fileSourceDao.SaveFileAsync(submitFile, stream);
             }
 
-            _ = _filesMessageService.SendAsync(submitFile, MessageInitiator.DocsService, MessageAction.FileCreated, submitFile.Title);
+            _ = _filesMessageService.SendAsync(MessageAction.FileCreated, submitFile, MessageInitiator.DocsService, submitFile.Title);
 
             await _fileMarker.MarkAsNewAsync(submitFile);
 
@@ -1556,15 +1556,15 @@ public class EntryManager
         return file;
     }
 
-    public async Task TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, string doc, bool editingAlone = false)
+    public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, string doc, int tenantId, bool editingAlone = false)
     {
         bool checkRight;
         if (_fileTracker.GetEditingBy(fileId).Contains(userId))
         {
-            checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, editingAlone);
+            checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
             if (!checkRight)
             {
-                return;
+                return null;
             }
         }
 
@@ -1600,11 +1600,13 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_ViewTrashItem);
         }
 
-        checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, editingAlone);
+        checkRight = _fileTracker.ProlongEditing(fileId, tabId, userId, tenantId, editingAlone);
         if (checkRight)
         {
             _fileTracker.ChangeRight(fileId, userId, false);
         }
+
+        return file;
     }
 
     public async Task<File<T>> UpdateToVersionFileAsync<T>(T fileId, int version, string doc = null, bool checkRight = true, bool finalize = false)
@@ -1994,12 +1996,5 @@ public class EntryManager
             _logger.InformationMoveSharedFile(file.Id.ToString(), parentId.ToString(), toId.ToString());
             await fileDao.MoveFileAsync(file.Id, toId);
         }
-    }
-
-    public static async Task ReassignItemsAsync<T>(Guid fromUserId, Guid toUserId, IFolderDao<T> folderDao, IFileDao<T> fileDao)
-    {
-        await fileDao.ReassignFilesAsync(fromUserId, toUserId);
-
-        await folderDao.ReassignFoldersAsync(fromUserId, toUserId);
     }
 }

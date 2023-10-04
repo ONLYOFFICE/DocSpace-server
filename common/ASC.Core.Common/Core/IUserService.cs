@@ -30,7 +30,20 @@ namespace ASC.Core;
 public interface IUserService
 {
     Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant);
-    IQueryable<UserInfo> GetUsers(int tenant, bool isDocSpaceAdmin,
+    Task<int> GetUsersCountAsync(
+        int tenant,
+        bool isDocSpaceAdmin,
+        EmployeeStatus? employeeStatus,
+        List<List<Guid>> includeGroups,
+        List<Guid> excludeGroups,
+        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
+        EmployeeActivationStatus? activationStatus,
+        AccountLoginType? accountLoginType,
+        QuotaFilter? quotaFilter,
+        string text);
+    IAsyncEnumerable<UserInfo> GetUsers(
+        int tenant,
+        bool isDocSpaceAdmin,
         EmployeeStatus? employeeStatus,
         List<List<Guid>> includeGroups,
         List<Guid> excludeGroups,
@@ -42,9 +55,7 @@ public interface IUserService
         string sortBy,
         bool sortOrderAsc,
         long limit,
-        long offset,
-        out int total,
-        out int count);
+        long offset);
     Task<byte[]> GetUserPhotoAsync(int tenant, Guid id);
     Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id);
     Task<Group> GetGroupAsync(int tenant, Guid id);
