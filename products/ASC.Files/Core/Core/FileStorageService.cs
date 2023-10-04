@@ -2523,21 +2523,21 @@ public class FileStorageService //: IFileStorageService
         return await _fileSharing.GetSharedInfoShortFileAsync(fileId);
     }
 
-    public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, ShareFilterType filterType, int offset, int count)
+    public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, int offset, int count)
     {
-        var room = await GetFolderDao<T>().GetFolderAsync(roomId).NotFoundIfNull();
+        var entry = await GetEntryAsync(entryId, entryType);
 
-        await foreach (var ace in _fileSharing.GetRoomSharesAsync(room, filterType, null, offset, count))
+        await foreach (var ace in _fileSharing.GetPureSharesAsync(entry, filterType, null, offset, count))
         {
             yield return ace;
         }
     }
 
-    public async Task<int> GetRoomSharesCountAsync<T>(T roomId, ShareFilterType filterType)
+    public async Task<int> GetPureSharesCountAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType)
     {
-        var room = await GetFolderDao<T>().GetFolderAsync(roomId).NotFoundIfNull();
+        var entry = await GetEntryAsync(entryId, entryType);
 
-        return await _fileSharing.GetRoomSharesCountAsync(room, filterType);
+        return await _fileSharing.GetPureSharesCountAsync(entry, filterType);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetSharedInfoAsync<T>(T roomId, IEnumerable<Guid> subjects)
@@ -3301,7 +3301,7 @@ public class FileStorageService //: IFileStorageService
         {
             var counter = 0;
 
-            await foreach (var ace in _fileSharing.GetRoomSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, offset, packSize + margin))
+            await foreach (var ace in _fileSharing.GetPureSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, offset, packSize + margin))
             {
                 counter++;
                 
@@ -3526,6 +3526,15 @@ public class FileStorageService //: IFileStorageService
         }
 
         return (await _fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
+    }
+    
+    private async Task<FileEntry<T>> GetEntryAsync<T>(T entryId, FileEntryType entryType)
+    {
+        FileEntry<T> entry = entryType == FileEntryType.Folder
+            ? await GetFolderDao<T>().GetFolderAsync(entryId)
+            : await GetFileDao<T>().GetFileAsync(entryId);
+
+        return entry.NotFoundIfNull();
     }
 
     private async Task<List<AceWrapper>> GetFullAceWrappersAsync(IEnumerable<FileShareParams> share)

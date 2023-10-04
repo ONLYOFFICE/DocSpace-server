@@ -336,9 +336,9 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         var count = Convert.ToInt32(_apiContext.Count);
         var counter = 0;
 
-        var totalCountTask = _fileStorageService.GetRoomSharesCountAsync(id, filterType);
+        var totalCountTask = _fileStorageService.GetPureSharesCountAsync(id, FileEntryType.Folder, filterType);
 
-        await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, offset, count))
+        await foreach (var ace in _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, offset, count))
         {
             counter++;
 
@@ -397,7 +397,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
 
         var counter = 0;
         
-        await foreach (var ace in  _fileStorageService.GetRoomSharedInfoAsync(id, filterType, 0, 100))
+        await foreach (var ace in  _fileStorageService.GetPureSharesAsync(id, FileEntryType.Folder, filterType, 0, 100))
         {
             counter++;
             

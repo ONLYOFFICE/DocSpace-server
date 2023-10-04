@@ -237,7 +237,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         var q = await GetPureSharesQuery(entry, filterType, filesDbContext);
 
-        if (filterType == ShareFilterType.User)
+        if (filterType == ShareFilterType.User && entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
         {
             var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share);
 
