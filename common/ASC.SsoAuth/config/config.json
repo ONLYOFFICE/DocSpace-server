@@ -1,8 +1,8 @@
-﻿{
+{
   "app": {
     "name": "Onlyoffice Single Sign-On handler",
     "port": 9834,
-    "appsettings": "../../../config",
+    "appsettings": "../../../../buildtools/config",
     "machinekey": "1123askdasjklasbnd",
     "environment": "Development",
     "logName": "web.sso.%DATE%.log",

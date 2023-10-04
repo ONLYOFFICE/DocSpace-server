@@ -4,9 +4,9 @@
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "files.service",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "core__eventBus__subscriptionClientName": "asc_event_bus_files_service_queue",
         "ASPNETCORE_URLS": "http://localhost:5009",
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -16,9 +16,9 @@
       "commandName": "WSL2",
       "launchBrowser": false,
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "files.service",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "ASPNETCORE_URLS": "http://localhost:5009",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

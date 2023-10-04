@@ -1,7 +1,7 @@
 {
 	"app":{
 	  "port": 9899,
-	  "appsettings": "../../../config",
+	  "appsettings": "../../../../buildtools/config",
 	  "environment": "Development"
 	}
 }
