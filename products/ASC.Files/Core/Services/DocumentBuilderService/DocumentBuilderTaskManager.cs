@@ -26,8 +26,6 @@
 
 using ASC.Web.Core.Utility.Settings;
 
-using SixLabors.ImageSharp.PixelFormats;
-
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singletone(Additional = typeof(DocumentBuilderTaskManagerHelperExtention))]
@@ -92,6 +90,26 @@ public class DocumentBuilderTaskManager
         }
     }
 
+    private static int[] ConvertHtmlColorToRgb(string color, double opacity)
+    {
+        if (color[0] != '#' || color.Length != 7 || opacity < 0 || opacity > 1)
+        {
+            throw new ArgumentException();
+        }
+
+        return new[]
+        {
+            ApplyOpacity(255, Convert.ToInt32(color.Substring(1, 2), 16), opacity),
+            ApplyOpacity(255, Convert.ToInt32(color.Substring(3, 2), 16), opacity),
+            ApplyOpacity(255, Convert.ToInt32(color.Substring(5, 2), 16), opacity),
+        };
+
+        static int ApplyOpacity(int background, int overlay, double opacity)
+        {
+            return (int)((1 - opacity) * background + opacity * overlay);
+        }
+    }
+
     public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(int tenantId, Guid userId, Folder<T> room)
     {
         var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
@@ -99,13 +117,9 @@ public class DocumentBuilderTaskManager
 
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
-        var mainBgColor = Color.Parse(selectedColorTheme.Main.Accent).ToPixel<Argb32>();
-        var lightBgColor = Color.FromRgb(
-                (byte)((1 - 0.08) * 255 + 0.08 * mainBgColor.R),
-                (byte)((1 - 0.08) * 255 + 0.08 * mainBgColor.G),
-                (byte)((1 - 0.08) * 255 + 0.08 * mainBgColor.B)
-            ).ToPixel<Argb32>();
-        var mainFontColor = Color.Parse(selectedColorTheme.Text.Accent).ToPixel<Argb32>();
+        var mainBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1);
+        var lightBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08);
+        var mainFontColor = ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1);
 
         var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
         var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
@@ -135,9 +149,9 @@ public class DocumentBuilderTaskManager
             logoSrc = fullAbsoluteLogoPath,
 
             themeColors = new {
-                mainBgColor = new int [] { mainBgColor.R, mainBgColor.G, mainBgColor.B },
-                lightBgColor = new int [] { lightBgColor.R, lightBgColor.G, lightBgColor.B },
-                mainFontColor = new int [] { mainFontColor.R, mainFontColor.G, mainFontColor.B }
+                mainBgColor,
+                lightBgColor,
+                mainFontColor
             },
 
             info = new {
