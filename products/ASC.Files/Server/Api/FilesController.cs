@@ -35,8 +35,10 @@ public class FilesControllerInternal : FilesController<int>
         IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-        : base(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ApiContext apiContext,
+        FileShareDtoHelper fileShareDtoHelper)
+        : base(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
     {
     }
 }
@@ -54,8 +56,10 @@ public class FilesControllerThirdparty : FilesController<string>
         IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-        : base(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ApiContext apiContext,
+        FileShareDtoHelper fileShareDtoHelper)
+        : base(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper, apiContext, fileShareDtoHelper)
     {
         _thirdPartySelector = thirdPartySelector;
         _documentServiceHelper = documentServiceHelper;
@@ -87,6 +91,8 @@ public abstract class FilesController<T> : ApiControllerBase
     private readonly FileStorageService _fileStorageService;
     private readonly IMapper _mapper;
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
+    private readonly ApiContext _apiContext;
+    private readonly FileShareDtoHelper _fileShareDtoHelper;
 
     public FilesController(
         FilesControllerHelper filesControllerHelper,
@@ -94,12 +100,16 @@ public abstract class FilesController<T> : ApiControllerBase
         IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper, 
+        ApiContext apiContext, 
+        FileShareDtoHelper fileShareDtoHelper) : base(folderDtoHelper, fileDtoHelper)
     {
         _filesControllerHelper = filesControllerHelper;
         _fileStorageService = fileStorageService;
         _mapper = mapper;
         _fileOperationDtoHelper = fileOperationDtoHelper;
+        _apiContext = apiContext;
+        _fileShareDtoHelper = fileShareDtoHelper;
     }
 
     /// <summary>
@@ -463,6 +473,35 @@ public abstract class FilesController<T> : ApiControllerBase
     public Task<EntryProperties> SetProperties(T fileId, EntryPropertiesRequestDto inDto)
     {
         return _fileStorageService.SetFileProperties(fileId, _mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto));
+    }
+    
+    /// <summary>
+    /// Returns the external links of a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Returns file external links</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">File security info</returns>
+    /// <path>api/2.0/files/file/{id}/links</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("file/{fileId}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T fileId)
+    {
+        var offset = Convert.ToInt32(_apiContext.StartIndex);
+        var count = Convert.ToInt32(_apiContext.Count);
+        var counter = 0;
+
+        var totalCountTask = _fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink);
+
+        await foreach (var ace in _fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, offset, count))
+        {
+            counter++;
+
+            yield return await _fileShareDtoHelper.Get(ace);
+        }
+
+        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 }
 
