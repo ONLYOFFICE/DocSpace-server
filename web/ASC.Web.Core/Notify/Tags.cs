@@ -121,6 +121,8 @@ public static class CommonTags
 
     public const string SalesEmail = "__SalesEmail";
 
+    public const string LinkSite = "__LinkSite";
+
     public const string SupportContact = "__SupportContact";
     public const string WithoutUnsubscribe = "WithoutUnsubscribe";
 

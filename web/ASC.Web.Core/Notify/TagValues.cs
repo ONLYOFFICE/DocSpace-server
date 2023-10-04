@@ -65,11 +65,13 @@ public static class TagValues
         return new TagValue("OrangeButton", action);
     }
 
-    public static ITagValue TrulyYours(string text)
+    public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text)
     {
+        var url = studioNotifyHelper.LinkSite;
+        var urlText = url.Split('/').Last();
         const string tdStyle = "color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 1.6em; margin: 0; padding: 0px 190px 40px; vertical-align: top; text-align: center;";
         const string astyle = "color: #FF6F3D; text-decoration: none;";
-        var action = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0""><td class=""fol"" style=""{tdStyle}"">{text} <br /><a style=""{astyle}"" target=""_blank"" href=""https://www.onlyoffice.com/"">www.onlyoffice.com</a></td></tr>";
+        var action = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0""><td class=""fol"" style=""{tdStyle}"">{text} <br /><a style=""{astyle}"" target=""_blank"" href=""{url}"">{urlText}</a></td></tr>";
         return new TagValue("TrulyYours", action);
     }
     public static ITagValue TableTop()

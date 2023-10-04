@@ -242,7 +242,7 @@ public class StudioNotifyService
                 new TagValue(Tags.Message, roomTitle),
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-                TagValues.TrulyYours(txtTrulyYours));
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
     }
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl)
@@ -256,7 +256,7 @@ public class StudioNotifyService
                 new[] { EMailSenderName },
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-                TagValues.TrulyYours(txtTrulyYours),
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")));
     }
 
@@ -370,7 +370,7 @@ public class StudioNotifyService
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(txtTrulyYours),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
         new TagValue("IMG1", img1),
         new TagValue("IMG2", img2),
@@ -424,7 +424,7 @@ public class StudioNotifyService
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(txtTrulyYours),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
         new TagValue("IMG1", img1),
         new TagValue("IMG2", img2),
@@ -470,7 +470,7 @@ public class StudioNotifyService
         new[] { EMailSenderName },
         new TagValue(Tags.ActivateUrl, confirmationUrl),
         TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
-        TagValues.TrulyYours(txtTrulyYours),
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(CommonTags.Footer, footer));
@@ -513,7 +513,7 @@ public class StudioNotifyService
         new[] { EMailSenderName },
         new TagValue(Tags.ActivateUrl, confirmationUrl),
         TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-        TagValues.TrulyYours(txtTrulyYours),
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(CommonTags.Footer, footer));
@@ -537,7 +537,7 @@ public class StudioNotifyService
            await _studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
         new[] { EMailSenderName },
         TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-        TagValues.TrulyYours(txtTrulyYours),
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
     }
 
@@ -665,7 +665,7 @@ public class StudioNotifyService
 
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
         tagValues.Add(new TagValue(Tags.PricingPage, _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
-        tagValues.Add(TagValues.TrulyYours(WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo))));
+        tagValues.Add(TagValues.TrulyYours(_studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo))));
         tagValues.Add(new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif")));
 
         await _client.SendNoticeToAsync(
@@ -690,7 +690,7 @@ public class StudioNotifyService
                 new[] { EMailSenderName },
                 new TagValue(Tags.ActivateUrl, activateUrl),
                 TagValues.OrangeButton(orangeButtonText, deactivateUrl),
-                TagValues.TrulyYours(bestReagardsTxt),
+                TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(_displayUserSettingsHelper)));
     }
 
@@ -706,7 +706,7 @@ public class StudioNotifyService
                 new IRecipient[] { u },
                 new[] { EMailSenderName },
                 TagValues.OrangeButton(orangeButtonText, url),
-                TagValues.TrulyYours(bestReagardsTxt),
+                TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt),
                 new TagValue(Tags.AutoRenew, showAutoRenewText.ToString()),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(_displayUserSettingsHelper)));
     }
@@ -721,7 +721,7 @@ public class StudioNotifyService
                 new IRecipient[] { owner },
                 new[] { EMailSenderName },
                 TagValues.OrangeButton(orangeButtonText, url),
-                TagValues.TrulyYours(txtTrulyYours),
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
                 new TagValue(Tags.OwnerName, owner.DisplayUserName(_displayUserSettingsHelper)));
     }
@@ -796,7 +796,7 @@ public class StudioNotifyService
             new[] { EMailSenderName },
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(txtTrulyYours),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
             new TagValue(CommonTags.Footer, footer));
         }
@@ -835,7 +835,7 @@ public class StudioNotifyService
         new TagValue(Tags.InviteLink, confirmUrl),
             new TagValue(CommonTags.Footer, _coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"),
         new TagValue(CommonTags.Culture, CultureInfo.CurrentUICulture.Name),
-        TagValues.TrulyYours(txtTrulyYours));
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
     }
 
     public async Task SendAlreadyExistAsync(string email)
@@ -870,7 +870,7 @@ public class StudioNotifyService
             await _studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, true),
         new[] { EMailSenderName },
             new TagValue(CommonTags.Footer, _coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"),
-            TagValues.TrulyYours(txtTrulyYours),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.MasterTemplate, "HtmlMasterPersonal"));
     }
 

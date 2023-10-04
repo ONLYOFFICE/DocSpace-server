@@ -92,7 +92,7 @@ public class NotifyHelper
             new[] { await _studioNotifyHelper.ToRecipientAsync(userId) },
             new[] { StudioNotifyService.EMailSenderName },
             new TagValue(Tags.OwnerName, (await _userManager.GetUsersAsync(userId)).DisplayUserName(_displayUserSettingsHelper)),
-            TagValues.TrulyYours(bestReagardsTxt));
+            TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt));
     }
 
     public async Task SendAboutRestoreStartedAsync(Tenant tenant, bool notifyAllUsers)
@@ -113,7 +113,7 @@ public class NotifyHelper
             Actions.RestoreStarted,
             users,
             new[] { StudioNotifyService.EMailSenderName },
-            TagValues.TrulyYours(bestReagardsTxt));
+            TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt));
     }
 
     public async Task SendAboutRestoreCompletedAsync(Tenant tenant, bool notifyAllUsers)
@@ -167,7 +167,7 @@ public class NotifyHelper
                     currentArgs.Add(TagValues.OrangeButton(orangeButtonText, confirmationUrl));
 
                     var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText");
-                    currentArgs.Add(TagValues.TrulyYours(bestReagardsTxt));
+                    currentArgs.Add(TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt));
 
                     await client.SendNoticeToAsync(
                         action,

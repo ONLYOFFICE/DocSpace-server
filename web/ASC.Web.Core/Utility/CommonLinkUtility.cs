@@ -528,16 +528,32 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
-    public string GetSupportContactLink(MailWhiteLabelSettingsHelper mailWhiteLabelSettings)
+    public async Task<string> GetSupportContactLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
     {
-        var url = mailWhiteLabelSettings.DefaultMailSiteUrl;
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
+        {
+            return string.Empty;
+        }
+
+        var url = additionalWhiteLabelSettingsHelper.DefaultFeedbackAndSupportUrl;
 
         if (string.IsNullOrEmpty(url))
         {
             return string.Empty;
         }
 
-        return url + "/support-contact-form.aspx";
+        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+    }
+    public string GetLinkDefaultSite(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    {
+        var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
+
+        if (string.IsNullOrEmpty(url))
+        {
+            return string.Empty;
+        }
+
+        return url;
     }
     public string GetMailSalesEmail(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
     {
