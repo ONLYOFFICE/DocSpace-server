@@ -204,8 +204,12 @@ public class EmailValidationKeyModel
     /// <type>System.String, System</type>
     public string Sms { get; set; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string module, out string first, out string sms)
+    /// <summary>Room ID</summary>
+    /// <type>System.String, System</type>
+    public string RoomId { get; set; }
+
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string module, out string first, out string sms, out string roomId)
     {
-        (key, emplType, email, uiD, type, module, first, sms) = (Key, EmplType, Email, UiD, Type, Module, First, Sms);
+        (key, emplType, email, uiD, type, module, first, sms, roomId) = (Key, EmplType, Email, UiD, Type, Module, First, Sms, RoomId);
     }
 }

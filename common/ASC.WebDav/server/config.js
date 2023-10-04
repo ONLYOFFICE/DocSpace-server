@@ -20,7 +20,7 @@
 module.exports = {
   // Port listener WebDav Server
   port: 1900,  
-  appsettings: "../../../config",
+  appsettings: "../../../../buildtools/config",
   environment: "Development",
   // Path to pfx key
   pfxKeyPath: null,

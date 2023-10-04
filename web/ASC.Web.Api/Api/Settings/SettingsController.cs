@@ -62,6 +62,8 @@ public class SettingsController : BaseSettingsController
     private readonly TenantDomainValidator _tenantDomainValidator;
     private readonly QuotaSyncOperation _quotaSyncOperation;
     private readonly ExternalShare _externalShare;
+    private readonly ConfigurationExtension _configurationExtension;
+    private readonly IMapper _mapper;
 
     public SettingsController(
         ILoggerProvider option,
@@ -97,8 +99,10 @@ public class SettingsController : BaseSettingsController
         CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
         QuotaSyncOperation quotaSyncOperation,
         QuotaUsageManager quotaUsageManager,
-        TenantDomainValidator tenantDomainValidator, 
-        ExternalShare externalShare
+        TenantDomainValidator tenantDomainValidator,
+        ExternalShare externalShare,
+        ConfigurationExtension configurationExtension,
+        IMapper mapper
         ) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _log = option.CreateLogger("ASC.Api");
@@ -132,6 +136,8 @@ public class SettingsController : BaseSettingsController
         _quotaUsageManager = quotaUsageManager;
         _tenantDomainValidator = tenantDomainValidator;
         _externalShare = externalShare;
+        _configurationExtension = configurationExtension;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -228,6 +234,9 @@ public class SettingsController : BaseSettingsController
             }
 
             settings.Plugins.Allow = _configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+
+            var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
+            settings.FormGallery = _mapper.Map<FormGalleryDto>(formGallerySettings);
         }
         else
         {
@@ -608,7 +617,7 @@ public class SettingsController : BaseSettingsController
             catch
             {
                 throw;
-        }
+            }
             finally
             {
                 _semaphore.Release();
@@ -651,7 +660,7 @@ public class SettingsController : BaseSettingsController
         if (settings.Selected == id)
         {
             settings.Selected = settings.Themes.Min(r => r.Id);
-           await _messageService.SendAsync(MessageAction.ColorThemeChanged);
+            await _messageService.SendAsync(MessageAction.ColorThemeChanged);
         }
 
         await _settingsManager.SaveAsync(settings);
@@ -1063,7 +1072,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
-        return (int) await _telegramHelper.UserIsConnectedAsync(_authContext.CurrentAccount.ID, Tenant.Id);
+        return (int)await _telegramHelper.UserIsConnectedAsync(_authContext.CurrentAccount.ID, Tenant.Id);
     }
 
     /// <summary>

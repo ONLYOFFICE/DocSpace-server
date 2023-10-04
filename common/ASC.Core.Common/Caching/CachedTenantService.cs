@@ -374,4 +374,9 @@ class CachedTenantService : ITenantService
     {
         return string.Format("settings/{0}/{1}", tenant, key.ToLowerInvariant());
     }
+
+    public IEnumerable<Tenant> GetTenantsWithCsp()
+    {
+        return _service.GetTenantsWithCsp();
+    }
 }
