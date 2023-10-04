@@ -1,8 +1,0 @@
-{
-  "OAuth": "OAuth",
-  "NoOAuthAppHeader": "No OAuth applications",
-  "NoOAuthAppDescription": "OAuth applications are used to access the ONLYOFFICE DocSpace API",
-  "RegisterNewApp": "Register a new application",
-  "NewApp": "New application",
-  "EditApp": "Edit application"
-}

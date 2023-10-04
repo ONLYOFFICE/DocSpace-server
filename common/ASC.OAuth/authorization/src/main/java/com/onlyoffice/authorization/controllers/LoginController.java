@@ -15,7 +15,7 @@ public class LoginController {
     private final String FORWARD = "FORWARD";
     private final ApplicationConfiguration configuration;
 
-    @GetMapping("/login")
+    @GetMapping("/oauth2/login")
     public String login(HttpServletRequest request) {
         log.debug("A new login request");
         if (request.getDispatcherType().name() == null || !request.getDispatcherType().name().equals(FORWARD))
