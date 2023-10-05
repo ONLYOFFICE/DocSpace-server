@@ -1059,7 +1059,7 @@ public class FileSecurity : IFileSecurity
                 ace = shares
                     .OrderBy(r => r, new SubjectComparer(subjects))
                     .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
-                    .FirstOrDefault(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.File);
+                    .FirstOrDefault(r => Equals(r.EntryId, e.Id.ToString()) && r.EntryType == FileEntryType.File);
 
                 if (ace == null)
                 {
