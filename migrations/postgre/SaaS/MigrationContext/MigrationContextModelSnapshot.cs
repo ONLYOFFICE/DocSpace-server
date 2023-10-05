@@ -4597,7 +4597,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint(19)")
+                        .HasColumnType("int(10)")
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 

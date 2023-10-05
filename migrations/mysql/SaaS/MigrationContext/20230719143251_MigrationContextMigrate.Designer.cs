@@ -4618,7 +4618,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             {
                 b.Property<long>("Id")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint(19)")
+                    .HasColumnType("int(10)")
                     .HasColumnName("id");
 
                 b.Property<string>("Link")
