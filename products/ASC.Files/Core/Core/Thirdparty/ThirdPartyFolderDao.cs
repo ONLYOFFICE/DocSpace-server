@@ -688,6 +688,10 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
     {
         return null;
     }
+    public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
+    {
+        return null;
+    }
     public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
     {
         return null;

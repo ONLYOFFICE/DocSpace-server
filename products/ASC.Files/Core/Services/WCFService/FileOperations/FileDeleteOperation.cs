@@ -334,19 +334,16 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
                         if (file.RootFolderType == FolderType.Archive)
                         {
-                            var archiveId = await folderDao.GetFolderIDArchive(true);
-                            var archiveFolder = await folderDao.GetFolderAsync(archiveId);
-
+                            var archiveId = await folderDao.GetFolderIDArchive(false);
                             var virtualRoomsId = await folderDao.GetFolderIDVirtualRooms(false);
-                            var virtualRoomsFolder = await folderDao.GetFolderAsync(virtualRoomsId);
 
-                            _ = await folderDao.ChangeFolderSizeAsync(archiveFolder, archiveFolder.Counter - file.ContentLength);
-                            _ = await folderDao.ChangeFolderSizeAsync(virtualRoomsFolder, virtualRoomsFolder.Counter + file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(virtualRoomsId, file.ContentLength);
+
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
                         {
-                            var trashFolder = await folderDao.GetFolderAsync(_trashId);
-                            _ = await folderDao.ChangeFolderSizeAsync(trashFolder, trashFolder.Counter - file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
 
                         if (_headers != null)
