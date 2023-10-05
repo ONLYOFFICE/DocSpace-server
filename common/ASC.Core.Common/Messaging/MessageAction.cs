@@ -204,7 +204,7 @@ public enum MessageAction
     
     RoomUpdateAccessForUser = 5075,
     RoomRemoveUser = 5084,
-    RoomCreateUser = 5085,// last
+    RoomCreateUser = 5085,
     RoomInvitationLinkUpdated = 5082,
     RoomInvitationLinkCreated = 5086,
     RoomInvitationLinkDeleted = 5087,
@@ -217,9 +217,13 @@ public enum MessageAction
     RoomLogoCreated = 5080,
     RoomLogoDeleted = 5081,
     
-    ExternalLinkCreated = 5088,
-    ExternalLinkUpdated = 5089,
-    ExternalLinkDeleted = 5090,
+    RoomExternalLinkCreated = 5088,
+    RoomExternalLinkUpdated = 5089,
+    RoomExternalLinkDeleted = 5090,
+    
+    FileExternalLinkCreated = 5091,
+    FileExternalLinkUpdated = 5092,
+    FileExternalLinkDeleted = 5093,  // last
 
     #endregion
 
