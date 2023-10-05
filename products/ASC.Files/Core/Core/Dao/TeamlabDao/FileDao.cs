@@ -1464,7 +1464,11 @@ internal class FileDao : AbstractDao, IFileDao<int>
                          ).FirstOrDefault()
                         where f.TenantId == r.TenantId
                         select f
-                          ).FirstOrDefault()
+                          ).FirstOrDefault(),
+                Order = (from f in filesDbContext.FileOrder
+                         where f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                         select f.Order
+                                ).FirstOrDefault(),
             });
     }
 
@@ -1632,6 +1636,7 @@ public class DbFileQuery
     public DbFile File { get; set; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public int Order { get; set; }
 }
 
 public class DbFileDeny

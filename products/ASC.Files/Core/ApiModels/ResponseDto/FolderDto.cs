@@ -137,7 +137,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
         _badgesSettingsHelper = badgesSettingsHelper;
     }
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
 
@@ -192,6 +192,18 @@ public class FolderDtoHelper : FileEntryDtoHelper
                 {
                     result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
                 }
+            }
+        }
+
+        if (folder.Order != 0)
+        {
+            if (!string.IsNullOrEmpty(order))
+            {
+                result.Order = string.Join('.', order, folder.Order);
+            }
+            else
+            {
+                result.Order = folder.Order.ToString();
             }
         }
 

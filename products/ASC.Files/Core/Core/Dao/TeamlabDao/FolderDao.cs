@@ -1220,13 +1220,17 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                         where f.TenantId == r.TenantId
                         select f
                           ).FirstOrDefault(),
+                Order = (from f in filesDbContext.FileOrder
+                         where f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                         select f.Order
+                                ).FirstOrDefault(),
             });
     }
 
     private IQueryable<DbFolderQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
     {
         var tenantId = TenantID;
-        
+
         return dbFiles
             .Select(r => new DbFolderQuery
             {
@@ -1234,15 +1238,15 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 Root = (from f in filesDbContext.Folders
                         where f.Id ==
                               (from t in filesDbContext.Tree
-                                  where t.FolderId == r.ParentId
-                                  orderby t.Level descending
-                                  select t.ParentId
+                               where t.FolderId == r.ParentId
+                               orderby t.Level descending
+                               select t.ParentId
                               ).FirstOrDefault()
                         where f.TenantId == r.TenantId
                         select f
                     ).FirstOrDefault(),
-                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom) && 
-                         filesDbContext.Security.Any(s => 
+                Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom) &&
+                         filesDbContext.Security.Any(s =>
                              s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.Folder && s.SubjectType == SubjectType.PrimaryExternalLink)
             });
     }
@@ -1649,6 +1653,7 @@ public class DbFolderQuery
     public DbFolder Folder { get; set; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public int Order { get; set; }
 }
 
 public class DbFolderQueryWithSecurity
@@ -1684,7 +1689,6 @@ static file class Queries
                 ctx.Folders
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
-
                     .Select(r =>
                         new DbFolderQuery
                         {
@@ -1698,7 +1702,11 @@ static file class Queries
                                           ).FirstOrDefault()
                                     where f.TenantId == r.TenantId
                                     select f
-                                ).FirstOrDefault()
+                                ).FirstOrDefault(),
+                            Order = (from f in ctx.FileOrder
+                                     where f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                                     select f.Order
+                                ).FirstOrDefault(),
                         }
                     ).SingleOrDefault());
 
@@ -1748,6 +1756,10 @@ static file class Queries
                                           ).FirstOrDefault()
                                     where f.TenantId == r.folder.TenantId
                                     select f
+                                ).FirstOrDefault(),
+                            Order = (from f in ctx.FileOrder
+                                     where f.EntryId == r.folder.Id && f.TenantId == r.folder.TenantId && f.EntryType == FileEntryType.Folder
+                                     select f.Order
                                 ).FirstOrDefault()
                         }
                     ));
