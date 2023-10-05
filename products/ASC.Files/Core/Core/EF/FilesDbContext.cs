@@ -26,6 +26,8 @@
 
 using ASC.Files.Core.Core.EF;
 
+using User = ASC.Core.Common.EF.User;
+
 namespace ASC.Files.Core.EF;
 
 public class FilesDbContext : DbContext
@@ -44,6 +46,7 @@ public class FilesDbContext : DbContext
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<FilesConverts> FilesConverts { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
 
     public FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : base(dbContextOptions) { }
@@ -67,6 +70,7 @@ public class FilesDbContext : DbContext
             .AddDbTenant()
             .AddFilesConverts()
             .AddDbFileOrder()
+            .AddUser()
             .AddDbFunctions();
     }
 }

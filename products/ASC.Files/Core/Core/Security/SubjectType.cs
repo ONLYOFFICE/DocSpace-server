@@ -26,10 +26,22 @@
 
 namespace ASC.Files.Core.Security;
 
+[Flags]
+public enum ShareFilterType
+{
+    User = 0,
+    InvitationLink = 1,
+    ExternalLink = 2,
+    AdditionalExternalLink = 4,
+    PrimaryExternalLink = 8,
+    Link = InvitationLink | ExternalLink | AdditionalExternalLink | PrimaryExternalLink
+}
+
 public enum SubjectType
 {
     User = 0,
     ExternalLink = 1,
     Group = 2,
     InvitationLink = 3,
+    PrimaryExternalLink = 4
 }

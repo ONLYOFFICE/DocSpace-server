@@ -39,6 +39,8 @@ public class MigrationContext : DbContext
 
     public DbSet<MobileAppInstall> MobileAppInstall { get; set; }
     public DbSet<DbIPLookup> DbIPLookup { get; set; }
+    public DbSet<DbWebPlugin> WebPlugins { get; set; }
+
     public DbSet<Regions> Regions { get; set; }
 
     public DbSet<FireBaseUser> FireBaseUsers { get; set; }
@@ -115,6 +117,7 @@ public class MigrationContext : DbContext
             .AddDbTariffRow()
             .AddMobileAppInstall()
             .AddDbIPLookup()
+            .AddDbWebPlugins()
             .AddRegions()
             .AddFireBaseUsers()
             .AddNotifyInfo()
