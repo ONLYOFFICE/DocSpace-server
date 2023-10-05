@@ -57,47 +57,137 @@ public class FileSecurity : IFileSecurity
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
 
-    public static readonly Dictionary<FolderType, HashSet<FileShare>> AvailableRoomRights = new()
+    public static readonly Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new()
     {
         {
-            FolderType.CustomRoom, new HashSet<FileShare>
+            FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.ExternalLink, new HashSet<FileShare>
+                    {
+                        FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.PrimaryExternalLink, new HashSet<FileShare>
+                    {
+                        FileShare.Read, FileShare.None
+                    }
+                }
             }
         },
         {
-            FolderType.FillingFormsRoom, new HashSet<FileShare>
+            FolderType.PublicRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.ExternalLink, new HashSet<FileShare>
+                    {
+                        FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.PrimaryExternalLink, new HashSet<FileShare>
+                    {
+                        FileShare.Read, FileShare.None
+                    }
+                }
             }
         },
         {
-            FolderType.EditingRoom, new HashSet<FileShare>
+            FolderType.FillingFormsRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
+                    }
+                }
             }
         },
         {
-            FolderType.ReviewRoom, new HashSet<FileShare>
+            FolderType.EditingRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
+                    }
+                }
             }
         },
         {
-            FolderType.ReadOnlyRoom, new HashSet<FileShare>
+            FolderType.ReviewRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
+                    }
+                }
             }
         },
         {
-            FolderType.PublicRoom, new HashSet<FileShare>
+            FolderType.ReadOnlyRoom, new Dictionary<SubjectType, HashSet<FileShare>>
             {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None,
-        }
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                    }
+                }
+            }
         }
     };
 
-    public static readonly Dictionary<EmployeeType, HashSet<FileShare>> AvailableUserRights = new()
+    public static readonly Dictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new()
     {
         {
             EmployeeType.DocSpaceAdmin, new HashSet<FileShare>
@@ -166,7 +256,8 @@ public class FileSecurity : IFileSecurity
                     FilesSecurityActions.Mute,
                     FilesSecurityActions.EditAccess,
                     FilesSecurityActions.Duplicate,
-                    FilesSecurityActions.Download
+                    FilesSecurityActions.Download,
+                    FilesSecurityActions.CopySharedLink
                 }
             }
     };
@@ -418,6 +509,7 @@ public class FileSecurity : IFileSecurity
     {
         return CanAsync(entry, _authContext.CurrentAccount.ID, FilesSecurityActions.Convert);
     }
+    
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry)
     {
         return await WhoCanAsync(entry, FilesSecurityActions.Read);
@@ -803,6 +895,11 @@ public class FileSecurity : IFileSecurity
                     return false;
                 }
 
+                if (action == FilesSecurityActions.CopySharedLink && folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+                {
+                    return false;
+                }
+
                 if (action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate && isRoom)
                 {
                     return false;
@@ -926,9 +1023,9 @@ public class FileSecurity : IFileSecurity
 
         FileShareRecord ace;
 
-        if (!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-            (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) || 
-            _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await _externalShare.GetLinkIdAsync()), out value))
+        if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+            (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId, isRoom), out var value)) || 
+            _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await _externalShare.GetLinkIdAsync(), isRoom), out value))
         {
             ace = value.Clone();
             ace.EntryId = e.Id;
@@ -967,16 +1064,16 @@ public class FileSecurity : IFileSecurity
                     .FirstOrDefault();
             }
             
-            if (!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-                ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink })
+            if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
             {
-                var id = ace.SubjectType == SubjectType.ExternalLink ? ace.Subject : userId;
+                var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
-                _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id, isRoom), ace);
             }
         }
 
-        if (ace is { SubjectType: SubjectType.ExternalLink } && ace.Subject != userId && 
+        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
             await _externalShare.ValidateRecordAsync(ace, null) != Status.Ok)
         {
             return false;
@@ -1152,6 +1249,12 @@ public class FileSecurity : IFileSecurity
                 break;
             case FilesSecurityActions.Download:
                 if (e.Access != FileShare.Restrict && ace?.Options is not { DenyDownload: true })
+                {
+                    return true;
+                }
+                break;
+            case FilesSecurityActions.CopySharedLink:
+                if (e.Access == FileShare.RoomAdmin || (e.Access != FileShare.Restrict && e.Shared))
                 {
                     return true;
                 }
@@ -1799,9 +1902,16 @@ public class FileSecurity : IFileSecurity
         return false;
     }
 
-    private string GetCacheKey<T>(T parentId, Guid userId)
+    private string GetCacheKey<T>(T entryId, Guid userId, bool isRoom)
     {
-        return $"{_tenantManager.GetCurrentTenant().Id}-{userId}-{parentId}";
+        var key = $"{_tenantManager.GetCurrentTenant().Id}-{userId}-{entryId}";
+
+        if (isRoom)
+        {
+            key += $"-room";
+        }
+
+        return key;
     }
 
     private string GetCacheKey<T>(T parentId)
@@ -1863,6 +1973,7 @@ public class FileSecurity : IFileSecurity
         Duplicate,
         SubmitToFormGallery,
         Download,
-        Convert
+        Convert,
+        CopySharedLink
     }
 }
