@@ -80,14 +80,14 @@ public class ExternalShare
         }
     }
     
-    public async Task<Status> ValidateAsync(Guid linkId)
+    public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
         var record = await _daoFactory.GetSecurityDao<int>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
 
-        return record == null ? Status.Invalid : await ValidateRecordAsync(record, null);
+        return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
     
-    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password)
+    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password, bool isAuthenticated)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
             record.Subject == FileConstant.ShareLinkId ||
@@ -99,6 +99,11 @@ public class ExternalShare
         if (record.Options.IsExpired)
         {
             return Status.Expired;
+        }
+
+        if (record.Options.Internal && !isAuthenticated)
+        {
+            return Status.Invalid;
         }
 
         if (string.IsNullOrEmpty(record.Options.Password))

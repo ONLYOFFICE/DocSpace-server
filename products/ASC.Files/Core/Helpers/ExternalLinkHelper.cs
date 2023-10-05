@@ -62,7 +62,7 @@ public class ExternalLinkHelper
             return result;
         }
 
-        var status = await _externalShare.ValidateRecordAsync(record, password);
+        var status = await _externalShare.ValidateRecordAsync(record, password, _securityContext.IsAuthenticated);
         result.Status = status;
 
         if (status != Status.Ok && status != Status.RequiredPassword)
