@@ -528,7 +528,8 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
-    public async Task<string> GetSupportContactLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
         {
@@ -544,27 +545,26 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
-    public string GetLinkDefaultSite(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+
+    public string GetSiteLink(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
     {
         var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return url;
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
-    public string GetMailSalesEmail(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+
+    public string GetSupportEmail(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    {
+        var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
+
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
+    }
+
+    public string GetSalesEmail(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
     {
         var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
 
-        if (string.IsNullOrEmpty(mail))
-        {
-            return string.Empty;
-        }
-
-        return mail;
+        return string.IsNullOrEmpty(mail) ? string.Empty : mail;
     }
 
     public string GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)

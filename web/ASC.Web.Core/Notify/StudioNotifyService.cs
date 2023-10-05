@@ -355,8 +355,9 @@ public class StudioNotifyService
             notifyAction = Actions.SaasUserWelcomeV1;
         }
 
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", GetCulture(newUserInfo));
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         var img1 = _studioNotifyHelper.GetNotificationImageUrl("users.png");
         var img2 = _studioNotifyHelper.GetNotificationImageUrl("files.png");
@@ -376,8 +377,7 @@ public class StudioNotifyService
         new TagValue("IMG2", img2),
         new TagValue("IMG3", img3),
         new TagValue("IMG4", img4),
-        new TagValue(CommonTags.Footer, footer),
-        new TagValue(CommonTags.MasterTemplate, _coreBaseSettings.Personal ? "HtmlMasterPersonal" : "HtmlMasterV2"));
+        new TagValue(CommonTags.Footer, footer));
     }
 
     public async Task GuestInfoAddedAfterInviteAsync(UserInfo newUserInfo)
@@ -406,11 +406,12 @@ public class StudioNotifyService
             notifyAction = Actions.SaasGuestWelcomeV1;
         }
 
+        var culture = GetCulture(newUserInfo);
         var orangeButtonText = _tenantExtra.Enterprise
-                              ? WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", GetCulture(newUserInfo))
-                              : WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", GetCulture(newUserInfo));
+                              ? WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", culture)
+                              : WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", culture);
 
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo));
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         var img1 = _studioNotifyHelper.GetNotificationImageUrl("users.png");
         var img2 = _studioNotifyHelper.GetNotificationImageUrl("files.png");
@@ -460,9 +461,9 @@ public class StudioNotifyService
         }
 
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", GetCulture(newUserInfo));
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
         notifyAction,
@@ -503,9 +504,9 @@ public class StudioNotifyService
         }
 
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", GetCulture(newUserInfo));
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
         notifyAction,
@@ -522,15 +523,15 @@ public class StudioNotifyService
     public async Task SendMsgProfileDeletionAsync(UserInfo user)
     {
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.ProfileRemove, _authContext.CurrentAccount.ID, _authContext.CurrentAccount.ID);
-
+        var culture = GetCulture(user);
         var orangeButtonText = _coreBaseSettings.Personal ?
-            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", GetCulture(user)) :
-            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", GetCulture(user));
+            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture) :
+            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", culture);
 
         var action = _coreBaseSettings.Personal
                          ? (_coreBaseSettings.CustomMode ? Actions.PersonalCustomModeProfileDelete : Actions.PersonalProfileDelete)
                      : Actions.ProfileDelete;
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(user));
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
         action,
@@ -680,9 +681,9 @@ public class StudioNotifyService
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)
     {
         var u = await _userManager.GetUsersAsync(t.OwnerId);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeactivatePortal", GetCulture(u));
-        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", GetCulture(u));
+        var culture = GetCulture(u);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeactivatePortal", culture);
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
         await _client.SendNoticeToAsync(
                 Actions.PortalDeactivate,
@@ -697,9 +698,9 @@ public class StudioNotifyService
     public async Task SendMsgPortalDeletionAsync(Tenant t, string url, bool showAutoRenewText)
     {
         var u = await _userManager.GetUsersAsync(t.OwnerId);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeletePortal", GetCulture(u));
-        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", GetCulture(u));
+        var culture = GetCulture(u);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeletePortal", culture);
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
         await _client.SendNoticeToAsync(
                 Actions.PortalDelete,
@@ -713,8 +714,9 @@ public class StudioNotifyService
 
     public async Task SendMsgPortalDeletionSuccessAsync(UserInfo owner, string url)
     {
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", GetCulture(owner));
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(owner));
+        var culture = GetCulture(owner);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
                 Actions.PortalDeleteSuccessV1,
@@ -787,8 +789,9 @@ public class StudioNotifyService
 
             _settingsManager.Save(new FirstEmailConfirmSettings() { IsFirst = true });
 
-            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", GetCulture(u));
-            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(u));
+            var culture = GetCulture(u);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", culture);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
             await _client.SendNoticeToAsync(
             notifyAction,
@@ -870,8 +873,7 @@ public class StudioNotifyService
             await _studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, true),
         new[] { EMailSenderName },
             new TagValue(CommonTags.Footer, _coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"),
-            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
-        new TagValue(CommonTags.MasterTemplate, "HtmlMasterPersonal"));
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
     }
 
     #endregion

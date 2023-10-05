@@ -97,12 +97,12 @@ namespace ASC.Notify.Textile.Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
-        ///          &lt;td style=&quot;width: 24px; vertical-align: top; margin: 0; padding: 32px 0 0 208px;&quot;&gt;
+        ///          &lt;td style=&quot;width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 208px;&quot;&gt;
         ///              &lt;a href=&quot;https://www.facebook.com/pages/OnlyOffice/833032526736775&quot; style=&quot;width: 24px; height: 24px; display: block; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
         ///                  &lt;img src=&quot;%IMAGEPATH%/social-facebook-24.png&quot; alt=&quot;Facebook&quot; style=&quot;width: 24px; height: 24px;&quot; /&gt;
         ///              &lt;/a&gt;
         ///          &lt;/td&gt;
-        ///          &lt;td style=&quot;width: 24px; vertic [rest of string was truncated]&quot;;.
+        ///          &lt;td style=&quot;width: 24px; ver [rest of string was truncated]&quot;;.
         /// </summary>
         public static string SocialNetworksFooter {
             get {

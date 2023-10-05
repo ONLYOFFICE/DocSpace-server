@@ -833,7 +833,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -887,7 +887,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -999,7 +999,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -1053,7 +1053,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -1321,7 +1321,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -1414,7 +1414,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -1862,7 +1862,7 @@ $OrangeButton
 
 Your current tariff plan is STARTUP. It is absolutely free and includes:
 
-&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 manager&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Up to 12 rooms&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Up to 3 users in each room&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 GB disk space&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: right;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 admin, 2 power users&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Up to 12 rooms&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Unlimited number of users in each room&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-left: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 GB disk space&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 *Enjoy a new way of document collaboration!*
 
@@ -1936,7 +1936,7 @@ Since you have decided not to use it anymore, your ONLYOFFICE DocSpace and all t
 
 &lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: right; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;We would appreciate your feedback. Why have you decided to stop using ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-If you think this is a mistake and want to continue using ONLYOFFICE DocSpace, please contact our "support team":"${__SupportContact}". 
+If you think this is a mistake and want to continue using ONLYOFFICE DocSpace, please contact our "support team":"${__SupportLink}". 
 
 $TrulyYours
 	  </comment>
@@ -2110,7 +2110,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>
@@ -2229,7 +2229,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours
 	  </comment>

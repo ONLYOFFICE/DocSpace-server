@@ -321,8 +321,10 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())));
         request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, _commonLinkUtility.GetUnsubscribe()));
         request.Arguments.Add(new TagValue(CommonTags.HelpLink, await _commonLinkUtility.GetHelpLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
-        request.Arguments.Add(new TagValue(CommonTags.SalesEmail, _commonLinkUtility.GetMailSalesEmail(_additionalWhiteLabelSettingsHelper)));
-        request.Arguments.Add(new TagValue(CommonTags.SupportContact, await _commonLinkUtility.GetSupportContactLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.SalesEmail, _commonLinkUtility.GetSalesEmail(_additionalWhiteLabelSettingsHelper)));
+        request.Arguments.Add(new TagValue(CommonTags.SiteLink, _commonLinkUtility.GetSiteLink(_mailWhiteLabelSettingsHelper)));
+        request.Arguments.Add(new TagValue(CommonTags.SupportLink, await _commonLinkUtility.GetSupportLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.SupportEmail, _commonLinkUtility.GetSupportEmail(_mailWhiteLabelSettingsHelper)));
         request.Arguments.Add(new TagValue(CommonTags.LetterLogoText, logoText));
         request.Arguments.Add(new TagValue(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(_settingsManager)));
         request.Arguments.Add(new TagValue(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name));

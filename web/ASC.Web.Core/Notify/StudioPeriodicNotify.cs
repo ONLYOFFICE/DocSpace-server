@@ -167,7 +167,7 @@ public class StudioPeriodicNotify
                         img4 = _studioNotifyHelper.GetNotificationImageUrl("management.png");
                         img5 = _studioNotifyHelper.GetNotificationImageUrl("administration.png");
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtomWatchFullPlaylist", c);
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
                         orangeButtonUrl = "https://www.youtube.com/playlist?list=PLCF48HEKMOYM8MBnwYs8q5J0ILMK9NzIx";
 
                         topGif = _studioNotifyHelper.GetNotificationImageUrl("mainpic_video_guides.png");
@@ -577,31 +577,33 @@ public class StudioPeriodicNotify
                 if (createdDate.AddDays(7) == nowDate)
                 {
                     var users = await _studioNotifyHelper.GetRecipientsAsync(true, true, false);
+
                     var orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                    Func<CultureInfo, string> orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                    Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+
+                    var img1 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
+                    var img2 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
+                    var img3 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
+                    var img4 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
+                    var img5 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
+
+                    var topGif = _studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
                     await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => await _studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                     {
                         var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                         Thread.CurrentThread.CurrentCulture = culture;
                         Thread.CurrentThread.CurrentUICulture = culture;
-                        var orangeButtonText = WebstudioNotifyPatternResource.ButtonCollaborateDocSpace;
 
-                        var img1 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
-                        var img2 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
-                        var img3 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
-                        var img4 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
-                        var img5 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
-
-                        Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
-                        var topGif = _studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
-                        
                         await client.SendNoticeToAsync(
                                 await _userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
                                 new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
                             new[] { senderName },
                                 new TagValue(Tags.UserName, u.DisplayUserName(_displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
-                            TagValues.OrangeButton(orangeButtonText, orangeButtonUrl),
+                            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                             TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture)),
                             new TagValue("IMG1", img1),
                             new TagValue("IMG2", img2),

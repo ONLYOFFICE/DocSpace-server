@@ -74,20 +74,21 @@ public class TextileStyler : IPatternStyler
         }
 
         formatter.Format(message.Body);
-        var imagePath = GetImagePath(message);
+
         var template = GetTemplate(message);
+        var imagePath = GetImagePath(message);
         var mailSettings = GetMailSettings(message);
         var unsubscribeText = GetUnsubscribeText(message, mailSettings);
 
+        InitTopImage(message, mailSettings, out var topImage);
         InitFooter(message, mailSettings, out var footerContent, out var footerSocialContent);
-        InitImage(message, out var footerTop);
 
         message.Body = template.Replace("%CONTENT%", output.GetFormattedText())
-                              .Replace("%TOPFOOTER%", footerTop)
-                              .Replace("%FOOTER%", footerContent)
-                              .Replace("%FOOTERSOCIAL%", footerSocialContent)
-                              .Replace("%TEXTFOOTER%", unsubscribeText)
-                              .Replace("%IMAGEPATH%", imagePath);
+                               .Replace("%TOPIMAGE%", topImage)
+                               .Replace("%FOOTER%", footerContent)
+                               .Replace("%FOOTERSOCIAL%", footerSocialContent)
+                               .Replace("%TEXTFOOTER%", unsubscribeText)
+                               .Replace("%IMAGEPATH%", imagePath);
     }
 
     private static string GetTemplate(NoticeMessage message)
@@ -212,30 +213,29 @@ public class TextileStyler : IPatternStyler
         }
     }
 
-    private void InitImage(NoticeMessage message, out string footerTop)
+    private void InitTopImage(NoticeMessage message, MailWhiteLabelSettings settings, out string footerTop)
     {
-        footerTop = string.Empty;
-
         var imagePath = GetImagePath(message);
         var logoImg = GetLogoImg(message, imagePath);
         var logoText = GetLogoText(message);
-        var mailSettings = GetMailSettings(message);
-        var TopGif = message.GetArgument("TopGif");
-        if (TopGif != null && !string.IsNullOrEmpty((string)TopGif.Value))
+        var siteUrl = settings == null ? _mailWhiteLabelSettingsHelper.DefaultMailSiteUrl : settings.SiteUrl;
+        var topGif = message.GetArgument("TopGif");
+
+        if (topGif != null && !string.IsNullOrEmpty((string)topGif.Value))
         {
             footerTop = NotifyTemplateResource.TopGif
-                .Replace("%LOGO%", (string)TopGif.Value)
-                .Replace("%SITEURL%", mailSettings == null ? _mailWhiteLabelSettingsHelper.DefaultMailSiteUrl : mailSettings.SiteUrl);
+                .Replace("%LOGO%", (string)topGif.Value)
+                .Replace("%SITEURL%", siteUrl);
         }
         else
         {
             footerTop = NotifyTemplateResource.TopLogo
                 .Replace("%LOGO%", logoImg)
                 .Replace("%LOGOTEXT%", logoText)
-                .Replace("%SITEURL%", mailSettings == null ? _mailWhiteLabelSettingsHelper.DefaultMailSiteUrl : mailSettings.SiteUrl);
+                .Replace("%SITEURL%", siteUrl);
         }
-
     }
+
     private void InitCommonFooter(MailWhiteLabelSettings settings, out string footerContent, out string footerSocialContent)
     {
         footerContent = string.Empty;

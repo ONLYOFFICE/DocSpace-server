@@ -196,20 +196,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Best regards, ONLYOFFICE™ Support Team.
+        ///   Looks up a localized string similar to Best regards, ONLYOFFICE Support Team.
         /// </summary>
         public static string BestRegardsText {
             get {
                 return ResourceManager.GetString("BestRegardsText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to WATCH FULL PLAYLIST.
-        /// </summary>
-        public static string ButtomWatchFullPlaylist {
-            get {
-                return ResourceManager.GetString("ButtomWatchFullPlaylist", resourceCulture);
             }
         }
         
@@ -484,6 +475,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to WATCH FULL PLAYLIST.
+        /// </summary>
+        public static string ButtonWatchFullPlaylist {
+            get {
+                return ResourceManager.GetString("ButtonWatchFullPlaylist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Activate your email for &quot;${__VirtualRootPath}&quot;:&quot;$InviteLink&quot; portal.
         ///
         ///Hello!
@@ -510,9 +510,9 @@ namespace ASC.Web.Core.PublicResources {
         ///To learn more on the backup procedure please refer to our &quot;Data backup&quot;:&quot;${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block&quot; user guide.
         ///
         ///
-        ///If you have any questions or need assistance please feel free to contact us at &quot;support.onlyoffice.com&quot;:&quot;http://support.onlyoffice.com&quot;
+        ///If you have any questions or need assistance please feel free to contact us at &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
-        ///$ [rest of string was truncated]&quot;;.
+        ///$TrulyYours.
         /// </summary>
         public static string pattern_backup_created {
             get {
@@ -529,10 +529,11 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///To learn more on the backup procedure please refer to our [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) user guide.
         ///
-        ///If you have any questions or need assistance please feel free to contact us at [support.onlyoffice.com](http://support.onlyoffice.com)
+        ///If you have any questions or need assistance please feel free to contact us at [${__SupportLink}](${__SupportLink})
         ///
         ///Best regards,
-        ///ONLYOFFICE™ Suppor [rest of string was truncated]&quot;;.
+        ///ONLYOFFICE™ Support Team
+        ///[www.onlyof [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_backup_created_tg {
             get {

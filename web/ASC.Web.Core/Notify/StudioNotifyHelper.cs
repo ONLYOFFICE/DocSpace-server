@@ -32,7 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class StudioNotifyHelper
 {
     public readonly string Helplink;
-    public readonly string LinkSite;
+    public readonly string SiteLink;
     public readonly StudioNotifySource NotifySource;
     public readonly ISubscriptionProvider SubscriptionProvider;
     public readonly IRecipientProvider RecipientsProvider;
@@ -63,7 +63,7 @@ public class StudioNotifyHelper
         ILogger<StudioNotifyHelper> logger)
     {
         Helplink = commonLinkUtility.GetHelpLink(settingsManager, additionalWhiteLabelSettingsHelper, false);
-        LinkSite = commonLinkUtility.GetLinkDefaultSite(mailWhiteLabelSettingsHelper);
+        SiteLink = commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
         NotifySource = studioNotifySource;
         _userManager = userManager;
         _settingsManager = settingsManager;

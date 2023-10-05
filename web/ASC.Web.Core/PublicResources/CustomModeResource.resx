@@ -132,7 +132,7 @@ Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to
 
 $OrangeButton
 
-If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportContact}".
+If you need help, browse our "Help Center":"${__HelpLink}" or ask our "support team":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
@@ -203,7 +203,7 @@ Confirm account termination
 
 Ignore this email if you do not want to proceed. 
 
-If you have any questions, please contact us at "${__SalesEmail}":"mailto:${__SalesEmail}"
+If you have any questions, please contact us at "${__SupportEmail}":"mailto:${__SupportEmail}"
 
 $TrulyYours</value>
   </data>

@@ -44,19 +44,8 @@ public static class TagValues
         return new TagValue("PersonalHeaderEnd", "</td></tr></tbody></table>");
     }
 
-    public static ITagValue GreenButton(string btnTextFunc, string btnUrl)
+    public static ITagValue OrangeButton(string btnText, string btnUrl)
     {
-        var btnText = btnTextFunc ?? string.Empty;
-        const string td = "<td style=\"height: 48px; width: 80px; margin:0; padding:0;\">&nbsp;</td>";
-        const string color = "color: #fff; font-family: Helvetica, Arial, Tahoma; font-size: 18px; font-weight: 600; vertical-align: middle; display: block; padding: 12px 0; text-align: center; text-decoration: none; background-color: #66b76d;";
-
-        var action = $@"<table style=""height: 48px; width: 540px; border-collapse: collapse; empty-cells: show; vertical-align: middle; text-align: center; margin: 30px auto; padding: 0;""><tbody><tr cellpadding=""0"" cellspacing=""0"" border=""0"">{td}<td style=""height: 48px; width: 380px; margin:0; padding:0; background-color: #66b76d; -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px;""><a style=""{color}"" target=""_blank"" href=""{btnUrl}"">{btnText}</a></td>{td}</tr></tbody></table>";
-
-        return new TagValue("GreenButton", action);
-    }
-    public static ITagValue OrangeButton(string btnTextFunc, string btnUrl)
-    {
-        var btnText = btnTextFunc ?? string.Empty;
         const string td = "<td style=\"height: 48px; width: 80px; margin:0; padding-bottom:56px;\">&nbsp;</td>";
         const string color = "background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; font-weight: 600; padding-top: 15px; padding-right: 25px; padding-bottom: 15px; padding-left: 25px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; mso-hide: all; white-space: nowrap; letter-spacing: 0.04em;";
 
@@ -67,8 +56,8 @@ public static class TagValues
 
     public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text)
     {
-        var url = studioNotifyHelper.LinkSite;
-        var urlText = url.Split('/').Last();
+        var url = studioNotifyHelper.SiteLink;
+        var urlText = new Uri(url).Host;
         const string tdStyle = "color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 1.6em; margin: 0; padding: 0px 190px 40px; vertical-align: top; text-align: center;";
         const string astyle = "color: #FF6F3D; text-decoration: none;";
         var action = $@"<tr border=""0"" cellspacing=""0"" cellpadding=""0""><td class=""fol"" style=""{tdStyle}"">{text} <br /><a style=""{astyle}"" target=""_blank"" href=""{url}"">{urlText}</a></td></tr>";
