@@ -456,7 +456,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         if (isNew)
         {
             await RecalculateFilesCountAsync(file.ParentId);
-            await SetCustomOrder(file.Id, file.ParentId);
+            await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
         }
 
         _semaphore.Release();
@@ -700,6 +700,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
             await Queries.DeleteSecurityAsync(filesDbContext, TenantID, fileId.ToString());
 
+            await DeleteCustomOrder(filesDbContext, fileId);
+
             await filesDbContext.SaveChangesAsync();
             await tx.CommitAsync();
 
@@ -779,6 +781,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 var trashId = await trashIdTask;
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
+                await DeleteCustomOrder(filesDbContext, fileId);
+
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -789,7 +793,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 else
                 {
                     await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                    await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
+
+
 
                 var tagDao = _daoFactory.GetTagDao<int>();
 
@@ -1353,7 +1360,18 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
     public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(fileId, parentFolderId, FileEntryType.File, order);
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
+    }
+
+    private async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
+    {
+        await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
+    }
+
+    private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId)
+    {
+        await DeleteCustomOrder(filesDbContext, fileId, FileEntryType.File);
     }
 
     #endregion

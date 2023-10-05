@@ -185,10 +185,8 @@ public class AbstractDao
 
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
 
-    internal async Task SetCustomOrder(int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
+    internal async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
         var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId, fileEntryType);
 
         if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
@@ -228,6 +226,17 @@ public class AbstractDao
         }
 
         await filesDbContext.SaveChangesAsync();
+    }
+
+    internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
+    {
+        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId, fileEntryType);
+        if (fileOrder != null)
+        {
+            filesDbContext.Remove(fileOrder);
+
+            await filesDbContext.SaveChangesAsync();
+        }
     }
 
     internal enum SearhTypeEnum

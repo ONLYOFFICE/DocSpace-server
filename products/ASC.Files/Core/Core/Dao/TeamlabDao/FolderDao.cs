@@ -475,7 +475,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         if (isnew)
         {
             await RecalculateFoldersCountAsync(folder.Id);
-            await SetCustomOrder(folder.Id, folder.ParentId);
+            await SetCustomOrder(filesDbContext, folder.Id, folder.ParentId);
         }
 
         return folder.Id;
@@ -534,6 +534,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
             await Queries.DeleteBunchObjectsAsync(filesDbContext, TenantID, folderId.ToString());
 
+            await DeleteCustomOrder(filesDbContext, folderId);
+
             await filesDbContext.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent);
@@ -583,6 +585,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 {
                     recalcFolders.Add(parent);
                 }
+
                 await Queries.UpdateFoldersAsync(filesDbContext, TenantID, folderId, toFolderId, _authContext.CurrentAccount.ID);
 
                 var subfolders = await Queries.SubfolderAsync(filesDbContext, folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
@@ -616,6 +619,13 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 else if (oldParentId == trashId)
                 {
                     await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
+                }
+
+                await DeleteCustomOrder(filesDbContext, folderId);
+
+                if (!trashId.Equals(toFolderId))
+                {
+                    await SetCustomOrder(filesDbContext, folderId, toFolderId);
                 }
 
                 await filesDbContext.SaveChangesAsync();
@@ -1194,7 +1204,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return q;
     }
 
-    private IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
+    protected IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
     {
         return dbFiles
             .Select(r => new DbFolderQuery
@@ -1212,7 +1222,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                           ).FirstOrDefault(),
             });
     }
-    
+
     private IQueryable<DbFolderQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
     {
         var tenantId = TenantID;
@@ -1403,7 +1413,18 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     public async Task SetCustomOrder(int folderId, int parentFolderId, int order = 0)
     {
-        await SetCustomOrder(folderId, parentFolderId, FileEntryType.Folder, order);
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
+    }
+
+    private async Task SetCustomOrder(FilesDbContext filesDbContext, int folderId, int parentFolderId, int order = 0)
+    {
+        await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);
+    }
+
+    public async Task DeleteCustomOrder(FilesDbContext filesDbContext, int folderId)
+    {
+        await DeleteCustomOrder(filesDbContext, folderId, FileEntryType.Folder);
     }
 
     private async IAsyncEnumerable<int> GetTenantsWithFeeds(DateTime fromTime, Expression<Func<DbFolder, bool>> filter, bool includeSecurity)
