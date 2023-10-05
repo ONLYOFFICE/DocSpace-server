@@ -2696,7 +2696,7 @@ public class FileStorageService //: IFileStorageService
             ExpirationDate = DateTime.UtcNow.Add(_invitationLinkHelper.IndividualLinkExpirationInterval)
         };
 
-        var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options, _actions[SubjectType.InvitationLink]);
+        var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options, _roomMessageActions[SubjectType.InvitationLink]);
 
         if (result != null)
         {
@@ -2707,13 +2707,13 @@ public class FileStorageService //: IFileStorageService
     }
 
     public async Task<AceWrapper> SetExternalLinkAsync<T>(T entryId, FileEntryType entryType, Guid linkId, string title, FileShare share, DateTime expirationDate = default,
-        string password = null, bool denyDownload = false, bool onlyInternal = false)
+        string password = null, bool denyDownload = false, bool requiredAuth = false)
     {
         FileEntry<T> entry = entryType == FileEntryType.File 
             ? await GetFileDao<T>().GetFileAsync(entryId)
             : await GetFolderDao<T>().GetFolderAsync(entryId);
 
-        return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, onlyInternal: onlyInternal);
+        return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, requiredAuth: requiredAuth);
     }
 
     public async Task<bool> SetAceLinkAsync<T>(T fileId, FileShare share)
@@ -3497,12 +3497,13 @@ public class FileStorageService //: IFileStorageService
     }
     
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
-        string password = null, bool denyDownload = false, bool primary = false, bool onlyInternal = false)
+        string password = null, bool denyDownload = false, bool primary = false, bool requiredAuth = false)
     {
         var options = new FileShareOptions
         {
             Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultExternalLinkTitle,
-            DenyDownload = denyDownload
+            DenyDownload = denyDownload,
+            Internal = requiredAuth
         };
         
         var expirationDateUtc = _tenantUtil.DateTimeToUtc(expirationDate);
@@ -3516,8 +3517,13 @@ public class FileStorageService //: IFileStorageService
         {
             options.Password = await _externalShare.CreatePasswordKeyAsync(password);
         }
+        
+        var actions = entry.FileEntryType == FileEntryType.File
+            ? _fileMessageActions
+            : _roomMessageActions;
 
-        var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options, _actions[SubjectType.ExternalLink]);
+        var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options, 
+            actions[SubjectType.ExternalLink]);
 
         if (result != null)
         {
@@ -3529,7 +3535,7 @@ public class FileStorageService //: IFileStorageService
             linkId = Guid.NewGuid();
             
             await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle }, 
-                _actions[SubjectType.ExternalLink]);
+                actions[SubjectType.ExternalLink]);
         }
         
         return (await _fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
@@ -3640,7 +3646,7 @@ public class FileStorageService //: IFileStorageService
         await SetAceObjectAsync(aceCollection, notify);
     }
 
-    private static readonly IReadOnlyDictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>> _actions =
+    private static readonly IReadOnlyDictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>> _roomMessageActions =
         new Dictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>>
         {
             {
@@ -3654,9 +3660,22 @@ public class FileStorageService //: IFileStorageService
             {
                 SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
                 {
-                    { EventType.Create, MessageAction.ExternalLinkCreated },
-                    { EventType.Update, MessageAction.ExternalLinkDeleted },
-                    { EventType.Remove, MessageAction.ExternalLinkUpdated }
+                    { EventType.Create, MessageAction.RoomExternalLinkCreated },
+                    { EventType.Update, MessageAction.RoomExternalLinkUpdated },
+                    { EventType.Remove, MessageAction.RoomExternalLinkDeleted }
+                }
+            }
+        };
+    
+    private static readonly IReadOnlyDictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>> _fileMessageActions =
+        new Dictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>>
+        {
+            {
+                SubjectType.ExternalLink, new Dictionary<EventType, MessageAction>
+                {
+                    { EventType.Create, MessageAction.FileExternalLinkCreated },
+                    { EventType.Update, MessageAction.FileExternalLinkUpdated },
+                    { EventType.Remove, MessageAction.FileExternalLinkDeleted }
                 }
             }
         };

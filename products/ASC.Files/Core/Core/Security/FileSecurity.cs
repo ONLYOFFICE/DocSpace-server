@@ -56,6 +56,21 @@ public class FileSecurity : IFileSecurity
     public readonly FileShare DefaultPrivacyShare = FileShare.Restrict;
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
+    
+    public static readonly Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses = new()
+    {
+        {
+            FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
+            {
+                {
+                    SubjectType.ExternalLink, new HashSet<FileShare>
+                    {
+                        FileShare.ReadWrite, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
+                    }
+                }
+            }
+        }
+    };
 
     public static readonly Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new()
     {
@@ -1074,7 +1089,7 @@ public class FileSecurity : IFileSecurity
         }
 
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
-            await _externalShare.ValidateRecordAsync(ace, null) != Status.Ok)
+            await _externalShare.ValidateRecordAsync(ace, null, isAuthenticated) != Status.Ok)
         {
             return false;
         }

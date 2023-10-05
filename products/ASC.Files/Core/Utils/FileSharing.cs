@@ -132,6 +132,22 @@ public class FileSharingAceHelper
                 w.SubjectType = existedShare.SubjectType;
             }
             
+            if (entryType == FileEntryType.File)
+            {
+                if (!FileSecurity.AvailableFileAccesses.TryGetValue(entry.RootFolderType, out var subjectAccesses) 
+                    || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                {
+                    continue;
+                }
+                
+                if (w.FileShareOptions != null && w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+                {
+                    w.FileShareOptions.Password = null;
+                    w.FileShareOptions.ExpirationDate = default;
+                    w.FileShareOptions.DenyDownload = false;
+                }
+            }
+            
             if (room != null)
             {
                 if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses) 
@@ -140,28 +156,9 @@ public class FileSharingAceHelper
                     continue;
                 }
 
-                if (w.IsLink && eventType == EventType.Create)
+                if (w.FileShareOptions != null && w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                 {
-                    var (filter, maxCount) = w.SubjectType switch
-                    {
-                        SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
-                        SubjectType.ExternalLink => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
-                        SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
-                        _ => (ShareFilterType.Link, 0)
-                    };
-                    
-                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
-
-                    if (linksCount >= maxCount)
-                    {
-                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
-                        continue;
-                    }
-                }
-
-                if (w.SubjectType == SubjectType.PrimaryExternalLink && w.FileShareOptions != null)
-                {
-                    w.FileShareOptions.ExpirationDate = default;
+                    w.FileShareOptions.Internal = false;
                 }
             }
 
@@ -224,6 +221,33 @@ public class FileSharingAceHelper
                         continue;
                     }
                 }
+            }
+            
+            if (w.IsLink && eventType == EventType.Create)
+            {
+                var (filter, maxCount) = w.SubjectType switch
+                {
+                    SubjectType.InvitationLink => (ShareFilterType.InvitationLink, MaxInvitationLinks),
+                    SubjectType.ExternalLink when room != null => (ShareFilterType.AdditionalExternalLink, MaxAdditionalExternalLinks),
+                    SubjectType.PrimaryExternalLink => (ShareFilterType.PrimaryExternalLink, MaxPrimaryExternalLinks),
+                    _ => (ShareFilterType.Link, -1)
+                };
+
+                if (maxCount > 0)
+                {
+                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
+
+                    if (linksCount >= maxCount)
+                    {
+                        warning ??= string.Format(FilesCommonResource.ErrorMessage_MaxLinksCount, maxCount);
+                        continue;
+                    }
+                }
+            }
+            
+            if (w.SubjectType == SubjectType.PrimaryExternalLink && w.FileShareOptions != null)
+            {
+                w.FileShareOptions.ExpirationDate = default;
             }
 
             var subjects = await _fileSecurity.GetUserSubjectsAsync(w.Id);
