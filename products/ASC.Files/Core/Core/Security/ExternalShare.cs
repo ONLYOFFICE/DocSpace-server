@@ -72,7 +72,7 @@ public class ExternalShare
 
                 url += $"&{FilesLinkUtility.ShareKey}={key}";
                 
-                return url;
+                return _commonLinkUtility.GetFullAbsolutePath(url);
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
                 return _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}");
             default:
