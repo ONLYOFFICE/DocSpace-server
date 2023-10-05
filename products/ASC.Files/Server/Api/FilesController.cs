@@ -503,6 +503,24 @@ public abstract class FilesController<T> : ApiControllerBase
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
+
+    /// <summary>
+    /// Sets an external link with the ID specified in the request.
+    /// </summary>
+    /// <short>Set an external link</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <path>api/2.0/files/file/{id}/links</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("file/{fileId}/links")]
+    public async Task<FileShareDto> SetExternalLinkAsync(T fileId, FileLinkRequestDto inDto)
+    {
+        var linkAce = await _fileStorageService.SetExternalLinkAsync(fileId, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal);
+        
+        return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
+    }
 }
 
 public class FilesControllerCommon : ApiControllerBase
