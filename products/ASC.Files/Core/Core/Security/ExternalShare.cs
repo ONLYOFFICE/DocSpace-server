@@ -282,6 +282,11 @@ public class ExternalShare
     {
         await _cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
     }
+
+    public string GetUrlWithShare(string url)
+    {
+        return GetUrlWithShareAsync(url).Result;
+    }
     
     public async Task<string> GetUrlWithShareAsync(string url)
     {
