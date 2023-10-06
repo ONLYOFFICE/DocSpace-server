@@ -63,7 +63,7 @@ public class FileShareRecord
         private static readonly int[] _filesShareOrder =
         {
             (int)FileShare.None,
-            (int)FileShare.ReadWrite,
+            (int)FileShare.Editing,
             (int)FileShare.CustomFilter,
             (int)FileShare.Review,
             (int)FileShare.FillForms,
@@ -72,10 +72,9 @@ public class FileShareRecord
             (int)FileShare.Restrict,
             
             // Not used
-            
+            (int)FileShare.ReadWrite,
             (int)FileShare.RoomAdmin,
             (int)FileShare.Collaborator,
-            (int)FileShare.Editing,
             (int)FileShare.Varies
         };
         

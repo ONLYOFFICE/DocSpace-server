@@ -65,7 +65,7 @@ public class FileSecurity : IFileSecurity
                 {
                     SubjectType.ExternalLink, new HashSet<FileShare>
                     {
-                        FileShare.ReadWrite, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
+                        FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
                     }
                 }
             }
@@ -1112,154 +1112,307 @@ public class FileSecurity : IFileSecurity
             case FilesSecurityActions.Mute:
                 return e.Access != FileShare.Restrict;
             case FilesSecurityActions.Comment:
-                if (e.Access is FileShare.Comment || 
-                    e.Access == FileShare.Review ||
-                    e.Access == FileShare.CustomFilter ||
-                    e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Editing ||
-                    e.Access == FileShare.FillForms ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Comment ||
+                            e.Access == FileShare.Review ||
+                            e.Access == FileShare.CustomFilter)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.Comment || 
+                            e.Access == FileShare.Review ||
+                            e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Editing ||
+                            e.Access == FileShare.FillForms ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.FillForms:
-                if (e.Access == FileShare.FillForms ||
-                    e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Editing ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Review ||
+                            e.Access == FileShare.FillForms) 
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.FillForms ||
+                            e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Review:
-                if (e.Access == FileShare.Review ||
-                    e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Editing ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Review)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.Review ||
+                            e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Convert:
             case FilesSecurityActions.Create:
-                if (e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Edit:
-                if (e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Editing ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Delete:
-                if (e.Access == FileShare.RoomAdmin ||
-                    (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
+                switch (e.RootFolderType)
                 {
-                    if (file is { RootFolderType: FolderType.VirtualRooms })
-                    {
-                        return true;
-                    }
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
+                        {
+                            if (file is { RootFolderType: FolderType.VirtualRooms })
+                            {
+                                return true;
+                            }
 
-                    if (folder is { RootFolderType: FolderType.VirtualRooms, FolderType: FolderType.DEFAULT })
-                    {
-                        return true;
-                    }
+                            if (folder is { RootFolderType: FolderType.VirtualRooms, FolderType: FolderType.DEFAULT })
+                            {
+                                return true;
+                            }
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.CustomFilter:
-                if (e.Access == FileShare.CustomFilter ||
-                    e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Editing ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing ||
+                            e.Access == FileShare.CustomFilter)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.EditRoom:
-                if (e.Access == FileShare.RoomAdmin)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Rename:
-                if (e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.ReadHistory:
-                if (e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Editing ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        if (e.Access != FileShare.Restrict)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Editing ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Lock:
-                if (e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.EditHistory:
-                if (e.Access == FileShare.ReadWrite ||
-                    e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Collaborator)
+                if (file is { Encrypted: true })
                 {
-                    return file != null && !file.Encrypted;
+                    return false;
+                }
+
+                switch (e.RootFolderType)
+                {
+                    case FolderType.USER:
+                        if (e.Access == FileShare.Editing)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.CopyTo:
             case FilesSecurityActions.MoveTo:
-                if (e.Access == FileShare.RoomAdmin ||
-                    e.Access == FileShare.Collaborator)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            e.Access == FileShare.Collaborator)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Copy:
             case FilesSecurityActions.Duplicate:
-                if (e.Access == FileShare.RoomAdmin ||
-                    (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin ||
+                            (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.EditAccess:
-                if (e.Access == FileShare.RoomAdmin)
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin)
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
             case FilesSecurityActions.Move:
-                if ((e.Access == FileShare.RoomAdmin ||
-                     e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID)
-                    && !isRoom)
+                switch (e.RootFolderType)
                 {
-                    return true;
-                } 
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if ((e.Access == FileShare.RoomAdmin ||
+                             e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID)
+                            && !isRoom)
+                        {
+                            return true;
+                        } 
+                        break;
+                }
                 break;
             case FilesSecurityActions.SubmitToFormGallery:
-                if ((e.Access == FileShare.RoomAdmin ||
-                     e.Access == FileShare.Collaborator) && 
-                    file is { FilterType: FilterType.OFormTemplateOnly })
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if ((e.Access == FileShare.RoomAdmin ||
+                             e.Access == FileShare.Collaborator) && 
+                            file is { FilterType: FilterType.OFormTemplateOnly })
+                        {
+                            return true;
+                        }
+                        break;   
                 }
                 break;
             case FilesSecurityActions.Download:
@@ -1269,9 +1422,16 @@ public class FileSecurity : IFileSecurity
                 }
                 break;
             case FilesSecurityActions.CopySharedLink:
-                if (e.Access == FileShare.RoomAdmin || (e.Access != FileShare.Restrict && e.Shared))
+                switch (e.RootFolderType)
                 {
-                    return true;
+                    case FolderType.USER:
+                        return false;
+                    default:
+                        if (e.Access == FileShare.RoomAdmin || (e.Access != FileShare.Restrict && e.Shared))
+                        {
+                            return true;
+                        }
+                        break;
                 }
                 break;
         }
