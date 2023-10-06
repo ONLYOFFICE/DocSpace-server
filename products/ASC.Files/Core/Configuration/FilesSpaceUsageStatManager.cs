@@ -154,7 +154,10 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid userId, int my, int trash) =>
                 ctx.Files
-                    .Where(r => r.TenantId == tenantId && r.CreateBy == userId &&
-                                (r.ParentId == my || r.ParentId == trash))
-                    .Sum(r => r.ContentLength));
+                    .Join(ctx.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
+                    .Join(ctx.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
+                    .Where(r => r.file.TenantId == r.bunch.TenantId)
+                    .Where(r => r.file.TenantId == tenantId)
+                    .Where(r => r.bunch.RightNode.StartsWith("files/my/"+ userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/"+ userId.ToString()))
+                    .Sum(r => r.file.ContentLength));
 }
