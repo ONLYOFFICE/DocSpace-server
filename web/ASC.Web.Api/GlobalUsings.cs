@@ -43,6 +43,7 @@ global using ASC.ActiveDirectory.ComplexOperations;
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
+global using Microsoft.IdentityModel.Tokens;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Security;
 global using ASC.Api.Settings;
