@@ -342,10 +342,6 @@ public class FileUploader
             await _fileMarker.MarkAsNewAsync(uploadSession.File);
             await _chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
         }
-        else
-        {
-            await _chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
-        }
 
         return uploadSession;
     }

@@ -1014,8 +1014,14 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
             return uploadSession.File;
         }
-
-        await _chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber);
+        if (!chunkNumber.HasValue)
+        {
+            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
+            number++;
+            uploadSession.Items["ChunksUploaded"] = number.ToString();
+            chunkNumber = number;
+        }
+        await _chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber.Value);
 
         if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {

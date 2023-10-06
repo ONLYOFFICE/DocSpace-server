@@ -37,7 +37,6 @@ public class CommonChunkedUploadSessionHolder
     public string TempDomain;
 
     public const string StoragePath = "sessions";
-    private readonly object _locker = new object();
 
     public CommonChunkedUploadSessionHolder(
         TempPath tempPath,
@@ -112,32 +111,14 @@ public class CommonChunkedUploadSessionHolder
         }
     }
 
-    public virtual async Task<string> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int? chunkNumber = null)
+    public virtual async Task<(string, string)> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int chunkNumber)
     {
         var tempPath = uploadSession.TempPath;
         var uploadId = uploadSession.UploadId;
 
-        lock (_locker)
-        {
-            if (!chunkNumber.HasValue) 
-            {
-                int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
-                number++;
-                chunkNumber = number;
-            }
-            uploadSession.Items["ChunksUploaded"] = chunkNumber.ToString();
-            uploadSession.BytesUploaded += length;
-        }
+        var eTag = await DataStore.UploadChunkAsync(Domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
 
-        var eTag = await DataStore.UploadChunkAsync(Domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber.Value, length);
-
-        lock (_locker)
-        {
-            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-            eTags.Add(chunkNumber.Value, eTag);
-            uploadSession.Items["ETag"] = eTags;
-        }
-        return Path.GetFileName(tempPath);
+        return (Path.GetFileName(tempPath), eTag);
     }
 
     public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long chunkLength)

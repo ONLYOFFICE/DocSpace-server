@@ -347,7 +347,7 @@ public class ChunkedRequestHelper<T>
         {
             if (!_chunkNumber.HasValue)
             {
-                var result = int.TryParse(_request.Query["fileNumber"], out var i);
+                var result = int.TryParse(_request.Query["chunkNumber"], out var i);
                 if (result) 
                 {
                     _chunkNumber = i;

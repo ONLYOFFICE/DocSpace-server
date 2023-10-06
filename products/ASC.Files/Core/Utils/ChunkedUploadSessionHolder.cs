@@ -35,6 +35,7 @@ public class ChunkedUploadSessionHolder
     private readonly SetupInfo _setupInfo;
     private readonly TempPath _tempPath;
     private readonly FileHelper _fileHelper;
+    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
     public ChunkedUploadSessionHolder(
         GlobalStore globalStore,
@@ -74,9 +75,36 @@ public class ChunkedUploadSessionHolder
         return result;
     }
 
-    public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length, int? chunkNumber = null)
+    public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length, int chunkNumber)
     {
-        await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
+        (var path, var eTag) = await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
+        await UpdateUploadSessionAsync<T>(uploadSession, chunkNumber, eTag, length);
+    }
+
+    public async Task UpdateUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession, int chunkNumber, string eTag, long bytesUploaded)
+    {
+        try
+        {
+            await _semaphore.WaitAsync();
+
+            var updatedUploadSession = await GetSessionAsync<T>(uploadSession.Id);
+
+            uploadSession.BytesUploaded = updatedUploadSession.BytesUploaded + bytesUploaded;
+
+            var eTags = updatedUploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
+            eTags.Add(chunkNumber, eTag);
+            uploadSession.Items["ETag"] = eTags;
+
+            await StoreSessionAsync(uploadSession);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task FinalizeUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)

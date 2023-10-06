@@ -77,7 +77,7 @@ public class CrossModuleTransferUtility
                     while (GetStream(stream, out memstream))
                     {
                         memstream.Seek(0, SeekOrigin.Begin);
-                        await holder.UploadChunkAsync(session, memstream, _chunkSize);
+                        await holder.UploadChunkAsync(session, memstream, _chunkSize, 1);
                         await memstream.DisposeAsync();
                     }
                 }

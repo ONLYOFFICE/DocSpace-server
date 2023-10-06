@@ -123,7 +123,19 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                     }
                     
                     theMemStream.Position = 0;
-                    StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
+
+                    int.TryParse(_chunkedUploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
+                    number++;
+                    _chunkedUploadSession.Items["ChunksUploaded"] = number.ToString();
+
+                    (StoragePath, var eTag) = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, number);
+
+                    _chunkedUploadSession.BytesUploaded = _chunkedUploadSession.BytesUploaded + theMemStream.Length;
+
+                    var eTags = _chunkedUploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
+                    eTags.Add(number, eTag);
+                    _chunkedUploadSession.Items["ETag"] = eTags;
+
                     _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
                 }
                 else
