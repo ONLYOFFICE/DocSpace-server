@@ -168,11 +168,6 @@ public class ExternalShare
         return Signature.Read<Guid>(key, await GetDbKeyAsync());
     }
 
-    public Guid GetLinkId()
-    {
-        return GetLinkIdAsync().Result;
-    }
-
     public async Task<Guid> GetLinkIdAsync()
     {
         if (_linkId != default)
