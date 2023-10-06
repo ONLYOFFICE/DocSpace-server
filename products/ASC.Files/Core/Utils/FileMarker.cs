@@ -27,6 +27,41 @@
 namespace ASC.Web.Files.Utils;
 
 [Singletone]
+public class FileMarkerCache
+{
+    private readonly ICache _cache;
+    private readonly ICacheNotify<FileMarkerCacheItem> _notify;
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
+
+    public FileMarkerCache(ICacheNotify<FileMarkerCacheItem> notify, ICache cache)
+    {
+        _cache = cache;
+        _notify = notify;
+
+        _notify.Subscribe((i) => _cache.Remove(i.Key), CacheNotifyAction.Remove);
+    }
+
+    public T Get<T>(string key) where T : class
+    {
+        return _cache.Get<T>(key);
+    }
+
+    public void Insert(string key, object value)
+    {
+        _notify.Publish(new FileMarkerCacheItem { Key = key }, CacheNotifyAction.Remove);
+
+        _cache.Insert(key, value, _cacheExpiration);
+    }
+
+    public void Remove(string key)
+    {
+        _notify.Publish(new FileMarkerCacheItem { Key = key }, CacheNotifyAction.Remove);
+
+        _cache.Remove(key);
+    }
+}
+
+[Singletone]
 public class FileMarkerHelper
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "file_marker";
@@ -68,8 +103,6 @@ public class FileMarkerHelper
 [Scope(Additional = typeof(FileMarkerExtention))]
 public class FileMarker
 {
-    private readonly ICache _cache;
-
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
 
     private readonly TenantManager _tenantManager;
@@ -82,6 +115,7 @@ public class FileMarker
     private readonly FilesSettingsHelper _filesSettingsHelper;
     private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
     private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
+    private readonly FileMarkerCache _fileMarkerCache;
 
     public FileMarker(
         TenantManager tenantManager,
@@ -93,7 +127,7 @@ public class FileMarker
         IServiceProvider serviceProvider,
         FilesSettingsHelper filesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-        ICache cache)
+        FileMarkerCache fileMarkerCache)
     {
         _tenantManager = tenantManager;
         _userManager = userManager;
@@ -104,7 +138,7 @@ public class FileMarker
         _serviceProvider = serviceProvider;
         _filesSettingsHelper = filesSettingsHelper;
         _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
-        _cache = cache;
+        _fileMarkerCache = fileMarkerCache;
     }
 
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
@@ -165,6 +199,7 @@ public class FileMarker
                 var guids = await filesSecurity.WhoCanReadAsync(obj.FileEntry);
                 userIDs = guids.Where(x => x != obj.CurrentAccountId).ToList();
             }
+
             if (obj.FileEntry.ProviderEntry)
             {
                 userIDs = await userIDs.ToAsyncEnumerable().WhereAwait(async u => !await _userManager.IsUserAsync(u)).ToListAsync();
@@ -224,8 +259,8 @@ public class FileMarker
                     if (obj.FileEntry.ProviderEntry)
                     {
                         rootFolder = obj.FileEntry.RootCreateBy == userID
-                                         ? await folderDaoInt.GetFolderAsync(userFolderId)
-                                         : folderShare;
+                            ? await folderDaoInt.GetFolderAsync(userFolderId)
+                            : folderShare;
                     }
                     else if (!Equals(obj.FileEntry.RootId, userFolderId))
                     {
@@ -360,44 +395,42 @@ public class FileMarker
         {
             await _semaphore.WaitAsync();
 
-        foreach (var userID in userEntriesData.Keys)
-        {
-            if (await tagDao.GetNewTagsAsync(userID, obj.FileEntry).AnyAsync())
+            foreach (var userId in userEntriesData.Keys)
             {
-                continue;
+                if (await tagDao.GetNewTagsAsync(userId, obj.FileEntry).AnyAsync())
+                {
+                    continue;
+                }
+
+                var entries = userEntriesData[userId].Distinct().ToList();
+
+                await GetNewTagsAsync(userId, entries.OfType<FileEntry<int>>().ToList());
+                await GetNewTagsAsync(userId, entries.OfType<FileEntry<string>>().ToList());
             }
 
-            var entries = userEntriesData[userID].Distinct().ToList();
+            if (updateTags.Count > 0)
+            {
+                await tagDao.IncrementNewTagsAsync(updateTags, obj.CurrentAccountId);
+            }
 
-            await GetNewTagsAsync(userID, entries.OfType<FileEntry<int>>().ToList());
-            await GetNewTagsAsync(userID, entries.OfType<FileEntry<string>>().ToList());
-        }
-
-        if (updateTags.Count > 0)
-        {
-            await tagDao.UpdateNewTags(updateTags, obj.CurrentAccountId);
-        }
-
-        if (newTags.Count > 0)
-        {
-            await tagDao.SaveTags(newTags, obj.CurrentAccountId);
-        }
-        }
-        catch
-        {
-            throw;
+            if (newTags.Count > 0)
+            {
+                await tagDao.SaveTags(newTags, obj.CurrentAccountId);
+            }
         }
         finally
         {
             _semaphore.Release();
         }
 
-        await Task.WhenAll(ExecMarkAsNewRequest(updateTags.Concat(newTags), socketManager));
+        await SendChangeNoticeAsync(updateTags.Concat(newTags), socketManager);
 
-        async Task GetNewTagsAsync<T1>(Guid userID, List<FileEntry<T1>> entries)
+        return;
+
+        async Task GetNewTagsAsync<T1>(Guid userId, List<FileEntry<T1>> entries)
         {
             var tagDao1 = _daoFactory.GetTagDao<T1>();
-            var exist = await tagDao1.GetNewTagsAsync(userID, entries).ToListAsync();
+            var exist = await tagDao1.GetNewTagsAsync(userId, entries).ToListAsync();
             var update = exist.Where(t => t.EntryType == FileEntryType.Folder).ToList();
             update.ForEach(t => t.Count++);
             updateTags.AddRange(update);
@@ -406,7 +439,7 @@ public class FileMarker
             {
                 if (entry != null && exist.All(tag => tag != null && !tag.EntryId.Equals(entry.Id)))
                 {
-                    newTags.Add(Tag.New(userID, entry));
+                    newTags.Add(Tag.New(userId, entry));
                 }
             });
         }
@@ -597,7 +630,9 @@ public class FileMarker
             EntryType = r.EntryType
         });
 
-        await Task.WhenAll(ExecMarkAsNewRequest(updateTags.Concat(toRemove), socketManager));
+        await SendChangeNoticeAsync(updateTags.Concat(toRemove), socketManager);
+
+        return;
 
         async Task UpdateRemoveTags<TFolder>(Folder<TFolder> folder)
         {
@@ -871,7 +906,7 @@ public class FileMarker
 
         if (parentFolderTag.Count != countSubNew)
         {
-            if(parent.FolderType == FolderType.VirtualRooms)
+            if (parent.FolderType == FolderType.VirtualRooms)
             {
                 parentFolderTag.Count = countSubNew;
                 if (parentFolderTag.Id == -1)
@@ -981,13 +1016,13 @@ public class FileMarker
     private void InsertToCahce(object folderId, int count)
     {
         var key = string.Format(CacheKeyFormat, _authContext.CurrentAccount.ID, folderId);
-        _cache.Insert(key, count.ToString(), TimeSpan.FromMinutes(10));
+        _fileMarkerCache.Insert(key, count.ToString());
     }
 
     private int GetCountFromCahce(object folderId)
     {
         var key = string.Format(CacheKeyFormat, _authContext.CurrentAccount.ID, folderId);
-        var count = _cache.Get<string>(key);
+        var count = _fileMarkerCache.Get<string>(key);
 
         return count == null ? -1 : int.Parse(count);
     }
@@ -1000,21 +1035,21 @@ public class FileMarker
     private void RemoveFromCahce(object folderId, Guid userId)
     {
         var key = string.Format(CacheKeyFormat, userId, folderId);
-        _cache.Remove(key);
+        _fileMarkerCache.Remove(key);
     }
 
-    private IEnumerable<Task> ExecMarkAsNewRequest(IEnumerable<Tag> tags, SocketManager socketManager)
+    private static async Task SendChangeNoticeAsync(IEnumerable<Tag> tags, SocketManager socketManager)
     {
-        foreach (var t in tags)
+        const int chunkSize = 1000;
+
+        foreach (var chunk in tags.Where(t => t.EntryType == FileEntryType.File).Chunk(chunkSize))
         {
-            if (t.EntryType == FileEntryType.File)
-            {
-                yield return socketManager.ExecMarkAsNewFileAsync(t.EntryId, t.Count, t.Owner);
-            }
-            else if (t.EntryType == FileEntryType.Folder)
-            {
-                yield return socketManager.ExecMarkAsNewFolderAsync(t.EntryId, t.Count, t.Owner);
-            }
+            await socketManager.ExecMarkAsNewFilesAsync(chunk);
+        }
+
+        foreach (var chunk in tags.Where(t => t.EntryType == FileEntryType.Folder).Chunk(chunkSize))
+        {
+            await socketManager.ExecMarkAsNewFoldersAsync(chunk);
         }
     }
 }

@@ -75,6 +75,8 @@ public class AuthenticationController : ControllerBase
     private readonly BruteForceLoginManager _bruteForceLoginManager;
     private readonly ILogger<AuthenticationController> _logger;
     private readonly InvitationLinkService _invitationLinkService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMapper _mapper;
 
     public AuthenticationController(
         UserManager userManager,
@@ -112,7 +114,9 @@ public class AuthenticationController : ControllerBase
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILogger<AuthenticationController> logger,
-        InvitationLinkService invitationLinkService)
+        InvitationLinkService invitationLinkService,
+        IHttpContextAccessor httpContextAccessor, 
+        IMapper mapper)
     {
         _userManager = userManager;
         _tenantManager = tenantManager;
@@ -150,6 +154,8 @@ public class AuthenticationController : ControllerBase
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _logger = logger;
         _invitationLinkService = invitationLinkService;
+        _httpContextAccessor = httpContextAccessor;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -285,7 +291,7 @@ public class AuthenticationController : ControllerBase
             };
         }
 
-        if (_tfaAppAuthSettingsHelper.IsVisibleSettings &&await  _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (_tfaAppAuthSettingsHelper.IsVisibleSettings && await _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
             {
@@ -316,8 +322,8 @@ public class AuthenticationController : ControllerBase
 
             if (!session)
             {
-            var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-            var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
+                var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+                var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
                 outDto.Expires = new ApiDateTime(_tenantManager, _timeZoneConverter, expires);
             }
@@ -348,7 +354,7 @@ public class AuthenticationController : ControllerBase
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
-    public async Task LogoutAsync()
+    public async Task<object> LogoutAsync()
     {
         var cookie = _cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = _cookieStorage.GetLoginEventIdFromCookie(cookie);
@@ -362,6 +368,25 @@ public class AuthenticationController : ControllerBase
         _cookiesManager.ClearCookies(CookiesType.SocketIO);
 
         _securityContext.Logout();
+
+
+        if (!string.IsNullOrEmpty(user.SsoNameId))
+        {
+            var settings = _settingsManager.Load<SsoSettingsV2>();
+
+            if (settings.EnableSso.GetValueOrDefault() && !string.IsNullOrEmpty(settings.IdpSettings.SloUrl))
+            {
+                var logoutSsoUserData = _signature.Create(new LogoutSsoUserData
+                {
+                    NameId = user.SsoNameId,
+                    SessionId = user.SsoSessionId
+                });
+
+                return _setupInfo.SsoSamlLogoutUrl + "?data=" + HttpUtility.UrlEncode(logoutSsoUserData);
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -376,16 +401,16 @@ public class AuthenticationController : ControllerBase
     /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
-    public async Task<ValidationResult> CheckConfirm(EmailValidationKeyModel inDto)
+    public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {
         if (inDto.Type != ConfirmType.LinkInvite)
         {
-            return await _emailValidationKeyModelHelper.ValidateAsync(inDto);
+            return new ConfirmDto { Result = await _emailValidationKeyModelHelper.ValidateAsync(inDto)};
         }
 
-        var linkData = await _invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.UiD ?? default);
+        var result = await _invitationLinkService.ValidateAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
 
-        return linkData.Result;
+        return _mapper.Map<Validation, ConfirmDto>(result);
     }
 
     /// <summary>
@@ -499,7 +524,7 @@ public class AuthenticationController : ControllerBase
 
                 var requestIp = MessageSettings.GetIP(Request);
 
-                (_, user) = await _bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp);
+                user = await _bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp, inDto.RecaptchaResponse);
             }
             else
             {
@@ -527,7 +552,12 @@ public class AuthenticationController : ControllerBase
         catch (BruteForceCredentialException)
         {
             await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
-            throw new AuthenticationException("Login Fail. Too many attempts");
+            throw new BruteForceCredentialException(Resource.ErrorTooManyLoginAttempts);
+        }
+        catch (RecaptchaException)
+        {
+            await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailRecaptcha);
+            throw new RecaptchaException(Resource.RecaptchaInvalid);
         }
         catch (Exception ex)
         {

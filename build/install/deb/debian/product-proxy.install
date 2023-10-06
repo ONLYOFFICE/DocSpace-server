@@ -1,6 +1,0 @@
-## COPY PUBLIC ##
-../../../build/install/docker/config/nginx/templates/*.template     etc/onlyoffice/{{product}}/nginx
-../../../config/nginx/onlyoffice*.conf                              etc/nginx/conf.d
-../../../config/nginx/includes/onlyoffice*.conf                     etc/nginx/includes
-../../../build/deploy/public/*                                      var/www/{{product}}/public
-../../../build/deploy/client/*                                      var/www/{{product}}/client

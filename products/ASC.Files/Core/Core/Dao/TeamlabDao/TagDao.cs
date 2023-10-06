@@ -216,7 +216,7 @@ internal abstract class BaseTagDao<T> : AbstractDao
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0)
     {
         var filesDbContext = _dbContextFactory.CreateDbContext();
-        var q = Query(filesDbContext.Tag).AsNoTracking().Where(r => r.Type == tagType);
+        var q = Query(filesDbContext.Tag).Where(r => r.Type == tagType);
 
         if (byName)
         {
@@ -280,30 +280,81 @@ internal abstract class BaseTagDao<T> : AbstractDao
             return result;
         }
 
-
-        await _semaphore.WaitAsync();
-
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        try
         {
+            await _semaphore.WaitAsync();
+
             await using var filesDbContext = _dbContextFactory.CreateDbContext();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            await DeleteTagsBeforeSave();
+            var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
-            var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
-            var cacheTagId = new Dictionary<string, int>();
-
-            foreach (var t in tags)
+            await strategy.ExecuteAsync(async () =>
             {
-                result.Add(await SaveTagAsync(t, cacheTagId, createOn, createdBy));
-            }
+                await using var internalFilesDbContext = _dbContextFactory.CreateDbContext();
+                await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
 
-            await tx.CommitAsync();
-        });
+                await DeleteTagsBeforeSave();
 
-        _semaphore.Release();
+                var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+                var cachedTags = new Dictionary<string, DbFilesTag>();
+
+                foreach (var t in tags)
+                {
+                    var key = GetCacheKey(t);
+
+                    if (cachedTags.ContainsKey(GetCacheKey(t)))
+                    {
+                        continue;
+                    }
+
+                    var id = await Queries.TagIdAsync(internalFilesDbContext, t.Owner, t.Name, t.Type);
+
+                    var toAdd = new DbFilesTag
+                    {
+                        Id = id,
+                        Name = t.Name,
+                        Owner = t.Owner,
+                        Type = t.Type,
+                        TenantId = TenantID
+                    };
+
+                    if (id == 0)
+                    {
+                        toAdd = internalFilesDbContext.Tag.Add(toAdd).Entity;
+                    }
+
+                    cachedTags.Add(key, toAdd);
+                }
+
+                await internalFilesDbContext.SaveChangesAsync();
+
+                foreach (var t in tags)
+                {
+                    var key = GetCacheKey(t);
+
+                    var linkToInsert = new DbFilesTagLink
+                    {
+                        TenantId = TenantID,
+                        TagId = cachedTags.Get(key).Id,
+                        EntryId = (await MappingIDAsync(t.EntryId, true)).ToString(),
+                        EntryType = t.EntryType,
+                        CreateBy = createdBy != default ? createdBy : _authContext.CurrentAccount.ID,
+                        CreateOn = createOn,
+                        Count = t.Count
+                    };
+
+                    await internalFilesDbContext.AddOrUpdateAsync(r => r.TagLink, linkToInsert);
+                    result.Add(t);
+                }
+
+                await internalFilesDbContext.SaveChangesAsync();
+
+                await tx.CommitAsync();
+            });
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
 
         return result;
     }
@@ -415,6 +466,45 @@ internal abstract class BaseTagDao<T> : AbstractDao
         await filesDbContext.SaveChangesAsync();
 
         return t;
+    }
+
+    public async Task IncrementNewTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default)
+    {
+        if (tags == null || !tags.Any())
+        {
+            return;
+        }
+
+        try
+        {
+            await _semaphore.WaitAsync();
+            
+            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var internalFilesDbContext = _dbContextFactory.CreateDbContext();
+                await using var tx = await internalFilesDbContext.Database.BeginTransactionAsync();
+
+                var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+                var tenantId = TenantID;
+
+                foreach (var tagsGroup in tags.GroupBy(t => new { t.EntryId, t.EntryType }))
+                {
+                    var mappedId = (await MappingIDAsync(tagsGroup.Key.EntryId)).ToString();
+                    
+                    await Queries.IncrementNewTagsAsync(filesDbContext, tenantId, tagsGroup.Select(t => t.Id), tagsGroup.Key.EntryType, 
+                        mappedId, createdBy, createOn);
+                }
+
+                await tx.CommitAsync();
+            });
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task UpdateNewTags(IEnumerable<Tag> tags, Guid createdBy = default)
@@ -662,6 +752,11 @@ internal abstract class BaseTagDao<T> : AbstractDao
 
         return result;
     }
+
+    private string GetCacheKey(Tag tag)
+    {
+        return string.Join("/", TenantID.ToString(), tag.Owner.ToString(), tag.Name, ((int)tag.Type).ToString(CultureInfo.InvariantCulture));
+    }
 }
 
 
@@ -857,7 +952,7 @@ static file class Queries
             IAsyncEnumerable<TagLinkData>> TagsBySubjectAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<TagType> tagType, HashSet<string> filesId,
                     HashSet<string> foldersId) =>
-                ctx.Tag.AsNoTracking()
+                ctx.Tag
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => tagType.Contains(r.Type))
                     .Join(ctx.TagLink, r => r.Id, l => l.TagId,
@@ -871,7 +966,7 @@ static file class Queries
         NewTagsForFilesAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, List<string> where) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -891,7 +986,7 @@ static file class Queries
         NewTagsForFoldersAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, List<string> monitorFolderIdsStrings) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -905,7 +1000,7 @@ static file class Queries
         TmpShareFileTagsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, FolderType folderType) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -938,7 +1033,7 @@ static file class Queries
         TmpShareFolderTagsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, FolderType folderType) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -972,7 +1067,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -996,7 +1091,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -1015,7 +1110,7 @@ static file class Queries
         NewTagsForSBoxAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject, List<string> thirdpartyFolderIds) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -1035,7 +1130,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject) =>
                 ctx.Tag
-                    .AsNoTracking()
+                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => subject == Guid.Empty || r.Owner == subject)
                     .Where(r => r.Type == TagType.New)
@@ -1056,7 +1151,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, List<int> monitorFolderIdsInt, bool deepSearch) =>
                 ctx.Tree
-                    .AsNoTracking()
+                    
                     .Where(r => monitorFolderIdsInt.Contains(r.ParentId))
                     .Where(r => deepSearch || r.Level == 1)
                     .Select(r => r.FolderId));
@@ -1118,7 +1213,7 @@ static file class Queries
     public static readonly Func<FilesDbContext, int, IEnumerable<string>, IAsyncEnumerable<DbFilesTag>> TagsInfoAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<string> names) =>
-                ctx.Tag.AsNoTracking().Where(r => r.TenantId == tenantId && names.Contains(r.Name)));
+                ctx.Tag.Where(r => r.TenantId == tenantId && names.Contains(r.Name)));
 
     public static readonly Func<FilesDbContext, int, DateTime, IAsyncEnumerable<TagLinkData>> MustBeDeletedFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -1267,4 +1362,18 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => tagsIds.Contains(r.Id))
                     .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, FileEntryType, string, Guid, DateTime, Task<int>>
+        IncrementNewTagsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> tagsIds, FileEntryType tagEntryType, string mappedId, Guid createdBy,
+                    DateTime createOn) =>
+                ctx.TagLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => tagsIds.Contains(r.TagId))
+                    .Where(r => r.EntryType == tagEntryType)
+                    .Where(r => r.EntryId == mappedId)
+                    .ExecuteUpdate(f => f
+                        .SetProperty(p => p.CreateBy, createdBy)
+                        .SetProperty(p => p.CreateOn, createOn)
+                        .SetProperty(p => p.Count, p => p.Count + 1)));
 }
