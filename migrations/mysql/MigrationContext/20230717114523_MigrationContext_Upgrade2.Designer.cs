@@ -6530,12 +6530,6 @@ namespace ASC.Migrations.MySql.Migrations.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("name");
 
-                    b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("ssl")
-                        .HasDefaultValueSql("'1'");
-
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
