@@ -402,8 +402,20 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             toUpdate.CreateBy = folder.CreateBy;
             toUpdate.ModifiedOn = _tenantUtil.DateTimeToUtc(folder.ModifiedOn);
             toUpdate.ModifiedBy = folder.ModifiedBy;
-            toUpdate.HasLogo = folder.HasLogo;
-            toUpdate.Color = folder.Color;
+
+            if (DocSpaceHelper.IsRoom(toUpdate.FolderType))
+            {
+                toUpdate.Settings = new DbRoomSettings
+                {
+                    RoomId = toUpdate.Id,
+                    TenantId = TenantID,
+                    Private = folder.Private,
+                    HasLogo = folder.HasLogo,
+                    Color = folder.Color,
+                    Indexing = folder.Indexing
+                };
+            }
+
             filesDbContext.Update(toUpdate);
 
             await filesDbContext.SaveChangesAsync();
@@ -426,11 +438,22 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 ModifiedOn = _tenantUtil.DateTimeToUtc(folder.ModifiedOn),
                 ModifiedBy = folder.ModifiedBy,
                 FolderType = folder.FolderType,
-                Private = folder.Private,
-                Color = folder.Color,
                 TenantId = TenantID
             };
-
+            
+            if (DocSpaceHelper.IsRoom(newFolder.FolderType))
+            {
+                newFolder.Settings = new DbRoomSettings
+                {
+                    RoomId = newFolder.Id,
+                    TenantId = TenantID,
+                    Private = folder.Private,
+                    HasLogo = folder.HasLogo,
+                    Color = folder.Color,
+                    Indexing = folder.Indexing
+                };
+            }
+            
             var entityEntry = await filesDbContext.Folders.AddAsync(newFolder);
             newFolder = entityEntry.Entity;
             await filesDbContext.SaveChangesAsync();
@@ -1220,7 +1243,14 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                         where f.TenantId == r.TenantId
                         select f
                           ).FirstOrDefault(),
-                Order = (from f in filesDbContext.FileOrder
+                Order = (r.FolderType == FolderType.CustomRoom ||
+                         r.FolderType == FolderType.EditingRoom || 
+                         r.FolderType == FolderType.ReviewRoom ||
+                         r.FolderType == FolderType.ReadOnlyRoom || 
+                         r.FolderType == FolderType.FillingFormsRoom ||
+                         r.FolderType == FolderType.PublicRoom  ? 
+                        from a in Array.Empty<int>() select  0 : 
+                        from f in filesDbContext.FileOrder
                          where f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
                          select f.Order
                                 ).FirstOrDefault(),
@@ -1652,6 +1682,7 @@ public class DbFolderQuery
 {
     public DbFolder Folder { get; set; }
     public DbFolder Root { get; set; }
+    public DbRoomSettings Settings { get; set; }
     public bool Shared { get; set; }
     public int Order { get; set; }
 }

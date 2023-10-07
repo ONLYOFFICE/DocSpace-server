@@ -48,6 +48,7 @@ public class FilesDbContext : DbContext
     public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
+    public DbSet<DbRoomSettings> RoomSettings { get; set; }
 
     public FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : base(dbContextOptions) { }
 
