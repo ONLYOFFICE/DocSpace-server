@@ -33,4 +33,8 @@ public class UpdateRoomRequestDto
     /// <summary>New room name</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
+
+    /// <summary>Room quota</summary>
+    /// <type>System.Int64, System</type>
+    public long? Quota { get; set; }
 }

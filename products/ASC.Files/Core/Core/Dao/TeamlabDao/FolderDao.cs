@@ -867,6 +867,24 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         return folder.Id;
     }
+
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var toUpdate = await Queries.FolderAsync(filesDbContext, TenantID, folder.Id);
+
+        toUpdate.Quota = newQuota >= -1 ? newQuota : -2;
+        toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
+        toUpdate.ModifiedOn = DateTime.UtcNow;
+        toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
+        filesDbContext.Update(toUpdate);
+
+        await filesDbContext.SaveChangesAsync();
+
+        _ = _factoryIndexer.IndexAsync(toUpdate);
+
+        return folder.Id;
+    }
     public async Task<int> RenameFolderAsync(Folder<int> folder, string newTitle)
     {
         await using var filesDbContext = _dbContextFactory.CreateDbContext();

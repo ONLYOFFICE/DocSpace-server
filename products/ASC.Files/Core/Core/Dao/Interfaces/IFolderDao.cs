@@ -170,6 +170,14 @@ public interface IFolderDao<T>
     Task<T> RenameFolderAsync(Folder<T> folder, string newTitle);
 
     /// <summary>
+    ///    Update folder
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="newTitle">new name</param>
+    /// <param name="newQuota">new name</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota);
+
+    /// <summary>
     ///    Gets the number of files and folders to the container in your
     /// </summary>
     /// <param name="folderId">folder id</param>

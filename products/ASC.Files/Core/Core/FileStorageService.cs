@@ -690,7 +690,79 @@ public class FileStorageService //: IFileStorageService
 
         return folder;
     }
+    public async Task<Folder<T>> UpdateRoomAsync<T>(T folderId, UpdateRoomRequestDto updateData)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
+        var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(tenantId);
+        var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
+
+        if (updateData.Quota != null)
+        {
+            ErrorIf(maxTotalSize < updateData.Quota, Resource.QuotaGreaterPortalError);
+        }
+
+        var tagDao = GetTagDao<T>();
+        var folderDao = GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        ErrorIf(folder == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+
+        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) ? folder.RootFolderType != FolderType.Archive && await _fileSecurity.CanEditRoomAsync(folder)
+            : await _fileSecurity.CanRenameAsync(folder);
+
+        ErrorIf(!canEdit, FilesCommonResource.ErrorMassage_SecurityException_RenameFolder);
+        if (!canEdit && await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_RenameFolder);
+        }
+
+        ErrorIf(folder.RootFolderType == FolderType.TRASH, FilesCommonResource.ErrorMassage_ViewTrashItem);
+        ErrorIf(folder.RootFolderType == FolderType.Archive, FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
+        var folderAccess = folder.Access;
+
+        if (!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) || (folder.Quota != updateData.Quota && updateData.Quota != null))
+        {
+            var newFolderID = await folderDao.UpdateFolderAsync(
+                 folder,
+                 !string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase) && updateData.Title != null ? updateData.Title : folder.Title,
+                 folder.Quota != updateData.Quota && updateData.Quota != null ? (long)updateData.Quota : folder.Quota);
+
+            folder = await folderDao.GetFolderAsync(newFolderID);
+            folder.Access = folderAccess;
+            if(!string.Equals(folder.Title, updateData.Title, StringComparison.OrdinalIgnoreCase))
+            {
+                var oldTitle = folder.Title;
+                if (DocSpaceHelper.IsRoom(folder.FolderType))
+                {
+                    _ = _filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
+                }
+                else
+                {
+                    _ = _filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                }
+            }
+        }
+
+        var newTags = tagDao.GetNewTagsAsync(_authContext.CurrentAccount.ID, folder);
+        var tag = await newTags.FirstOrDefaultAsync();
+        if (tag != null)
+        {
+            folder.NewForMe = tag.Count;
+        }
+
+        if (folder.RootFolderType == FolderType.USER
+            && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID)
+            && !await _fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(folder.ParentId)))
+        {
+            folder.FolderIdDisplay = await _globalFolderHelper.GetFolderShareAsync<T>();
+        }
+
+        await _entryStatusManager.SetIsFavoriteFolderAsync(folder);
+
+        await _socketManager.UpdateFolderAsync(folder);
+
+        return folder;
+    }
     public async Task<Folder<T>> FolderRenameAsync<T>(T folderId, string title)
     {
         var tagDao = GetTagDao<T>();
