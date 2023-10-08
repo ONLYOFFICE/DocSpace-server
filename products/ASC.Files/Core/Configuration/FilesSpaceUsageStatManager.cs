@@ -167,7 +167,6 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
     {
         await _tenantManager.SetCurrentTenantAsync(TenantId);
 
-        await RecalculateFoldersUsedSpace(TenantId);
         var size = await GetUserSpaceUsageAsync(userId);
 
         await _tenantManager.SetTenantQuotaRowAsync(

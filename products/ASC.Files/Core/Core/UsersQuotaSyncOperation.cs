@@ -134,6 +134,7 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
             var _authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var _securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var _webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
+            var _filesSpaceUsageStatManager = scope.ServiceProvider.GetRequiredService<FilesSpaceUsageStatManager>();
 
             await _tenantManager.SetCurrentTenantAsync(TenantId);
 
@@ -156,11 +157,9 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
 
                 foreach (var item in webItems)
                 {
-                    IUserSpaceUsage manager;
-
                     if (item.ID == WebItemManager.DocumentsProductID)
                     {
-                        manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
+                        var manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
                         if (manager == null)
                         {
                             continue;
@@ -168,8 +167,18 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
                         await manager.RecalculateUserQuota(TenantId, user.Id);
                     }
                 }
-
             }
+
+            var userQuotaSettings = _settingsManager.Load<TenantUserQuotaSettings>();
+            userQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            _settingsManager.Save(userQuotaSettings);
+
+            await _filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
+
+            var roomQuotaSettings = _settingsManager.Load<TenantRoomQuotaSettings>();
+            roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
+            _settingsManager.Save(roomQuotaSettings);
+
         }
         catch (Exception ex)
         {
@@ -178,10 +187,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         }
         finally
         {
-            var quotaSettings = _settingsManager.Load<TenantUserQuotaSettings>();
-            quotaSettings.LastRecalculateDate = DateTime.UtcNow;
-
-            _settingsManager.Save(quotaSettings);
             IsCompleted = true;
         }
         PublishChanges();
