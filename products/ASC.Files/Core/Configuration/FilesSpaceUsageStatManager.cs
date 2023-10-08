@@ -121,17 +121,53 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
 
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var my = await _globalFolder.GetFolderMyAsync(_fileMarker, _daoFactory);
         var trash = await _globalFolder.GetFolderTrashAsync(_daoFactory);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
         return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
     }
 
+    public async Task RecalculateFoldersUsedSpace(int TenantId)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        var queryGroup = filesDbContext.Folders
+                    .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
+                    .Join(filesDbContext.Files, r => r.tree.FolderId, b => b.ParentId, (temp, file) => new { temp.folder, file })
+                    .Where(r => r.file.TenantId == r.folder.TenantId)
+                    .Where(r => r.folder.TenantId == TenantId)
+                    .GroupBy(temp => temp.folder.Id)
+                    .Select(group => new
+                    {
+                        Id = group.Key,
+                        Sum = group.Sum(temp => temp.file.ContentLength)
+                    });
+
+        var query = filesDbContext.Folders
+                        .Join(queryGroup,
+                            folder => folder.Id,
+                            result => result.Id,
+                            (folder, result) =>
+                                new { Folder = folder, Result = result })
+                        .ToList();
+
+        foreach (var item in query)
+        {
+            item.Folder.Counter = item.Result.Sum;
+            filesDbContext.Update(item.Folder);
+        }
+
+        await filesDbContext.SaveChangesAsync();
+
+    }
     public async Task RecalculateUserQuota(int TenantId, Guid userId)
     {
         await _tenantManager.SetCurrentTenantAsync(TenantId);
+
+        await RecalculateFoldersUsedSpace(TenantId);
         var size = await GetUserSpaceUsageAsync(userId);
 
         await _tenantManager.SetTenantQuotaRowAsync(
@@ -158,6 +194,6 @@ static file class Queries
                     .Join(ctx.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
                     .Where(r => r.file.TenantId == r.bunch.TenantId)
                     .Where(r => r.file.TenantId == tenantId)
-                    .Where(r => r.bunch.RightNode.StartsWith("files/my/"+ userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/"+ userId.ToString()))
+                    .Where(r => r.bunch.RightNode.StartsWith("files/my/" + userId.ToString()) || r.bunch.RightNode.StartsWith("files/trash/" + userId.ToString()))
                     .Sum(r => r.file.ContentLength));
 }
