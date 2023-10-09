@@ -375,6 +375,7 @@ public class EntryManager
         bool excludeSubject = false, ProviderFilter provider = ProviderFilter.None, SubjectFilter subjectFilter = SubjectFilter.Owner, ApplyFilterOption applyFilterOption = ApplyFilterOption.All)
     {
         var total = 0;
+        var withShared = false;
 
         if (parent == null)
         {
@@ -398,6 +399,11 @@ public class EntryManager
         if (parent.FolderType == FolderType.TRASH)
         {
             withSubfolders = false;
+        }
+
+        if (parent.RootFolderType == FolderType.USER)
+        {
+            withShared = true;
         }
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
@@ -481,7 +487,7 @@ public class EntryManager
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId)
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId, withShared)
                 .ToListAsync();
 
             entries = new List<FileEntry>(folders.Count + files.Count);
@@ -501,7 +507,7 @@ public class EntryManager
         else
         {
             var folders = _daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);
-            var files = _daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject);
+            var files = _daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, withShared: withShared);
 
             var task1 = _fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = _fileSecurity.FilterReadAsync(files).ToListAsync();

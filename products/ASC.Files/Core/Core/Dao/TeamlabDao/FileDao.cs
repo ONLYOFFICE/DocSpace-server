@@ -259,7 +259,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false,
-        int offset = 0, int count = -1, int roomId = default)
+        int offset = 0, int count = -1, int roomId = default, bool withShared = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -277,7 +277,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
             q = q.Take(count);
         }
 
-        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
+        var result = withShared ? FromQueryWithShared(filesDbContext, q) : FromQuery(filesDbContext, q);
+
+        await foreach (var e in result.AsAsyncEnumerable())
         {
             yield return _mapper.Map<DbFileQuery, File<int>>(e);
         }
@@ -1438,6 +1440,30 @@ internal class FileDao : AbstractDao, IFileDao<int>
                         where f.TenantId == r.TenantId
                         select f
                           ).FirstOrDefault()
+            });
+    }
+    
+    protected IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
+    {
+        var tenantId = TenantID;
+        
+        return dbFiles
+            .Select(r => new DbFileQuery
+            {
+                File = r,
+                Root = (from f in filesDbContext.Folders
+                        where f.Id ==
+                              (from t in filesDbContext.Tree
+                                  where t.FolderId == r.ParentId
+                                  orderby t.Level descending
+                                  select t.ParentId
+                              ).FirstOrDefault()
+                        where f.TenantId == r.TenantId
+                        select f
+                    ).FirstOrDefault(),
+                Shared = filesDbContext.Security.Any(s => 
+                    s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
+                    (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
             });
     }
 
