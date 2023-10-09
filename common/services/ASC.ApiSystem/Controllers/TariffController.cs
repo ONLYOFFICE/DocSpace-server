@@ -62,7 +62,7 @@ public class TariffController : ControllerBase
 
     [HttpPut("set")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> SetTariffAsync(TariffModel model)
     {
         (var succ, var tenant) = await CommonMethods.TryGetTenantAsync(model);
