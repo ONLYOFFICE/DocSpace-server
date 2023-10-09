@@ -30,10 +30,12 @@ namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
 {
     private readonly ILogger _logger;
-    private readonly FileStorageService _fileStorageService;
     private readonly TenantManager _tenantManager;
     private readonly AuthManager _authManager;
     private readonly SecurityContext _securityContext;
+    private readonly DocumentBuilderScriptHelper _documentBuilderScriptHelper;
+    private readonly DocumentBuilderTaskManager _documentBuilderTaskManager;
+    private readonly IServiceProvider _serviceProvider;
 
     private RoomIndexExportIntegrationEventHandler() : base()
     {
@@ -42,16 +44,20 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
     public RoomIndexExportIntegrationEventHandler(
         ILogger<RoomIndexExportIntegrationEventHandler> logger,
-        FileStorageService fileStorageService,
         TenantManager tenantManager,
         AuthManager authManager,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        DocumentBuilderScriptHelper documentBuilderScriptHelper,
+        DocumentBuilderTaskManager documentBuilderTaskManager,
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _fileStorageService = fileStorageService;
         _tenantManager = tenantManager;
         _authManager = authManager;
         _securityContext = securityContext;
+        _documentBuilderScriptHelper = documentBuilderScriptHelper;
+        _documentBuilderTaskManager = documentBuilderTaskManager;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task Handle(RoomIndexExportIntegrationEvent @event)
@@ -68,7 +74,13 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
             await _securityContext.AuthenticateMeWithoutCookieAsync(account);
 
-            await _fileStorageService.StartRoomIndexExport(@event.TenantId, @event.CreateBy, @event.RoomId);
+            var (script, tempFileName, outputFileName) = await _documentBuilderScriptHelper.GetScript(@event.CreateBy, @event.RoomId);
+
+            var task = _serviceProvider.GetService<DocumentBuilderTask<int>>();
+
+            task.Init(@event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
+
+            _documentBuilderTaskManager.StartTask(task);
         }
     }
 }

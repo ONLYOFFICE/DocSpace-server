@@ -26,10 +26,10 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Scope]
+[Transient]
 public class DocumentBuilderTask<T> : DistributedTaskProgress
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceProvider;
 
     private int _tenantId;
     private Guid _userId;
@@ -37,7 +37,7 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
     private string _tempFileName;
     private string _outputFileName;
 
-    public DocumentBuilderTask(IServiceProvider serviceProvider)
+    public DocumentBuilderTask(IServiceScopeFactory serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
@@ -168,7 +168,7 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
 
         request.RequestUri = sourceUri;
 
-        var httpClient = clientFactory.CreateClient();
+        using var httpClient = clientFactory.CreateClient();
 
         using var response = await httpClient.SendAsync(request);
 

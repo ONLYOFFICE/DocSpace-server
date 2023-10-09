@@ -93,6 +93,7 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();

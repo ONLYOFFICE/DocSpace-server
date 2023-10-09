@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.Utility.Settings;
-
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singletone(Additional = typeof(DocumentBuilderTaskManagerHelperExtention))]
@@ -34,26 +32,10 @@ public class DocumentBuilderTaskManager
     private readonly object _synchRoot = new object();
 
     private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly SettingsManager _settingsManager;
-    private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
 
-    public DocumentBuilderTaskManager(
-        IDistributedTaskQueueFactory queueFactory,
-        IServiceProvider serviceProvider,
-        CommonLinkUtility commonLinkUtility,
-        SettingsManager settingsManager,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        DisplayUserSettingsHelper displayUserSettingsHelper)
+    public DocumentBuilderTaskManager(IDistributedTaskQueueFactory queueFactory)
     {
         _queue = queueFactory.CreateQueue(GetType());
-        _serviceProvider = serviceProvider;
-        _commonLinkUtility = commonLinkUtility;
-        _settingsManager = settingsManager;
-        _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
     }
 
     public static string GetTaskId(int tenantId, Guid userId)
@@ -83,7 +65,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    private DistributedTaskProgress StartTask<T>(DocumentBuilderTask<T> newTask)
+    public DistributedTaskProgress StartTask<T>(DocumentBuilderTask<T> newTask)
     {
         lock (_synchRoot)
         {
@@ -103,120 +85,6 @@ public class DocumentBuilderTaskManager
 
             return task;
         }
-    }
-
-    private static int[] ConvertHtmlColorToRgb(string color, double opacity)
-    {
-        if (color[0] != '#' || color.Length != 7 || opacity < 0 || opacity > 1)
-        {
-            throw new ArgumentException();
-        }
-
-        return new[]
-        {
-            ApplyOpacity(255, Convert.ToInt32(color.Substring(1, 2), 16), opacity),
-            ApplyOpacity(255, Convert.ToInt32(color.Substring(3, 2), 16), opacity),
-            ApplyOpacity(255, Convert.ToInt32(color.Substring(5, 2), 16), opacity),
-        };
-
-        static int ApplyOpacity(int background, int overlay, double opacity)
-        {
-            return (int)((1 - opacity) * background + opacity * overlay);
-        }
-    }
-
-    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Tenant tenant, UserInfo user, Folder<T> room, DataWrapper<T> items, TenantWhiteLabelSettings tenantWhiteLabelSettings, CustomColorThemesSettings customColorThemesSettings, string fullAbsoluteLogoPath)
-    {
-        //var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        //var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
-
-        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
-
-        var mainBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1);
-        var lightBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08);
-        var mainFontColor = ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1);
-
-        //var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
-        //var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
-
-        var entries = new List<object>
-        {
-            new
-            {
-                index = (string)null,
-                name = room.Title,
-                url = "http://onlyoffice.com",
-                type = "Room",
-                pages = (string)null,
-                size = (string)null,
-                author = room.CreateByString,
-                created = room.CreateOnString,
-                modified = room.CreateOnString
-            }
-        };
-
-        entries.AddRange(items.Entries.Select(item => new
-        {
-            index = "1.N",
-            name = item.Title,
-            url = "http://onlyoffice.com",
-            type = item.FileEntryType == FileEntryType.Folder ? "Folder" : Path.GetExtension(item.Title),
-            pages = item.FileEntryType == FileEntryType.Folder ? null : "1",
-            size = item.FileEntryType == FileEntryType.Folder ? null : "1",
-            author = item.CreateByString,
-            created = item.CreateOnString,
-            modified = item.ModifiedOnString
-        }));
-
-        var data = new
-        {
-            resources = new {
-                company = FilesCommonResource.RoomIndex_Company + ":",
-                room = FilesCommonResource.RoomIndex_Room + ":",
-                exportAuthor = FilesCommonResource.RoomIndex_ExportAuthor + ":",
-                dateGenerated = FilesCommonResource.RoomIndex_DateGenerated + ":",
-                index = FilesCommonResource.RoomIndex_Index,
-                name = FilesCommonResource.RoomIndex_Name,
-                type = FilesCommonResource.RoomIndex_Type,
-                pages = FilesCommonResource.RoomIndex_Pages,
-                size = FilesCommonResource.RoomIndex_Size,
-                author = FilesCommonResource.RoomIndex_Author,
-                created = FilesCommonResource.RoomIndex_Created,
-                modified = FilesCommonResource.RoomIndex_Modified,
-                total = FilesCommonResource.RoomIndex_Total,
-                sheetName = FilesCommonResource.RoomIndex_SheetName,
-                numberFormat = $"0.00",
-                dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
-            },
-
-            logoSrc = fullAbsoluteLogoPath,
-
-            themeColors = new {
-                mainBgColor,
-                lightBgColor,
-                mainFontColor
-            },
-
-            info = new {
-                company = tenantWhiteLabelSettings.LogoText,
-                room = room.Title,
-                exportAuthor = user.DisplayUserName(_displayUserSettingsHelper),
-                dateGenerated = room.CreateOnString
-            },
-
-            data = entries
-        };
-
-        var outputFileName = $"{room.Title}_index.xlsx";
-
-        //TODO: think about writing a temporary file in a loop by N
-        var (script, tempFileName) = DocumentBuilderScriptHelper.GetScript(data);
-
-        var task = new DocumentBuilderTask<T>(_serviceProvider);
-
-        task.Init(tenant.Id, user.Id, script, tempFileName, outputFileName);
-
-        return StartTask(task);
     }
 }
 

@@ -567,6 +567,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
     private readonly InvitationLinkService _invitationLinkService;
     private readonly AuthContext _authContext;
     private readonly IEventBus _eventBus;
+    private readonly DocumentBuilderTaskManager _documentBuilderTaskManager;
 
     public VirtualRoomsCommonController(
         FileStorageService fileStorageService,
@@ -582,7 +583,8 @@ public class VirtualRoomsCommonController : ApiControllerBase
         FileDtoHelper fileDtoHelper,
         InvitationLinkService invitationLinkService,
         AuthContext authContext,
-        IEventBus eventBus) : base(folderDtoHelper, fileDtoHelper)
+        IEventBus eventBus,
+        DocumentBuilderTaskManager documentBuilderTaskManager) : base(folderDtoHelper, fileDtoHelper)
     {
         _fileStorageService = fileStorageService;
         _folderContentDtoHelper = folderContentDtoHelper;
@@ -596,6 +598,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
         _invitationLinkService = invitationLinkService;
         _authContext = authContext;
         _eventBus = eventBus;
+        _documentBuilderTaskManager = documentBuilderTaskManager;
     }
 
     /// <summary>
@@ -849,7 +852,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
         var tenantId = _apiContext.Tenant.Id;
         var userId = _authContext.CurrentAccount.ID;
 
-        var task = _fileStorageService.GetRoomIndexExport(tenantId, userId);
+        var task = _documentBuilderTaskManager.GetTask(tenantId, userId);
 
         return DocumentBuilderTaskDto.Get(task);
     }
@@ -862,7 +865,8 @@ public class VirtualRoomsCommonController : ApiControllerBase
         var tenantId = _apiContext.Tenant.Id;
         var userId = _authContext.CurrentAccount.ID;
 
-        _fileStorageService.TerminateRoomIndexExport(tenantId, userId);
+        //TODO: through eventbus
+        _documentBuilderTaskManager.TerminateTask(tenantId, userId);
     }
 
     private void ErrorIfNotDocSpace()

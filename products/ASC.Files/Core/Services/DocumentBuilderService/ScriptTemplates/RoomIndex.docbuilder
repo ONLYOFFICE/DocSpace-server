@@ -232,5 +232,5 @@ oWorksheet.FormatAsTable(formattedTableRange);
 
 oWorksheet.GetRange(toColumnName(1) + 1).Select();
 
-builder.SaveFile("xlsx", "${outputFileName}");
+builder.SaveFile("xlsx", "${tempFileName}");
 builder.CloseFile();

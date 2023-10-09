@@ -65,6 +65,7 @@ global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Expired;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;

@@ -87,9 +87,6 @@ public class FileStorageService //: IFileStorageService
     private readonly ExternalShare _externalShare;
     private readonly TenantUtil _tenantUtil;
     private readonly RoomLogoManager _roomLogoManager;
-    private readonly DocumentBuilderTaskManager _documentBuilderTaskManager;
-    private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
 
     public FileStorageService(
         Global global,
@@ -149,10 +146,7 @@ public class FileStorageService //: IFileStorageService
         QuotaSocketManager quotaSocketManager,
         ExternalShare externalShare,
         TenantUtil tenantUtil,
-        RoomLogoManager roomLogoManager,
-        DocumentBuilderTaskManager documentBuilderTaskManager,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        CommonLinkUtility commonLinkUtility)
+        RoomLogoManager roomLogoManager)
     {
         _global = global;
         _globalStore = globalStore;
@@ -212,9 +206,6 @@ public class FileStorageService //: IFileStorageService
         _externalShare = externalShare;
         _tenantUtil = tenantUtil;
         _roomLogoManager = roomLogoManager;
-        _documentBuilderTaskManager = documentBuilderTaskManager;
-        _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
-        _commonLinkUtility = commonLinkUtility;
     }
 
     public async Task<Folder<T>> GetFolderAsync<T>(T folderId)
@@ -3391,43 +3382,6 @@ public class FileStorageService //: IFileStorageService
     {
         return string.Empty; //TODO: Studio.UserControls.Common.HelpCenter.HelpCenter.RenderControlToString();
     }
-
-
-    #region Export Room Index
-
-    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(int tenantId, Guid userId, T roomID)
-    {
-        var tenant = await _tenantManager.GetTenantAsync(tenantId);
-
-        var user = await _userManager.GetUsersAsync(userId);
-
-        var room = await GetFolderAsync(roomID);
-
-        //TODO: think about loop by N
-        var items = await GetFolderItemsAsync(roomID, 0, int.MaxValue, FilterType.None, false, Guid.Empty.ToString(), string.Empty, false, true, null);
-
-        var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-
-        var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
-
-        var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
-
-        var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
-
-        return await _documentBuilderTaskManager.StartRoomIndexExport(tenant, user, room, items, tenantWhiteLabelSettings, customColorThemesSettings, fullAbsoluteLogoPath);
-    }
-
-    public DistributedTaskProgress GetRoomIndexExport(int tenantId, Guid userId)
-    {
-        return _documentBuilderTaskManager.GetTask(tenantId, userId);
-    }
-
-    public void TerminateRoomIndexExport(int tenantId, Guid userId)
-    {
-        _documentBuilderTaskManager.TerminateTask(tenantId, userId);
-    }
-
-    #endregion
 
 
     private IFolderDao<T> GetFolderDao<T>()

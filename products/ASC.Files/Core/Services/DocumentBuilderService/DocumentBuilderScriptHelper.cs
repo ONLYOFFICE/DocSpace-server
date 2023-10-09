@@ -26,12 +26,164 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Singletone]
+[Scope]
 public class DocumentBuilderScriptHelper
 {
+    private readonly UserManager _userManager;
+    private readonly IDaoFactory _daoFactory;
+    private readonly EntryManager _entryManager;
+    private readonly SettingsManager _settingsManager;
+    private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
+    private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
+
+    public DocumentBuilderScriptHelper(
+        UserManager userManager,
+        IDaoFactory daoFactory,
+        EntryManager entryManager,
+        SettingsManager settingsManager,
+        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+        CommonLinkUtility commonLinkUtility,
+        DisplayUserSettingsHelper displayUserSettingsHelper)
+    {
+        _userManager = userManager;
+        _daoFactory = daoFactory;
+        _entryManager = entryManager;
+        _settingsManager = settingsManager;
+        _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
+        _commonLinkUtility = commonLinkUtility;
+        _displayUserSettingsHelper = displayUserSettingsHelper;
+    }
+
+    private async Task<(object data, string outputFileName)> GetDataObject<T>(Guid userId, T roomId)
+    {
+        var user = await _userManager.GetUsersAsync(userId);
+
+        var folderDao = _daoFactory.GetFolderDao<T>();
+
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        var outputFileName = GetOutputFileName(room.Title);
+
+        //TODO: think about loop by N
+        var (entries, total) = await _entryManager.GetEntriesAsync(room, 0, int.MaxValue, FilterType.None, false, Guid.Empty, string.Empty, false, true, null);
+
+        var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
+
+        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+
+        var mainBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1);
+        var lightBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08);
+        var mainFontColor = ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1);
+
+        var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+        var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
+
+        var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
+
+        var items = new List<object>
+        {
+            new
+            {
+                index = (string)null,
+                name = room.Title,
+                url = "http://onlyoffice.com",
+                type = "Room",
+                pages = (string)null,
+                size = (string)null,
+                author = room.CreateByString,
+                created = room.CreateOnString,
+                modified = room.CreateOnString
+            }
+        };
+
+        items.AddRange(entries.Select(item => new
+        {
+            index = "1.N",
+            name = item.Title,
+            url = "http://onlyoffice.com",
+            type = item.FileEntryType == FileEntryType.Folder ? "Folder" : Path.GetExtension(item.Title),
+            pages = item.FileEntryType == FileEntryType.Folder ? null : "1",
+            size = item.FileEntryType == FileEntryType.Folder ? null : "1",
+            author = item.CreateByString,
+            created = item.CreateOnString,
+            modified = item.ModifiedOnString
+        }));
+
+        var data = new
+        {
+            resources = new
+            {
+                company = FilesCommonResource.RoomIndex_Company + ":",
+                room = FilesCommonResource.RoomIndex_Room + ":",
+                exportAuthor = FilesCommonResource.RoomIndex_ExportAuthor + ":",
+                dateGenerated = FilesCommonResource.RoomIndex_DateGenerated + ":",
+                index = FilesCommonResource.RoomIndex_Index,
+                name = FilesCommonResource.RoomIndex_Name,
+                type = FilesCommonResource.RoomIndex_Type,
+                pages = FilesCommonResource.RoomIndex_Pages,
+                size = FilesCommonResource.RoomIndex_Size,
+                author = FilesCommonResource.RoomIndex_Author,
+                created = FilesCommonResource.RoomIndex_Created,
+                modified = FilesCommonResource.RoomIndex_Modified,
+                total = FilesCommonResource.RoomIndex_Total,
+                sheetName = FilesCommonResource.RoomIndex_SheetName,
+                numberFormat = $"0.00",
+                dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
+            },
+
+            logoSrc = fullAbsoluteLogoPath,
+
+            themeColors = new
+            {
+                mainBgColor,
+                lightBgColor,
+                mainFontColor
+            },
+
+            info = new
+            {
+                company = tenantWhiteLabelSettings.LogoText,
+                room = room.Title,
+                exportAuthor = user.DisplayUserName(_displayUserSettingsHelper),
+                dateGenerated = room.CreateOnString
+            },
+
+            data = items
+        };
+
+        return (data, outputFileName);
+    }
+
+    private static int[] ConvertHtmlColorToRgb(string color, double opacity)
+    {
+        if (color[0] != '#' || color.Length != 7 || opacity < 0 || opacity > 1)
+        {
+            throw new ArgumentException();
+        }
+
+        return new[]
+        {
+            ApplyOpacity(255, Convert.ToInt32(color.Substring(1, 2), 16), opacity),
+            ApplyOpacity(255, Convert.ToInt32(color.Substring(3, 2), 16), opacity),
+            ApplyOpacity(255, Convert.ToInt32(color.Substring(5, 2), 16), opacity),
+        };
+
+        static int ApplyOpacity(int background, int overlay, double opacity)
+        {
+            return (int)((1 - opacity) * background + opacity * overlay);
+        }
+    }
+
     private static string GetTempFileName()
     {
         return $"temp{DateTime.UtcNow.Ticks}.xlsx";
+    }
+
+    private static string GetOutputFileName(string title)
+    {
+        return $"{title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
     }
 
     private static string ReadTemplateFromEmbeddedResource()
@@ -54,15 +206,17 @@ public class DocumentBuilderScriptHelper
         return streamReader.ReadToEnd();
     }
 
-    public static (string script, string tempFileName) GetScript(object data)
+    public async Task<(string script, string tempFileName, string outputFileName)> GetScript<T>(Guid userId, T roomId)
     {
         var script = ReadTemplateFromEmbeddedResource() ?? throw new Exception("Template not found");
 
         var tempFileName = GetTempFileName();
 
-        script = script.Replace("${outputFileName}", tempFileName)
+        var (data, outputFileName) = await GetDataObject(userId, roomId);
+
+        script = script.Replace("${tempFileName}", tempFileName)
                      .Replace("${inputData}", JsonConvert.SerializeObject(data));
 
-        return (script, tempFileName);
+        return (script, tempFileName, outputFileName);
     }
 }
