@@ -378,8 +378,8 @@ public class SettingsController : BaseSettingsController
     /// </short>
     /// <category>Quota</category>
     /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
-    /// <returns type="System.Object, System">Message about the result of saving the user quota settings</returns>
-    /// <path>api/2.0/settings/userquotasettings</path>
+    /// <returns type="System.Object, System">Message about the result of saving the room quota settings</returns>
+    /// <path>api/2.0/settings/roomquotasettings</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
@@ -403,6 +403,34 @@ public class SettingsController : BaseSettingsController
         return quotaSettings;
     }
 
+    /// <summary>
+    /// Saves the tenant quota settings.
+    /// </summary>
+    /// <short>
+    /// Save the tenant quota settings
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UserQuotaSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for the user quota settings</param>
+    /// <returns type="System.Object, System">Message about the result of saving the tenant quota settings</returns>
+    /// <path>api/2.0/settings/tenantquotasettings</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("tenantquotasettings")]
+    public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
+    {
+        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+
+        if (!await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID) || !_coreBaseSettings.Standalone)
+        {
+            throw new NotSupportedException("Not available.");
+        }
+
+        var tenantQuotaSetting = await _settingsManager.LoadAsync<TenantQuotaSettings>();
+        tenantQuotaSetting.DisableQuota = !inDto.EnableQuota;
+
+        await _settingsManager.SaveAsync(tenantQuotaSetting);
+
+        return tenantQuotaSetting;
+    }
 
     /// <summary>
     /// Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. "de", "en-US", etc.).
