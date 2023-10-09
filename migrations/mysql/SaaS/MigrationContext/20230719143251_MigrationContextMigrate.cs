@@ -1356,8 +1356,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenantid = table.Column<int>(name: "tenant_id", type: "int", nullable: false),
                     uri = table.Column<string>(type: "text", nullable: true, defaultValueSql: "''", collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'"),
-                    ssl = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
+                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
                 },
                 constraints: table =>
                 {
