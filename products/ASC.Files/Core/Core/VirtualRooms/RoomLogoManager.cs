@@ -171,9 +171,9 @@ public class RoomLogoManager
     {
         if (!room.HasLogo)
         {
-            if (string.IsNullOrEmpty(room.Color))
+            if (string.IsNullOrEmpty(room.SettingsColor))
             {
-                room.Color = GetRandomColour();
+                room.SettingsColor = GetRandomColour();
 
                 var folderDao = _daoFactory.GetFolderDao<T>();
                 await folderDao.SaveFolderAsync(room);
@@ -185,7 +185,7 @@ public class RoomLogoManager
                 Large = string.Empty,
                 Medium = string.Empty,
                 Small = string.Empty,
-                Color = room.Color
+                Color = room.SettingsColor
             };
         }
 

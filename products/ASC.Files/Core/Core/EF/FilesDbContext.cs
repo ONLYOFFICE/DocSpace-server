@@ -72,6 +72,7 @@ public class FilesDbContext : DbContext
             .AddFilesConverts()
             .AddDbFileOrder()
             .AddUser()
+            .AddDbRoomSettings()
             .AddDbFunctions();
     }
 }

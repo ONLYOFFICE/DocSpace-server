@@ -75,7 +75,7 @@ public class Folder<T> : FileEntry<T>, IFolder
     public bool Pinned { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
-    public string Color { get; set; }
+    public string SettingsColor { get; set; }
     public bool Indexing { get; set; }
     public override bool IsNew
     {

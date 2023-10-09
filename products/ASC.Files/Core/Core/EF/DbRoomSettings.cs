@@ -36,6 +36,7 @@ public class DbRoomSettings
     public bool Indexing { get; set; }
 
     public DbTenant Tenant { get; set; }
+    public DbFolder Room { get; set; }
 }
 
 public static class DbRoomSettingsExtension
@@ -43,6 +44,7 @@ public static class DbRoomSettingsExtension
     public static ModelBuilderWrapper AddDbRoomSettings(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbRoomSettings>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbRoomSettings>().Navigation(e => e.Room).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddDbRoomSettings, Provider.MySql)
@@ -55,7 +57,7 @@ public static class DbRoomSettingsExtension
     {
         modelBuilder.Entity<DbRoomSettings>(entity =>
         {
-            entity.ToTable("files_order")
+            entity.ToTable("files_room_settings")
                 .HasCharSet("utf8");
 
             entity.HasKey(e => new { e.TenantId, e.RoomId })
@@ -67,7 +69,9 @@ public static class DbRoomSettingsExtension
                 .HasColumnName("private")
                 .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+            entity.Property(e => e.HasLogo).HasColumnName("has_logo").HasDefaultValueSql("0");
+            
+            entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
 
             entity.Property(e => e.Color)
                 .HasColumnName("color")

@@ -103,6 +103,7 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
     public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
+    public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -168,6 +169,7 @@ public class MigrationContext : DbContext
             .AddWebhooksLog()
             .AddShortLinks()
             .AddDbFileOrder()
+            .AddDbRoomSettings()
             .AddDbFunctions();
     }
 }

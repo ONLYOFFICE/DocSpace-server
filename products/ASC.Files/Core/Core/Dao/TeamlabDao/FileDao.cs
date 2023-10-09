@@ -1465,10 +1465,19 @@ internal class FileDao : AbstractDao, IFileDao<int>
                         where f.TenantId == r.TenantId
                         select f
                           ).FirstOrDefault(),
-                Order = (from f in filesDbContext.FileOrder
-                         where f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
-                         select f.Order
-                                ).FirstOrDefault(),
+                Order = (
+                    from f in filesDbContext.FileOrder
+                    where (
+                        from rs in filesDbContext.RoomSettings 
+                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                            (from t in filesDbContext.Tree
+                                where t.FolderId == r.ParentId
+                                orderby t.Level descending
+                                select t.ParentId
+                            ).Skip(1).FirstOrDefault()
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                    select f.Order
+                ).FirstOrDefault()
             });
     }
 

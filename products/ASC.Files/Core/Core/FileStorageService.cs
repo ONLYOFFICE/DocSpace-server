@@ -614,7 +614,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
             newFolder.Private = parent.Private ? parent.Private : privacy;
-            newFolder.Color = _roomLogoManager.GetRandomColour();
+            newFolder.SettingsColor = _roomLogoManager.GetRandomColour();
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             var folder = await folderDao.GetFolderAsync(folderId);
 
