@@ -88,6 +88,10 @@ public class CommonMethods
             status = t.Status.ToString(),
             tenantId = t.Id,
             timeZoneName = _timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            quota = !_hostedSolution.GetTenantQuotaSettings(t.Id).Result.DisableQuota ? _hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize : -1,
+            usedSize = _hostedSolution.FindTenantQuotaRowsAsync(t.Id).Result
+                            .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+                            .Sum(q => q.Counter)
         };
     }
 
