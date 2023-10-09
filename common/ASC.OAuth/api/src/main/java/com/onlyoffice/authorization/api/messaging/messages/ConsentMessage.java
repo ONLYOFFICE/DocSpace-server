@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 @Builder
 @Getter
 @Setter
+@EqualsAndHashCode
 public class ConsentMessage implements Serializable {
     private String registeredClientId;
     private String principalName;

@@ -64,3 +64,51 @@ ALTER TABLE identity_clients
 	ADD CONSTRAINT FK_tenant_id__id
 	FOREIGN KEY (tenant_id)
 	REFERENCES tenants_tenants (id);
+
+DROP EVENT IF EXISTS delete_invalidated_consents;
+DROP EVENT IF EXISTS delete_invalidated_authorization;
+DROP EVENT IF EXISTS delete_invalidated_clients;
+
+CREATE EVENT delete_invalidated_consents
+ON schedule at current_timestamp + interval 1 hour
+    DO
+		DELETE FROM identity_consents ic WHERE ic.invalidated = 1;
+
+CREATE EVENT delete_invalidated_authorization
+ON schedule at current_timestamp + interval 1 hour
+    DO
+      DELETE FROM identity_authorizations ia WHERE ia.invalidated = 1;
+
+CREATE EVENT delete_invalidated_clients
+ON schedule at current_timestamp + interval 1 hour
+    DO
+      DELETE FROM identity_clients ic WHERE ic.invalidated = 1;
+
+DROP TRIGGER IF EXISTS update_entry_authorizations;
+DROP TRIGGER IF EXISTS update_entry_consents;
+
+DELIMITER $$
+CREATE TRIGGER update_entry_authorizations
+BEFORE UPDATE ON identity_authorizations
+FOR EACH ROW
+BEGIN
+  IF new.modified_at <= old.modified_at
+  THEN
+   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
+  END IF;
+
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER update_entry_consents
+BEFORE UPDATE ON identity_consents
+FOR EACH ROW
+BEGIN
+  IF new.modified_at <= old.modified_at
+  THEN
+   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
+  END IF;
+
+END$$
+DELIMITER ;

@@ -14,6 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Entity
 @Table(name = "identity_clients")
+@ToString
 public class Client {
     @Id
     @Column(name = "client_id", unique = true, length = 36)
@@ -46,10 +47,19 @@ public class Client {
     @ManyToOne
     @JoinColumn(name="tenant_id", nullable=false)
     private Tenant tenant;
+    @Column(name = "enabled")
+    private Boolean enabled;
     @Column(name = "invalidated")
     private Boolean invalidated;
     @PrePersist
-    public void prePersist() {
+    private void prePersist() {
+        this.enabled = true;
+        this.invalidated = false;
         this.clientIssuedAt = Timestamp.from(Instant.now());
+    }
+    @PreUpdate
+    private void preUpdate() {
+        if (this.invalidated)
+            this.enabled = false;
     }
 }

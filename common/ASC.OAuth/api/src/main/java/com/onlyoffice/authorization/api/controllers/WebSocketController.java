@@ -25,13 +25,13 @@ public class WebSocketController {
                 return;
             }
             client.joinRoom(tenant);
-            log.debug("Client[{}] - Connected to socket", client.getSessionId().toString());
+            log.info("client[{}] - Connected to socket", client.getSessionId().toString());
         };
     }
 
     private DisconnectListener onDisconnected() {
         return client -> {
-            log.debug("Client[{}] - Disconnected from socket", client.getSessionId().toString());
+            log.info("client[{}] - Disconnected from socket", client.getSessionId().toString());
         };
     }
 }

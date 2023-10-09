@@ -15,6 +15,7 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "identity_consents")
+@EqualsAndHashCode
 public class Consent {
     @Id
     @Column(name = "registered_client_id")
@@ -29,7 +30,10 @@ public class Consent {
     private Timestamp modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
-
+    @PrePersist
+    private void prePersist() {
+        this.invalidated = false;
+    }
     @Getter
     @Setter
     @AllArgsConstructor

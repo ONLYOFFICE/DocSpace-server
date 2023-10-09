@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.api.controllers.advice;
 
-import com.onlyoffice.authorization.api.dto.ErrorDTO;
+import com.onlyoffice.authorization.api.dto.response.ErrorDTO;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

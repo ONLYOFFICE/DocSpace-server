@@ -3,6 +3,9 @@ package com.onlyoffice.authorization.api.services;
 import com.onlyoffice.authorization.api.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.messaging.messages.AuthorizationMessage;
 import com.onlyoffice.authorization.api.repositories.AuthorizationRepository;
+import com.onlyoffice.authorization.api.usecases.repository.authorization.AuthorizationPersistenceMutationUsecases;
+import com.onlyoffice.authorization.api.usecases.service.authorization.AuthorizationCleanupUsecases;
+import com.onlyoffice.authorization.api.usecases.service.authorization.AuthorizationCreationUsecases;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,13 +17,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthorizationService {
-    private final AuthorizationRepository authorizationRepository;
+public class AuthorizationService implements AuthorizationCleanupUsecases, AuthorizationCreationUsecases {
+    private final AuthorizationPersistenceMutationUsecases mutationUsecases;
 
     @Transactional
     public void saveAuthorization(AuthorizationMessage authorizationMessage) {
-        log.debug("Saving an authorization with id: {}", authorizationMessage.getId());
-        authorizationRepository.save(AuthorizationMapper.INSTANCE.toEntity(authorizationMessage));
+        log.info("saving an authorization with id: {}", authorizationMessage.getId());
+        mutationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE.toEntity(authorizationMessage));
     }
 
     /**
@@ -30,13 +33,13 @@ public class AuthorizationService {
      */
     @Transactional
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
-        log.debug("Saving authorizations");
+        log.info("saving authorizations");
         List<String> ids = new ArrayList<>();
 
         for (AuthorizationMessage authorization : authorizations) {
             try {
-                log.debug("Saving an authorization with id: {}", authorization.getId());
-                authorizationRepository.save(AuthorizationMapper.INSTANCE.toEntity(authorization));
+                log.info("Saving an authorization with id: {}", authorization.getId());
+                mutationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE.toEntity(authorization));
             } catch (Exception e) {
                 ids.add(authorization.getId());
                 log.error(e.getMessage());
@@ -48,17 +51,17 @@ public class AuthorizationService {
 
     @Transactional
     public void deleteAuthorization(AuthorizationMessage a) {
-        log.debug("Deleting authorization with id: {}", a.getId());
-        authorizationRepository.deleteById(a.getId());
+        log.info("deleting authorization with id: {}", a.getId());
+        mutationUsecases.deleteById(a.getId());
     }
 
     @Transactional
     public void deleteAuthorizations(Iterable<AuthorizationMessage> authorizations) {
-        log.debug("Deleting authorizations");
+        log.info("deleting authorizations");
         for (AuthorizationMessage authorization : authorizations) {
             try {
-                log.debug("Deleting authorization with id: {}", authorization.getId());
-                authorizationRepository.deleteById(authorization.getId());
+                log.info("deleting authorization with id {}", authorization.getId());
+                mutationUsecases.deleteById(authorization.getId());
             } catch (Exception e) {
                 log.error(e.getMessage());
             }

@@ -69,4 +69,8 @@ public class Authorization {
     private Timestamp modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
+    @PrePersist
+    private void prePersist() {
+        this.invalidated = false;
+    }
 }

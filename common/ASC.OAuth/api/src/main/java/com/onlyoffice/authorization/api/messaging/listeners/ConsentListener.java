@@ -4,6 +4,7 @@ import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfigur
 import com.onlyoffice.authorization.api.messaging.messages.ConsentMessage;
 import com.onlyoffice.authorization.api.messaging.messages.wrappers.MessageWrapper;
 import com.onlyoffice.authorization.api.services.ConsentService;
+import com.onlyoffice.authorization.api.usecases.service.consent.ConsentCreationUsecases;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConsentListener {
     private final RabbitMQConfiguration configuration;
-    private final ConsentService consentService;
+    private final ConsentCreationUsecases creationUsecases;
     private LinkedBlockingQueue<MessageWrapper<ConsentMessage>> messages = new LinkedBlockingQueue<>();
     @RabbitHandler
     public void receiveSave(
@@ -37,11 +38,11 @@ public class ConsentListener {
             @Header(AmqpHeaders.DELIVERY_TAG) long tag
     ) {
         if (messages.size() > configuration.getPrefetch()) {
-            log.warn("Consent message queue is full");
+            log.warn("consent message queue is full");
             return;
         }
 
-        log.debug("Adding a consent message to the queue");
+        log.info("adding a consent message to the queue");
 
         messages.add(MessageWrapper
                 .<ConsentMessage>builder()
@@ -54,12 +55,11 @@ public class ConsentListener {
     @Scheduled(fixedDelay = 1000)
     private void persistConsents() {
         if (messages.size() > 0) {
-            log.debug("Persisting consent messages (count {})", messages.size());
+            log.info("persisting consent messages (count {})", messages.size());
 
-            consentService.saveConsents(messages
+            creationUsecases.saveConsents(messages
                     .stream().map(s -> s.getData())
-                    .collect(Collectors.toSet())
-            );
+                    .collect(Collectors.toSet()));
 
             messages.removeIf(m -> {
                 var tag = m.getTag();

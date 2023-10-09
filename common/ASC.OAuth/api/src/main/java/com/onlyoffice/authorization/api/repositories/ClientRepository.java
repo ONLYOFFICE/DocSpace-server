@@ -1,6 +1,8 @@
 package com.onlyoffice.authorization.api.repositories;
 
 import com.onlyoffice.authorization.api.entities.Client;
+import com.onlyoffice.authorization.api.usecases.repository.client.ClientPersistenceMutationUsecases;
+import com.onlyoffice.authorization.api.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,9 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Transactional(rollbackFor = Exception.class)
-public interface ClientRepository extends CrudRepository<Client, String>,
-        PagingAndSortingRepository<Client, String> {
+public interface ClientRepository extends CrudRepository<Client, String>, PagingAndSortingRepository<Client, String>,
+        ClientPersistenceRetrievalUsecases, ClientPersistenceMutationUsecases {
     @Query("""
            SELECT c FROM Client c WHERE c.clientId=:id AND c.invalidated=false
            """)
@@ -29,4 +30,13 @@ public interface ClientRepository extends CrudRepository<Client, String>,
            """)
     @Modifying
     void regenerateClientSecretByClientId(@Param("clientId") String clientId, @Param("tenant") int tenant, @Param("secret") String secret);
+    @Query("""
+        UPDATE Client c set c.enabled = :enabled WHERE c.clientId=:clientId
+        """)
+    @Modifying
+    void changeActivation(@Param("clientId") String clientId, @Param(value = "enabled") boolean enabled);
+
+    default Client saveClient(Client entity) {
+        return this.save(entity);
+    }
 }

@@ -1,4 +1,4 @@
-package com.onlyoffice.authorization.api.dto;
+package com.onlyoffice.authorization.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @Getter
 @Setter
-public class RegenerateDTO extends RepresentationModel<ClientDTO> implements Serializable {
+public class SecretDTO extends RepresentationModel<ClientDTO> implements Serializable {
     @JsonProperty("client_secret")
     private String clientSecret;
 }

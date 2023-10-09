@@ -1,14 +1,14 @@
 package com.onlyoffice.authorization.api.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.dto.ScopeDTO;
+import com.onlyoffice.authorization.api.dto.response.ScopeDTO;
+import com.onlyoffice.authorization.api.exceptions.ScopeNotFoundException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping(value = "/api/scopes", headers = {"X-API-Version=1"})
-@RequiredArgsConstructor
 @Slf4j
+@RestController
+@RequestMapping(value = "/api/2.0/scopes")
+@RequiredArgsConstructor
 public class ScopeController {
     private final ApplicationConfiguration configuration;
     private Set<ScopeDTO> scopes;
@@ -43,24 +43,20 @@ public class ScopeController {
     @RateLimiter(name = "getRateLimiter")
     @SneakyThrows
     public ResponseEntity<Iterable<ScopeDTO>> getScopes() {
-        log.debug("Received a request to list scopes");
+        log.info("received a request to list scopes");
         return ResponseEntity.ok(this.scopes);
     }
 
     @GetMapping("/{name}")
     @RateLimiter(name = "getRateLimiter")
     @SneakyThrows
-    public ResponseEntity<ScopeDTO> getScope(@PathVariable String name) {
-        log.debug("Received a get {} scope", name);
+    public ResponseEntity<ScopeDTO> getScope(@PathVariable @NotEmpty String name) {
+        log.info("received a get {} scope", name);
         var scope = this.scopes.stream()
                 .filter(s -> s.getName().equals(name))
-                .findFirst();
-
-        if (scope.isEmpty()) {
-            log.error("Scope {} does not exist", name);
-            return ResponseEntity.badRequest().build();
-        }
-
-        return ResponseEntity.ok(scope.get());
+                .findFirst()
+                .orElseThrow(() -> new ScopeNotFoundException("could not find scope with this name"));
+        return ResponseEntity.ok(scope);
     }
 }
+

@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WebSocketConfiguration {
-    @Value("${socket-server.host}")
+    @Value("${server.socket.host}")
     private String host;
-    @Value("${socket-server.port}")
+    @Value("${server.socket.port}")
     private Integer port;
 
     @Bean

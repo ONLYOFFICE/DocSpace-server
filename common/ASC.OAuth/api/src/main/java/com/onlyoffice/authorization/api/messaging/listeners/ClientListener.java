@@ -1,10 +1,10 @@
 package com.onlyoffice.authorization.api.messaging.listeners;
 
 import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
-import com.onlyoffice.authorization.api.dto.ClientDTO;
+import com.onlyoffice.authorization.api.messaging.messages.ClientMessage;
 import com.onlyoffice.authorization.api.messaging.messages.NotificationMessage;
 import com.onlyoffice.authorization.api.messaging.messages.wrappers.MessageWrapper;
-import com.onlyoffice.authorization.api.services.ClientService;
+import com.onlyoffice.authorization.api.usecases.service.client.ClientCreationUsecases;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,11 +12,13 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,40 +26,49 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClientListener {
     private final RabbitMQConfiguration configuration;
-    private final ClientService clientService;
+
+    private final ClientCreationUsecases creationUsecases;
     private final AmqpTemplate rabbitClient;
-    private CopyOnWriteArrayList<MessageWrapper<ClientDTO>> messages = new CopyOnWriteArrayList<>();
+
+    private LinkedBlockingQueue<MessageWrapper<ClientMessage>> messages = new LinkedBlockingQueue<>();
+    private AtomicInteger lastBatchProcessed = new AtomicInteger(0);
 
     @RabbitListener(
             queues = "${messaging.rabbitmq.configuration.client.queue}",
             containerFactory = "prefetchRabbitListenerContainerFactory"
     )
     public void receiveMessage(
-            ClientDTO clientDTO,
+            @Payload ClientMessage message,
             Channel channel,
             @Header(AmqpHeaders.DELIVERY_TAG) long tag
     ) {
         if (messages.size() == configuration.getPrefetch()) {
-            log.warn("Client message queue is full");
+            log.warn("client message queue is full");
             return;
         }
 
-        log.debug("Adding a client message to the queue");
+        log.info("adding a client message to the queue");
 
         messages.add(MessageWrapper.
-                <ClientDTO>builder().
+                <ClientMessage>builder().
                 tag(tag).
                 channel(channel).
-                data(clientDTO).
+                data(message).
                 build());
+    }
+
+    public int getLastBatchSize() {
+        return this.lastBatchProcessed.get();
     }
 
     @Scheduled(fixedDelay = 1000)
     private void persistClients() {
         if (messages.size() > 0) {
-            log.debug("Persisting client messages (count {})", messages.size());
+            lastBatchProcessed.set(messages.size());
+            log.info("persisting client messages (count {})", messages.size());
 
-            var ids = clientService.createClients(messages.stream().map(s -> s.getData())
+            var ids = creationUsecases.saveClients(messages.stream()
+                    .map(msg -> msg.getData())
                     .collect(Collectors.toList()));
 
             messages.removeIf(w -> {

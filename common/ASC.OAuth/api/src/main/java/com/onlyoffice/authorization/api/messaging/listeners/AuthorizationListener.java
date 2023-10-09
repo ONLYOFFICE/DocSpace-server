@@ -3,8 +3,9 @@ package com.onlyoffice.authorization.api.messaging.listeners;
 import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.messaging.messages.AuthorizationMessage;
 import com.onlyoffice.authorization.api.messaging.messages.wrappers.MessageWrapper;
-import com.onlyoffice.authorization.api.services.AuthorizationService;
+import com.onlyoffice.authorization.api.usecases.service.authorization.AuthorizationCreationUsecases;
 import com.rabbitmq.client.Channel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -28,7 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthorizationListener {
     private final RabbitMQConfiguration configuration;
-    private final AuthorizationService authorizationService;
+    private final AuthorizationCreationUsecases creationUsecases;
+    @Getter
     private LinkedBlockingQueue<MessageWrapper<AuthorizationMessage>> messages = new LinkedBlockingQueue<>();
     @RabbitHandler
     public void receiveMessage(
@@ -37,11 +39,11 @@ public class AuthorizationListener {
             @Header(AmqpHeaders.DELIVERY_TAG) long tag
     ) {
         if (messages.size() > configuration.getPrefetch()) {
-            log.warn("Authorization message queue is full");
+            log.warn("authorization message queue is full");
             return;
         }
 
-        log.debug("Adding an authorization message to the queue");
+        log.info("adding an authorization message to the queue");
 
         messages.add(MessageWrapper.
                 <AuthorizationMessage>builder()
@@ -54,12 +56,11 @@ public class AuthorizationListener {
     @Scheduled(fixedDelay = 1000)
     private void persistAuthorizations() {
         if (messages.size() > 0) {
-            log.debug("Persisting authorization messages (count {})", messages.size());
+            log.info("persisting authorization messages (count {})", messages.size());
 
-            var ids = authorizationService.saveAuthorizations(messages
+            var ids = creationUsecases.saveAuthorizations(messages
                     .stream().map(s -> s.getData())
-                    .collect(Collectors.toSet())
-            );
+                    .collect(Collectors.toSet()));
 
             messages.removeIf(m -> {
                 var tag = m.getTag();

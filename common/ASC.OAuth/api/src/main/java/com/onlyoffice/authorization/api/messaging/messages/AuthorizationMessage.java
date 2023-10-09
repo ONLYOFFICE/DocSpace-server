@@ -11,6 +11,7 @@ import java.util.Date;
 @Builder
 @Getter
 @Setter
+@EqualsAndHashCode
 public class AuthorizationMessage implements Serializable {
     private String id;
     private String registeredClientId;

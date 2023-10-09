@@ -1,7 +1,11 @@
 package com.onlyoffice.authorization.api.mappers;
 
-import com.onlyoffice.authorization.api.dto.ClientDTO;
+import com.onlyoffice.authorization.api.dto.request.CreateClientDTO;
+import com.onlyoffice.authorization.api.dto.request.UpdateClientDTO;
+import com.onlyoffice.authorization.api.dto.response.ClientDTO;
 import com.onlyoffice.authorization.api.entities.Client;
+import com.onlyoffice.authorization.api.entities.Tenant;
+import com.onlyoffice.authorization.api.messaging.messages.ClientMessage;
 import org.bouncycastle.util.Strings;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -22,33 +26,50 @@ public interface ClientMapper {
         return String.join(",", value);
     }
 
-    @Mappings({
-            @Mapping(source = "tenant.id", target = "tenant"),
-            @Mapping(source = "invalidated", target = "invalidated")
-    })
-    ClientDTO toDTO(Client client);
+    default Tenant map(int value) {
+        return Tenant.builder().id(value).build();
+    }
 
     @Mappings({
             @Mapping(
                     source = "authenticationMethod",
                     target = "authenticationMethod",
                     defaultValue = "client_secret_post"
-            ),
-            @Mapping(
-                    source = "tenant",
-                    target = "tenant.id"
-            ),
-            @Mapping(
-                    source = "invalidated",
-                    target = "invalidated"
             )
     })
-    Client toEntity(ClientDTO clientDTO);
-
+    Client fromMessageToEntity(ClientMessage message);
     @Mappings({
-            @Mapping(target = "clientId", ignore = true),
-            @Mapping(target = "clientSecret", ignore = true),
-            @Mapping(target = "tenant", ignore = true)
+            @Mapping(
+                    source = "authenticationMethod",
+                    target = "authenticationMethod",
+                    defaultValue = "client_secret_post"
+            )
     })
-    void update(@MappingTarget Client entity, ClientDTO clientDTO);
+    ClientMessage fromQueryToMessage(ClientDTO client);
+    @Mappings({
+            @Mapping(
+                    source = "authenticationMethod",
+                    target = "authenticationMethod",
+                    defaultValue = "client_secret_post"
+            )
+    })
+    ClientDTO fromCommandToQuery(CreateClientDTO client);
+    @Mappings({
+            @Mapping(source = "tenant.id", target = "tenant"),
+            @Mapping(source = "enabled", target = "enabled"),
+    })
+    ClientDTO fromEntityToQuery(Client client);
+    @Mappings({
+            @Mapping(source = "tenant", target = "tenant.id"),
+            @Mapping(source = "enabled", target = "enabled"),
+    })
+    Client fromQueryToEntity(ClientDTO client);
+    @Mappings({
+            @Mapping(
+                    source = "authenticationMethod",
+                    target = "authenticationMethod",
+                    defaultValue = "client_secret_post"
+            )
+    })
+    void update(@MappingTarget Client entity, UpdateClientDTO clientDTO);
 }

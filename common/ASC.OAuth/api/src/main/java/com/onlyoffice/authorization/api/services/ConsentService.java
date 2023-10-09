@@ -3,7 +3,9 @@ package com.onlyoffice.authorization.api.services;
 import com.onlyoffice.authorization.api.entities.Consent;
 import com.onlyoffice.authorization.api.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.messaging.messages.ConsentMessage;
-import com.onlyoffice.authorization.api.repositories.ConsentRepository;
+import com.onlyoffice.authorization.api.usecases.repository.consent.ConsentPersistenceMutationUsecases;
+import com.onlyoffice.authorization.api.usecases.service.consent.ConsentCleanupUsecases;
+import com.onlyoffice.authorization.api.usecases.service.consent.ConsentCreationUsecases;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,24 +17,24 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ConsentService {
-    private final ConsentRepository consentRepository;
+public class ConsentService implements ConsentCleanupUsecases, ConsentCreationUsecases {
+    private final ConsentPersistenceMutationUsecases mutationUsecases;
 
     @Transactional
     public void saveConsent(ConsentMessage consentMessage) {
-        log.debug("Trying to save a new consent for {} and {}",
+        log.info("trying to save a new consent for {} and {}",
                 consentMessage.getPrincipalName(), consentMessage.getRegisteredClientId());
-        consentRepository.save(ConsentMapper.INSTANCE.toEntity(consentMessage));
+        mutationUsecases.saveConsent(ConsentMapper.INSTANCE.toEntity(consentMessage));
     }
 
     @Transactional
     public void saveConsents(Iterable<ConsentMessage> consents) {
-        log.debug("Trying to save consents");
+        log.info("trying to save consents");
         for (ConsentMessage consent : consents) {
             try {
-                log.debug("Saving a new consent for {} and {}",
+                log.info("saving a new consent for {} and {}",
                         consent.getPrincipalName(), consent.getRegisteredClientId());
-                consentRepository.save(ConsentMapper.INSTANCE.toEntity(consent));
+                mutationUsecases.saveConsent(ConsentMapper.INSTANCE.toEntity(consent));
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -41,21 +43,19 @@ public class ConsentService {
 
     @Transactional
     public void deleteConsent(ConsentMessage consentMessage) {
-        log.debug("Deleting a consent for {} and {}",
+        log.info("deleting a consent for {} and {}",
                 consentMessage.getPrincipalName(), consentMessage.getRegisteredClientId());
-        consentRepository.deleteById(new Consent.ConsentId(
+        mutationUsecases.deleteById(new Consent.ConsentId(
                 consentMessage.getRegisteredClientId(),
-                consentMessage.getPrincipalName()
-        ));
+                consentMessage.getPrincipalName()));
     }
 
     @Transactional
     public void deleteConsents(Iterable<ConsentMessage> consents) {
-        log.debug("Trying to delete all consents");
-        consentRepository.deleteAll(StreamSupport
+        log.info("trying to delete all consents");
+        mutationUsecases.deleteAll(StreamSupport
                 .stream(consents.spliterator(), false)
                 .map(c -> ConsentMapper.INSTANCE.toEntity(c))
-                .collect(Collectors.toList())
-        );
+                .collect(Collectors.toList()));
     }
 }

@@ -17,8 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @EnableScheduling
 public class ApplicationConfiguration {
-    private SecurityConfiguration security;
-    private List<ScopeConfiguration> scopes;
+    private SecurityConfiguration security = new SecurityConfiguration();
+    private List<ScopeConfiguration> scopes = List.of();
 
     @Getter
     @Setter

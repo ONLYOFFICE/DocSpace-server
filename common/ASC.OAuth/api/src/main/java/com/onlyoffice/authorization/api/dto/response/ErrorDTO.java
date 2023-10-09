@@ -1,4 +1,4 @@
-package com.onlyoffice.authorization.api.dto;
+package com.onlyoffice.authorization.api.dto.response;
 
 import lombok.*;
 

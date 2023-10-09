@@ -1,9 +1,8 @@
 server:
-  port: 9090
-
-socket-server:
-  host: 127.0.0.1
-  port: 8585
+  socket:
+    host: ${SOCKET_SERVER_HOST:127.0.0.1}
+    port: ${SOCKET_SERVER_PORT:8585}
+  port: ${SERVER_PORT:9090}
 
 application:
   security:
@@ -15,6 +14,10 @@ application:
     -
       name: accounts:write
       description: write accounts
+
+docspace:
+  server:
+    url: http://${DOCSPACE_ADDRESS:127.0.0.1}
 
 messaging:
   rabbitmq:
@@ -52,10 +55,10 @@ spring:
   flyway:
     enabled: true
     baselineOnMigrate: true
-    url: jdbc:mysql://${JDBC_URL:onlyoffice-mysql-server}/${JDBC_DATABASE:docspace}
+    url: jdbc:mysql://${JDBC_URL:127.0.0.1:33060}/${JDBC_DATABASE:docspace}
     user: ${JDBC_USER_NAME:root}
     password: ${JDBC_PASSWORD:my-secret-pw}
-    schemas: ${JDBC_DATABSE:docspace}
+    schemas: ${JDBC_DATABASE:docspace}
     sql-migration-prefix: V
     repeatable-sql-migration-prefix: R
     sql-migration-separator: __
@@ -77,13 +80,13 @@ spring:
         order_inserts: true
         dialect: org.hibernate.dialect.MySQLDialect
   datasource:
-    url: jdbc:mysql://${JDBC_URL:onlyoffice-mysql-server}/${JDBC_DATABASE:docspace}
+    url: jdbc:mysql://${JDBC_URL:127.0.0.1:33060}/${JDBC_DATABASE:docspace}
     username: ${JDBC_USER_NAME:root}
     password: ${JDBC_PASSWORD:my-secret-pw}
     driver-class-name: com.mysql.cj.jdbc.Driver
   rabbitmq:
-    host: ${RABBIT_HOST:onlyoffice-rabbitmq}
-    port: ${RABBIT_PORT:5671}
+    host: ${RABBIT_HOST:127.0.0.1}
+    port: ${RABBIT_PORT:5672}
     username: ${RABBIT_USER_NAME:guest}
     password: ${RABBIT_PASSWORD:guest}
     listener:
@@ -105,18 +108,15 @@ resilience4j:
         registerHealthIndicator: true
         eventConsumerBufferSize: 100
     instances:
-      getRateLimiter:
+      batchClientRateLimiter:
         baseConfig: default
-      batchRateLimiter:
+        limitForPeriod: 500
+      getClientRateLimiter:
         baseConfig: default
-        limitForPeriod: 1500
-      regenerateSecretRateLimiter:
+      regenerateClientSecretRateLimiter:
         baseConfig: default
         limitForPeriod: 15
       updateClientRateLimiter:
-        baseConfig: default
-        limitForPeriod: 15
-      deleteClientRateLimiter:
         baseConfig: default
         limitForPeriod: 15
   timelimiter:

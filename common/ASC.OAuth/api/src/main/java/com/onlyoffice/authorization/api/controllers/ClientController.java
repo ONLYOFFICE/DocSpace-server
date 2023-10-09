@@ -1,17 +1,25 @@
 package com.onlyoffice.authorization.api.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
-import com.onlyoffice.authorization.api.dto.ClientDTO;
-import com.onlyoffice.authorization.api.dto.PaginationDTO;
-import com.onlyoffice.authorization.api.dto.RegenerateDTO;
-import com.onlyoffice.authorization.api.services.ClientService;
+import com.onlyoffice.authorization.api.dto.request.ChangeClientActivationDTO;
+import com.onlyoffice.authorization.api.dto.request.CreateClientDTO;
+import com.onlyoffice.authorization.api.dto.request.UpdateClientDTO;
+import com.onlyoffice.authorization.api.dto.response.ClientDTO;
+import com.onlyoffice.authorization.api.dto.response.PaginationDTO;
+import com.onlyoffice.authorization.api.dto.response.SecretDTO;
+import com.onlyoffice.authorization.api.usecases.service.client.ClientCleanupUsecases;
+import com.onlyoffice.authorization.api.usecases.service.client.ClientCreationUsecases;
+import com.onlyoffice.authorization.api.usecases.service.client.ClientMutationUsecases;
+import com.onlyoffice.authorization.api.usecases.service.client.ClientRetrieveUsecases;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,268 +28,259 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-@RestController
-@RequestMapping(value = "/api/clients", headers = {"X-API-Version=1"})
-@RequiredArgsConstructor
 @Slf4j
+@RestController
+@RequestMapping(value = "/api/2.0/clients")
+@RequiredArgsConstructor
 public class ClientController {
-    private final int MAX_LIMIT_PER_PAGE = 20;
+    private final String X_TENANT_HEADER = "X-Tenant";
     private List<String> allowedScopes = new ArrayList<>();
 
     private final ApplicationConfiguration applicationConfiguration;
-    private final RabbitMQConfiguration configuration;
-    private final ClientService clientService;
-    private final AmqpTemplate amqpTemplate;
+    private final ClientRetrieveUsecases retrieveUsecases;
+    private final ClientCreationUsecases creationUsecases;
+    private final ClientMutationUsecases mutationUsecases;
+    private final ClientCleanupUsecases cleanupUsecases;
 
     @PostConstruct
     public void init() {
-        this.allowedScopes = applicationConfiguration.getScopes().stream().map(s -> s.getName())
+        this.allowedScopes = applicationConfiguration.getScopes().stream()
+                .map(s -> s.getName())
                 .collect(Collectors.toList());
     }
 
     @GetMapping
-    @RateLimiter(name = "getRateLimiter")
+    @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<PaginationDTO<ClientDTO>> getClients(
             HttpServletResponse response,
-            @RequestHeader(value = "X-Tenant") int tenant,
-            @RequestParam(value = "page") int page,
-            @RequestParam(value = "limit") int limit
+            @RequestParam(value = "page") @Min(value = 0) int page,
+            @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit
     ) {
-        if (limit > MAX_LIMIT_PER_PAGE)
-            limit = MAX_LIMIT_PER_PAGE;
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new get clients request for tenant {} with page {} and limit", tenant, page, limit);
 
-        log.debug("Received a new get clients request for tenant {} with page {} and limit", tenant, page, limit);
-
-        PaginationDTO<ClientDTO> pagination = clientService.getTenantClients(tenant, page, limit);
+        PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant, page, limit);
         for (final ClientDTO client : pagination.getData()) {
             client.add(linkTo(methodOn(ClientController.class)
-                    .getClient(null, tenant, client.getClientId()))
+                    .getClient(response, client.getClientId()))
                     .withRel(HttpMethod.GET.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                    .withTitle("get_client")
-                    .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                    .withTitle("get_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(response, tenant, client.getClientId(), null))
+                    .updateClient(response, client.getClientId(), null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                    .withTitle("update_client")
-                    .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                    .withTitle("update_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(response, client.getClientId(), tenant))
+                    .deleteClient(response, client.getClientId()))
                     .withRel(HttpMethod.DELETE.name())
-                    .withTitle("delete_client")
-                    .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                    .withTitle("delete_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .regenerateSecret(response, tenant, client.getClientId()))
+                    .regenerateSecret(response, client.getClientId()))
                     .withRel(HttpMethod.PATCH.name())
-                    .withTitle("regenerate_secret")
-                    .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                    .withTitle("regenerate_secret"));
+            client.add(linkTo(methodOn(ClientController.class)
+                    .activateClient(response, client.getClientId(), null))
+                    .withRel(HttpMethod.PATCH.name())
+                    .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                    .withTitle("activate_client"));
         }
 
         pagination.add(linkTo(methodOn(ClientController.class)
-                .postClient(response,null)).withRel(HttpMethod.POST.name())
-                .withTitle("create_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .postClient(response, null)).withRel(HttpMethod.POST.name())
+                .withTitle("create_client"));
 
         return ResponseEntity.ok(pagination);
     }
 
     @GetMapping("/{clientId}")
-    @RateLimiter(name = "getRateLimiter")
+    @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientDTO> getClient(
             HttpServletResponse response,
-            @RequestHeader(value = "X-Tenant") int tenant,
-            @PathVariable String clientId
+            @PathVariable @NotEmpty String clientId
     ) {
-        log.debug("Received a new get client {} request for tenant {}", clientId, tenant);
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new get client {} request for tenant {}", clientId, tenant);
 
-        var client = clientService.getClient(clientId, tenant);
-
+        var client = retrieveUsecases.getClient(clientId, tenant);
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, tenant, clientId, null))
+                .updateClient(response, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("update_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, clientId, tenant))
+                .deleteClient(response, clientId))
                 .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, tenant, client.getClientId()))
+                .regenerateSecret(response, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
-                .withTitle("regenerate_secret")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(response,null))
+                .postClient(response, null))
                 .withRel(HttpMethod.POST.name())
-                .withTitle("create_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("create_client"));
+        client.add(linkTo(methodOn(ClientController.class)
+                .activateClient(response, clientId, null))
+                .withRel(HttpMethod.PATCH.name())
+                .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                .withTitle("activate_client"));
 
         return ResponseEntity.ok(client);
     }
 
     @PostMapping
-    @RateLimiter(name = "batchRateLimiter")
+    @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity<ClientDTO> postClient(
             HttpServletResponse response,
-            @RequestBody ClientDTO client
+            @RequestBody @Valid CreateClientDTO body
     ) {
-        log.debug("Received a new create client request");
-        if (!client.getScopes().stream()
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new create client request");
+        if (!body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
-            log.error("Could not create a new client with the scopes specified");
+            log.error("could not create a new client with the scopes specified");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        log.debug("Generating a new client's credentials");
-
-        client.setClientId(UUID.randomUUID().toString());
-        client.setClientSecret(UUID.randomUUID().toString());
-
-        this.amqpTemplate.convertAndSend(
-                configuration.getClient().getExchange(),
-                configuration.getClient().getRouting(),
-                client
-        );
-
-        log.debug("Successfully submitted a new client broker message");
+        log.info("generating a new client's credentials");
+        var client = creationUsecases.clientAsyncCreationTask(body, tenant);
+        log.info("successfully submitted a new client broker message");
 
         client.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, client.getTenant(), client.getClientId()))
+                .getClient(response, client.getClientId()))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("get_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", client.getTenant())));
+                .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, client.getTenant(), client.getClientId(),null))
+                .updateClient(response, client.getClientId(),null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("update_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", client.getTenant())));
+                .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, client.getClientId(), client.getTenant()))
+                .deleteClient(response, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", client.getTenant())));
+                .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, client.getTenant(), client.getClientId()))
+                .regenerateSecret(response, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
-                .withTitle("regenerate_secret")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", client.getTenant())));
+                .withTitle("regenerate_secret"));
+        client.add(linkTo(methodOn(ClientController.class)
+                .activateClient(response, client.getClientId(), null))
+                .withRel(HttpMethod.PATCH.name())
+                .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                .withTitle("activate_client"));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(client);
     }
 
     @PutMapping("/{clientId}")
-    @RateLimiter(name = "batchRateLimiter")
+    @RateLimiter(name = "updateClientRateLimiter")
     public ResponseEntity<ClientDTO> updateClient(
             HttpServletResponse response,
-            @RequestHeader(value = "X-Tenant") int tenant,
-            @PathVariable String clientId,
-            @RequestBody ClientDTO clientDTO
+            @PathVariable @NotEmpty String clientId,
+            @RequestBody @Valid UpdateClientDTO body
     ) {
-        log.debug("Received a new update client {} request", clientId);
-        if (!clientDTO.getScopes().stream()
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new update client {} request", clientId);
+        if (body.getScopes() != null && !body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
             log.error("Could not update client {} with the scopes specified", clientId);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        clientDTO.setClientId(clientId);
-        var client = clientService.updateClient(clientDTO, tenant);
-
+        var client = creationUsecases.updateClient(body, clientId, tenant);
         client.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, tenant, client.getClientId()))
+                .getClient(response, client.getClientId()))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("get_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, client.getClientId(), tenant))
+                .deleteClient(response, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, tenant, client.getClientId()))
+                .regenerateSecret(response, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
-                .withTitle("regenerate_secret")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(response,null))
+                .postClient(response, null))
                 .withRel(HttpMethod.POST.name())
-                .withTitle("create_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("create_client"));
+        client.add(linkTo(methodOn(ClientController.class)
+                .activateClient(response, clientId, null))
+                .withRel(HttpMethod.PATCH.name())
+                .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                .withTitle("activate_client"));
 
         return ResponseEntity.ok(client);
     }
 
-    @PatchMapping("/{clientId}")
-    @RateLimiter(name = "regenerateSecretRateLimiter")
-    public ResponseEntity<RegenerateDTO> regenerateSecret(
+    @PatchMapping("/{clientId}/regenerate")
+    @RateLimiter(name = "regenerateClientSecretRateLimiter")
+    public ResponseEntity<SecretDTO> regenerateSecret(
             HttpServletResponse response,
-            @RequestHeader(value = "X-Tenant") int tenant,
-            @PathVariable String clientId
+            @PathVariable @NotEmpty String clientId
     ) {
-        log.debug("Received a new regenerate client's {} secret request", clientId);
-        var regenerate = clientService.regenerateSecret(clientId, tenant);
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new regenerate client's {} secret request", clientId);
+        var regenerate = mutationUsecases.regenerateSecret(clientId, tenant);
 
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, tenant, clientId))
+                .getClient(response, clientId))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("get_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("get_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, tenant, clientId, null))
+                .updateClient(response, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
-                .withTitle("update_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("update_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, clientId, tenant))
+                .deleteClient(response, clientId))
                 .withRel(HttpMethod.DELETE.name())
-                .withTitle("delete_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .withTitle("delete_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .postClient(response,null)).withRel(HttpMethod.POST.name())
-                .withTitle("create_client")
-                .withProfile(String.format("X-API-Version=1;X-Tenant=%d", tenant)));
+                .postClient(response, null)).withRel(HttpMethod.POST.name())
+                .withTitle("create_client"));
+        regenerate.add(linkTo(methodOn(ClientController.class)
+                .activateClient(response, clientId, null))
+                .withRel(HttpMethod.PATCH.name())
+                .withMedia(MediaType.APPLICATION_JSON_VALUE)
+                .withTitle("activate_client"));
 
         return ResponseEntity.ok(regenerate);
     }
 
     @DeleteMapping("/{clientId}")
-    @RateLimiter(name = "batchRateLimiter")
+    @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity deleteClient(
             HttpServletResponse response,
-            @PathVariable String clientId,
-            @RequestHeader(value = "X-Tenant") int tenant
+            @PathVariable @NotEmpty String clientId
     ) {
-        log.debug("Received a new delete client {} request for tenant {}", clientId, tenant);
-
-        this.amqpTemplate.convertAndSend(
-                configuration.getClient().getExchange(),
-                configuration.getClient().getRouting(),
-                ClientDTO
-                        .builder()
-                        .tenant(tenant)
-                        .clientId(clientId)
-                        .clientSecret(UUID.randomUUID().toString())
-                        .scopes(Set.of("***"))
-                        .redirectUri("***")
-                        .invalidated(true)
-                        .build()
-        );
-
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new delete client {} request for tenant {}", clientId, tenant);
+        cleanupUsecases.clientAsyncDeletionTask(clientId, tenant);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PatchMapping("/{clientId}/activation")
+    @RateLimiter(name = "regenerateClientSecretRateLimiter")
+    public ResponseEntity activateClient(
+            HttpServletResponse response,
+            @PathVariable @NotEmpty String clientId,
+            @RequestBody @Valid ChangeClientActivationDTO body
+    ) {
+        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        log.info("received a new disable client {} request for tenant {}", clientId, tenant);
+        if (mutationUsecases.changeActivation(body, clientId))
+            return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.badRequest().build();
+    }
 }
+
