@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Service;
+
 public class Startup : BaseWorkerStartup
 {
     private readonly IConfiguration _configuration;

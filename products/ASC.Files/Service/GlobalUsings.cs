@@ -70,6 +70,7 @@ global using ASC.Files.Expired;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
+global using ASC.Files.Service.RoomIndexExport;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.Thumbnail.IntegrationEvents.EventHandling;
 global using ASC.Web.Core;

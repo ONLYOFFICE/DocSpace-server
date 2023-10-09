@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
+namespace ASC.Files.Service.RoomIndexExport;
 
 [Scope]
 public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<RoomIndexExportIntegrationEvent>
@@ -67,6 +67,12 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+
+            if (@event.Terminate)
+            {
+                _documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                return;
+            }
 
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
 

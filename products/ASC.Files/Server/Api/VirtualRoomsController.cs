@@ -865,8 +865,9 @@ public class VirtualRoomsCommonController : ApiControllerBase
         var tenantId = _apiContext.Tenant.Id;
         var userId = _authContext.CurrentAccount.ID;
 
-        //TODO: through eventbus
-        _documentBuilderTaskManager.TerminateTask(tenantId, userId);
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, true);
+
+        _eventBus.Publish(evt);
     }
 
     private void ErrorIfNotDocSpace()
