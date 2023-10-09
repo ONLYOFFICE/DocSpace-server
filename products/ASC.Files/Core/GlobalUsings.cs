@@ -140,6 +140,7 @@ global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
+global using ASC.Web.Core.Utility.Settings;
 global using ASC.Web.Core.Utility.Skins;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Files;

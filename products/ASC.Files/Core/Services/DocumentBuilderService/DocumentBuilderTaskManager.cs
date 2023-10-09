@@ -56,14 +56,26 @@ public class DocumentBuilderTaskManager
         _displayUserSettingsHelper = displayUserSettingsHelper;
     }
 
+    public static string GetTaskId(int tenantId, Guid userId)
+    {
+        return $"DocumentBuilderTask_{tenantId}_{userId}";
+    }
+
+    public DistributedTaskProgress GetTask(int tenantId, Guid userId)
+    {
+        var taskId = GetTaskId(tenantId, userId);
+
+        return GetTask(taskId);
+    }
+
     public DistributedTaskProgress GetTask(string taskId)
     {
         return _queue.PeekTask<DistributedTaskProgress>(taskId);
     }
 
-    public void TerminateTask(string taskId)
+    public void TerminateTask(int tenantId, Guid userId)
     {
-        var task = GetTask(taskId);
+        var task = GetTask(tenantId, userId);
 
         if (task != null)
         {
@@ -113,10 +125,10 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Tenant tenant, UserInfo user, Folder<T> room, DataWrapper<T> items)
+    public async Task<DistributedTaskProgress> StartRoomIndexExport<T>(Tenant tenant, UserInfo user, Folder<T> room, DataWrapper<T> items, TenantWhiteLabelSettings tenantWhiteLabelSettings, CustomColorThemesSettings customColorThemesSettings, string fullAbsoluteLogoPath)
     {
-        var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
+        //var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        //var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
@@ -124,8 +136,8 @@ public class DocumentBuilderTaskManager
         var lightBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08);
         var mainFontColor = ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1);
 
-        var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
-        var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
+        //var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
+        //var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
 
         var entries = new List<object>
         {
@@ -197,6 +209,7 @@ public class DocumentBuilderTaskManager
 
         var outputFileName = $"{room.Title}_index.xlsx";
 
+        //TODO: think about writing a temporary file in a loop by N
         var (script, tempFileName) = DocumentBuilderScriptHelper.GetScript(data);
 
         var task = new DocumentBuilderTask<T>(_serviceProvider);

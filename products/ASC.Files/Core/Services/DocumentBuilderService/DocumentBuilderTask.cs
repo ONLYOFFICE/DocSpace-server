@@ -50,7 +50,7 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
         _tempFileName = tempFileName;
         _outputFileName = outputFileName;
 
-        Id = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{GetType().Name}_{tenantId}_{userId}"));
+        Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
         Status = DistributedTaskStatus.Created;
 
         this["ResultFileId"] = default(T);

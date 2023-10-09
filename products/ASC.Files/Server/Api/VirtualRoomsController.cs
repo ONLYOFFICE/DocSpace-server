@@ -544,41 +544,6 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
-
-    [HttpPost("rooms/indexexport/{id}")]
-    public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(T id)
-    {
-        ErrorIfNotDocSpace();
-
-        var folder = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
-
-        var startIndex = Convert.ToInt32(_apiContext.StartIndex);
-
-        var items = await _fileStorageService.GetFolderItemsAsync(id, startIndex, Convert.ToInt32(_apiContext.Count), FilterType.None, false, Guid.Empty.ToString(), string.Empty, false, true, null);
-
-        var task = await _fileStorageService.StartRoomIndexExport(folder, items);
-
-        return DocumentBuilderTaskDto.Get(task);
-    }
-
-    [HttpGet("rooms/indexexport/{taskId}")]
-    public DocumentBuilderTaskDto GetRoomIndexExport(string taskId)
-    {
-        ErrorIfNotDocSpace();
-
-        var task = _fileStorageService.GetRoomIndexExport(taskId);
-
-        return DocumentBuilderTaskDto.Get(task);
-    }
-
-    [HttpDelete("rooms/indexexport/{taskId}")]
-    public void TerminateRoomIndexExport(string taskId)
-    {
-        ErrorIfNotDocSpace();
-
-        _fileStorageService.TerminateRoomIndexExport(taskId);
-    }
-
     protected void ErrorIfNotDocSpace()
     {
         if (_coreBaseSettings.DisableDocSpace)
@@ -601,6 +566,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
     private readonly FileSizeComment _fileSizeComment;
     private readonly InvitationLinkService _invitationLinkService;
     private readonly AuthContext _authContext;
+    private readonly IEventBus _eventBus;
 
     public VirtualRoomsCommonController(
         FileStorageService fileStorageService,
@@ -615,7 +581,8 @@ public class VirtualRoomsCommonController : ApiControllerBase
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         InvitationLinkService invitationLinkService,
-        AuthContext authContext) : base(folderDtoHelper, fileDtoHelper)
+        AuthContext authContext,
+        IEventBus eventBus) : base(folderDtoHelper, fileDtoHelper)
     {
         _fileStorageService = fileStorageService;
         _folderContentDtoHelper = folderContentDtoHelper;
@@ -628,6 +595,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
         _fileSizeComment = fileSizeComment;
         _invitationLinkService = invitationLinkService;
         _authContext = authContext;
+        _eventBus = eventBus;
     }
 
     /// <summary>
@@ -858,6 +826,43 @@ public class VirtualRoomsCommonController : ApiControllerBase
 
             await _fileStorageService.SetAceObjectAsync(aceCollection, false);
         }
+    }
+
+    [HttpPost("rooms/indexexport/{id}")]
+    public void StartRoomIndexExportAsync(int id)
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = _apiContext.Tenant.Id;
+        var userId = _authContext.CurrentAccount.ID;
+
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id);
+
+        _eventBus.Publish(evt);
+    }
+
+    [HttpGet("rooms/indexexport")]
+    public DocumentBuilderTaskDto GetRoomIndexExport()
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = _apiContext.Tenant.Id;
+        var userId = _authContext.CurrentAccount.ID;
+
+        var task = _fileStorageService.GetRoomIndexExport(tenantId, userId);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    [HttpDelete("rooms/indexexport")]
+    public void TerminateRoomIndexExport()
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = _apiContext.Tenant.Id;
+        var userId = _authContext.CurrentAccount.ID;
+
+        _fileStorageService.TerminateRoomIndexExport(tenantId, userId);
     }
 
     private void ErrorIfNotDocSpace()
