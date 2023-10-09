@@ -32,7 +32,6 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
     private String url;
-    private String frontendUrl;
     private String login = "/oauth2/login";
     private String logout = "/logout";
 
