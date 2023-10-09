@@ -87,10 +87,9 @@ public class ExternalShare
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
     
-    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password, bool isAuthenticated)
+    public async Task<Status> ValidateRecordAsync(FileShareRecord record, string password, bool isAuthenticated, FileEntry entry = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
-            record.Subject == FileConstant.ShareLinkId ||
             record.Options == null)
         {
             return Status.Ok;
@@ -101,7 +100,7 @@ public class ExternalShare
             return Status.Expired;
         }
 
-        if (record.Options.Internal && !isAuthenticated)
+        if ((record.Options.Internal && !isAuthenticated) || entry is { RootFolderType: FolderType.Archive or FolderType.TRASH })
         {
             return Status.Invalid;
         }

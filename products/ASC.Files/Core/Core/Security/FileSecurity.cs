@@ -1095,7 +1095,7 @@ public class FileSecurity : IFileSecurity
         }
 
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
-            await _externalShare.ValidateRecordAsync(ace, null, isAuthenticated) != Status.Ok)
+            await _externalShare.ValidateRecordAsync(ace, null, isAuthenticated, e) != Status.Ok)
         {
             return false;
         }
