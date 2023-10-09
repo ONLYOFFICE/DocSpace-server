@@ -583,8 +583,8 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
             result.FilesCount = 0;
             result.FoldersCount = 0;
             result.Error = errorFolder.Error;
-            result.Private = Private;
-            result.HasLogo = HasLogo;
+            result.SettingsPrivate = Private;
+            result.SettingsHasLogo = HasLogo;
 
             return result;
         }
@@ -607,8 +607,8 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
         result.Title = isRoot ? CustomerTitle : MakeTitle(folder.Name);
         result.FilesCount = 0;
         result.FoldersCount = 0;
-        result.Private = Private;
-        result.HasLogo = HasLogo;
+        result.SettingsPrivate = Private;
+        result.SettingsHasLogo = HasLogo;
 
         SetFolderType(result, isRoot);
 

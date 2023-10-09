@@ -560,6 +560,26 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
+    [HttpPut("rooms/{id}/settings")]
+    public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+    
+    [HttpPut("rooms/{id}/order")]
+    public async Task<FolderDto<T>> ReorderAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _fileStorageService.ReOrder(id);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+    
     protected void ErrorIfNotDocSpace()
     {
         if (_coreBaseSettings.DisableDocSpace)

@@ -231,7 +231,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
         result.IsFavorite = folder.IsFavorite.NullIfDefault();
         result.New = newBadges;
         result.Pinned = folder.Pinned;
-        result.Private = folder.Private;
+        result.Private = folder.SettingsPrivate;
 
         return result;
     }

@@ -1573,7 +1573,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 SortedByType.Type => orderBy.IsAsc
                     ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1))
                     : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1)),
-                SortedByType.Custom => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (file, order) => new { folder = file, order })
+                SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (file, order) => new { folder = file, order })
                     .Where(r => r.order.EntryType == FileEntryType.File && r.order.TenantId == r.folder.TenantId)
                     .OrderBy(r => r.order.Order)
                     .Select(r => r.folder),

@@ -39,7 +39,7 @@ public enum SortedByType
     RoomType,
     Tags,
     Room,
-    Custom
+    CustomOrder
 }
 
 [DebuggerDisplay("{SortedBy} {IsAsc}")]

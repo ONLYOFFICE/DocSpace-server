@@ -409,10 +409,10 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 {
                     RoomId = toUpdate.Id,
                     TenantId = TenantID,
-                    Private = folder.Private,
-                    HasLogo = folder.HasLogo,
+                    Private = folder.SettingsPrivate,
+                    HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
-                    Indexing = folder.Indexing
+                    Indexing = folder.SettingsIndexing
                 };
             }
 
@@ -447,10 +447,10 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                 {
                     RoomId = newFolder.Id,
                     TenantId = TenantID,
-                    Private = folder.Private,
-                    HasLogo = folder.HasLogo,
+                    Private = folder.SettingsPrivate,
+                    HasLogo = folder.SettingsHasLogo,
                     Color = folder.SettingsColor,
-                    Indexing = folder.Indexing
+                    Indexing = folder.SettingsIndexing
                 };
             }
             
@@ -834,7 +834,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     public bool UseTrashForRemoveAsync(Folder<int> folder)
     {
-        return folder.RootFolderType != FolderType.TRASH && folder.RootFolderType != FolderType.Privacy && folder.FolderType != FolderType.BUNCH && !folder.Private;
+        return folder.RootFolderType != FolderType.TRASH && folder.RootFolderType != FolderType.Privacy && folder.FolderType != FolderType.BUNCH && !folder.SettingsPrivate;
     }
 
     public bool UseRecursiveOperation(int folderId, string toRootFolderId)
@@ -1644,7 +1644,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Title) : q.OrderByDescending(r => r.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
-            SortedByType.Custom => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (folder, order) => new { folder, order })
+            SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (folder, order) => new { folder, order })
                                     .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
                                     .OrderBy(r => r.order.Order)
                                     .Select(r => r.folder),

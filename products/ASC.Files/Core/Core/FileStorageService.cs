@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Folder = DocuSign.eSign.Model.Folder;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -613,7 +615,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.Title = title;
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
-            newFolder.Private = parent.Private ? parent.Private : privacy;
+            newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
             newFolder.SettingsColor = _roomLogoManager.GetRandomColour();
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             var folder = await folderDao.GetFolderAsync(folderId);
@@ -2906,6 +2908,56 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
+    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing)
+    {
+        var folderDao = GetFolderDao<T>();
+        var fileDao = GetFileDao<T>();
+
+        var room = await folderDao.GetFolderAsync(folderId);
+
+        ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+        ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
+
+        if (room.SettingsIndexing != indexing)
+        {
+            room.SettingsIndexing = indexing;
+            await folderDao.SaveFolderAsync(room);
+        }
+        
+        return room;
+    }
+    
+    
+    public async Task<Folder<T>> ReOrder<T>(T folderId)
+    {        
+        var folderDao = GetFolderDao<T>();
+        var fileDao = GetFileDao<T>();
+
+        var room = await folderDao.GetFolderAsync(folderId);
+
+        ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+        ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
+        
+        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
+        for (var i = 0; i < folders.Count; i++)
+        {
+            await folderDao.SetCustomOrder(folders[i], folderId, i + 1);
+        }
+
+        var files = await fileDao.GetFilesAsync(folderId).ToListAsync();
+        for (var i = 0; i < files.Count; i++)
+        {
+            await fileDao.SetCustomOrder(files[i], folderId, i + 1);
+        }
+            
+        for (var i = 0; i < folders.Count; i++)
+        {
+            await ReOrder(folders[i]);
+        }
+
+        return room;
+    }
+    
     public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
     {
         ErrorIf(!_authContext.IsAuthenticated, FilesCommonResource.ErrorMassage_SecurityException);

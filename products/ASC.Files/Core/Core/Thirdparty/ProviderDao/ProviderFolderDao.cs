@@ -538,7 +538,7 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         folder.FolderType = providerInfo.FolderType;
         folder.ProviderId = providerInfo.ProviderId;
         folder.RootFolderType = providerInfo.RootFolderType;
-        folder.HasLogo = providerInfo.HasLogo;
+        folder.SettingsHasLogo = providerInfo.HasLogo;
         folder.ModifiedBy = providerInfo.Owner;
         folder.ModifiedOn = providerInfo.CreateOn;
 
