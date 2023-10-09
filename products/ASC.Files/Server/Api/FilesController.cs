@@ -509,15 +509,32 @@ public abstract class FilesController<T> : ApiControllerBase
     /// </summary>
     /// <short>Set an external link</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.FileLinkRequestDto, ASC.Files.Core" name="inDto">External link request parameters</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
     /// <path>api/2.0/files/file/{id}/links</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("file/{fileId}/links")]
-    public async Task<FileShareDto> SetExternalLinkAsync(T fileId, FileLinkRequestDto inDto)
+    [HttpPut("file/{id}/links")]
+    public async Task<FileShareDto> SetExternalLinkAsync(T id, FileLinkRequestDto inDto)
     {
-        var linkAce = await _fileStorageService.SetExternalLinkAsync(fileId, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal);
+        var linkAce = await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal);
+        
+        return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
+    }
+    
+    /// <summary>
+    /// Returns the primary external link with the identifier specified in the request.
+    /// </summary>
+    /// <short>Returns primary external link</short>
+    /// <category>Files</category>
+    /// <param type="System.Int32, System" method="url" name="id">File ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of file</returns>
+    /// <path>api/2.0/files/file/{id}/link</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("file/{id}/link")]
+    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    {
+        var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
         
         return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
     }

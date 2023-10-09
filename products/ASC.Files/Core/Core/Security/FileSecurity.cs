@@ -67,6 +67,12 @@ public class FileSecurity : IFileSecurity
                     {
                         FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
                     }
+                },
+                {
+                    SubjectType.PrimaryExternalLink, new HashSet<FileShare>
+                    {
+                        FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
+                    }
                 }
             }
         }

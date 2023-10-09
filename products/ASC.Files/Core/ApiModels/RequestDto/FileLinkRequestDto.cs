@@ -31,4 +31,8 @@ public class FileLinkRequestDto : LinkRequestDtoBase
     /// <summary>Scope of the link</summary>
     /// <type>System.Boolean, System</type>
     public bool Internal { get; set; }
+    
+    /// <summary>Primary link flag</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Primary { get; set; }
 }

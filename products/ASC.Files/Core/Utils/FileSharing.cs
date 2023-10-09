@@ -134,6 +134,11 @@ public class FileSharingAceHelper
             
             if (entryType == FileEntryType.File)
             {
+                if (entry.RootFolderType != FolderType.USER)
+                {
+                    continue;
+                }
+                
                 if (!FileSecurity.AvailableFileAccesses.TryGetValue(entry.RootFolderType, out var subjectAccesses) 
                     || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
                 {
