@@ -1,5 +1,8 @@
 server:
   port: 8080
+  servlet:
+    session:
+      tracking-modes: cookie
 
 spring:
   application:
@@ -7,7 +10,7 @@ spring:
   profiles:
     active: ${PROFILE:dev}
   datasource:
-    url: jdbc:mysql://${JDBC_URL:onlyoffice-mysql-server}/${JDBC_DATABASE:docspace}
+    url: jdbc:mysql://${JDBC_URL:127.0.0.1:33060}/${JDBC_DATABASE:docspace}
     username: ${JDBC_USER_NAME:root}
     password: ${JDBC_PASSWORD:my-secret-pw}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,8 +19,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
   rabbitmq:
-    host: ${RABBIT_HOST:onlyoffice-rabbitmq}
-    port: ${RABBIT_PORT:5671}
+    host: ${RABBIT_HOST:127.0.0.1}
+    port: ${RABBIT_PORT:5672}
     username: ${RABBIT_USER_NAME:guest}
     password: ${RABBIT_PASSWORD:guest}
     listener:
@@ -35,7 +38,7 @@ application:
 
 docspace:
   server:
-    url: http://${DOCSPACE_ADDRESS:localhost:8092}
+    url: http://${DOCSPACE_ADDRESS:127.0.0.1}
 
 messaging:
   rabbitmq:

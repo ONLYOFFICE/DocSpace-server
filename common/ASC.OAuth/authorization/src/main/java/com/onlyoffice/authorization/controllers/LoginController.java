@@ -1,6 +1,6 @@
 package com.onlyoffice.authorization.controllers;
 
-import com.onlyoffice.authorization.configuration.ApplicationConfiguration;
+import com.onlyoffice.authorization.configuration.DocspaceConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Slf4j
 public class LoginController {
     private final String FORWARD = "FORWARD";
-    private final ApplicationConfiguration configuration;
+    private final DocspaceConfiguration docspaceConfiguration;
 
     @GetMapping("/oauth2/login")
-    public String login(HttpServletRequest request) {
+    public String login(
+            HttpServletRequest request,
+            @RequestParam(name = "error", required = false) String error
+    ) {
         log.debug("A new login request");
         if (request.getDispatcherType().name() == null || !request.getDispatcherType().name().equals(FORWARD))
-            return "error";
+            return String.format("redirect:%s", docspaceConfiguration.getUrl());
+
+        if (error != null && !error.isBlank())
+            return String.format("redirect:%s", docspaceConfiguration.getUrl());
+
         return "login";
     }
 

@@ -1,5 +1,6 @@
 package com.onlyoffice.authorization.controllers;
 
+import com.onlyoffice.authorization.aspect.InvalidateSession;
 import com.onlyoffice.authorization.configuration.ApplicationConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class AuthorizationConsentController {
     private final OAuth2AuthorizationConsentService authorizationConsentService;
 
     @GetMapping(value = "/oauth2/consent")
+    @InvalidateSession
     public String consent(
             Principal principal, Model model,
             @RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
