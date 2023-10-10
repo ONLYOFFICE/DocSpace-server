@@ -42,7 +42,6 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public SubjectType SubjectType { get; set; }
     public FileShareOptions FileShareOptions { get; set; }
     public bool CanEditAccess { get; set; }
-    public bool IsTemplate { get; set; }
 
     [JsonPropertyName("title")]
     public string SubjectName { get; set; }
@@ -64,7 +63,7 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public bool DisableRemove { get; set; }
 
     [JsonIgnore] 
-    public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink) || !string.IsNullOrEmpty(Link);
+    public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
 
 /// <summary>

@@ -1,4 +1,4 @@
-﻿﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,8 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
-        SocketManager socketManager) : base(
+        SocketManager socketManager,
+        ApiContext apiContext) : base(
             globalFolderHelper,
             fileOperationDtoHelper,
             coreBaseSettings,
@@ -51,7 +52,8 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
             fileDtoHelper,
             fileShareDtoHelper,
             mapper,
-            socketManager)
+            socketManager,
+            apiContext)
     {
     }
 
@@ -88,7 +90,8 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
-        SocketManager socketManager) : base(
+        SocketManager socketManager,
+        ApiContext apiContext) : base(
             globalFolderHelper,
             fileOperationDtoHelper,
             coreBaseSettings,
@@ -99,7 +102,8 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
             fileDtoHelper,
             fileShareDtoHelper,
             mapper,
-            socketManager)
+            socketManager,
+            apiContext)
     {
     }
 
@@ -135,6 +139,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     private readonly FileShareDtoHelper _fileShareDtoHelper;
     private readonly IMapper _mapper;
     private readonly SocketManager _socketManager;
+    private readonly ApiContext _apiContext;
 
     protected VirtualRoomsController(
         GlobalFolderHelper globalFolderHelper,
@@ -147,7 +152,8 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
-        SocketManager socketManager) : base(folderDtoHelper, fileDtoHelper)
+        SocketManager socketManager, 
+        ApiContext apiContext) : base(folderDtoHelper, fileDtoHelper)
     {
         _globalFolderHelper = globalFolderHelper;
         _fileOperationDtoHelper = fileOperationDtoHelper;
@@ -158,6 +164,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         _fileShareDtoHelper = fileShareDtoHelper;
         _mapper = mapper;
         _socketManager = socketManager;
+        _apiContext = apiContext;
     }
 
     /// <summary>
@@ -286,22 +293,25 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
 
         var result = new RoomSecurityDto();
 
-        if (inDto.Invitations != null && inDto.Invitations.Any())
+        if (inDto.Invitations == null || !inDto.Invitations.Any())
         {
-            var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
-
-            var aceCollection = new AceCollection<T>
-            {
-                Files = Array.Empty<T>(),
-                Folders = new[] { id },
-                Aces = wrappers,
-                Message = inDto.Message
-            };
-
-            result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.Notify);
+            return result;
         }
 
-        result.Members = await GetRoomSecurityInfoAsync(id).ToListAsync();
+        var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.Invitations);
+
+        var aceCollection = new AceCollection<T>
+        {
+            Files = Array.Empty<T>(),
+            Folders = new[] { id },
+            Aces = wrappers,
+            Message = inDto.Message
+        };
+
+        result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.Notify);
+        result.Members = await _fileStorageService.GetRoomSharedInfoAsync(id, inDto.Invitations.Select(s => s.Id))
+            .SelectAwait(async a => await _fileShareDtoHelper.Get(a))
+            .ToListAsync();
 
         return result;
     }
@@ -312,78 +322,105 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <short>Get room access rights</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param name="filterType">
+    /// Share type filter
+    /// </param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room files</returns>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("rooms/{id}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(T id)
+    public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(T id, ShareFilterType filterType = ShareFilterType.User)
     {
-        var fileShares = await _fileStorageService.GetSharedInfoAsync(Array.Empty<T>(), new[] { id });
+        var offset = Convert.ToInt32(_apiContext.StartIndex);
+        var count = Convert.ToInt32(_apiContext.Count);
+        var counter = 0;
 
-        foreach (var fileShareDto in fileShares)
+        var totalCountTask = _fileStorageService.GetRoomSharesCountAsync(id, filterType);
+
+        await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, offset, count))
         {
-            yield return await _fileShareDtoHelper.Get(fileShareDto);
+            counter++;
+
+            yield return await _fileShareDtoHelper.Get(ace);
         }
+
+        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 
     /// <summary>
-    /// Sets an external link to invite the users to a room with the ID specified in the request.
+    /// Sets an external or invitation link with the ID specified in the request.
     /// </summary>
-    /// <short>Set an external invitation link</short>
+    /// <short>Set an external or invitation link</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.LinkRequestDto, ASC.Files.Core" name="inDto">Invitation link request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room files</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room</returns>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>PUT</httpMethod>
-    /// <collection>list</collection>
     [HttpPut("rooms/{id}/links")]
-    public async IAsyncEnumerable<FileShareDto> SetLinkAsync(T id, LinkRequestDto inDto)
+    public async Task<FileShareDto> SetLinkAsync(T id, LinkRequestDto inDto)
     {
-        var fileShares = inDto.LinkType switch
+        var linkAce = inDto.LinkType switch
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(id, inDto.LinkId, inDto.Title, inDto.Access),
             LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title, 
-                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access , inDto.ExpirationDate ?? default, inDto.Password, inDto.Disabled, inDto.DenyDownload),
+                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access , inDto.ExpirationDate ?? default, inDto.Password, inDto.DenyDownload),
             _ => throw new InvalidOperationException()
         };
 
-        foreach (var fileShareDto in fileShares)
-        {
-            yield return await _fileShareDtoHelper.Get(fileShareDto);
-        }
+        return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
     }
 
     /// <summary>
-    /// Getting room links
+    /// Returns the links of a room with the ID specified in the request.
     /// </summary>
-    /// <short>Set an external invitation link</short>
+    /// <short>Returns room links</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core" name="type">Link type</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security info</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room</returns>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("rooms/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T id, LinkType? type)
     {
-        var subjectTypes = type.HasValue
-            ? type.Value switch
+        var filterType = type.HasValue ? type.Value switch 
             {
-                LinkType.Invitation => new[] { SubjectType.InvitationLink },
-                LinkType.External => new[] { SubjectType.ExternalLink },
-                _ => new[] { SubjectType.InvitationLink, SubjectType.ExternalLink }
-            }
-            : new[] { SubjectType.InvitationLink, SubjectType.ExternalLink };
+                LinkType.Invitation => ShareFilterType.InvitationLink,
+                LinkType.External => ShareFilterType.ExternalLink,
+                _ => ShareFilterType.Link
+            } 
+            : ShareFilterType.Link;
 
-        var fileShares = await _fileStorageService.GetSharedInfoAsync(Array.Empty<T>(), new[] { id }, subjectTypes, true);
-
-        foreach (var fileShareDto in fileShares)
+        var counter = 0;
+        
+        await foreach (var ace in  _fileStorageService.GetRoomSharedInfoAsync(id, filterType, 0, 100))
         {
-            yield return await _fileShareDtoHelper.Get(fileShareDto);
+            counter++;
+            
+            yield return await _fileShareDtoHelper.Get(ace);
         }
+
+        _apiContext.SetCount(counter);
+    }
+
+    /// <summary>
+    /// Returns the primary external link with the identifier specified in the request.
+    /// </summary>
+    /// <short>Returns primary external link</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room</returns>
+    /// <path>api/2.0/files/rooms/{id}/link</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("rooms/{id}/link")]
+    public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
+    {
+        var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
+        
+        return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
     }
 
     /// <summary>
@@ -518,9 +555,9 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("rooms/{id}/resend")]
-    public async Task ResendEmailInvitationsAsync(T id, UserInvintationRequestDto inDto)
+    public async Task ResendEmailInvitationsAsync(T id, UserInvitationRequestDto inDto)
     {
-        await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds);
+        await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
     protected void ErrorIfNotDocSpace()

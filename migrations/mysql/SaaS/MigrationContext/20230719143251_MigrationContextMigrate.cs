@@ -1356,8 +1356,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     tenantid = table.Column<int>(name: "tenant_id", type: "int", nullable: false),
                     uri = table.Column<string>(type: "text", nullable: true, defaultValueSql: "''", collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
-                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'"),
-                    ssl = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
+                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'1'")
                 },
                 constraints: table =>
                 {
@@ -1507,7 +1506,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "short_links",
                 columns: table => new
                 {
-                    id = table.Column<long>(type: "bigint(19)", nullable: false)
+                    id = table.Column<long>(type: "int(10)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     @short = table.Column<string>(name: "short", type: "varchar(12)", nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),

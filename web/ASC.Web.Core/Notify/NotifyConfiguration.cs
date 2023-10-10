@@ -52,7 +52,7 @@ public class NotifyConfiguration
             {
                 _configured = true;
                 _workContext.NotifyStartUp();
-                _workContext.NotifyContext.NotifyClientRegistration += NotifyClientRegisterCallback;
+                _workContext.NotifyClientRegistration += NotifyClientRegisterCallback;
                 _notifyEngine.AddAction<NotifyTransferRequest>();
             }
         }
@@ -182,38 +182,10 @@ public class ProductSecurityInterceptor
             {
                 var tenant = _tenantManager.GetCurrentTenant();
 
-                if (32 <= r.Recipient.ID.Length)
-                {
-                    var guid = default(Guid);
-                    try
-                    {
-                        guid = new Guid(r.Recipient.ID);
-                    }
-                    catch (FormatException) { }
-                    catch (OverflowException) { }
-
-                    if (guid != default)
-                    {
-                        u = await _userManager.GetUsersAsync(guid);
-                    }
-                }
-
-                if (Constants.LostUser.Equals(u))
-                {
-                    u = await _userManager.GetUserByEmailAsync(r.Recipient.ID);
-                }
-
-                if (Constants.LostUser.Equals(u))
-                {
-                    u = await _userManager.GetUserByUserNameAsync(r.Recipient.ID);
-                }
+                u = await _userManager.SearchUserAsync(r.Recipient.ID);
 
                 if (!Constants.LostUser.Equals(u))
                 {
-                    var culture = !string.IsNullOrEmpty(u.CultureName) ? u.GetCulture() : tenant.GetCulture();
-                    CultureInfo.CurrentCulture = culture;
-                    CultureInfo.CurrentUICulture = culture;
-
                     // security
                     var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
                     var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
@@ -231,14 +203,6 @@ public class ProductSecurityInterceptor
                         return !await _webItemSecurity.IsAvailableForUserAsync(productId, u.Id);
                     }
                 }
-            }
-
-            var tagCulture = r.Arguments.FirstOrDefault(a => a.Tag == CommonTags.Culture);
-            if (tagCulture != null)
-            {
-                var culture = CultureInfo.GetCultureInfo((string)tagCulture.Value);
-                CultureInfo.CurrentCulture = culture;
-                CultureInfo.CurrentUICulture = culture;
             }
         }
         catch (Exception error)
@@ -273,6 +237,7 @@ public class NotifyTransferRequest : INotifyEngineAction
     private readonly WebItemManager _webItemManager;
     private readonly TenantLogoManager _tenantLogoManager;
     private readonly AdditionalWhiteLabelSettingsHelperInit _additionalWhiteLabelSettingsHelper;
+    private readonly MailWhiteLabelSettingsHelper _mailWhiteLabelSettingsHelper;
     private readonly TenantUtil _tenantUtil;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly CommonLinkUtility _commonLinkUtility;
@@ -290,6 +255,7 @@ public class NotifyTransferRequest : INotifyEngineAction
         WebItemManager webItemManager,
         TenantLogoManager tenantLogoManager,
         AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
+        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         TenantUtil tenantUtil,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
@@ -304,6 +270,7 @@ public class NotifyTransferRequest : INotifyEngineAction
         _webItemManager = webItemManager;
         _tenantLogoManager = tenantLogoManager;
         _additionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelper;
+        _mailWhiteLabelSettingsHelper = mailWhiteLabelSettingsHelper;
         _tenantUtil = tenantUtil;
         _coreBaseSettings = coreBaseSettings;
         _commonLinkUtility = commonLinkUtility;
@@ -354,6 +321,10 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())));
         request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, _commonLinkUtility.GetUnsubscribe()));
         request.Arguments.Add(new TagValue(CommonTags.HelpLink, await _commonLinkUtility.GetHelpLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.SalesEmail, _commonLinkUtility.GetSalesEmail(_additionalWhiteLabelSettingsHelper)));
+        request.Arguments.Add(new TagValue(CommonTags.SiteLink, _commonLinkUtility.GetSiteLink(_mailWhiteLabelSettingsHelper)));
+        request.Arguments.Add(new TagValue(CommonTags.SupportLink, await _commonLinkUtility.GetSupportLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.SupportEmail, _commonLinkUtility.GetSupportEmail(_mailWhiteLabelSettingsHelper)));
         request.Arguments.Add(new TagValue(CommonTags.LetterLogoText, logoText));
         request.Arguments.Add(new TagValue(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(_settingsManager)));
         request.Arguments.Add(new TagValue(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name));

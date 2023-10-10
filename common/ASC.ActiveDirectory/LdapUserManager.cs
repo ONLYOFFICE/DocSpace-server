@@ -286,8 +286,7 @@ public class LdapUserManager
                     var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
                     source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
-                    var notifuEngineQueue = scope.ServiceProvider.GetRequiredService<NotifyEngineQueue>();
-                    var client = workContext.NotifyContext.RegisterClient(notifuEngineQueue, source);
+                    var client = workContext.RegisterClient(scope.ServiceProvider, source);
 
                     var confirmLink = await _commonLinkUtility.GetConfirmationEmailUrlAsync(ldapUserInfo.Email, ConfirmType.EmailActivation);
 
@@ -300,7 +299,7 @@ public class LdapUserManager
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(_displayUserSettingsHelper)),
                         new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
                         new TagValue(NotifyConstants.TagMyStaffLink, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagGreenButton(_resource.NotifyButtonJoin, confirmLink),
+                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, confirmLink),
                         new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
                 }
 
