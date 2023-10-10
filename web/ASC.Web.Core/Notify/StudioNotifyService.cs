@@ -255,7 +255,7 @@ public class StudioNotifyService
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
-                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")))
+                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif"))
         };
 
         if (!string.IsNullOrEmpty(culture))
