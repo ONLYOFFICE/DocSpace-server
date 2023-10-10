@@ -908,7 +908,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 if (oldParentId.HasValue)
                 {
-                    await UpdateUsedRoomSpace(
+                    await UpdateUsedFileSpace(
                         folderDao,
                         oldFolder,
                         toFolder,
@@ -1101,7 +1101,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                    : null;
     }
 
-    private async Task UpdateUsedRoomSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size, int trashId)
+    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size, int trashId)
     {
         var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
         var (oldFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);

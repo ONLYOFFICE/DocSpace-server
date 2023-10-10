@@ -291,15 +291,15 @@ internal abstract class ThirdPartyProviderDao
     }
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
-        return null;
+        throw new NotImplementedException();
     }
     public Task<string> ChangeFolderSizeAsync(Folder<string> folder, long size)
     {
-        return null;
+        throw new NotImplementedException();
     }
     public Task<string> ChangeFolderQuotaAsync(Folder<string> folder, long quota)
     {
-        return null;
+        throw new NotImplementedException();
     }
 
     protected static IAsyncEnumerable<Folder<string>> FilterRoomsAsync(IAsyncEnumerable<Folder<string>> rooms, ProviderFilter provider, FilterType filterType, Guid subjectId,

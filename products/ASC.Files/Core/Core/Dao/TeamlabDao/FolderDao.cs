@@ -263,7 +263,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         {
             switch (rootFolder.FolderType)
             {
-
                 case FolderType.USER:
                     result.MyDocumentsUsedSpace = rootFolder.UsedSpace;
                     break;
@@ -278,7 +277,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                     break;
             }
         }
-
         return result;
     }
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
@@ -830,9 +828,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     public async Task<int> ChangeTreeFolderSizeAsync(int folderId, long size)
     {
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
         await Queries.UpdateTreeFolderCounterAsync(filesDbContext, TenantID, folderId, size);
-
         return folderId;
     }
     public async Task<int> ChangeFolderSizeAsync(Folder<int> folder, long size)

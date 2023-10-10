@@ -293,26 +293,26 @@ public class EFUserService : IUserService
             if (sortBy == "type")
             {
                 var q1 = (from user in q
-                    join userGroup in userDbContext.UserGroups.Where(g =>
-                        !g.Removed && (g.UserGroupId == Users.Constants.GroupAdmin.ID || g.UserGroupId == Users.Constants.GroupUser.ID ||
-                                       g.UserGroupId == Users.Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                         from @group in joinedGroup.DefaultIfEmpty()
-                    select new UserWithGroup { User = user, Group = @group }).OrderBy(r => r.User.ActivationStatus);
+                          join userGroup in userDbContext.UserGroups.Where(g =>
+                              !g.Removed && (g.UserGroupId == Users.Constants.GroupAdmin.ID || g.UserGroupId == Users.Constants.GroupUser.ID ||
+                                             g.UserGroupId == Users.Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                          from @group in joinedGroup.DefaultIfEmpty()
+                          select new UserWithGroup { User = user, Group = @group }).OrderBy(r => r.User.ActivationStatus);
 
                 q = (sortOrderAsc ? q1.ThenBy(_orderByUserType) : q1.ThenByDescending(_orderByUserType)).Select(r => r.User);
-                }
-                else if (sortBy == "usedspace")
-                {
+            }
+            else if (sortBy == "usedspace")
+            {
                 var q2 = from user in q
-                         join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty) 
+                         join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty)
                             on user.Id equals quota.UserId into quotaRow
                          from @quota in quotaRow.DefaultIfEmpty()
 
-                         select new { user, @quota};
+                         select new { user, @quota };
 
                 var q3 = q2.GroupBy(q => q.user, q => q.quota.Counter, (user, g) => new
                 {
-                    user = user,
+                    user,
                     sum_counter = g.ToList().Sum()
                 });
 
@@ -336,12 +336,12 @@ public class EFUserService : IUserService
             q = q.Skip((int)offset);
         }
 
-            q = q.Take((int)limit);
+        q = q.Take((int)limit);
 
         await foreach (var user in q.ToAsyncEnumerable())
         {
             yield return _mapper.Map<User, UserInfo>(user);
-    }
+        }
     }
 
     public IQueryable<UserInfo> GetUsers(int tenant, out int total)
@@ -382,20 +382,20 @@ public class EFUserService : IUserService
             await Queries.DeteteSubscriptionsByIdsAsync(userDbContext, tenant, stringIds);
             await Queries.DeleteDbSubscriptionMethodsByIdsAsync(userDbContext, tenant, stringIds);
 
-        if (immediate)
-        {
+            if (immediate)
+            {
                 await Queries.DeteleUserGroupsByIdsAsync(userDbContext, tenant, ids);
                 await Queries.DeleteDbGroupsAsync(userDbContext, tenant, ids);
-        }
-        else
-        {
+            }
+            else
+            {
                 await Queries.UpdateUserGroupsByIdsAsync(userDbContext, tenant, ids);
                 await Queries.UpdateDbGroupsAsync(userDbContext, tenant, ids);
             }
 
             await tx.CommitAsync();
-            });
-        }
+        });
+    }
 
     public async Task RemoveUserAsync(int tenant, Guid id)
     {
@@ -418,20 +418,20 @@ public class EFUserService : IUserService
             await Queries.DeleteDbSubscriptionMethodsAsync(userDbContext, tenant, id.ToString());
             await Queries.DeleteUserPhotosAsync(userDbContext, tenant, id);
 
-        if (immediate)
-        {
+            if (immediate)
+            {
                 await Queries.DeleteUserGroupsAsync(userDbContext, tenant, id);
                 await Queries.DeleteUsersAsync(userDbContext, tenant, id);
                 await Queries.DeleteUserSecuritiesAsync(userDbContext, tenant, id);
-        }
-        else
-        {
+            }
+            else
+            {
                 await Queries.UpdateUserGroupsAsync(userDbContext, tenant, id);
                 await Queries.UpdateUsersAsync(userDbContext, tenant, id);
             }
             await tr.CommitAsync();
-            });
-        }
+        });
+    }
 
     public async Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType)
     {

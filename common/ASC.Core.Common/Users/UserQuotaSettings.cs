@@ -41,6 +41,4 @@ public class UserQuotaSettings : ISettings<UserQuotaSettings>
     {
         return new UserQuotaSettings();
     }
-
-    
 }

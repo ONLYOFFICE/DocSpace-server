@@ -276,6 +276,7 @@ public interface IFolderDao<T>
     /// <param name="size">folder size</param>
     /// <returns></returns>
     Task<T> ChangeFolderSizeAsync(Folder<T> folder, long size);
+
     /// <summary>
     /// Only in TMFolderDao
     /// </summary>
@@ -283,6 +284,7 @@ public interface IFolderDao<T>
     /// <param name="size">folder size</param>
     /// <returns></returns>
     Task<T> ChangeTreeFolderSizeAsync(T folderId, long size);
+
     IAsyncEnumerable<T> GetFolderIDsAsync(string module, string bunch, IEnumerable<string> data, bool createIfNotExists);
 
     /// <summary>

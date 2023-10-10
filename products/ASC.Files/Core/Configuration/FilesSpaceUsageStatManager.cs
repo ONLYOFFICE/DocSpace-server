@@ -121,12 +121,11 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
 
     public async Task<long> GetUserSpaceUsageAsync(Guid userId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var my = await _globalFolder.GetFolderMyAsync(_fileMarker, _daoFactory);
         var trash = await _globalFolder.GetFolderTrashAsync(_daoFactory);
 
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
         return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
     }
 
