@@ -1,60 +1,50 @@
 package com.onlyoffice.authorization.extensions.providers;
 
-import com.onlyoffice.authorization.configuration.DocspaceConfiguration;
-import com.onlyoffice.authorization.dto.UsernamePasswordCredentials;
-import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import com.onlyoffice.authorization.client.DocspaceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Arrays;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class DocspaceAuthenticationProvider implements AuthenticationProvider {
-    private final DocspaceConfiguration docspaceConfiguration;
-    private final RestTemplate restTemplate;
+    private final DocspaceClient docspaceClient;
 
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        log.debug("trying to authenticate a docspace user {}", authentication.getPrincipal().toString());
-        UsernamePasswordAuthenticationToken a = (UsernamePasswordAuthenticationToken) authentication;
-        if (isDocspaceAuthenticated(a.getPrincipal().toString(), a.getCredentials().toString())) {
-            return new UsernamePasswordAuthenticationToken(a.getPrincipal(), a.getCredentials(), null);
-        }
+        var request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                .getRequest();
 
-        throw new BadCredentialsException("invalid username or password");
+        log.debug("trying to authenticate a docspace user {}", authentication.getPrincipal().toString());
+
+        var authCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase("asc_auth_key"))
+                .findFirst();
+
+        if (authCookie.isEmpty())
+            throw new BadCredentialsException("Authorization cookie is empty");
+
+        var cookie = String.format("%s=%s", authCookie.get().getName(),
+                authCookie.get().getValue());
+
+        var me = docspaceClient.getMe(cookie);
+        if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin())
+            throw new BadCredentialsException("Invalid Docspace authorization");
+
+        return new UsernamePasswordAuthenticationToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), null);
     }
 
     public boolean supports(Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.equals(authentication);
-    }
-
-    @Bulkhead(name = "docspaceBulkhead", fallbackMethod = "docspaceAuthenticatedFallback")
-    private boolean isDocspaceAuthenticated(String username, String password) {
-        try {
-            log.debug("trying to authenticate user with name {} and password {}", username, password);
-            return restTemplate.postForEntity(
-                    String.format("%s/api/2.0/authentication", docspaceConfiguration.getUrl()),
-                    UsernamePasswordCredentials
-                            .builder()
-                            .username(username)
-                            .password(password)
-                            .build(),
-                    Object.class
-            ).getStatusCode().is2xxSuccessful();
-        } catch (Exception e) {
-            log.error("could not authenticate a docspace user: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    private boolean isDocspaceAuthenticated(String username, String password, Throwable e) {
-        log.warn("Number of concurrent calls to Docpsace API has been reached: {}", e.getMessage());
-        return false;
     }
 }
