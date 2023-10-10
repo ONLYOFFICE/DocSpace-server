@@ -526,4 +526,7 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Type</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
 </root>

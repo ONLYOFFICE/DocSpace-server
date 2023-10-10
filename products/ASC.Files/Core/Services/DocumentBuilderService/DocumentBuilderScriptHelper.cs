@@ -35,7 +35,10 @@ public class DocumentBuilderScriptHelper
     private readonly SettingsManager _settingsManager;
     private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
     private readonly CommonLinkUtility _commonLinkUtility;
+    private readonly FilesLinkUtility _filesLinkUtility;
+    private readonly FileUtility _fileUtility;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
+    private readonly PathProvider _pathProvider;
 
     public DocumentBuilderScriptHelper(
         UserManager userManager,
@@ -44,7 +47,10 @@ public class DocumentBuilderScriptHelper
         SettingsManager settingsManager,
         TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
         CommonLinkUtility commonLinkUtility,
-        DisplayUserSettingsHelper displayUserSettingsHelper)
+        FilesLinkUtility filesLinkUtility,
+        FileUtility fileUtility,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        PathProvider pathProvider)
     {
         _userManager = userManager;
         _daoFactory = daoFactory;
@@ -52,7 +58,10 @@ public class DocumentBuilderScriptHelper
         _settingsManager = settingsManager;
         _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
         _commonLinkUtility = commonLinkUtility;
+        _filesLinkUtility = filesLinkUtility;
+        _fileUtility = fileUtility;
         _displayUserSettingsHelper = displayUserSettingsHelper;
+        _pathProvider = pathProvider;
     }
 
     private async Task<(object data, string outputFileName)> GetDataObject<T>(Guid userId, T roomId)
@@ -88,8 +97,8 @@ public class DocumentBuilderScriptHelper
             {
                 index = (string)null,
                 name = room.Title,
-                url = "http://onlyoffice.com",
-                type = "Room",
+                url = _commonLinkUtility.GetFullAbsolutePath(_pathProvider.GetRoomsUrl(room.Id.ToString())),
+                type = FilesCommonResource.RoomIndex_Room,
                 pages = (string)null,
                 size = (string)null,
                 author = room.CreateByString,
@@ -98,14 +107,15 @@ public class DocumentBuilderScriptHelper
             }
         };
 
-        items.AddRange(entries.Select(item => new
+
+        items.AddRange(entries.OfType<FileEntry<T>>().Select(item => new
         {
             index = "1.N",
             name = item.Title,
-            url = "http://onlyoffice.com",
-            type = item.FileEntryType == FileEntryType.Folder ? "Folder" : Path.GetExtension(item.Title),
+            url = _commonLinkUtility.GetFullAbsolutePath(item.FileEntryType == FileEntryType.Folder ? _pathProvider.GetRoomsUrl(item.Id.ToString()) : _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, item.Title, item.Id)),
+            type = item.FileEntryType == FileEntryType.Folder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(item.Title),
             pages = item.FileEntryType == FileEntryType.Folder ? null : "1",
-            size = item.FileEntryType == FileEntryType.Folder ? null : "1",
+            size = item.FileEntryType == FileEntryType.Folder ? null : Math.Round(((File<T>)item).ContentLength/1024d/1024d, 2).ToString(CultureInfo.InvariantCulture),
             author = item.CreateByString,
             created = item.CreateOnString,
             modified = item.ModifiedOnString

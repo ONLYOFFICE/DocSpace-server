@@ -1178,6 +1178,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder.
+        /// </summary>
+        public static string RoomIndex_Folder {
+            get {
+                return ResourceManager.GetString("RoomIndex_Folder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Index.
         /// </summary>
         public static string RoomIndex_Index {
