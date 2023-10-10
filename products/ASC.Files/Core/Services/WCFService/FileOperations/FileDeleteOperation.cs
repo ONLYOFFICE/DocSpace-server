@@ -312,7 +312,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
-                    await FileDao.MoveFileAsync(file.Id, _trashId);
+                    await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER);
                     if (isNeedSendActions)
                     {
                         _ = filesMessageService.SendAsync(MessageAction.FileMovedToTrash, file, _headers, file.Title);

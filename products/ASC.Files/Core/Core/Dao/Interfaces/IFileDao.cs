@@ -185,15 +185,17 @@ public interface IFileDao<T>
     /// <param name="folderId">folder id</param>
     /// <returns>Returns true if the file exists, otherwise false</returns>
     Task<bool> IsExistAsync(string title, object folderId);
+
     /// <summary>
     ///   Moves a file or set of files in a folder
     /// </summary>
     /// <param name="fileId">file id</param>
     /// <param name="toFolderId">The ID of the destination folder</param>
-    Task<T> MoveFileAsync(T fileId, T toFolderId);
-    Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId);
-    Task<string> MoveFileAsync(T fileId, string toFolderId);
-    Task<int> MoveFileAsync(T fileId, int toFolderId);
+    /// <param name="deleteLinks">Flag for removing links when moving</param>
+    Task<T> MoveFileAsync(T fileId, T toFolderId, bool deleteLinks = false);
+    Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId, bool deleteLinks = false);
+    Task<string> MoveFileAsync(T fileId, string toFolderId, bool deleteLinks = false);
+    Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
 
     /// <summary>
     ///  Copy the files in a folder

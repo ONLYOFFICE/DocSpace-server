@@ -738,22 +738,22 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await Queries.DbFilesAnyAsync(filesDbContext, TenantID, title, folderId);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
         }
 
         if (toFolderId is string tsId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId, deleteLinks));
         }
 
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(int fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
     {
         if (fileId == default)
         {
@@ -802,6 +802,11 @@ internal class FileDao : AbstractDao, IFileDao<int>
                     await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
                 }
 
+                if (deleteLinks)
+                {
+                    await Queries.DeleteExternalLinks(filesDbContext, TenantID, fileId.ToString());
+                }
+
                 await foreach (var f in fromFolders)
                 {
                     await RecalculateFilesCountAsync(f);
@@ -825,7 +830,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return fileId;
     }
 
-    public async Task<string> MoveFileAsync(int fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(int fileId, string toFolderId, bool deleteLinks = false)
     {
         var toSelector = _selectorFactory.GetSelector(toFolderId);
 
@@ -2142,5 +2147,15 @@ static file class Queries
                 ctx.FilesProperties
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteExternalLinks =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string entryId) =>
+                ctx.Security
+                    .Where(s => s.TenantId == tenantId)
+                    .Where(s => s.EntryId == entryId)
+                    .Where(s => s.EntryType == FileEntryType.File)
+                    .Where(s => s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
 }

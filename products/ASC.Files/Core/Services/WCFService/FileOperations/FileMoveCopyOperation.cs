@@ -602,6 +602,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else
             {
+                var deleteLinks = file.RootFolderType == FolderType.USER && 
+                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
+                
                 var parentFolder = await FolderDao.GetFolderAsync(file.ParentId);
                 try
                 {
@@ -648,7 +651,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-                                var newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId);
+                                var newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks);
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
                                 _ = filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);

@@ -404,7 +404,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         }
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
         {
@@ -419,7 +419,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(string fileId, int toFolderId)
+    public async Task<int> MoveFileAsync(string fileId, int toFolderId, bool deleteLinks = false)
     {
         var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
             fileId, this, _daoSelector.ConvertId,
@@ -429,7 +429,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         return moved.Id;
     }
 
-    public async Task<string> MoveFileAsync(string fileId, string toFolderId)
+    public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var file = await Dao.GetFileAsync(fileId);
         if (file is IErrorItem errorFile)
