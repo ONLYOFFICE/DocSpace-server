@@ -588,7 +588,12 @@ public class FileStorageService //: IFileStorageService
 
     private async Task<Folder<T>> CreateFormRoomAsync<T>(string title, T parentId, bool privacy)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.FormRoom, privacy);
+        var result = await InternalCreateNewFolderAsync(parentId, title, FolderType.FormRoom, privacy);
+
+        await InternalCreateNewFolderAsync(result.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
+        await InternalCreateNewFolderAsync(result.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
+
+        return result;
     }
 
     private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy)
