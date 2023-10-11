@@ -40,11 +40,15 @@ public class NotifyQueue
     public DateTime CreationDate { get; set; }
     public string Attachments { get; set; }
     public string AutoSubmitted { get; set; }
+
+    public DbTenant Tenant { get; set; }
 }
 public static class NotifyQueueExtension
 {
     public static ModelBuilderWrapper AddNotifyQueue(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<NotifyQueue>().Navigation(e => e.Tenant).AutoInclude(false);
+
         modelBuilder
             .Add(MySqlAddNotifyQueue, Provider.MySql)
             .Add(PgSqlAddNotifyQueue, Provider.PostgreSql);
@@ -90,6 +94,9 @@ public static class NotifyQueueExtension
             entity.Property(e => e.CreationDate)
                 .HasColumnName("creation_date")
                 .HasColumnType("datetime");
+
+            entity.HasIndex(e => e.CreationDate)
+                .HasDatabaseName("creation_date");
 
             entity.Property(e => e.Reciever)
                 .HasColumnName("reciever")
@@ -150,6 +157,9 @@ public static class NotifyQueueExtension
                 .HasDefaultValueSql("NULL");
 
             entity.Property(e => e.CreationDate).HasColumnName("creation_date");
+
+            entity.HasIndex(e => e.CreationDate)
+                    .HasDatabaseName("creation_date_notify_queue");
 
             entity.Property(e => e.Reciever)
                 .HasColumnName("reciever")

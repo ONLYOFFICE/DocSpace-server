@@ -28,58 +28,64 @@ using UnknownImageFormatException = SixLabors.ImageSharp.UnknownImageFormatExcep
 
 namespace ASC.Web.Core.WhiteLabel;
 
-[Serializable]
 public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 {
     public const string DefaultLogoText = BaseWhiteLabelSettings.DefaultLogoText;
 
     #region Logos information: extension, isDefault, text for img auto generating
 
-    internal string LogoLightSmallExt { get; set; }
+    public string LogoLightSmallExt { get; set; }
+    public string DarkLogoLightSmallExt { get; set; }
 
     [JsonPropertyName("DefaultLogoLightSmall")]
-    internal bool IsDefaultLogoLightSmall { get; set; }
+    public bool IsDefaultLogoLightSmall { get; set; }
 
-    internal string LogoDarkExt { get; set; }
+    public string LogoDarkExt { get; set; }
+    public string DarkLogoDarkExt { get; set; }
 
     [JsonPropertyName("DefaultLogoDark")]
-    internal bool IsDefaultLogoDark { get; set; }
+    public bool IsDefaultLogoDark { get; set; }
 
-    internal string LogoFaviconExt { get; set; }
+    public string LogoFaviconExt { get; set; }
+    public string DarkLogoFaviconExt { get; set; }
 
     [JsonPropertyName("DefaultLogoFavicon")]
-    internal bool IsDefaultLogoFavicon { get; set; }
+    public bool IsDefaultLogoFavicon { get; set; }
 
-    internal string LogoDocsEditorExt { get; set; }
+    public string LogoDocsEditorExt { get; set; }
+    public string DarkLogoDocsEditorExt { get; set; }
 
     [JsonPropertyName("DefaultLogoDocsEditor")]
-    internal bool IsDefaultLogoDocsEditor { get; set; }
+    public bool IsDefaultLogoDocsEditor { get; set; }
 
-    internal string LogoDocsEditorEmbedExt { get; set; }
+    public string LogoDocsEditorEmbedExt { get; set; }
+    public string DarkLogoDocsEditorEmbedExt { get; set; }
 
     [JsonPropertyName("DefaultLogoDocsEditorEmbed")]
-    internal bool IsDefaultLogoDocsEditorEmbed { get; set; }
+    public bool IsDefaultLogoDocsEditorEmbed { get; set; }
 
-    internal string LogoLeftMenuExt { get; set; }
+    public string LogoLeftMenuExt { get; set; }
+    public string DarkLogoLeftMenuExt { get; set; }
 
     [JsonPropertyName("DefaultLogoLeftMenu")]
-    internal bool IsDefaultLogoLeftMenu { get; set; }
+    public bool IsDefaultLogoLeftMenu { get; set; }
 
-    internal string LogoAboutPageExt { get; set; }
+    public string LogoAboutPageExt { get; set; }
+    public string DarkLogoAboutPageExt { get; set; }
 
     [JsonPropertyName("DefaultLogoAboutPage")]
-    internal bool IsDefaultLogoAboutPage { get; set; }
+    public bool IsDefaultLogoAboutPage { get; set; }
 
     public string LogoText { get; set; }
 
-    public string GetLogoText(SettingsManager settingsManager)
+    public async Task<string> GetLogoTextAsync(SettingsManager settingsManager)
     {
         if (!string.IsNullOrEmpty(LogoText) && LogoText != DefaultLogoText)
         {
             return LogoText;
         }
 
-        var partnerSettings = settingsManager.LoadForDefaultTenant<TenantWhiteLabelSettings>();
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
         return string.IsNullOrEmpty(partnerSettings.LogoText) ? DefaultLogoText : partnerSettings.LogoText;
     }
 
@@ -93,12 +99,27 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
     #region Logo available sizes
 
     public static readonly Size LogoLightSmallSize = new Size(422, 48);
-    public static readonly Size LogoDarkSize = new Size(810, 92);
+    public static readonly Size LogoLoginPageSize = new Size(772, 88);
     public static readonly Size LogoFaviconSize = new Size(32, 32);
     public static readonly Size LogoDocsEditorSize = new Size(172, 40);
     public static readonly Size LogoDocsEditorEmbedSize = new Size(172, 40);
     public static readonly Size LogoLeftMenuSize = new Size(56, 56);
-    public static readonly Size LogoAboutPageSize = new Size(810, 92);
+    public static readonly Size LogoAboutPageSize = new Size(442, 48);
+    public static readonly Size LogoNotificationSize = new Size(386, 44);
+    public static Size GetSize(WhiteLabelLogoTypeEnum type)
+    {
+        return type switch
+        {
+            WhiteLabelLogoTypeEnum.LightSmall => LogoLightSmallSize,
+            WhiteLabelLogoTypeEnum.LoginPage => LogoLoginPageSize,
+            WhiteLabelLogoTypeEnum.Favicon => LogoFaviconSize,
+            WhiteLabelLogoTypeEnum.DocsEditor => LogoDocsEditorSize,
+            WhiteLabelLogoTypeEnum.DocsEditorEmbed => LogoDocsEditorEmbedSize,
+            WhiteLabelLogoTypeEnum.LeftMenu => LogoLeftMenuSize,
+            WhiteLabelLogoTypeEnum.AboutPage => LogoAboutPageSize,
+            _ => new Size(),
+        };
+    }
 
     #endregion
 
@@ -109,12 +130,25 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         return new TenantWhiteLabelSettings
         {
             LogoLightSmallExt = null,
+            DarkLogoLightSmallExt = null,
+
             LogoDarkExt = null,
+            DarkLogoDarkExt = null,
+
             LogoFaviconExt = null,
+            DarkLogoFaviconExt = null,
+
             LogoDocsEditorExt = null,
+            DarkLogoDocsEditorExt = null,
+
             LogoDocsEditorEmbedExt = null,
+            DarkLogoDocsEditorEmbedExt = null,
+
             LogoLeftMenuExt = null,
+            DarkLogoLeftMenuExt = null,
+
             LogoAboutPageExt = null,
+            DarkLogoAboutPageExt = null,
 
             IsDefaultLogoLightSmall = true,
             IsDefaultLogoDark = true,
@@ -142,12 +176,13 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         return type switch
         {
             WhiteLabelLogoTypeEnum.LightSmall => IsDefaultLogoLightSmall,
-            WhiteLabelLogoTypeEnum.Dark => IsDefaultLogoDark,
+            WhiteLabelLogoTypeEnum.LoginPage => IsDefaultLogoDark,
             WhiteLabelLogoTypeEnum.Favicon => IsDefaultLogoFavicon,
             WhiteLabelLogoTypeEnum.DocsEditor => IsDefaultLogoDocsEditor,
             WhiteLabelLogoTypeEnum.DocsEditorEmbed => IsDefaultLogoDocsEditorEmbed,
             WhiteLabelLogoTypeEnum.LeftMenu => IsDefaultLogoLeftMenu,
             WhiteLabelLogoTypeEnum.AboutPage => IsDefaultLogoAboutPage,
+            WhiteLabelLogoTypeEnum.Notification => IsDefaultLogoDark,
             _ => true,
         };
     }
@@ -159,7 +194,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             case WhiteLabelLogoTypeEnum.LightSmall:
                 IsDefaultLogoLightSmall = value;
                 break;
-            case WhiteLabelLogoTypeEnum.Dark:
+            case WhiteLabelLogoTypeEnum.LoginPage:
                 IsDefaultLogoDark = value;
                 break;
             case WhiteLabelLogoTypeEnum.Favicon:
@@ -180,45 +215,95 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         }
     }
 
-    internal string GetExt(WhiteLabelLogoTypeEnum type)
+    internal string GetExt(WhiteLabelLogoTypeEnum type, bool dark)
     {
         return type switch
         {
-            WhiteLabelLogoTypeEnum.LightSmall => LogoLightSmallExt,
-            WhiteLabelLogoTypeEnum.Dark => LogoDarkExt,
-            WhiteLabelLogoTypeEnum.Favicon => LogoFaviconExt,
-            WhiteLabelLogoTypeEnum.DocsEditor => LogoDocsEditorExt,
-            WhiteLabelLogoTypeEnum.DocsEditorEmbed => LogoDocsEditorEmbedExt,
-            WhiteLabelLogoTypeEnum.LeftMenu => LogoLeftMenuExt,
-            WhiteLabelLogoTypeEnum.AboutPage => LogoAboutPageExt,
+            WhiteLabelLogoTypeEnum.LightSmall => dark ? DarkLogoLightSmallExt : LogoLightSmallExt,
+            WhiteLabelLogoTypeEnum.LoginPage => dark ? DarkLogoDarkExt : LogoDarkExt,
+            WhiteLabelLogoTypeEnum.Favicon => dark ? DarkLogoFaviconExt : LogoFaviconExt,
+            WhiteLabelLogoTypeEnum.DocsEditor => dark ? DarkLogoDocsEditorExt : LogoDocsEditorExt,
+            WhiteLabelLogoTypeEnum.DocsEditorEmbed => dark ? DarkLogoDocsEditorEmbedExt : LogoDocsEditorEmbedExt,
+            WhiteLabelLogoTypeEnum.LeftMenu => dark ? DarkLogoLeftMenuExt : LogoLeftMenuExt,
+            WhiteLabelLogoTypeEnum.AboutPage => dark ? DarkLogoAboutPageExt : LogoAboutPageExt,
+            WhiteLabelLogoTypeEnum.Notification => "png",
             _ => "",
         };
     }
 
-    internal void SetExt(WhiteLabelLogoTypeEnum type, string fileExt)
+    internal void SetExt(WhiteLabelLogoTypeEnum type, string fileExt, bool dark)
     {
         switch (type)
         {
             case WhiteLabelLogoTypeEnum.LightSmall:
-                LogoLightSmallExt = fileExt;
+                if (dark)
+                {
+                    DarkLogoLightSmallExt = fileExt;
+                }
+                else
+                {
+                    LogoLightSmallExt = fileExt;
+                }
                 break;
-            case WhiteLabelLogoTypeEnum.Dark:
-                LogoDarkExt = fileExt;
+            case WhiteLabelLogoTypeEnum.LoginPage:
+                if (dark)
+                {
+                    DarkLogoDarkExt = fileExt;
+                }
+                else
+                {
+                    LogoDarkExt = fileExt;
+                }
                 break;
             case WhiteLabelLogoTypeEnum.Favicon:
-                LogoFaviconExt = fileExt;
+                if (dark)
+                {
+                    DarkLogoFaviconExt = fileExt;
+                }
+                else
+                {
+                    LogoFaviconExt = fileExt;
+                }
                 break;
             case WhiteLabelLogoTypeEnum.DocsEditor:
-                LogoDocsEditorExt = fileExt;
+                if (dark)
+                {
+                    DarkLogoDocsEditorExt = fileExt;
+                }
+                else
+                {
+                    LogoDocsEditorExt = fileExt;
+                }
                 break;
             case WhiteLabelLogoTypeEnum.DocsEditorEmbed:
-                LogoDocsEditorEmbedExt = fileExt;
+                if (dark)
+                {
+                    DarkLogoDocsEditorEmbedExt = fileExt;
+                }
+                else
+                {
+                    LogoDocsEditorEmbedExt = fileExt;
+                }
                 break;
             case WhiteLabelLogoTypeEnum.LeftMenu:
-                LogoLeftMenuExt = fileExt;
+                if (dark)
+                {
+                    DarkLogoLeftMenuExt = fileExt;
+                }
+                else
+                {
+                    LogoLeftMenuExt = fileExt;
+                }
                 break;
             case WhiteLabelLogoTypeEnum.AboutPage:
-                LogoAboutPageExt = fileExt;
+                if (dark)
+                {
+                    DarkLogoAboutPageExt = fileExt;
+                }
+                else
+                {
+                    LogoAboutPageExt = fileExt;
+                }
                 break;
         }
     }
@@ -264,12 +349,26 @@ public class TenantWhiteLabelSettingsHelper
         var defaultSettings = _settingsManager.GetDefault<TenantWhiteLabelSettings>();
 
         return tenantWhiteLabelSettings.LogoLightSmallExt == defaultSettings.LogoLightSmallExt &&
+                tenantWhiteLabelSettings.DarkLogoLightSmallExt == defaultSettings.DarkLogoLightSmallExt &&
+
                 tenantWhiteLabelSettings.LogoDarkExt == defaultSettings.LogoDarkExt &&
+                tenantWhiteLabelSettings.DarkLogoDarkExt == defaultSettings.DarkLogoDarkExt &&
+
                 tenantWhiteLabelSettings.LogoFaviconExt == defaultSettings.LogoFaviconExt &&
+                tenantWhiteLabelSettings.DarkLogoFaviconExt == defaultSettings.DarkLogoFaviconExt &&
+
                 tenantWhiteLabelSettings.LogoDocsEditorExt == defaultSettings.LogoDocsEditorExt &&
+                tenantWhiteLabelSettings.DarkLogoDocsEditorExt == defaultSettings.DarkLogoDocsEditorExt &&
+
                 tenantWhiteLabelSettings.LogoDocsEditorEmbedExt == defaultSettings.LogoDocsEditorEmbedExt &&
+                tenantWhiteLabelSettings.DarkLogoDocsEditorEmbedExt == defaultSettings.DarkLogoDocsEditorEmbedExt &&
+
                 tenantWhiteLabelSettings.LogoLeftMenuExt == defaultSettings.LogoLeftMenuExt &&
+                tenantWhiteLabelSettings.DarkLogoLeftMenuExt == defaultSettings.DarkLogoLeftMenuExt &&
+
                 tenantWhiteLabelSettings.LogoAboutPageExt == defaultSettings.LogoAboutPageExt &&
+                tenantWhiteLabelSettings.DarkLogoAboutPageExt == defaultSettings.DarkLogoAboutPageExt &&
+
 
                 tenantWhiteLabelSettings.IsDefaultLogoLightSmall == defaultSettings.IsDefaultLogoLightSmall &&
                 tenantWhiteLabelSettings.IsDefaultLogoDark == defaultSettings.IsDefaultLogoDark &&
@@ -285,12 +384,25 @@ public class TenantWhiteLabelSettingsHelper
     public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
     {
         tenantWhiteLabelSettings.LogoLightSmallExt = null;
+        tenantWhiteLabelSettings.DarkLogoLightSmallExt = null;
+
         tenantWhiteLabelSettings.LogoDarkExt = null;
+        tenantWhiteLabelSettings.DarkLogoDarkExt = null;
+
         tenantWhiteLabelSettings.LogoFaviconExt = null;
+        tenantWhiteLabelSettings.DarkLogoFaviconExt = null;
+
         tenantWhiteLabelSettings.LogoDocsEditorExt = null;
+        tenantWhiteLabelSettings.DarkLogoDocsEditorExt = null;
+
         tenantWhiteLabelSettings.LogoDocsEditorEmbedExt = null;
+        tenantWhiteLabelSettings.DarkLogoDocsEditorEmbedExt = null;
+
         tenantWhiteLabelSettings.LogoLeftMenuExt = null;
+        tenantWhiteLabelSettings.DarkLogoLeftMenuExt = null;
+
         tenantWhiteLabelSettings.LogoAboutPageExt = null;
+        tenantWhiteLabelSettings.DarkLogoAboutPageExt = null;
 
         tenantWhiteLabelSettings.IsDefaultLogoLightSmall = true;
         tenantWhiteLabelSettings.IsDefaultLogoDark = true;
@@ -302,18 +414,18 @@ public class TenantWhiteLabelSettingsHelper
 
         tenantWhiteLabelSettings.SetLogoText(null);
 
-        var store = storage ?? _storageFactory.GetStorage(tenantId, ModuleName);
+        var store = storage ?? await _storageFactory.GetStorageAsync(tenantId, ModuleName);
 
         try
         {
-           await store.DeleteFilesAsync("", "*", false);
+            await store.DeleteFilesAsync("", "*", false);
         }
         catch (Exception e)
         {
             _log.ErrorRestoreDefault(e);
         }
 
-        Save(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
+        await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
     }
 
     public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type)
@@ -323,8 +435,9 @@ public class TenantWhiteLabelSettingsHelper
             try
             {
                 tenantWhiteLabelSettings.SetIsDefault(type, true);
-                var store = _storageFactory.GetStorage(_tenantManager.GetCurrentTenant().Id, ModuleName);
-                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type);
+                var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type, false);
+                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type, true);
             }
             catch (Exception e)
             {
@@ -337,9 +450,9 @@ public class TenantWhiteLabelSettingsHelper
 
     #region Set logo
 
-    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, string logoFileExt, byte[] data, IDataStore storage = null)
+    public async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
     {
-        var store = storage ?? _storageFactory.GetStorage(_tenantManager.GetCurrentTenant().Id, ModuleName);
+        var store = storage ?? await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
 
         #region delete from storage if already exists
 
@@ -349,7 +462,7 @@ public class TenantWhiteLabelSettingsHelper
         {
             try
             {
-                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type);
+                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type, dark);
             }
             catch (Exception e)
             {
@@ -359,144 +472,259 @@ public class TenantWhiteLabelSettingsHelper
         #endregion
 
         using (var memory = new MemoryStream(data))
-        using (var image = Image.Load(memory))
         {
-            var logoFileName = BuildLogoFileName(type, logoFileExt, false);
+            var logoFileName = BuildLogoFileName(type, logoFileExt, dark);
 
             memory.Seek(0, SeekOrigin.Begin);
             await store.SaveAsync(logoFileName, memory);
         }
-
-        tenantWhiteLabelSettings.SetExt(type, logoFileExt);
-        tenantWhiteLabelSettings.SetIsDefault(type, false);
-
-        var generalSize = GetSize(type, true);
-        var generalFileName = BuildLogoFileName(type, logoFileExt, true);
-        await ResizeLogo(generalFileName, data, -1, generalSize, store);
     }
 
-    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, Dictionary<int, string> logo, IDataStore storage = null)
+    public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
     {
-        var xStart = @"data:image/png;base64,";
-
         foreach (var currentLogo in logo)
         {
             var currentLogoType = (WhiteLabelLogoTypeEnum)currentLogo.Key;
-            var currentLogoPath = currentLogo.Value;
 
-            if (!string.IsNullOrEmpty(currentLogoPath))
+            var (lightData, extLight) = await GetLogoData(currentLogo.Value.Key);
+
+            var (darkData, extDark) = await GetLogoData(currentLogo.Value.Value);
+
+            if (lightData == null && darkData == null)
             {
-                var fileExt = "png";
-                byte[] data;
-                if (!currentLogoPath.StartsWith(xStart))
-                {
-                    var fileName = Path.GetFileName(currentLogoPath);
-                    fileExt = fileName.Split('.').Last();
-                    data = _userPhotoManager.GetTempPhotoData(fileName);
-                    try
-                    {
-                        await _userPhotoManager.RemoveTempPhoto(fileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.ErrorSetLogo(ex);
-                    }
-                }
-                else
-                {
-                    var xB64 = currentLogoPath.Substring(xStart.Length); // Get the Base64 string
-                    data = Convert.FromBase64String(xB64); // Convert the Base64 string to binary data
-                }
+                return;
+            }
 
-                if (data != null)
+            if (lightData != null)
+            {
+                await SetLogoAsync(tenantWhiteLabelSettings, currentLogoType, extLight, lightData, false, storage);
+                tenantWhiteLabelSettings.SetExt(currentLogoType, extLight, false);
+                if (currentLogoType == WhiteLabelLogoTypeEnum.LoginPage)
                 {
-                    await SetLogo(tenantWhiteLabelSettings, currentLogoType, fileExt, data, storage);
+                    var (notificationData, extNotification) = GetNotificationLogoData(lightData, extLight, tenantWhiteLabelSettings);
+
+                    if (notificationData != null)
+                    {
+                        await SetLogoAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.Notification, extNotification, notificationData, false, storage);
+                    }
                 }
+            }
+
+            if (darkData != null && CanBeDark(currentLogoType))
+            {
+                await SetLogoAsync(tenantWhiteLabelSettings, currentLogoType, extDark, darkData, true, storage);
+                tenantWhiteLabelSettings.SetExt(currentLogoType, extDark, true);
+            }
+
+            tenantWhiteLabelSettings.SetIsDefault(currentLogoType, false);
+        }
+    }
+
+    private async Task<(byte[], string)> GetLogoData(string logo)
+    {
+        var supportedFormats = new[]
+        {
+            new {
+                    mime = "image/jpeg",
+                    ext = "jpg"
+                },
+            new {
+                    mime = "image/png",
+                    ext = "png"
+                },
+            new {
+                    mime = "image/svg+xml",
+                    ext = "svg"
+                }
+        };
+
+        string ext = null;
+
+        if (!string.IsNullOrEmpty(logo))
+        {
+            byte[] data;
+            var format = supportedFormats.FirstOrDefault(r => logo.StartsWith($"data:{r.mime};base64,"));
+            if (format == null)
+            {
+                var fileName = Path.GetFileName(logo);
+                ext = fileName.Split('.').Last();
+                data = await _userPhotoManager.GetTempPhotoData(fileName);
+                try
+                {
+                    await _userPhotoManager.RemoveTempPhotoAsync(fileName);
+                }
+                catch (Exception ex)
+                {
+                    _log.ErrorSetLogo(ex);
+                }
+            }
+            else
+            {
+                ext = format.ext;
+                var xB64 = logo.Substring($"data:{format.mime};base64,".Length); // Get the Base64 string
+                data = Convert.FromBase64String(xB64); // Convert the Base64 string to binary data
+            }
+
+            return (data, ext);
+        }
+        else
+        {
+            return (null, ext);
+        }
+    }
+
+    private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)
+    {
+        var extNotification = tenantWhiteLabelSettings.GetExt(WhiteLabelLogoTypeEnum.Notification, false);
+
+        switch (extLogo)
+        {
+            case "png":
+                return (logoData, extNotification);
+            case "svg":
+                return (GetLogoDataFromSvg(), extNotification);
+            case "jpg":
+            case "jpeg":
+                return (GetLogoDataFromJpg(), extNotification);
+            default:
+                return (null, extNotification);
+        }
+
+        byte[] GetLogoDataFromSvg()
+        {
+            var size = GetSize(WhiteLabelLogoTypeEnum.Notification);
+            var skSize = new SKSize(size.Width, size.Height);
+
+            var svg = new SkiaSharp.Extended.Svg.SKSvg(skSize);
+
+            using (var stream = new MemoryStream(logoData))
+            {
+                svg.Load(stream);
+            }
+
+            using (var bitMap = new SKBitmap((int)svg.CanvasSize.Width, (int)svg.CanvasSize.Height))
+            using (var canvas = new SKCanvas(bitMap))
+            {
+                canvas.DrawPicture(svg.Picture);
+
+                using (var image = SKImage.FromBitmap(bitMap))
+                using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
+                {
+                    return pngData.ToArray();
+                }
+            }
+        }
+
+        byte[] GetLogoDataFromJpg()
+        {
+            using (var image = SKImage.FromEncodedData(logoData))
+            using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
+            {
+                return pngData.ToArray();
             }
         }
     }
 
-    public async Task SetLogoFromStream(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, string fileExt, Stream fileStream, IDataStore storage = null)
+    public async Task SetLogoFromStream(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, string fileExt, Stream fileStream, bool dark, IDataStore storage = null)
     {
-        byte[] data;
-        using (var memoryStream = new MemoryStream())
+        var data = GetData(fileStream);
+
+        var canSet = true;
+        if (dark)
         {
-            fileStream.CopyTo(memoryStream);
-            data = memoryStream.ToArray();
+            canSet = CanBeDark(type);
+        }
+        if (data != null && canSet)
+        {
+            await SetLogoAsync(tenantWhiteLabelSettings, type, fileExt, data, dark, storage);
+            tenantWhiteLabelSettings.SetExt(type, fileExt, dark);
         }
 
-        if (data != null)
+        tenantWhiteLabelSettings.SetIsDefault(type, false);
+    }
+
+    private byte[] GetData(Stream stream)
+    {
+        if (stream != null)
         {
-            await SetLogo(tenantWhiteLabelSettings, type, fileExt, data, storage);
+            using (var memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
         }
+        return null;
     }
 
     #endregion
 
     #region Get logo path
 
-    public string GetAbsoluteLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool general = true)
+    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool dark = false)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
-            return GetAbsoluteDefaultLogoPath(type, general);
+            return await GetAbsoluteDefaultLogoPathAsync(type, dark);
         }
 
-        return GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, general);
+        return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark);
     }
 
-    private string GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool general)
+    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool dark)
     {
-        var store = _storageFactory.GetStorage(_tenantManager.GetCurrentTenant().Id, ModuleName);
-        var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type), general);
+        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
 
-        if (store.IsFileAsync(fileName).Result)
+        if (await store.IsFileAsync(fileName))
         {
-            return store.GetUriAsync(fileName).Result.ToString();
+            return (await store.GetUriAsync(fileName)).ToString();
         }
-        return GetAbsoluteDefaultLogoPath(type, general);
+        return await GetAbsoluteDefaultLogoPathAsync(type, dark);
     }
 
-    public string GetAbsoluteDefaultLogoPath(WhiteLabelLogoTypeEnum type, bool general)
+    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoTypeEnum type, bool dark)
     {
-        var partnerLogoPath = GetPartnerStorageLogoPath(type, general);
+        var partnerLogoPath = await GetPartnerStorageLogoPathAsync(type, dark);
         if (!string.IsNullOrEmpty(partnerLogoPath))
         {
             return partnerLogoPath;
         }
 
-        return type switch
+        var ext = type switch
         {
-            WhiteLabelLogoTypeEnum.LightSmall => _webImageSupplier.GetAbsoluteWebPath("logo/light_small_doc_space.svg"),
-            WhiteLabelLogoTypeEnum.Dark => _webImageSupplier.GetAbsoluteWebPath("logo/dark_doc_space.svg"),
-            WhiteLabelLogoTypeEnum.DocsEditor => general ? _webImageSupplier.GetAbsoluteWebPath("logo/editor_logo_general.png") : _webImageSupplier.GetAbsoluteWebPath("logo/editor_logo.png"),
-            WhiteLabelLogoTypeEnum.DocsEditorEmbed => general ? _webImageSupplier.GetAbsoluteWebPath("logo/editor_logo_embed_general.png") : _webImageSupplier.GetAbsoluteWebPath("logo/editor_logo_embed.png"),
-            WhiteLabelLogoTypeEnum.Favicon => general ? _webImageSupplier.GetAbsoluteWebPath("logo/favicon_general.ico") : _webImageSupplier.GetAbsoluteWebPath("logo/favicon.ico"),
-            WhiteLabelLogoTypeEnum.LeftMenu => _webImageSupplier.GetAbsoluteWebPath("logo/left_menu_general.svg"),
-            WhiteLabelLogoTypeEnum.AboutPage => _webImageSupplier.GetAbsoluteWebPath("logo/about_doc_space.svg"),
-            _ => "",
+            WhiteLabelLogoTypeEnum.Favicon => "ico",
+            WhiteLabelLogoTypeEnum.Notification => "png",
+            _ => "svg"
         };
+
+        var path = type switch
+        {
+            WhiteLabelLogoTypeEnum.Notification => "notifications/",
+            _ => "logo/"
+        };
+
+        return _webImageSupplier.GetAbsoluteWebPath(path + BuildLogoFileName(type, ext, dark));
     }
 
-    private string GetPartnerStorageLogoPath(WhiteLabelLogoTypeEnum type, bool general)
+    private async Task<string> GetPartnerStorageLogoPathAsync(WhiteLabelLogoTypeEnum type, bool dark)
     {
-        var partnerSettings = _settingsManager.LoadForDefaultTenant<TenantWhiteLabelSettings>();
+        var partnerSettings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
         if (partnerSettings.GetIsDefault(type))
         {
             return null;
         }
 
-        var partnerStorage = _storageFactory.GetStorage(null, "static_partnerdata");
+        var partnerStorage = await _storageFactory.GetStorageAsync(-1, "static_partnerdata");
 
         if (partnerStorage == null)
         {
             return null;
         }
 
-        var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type), general);
+        var logoPath = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
-        return partnerStorage.IsFileAsync(logoPath).Result ? partnerStorage.GetUriAsync(logoPath).Result.ToString() : null;
+        return (await partnerStorage.IsFileAsync(logoPath)) ? (await partnerStorage.GetUriAsync(logoPath)).ToString() : null;
     }
 
     #endregion
@@ -506,83 +734,75 @@ public class TenantWhiteLabelSettingsHelper
     /// <summary>
     /// Get logo stream or null in case of default whitelabel
     /// </summary>
-    public Stream GetWhitelabelLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool general)
+    public async Task<Stream> GetWhitelabelLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool dark = false)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
-            return GetPartnerStorageLogoData(type, general);
+            return await GetPartnerStorageLogoData(type, dark);
         }
 
-        return GetStorageLogoData(tenantWhiteLabelSettings, type, general);
+        return await GetStorageLogoData(tenantWhiteLabelSettings, type, dark);
     }
 
-    private Stream GetStorageLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool general)
+    private async Task<Stream> GetStorageLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum type, bool dark)
     {
-        var storage = _storageFactory.GetStorage(_tenantManager.GetCurrentTenant().Id, ModuleName);
+        var storage = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
 
         if (storage == null)
         {
             return null;
         }
 
-        var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type), general);
+        var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
 
-        return storage.IsFileAsync(fileName).Result ? storage.GetReadStreamAsync(fileName).Result : null;
+        return await storage.IsFileAsync(fileName) ? await storage.GetReadStreamAsync(fileName) : null;
     }
 
-    private Stream GetPartnerStorageLogoData(WhiteLabelLogoTypeEnum type, bool general)
+    private async Task<Stream> GetPartnerStorageLogoData(WhiteLabelLogoTypeEnum type, bool dark)
     {
-        var partnerSettings = _settingsManager.LoadForDefaultTenant<TenantWhiteLabelSettings>();
+        var partnerSettings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
         if (partnerSettings.GetIsDefault(type))
         {
             return null;
         }
 
-        var partnerStorage = _storageFactory.GetStorage(null, "static_partnerdata");
+        var partnerStorage = await _storageFactory.GetStorageAsync(-1, "static_partnerdata");
 
         if (partnerStorage == null)
         {
             return null;
         }
 
-        var fileName = BuildLogoFileName(type, partnerSettings.GetExt(type), general);
+        var fileName = BuildLogoFileName(type, partnerSettings.GetExt(type, dark), dark);
 
-        return partnerStorage.IsFileAsync(fileName).Result ? partnerStorage.GetReadStreamAsync(fileName).Result : null;
+        return await partnerStorage.IsFileAsync(fileName) ? await partnerStorage.GetReadStreamAsync(fileName) : null;
     }
 
     #endregion
 
-    public static string BuildLogoFileName(WhiteLabelLogoTypeEnum type, string fileExt, bool general)
+    public static string BuildLogoFileName(WhiteLabelLogoTypeEnum type, string fileExt, bool dark)
     {
-        return $"logo_{type.ToString().ToLowerInvariant()}{(general ? "_general" : "")}.{fileExt}";
+        if (CanBeDark(type))
+        {
+            return $"{(dark ? "dark_" : "")}{type.ToString().ToLowerInvariant()}.{fileExt}";
+        }
+
+        return $"{type.ToString().ToLowerInvariant()}.{fileExt}";
     }
 
-    public static Size GetSize(WhiteLabelLogoTypeEnum type, bool general)
+    public static Size GetSize(WhiteLabelLogoTypeEnum type)
     {
         return type switch
         {
-            WhiteLabelLogoTypeEnum.LightSmall => new Size(
-                   general ? TenantWhiteLabelSettings.LogoLightSmallSize.Width / 2 : TenantWhiteLabelSettings.LogoLightSmallSize.Width,
-                   general ? TenantWhiteLabelSettings.LogoLightSmallSize.Height / 2 : TenantWhiteLabelSettings.LogoLightSmallSize.Height),
-            WhiteLabelLogoTypeEnum.Dark => new Size(
-                    general ? TenantWhiteLabelSettings.LogoDarkSize.Width / 2 : TenantWhiteLabelSettings.LogoDarkSize.Width,
-                    general ? TenantWhiteLabelSettings.LogoDarkSize.Height / 2 : TenantWhiteLabelSettings.LogoDarkSize.Height),
-            WhiteLabelLogoTypeEnum.Favicon => new Size(
-                    general ? TenantWhiteLabelSettings.LogoFaviconSize.Width / 2 : TenantWhiteLabelSettings.LogoFaviconSize.Width,
-                    general ? TenantWhiteLabelSettings.LogoFaviconSize.Height / 2 : TenantWhiteLabelSettings.LogoFaviconSize.Height),
-            WhiteLabelLogoTypeEnum.DocsEditor => new Size(
-                    general ? TenantWhiteLabelSettings.LogoDocsEditorSize.Width / 2 : TenantWhiteLabelSettings.LogoDocsEditorSize.Width,
-                    general ? TenantWhiteLabelSettings.LogoDocsEditorSize.Height / 2 : TenantWhiteLabelSettings.LogoDocsEditorSize.Height),
-            WhiteLabelLogoTypeEnum.DocsEditorEmbed => new Size(
-                    general ? TenantWhiteLabelSettings.LogoDocsEditorEmbedSize.Width / 2 : TenantWhiteLabelSettings.LogoDocsEditorEmbedSize.Width,
-                    general ? TenantWhiteLabelSettings.LogoDocsEditorEmbedSize.Height / 2 : TenantWhiteLabelSettings.LogoDocsEditorEmbedSize.Height),
-            WhiteLabelLogoTypeEnum.LeftMenu => new Size(
-                    general ? TenantWhiteLabelSettings.LogoLeftMenuSize.Width / 2 : TenantWhiteLabelSettings.LogoLeftMenuSize.Width,
-                    general ? TenantWhiteLabelSettings.LogoLeftMenuSize.Height / 2 : TenantWhiteLabelSettings.LogoLeftMenuSize.Height),
-            WhiteLabelLogoTypeEnum.AboutPage => new Size(
-                    general ? TenantWhiteLabelSettings.LogoAboutPageSize.Width / 2 : TenantWhiteLabelSettings.LogoAboutPageSize.Width,
-                    general ? TenantWhiteLabelSettings.LogoAboutPageSize.Height / 2 : TenantWhiteLabelSettings.LogoAboutPageSize.Height),
+            WhiteLabelLogoTypeEnum.LightSmall => TenantWhiteLabelSettings.LogoLightSmallSize,
+            WhiteLabelLogoTypeEnum.LoginPage => TenantWhiteLabelSettings.LogoLoginPageSize,
+            WhiteLabelLogoTypeEnum.Favicon => TenantWhiteLabelSettings.LogoFaviconSize,
+            WhiteLabelLogoTypeEnum.DocsEditor => TenantWhiteLabelSettings.LogoDocsEditorSize,
+            WhiteLabelLogoTypeEnum.DocsEditorEmbed => TenantWhiteLabelSettings.LogoDocsEditorEmbedSize,
+            WhiteLabelLogoTypeEnum.LeftMenu => TenantWhiteLabelSettings.LogoLeftMenuSize,
+            WhiteLabelLogoTypeEnum.AboutPage => TenantWhiteLabelSettings.LogoAboutPageSize,
+            WhiteLabelLogoTypeEnum.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
             _ => new Size(0, 0),
         };
     }
@@ -603,9 +823,9 @@ public class TenantWhiteLabelSettingsHelper
         try
         {
             using var stream = new MemoryStream(data);
-            using var img = Image.Load(stream, out var format);
+            using var img = Image.Load(stream);
 
-            if (size != img.Size())
+            if (size != img.Size)
             {
                 using var img2 = CommonPhotoManager.DoThumbnail(img, size, false, true, false);
                 data = CommonPhotoManager.SaveToBytes(img2);
@@ -630,14 +850,14 @@ public class TenantWhiteLabelSettingsHelper
 
     private static readonly List<int> _appliedTenants = new List<int>();
 
-    public void Apply(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
+    public async Task ApplyAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
     {
         if (_appliedTenants.Contains(tenantId))
         {
             return;
         }
 
-        SetNewLogoText(tenantWhiteLabelSettings, tenantId);
+        await SetNewLogoTextAsync(tenantWhiteLabelSettings, tenantId);
 
         if (!_appliedTenants.Contains(tenantId))
         {
@@ -645,9 +865,9 @@ public class TenantWhiteLabelSettingsHelper
         }
     }
 
-    public void Save(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, TenantLogoManager tenantLogoManager, bool restore = false)
+    public async Task SaveAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, TenantLogoManager tenantLogoManager, bool restore = false)
     {
-        _settingsManager.SaveForTenant(tenantWhiteLabelSettings, tenantId);
+        await _settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
 
         if (tenantId == Tenant.DefaultTenant)
         {
@@ -655,23 +875,23 @@ public class TenantWhiteLabelSettingsHelper
         }
         else
         {
-            SetNewLogoText(tenantWhiteLabelSettings, tenantId, restore);
-            tenantLogoManager.RemoveMailLogoDataFromCache();
+            await SetNewLogoTextAsync(tenantWhiteLabelSettings, tenantId, restore);
+            await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
         }
     }
 
-    private void SetNewLogoText(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, bool restore = false)
+    private async Task SetNewLogoTextAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, bool restore = false)
     {
         _whiteLabelHelper.DefaultLogoText = TenantWhiteLabelSettings.DefaultLogoText;
-        var partnerSettings = _settingsManager.LoadForDefaultTenant<TenantWhiteLabelSettings>();
+        var partnerSettings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
-        if (restore && string.IsNullOrEmpty(partnerSettings.GetLogoText(_settingsManager)))
+        if (restore && string.IsNullOrEmpty(await partnerSettings.GetLogoTextAsync(_settingsManager)))
         {
             _whiteLabelHelper.RestoreOldText(tenantId);
         }
         else
         {
-            _whiteLabelHelper.SetNewText(tenantId, tenantWhiteLabelSettings.GetLogoText(_settingsManager));
+            _whiteLabelHelper.SetNewText(tenantId, await tenantWhiteLabelSettings.GetLogoTextAsync(_settingsManager));
         }
     }
 
@@ -679,16 +899,15 @@ public class TenantWhiteLabelSettingsHelper
 
     #region Delete from Store
 
-    private async Task DeleteLogoFromStore(TenantWhiteLabelSettings tenantWhiteLabelSettings, IDataStore store, WhiteLabelLogoTypeEnum type)
+    private async Task DeleteLogoFromStore(TenantWhiteLabelSettings tenantWhiteLabelSettings, IDataStore store, WhiteLabelLogoTypeEnum type, bool dark)
     {
-        await DeleteLogoFromStoreByGeneral(tenantWhiteLabelSettings, store, type, false);
-        await DeleteLogoFromStoreByGeneral(tenantWhiteLabelSettings, store, type, true);
+        await DeleteLogoFromStoreByGeneral(tenantWhiteLabelSettings, store, type, dark);
     }
 
-    private async Task DeleteLogoFromStoreByGeneral(TenantWhiteLabelSettings tenantWhiteLabelSettings, IDataStore store, WhiteLabelLogoTypeEnum type, bool general)
+    private async Task DeleteLogoFromStoreByGeneral(TenantWhiteLabelSettings tenantWhiteLabelSettings, IDataStore store, WhiteLabelLogoTypeEnum type, bool dark)
     {
-        var fileExt = tenantWhiteLabelSettings.GetExt(type);
-        var logo = BuildLogoFileName(type, fileExt, general);
+        var fileExt = tenantWhiteLabelSettings.GetExt(type, dark);
+        var logo = BuildLogoFileName(type, fileExt, dark);
         if (await store.IsFileAsync(logo))
         {
             await store.DeleteAsync(logo);
@@ -696,4 +915,15 @@ public class TenantWhiteLabelSettingsHelper
     }
 
     #endregion
+
+    private static bool CanBeDark(WhiteLabelLogoTypeEnum type)
+    {
+        return type switch
+        {
+            WhiteLabelLogoTypeEnum.Favicon => false,
+            WhiteLabelLogoTypeEnum.DocsEditor => false,
+            WhiteLabelLogoTypeEnum.DocsEditorEmbed => false,
+            _ => true,
+        };
+    }
 }

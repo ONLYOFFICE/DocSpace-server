@@ -78,4 +78,78 @@ $Message</value>
   <data name="subject_ShareFolder" xml:space="preserve">
     <value>Documentos. Acesso autorizado para a pasta: $DocumentTitle</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName mencionou-o(a) num comentário no documento
+
+$__AuthorName mencionou-o(a) no comentário ao documento "$DocumentTitle":"$DocumentURL" na sala "$RoomTitle":"$RoomURL":  
+
+$Message</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName eliminou uma sala
+
+$__AuthorName eliminou a sala: $RoomTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Documentos. Todos os assinantes completaram o [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Documentos. Todos os assinantes completaram o $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Documentos. Estado da assinatura alterado</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Documentos. O envio foi concluído.</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Documentos. Acesso concedido à pasta: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Documentos. Acesso concedido ao documento: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>Notificação do DocSpace. Sala eliminada</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>Notificação do DocSpace. Mencionada no documento</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Todos os assinantes completaram o $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Acesso concedido ao documento encriptado: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Acesso concedido à pasta: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Acesso concedido ao documento: $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Estado da assinatura alterado</value>
+  </data>
+  <data name="subject_EditorMentions_push" xml:space="preserve">
+    <value>Mencionado(a) no documento</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>O envio foi concluído.</value>
+  </data>
+  <data name="pattern_DocuSignComplete" xml:space="preserve">
+    <value>h1. Todos os subscritores completaram o $DocumentTitle
+
+Este é um e-mail de notificação para o informar que todos os subscritores completaram o "$DocumentTitle":"$DocumentURL".</value>
+  </data>
+  <data name="pattern_DocuSignStatus" xml:space="preserve">
+    <value>h1. $Message: $DocumentTitle
+
+Inicie sessão na sua conta DocuSign para obter mais informações.</value>
+  </data>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. Envio completo
+
+Esta é uma notificação por correio eletrónico para o informar de que solicitou o envio de mensagens $MailsCount e que o processo está agora concluído. $Message
+
+As mensagens de e-mail que foram enviadas com êxito podem ser encontradas na pasta "Enviadas":"$__VirtualRootPath/addons/mail/#sent" do Módulo E-mail.</value>
+  </data>
 </root>

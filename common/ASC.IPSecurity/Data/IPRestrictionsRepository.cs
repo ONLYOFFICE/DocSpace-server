@@ -38,43 +38,47 @@ public class IPRestrictionsRepository
         _mapper = mapper;
     }
 
-    public List<IPRestriction> Get(int tenant)
+    public async Task<List<IPRestriction>> GetAsync(int tenant)
     {
-        using var tenantDbContext = _dbContextManager.CreateDbContext();
-        return tenantDbContext.TenantIpRestrictions
-            .Where(r => r.Tenant == tenant)
+        await using var tenantDbContext = _dbContextManager.CreateDbContext();
+        return await tenantDbContext.TenantIpRestrictions
+            .Where(r => r.TenantId == tenant)
             .ProjectTo<IPRestriction>(_mapper.ConfigurationProvider)
-            .ToList();
+            .ToListAsync();
     }
 
-    public List<IpRestrictionBase> Save(IEnumerable<IpRestrictionBase> ips, int tenant)
+    public async Task<List<IpRestrictionBase>> SaveAsync(IEnumerable<IpRestrictionBase> ips, int tenant)
     {
-        using var tenantDbContext = _dbContextManager.CreateDbContext();
+        await using var tenantDbContext = _dbContextManager.CreateDbContext();
         var strategy = tenantDbContext.Database.CreateExecutionStrategy();
 
-        strategy.Execute(() =>
+        await strategy.ExecuteAsync(async () =>
         {
-            using var tenantDbContext = _dbContextManager.CreateDbContext();
-            using var tx = tenantDbContext.Database.BeginTransaction();
+            using var filesDbContext = _dbContextManager.CreateDbContext();
+            using var tr = await tenantDbContext.Database.BeginTransactionAsync();
 
-            var restrictions = tenantDbContext.TenantIpRestrictions.Where(r => r.Tenant == tenant).ToList();
-            tenantDbContext.TenantIpRestrictions.RemoveRange(restrictions);
-            tenantDbContext.SaveChanges();
+            await Queries.DeleteTenantIpRestrictionsAsync(tenantDbContext, tenant);
 
             var ipsList = ips.Select(r => new TenantIpRestrictions
             {
-                Tenant = tenant,
+                TenantId = tenant,
                 Ip = r.Ip,
                 ForAdmin = r.ForAdmin
-                
             });
-
             tenantDbContext.TenantIpRestrictions.AddRange(ipsList);
-            tenantDbContext.SaveChanges();
 
-            tx.Commit();
+            await tenantDbContext.SaveChangesAsync();
+            await tr.CommitAsync();
         });
-
         return ips.ToList();
     }
+}
+
+static file class Queries
+{
+    public static readonly Func<TenantDbContext, int, Task<int>>
+        DeleteTenantIpRestrictionsAsync = EF.CompileAsyncQuery(
+            (TenantDbContext ctx, int tenantId) =>
+                ctx.TenantIpRestrictions.Where(r => r.TenantId == tenantId)
+                        .ExecuteDelete());
 }

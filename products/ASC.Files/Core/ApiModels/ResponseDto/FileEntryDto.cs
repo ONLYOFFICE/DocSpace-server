@@ -24,28 +24,80 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using static ASC.Files.Core.Security.FileSecurity;
+
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+[JsonSourceGenerationOptions(WriteIndented = false, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+[JsonSerializable(typeof(FileDto<int>[]))]
+[JsonSerializable(typeof(FileDto<string>[]))]
+[JsonSerializable(typeof(FolderDto<int>[]))]
+[JsonSerializable(typeof(FolderDto<string>[]))]
+public partial class FileEntryDtoContext : JsonSerializerContext { }
+
+
+/// <summary>
+/// </summary>
+[JsonDerivedType(typeof(FileDto<int>))]
+[JsonDerivedType(typeof(FileDto<string>))]
+[JsonDerivedType(typeof(FolderDto<int>))]
+[JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
     protected internal abstract FileEntryType EntryType { get; }
+
+    /// <summary>Title</summary>
+    /// <type>System.String, System</type>
     public string Title { get; set; }
+
+    /// <summary>Access rights</summary>
+    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
+
+    /// <summary>Specifies if the file is shared or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
+
+    /// <summary>Creation time</summary>
+    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
     public ApiDateTime Created { get; set; }
+
+    /// <summary>Author</summary>
+    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
+
+    /// <summary>Time of the last file update</summary>
+    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
     public ApiDateTime Updated
     {
         get => _updated < Created ? Created : _updated;
         set => _updated = value;
     }
 
+    /// <summary>Time when the file will be automatically deleted</summary>
+    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    public ApiDateTime AutoDelete { get; set; }
+
+    /// <summary>Root folder type</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
     public FolderType RootFolderType { get; set; }
+
+    /// <summary>A user who updated a file</summary>
+    /// <type>ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core</type>
     public EmployeeDto UpdatedBy { get; set; }
+
+    /// <summary>Provider is specified or not</summary>
+    /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? ProviderItem { get; set; }
+
+    /// <summary>Provider key</summary>
+    /// <type>System.String, System</type>
     public string ProviderKey { get; set; }
+
+    /// <summary>Provider ID</summary>
+    /// <type>System.Nullable{System.Int32}, System</type>
     public int? ProviderId { get; set; }
 
     protected FileEntryDto(FileEntry entry)
@@ -66,8 +118,16 @@ public abstract class FileEntryDto<T> : FileEntryDto
 {
     public T Id { get; set; }
     public T RootFolderId { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public T OriginId { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public T OriginRoomId { get; set; }
+    public string OriginTitle { get; set; }
+    public string OriginRoomTitle { get; set; }
     public bool CanShare { get; set; }
-    public bool CanEdit { get; set; }
+    public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
@@ -82,6 +142,8 @@ public abstract class FileEntryDto<T> : FileEntryDto
 [Scope]
 public class FileEntryDtoHelper
 {
+
+
     private readonly ApiDateTimeHelper _apiDateTimeHelper;
     private readonly EmployeeDtoHelper _employeeWraperHelper;
     private readonly FileSharingHelper _fileSharingHelper;
@@ -90,7 +152,8 @@ public class FileEntryDtoHelper
     public FileEntryDtoHelper(
         ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWraperHelper,
-        FileSharingHelper fileSharingHelper, FileSecurity fileSecurity
+        FileSharingHelper fileSharingHelper,
+        FileSecurity fileSecurity
         )
     {
         _apiDateTimeHelper = apiDateTimeHelper;
@@ -101,6 +164,13 @@ public class FileEntryDtoHelper
 
     protected internal async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
+        if (entry.Security == null)
+        {
+            entry = await _fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).FirstAsync();
+        }
+
+        CorrectSecurityByLockedStatus(entry);
+
         return new T
         {
             Id = entry.Id,
@@ -108,16 +178,21 @@ public class FileEntryDtoHelper
             Access = entry.Access,
             Shared = entry.Shared,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),
-            CreatedBy = await _employeeWraperHelper.Get(entry.CreateBy),
+            CreatedBy = await _employeeWraperHelper.GetAsync(entry.CreateBy),
             Updated = _apiDateTimeHelper.Get(entry.ModifiedOn),
-            UpdatedBy = await _employeeWraperHelper.Get(entry.ModifiedBy),
+            UpdatedBy = await _employeeWraperHelper.GetAsync(entry.ModifiedBy),
             RootFolderType = entry.RootFolderType,
             RootFolderId = entry.RootId,
             ProviderItem = entry.ProviderEntry.NullIfDefault(),
             ProviderKey = entry.ProviderKey,
             ProviderId = entry.ProviderId.NullIfDefault(),
             CanShare = await _fileSharingHelper.CanSetAccessAsync(entry),
-            CanEdit = await _fileSecurity.CanEditAsync(entry)
+            Security = entry.Security,
+            OriginId = entry.OriginId,
+            OriginTitle = entry.OriginTitle,
+            OriginRoomId = entry.OriginRoomId,
+            OriginRoomTitle = entry.OriginRoomTitle,
+            AutoDelete = entry.DeletedPermanentlyOn != default ? _apiDateTimeHelper.Get(entry.DeletedPermanentlyOn) : null
         };
     }
 }

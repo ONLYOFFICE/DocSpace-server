@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Http.Extensions;
+
 namespace ASC.Api.Core.Middleware;
 
 public abstract class CommonApiResponse
@@ -104,6 +106,8 @@ public class SuccessApiResponse : CommonApiResponse
         }
     }
 
+    public List<Link> Links { get; set; }
+
     public SuccessApiResponse()
     {
 
@@ -114,6 +118,15 @@ public class SuccessApiResponse : CommonApiResponse
         Status = 0;
         _httpContext = httpContext;
         Response = response;
+
+        Links = new List<Link>(1)
+        {
+            new Link()
+            {
+                Href = httpContext.Request.GetDisplayUrl(),
+                Action = httpContext.Request.Method
+            }
+        };
     }
 }
 
@@ -140,4 +153,10 @@ public class CommonApiError
 
         return result;
     }
+}
+
+public class Link
+{
+    public string Href { get; set; }
+    public string Action { get; set; }
 }

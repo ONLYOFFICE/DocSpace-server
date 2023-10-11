@@ -27,9 +27,9 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class LocalBackupStorage : IBackupStorage
+public class LocalBackupStorage : IBackupStorage, IGetterWriteOperator
 {
-    public Task<string> Upload(string storageBasePath, string localPath, Guid userId)
+    public Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)
     {
         if (!Directory.Exists(storageBasePath))
         {
@@ -45,25 +45,36 @@ public class LocalBackupStorage : IBackupStorage
         return Task.FromResult(storagePath);
     }
 
-    public Task Download(string storagePath, string targetLocalPath)
+    public Task<string> DownloadAsync(string storagePath, string targetLocalPath)
     {
+        var tempPath = Path.Combine(storagePath, Path.GetFileName(targetLocalPath));
         File.Copy(storagePath, targetLocalPath, true);
-        return Task.CompletedTask;
+        return Task.FromResult(tempPath);
     }
 
-    public Task Delete(string storagePath)
+    public Task DeleteAsync(string storagePath)
     {
         File.Delete(storagePath);
         return Task.CompletedTask;
     }
 
-    public Task<bool> IsExists(string storagePath)
+    public Task<bool> IsExistsAsync(string storagePath)
     {
         return Task.FromResult(File.Exists(storagePath));
     }
 
-    public Task<string> GetPublicLink(string storagePath)
+    public Task<string> GetPublicLinkAsync(string storagePath)
     {
         return Task.FromResult(string.Empty);
+    }
+
+    public Task<IDataWriteOperator> GetWriteOperatorAsync(string storageBasePath, string title, Guid userId)
+    {
+        return Task.FromResult<IDataWriteOperator>(null);
+    }
+
+    public Task<string> GetBackupExtensionAsync(string storageBasePath)
+    {
+        return Task.FromResult("tar.gz");
     }
 }

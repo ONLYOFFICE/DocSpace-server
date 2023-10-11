@@ -26,15 +26,40 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// </summary>
 public class FolderContentDto<T>
 {
+    /// <summary>List of files</summary>
+    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
     public List<FileEntryDto> Files { get; set; }
+
+    /// <summary>List of folders</summary>
+    /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
     public List<FileEntryDto> Folders { get; set; }
+
+    /// <summary>Current folder information</summary>
+    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core</type>
     public FolderDto<T> Current { get; set; }
+
+    /// <summary>Folder path</summary>
+    /// <type>System.Object, System</type>
     public object PathParts { get; set; }
+
+    /// <summary>Folder start index</summary>
+    /// <type>System.Int32, System</type>
     public int StartIndex { get; set; }
+
+    /// <summary>Number of folder elements</summary>
+    /// <type>System.Int32, System</type>
     public int Count { get; set; }
+
+    /// <summary>Total number of elements in the folder</summary>
+    /// <type>System.Int32, System</type>
     public int Total { get; set; }
+
+    /// <summary>New element index</summary>
+    /// <type>System.Int32, System</type>
     public int New { get; set; }
 
     public FolderContentDto() { }
@@ -63,20 +88,29 @@ public class FolderContentDto<T>
 public class FolderContentDtoHelper
 {
     private readonly FileSecurity _fileSecurity;
+    private readonly FileSecurityCommon _fileSecurityCommon;
+    private readonly AuthContext _authContext;
     private readonly IDaoFactory _daoFactory;
     private readonly FileDtoHelper _fileDtoHelper;
     private readonly FolderDtoHelper _folderDtoHelper;
+    private readonly BadgesSettingsHelper _badgesSettingsHelper;
 
     public FolderContentDtoHelper(
         FileSecurity fileSecurity,
         IDaoFactory daoFactory,
         FileDtoHelper fileWrapperHelper,
-        FolderDtoHelper folderWrapperHelper)
+        FolderDtoHelper folderWrapperHelper,
+        BadgesSettingsHelper badgesSettingsHelper,
+        FileSecurityCommon fileSecurityCommon,
+        AuthContext authContext)
     {
         _fileSecurity = fileSecurity;
         _daoFactory = daoFactory;
         _fileDtoHelper = fileWrapperHelper;
         _folderDtoHelper = folderWrapperHelper;
+        _badgesSettingsHelper = badgesSettingsHelper;
+        _fileSecurityCommon = fileSecurityCommon;
+        _authContext = authContext;
     }
 
     public async Task<FolderContentDto<T>> GetAsync<T>(DataWrapper<T> folderItems, int startIndex)
@@ -125,12 +159,14 @@ public class FolderContentDtoHelper
         var foldersTask = GetFoldersDto(folders).ToListAsync();
         var currentTask = _folderDtoHelper.GetAsync(folderItems.FolderInfo);
 
+        var isEnableBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+
         var result = new FolderContentDto<T>
         {
             PathParts = folderItems.FolderPathParts,
             StartIndex = startIndex,
             Total = folderItems.Total,
-            New = folderItems.New,
+            New = isEnableBadges ? folderItems.New : 0,
             Count = folderItems.Entries.Count,
             Current = await currentTask
         };
@@ -170,108 +206,45 @@ public class FolderContentDtoHelper
 
         async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries)
         {
+            List<FileShareRecord> currentUsersRecords = null;
+
             foreach (var r in folderEntries)
             {
                 if (r is Folder<int> fol1)
                 {
-                    yield return await _folderDtoHelper.GetAsync(fol1, foldersIntWithRights);
+                    yield return await GetFolder(fol1, foldersIntWithRights);
                 }
                 else if (r is Folder<string> fol2)
                 {
-                    yield return await _folderDtoHelper.GetAsync(fol2, foldersStringWithRights);
+                    yield return await GetFolder(fol2, foldersStringWithRights);
                 }
             }
-        }
-    }
-}
 
-public class FileEntryWrapperConverter : System.Text.Json.Serialization.JsonConverter<FileEntryDto>
-{
-    public override FileEntryDto Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        try
-        {
-            return JsonSerializer.Deserialize<FileDto<int>>(ref reader, options);
-        }
-        catch (Exception)
-        {
-
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize<FileDto<string>>(ref reader, options);
-        }
-        catch (Exception)
-        {
-
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize<FileDto<string>>(ref reader, options);
-        }
-        catch (Exception)
-        {
-
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize<FolderDto<int>>(ref reader, options);
-        }
-        catch (Exception)
-        {
-
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize<FolderDto<string>>(ref reader, options);
-        }
-        catch (Exception)
-        {
-
-        }
-
-        return null;
-    }
-
-    public override void Write(Utf8JsonWriter writer, FileEntryDto value, JsonSerializerOptions options)
-    {
-        if (value.EntryType == FileEntryType.Folder)
-        {
-            if (value is FolderDto<string> f1)
+            async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, List<Tuple<FileEntry<T1>, bool>> foldersWithRights)
             {
-                JsonSerializer.Serialize(writer, f1, typeof(FolderDto<string>), options);
-
-                return;
-            }
-
-            if (value is FolderDto<int> f2)
-            {
-                JsonSerializer.Serialize(writer, f2, typeof(FolderDto<int>), options);
-
-                return;
+                var result = await _folderDtoHelper.GetAsync(fol1, foldersWithRights);
+                if (DocSpaceHelper.IsRoom(fol1.FolderType))
+                {
+                    if (fol1.CreateBy == _authContext.CurrentAccount.ID)
+                    {
+                        result.InRoom = true;
+                    }
+                    else
+                    {
+                        if (currentUsersRecords == null && await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
+                        {
+                            var securityDao = _daoFactory.GetSecurityDao<T>();
+                            var currentUserSubjects = await _fileSecurity.GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
+                            currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
+                        }
+                        if (currentUsersRecords != null)
+                        {
+                            result.InRoom = currentUsersRecords.Any(c => c.EntryId.Equals(fol1.Id));
+                        }
+                    }
+                }
+                return result;
             }
         }
-        else
-        {
-            if (value is FileDto<string> f3)
-            {
-                JsonSerializer.Serialize(writer, f3, typeof(FileDto<string>), options);
-
-                return;
-            }
-
-            if (value is FileDto<int> f4)
-            {
-                JsonSerializer.Serialize(writer, f4, typeof(FileDto<int>), options);
-
-                return;
-            }
-        }
-
-        JsonSerializer.Serialize(writer, value, options);
     }
 }

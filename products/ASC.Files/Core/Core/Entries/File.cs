@@ -41,7 +41,6 @@ public enum FileStatus
 }
 
 [Transient]
-[Serializable]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
 public class File<T> : FileEntry<T>, IFileEntry<T>
 {
@@ -58,9 +57,8 @@ public class File<T> : FileEntry<T>, IFileEntry<T>
         FileHelper fileHelper,
         Global global,
         GlobalFolderHelper globalFolderHelper,
-        SettingsManager settingsManager,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global, globalFolderHelper, settingsManager, filesSettingsHelper, fileDateTime)
+        FileDateTime fileDateTime) : base(fileHelper, global, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         Version = 1;
         VersionGroup = 1;
@@ -175,23 +173,6 @@ public class File<T> : FileEntry<T>, IFileEntry<T>
             else
             {
                 _status &= ~FileStatus.IsTemplate;
-            }
-        }
-    }
-
-    [JsonIgnore]
-    public bool IsFillFormDraft
-    {
-        get => (_status & FileStatus.IsFillFormDraft) == FileStatus.IsFillFormDraft;
-        set
-        {
-            if (value)
-            {
-                _status |= FileStatus.IsFillFormDraft;
-            }
-            else
-            {
-                _status &= ~FileStatus.IsFillFormDraft;
             }
         }
     }

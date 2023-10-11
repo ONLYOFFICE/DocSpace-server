@@ -26,6 +26,10 @@
 
 namespace ASC.Files.Api;
 
+/// <summary>
+/// Provides access to documents.
+/// </summary>
+/// <name>files</name>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -41,7 +45,7 @@ public abstract class ApiControllerBase : ControllerBase
         _fileDtoHelper = fileDtoHelper;
     }
 
-    public async Task<FileEntryDto> GetFileEntryWrapperAsync(FileEntry r)
+    protected async Task<FileEntryDto> GetFileEntryWrapperAsync(FileEntry r)
     {
         FileEntryDto wrapper = null;
         if (r.FileEntryType == FileEntryType.Folder)

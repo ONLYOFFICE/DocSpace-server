@@ -24,19 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Core.Common.EF;
 
 public class UserGroup : BaseEntity, IMapFrom<UserGroupRef>
 {
-    public int Tenant { get; set; }
+    public int TenantId { get; set; }
     public Guid Userid { get; set; }
     public Guid UserGroupId { get; set; }
     public UserGroupRefType RefType { get; set; }
     public bool Removed { get; set; }
     public DateTime LastModified { get; set; }
+
+    public DbTenant Tenant { get; set; }
+
     public override object[] GetKeys()
     {
-        return new object[] { Tenant, Userid, UserGroupId, RefType };
+        return new object[] { TenantId, Userid, UserGroupId, RefType };
     }
     public void Mapping(Profile profile)
     {
@@ -49,13 +54,15 @@ public static class DbUserGroupExtension
 {
     public static ModelBuilderWrapper AddUserGroup(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<UserGroup>().Navigation(e => e.Tenant).AutoInclude(false);
+
         modelBuilder
             .Add(MySqlAddUserGroup, Provider.MySql)
             .Add(PgSqlAddUserGroup, Provider.PostgreSql)
             .HasData(
             new UserGroup
             {
-                Tenant = 1,
+                TenantId = 1,
                 Userid = Guid.Parse("66faa6e4-f133-11ea-b126-00ffeec8b4ef"),
                 UserGroupId = Guid.Parse("cd84e66b-b803-40fc-99f9-b2969a54a1de"),
                 RefType = 0,
@@ -70,7 +77,7 @@ public static class DbUserGroupExtension
     {
         modelBuilder.Entity<UserGroup>(entity =>
         {
-            entity.HasKey(e => new { e.Tenant, e.Userid, e.UserGroupId, e.RefType })
+            entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
                 .HasName("PRIMARY");
 
             entity.ToTable("core_usergroup")
@@ -79,7 +86,7 @@ public static class DbUserGroupExtension
             entity.HasIndex(e => e.LastModified)
                 .HasDatabaseName("last_modified");
 
-            entity.Property(e => e.Tenant).HasColumnName("tenant");
+            entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Userid)
                 .HasColumnName("userid")
@@ -109,7 +116,7 @@ public static class DbUserGroupExtension
     {
         modelBuilder.Entity<UserGroup>(entity =>
         {
-            entity.HasKey(e => new { e.Tenant, e.Userid, e.UserGroupId, e.RefType })
+            entity.HasKey(e => new { e.TenantId, e.Userid, e.UserGroupId, e.RefType })
                 .HasName("core_usergroup_pkey");
 
             entity.ToTable("core_usergroup", "onlyoffice");
@@ -117,7 +124,7 @@ public static class DbUserGroupExtension
             entity.HasIndex(e => e.LastModified)
                 .HasDatabaseName("last_modified_core_usergroup");
 
-            entity.Property(e => e.Tenant).HasColumnName("tenant");
+            entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Userid)
                 .HasColumnName("userid")

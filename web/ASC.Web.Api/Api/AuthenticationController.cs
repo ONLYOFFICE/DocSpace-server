@@ -29,6 +29,10 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
+/// <summary>
+/// Authorization API.
+/// </summary>
+/// <name>authentication</name>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -42,7 +46,7 @@ public class AuthenticationController : ControllerBase
     private readonly CookiesManager _cookiesManager;
     private readonly PasswordHasher _passwordHasher;
     private readonly EmailValidationKeyModelHelper _emailValidationKeyModelHelper;
-    private readonly ICache _cache;
+    private readonly SetupInfo _setupInfo;
     private readonly MessageService _messageService;
     private readonly ProviderManager _providerManager;
     private readonly AccountLinker _accountLinker;
@@ -67,7 +71,12 @@ public class AuthenticationController : ControllerBase
     private readonly DbLoginEventsManager _dbLoginEventsManager;
     private readonly UserManagerWrapper _userManagerWrapper;
     private readonly TfaAppAuthSettingsHelper _tfaAppAuthSettingsHelper;
+    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
     private readonly BruteForceLoginManager _bruteForceLoginManager;
+    private readonly ILogger<AuthenticationController> _logger;
+    private readonly InvitationLinkService _invitationLinkService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMapper _mapper;
 
     public AuthenticationController(
         UserManager userManager,
@@ -77,7 +86,6 @@ public class AuthenticationController : ControllerBase
         CookiesManager cookiesManager,
         PasswordHasher passwordHasher,
         EmailValidationKeyModelHelper emailValidationKeyModelHelper,
-        ICache cache,
         SetupInfo setupInfo,
         MessageService messageService,
         ProviderManager providerManager,
@@ -103,7 +111,12 @@ public class AuthenticationController : ControllerBase
         CookieStorage cookieStorage,
         DbLoginEventsManager dbLoginEventsManager,
         BruteForceLoginManager bruteForceLoginManager,
-        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper)
+        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        ILogger<AuthenticationController> logger,
+        InvitationLinkService invitationLinkService,
+        IHttpContextAccessor httpContextAccessor, 
+        IMapper mapper)
     {
         _userManager = userManager;
         _tenantManager = tenantManager;
@@ -112,7 +125,7 @@ public class AuthenticationController : ControllerBase
         _cookiesManager = cookiesManager;
         _passwordHasher = passwordHasher;
         _emailValidationKeyModelHelper = emailValidationKeyModelHelper;
-        _cache = cache;
+        _setupInfo = setupInfo;
         _messageService = messageService;
         _providerManager = providerManager;
         _accountLinker = accountLinker;
@@ -138,8 +151,20 @@ public class AuthenticationController : ControllerBase
         _userManagerWrapper = userManagerWrapper;
         _bruteForceLoginManager = bruteForceLoginManager;
         _tfaAppAuthSettingsHelper = tfaAppAuthSettingsHelper;
+        _emailValidationKeyProvider = emailValidationKeyProvider;
+        _logger = logger;
+        _invitationLinkService = invitationLinkService;
+        _httpContextAccessor = httpContextAccessor;
+        _mapper = mapper;
     }
 
+    /// <summary>
+    /// Checks if the current user is authenticated or not.
+    /// </summary>
+    /// <short>Check authentication</short>
+    /// <httpMethod>GET</httpMethod>
+    /// <path>api/2.0/authentication</path>
+    /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -147,26 +172,36 @@ public class AuthenticationController : ControllerBase
         return _securityContext.IsAuthenticated;
     }
 
+    /// <summary>
+    /// Authenticates the current user by SMS or two-factor authentication code.
+    /// </summary>
+    /// <short>
+    /// Authenticate a user by code
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/{code}</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
         var tenant = _tenantManager.GetCurrentTenant().Id;
-        var user = (await GetUser(inDto)).UserInfo;
+        var user = (await GetUserAsync(inDto)).UserInfo;
         var sms = false;
 
         try
         {
-            if (_studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettings() && _studioSmsNotificationSettingsHelper.TfaEnabledForUser(user.Id))
+            if (await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await _studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
                 sms = true;
-                _smsManager.ValidateSmsCode(user, inDto.Code, true);
+                await _smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
             }
-            else if (_tfaAppAuthSettingsHelper.IsVisibleSettings && _tfaAppAuthSettingsHelper.TfaEnabledForUser(user.Id))
+            else if (_tfaAppAuthSettingsHelper.IsVisibleSettings && await _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
-                if (_tfaManager.ValidateAuthCode(user, inDto.Code, true, true))
+                if (await _tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
-                    _messageService.Send(MessageAction.UserConnectedTfaApp, _messageTarget.Create(user.Id));
+                    await _messageService.SendAsync(MessageAction.UserConnectedTfaApp, _messageTarget.Create(user.Id));
                 }
             }
             else
@@ -174,8 +209,8 @@ public class AuthenticationController : ControllerBase
                 throw new SecurityException("Auth code is not available");
             }
 
-            var token = _cookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.Id, MessageAction.LoginSuccess);
-            var expires = _tenantCookieSettingsHelper.GetExpiresTime(tenant);
+            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id);
+            var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
             var result = new AuthenticationTokenDto
             {
@@ -195,12 +230,13 @@ public class AuthenticationController : ControllerBase
 
             return result;
         }
-        catch
+        catch (Exception ex)
         {
-            _messageService.Send(user.DisplayUserName(false, _displayUserSettingsHelper), sms
+            await _messageService.SendAsync(user.DisplayUserName(false, _displayUserSettingsHelper), sms
                                                                           ? MessageAction.LoginFailViaApiSms
                                                                           : MessageAction.LoginFailViaApiTfa,
                                 _messageTarget.Create(user.Id));
+            _logger.ErrorWithException(ex);
             throw new AuthenticationException("User authentication failed");
         }
         finally
@@ -209,22 +245,38 @@ public class AuthenticationController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Authenticates the current user by SMS, authenticator app, or without two-factor authentication.
+    /// </summary>
+    /// <short>
+    /// Authenticate a user
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
     {
-        var wrapper = await GetUser(inDto);
+        var wrapper = await GetUserAsync(inDto);
         var viaEmail = wrapper.ViaEmail;
         var user = wrapper.UserInfo;
+        var session = inDto.Session;
 
-        if (_studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettings() && _studioSmsNotificationSettingsHelper.TfaEnabledForUser(user.Id))
+        if (user == null || Equals(user, Constants.LostUser))
+        {
+            throw new Exception(Resource.ErrorUserNotFound);
+        }
+
+        if (await _studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await _studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             if (string.IsNullOrEmpty(user.MobilePhone) || user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated)
             {
                 return new AuthenticationTokenDto
                 {
                     Sms = true,
-                    ConfirmUrl = _commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneActivation)
+                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation)
                 };
             }
 
@@ -235,46 +287,53 @@ public class AuthenticationController : ControllerBase
                 Sms = true,
                 PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
                 Expires = new ApiDateTime(_tenantManager, _timeZoneConverter, DateTime.UtcNow.Add(_smsKeyStorage.StoreInterval)),
-                ConfirmUrl = _commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth)
+                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneAuth)
             };
         }
 
-        if (_tfaAppAuthSettingsHelper.IsVisibleSettings && _tfaAppAuthSettingsHelper.TfaEnabledForUser(user.Id))
+        if (_tfaAppAuthSettingsHelper.IsVisibleSettings && await _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            if (!TfaAppUserSettings.EnableForUser(_settingsManager, user.Id))
+            if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
             {
                 return new AuthenticationTokenDto
                 {
                     Tfa = true,
-                    TfaKey = _tfaManager.GenerateSetupCode(user).ManualEntryKey,
-                    ConfirmUrl = _commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.TfaActivation)
+                    TfaKey = (await _tfaManager.GenerateSetupCodeAsync(user)).ManualEntryKey,
+                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation)
                 };
             }
 
             return new AuthenticationTokenDto
             {
                 Tfa = true,
-                ConfirmUrl = _commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.TfaAuth)
+                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaAuth)
             };
         }
 
         try
         {
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
-            var token = _cookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.Id, action);
+            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id, action, session);
 
-            var tenant = _tenantManager.GetCurrentTenant().Id;
-            var expires = _tenantCookieSettingsHelper.GetExpiresTime(tenant);
-
-            return new AuthenticationTokenDto
+            var outDto = new AuthenticationTokenDto
             {
-                Token = token,
-                Expires = new ApiDateTime(_tenantManager, _timeZoneConverter, expires)
+                Token = token
             };
+
+            if (!session)
+            {
+                var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+                var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
+
+                outDto.Expires = new ApiDateTime(_tenantManager, _timeZoneConverter, expires);
+            }
+
+            return outDto;
         }
-        catch
+        catch (Exception ex)
         {
-            _messageService.Send(user.DisplayUserName(false, _displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
+            await _messageService.SendAsync(user.DisplayUserName(false, _displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
+            _logger.ErrorWithException(ex);
             throw new AuthenticationException("User authentication failed");
         }
         finally
@@ -283,41 +342,96 @@ public class AuthenticationController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Logs out of the current user account.
+    /// </summary>
+    /// <short>
+    /// Log out
+    /// </short>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/logout</path>
+    /// <returns></returns>
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
-    public async Task Logout()
+    public async Task<object> LogoutAsync()
     {
         var cookie = _cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = _cookieStorage.GetLoginEventIdFromCookie(cookie);
-        await _dbLoginEventsManager.LogOutEvent(loginEventId);
+        await _dbLoginEventsManager.LogOutEventAsync(loginEventId);
 
-        var user = _userManager.GetUsers(_securityContext.CurrentAccount.ID);
+        var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, _displayUserSettingsHelper);
-        _messageService.Send(loginName, MessageAction.Logout);
+        await _messageService.SendAsync(loginName, MessageAction.Logout);
 
         _cookiesManager.ClearCookies(CookiesType.AuthKey);
         _cookiesManager.ClearCookies(CookiesType.SocketIO);
 
         _securityContext.Logout();
+
+
+        if (!string.IsNullOrEmpty(user.SsoNameId))
+        {
+            var settings = _settingsManager.Load<SsoSettingsV2>();
+
+            if (settings.EnableSso.GetValueOrDefault() && !string.IsNullOrEmpty(settings.IdpSettings.SloUrl))
+            {
+                var logoutSsoUserData = _signature.Create(new LogoutSsoUserData
+                {
+                    NameId = user.SsoNameId,
+                    SessionId = user.SsoSessionId
+                });
+
+                return _setupInfo.SsoSamlLogoutUrl + "?data=" + HttpUtility.UrlEncode(logoutSsoUserData);
+            }
+        }
+
+        return null;
     }
 
+    /// <summary>
+    /// Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).
+    /// </summary>
+    /// <short>
+    /// Open confirmation email URL
+    /// </short>
+    /// <param type="ASC.Security.Cryptography.EmailValidationKeyModel, ASC.Core.Common" name="inDto">Confirmation email parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/confirm</path>
+    /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
     [AllowNotPayment, AllowSuspended]
     [HttpPost("confirm")]
-    public ValidationResult CheckConfirm(EmailValidationKeyModel inDto)
+    public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {
-        return _emailValidationKeyModelHelper.Validate(inDto);
+        if (inDto.Type != ConfirmType.LinkInvite)
+        {
+            return new ConfirmDto { Result = await _emailValidationKeyModelHelper.ValidateAsync(inDto)};
+        }
+
+        var result = await _invitationLinkService.ValidateAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
+
+        return _mapper.Map<Validation, ConfirmDto>(result);
     }
 
+    /// <summary>
+    /// Sets a mobile phone for the current user.
+    /// </summary>
+    /// <short>
+    /// Set a mobile phone
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileRequestsDto, ASC.Web.Api" name="inDto">Mobile phone request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/setphone</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
     public async Task<AuthenticationTokenDto> SaveMobilePhoneAsync(MobileRequestsDto inDto)
     {
-        _apiContext.AuthByClaim();
+        await _apiContext.AuthByClaimAsync();
         var user = _userManager.GetUsers(_authContext.CurrentAccount.ID);
         inDto.MobilePhone = await _smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
-        _messageService.Send(MessageAction.UserUpdatedMobileNumber, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), inDto.MobilePhone);
+        await _messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), inDto.MobilePhone);
 
         return new AuthenticationTokenDto
         {
@@ -327,11 +441,21 @@ public class AuthenticationController : ControllerBase
         };
     }
 
+    /// <summary>
+    /// Sends SMS with an authentication code.
+    /// </summary>
+    /// <short>
+    /// Send SMS code
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/sendsms</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
     {
-        var user = (await GetUser(inDto)).UserInfo;
+        var user = (await GetUserAsync(inDto)).UserInfo;
         await _smsManager.PutAuthCodeAsync(user, true);
 
         return new AuthenticationTokenDto
@@ -342,17 +466,39 @@ public class AuthenticationController : ControllerBase
         };
     }
 
-    private async Task<UserInfoWrapper> GetUser(AuthRequestsDto inDto)
+    private async Task<UserInfoWrapper> GetUserAsync(AuthRequestsDto inDto)
     {
         var wrapper = new UserInfoWrapper
         {
             ViaEmail = true
         };
+
         var action = MessageAction.LoginFailViaApi;
-        UserInfo user;
+        UserInfo user = null;
+
         try
         {
-            if ((string.IsNullOrEmpty(inDto.Provider) && string.IsNullOrEmpty(inDto.SerializedProfile)) || inDto.Provider == "email")
+            if (inDto.ConfirmData != null)
+            {
+                var email = inDto.ConfirmData.Email;
+
+                var checkKeyResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.Auth + inDto.ConfirmData.First + inDto.ConfirmData.Module + inDto.ConfirmData.Sms, inDto.ConfirmData.Key, _setupInfo.ValidAuthKeyInterval);
+
+                if (checkKeyResult == ValidationResult.Ok)
+                {
+                    user = email.Contains("@")
+                                   ? await _userManager.GetUserByEmailAsync(email)
+                                   : await _userManager.GetUsersAsync(new Guid(email));
+
+                    if (_securityContext.IsAuthenticated && _securityContext.CurrentAccount.ID != user.Id)
+                    {
+                        _securityContext.Logout();
+                        _cookiesManager.ClearCookies(CookiesType.AuthKey);
+                        _cookiesManager.ClearCookies(CookiesType.SocketIO);
+                    }
+                }
+            }
+            else if ((string.IsNullOrEmpty(inDto.Provider) && string.IsNullOrEmpty(inDto.SerializedProfile)) || inDto.Provider == "email")
             {
                 inDto.UserName.ThrowIfNull(new ArgumentException(@"userName empty", "userName"));
                 if (!string.IsNullOrEmpty(inDto.Password))
@@ -378,11 +524,11 @@ public class AuthenticationController : ControllerBase
 
                 var requestIp = MessageSettings.GetIP(Request);
 
-                user = _bruteForceLoginManager.Attempt(inDto.UserName, inDto.PasswordHash, requestIp, out _);
+                user = await _bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp, inDto.RecaptchaResponse);
             }
             else
             {
-                if (!(_coreBaseSettings.Standalone || _tenantManager.GetTenantQuota(_tenantManager.GetCurrentTenant().Id).Oauth))
+                if (!(_coreBaseSettings.Standalone || (await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync())).Oauth))
                 {
                     throw new Exception(Resource.ErrorNotAllowedOption);
                 }
@@ -405,12 +551,18 @@ public class AuthenticationController : ControllerBase
         }
         catch (BruteForceCredentialException)
         {
-            _messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
-            throw new AuthenticationException("Login Fail. Too many attempts");
+            await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
+            throw new BruteForceCredentialException(Resource.ErrorTooManyLoginAttempts);
         }
-        catch
+        catch (RecaptchaException)
         {
-            _messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
+            await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailRecaptcha);
+            throw new RecaptchaException(Resource.RecaptchaInvalid);
+        }
+        catch (Exception ex)
+        {
+            await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
+            _logger.ErrorWithException(ex);
             throw new AuthenticationException("User authentication failed");
         }
         wrapper.UserInfo = user;
@@ -433,8 +585,8 @@ public class AuthenticationController : ControllerBase
 
             var userInfo = Constants.LostUser;
 
-            Guid userId;
-            if (TryGetUserByHash(loginProfile.HashId, out userId))
+            (var succ, var userId) = await TryGetUserByHashAsync(loginProfile.HashId);
+            if (succ)
             {
                 userInfo = _userManager.GetUsers(userId);
             }
@@ -446,8 +598,8 @@ public class AuthenticationController : ControllerBase
                 {
                     try
                     {
-                        _securityContext.AuthenticateMeWithoutCookie(ASC.Core.Configuration.Constants.CoreSystem);
-                        await _userManager.DeleteUser(userInfo.Id);
+                        await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+                        await _userManager.DeleteUserAsync(userInfo.Id);
                         userInfo = Constants.LostUser;
                     }
                     finally
@@ -488,7 +640,7 @@ public class AuthenticationController : ControllerBase
                 //    }
                 //}
 
-                _studioNotifyService.UserHasJoin();
+                await _studioNotifyService.UserHasJoinAsync();
                 _userHelpTourHelper.IsNewUser = true;
                 _personalSettingsHelper.IsNewUser = true;
             }
@@ -511,15 +663,15 @@ public class AuthenticationController : ControllerBase
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
-        var userInfo = _userManager.GetUserByEmail(loginProfile.EMail);
+        var userInfo = await _userManager.GetUserByEmailAsync(loginProfile.EMail);
         if (!_userManager.UserExists(userInfo.Id))
         {
             var newUserInfo = ProfileToUserInfo(loginProfile);
 
             try
             {
-                _securityContext.AuthenticateMeWithoutCookie(ASC.Core.Configuration.Constants.CoreSystem);
-                userInfo = await _userManagerWrapper.AddUser(newUserInfo, UserManagerWrapper.GeneratePassword());
+                await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+                userInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
             }
             finally
             {
@@ -527,7 +679,7 @@ public class AuthenticationController : ControllerBase
             }
         }
 
-        _accountLinker.AddLink(userInfo.Id.ToString(), loginProfile);
+        await _accountLinker.AddLinkAsync(userInfo.Id.ToString(), loginProfile);
 
         return userInfo;
     }
@@ -565,22 +717,22 @@ public class AuthenticationController : ControllerBase
         return userInfo;
     }
 
-    private bool TryGetUserByHash(string hashId, out Guid userId)
+    private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {
-        userId = Guid.Empty;
+        var userId = Guid.Empty;
         if (string.IsNullOrEmpty(hashId))
         {
-            return false;
+            return (false, userId);
         }
 
-        var linkedProfiles = _accountLinker.GetLinkedObjectsByHashId(hashId);
+        var linkedProfiles = await _accountLinker.GetLinkedObjectsByHashIdAsync(hashId);
         var tmp = Guid.Empty;
         if (linkedProfiles.Any(profileId => Guid.TryParse(profileId, out tmp) && _userManager.UserExists(tmp)))
         {
             userId = tmp;
         }
 
-        return true;
+        return (true, userId);
     }
 }
 

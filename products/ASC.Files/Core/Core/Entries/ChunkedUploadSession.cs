@@ -27,7 +27,6 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Id} into {FolderId}")]
-[Serializable]
 public class ChunkedUploadSession<T> : CommonChunkedUploadSession
 {
     public T FolderId { get; set; }
@@ -67,7 +66,6 @@ public class ChunkedUploadSession<T> : CommonChunkedUploadSession
         chunkedUploadSession.TransformItems();
 
         return chunkedUploadSession;
-
     }
 }
 
@@ -98,15 +96,15 @@ public class ChunkedUploadSessionHelper
 
                 if (f is Folder<string> f1)
                 {
-                    return (T)Convert.ChangeType(f1.Id, typeof(T));
+                    return IdConverter.Convert<T>(f1.Id);
                 }
 
                 if (f is Folder<int> f2)
                 {
-                    return (T)Convert.ChangeType(f2.Id, typeof(T));
+                    return IdConverter.Convert<T>(f2.Id);
                 }
 
-                return (T)Convert.ChangeType(0, typeof(T));
+                return IdConverter.Convert<T>(0);
             })
             : new List<T> { session.FolderId };
 

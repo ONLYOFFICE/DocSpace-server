@@ -31,7 +31,6 @@ public class BackupStorageFactory
 {
     private readonly ConfigurationExtension _configuration;
     private readonly DocumentsBackupStorage _documentsBackupStorage;
-    private readonly DataStoreBackupStorage _dataStoreBackupStorage;
     private readonly ILogger<BackupStorageFactory> _logger;
     private readonly LocalBackupStorage _localBackupStorage;
     private readonly ConsumerBackupStorage _consumerBackupStorage;
@@ -43,23 +42,21 @@ public class BackupStorageFactory
         ConfigurationExtension configuration,
         DocumentsBackupStorage documentsBackupStorage,
         TenantManager tenantManager,
-        DataStoreBackupStorage dataStoreBackupStorage,
         ILogger<BackupStorageFactory> logger)
     {
         _configuration = configuration;
         _documentsBackupStorage = documentsBackupStorage;
-        _dataStoreBackupStorage = dataStoreBackupStorage;
         _logger = logger;
         _localBackupStorage = localBackupStorage;
         _consumerBackupStorage = consumerBackupStorage;
         _tenantManager = tenantManager;
     }
 
-    public IBackupStorage GetBackupStorage(BackupRecord record)
+    public async Task<IBackupStorage> GetBackupStorageAsync(BackupRecord record)
     {
         try
         {
-            return GetBackupStorage(record.StorageType, record.TenantId, JsonConvert.DeserializeObject<Dictionary<string, string>>(record.StorageParams));
+            return await GetBackupStorageAsync(record.StorageType, record.TenantId, JsonConvert.DeserializeObject<Dictionary<string, string>>(record.StorageParams));
         }
         catch (Exception error)
         {
@@ -69,26 +66,24 @@ public class BackupStorageFactory
         }
     }
 
-    public IBackupStorage GetBackupStorage(BackupStorageType type, int tenantId, Dictionary<string, string> storageParams)
+    public async Task<IBackupStorage> GetBackupStorageAsync(BackupStorageType type, int tenantId, Dictionary<string, string> storageParams)
     {
         var settings = _configuration.GetSetting<BackupSettings>("backup");
-        var webConfigPath = PathHelper.ToRootedConfigPath(settings.WebConfigs.CurrentPath);
-
 
         switch (type)
         {
             case BackupStorageType.Documents:
             case BackupStorageType.ThridpartyDocuments:
                 {
-                    _documentsBackupStorage.Init(tenantId, webConfigPath);
+                    await _documentsBackupStorage.InitAsync(tenantId);
 
                     return _documentsBackupStorage;
                 }
             case BackupStorageType.DataStore:
                 {
-                    _dataStoreBackupStorage.Init(tenantId, webConfigPath);
+                    await _consumerBackupStorage.InitAsync(tenantId);
 
-                    return _dataStoreBackupStorage;
+                    return _consumerBackupStorage;
                 }
             case BackupStorageType.Local:
                 return _localBackupStorage;
@@ -99,8 +94,8 @@ public class BackupStorageFactory
                         return null;
                     }
 
-                    _tenantManager.SetCurrentTenant(tenantId);
-                    _consumerBackupStorage.Init(storageParams);
+                    await _tenantManager.SetCurrentTenantAsync(tenantId);
+                    await _consumerBackupStorage.InitAsync(storageParams);
 
                     return _consumerBackupStorage;
                 }

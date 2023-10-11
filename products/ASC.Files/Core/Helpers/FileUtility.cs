@@ -132,6 +132,12 @@ public class FileUtilityConfiguration
         get => _masterFormExtension ??= _configuration["files:docservice:internal-form"] ?? ".docxf";
     }
 
+    private List<LogoColor> _logoColors;
+    public List<LogoColor> LogoColors
+    {
+        get => _logoColors ??= _configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
+    }
+
     public Dictionary<FileType, string> InternalExtension
     {
         get => new Dictionary<FileType, string>
@@ -172,6 +178,27 @@ public class FileUtilityConfiguration
     {
         return !bool.TryParse(_configuration["files:docservice:forcesave"] ?? "", out var canForcesave) || canForcesave;
     }
+}
+
+public class LogoColor
+{
+    public byte R { get; set; }
+    public byte G { get; set; }
+    public byte B { get; set; }
+}
+
+public enum Accessability
+{
+    ImageView,
+    MediaView,
+    WebView,
+    WebEdit,
+    WebReview,
+    WebCustomFilterEditing,
+    WebRestrictedEditing,
+    WebComment,
+    CoAuhtoring,
+    Convert
 }
 
 [Scope]
@@ -233,10 +260,16 @@ public class FileUtility
         return GetInternalExtension(googleExtension);
     }
 
+    public string GetInternalConvertExtension(string fileName)
+    {
+        return "ooxml";
+    }
+
     public static string ReplaceFileExtension(string fileName, string newExtension)
     {
         newExtension = string.IsNullOrEmpty(newExtension) ? string.Empty : newExtension;
-        return Path.GetFileNameWithoutExtension(fileName) + newExtension;
+        return Path.GetFileNameWithoutExtension(fileName)
+                 + "." + newExtension.TrimStart('.');
     }
 
     public static FileType GetFileTypeByFileName(string fileName)
@@ -296,6 +329,54 @@ public class FileUtility
         return FileType.Unknown;
     }
 
+    public IDictionary<Accessability, bool> GetAccessability(string fileName)
+    {
+        var result = new Dictionary<Accessability, bool>();
+
+        foreach (var r in Enum.GetValues<Accessability>())
+        {
+            var val = false;
+
+            switch (r)
+            {
+                case Accessability.ImageView:
+                    val = CanImageView(fileName);
+                    break;
+                case Accessability.MediaView:
+                    val = CanMediaView(fileName);
+                    break;
+                case Accessability.WebView:
+                    val = CanWebView(fileName);
+                    break;
+                case Accessability.WebEdit:
+                    val = CanWebEdit(fileName);
+                    break;
+                case Accessability.WebReview:
+                    val = CanWebReview(fileName);
+                    break;
+                case Accessability.WebCustomFilterEditing:
+                    val = CanWebCustomFilterEditing(fileName);
+                    break;
+                case Accessability.WebRestrictedEditing:
+                    val = CanWebRestrictedEditing(fileName);
+                    break;
+                case Accessability.WebComment:
+                    val = CanWebComment(fileName);
+                    break;
+                case Accessability.CoAuhtoring:
+                    val = CanCoAuhtoring(fileName);
+                    break;
+                case Accessability.Convert:
+                    val = CanConvert(fileName);
+                    break;
+            }
+
+            result.Add(r, val);
+        }
+
+        return result;
+    }
+
     public bool CanImageView(string fileName)
     {
         var ext = GetFileExtension(fileName);
@@ -350,6 +431,13 @@ public class FileUtility
         return ExtsCoAuthoring.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
+
+    public bool CanConvert(string fileName)
+    {
+        var ext = GetFileExtension(fileName);
+        return ExtsMustConvert.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
     public bool CanIndex(string fileName)
     {
         var ext = GetFileExtension(fileName);
@@ -362,42 +450,74 @@ public class FileUtility
 
     private Dictionary<string, List<string>> _extsConvertible;
 
-    public Dictionary<string, List<string>> ExtsConvertible
+    public Dictionary<string, List<string>> GetExtsConvertible()
     {
-        get
+        if (_extsConvertible == null)
         {
-            if (_extsConvertible == null)
+            _extsConvertible = new Dictionary<string, List<string>>();
+            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
             {
-                _extsConvertible = new Dictionary<string, List<string>>();
-                if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
-                {
-                    return _extsConvertible;
-                }
-
-                using var filesDbContext = _dbContextFactory.CreateDbContext();
-                var list = filesDbContext.FilesConverts.Select(r => new { r.Input, r.Output }).ToList();
-
-                foreach (var item in list)
-                {
-                    var input = item.Input;
-                    var output = item.Output;
-                    if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
-                    {
-                        continue;
-                    }
-
-                    input = input.ToLower().Trim();
-                    output = output.ToLower().Trim();
-                    if (!_extsConvertible.ContainsKey(input))
-                    {
-                        _extsConvertible[input] = new List<string>();
-                    }
-
-                    _extsConvertible[input].Add(output);
-                }
+                return _extsConvertible;
             }
-            return _extsConvertible;
+
+            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            var list = Queries.Folders(filesDbContext);
+
+            foreach (var item in list)
+            {
+                var input = item.Input;
+                var output = item.Output;
+                if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
+                {
+                    continue;
+                }
+
+                input = input.ToLower().Trim();
+                output = output.ToLower().Trim();
+                if (!_extsConvertible.ContainsKey(input))
+                {
+                    _extsConvertible[input] = new List<string>();
+                }
+
+                _extsConvertible[input].Add(output);
+            }
         }
+        return _extsConvertible;
+    }
+
+    public async Task<Dictionary<string, List<string>>> GetExtsConvertibleAsync()
+    {
+        if (_extsConvertible == null)
+        {
+            _extsConvertible = new Dictionary<string, List<string>>();
+            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
+            {
+                return _extsConvertible;
+            }
+
+            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
+
+            foreach (var item in list)
+            {
+                var input = item.Input;
+                var output = item.Output;
+                if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
+                {
+                    continue;
+                }
+
+                input = input.ToLower().Trim();
+                output = output.ToLower().Trim();
+                if (!_extsConvertible.ContainsKey(input))
+                {
+                    _extsConvertible[input] = new List<string>();
+                }
+
+                _extsConvertible[input].Add(output);
+            }
+        }
+        return _extsConvertible;
     }
 
     private List<string> _extsUploadable;
@@ -636,4 +756,17 @@ public class FileUtility
     private bool GetCanForcesave() => _fileUtilityConfiguration.GetCanForcesave();
 
     #endregion
+}
+
+static file class Queries
+{
+    public static readonly Func<FilesDbContext, IEnumerable<FilesConverts>> Folders =
+        Microsoft.EntityFrameworkCore.EF.CompileQuery(
+            (FilesDbContext ctx) =>
+                ctx.FilesConverts);
+
+    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx) =>
+                ctx.FilesConverts);
 }

@@ -46,7 +46,8 @@ public enum FolderType
     ReadOnlyRoom = 18,
     CustomRoom = 19,
     Archive = 20,
-    ThirdpartyBackup = 21
+    ThirdpartyBackup = 21,
+    PublicRoom = 22
 }
 
 public interface IFolder
@@ -73,6 +74,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     public string FolderUrl { get; set; }
     public bool Pinned { get; set; }
     public bool Private { get; set; }
+    public bool HasLogo { get; set; }
+    public string Color { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);
@@ -91,9 +94,8 @@ public class Folder<T> : FileEntry<T>, IFolder
         FileHelper fileHelper,
         Global global,
         GlobalFolderHelper globalFolderHelper,
-        SettingsManager settingsManager,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global, globalFolderHelper, settingsManager, filesSettingsHelper, fileDateTime)
+        FileDateTime fileDateTime) : base(fileHelper, global, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

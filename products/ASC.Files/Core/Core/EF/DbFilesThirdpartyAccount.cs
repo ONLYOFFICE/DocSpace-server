@@ -42,6 +42,9 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
     public int TenantId { get; set; }
     public string FolderId { get; set; }
     public bool Private { get; set; }
+    public bool HasLogo { get; set; }
+
+    public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()
     {
@@ -53,6 +56,8 @@ public static class DbFilesThirdpartyAccountExtension
 {
     public static ModelBuilderWrapper AddDbFilesThirdpartyAccount(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<DbFilesThirdpartyAccount>().Navigation(e => e.Tenant).AutoInclude(false);
+
         modelBuilder
             .Add(MySqlAddDbFilesThirdpartyAccount, Provider.MySql)
             .Add(PgSqlAddDbFilesThirdpartyAccount, Provider.PostgreSql);
@@ -137,6 +142,8 @@ public static class DbFilesThirdpartyAccountExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Private).HasColumnName("private");
+
+            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
         });
     }
     public static void PgSqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
@@ -189,6 +196,8 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.FolderId).HasColumnName("folder_id");
 
             entity.Property(e => e.Private).HasColumnName("private");
+
+            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
         });
     }
 }

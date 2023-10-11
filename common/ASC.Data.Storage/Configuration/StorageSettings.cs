@@ -57,32 +57,39 @@ public class BaseStorageSettingsListener
 
             _subscribed = true;
 
-            _cacheNotify.Subscribe((i) =>
+            _cacheNotify.Subscribe(async (i) =>
             {
                 using var scope = _serviceProvider.CreateScope();
 
                 var scopeClass = scope.ServiceProvider.GetService<BaseStorageSettingsListenerScope>();
                 var (storageSettingsHelper, settingsManager) = scopeClass;
-                var settings = settingsManager.LoadForTenant<StorageSettings>(i.TenantId);
+                var settings = await settingsManager.LoadAsync<StorageSettings>(i.TenantId);
                 if (i.Name == settings.Module)
                 {
-                    storageSettingsHelper.Clear(settings);
+                    await storageSettingsHelper.ClearAsync(settings);
                 }
 
-                var cdnSettings = settingsManager.LoadForTenant<CdnStorageSettings>(i.TenantId);
+                var cdnSettings = await settingsManager.LoadAsync<CdnStorageSettings>(i.TenantId);
                 if (i.Name == cdnSettings.Module)
                 {
-                    storageSettingsHelper.Clear(cdnSettings);
+                    await storageSettingsHelper.ClearAsync(cdnSettings);
                 }
             }, CacheNotifyAction.Remove);
         }
     }
 }
 
-[Serializable]
+/// <summary>
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>> where T : class, ISettings<T>, new()
 {
+    /// <summary>Storage name</summary>
+    /// <type>System.String, System</type>
     public string Module { get; set; }
+
+    /// <summary>Storage properties</summary>
+    /// <type>System.Collections.Generic.Dictionary{System.String, System.String}, System.Collections.Generic</type>
     public Dictionary<string, string> Props { get; set; }
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
@@ -94,7 +101,8 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     }
 }
 
-[Serializable]
+/// <summary>
+/// </summary>
 public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<StorageSettings>
 {
     [JsonIgnore]
@@ -106,8 +114,9 @@ public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<S
     }
 }
 
+/// <summary>
+/// </summary>
 [Scope]
-[Serializable]
 public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISettings<CdnStorageSettings>
 {
     [JsonIgnore]
@@ -125,12 +134,9 @@ public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISett
 public class StorageSettingsHelper
 {
     private readonly StorageFactoryConfig _storageFactoryConfig;
-    private readonly PathUtils _pathUtils;
     private readonly ICacheNotify<DataStoreCacheItem> _cache;
-    private readonly ILogger _options;
     private readonly TenantManager _tenantManager;
     private readonly SettingsManager _settingsManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ConsumerFactory _consumerFactory;
     private readonly IServiceProvider _serviceProvider;
     private IDataStore _dataStore;
@@ -138,9 +144,7 @@ public class StorageSettingsHelper
     public StorageSettingsHelper(
         BaseStorageSettingsListener baseStorageSettingsListener,
         StorageFactoryConfig storageFactoryConfig,
-        PathUtils pathUtils,
         ICacheNotify<DataStoreCacheItem> cache,
-        ILogger<StorageSettingsHelper> options,
         TenantManager tenantManager,
         SettingsManager settingsManager,
         ConsumerFactory consumerFactory,
@@ -148,43 +152,25 @@ public class StorageSettingsHelper
     {
         baseStorageSettingsListener.Subscribe();
         _storageFactoryConfig = storageFactoryConfig;
-        _pathUtils = pathUtils;
         _cache = cache;
-        _options = options;
         _tenantManager = tenantManager;
         _settingsManager = settingsManager;
         _consumerFactory = consumerFactory;
         _serviceProvider = serviceProvider;
     }
 
-    public StorageSettingsHelper(
-        BaseStorageSettingsListener baseStorageSettingsListener,
-        StorageFactoryConfig storageFactoryConfig,
-        PathUtils pathUtils,
-        ICacheNotify<DataStoreCacheItem> cache,
-        ILogger<StorageSettingsHelper> options,
-        TenantManager tenantManager,
-        SettingsManager settingsManager,
-        IHttpContextAccessor httpContextAccessor,
-        ConsumerFactory consumerFactory,
-        IServiceProvider serviceProvider)
-            : this(baseStorageSettingsListener, storageFactoryConfig, pathUtils, cache, options, tenantManager, settingsManager, consumerFactory, serviceProvider)
+    public async Task<bool> SaveAsync<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
     {
-        _httpContextAccessor = httpContextAccessor;
+        await ClearDataStoreCacheAsync();
+
+        return await _settingsManager.SaveAsync(baseStorageSettings);
     }
 
-    public bool Save<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
-    {
-        ClearDataStoreCache();
-
-        return _settingsManager.Save(baseStorageSettings);
-    }
-
-    public void Clear<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
+    public async Task ClearAsync<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
     {
         baseStorageSettings.Module = null;
         baseStorageSettings.Props = null;
-        Save(baseStorageSettings);
+        await SaveAsync(baseStorageSettings);
     }
 
     public DataStoreConsumer DataStoreConsumer<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
@@ -211,7 +197,7 @@ public class StorageSettingsHelper
         return _dataStoreConsumer;
     }
 
-    public IDataStore DataStore<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
+    public async Task<IDataStore> DataStoreAsync<T>(BaseStorageSettings<T> baseStorageSettings) where T : class, ISettings<T>, new()
     {
         if (_dataStore != null)
         {
@@ -224,12 +210,12 @@ public class StorageSettingsHelper
         }
 
         return _dataStore = ((IDataStore)_serviceProvider.GetService(DataStoreConsumer(baseStorageSettings).HandlerType))
-            .Configure(_tenantManager.GetCurrentTenant().Id.ToString(), null, null, DataStoreConsumer(baseStorageSettings));
+            .Configure((await _tenantManager.GetCurrentTenantIdAsync()).ToString(), null, null, DataStoreConsumer(baseStorageSettings));
     }
 
-    internal void ClearDataStoreCache()
+    internal async Task ClearDataStoreCacheAsync()
     {
-        var path = TenantPath.CreatePath(_tenantManager.GetCurrentTenant().Id);
+        var path = TenantPath.CreatePath(await _tenantManager.GetCurrentTenantIdAsync());
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {

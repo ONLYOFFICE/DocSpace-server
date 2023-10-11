@@ -47,17 +47,17 @@ public class LdapNotifySource : INotifySource
         _tenant = tenant;
     }
 
-    public void AutoSync(DateTime date)
+    public async Task AutoSyncAsync(DateTime date)
     {
-        _ldapNotifyHelper.AutoSync(_tenant);
+        await _ldapNotifyHelper.AutoSyncAsync(_tenant);
     }
 
-    public IActionProvider GetActionProvider()
+    public Task<IActionProvider> GetActionProvider(NotifyRequest r)
     {
         throw new NotImplementedException();
     }
 
-    public IPatternProvider GetPatternProvider()
+    public Task<IPatternProvider> GetPatternProvider(NotifyRequest r)
     {
         throw new NotImplementedException();
     }

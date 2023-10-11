@@ -24,17 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Collections.Concurrent;
+global using System.Net;
+global using System.Security.Cryptography;
+global using System.Text;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
+global using ASC.Common;
+global using ASC.Common.Log;
+global using ASC.Common.Utils;
 global using ASC.Data.Storage;
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Log;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.Web.Core.HttpHandlers;
+global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Studio;
+global using ASC.Web.Studio.IntegrationEvents;
+global using ASC.Web.Studio.IntegrationEvents.EventHandling;
+global using ASC.Webhooks;
+global using ASC.Webhooks.Core;
+global using ASC.Webhooks.Core.IntegrationEvents.Events;
+global using ASC.Webhooks.Extension;
+global using ASC.Webhooks.Service.Log;
+global using ASC.Webhooks.Service.Services;
 
 global using Autofac;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;
-global using Microsoft.AspNetCore.HttpOverrides;
+global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+global using Microsoft.Extensions.Logging;
+
+global using Polly;
+global using Polly.Extensions.Http;

@@ -28,22 +28,29 @@ namespace ASC.Files.Core.Helpers;
 
 public static class DocSpaceHelper
 {
-    public static HashSet<FileShare> PaidRights { get; } = new HashSet<FileShare> { FileShare.RoomAdmin };
-
-    private static readonly HashSet<FileShare> _fillingFormRoomConstraints
-        = new HashSet<FileShare> { FileShare.RoomAdmin, FileShare.FillForms, FileShare.Read, FileShare.None };
-    private static readonly HashSet<FileShare> _collaborationRoomConstraints
-        = new HashSet<FileShare> { FileShare.RoomAdmin, FileShare.Editing, FileShare.Read, FileShare.None };
-    private static readonly HashSet<FileShare> _reviewRoomConstraints
-        = new HashSet<FileShare> { FileShare.RoomAdmin, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None };
-    private static readonly HashSet<FileShare> _viewOnlyRoomConstraints
-        = new HashSet<FileShare> { FileShare.RoomAdmin, FileShare.Read, FileShare.None };
-
     public static bool IsRoom(FolderType folderType)
     {
-        return folderType == FolderType.CustomRoom || folderType == FolderType.EditingRoom 
-            || folderType == FolderType.ReviewRoom || folderType == FolderType.ReadOnlyRoom 
-            || folderType == FolderType.FillingFormsRoom;
+        return folderType is 
+            FolderType.CustomRoom or 
+            FolderType.EditingRoom or 
+            FolderType.ReviewRoom or 
+            FolderType.ReadOnlyRoom or 
+            FolderType.FillingFormsRoom or
+            FolderType.PublicRoom;
+    }
+
+    public static RoomType? GetRoomType(FolderType folderType)
+    {
+        return folderType switch
+        {
+            FolderType.FillingFormsRoom => RoomType.FillingFormsRoom,
+            FolderType.EditingRoom => RoomType.EditingRoom,
+            FolderType.ReviewRoom => RoomType.ReviewRoom,
+            FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
+            FolderType.CustomRoom => RoomType.CustomRoom,
+            FolderType.PublicRoom => RoomType.PublicRoom,
+            _ => null,
+        };
     }
 
     public static async Task<bool> LocatedInPrivateRoomAsync<T>(File<T> file, IFolderDao<T> folderDao)
@@ -51,24 +58,6 @@ public static class DocSpaceHelper
         var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
         var room = parents.FirstOrDefault(f => IsRoom(f.FolderType));
 
-        return room != null && room.Private;
-    }
-
-    public static bool ValidateShare(FolderType folderType, FileShare fileShare, bool isUser)
-    {
-        if (isUser && PaidRights.Contains(fileShare))
-        {
-            return false;
-        }
-
-        return folderType switch
-        {
-            FolderType.CustomRoom => true,
-            FolderType.FillingFormsRoom => _fillingFormRoomConstraints.Contains(fileShare),
-            FolderType.EditingRoom => _collaborationRoomConstraints.Contains(fileShare),
-            FolderType.ReviewRoom => _reviewRoomConstraints.Contains(fileShare),
-            FolderType.ReadOnlyRoom => _viewOnlyRoomConstraints.Contains(fileShare),
-            _ => false
-        };
+        return room is { Private: true };
     }
 }

@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Security;
 
-public class FileShareRecord : IMapFrom<DbFilesSecurity>
+public class FileShareRecord
 {
     public int TenantId { get; set; }
     public object EntryId { get; set; }
@@ -35,29 +35,29 @@ public class FileShareRecord : IMapFrom<DbFilesSecurity>
     public Guid Subject { get; set; }
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
-    public FileShareOptions FileShareOptions { get; set; }
+    public FileShareOptions Options { get; set; }
     public int Level { get; set; }
-    public bool IsLink => SubjectType == SubjectType.InvintationLink || SubjectType == SubjectType.ExternalLink;
-
-    public void Mapping(AutoMapper.Profile profile)
-    {
-        profile.CreateMap<DbFilesSecurity, FileShareRecord>()
-            .ForMember(dest => dest.FileShareOptions, opt => opt.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.FileShareOptions, new JsonSerializerOptions())));
-    }
+    public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
     public class ShareComparer : IComparer<FileShare>
     {
-        private static readonly int[] _shareOrder = new[]
+        private static readonly int[] _shareOrder =
         {
-                (int)FileShare.None,
-                (int)FileShare.ReadWrite,
-                (int)FileShare.CustomFilter,
-                (int)FileShare.Review,
-                (int)FileShare.FillForms,
-                (int)FileShare.Comment,
-                (int)FileShare.Read,
-                (int)FileShare.Restrict,
-                (int)FileShare.Varies
+            (int)FileShare.None,
+            (int)FileShare.RoomAdmin,
+            (int)FileShare.Collaborator,
+            (int)FileShare.Editing,
+            (int)FileShare.FillForms,
+            (int)FileShare.Review,
+            (int)FileShare.Comment,
+            (int)FileShare.Read,
+            
+            // Not used
+            
+            (int)FileShare.ReadWrite,
+            (int)FileShare.CustomFilter,
+            (int)FileShare.Varies,
+            (int)FileShare.Restrict
         };
 
         public int Compare(FileShare x, FileShare y)
@@ -75,4 +75,40 @@ public class SmallShareRecord
     public DateTime TimeStamp { get; set; }
     public FileShare Share { get; set; }
     public SubjectType SubjectType { get; set; }
+}
+
+
+public static class ShareCompareHelper
+{
+    private static readonly ConcurrentDictionary<string, Expression> _predicates = new();
+    
+    public static Expression<Func<TType, int>> GetCompareExpression<TType>(Expression<Func<TType, FileShare>> memberExpression)
+    {
+        var type = typeof(TType);
+        var key = type.ToString();
+        
+        if (_predicates.TryGetValue(key, out var value))
+        {
+            return (Expression<Func<TType, int>>)value;
+        }
+
+        var shares = Enum.GetValues<FileShare>()
+            .Order(new FileShareRecord.ShareComparer())
+            .ToList();
+
+        ConditionalExpression expression = null;
+
+        for (var i = shares.Count - 1; i >= 0; i--)
+        {
+            expression = Expression.Condition(
+                Expression.Equal(memberExpression.Body, Expression.Constant(shares[i])), Expression.Constant(i), 
+                expression != null ? expression : Expression.Constant(i + 1));
+        }
+        
+        var predicate = Expression.Lambda<Func<TType, int>>(expression!, memberExpression.Parameters[0]);
+
+        _predicates.TryAdd(key, predicate);
+
+        return predicate;
+    }
 }

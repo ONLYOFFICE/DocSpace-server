@@ -5,9 +5,9 @@
       "launchBrowser": false,
       "launchUrl": "http://localhost:5004/api/2.0/people/info",
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "people",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "ASPNETCORE_URLS": "http://localhost:5004",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -17,9 +17,9 @@
       "launchBrowser": false,
       "launchUrl": "http://localhost:5004/api/2.0/people/info",
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "people",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "ASPNETCORE_URLS": "http://localhost:5004",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

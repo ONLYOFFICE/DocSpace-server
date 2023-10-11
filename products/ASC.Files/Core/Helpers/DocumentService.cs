@@ -65,16 +65,19 @@ public static class DocumentService
     /// <summary>
     /// The method is to convert the file to the required format
     /// </summary>
+    /// <param name="fileUtility"></param>
     /// <param name="documentConverterUrl">Url to the service of conversion</param>
     /// <param name="documentUri">Uri for the document to convert</param>
     /// <param name="fromExtension">Document extension</param>
     /// <param name="toExtension">Extension to which to convert</param>
     /// <param name="documentRevisionId">Key for caching on service</param>
     /// <param name="password">Password</param>
+    /// <param name="region"></param>
     /// <param name="thumbnail">Thumbnail settings</param>
+    /// <param name="spreadsheetLayout"></param>
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
-    /// <param name="convertedDocumentUri">Uri to the converted document</param>
+    /// <param name="clientFactory"></param>
     /// <returns>The percentage of completion of conversion</returns>
     /// <example>
     /// string convertedDocumentUri;
@@ -83,7 +86,7 @@ public static class DocumentService
     /// <exception>
     /// </exception>
 
-    public static Task<(int ResultPercent, string ConvertedDocumentUri)> GetConvertedUriAsync(
+    public static Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> GetConvertedUriAsync(
         FileUtility fileUtility,
         string documentConverterUrl,
         string documentUri,
@@ -112,7 +115,7 @@ public static class DocumentService
         return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory);
     }
 
-    private static async Task<(int ResultPercent, string ConvertedDocumentUri)> InternalGetConvertedUriAsync(
+    private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
        FileUtility fileUtility,
        string documentConverterUrl,
        string documentUri,
@@ -238,6 +241,7 @@ public static class DocumentService
     /// <summary>
     /// Request to Document Server with command
     /// </summary>
+    /// <param name="fileUtility"></param>
     /// <param name="documentTrackerUrl">Url to the command service</param>
     /// <param name="method">Name of method</param>
     /// <param name="documentRevisionId">Key for caching on service, whose used in editor</param>
@@ -245,7 +249,7 @@ public static class DocumentService
     /// <param name="users">users id for drop</param>
     /// <param name="meta">file meta data for update</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
-    /// <param name="version">server version</param>
+    /// <param name="clientFactory"></param>
     /// <returns>Response</returns>
 
     public static async Task<CommandResponse> CommandRequestAsync(FileUtility fileUtility,
@@ -258,6 +262,7 @@ public static class DocumentService
         string signatureSecret,
         IHttpClientFactory clientFactory)
     {
+        var cancellationTokenSource = new CancellationTokenSource(Timeout);
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(documentTrackerUrl),
@@ -295,17 +300,12 @@ public static class DocumentService
                     { "payload", body }
                 };
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                                              new JsonNetSerializer(),
-                                                              new JwtBase64UrlEncoder());
-#pragma warning restore CS0618 // Type or member is obsolete
+            var token = JsonWebToken.Encode(payload, signatureSecret);
 
-            var token = encoder.Encode(payload, signatureSecret);
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
-            token = encoder.Encode(body, signatureSecret);
+            token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
         }
 
@@ -318,8 +318,8 @@ public static class DocumentService
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
 
         string dataResponse;
-        using (var response = await httpClient.SendAsync(request))
-        using (var stream = await response.Content.ReadAsStreamAsync())
+        using (var response = await httpClient.SendAsync(request, cancellationTokenSource.Token))
+        await using (var stream = await response.Content.ReadAsStreamAsync(cancellationTokenSource.Token))
         {
             if (stream == null)
             {
@@ -333,7 +333,11 @@ public static class DocumentService
 
         try
         {
-            var commandResponse = JsonConvert.DeserializeObject<CommandResponse>(dataResponse);
+            var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            });
             return commandResponse;
         }
         catch (Exception ex)
@@ -416,7 +420,7 @@ public static class DocumentService
         string dataResponse = null;
 
         using (var response = await httpClient.SendAsync(request))
-        using (var responseStream = await response.Content.ReadAsStreamAsync())
+        await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
             if (responseStream != null)
             {
@@ -473,7 +477,7 @@ public static class DocumentService
         httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
 
         using var response = await httpClient.SendAsync(request);
-        using var responseStream = await response.Content.ReadAsStreamAsync();
+        await using var responseStream = await response.Content.ReadAsStreamAsync();
         if (responseStream == null)
         {
             throw new Exception("Empty response");
@@ -494,7 +498,6 @@ public static class DocumentService
         License
     }
 
-    [Serializable]
     [DebuggerDisplay("{Key}")]
     public class CommandResponse
     {
@@ -531,7 +534,6 @@ public static class DocumentService
             TokenExpire = 7,
         }
 
-        [Serializable]
         [DebuggerDisplay("{BuildVersion}")]
         public class ServerInfo
         {
@@ -576,14 +578,12 @@ public static class DocumentService
             }
         }
 
-        [Serializable]
         [DataContract(Name = "Quota", Namespace = "")]
         public class QuotaInfo
         {
             [JsonPropertyName("users")]
             public List<User> Users { get; set; }
 
-            [Serializable]
             [DebuggerDisplay("{UserId} ({Expire})")]
             public class User
             {
@@ -596,192 +596,227 @@ public static class DocumentService
         }
     }
 
-    [Serializable]
     [DebuggerDisplay("{Command} ({Key})")]
     private class CommandBody
     {
+        [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public CommandMethod Command { get; set; }
 
+        [JsonProperty(PropertyName = "c", Required = Required.Always)]
         [JsonPropertyName("c")]
         public string C
         {
             get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
         }
 
+        [JsonProperty(PropertyName = "callback", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("callback")]
         public string Callback { get; set; }
 
+        [JsonProperty(PropertyName = "key", Required = Required.AllowNull)]
         [JsonPropertyName("key")]
         public string Key { get; set; }
 
+        [JsonProperty(PropertyName = "meta", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("meta")]
         public MetaData Meta { get; set; }
 
+        [JsonProperty(PropertyName = "users", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("users")]
         public string[] Users { get; set; }
 
+        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("token")]
         public string Token { get; set; }
 
         //not used
+        [JsonProperty(PropertyName = "userdata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("userdata")]
         public string UserData { get; set; }
     }
 
-    [Serializable]
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
+        [JsonProperty(PropertyName = "title")]
         [JsonPropertyName("title")]
         public string Title { get; set; }
     }
 
-    [Serializable]
     [DebuggerDisplay("{Height}x{Width}")]
     public class ThumbnailData
     {
+        [JsonProperty(PropertyName = "aspect")]
         [JsonPropertyName("aspect")]
         public int Aspect { get; set; }
 
+        [JsonProperty(PropertyName = "first")]
         [JsonPropertyName("first")]
         public bool First { get; set; }
 
+        [JsonProperty(PropertyName = "height")]
         [JsonPropertyName("height")]
         public int Height { get; set; }
 
+        [JsonProperty(PropertyName = "width")]
         [JsonPropertyName("width")]
         public int Width { get; set; }
     }
 
-    [Serializable]
     [DataContract(Name = "spreadsheetLayout", Namespace = "")]
     [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
     public class SpreadsheetLayout
     {
+        [JsonProperty(PropertyName = "ignorePrintArea")]
         [JsonPropertyName("ignorePrintArea")]
         public bool IgnorePrintArea { get; set; }
 
+        [JsonProperty(PropertyName = "orientation")]
         [JsonPropertyName("orientation")]
         public string Orientation { get; set; }
 
+        [JsonProperty(PropertyName = "fitToHeight")]
         [JsonPropertyName("fitToHeight")]
         public int FitToHeight { get; set; }
 
+        [JsonProperty(PropertyName = "fitToWidth")]
         [JsonPropertyName("fitToWidth")]
         public int FitToWidth { get; set; }
 
+        [JsonProperty(PropertyName = "headings")]
         [JsonPropertyName("headings")]
         public bool Headings { get; set; }
 
+        [JsonProperty(PropertyName = "gridLines")]
         [JsonPropertyName("gridLines")]
         public bool GridLines { get; set; }
 
+        [JsonProperty(PropertyName = "margins")]
         [JsonPropertyName("margins")]
         public LayoutMargins Margins { get; set; }
 
+        [JsonProperty(PropertyName = "pageSize")]
         [JsonPropertyName("pageSize")]
         public LayoutPageSize PageSize { get; set; }
 
 
-        [Serializable]
         [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
         public class LayoutMargins
         {
+            [JsonProperty(PropertyName = "left")]
             [JsonPropertyName("left")]
             public string Left { get; set; }
 
+            [JsonProperty(PropertyName = "right")]
             [JsonPropertyName("right")]
             public string Right { get; set; }
 
+            [JsonProperty(PropertyName = "top")]
             [JsonPropertyName("top")]
             public string Top { get; set; }
 
+            [JsonProperty(PropertyName = "bottom")]
             [JsonPropertyName("bottom")]
             public string Bottom { get; set; }
         }
 
-        [Serializable]
         [DebuggerDisplay("PageSize {Width} {Height}")]
         public class LayoutPageSize
         {
+            [JsonProperty(PropertyName = "height")]
             [JsonPropertyName("height")]
             public string Height { get; set; }
 
+            [JsonProperty(PropertyName = "width")]
             [JsonPropertyName("width")]
             public string Width { get; set; }
         }
     }
 
-    [Serializable]
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
     private class ConvertionBody
     {
+        [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]
         public bool Async { get; set; }
 
+        [JsonProperty(PropertyName = "filetype", Required = Required.Always)]
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
 
+        [JsonProperty(PropertyName = "key", Required = Required.Always)]
         [JsonPropertyName("key")]
         public string Key { get; set; }
 
+        [JsonProperty(PropertyName = "outputtype", Required = Required.Always)]
         [JsonPropertyName("outputtype")]
         public string OutputType { get; set; }
 
+        [JsonProperty(PropertyName = "password", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("password")]
         public string Password { get; set; }
 
+        [JsonProperty(PropertyName = "title")]
         [JsonPropertyName("title")]
         public string Title { get; set; }
 
+        [JsonProperty(PropertyName = "thumbnail", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("thumbnail")]
         public ThumbnailData Thumbnail { get; set; }
 
+        [JsonProperty(PropertyName = "spreadsheetLayout", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("spreadsheetLayout")]
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
 
+        [JsonProperty(PropertyName = "url", Required = Required.Always)]
         [JsonPropertyName("url")]
         public string Url { get; set; }
 
+        [JsonProperty(PropertyName = "region", Required = Required.Always)]
         [JsonPropertyName("region")]
         public string Region { get; set; }
 
+        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("token")]
         public string Token { get; set; }
     }
 
-    [Serializable]
     [DebuggerDisplay("{Key}")]
     private class BuilderBody
     {
+        [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]
         public bool Async { get; set; }
 
+        [JsonProperty(PropertyName = "key", Required = Required.Always)]
         [JsonPropertyName("key")]
         public string Key { get; set; }
 
+        [JsonProperty(PropertyName = "url", Required = Required.Always)]
         [JsonPropertyName("url")]
         public string Url { get; set; }
 
+        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("token")]
         public string Token { get; set; }
     }
 
-    [Serializable]
     public class FileLink
     {
+        [JsonProperty(PropertyName = "filetype")]
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
 
+        [JsonProperty(PropertyName = "token", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonPropertyName("token")]
         public string Token { get; set; }
 
+        [JsonProperty(PropertyName = "url")]
         [JsonPropertyName("url")]
         public string Url { get; set; }
     }
 
-    [Serializable]
     public class DocumentServiceException : Exception
     {
         public ErrorCode Code { get; set; }
@@ -812,7 +847,7 @@ public static class DocumentService
 
         public static void ProcessResponseError(string errorCode)
         {
-            if (!ErrorCodeExtensions.TryParse(errorCode, true, out ErrorCode code))
+            if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code))
             {
                 code = ErrorCode.Unknown;
             }
@@ -859,9 +894,8 @@ public static class DocumentService
     /// Processing document received from the editing service
     /// </summary>
     /// <param name="jsonDocumentResponse">The resulting json from editing service</param>
-    /// <param name="responseUri">Uri to the converted document</param>
-    /// <returns>The percentage of completion of conversion</returns>
-    private static (int ResultPercent, string responseuri) GetResponseUri(string jsonDocumentResponse)
+    /// <returns>The percentage of completion of conversion and Uri to the converted document</returns>
+    private static (int ResultPercent, string responseuri, string convertedFileType) GetResponseUri(string jsonDocumentResponse)
     {
         if (string.IsNullOrEmpty(jsonDocumentResponse))
         {
@@ -884,9 +918,11 @@ public static class DocumentService
 
         int resultPercent;
         var responseUri = string.Empty;
+        var responseType = string.Empty;
         if (isEndConvert)
         {
             responseUri = responseFromService.Value<string>("fileUrl");
+            responseType = responseFromService.Value<string>("fileType");
             resultPercent = 100;
         }
         else
@@ -898,6 +934,6 @@ public static class DocumentService
             }
         }
 
-        return (resultPercent, responseUri);
+        return (resultPercent, responseUri, responseType);
     }
 }

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Core;
 
 public class Group : IMapFrom<DbGroup>
@@ -34,7 +36,7 @@ public class Group : IMapFrom<DbGroup>
     public Guid CategoryId { get; set; }
     public bool Removed { get; set; }
     public DateTime LastModified { get; set; }
-    public int Tenant { get; set; }
+    public int TenantId { get; set; }
     public string Sid { get; set; }
 
     public override string ToString()

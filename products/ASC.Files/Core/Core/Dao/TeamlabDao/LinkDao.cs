@@ -59,13 +59,13 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task AddLinkAsync(string sourceId, string linkedId)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
         await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink()
         {
             TenantId = TenantID,
-            SourceId = sourceId,
-            LinkedId = linkedId,
+            SourceId = (await MappingIDAsync(sourceId)).ToString(),
+            LinkedId = (await MappingIDAsync(linkedId)).ToString(),
             LinkedFor = _authContext.CurrentAccount.ID
         });
 
@@ -74,30 +74,33 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task<string> GetSourceAsync(string linkedId)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
-        return await filesDbContext.FilesLink
-            .Where(r => r.TenantId == TenantID && r.LinkedId == linkedId && r.LinkedFor == _authContext.CurrentAccount.ID)
-            .Select(r => r.SourceId)
-            .SingleOrDefaultAsync();
+        linkedId = (await MappingIDAsync(linkedId)).ToString();
+
+        var sourceId = await Queries.SourceIdAsync(filesDbContext, TenantID, linkedId, _authContext.CurrentAccount.ID);
+
+        return (await MappingIDAsync(sourceId))?.ToString();
     }
 
     public async Task<string> GetLinkedAsync(string sourceId)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
-        return await filesDbContext.FilesLink
-            .Where(r => r.TenantId == TenantID && r.SourceId == sourceId && r.LinkedFor == _authContext.CurrentAccount.ID)
-            .Select(r => r.LinkedId)
-            .SingleOrDefaultAsync();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        sourceId = (await MappingIDAsync(sourceId)).ToString();
+
+        var linkedId = await Queries.LinkedIdAsync(filesDbContext, TenantID, sourceId, _authContext.CurrentAccount.ID);
+
+        return (await MappingIDAsync(linkedId))?.ToString();
     }
 
     public async Task DeleteLinkAsync(string sourceId)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
-        var link = await filesDbContext.FilesLink
-            .Where(r => r.TenantId == TenantID && r.SourceId == sourceId && r.LinkedFor == _authContext.CurrentAccount.ID)
-            .SingleOrDefaultAsync();
+        sourceId = (await MappingIDAsync(sourceId)).ToString();
+
+        var link = await Queries.FileLinkAsync(filesDbContext, TenantID, sourceId, _authContext.CurrentAccount.ID);
 
         filesDbContext.FilesLink.Remove(link);
 
@@ -106,12 +109,42 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task DeleteAllLinkAsync(string fileId)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
-        var link = await filesDbContext.FilesLink.Where(r => r.TenantId == TenantID && (r.SourceId == fileId || r.LinkedId == fileId)).ToListAsync();
+        fileId = (await MappingIDAsync(fileId)).ToString();
 
-        filesDbContext.FilesLink.RemoveRange(link);
-
-        await filesDbContext.SaveChangesAsync();
+        await Queries.DeleteFileLinks(filesDbContext, TenantID, fileId);
     }
+}
+
+static file class Queries
+{
+    public static readonly Func<FilesDbContext, int, string, Guid, Task<string>> SourceIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string linkedId, Guid id) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId && r.LinkedId == linkedId && r.LinkedFor == id)
+                    .Select(r => r.SourceId)
+                    .SingleOrDefault());
+
+    public static readonly Func<FilesDbContext, int, string, Guid, Task<string>> LinkedIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string sourceId, Guid id) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId && r.SourceId == sourceId && r.LinkedFor == id)
+                    .Select(r => r.LinkedId)
+                    .SingleOrDefault());
+
+    public static readonly Func<FilesDbContext, int, string, Guid, Task<DbFilesLink>> FileLinkAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string sourceId, Guid id) =>
+                ctx.FilesLink
+                    .SingleOrDefault(r => r.TenantId == tenantId && r.SourceId == sourceId && r.LinkedFor == id));
+
+    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteFileLinks =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string fileId) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId && (r.SourceId == fileId || r.LinkedId == fileId))
+                    .ExecuteDelete());
 }

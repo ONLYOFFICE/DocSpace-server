@@ -46,32 +46,32 @@ public class TenantLogoHelper
         _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
     }
 
-    public string GetLogo(WhiteLabelLogoTypeEnum type, bool general = true, bool isDefIfNoWhiteLabel = false)
+    public async Task<string> GetLogo(WhiteLabelLogoTypeEnum type, bool isDefIfNoWhiteLabel = false, bool dark = false)
     {
         string imgUrl;
         if (_tenantLogoManager.WhiteLabelEnabled)
         {
-            var _tenantWhiteLabelSettings = _settingsManager.Load<TenantWhiteLabelSettings>();
-            return _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPath(_tenantWhiteLabelSettings, type, general);
+            var _tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+            return await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(_tenantWhiteLabelSettings, type, dark);
         }
         else
         {
             if (isDefIfNoWhiteLabel)
             {
-                imgUrl = _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPath(type, general);
+                imgUrl = await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
             }
             else
             {
-                if (type == WhiteLabelLogoTypeEnum.Dark)
+                if (type == WhiteLabelLogoTypeEnum.LoginPage)
                 {
                     /*** simple scheme ***/
-                    var _tenantInfoSettings = _settingsManager.Load<TenantInfoSettings>();
-                    imgUrl = _tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPath(_tenantInfoSettings);
+                    var _tenantInfoSettings = await _settingsManager.LoadAsync<TenantInfoSettings>();
+                    imgUrl = await _tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(_tenantInfoSettings);
                     /***/
                 }
                 else
                 {
-                    imgUrl = _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPath(type, general);
+                    imgUrl = await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
                 }
             }
         }

@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
-public class UploadControllerHelper<T> : FilesHelperBase<T>
+public class UploadControllerHelper : FilesHelperBase
 {
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
@@ -40,7 +40,7 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
         ApiContext apiContext,
-        FileStorageService<T> fileStorageService,
+        FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
         IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
@@ -67,20 +67,20 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
         _securityContext = securityContext;
     }
 
-    public async Task<object> CreateEditSession(T fileId, long fileSize)
+    public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
         return await CreateUploadSessionAsync(file, false, default(ApiDateTime), true);
     }
 
-    public async Task<object> CreateUploadSessionAsync(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, _filesSettingsHelper.UpdateIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    public async Task<object> CreateUploadSessionAsync(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         if (_filesLinkUtility.IsLocalFileUploader)
         {
@@ -95,7 +95,7 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
             };
         }
 
-        var createSessionUrl = _filesLinkUtility.GetInitiateUploadSessionUrl(_tenantManager.GetCurrentTenant().Id, file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, _securityContext);
+        var createSessionUrl = _filesLinkUtility.GetInitiateUploadSessionUrl(await _tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, _securityContext);
 
         var httpClient = _httpClientFactory.CreateClient();
 
@@ -106,20 +106,38 @@ public class UploadControllerHelper<T> : FilesHelperBase<T>
         };
 
         // hack for uploader.onlyoffice.com in api requests
-        var rewriterHeader = _httpContextAccessor.HttpContext.Request.Headers[HttpRequestExtensions.UrlRewriterHeader];
-        if (!string.IsNullOrEmpty(rewriterHeader))
-        {
-            request.Headers.Add(HttpRequestExtensions.UrlRewriterHeader, rewriterHeader.ToString());
-        }
+        //var rewriterHeader = _httpContextAccessor.HttpContext.Request.Headers[HttpRequestExtensions.UrlRewriterHeader];
+        //if (!string.IsNullOrEmpty(rewriterHeader))
+        //{
+        //    request.Headers.Add(HttpRequestExtensions.UrlRewriterHeader, rewriterHeader.ToString());
+        //}
 
         using var response = await httpClient.SendAsync(request);
-        using var responseStream = await response.Content.ReadAsStreamAsync();
+        await using var responseStream = await response.Content.ReadAsStreamAsync();
         using var streamReader = new StreamReader(responseStream);
 
-        return JObject.Parse(await streamReader.ReadToEndAsync()); //result is json string
+        var responseAsString = await streamReader.ReadToEndAsync();
+        var jObject = JObject.Parse(responseAsString); //result is json string
+
+        var result = new
+        {
+            success = jObject["success"].ToString(),
+            data = new
+            {
+                id = jObject["data"]["id"].ToString(),
+                path = jObject["data"]["path"].Values().Select(x => (T)Convert.ChangeType(x, typeof(T))),
+                created = jObject["data"]["created"].Value<DateTime>(),
+                expired = jObject["data"]["expired"].Value<DateTime>(),
+                location = jObject["data"]["location"].ToString(),
+                bytes_uploaded = jObject["data"]["bytes_uploaded"].Value<long>(),
+                bytes_total = jObject["data"]["bytes_total"].Value<long>()
+            }
+        };
+
+        return result;
     }
 
-    public async Task<object> UploadFileAsync(T folderId, UploadRequestDto uploadModel)
+    public async Task<object> UploadFileAsync<T>(T folderId, UploadRequestDto uploadModel)
     {
         if (uploadModel.StoreOriginalFileFlag.HasValue)
         {

@@ -28,7 +28,7 @@
       return;
     }
 
-    if (!session.user) {
+    if (!session.user && !session.anonymous) {
       logger.error("invalid session: unknown user");
       return;
     }
@@ -45,42 +45,26 @@
       return `${tenantId}-${roomPart}`;
     };
 
-    logger.info(
-      `connect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}'`
-    );
+    const connectMessage = !session.anonymous ? 
+      `connect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}'` : 
+      `connect anonymous user by share key on tenant='${tenantId}' socketId='${socket.id}'`;
+
+    logger.info(connectMessage);
 
     socket.on("disconnect", (reason) => {
-      logger.info(
-        `disconnect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}`
-      );
+      const disconnectMessage = !session.anonymous ? 
+        `disconnect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}` :
+        `disconnect anonymous user by share key on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}`;
+
+      logger.info(disconnectMessage)
     });
 
-    socket.on("subscribe", (roomParts) => {
-      if (!roomParts) return;
-
-      if (Array.isArray(roomParts)) {
-        const rooms = roomParts.map((p) => getRoom(p));
-        logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
-        socket.join(rooms);
-      } else {
-        const room = getRoom(roomParts);
-        logger.info(`client ${socket.id} join room ${room}`);
-        socket.join(room);
-      }
+    socket.on("subscribe", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, subscribe);
     });
 
-    socket.on("unsubscribe", (roomParts) => {
-      if (!roomParts) return;
-
-      if (Array.isArray(roomParts)) {
-        const rooms = roomParts.map((p) => getRoom(p));
-        logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
-        socket.leave(rooms);
-      } else {
-        const room = getRoom(roomParts);
-        logger.info(`client ${socket.id} leave room ${room}`);
-        socket.leave(room);
-      }
+    socket.on("unsubscribe", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, unsubscribe);
     });
 
     socket.on("refresh-folder", (folderId) => {
@@ -94,6 +78,48 @@
       logger.info(`restore backup in room ${room}`);
       socket.to(room).emit("restore-backup");
     });
+
+    function changeSubscription(roomParts, individual, changeFunc) {
+      if (!roomParts) return;
+
+      changeFunc(roomParts);
+
+      if (individual && !session.anonymous) {
+        if (Array.isArray(roomParts)) {
+          changeFunc(roomParts.map((p) => `${p}-${userId}`));
+        } else {
+          changeFunc(`${roomParts}-${userId}`);
+        }
+      }
+    }
+
+    function subscribe(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) {
+        const rooms = roomParts.map((p) => getRoom(p));
+        logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
+        socket.join(rooms);
+      } else {
+        const room = getRoom(roomParts);
+        logger.info(`client ${socket.id} join room ${room}`);
+        socket.join(room);
+      }
+    }
+
+    function unsubscribe(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) {
+        const rooms = roomParts.map((p) => getRoom(p));
+        logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
+        socket.leave(rooms);
+      } else {
+        const room = getRoom(roomParts);
+        logger.info(`client ${socket.id} leave room ${room}`);
+        socket.leave(room);
+      }
+    }
   });
 
   function startEdit({ fileId, room } = {}) {
@@ -115,9 +141,19 @@
     modifyFolder(room, "create", fileId, "file", data);
   }
 
+  function createFolder({ folderId, room, data } = {}) {
+    logger.info(`create new folder ${folderId} in room ${room}`);
+    modifyFolder(room, "create", folderId, "folder", data);
+  }
+
   function updateFile({ fileId, room, data } = {}) {
     logger.info(`update file ${fileId} in room ${room}`);
     modifyFolder(room, "update", fileId, "file", data);
+  }
+
+  function updateFolder({ folderId, room, data } = {}) {
+    logger.info(`update folder ${folderId} in room ${room}`);
+    modifyFolder(room, "update", folderId, "folder", data);
   }
 
   function deleteFile({ fileId, room } = {}) {
@@ -125,5 +161,51 @@
     modifyFolder(room, "delete", fileId, "file");
   }
 
-  return { startEdit, stopEdit, createFile, deleteFile, updateFile };
+  function deleteFolder({ folderId, room } = {}) {
+    logger.info(`delete file ${folderId} in room ${room}`);
+    modifyFolder(room, "delete", folderId, "folder");
+  }
+
+  function markAsNewFile({ fileId, count, room } = {}) {
+    logger.info(`markAsNewFile ${fileId} in room ${room}:${count}`);
+    filesIO.to(room).emit("s:markasnew-file", { fileId, count });
+  }
+
+  function markAsNewFiles(items = []) {
+    items.forEach(markAsNewFile);
+  }
+
+  function markAsNewFolder({ folderId, count, room } = {}) {
+    logger.info(`markAsNewFolder ${folderId} in room ${room}:${count}`);
+    filesIO.to(room).emit("s:markasnew-folder", { folderId, count });
+  }
+
+  function markAsNewFolders(items = []) {
+    items.forEach(markAsNewFolder);
+  }
+
+  function changeQuotaUsedValue({ featureId, value, room } = {}) {
+    logger.info(`changeQuotaUsedValue in room ${room}`, { featureId, value });
+    filesIO.to(room).emit("s:change-quota-used-value", { featureId, value });
+  }
+
+  function changeQuotaFeatureValue({ featureId, value, room } = {}) {
+    logger.info(`changeQuotaFeatureValue in room ${room}`, { featureId, value });
+    filesIO.to(room).emit("s:change-quota-feature-value", { featureId, value });
+  }
+
+  return {
+    startEdit,
+    stopEdit,
+    createFile,
+    createFolder,
+    deleteFile,
+    deleteFolder,
+    updateFile,
+    updateFolder,
+    changeQuotaUsedValue,
+    changeQuotaFeatureValue,
+    markAsNewFiles,
+    markAsNewFolders
+  };
 };

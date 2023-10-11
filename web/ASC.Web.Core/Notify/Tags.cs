@@ -66,6 +66,7 @@ public static class Tags
     public const string BlogLink = "TagBlogLink";
     public const string DueDate = "DueDate";
     public const string DelayDueDate = "DelayDueDate";
+    public const string PaymentDelay = "PaymentDelay";
     public const string LinkToRecovery = "LinkToRecovery";
 
     public const string FromUserName = "FromUserName";
@@ -118,6 +119,14 @@ public static class CommonTags
 
     public const string HelpLink = "__HelpLink";
 
+    public const string SalesEmail = "__SalesEmail";
+
+    public const string SiteLink = "__SiteLink";
+
+    public const string SupportLink = "__SupportLink";
+
+    public const string SupportEmail = "__SupportEmail";
+
     public const string WithoutUnsubscribe = "WithoutUnsubscribe";
 
     public const string LetterLogo = "LetterLogo";
@@ -129,4 +138,5 @@ public static class CommonTags
     public const string EmbeddedAttachments = "EmbeddedAttachments";
 
     public const string ImagePath = "ImagePath";
+    public const string TopGif = "TopGif";
 }

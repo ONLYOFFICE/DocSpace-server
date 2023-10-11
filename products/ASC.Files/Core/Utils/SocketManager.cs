@@ -26,85 +26,141 @@
 
 namespace ASC.Web.Files.Utils;
 
-[Scope]
-public class SocketManager
+public class SocketManager : SocketServiceClient
 {
-    private readonly SocketServiceClient _socketServiceClient;
     private readonly FileDtoHelper _filesWrapperHelper;
+    private readonly FolderDtoHelper _folderDtoHelper;
     private readonly TenantManager _tenantManager;
 
+    public override string Hub => "files";
+
     public SocketManager(
-        IOptionsSnapshot<SocketServiceClient> optionsSnapshot,
+        ILogger<SocketServiceClient> logger,
+        IHttpClientFactory clientFactory,
+        MachinePseudoKeys mashinePseudoKeys,
+        IConfiguration configuration,
         FileDtoHelper filesWrapperHelper,
-        TenantManager tenantManager
-        )
+        TenantManager tenantManager,
+        FolderDtoHelper folderDtoHelper) : base(logger, clientFactory, mashinePseudoKeys, configuration)
     {
-        _socketServiceClient = optionsSnapshot.Get("files");
         _filesWrapperHelper = filesWrapperHelper;
         _tenantManager = tenantManager;
+        _folderDtoHelper = folderDtoHelper;
     }
 
-    public void StartEdit<T>(T fileId)
+    public async Task StartEditAsync<T>(T fileId)
     {
-        var room = GetFileRoom(fileId);
-        _socketServiceClient.StartEdit(fileId, room);
+        var room = await GetFileRoomAsync(fileId);
+        await MakeRequest("start-edit", new { room, fileId });
     }
 
-    public void StopEdit<T>(T fileId)
+    public async Task StopEditAsync<T>(T fileId)
     {
-        var room = GetFileRoom(fileId);
-        _socketServiceClient.StopEdit(fileId, room);
+        var room = await GetFileRoomAsync(fileId);
+        await MakeRequest("stop-edit", new { room, fileId });
     }
 
     public async Task CreateFileAsync<T>(File<T> file)
     {
-        var room = GetFolderRoom(file.ParentId);
-        var serializerSettings = new JsonSerializerOptions()
-        {
-            WriteIndented = false,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-        serializerSettings.Converters.Add(new ApiDateTimeConverter());
-        serializerSettings.Converters.Add(new FileEntryWrapperConverter());
-        var data = JsonSerializer.Serialize(await _filesWrapperHelper.GetAsync(file), serializerSettings);
+        var room = await GetFolderRoomAsync(file.ParentId);
 
-        _socketServiceClient.CreateFile(file.Id, room, data);
+        var data = await SerializeFile(file);
+
+        await MakeRequest("create-file", new { room, fileId = file.Id, data });
+    }
+
+    public async Task CreateFolderAsync<T>(Folder<T> folder)
+    {
+        var room = await GetFolderRoomAsync(folder.ParentId);
+
+        var data = await SerializeFolder(folder);
+
+        await MakeRequest("create-folder", new { room, folderId = folder.Id, data });
     }
 
     public async Task UpdateFileAsync<T>(File<T> file)
     {
-        var room = GetFolderRoom(file.ParentId);
-        var serializerSettings = new JsonSerializerOptions()
-        {
-            WriteIndented = false,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-        serializerSettings.Converters.Add(new ApiDateTimeConverter());
-        serializerSettings.Converters.Add(new FileEntryWrapperConverter());
-        var data = JsonSerializer.Serialize(await _filesWrapperHelper.GetAsync(file), serializerSettings);
+        var room = await GetFolderRoomAsync(file.ParentId);
 
-        _socketServiceClient.UpdateFile(file.Id, room, data);
+        var data = await SerializeFile(file);
+
+        await MakeRequest("update-file", new { room, fileId = file.Id, data });
     }
 
-    public void DeleteFile<T>(File<T> file)
+    public async Task UpdateFolderAsync<T>(Folder<T> folder)
     {
-        var room = GetFolderRoom(file.ParentId);
-        _socketServiceClient.DeleteFile(file.Id, room);
+        var room = await GetFolderRoomAsync(folder.ParentId);
+
+        var data = await SerializeFolder(folder);
+
+        await MakeRequest("update-folder", new { room, folderId = folder.Id, data });
     }
 
-    private string GetFileRoom<T>(T fileId)
+    public async Task DeleteFileAsync<T>(File<T> file)
     {
-        var tenantId = _tenantManager.GetCurrentTenant().Id;
+        var room = await GetFolderRoomAsync(file.ParentId);
 
-        return $"{tenantId}-FILE-{fileId}";
+        await MakeRequest("delete-file", new { room, fileId = file.Id });
     }
 
-    private string GetFolderRoom<T>(T folderId)
+    public async Task DeleteFolder<T>(Folder<T> folder)
     {
-        var tenantId = _tenantManager.GetCurrentTenant().Id;
+        var room = await GetFolderRoomAsync(folder.ParentId);
 
-        return $"{tenantId}-DIR-{folderId}";
+        await MakeRequest("delete-folder", new { room, folderId = folder.Id });
+    }
+
+    public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
+    {
+        var result = await tags.ToAsyncEnumerable()
+            .SelectAwait(async tag => new
+            {
+                room = await GetFileRoomAsync(tag.EntryId, tag.Owner),
+                fileId = tag.EntryId,
+                count = tag.Count
+            })
+            .ToListAsync();
+
+        SendNotAwaitableRequest("markasnew-file", result);
+    }
+
+    public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
+    {
+        var result = await tags.ToAsyncEnumerable()
+            .SelectAwait(async tag => new
+            {
+                room = await GetFolderRoomAsync(tag.EntryId, tag.Owner),
+                folderId = tag.EntryId,
+                count = tag.Count
+            })
+            .ToListAsync();
+
+        SendNotAwaitableRequest("markasnew-folder", result);
+    }
+
+    private async Task<string> GetFileRoomAsync<T>(T fileId, Guid? owner = null)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var ownerData = owner.HasValue ? "-" + owner.Value : "";
+
+        return $"{tenantId}-FILE-{fileId}{ownerData}";
+    }
+
+    private async Task<string> GetFolderRoomAsync<T>(T folderId, Guid? owner = null)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var ownerData = owner.HasValue ? "-" + owner.Value : "";
+
+        return $"{tenantId}-DIR-{folderId}{ownerData}";
+    }
+
+    private async Task<string> SerializeFile<T>(File<T> file)
+    {
+        return JsonSerializer.Serialize(await _filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default);
+    }
+
+    private async Task<string> SerializeFolder<T>(Folder<T> folder)
+    {
+        return JsonSerializer.Serialize(await _folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default);
     }
 }

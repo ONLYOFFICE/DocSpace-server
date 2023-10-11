@@ -26,7 +26,6 @@
 
 namespace ASC.Core.Users;
 
-[Serializable]
 public class GroupInfo : IRole, IRecipientsGroup
 {
     public Guid ID { get; internal set; }
@@ -71,4 +70,5 @@ public class GroupInfo : IRole, IRecipientsGroup
     string IRecipient.Name => Name;
     public string AuthenticationType => "ASC";
     public bool IsAuthenticated => false;
+    public string Key => ID.ToString();
 }

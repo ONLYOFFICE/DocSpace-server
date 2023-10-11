@@ -49,6 +49,7 @@ var logger = LogManager.Setup()
 try
 {
     logger.Info("Configuring web host ({applicationContext})...", AppName);
+
     builder.Host.ConfigureDefault();
     builder.WebHost.ConfigureDefaultKestrel();
 
@@ -56,10 +57,7 @@ try
 
     startup.ConfigureServices(builder.Services);
 
-    builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-    {
-        startup.ConfigureContainer(containerBuilder);
-    });
+    builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
     var app = builder.Build();
 
@@ -86,5 +84,5 @@ finally
 public partial class Program
 {
     public static string Namespace = typeof(Startup).Namespace;
-    public static string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1).Replace(".","");
+    public static string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1).Replace(".", "");
 }

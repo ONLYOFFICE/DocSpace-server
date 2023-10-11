@@ -34,6 +34,7 @@ public interface ITenantQuotaFeatureChecker
 
 public abstract class TenantQuotaFeatureChecker<T, T1> : ITenantQuotaFeatureChecker where T : TenantQuotaFeature<T1> where T1 : IComparable<T1>
 {
+    private static readonly object _lock = new object();
     protected readonly ITenantQuotaFeatureStat<T, T1> _tenantQuotaFeatureStatistic;
     protected readonly TenantManager _tenantManager;
 
@@ -47,28 +48,31 @@ public abstract class TenantQuotaFeatureChecker<T, T1> : ITenantQuotaFeatureChec
 
     public virtual async Task CheckUsed(TenantQuota quota)
     {
-        var used = await _tenantQuotaFeatureStatistic.GetValue();
+        var used = await _tenantQuotaFeatureStatistic.GetValueAsync();
         Check(quota, used);
     }
 
-    public void CheckAdd(T1 newValue)
+    public async Task CheckAddAsync(T1 newValue)
     {
-        CheckAdd(_tenantManager.GetCurrentTenant().Id, newValue);
+        await CheckAddAsync(await _tenantManager.GetCurrentTenantIdAsync(), newValue);
     }
 
-    public virtual void CheckAdd(int tenantId, T1 newValue)
+    public virtual async Task CheckAddAsync(int tenantId, T1 newValue)
     {
-        var quota = _tenantManager.GetTenantQuota(tenantId);
+        var quota = await _tenantManager.GetTenantQuotaAsync(tenantId);
         Check(quota, newValue);
     }
 
     protected void Check(TenantQuota quota, T1 newValue)
     {
-        var val = quota.GetFeature<T>().Value;
-
-        if (newValue.CompareTo(val) > 0)
+        lock (_lock)
         {
-            throw new TenantQuotaException(string.Format(Exception, val));
+            var val = quota.GetFeature<T>().Value;
+
+            if (newValue.CompareTo(val) > 0)
+            {
+                throw new TenantQuotaException(string.Format(Exception, val));
+            }
         }
     }
 }
@@ -81,6 +85,6 @@ public abstract class TenantQuotaFeatureCheckerCount<T> : TenantQuotaFeatureChec
 
     public async Task CheckAppend()
     {
-        CheckAdd((await _tenantQuotaFeatureStatistic.GetValue()) + 1);
+        await CheckAddAsync((await _tenantQuotaFeatureStatistic.GetValueAsync()) + 1);
     }
 }

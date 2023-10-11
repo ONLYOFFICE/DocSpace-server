@@ -30,17 +30,23 @@ namespace ASC.Webhooks.Core;
 public class WebhookPublisher : IWebhookPublisher
 {
     private readonly DbWorker _dbWorker;
-    private readonly ICacheNotify<WebhookRequest> _webhookNotify;
+    private readonly IEventBus _eventBus;
+    private readonly SecurityContext _securityContext;
+    private readonly TenantManager _tenantManager;
 
     public WebhookPublisher(
         DbWorker dbWorker,
-        ICacheNotify<WebhookRequest> webhookNotify)
+        IEventBus eventBus,
+        SecurityContext securityContext,
+        TenantManager tenantManager)
     {
         _dbWorker = dbWorker;
-        _webhookNotify = webhookNotify;
+        _eventBus = eventBus;
+        _securityContext = securityContext;
+        _tenantManager = tenantManager;
     }
 
-    public async Task PublishAsync(string method, string route, string requestPayload)
+    public async Task PublishAsync(int webhookId, string requestPayload)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
@@ -51,11 +57,11 @@ public class WebhookPublisher : IWebhookPublisher
 
         await foreach (var config in webhookConfigs.Where(r => r.Enabled))
         {
-            _ = await PublishAsync(method, route, requestPayload, config.Id);
+            _ = await PublishAsync(webhookId, requestPayload, config.Id);
         }
     }
 
-    public async Task<WebhooksLog> PublishAsync(string method, string route, string requestPayload, int configId)
+    public async Task<WebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
@@ -64,8 +70,7 @@ public class WebhookPublisher : IWebhookPublisher
 
         var webhooksLog = new WebhooksLog
         {
-            Method = method,
-            Route = route,
+            WebhookId = webhookId,
             CreationTime = DateTime.UtcNow,
             RequestPayload = requestPayload,
             ConfigId = configId
@@ -73,12 +78,12 @@ public class WebhookPublisher : IWebhookPublisher
 
         var webhook = await _dbWorker.WriteToJournal(webhooksLog);
 
-        var request = new WebhookRequest
+        _eventBus.Publish(new WebhookRequestIntegrationEvent(
+            _securityContext.CurrentAccount.ID,
+            _tenantManager.GetCurrentTenant().Id)
         {
-            Id = webhook.Id
-        };
-
-        _webhookNotify.Publish(request, CacheNotifyAction.Update);
+            WebhookId = webhook.Id
+        });
 
         return webhook;
     }

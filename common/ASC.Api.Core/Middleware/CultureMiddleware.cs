@@ -41,7 +41,7 @@ public class CultureMiddleware
 
         if (authContext.IsAuthenticated)
         {
-            var user = userManager.GetUsers(authContext.CurrentAccount.ID);
+            var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
             if (!string.IsNullOrEmpty(user.CultureName))
             {
@@ -51,11 +51,14 @@ public class CultureMiddleware
 
         if (culture == null)
         {
-            culture = tenantManager.GetCurrentTenant().GetCulture();
+            culture = (await tenantManager.GetCurrentTenantAsync(false))?.GetCulture();
         }
 
-        Thread.CurrentThread.CurrentCulture = culture;
-        Thread.CurrentThread.CurrentUICulture = culture;
+        if (culture != null)
+        {
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+        }
 
         await _next.Invoke(context);
     }

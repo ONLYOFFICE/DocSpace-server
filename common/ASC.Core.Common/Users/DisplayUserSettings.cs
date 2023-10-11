@@ -26,7 +26,6 @@
 
 namespace ASC.Web.Core.Users;
 
-[Serializable]
 public class DisplayUserSettings : ISettings<DisplayUserSettings>
 {
     [JsonIgnore]
@@ -57,9 +56,9 @@ public class DisplayUserSettingsHelper
     private readonly UserManager _userManager;
     private readonly UserFormatter _userFormatter;
 
-    public string GetFullUserName(Guid userID, bool withHtmlEncode = true)
+    public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true)
     {
-        return GetFullUserName(_userManager.GetUsers(userID), withHtmlEncode);
+        return GetFullUserName(await _userManager.GetUsersAsync(userID), withHtmlEncode);
     }
 
     public string GetFullUserName(UserInfo userInfo, bool withHtmlEncode = true)
@@ -79,7 +78,13 @@ public class DisplayUserSettingsHelper
             {
                 var resourceType = Type.GetType("ASC.Web.Core.PublicResources.Resource, ASC.Web.Core");
                 var resourceProperty = resourceType.GetProperty("ProfileRemoved", BindingFlags.Static | BindingFlags.Public);
-                var resourceValue = (string)resourceProperty.GetValue(null);
+
+                var resourceValue = "";
+
+                if (resourceProperty != null)
+                {
+                    resourceValue = (string)resourceProperty.GetValue(null);
+                }
 
                 return string.IsNullOrEmpty(resourceValue) ? _removedProfileName : resourceValue;
             }

@@ -26,38 +26,45 @@
 
 namespace ASC.Data.Reassigns;
 
+/// <summary>
+/// </summary>
 [Transient]
 public class RemoveProgressItem : DistributedTaskProgress
 {
+    /// <summary>ID of the user whose data is deleted</summary>
+    /// <type>System.Guid, System</type>
     public Guid FromUser { get; private set; }
+
+    /// <summary>The user whose data is deleted</summary>
+    /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
     public UserInfo User { get; private set; }
 
-    private readonly IDictionary<string, StringValues> _httpHeaders;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly int _tenantId;
-    private readonly Guid _currentUserId;
-    private readonly bool _notify;
     //private readonly IFileStorageService _docService;
     //private readonly MailGarbageEngine _mailEraser;
 
-    public RemoveProgressItem(
-        IServiceScopeFactory serviceScopeFactory,
-            IDictionary<string, StringValues> httpHeaders,
-            int tenantId, UserInfo user, Guid currentUserId, bool notify)
+    private IDictionary<string, StringValues> _httpHeaders;
+    private int _tenantId;
+    private Guid _currentUserId;
+    private bool _notify;
+    private bool _deleteProfile;
+
+    public RemoveProgressItem(IServiceScopeFactory serviceScopeFactory)
     {
-        _httpHeaders = httpHeaders;
         _serviceScopeFactory = serviceScopeFactory;
-
-
         //_docService = Web.Files.Classes.Global.FileStorageService;
         //_mailEraser = new MailGarbageEngine();
+    }
 
+    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
+    {
+        _httpHeaders = httpHeaders;
         _tenantId = tenantId;
         User = user;
         FromUser = user.Id;
         _currentUserId = currentUserId;
         _notify = notify;
-
+        _deleteProfile = deleteProfile;
         Id = QueueWorkerRemove.GetProgressItemId(tenantId, FromUser);
         Status = DistributedTaskStatus.Created;
         Exception = null;
@@ -67,11 +74,11 @@ public class RemoveProgressItem : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, coreBaseSettings, messageService, studioNotifyService, securityContext, userManager, messageTarget, webItemManagerSecurity, storageFactory, userFormatter, options) = scopeClass;
+        var (tenantManager, coreBaseSettings, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, messageTarget, webItemManagerSecurity, storageFactory, userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
-        tenantManager.SetCurrentTenant(_tenantId);
+        await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User, DisplayUserNameFormat.Default);
 
         try
@@ -79,51 +86,35 @@ public class RemoveProgressItem : DistributedTaskProgress
             Percentage = 0;
             Status = DistributedTaskStatus.Running;
 
-            securityContext.AuthenticateMeWithoutCookie(_currentUserId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            long crmSpace;
+            Percentage = 5;
+            PublishChanges();
+
+            await fileStorageService.DemandPermissionToDeletePersonalDataAsync(User);
+
+            Percentage = 10;
+            PublishChanges();
+
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            logger.LogInformation("deleting user data for {fromUser} ", FromUser);
-
-            logger.LogInformation("deleting of data from documents");
-
-            //_docService.DeleteStorage(_userId);
-            Percentage = 25;
+            Percentage = 30;
             PublishChanges();
 
-            if (!coreBaseSettings.CustomMode)
-            {
-                logger.LogInformation("deleting of data from crm");
+            await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
 
-
-                //using (var scope = DIHelper.Resolve(_tenantId))
-                //{
-                //    var crmDaoFactory = scope.Resolve<CrmDaoFactory>();
-                crmSpace = 0;// crmDaoFactory.ReportDao.GetFiles(_userId).Sum(file => file.ContentLength);
-                             //    crmDaoFactory.ReportDao.DeleteFiles(_userId);
-                             //}
-                Percentage = 50;
-            }
-            else
-            {
-                crmSpace = 0;
-            }
-
+            Percentage = 95;
             PublishChanges();
-
-            logger.LogInformation("deleting of data from mail");
 
             //_mailEraser.ClearUserMail(_userId);
-            Percentage = 75;
-            PublishChanges();
+            //await DeleteTalkStorage(storageFactory);
 
-            logger.LogInformation("deleting of data from talk");
-            await DeleteTalkStorage(storageFactory);
-            Percentage = 99;
-            PublishChanges();
+            if (_deleteProfile)
+            {
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, messageTarget, userName);
+            }
 
-            SendSuccessNotify(studioNotifyService, messageService, messageTarget, userName, wrapper.DocsSpace, crmSpace, wrapper.MailSpace, wrapper.TalkSpace);
+            await SendSuccessNotifyAsync(studioNotifyService, messageService, messageTarget, userName, wrapper);
 
             Percentage = 100;
             Status = DistributedTaskStatus.Completed;
@@ -133,7 +124,7 @@ public class RemoveProgressItem : DistributedTaskProgress
             logger.ErrorRemoveProgressItem(ex);
             Status = DistributedTaskStatus.Failted;
             Exception = ex;
-            SendErrorNotify(studioNotifyService, ex.Message, userName);
+            await SendErrorNotifyAsync(studioNotifyService, ex.Message, userName);
         }
         finally
         {
@@ -208,7 +199,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 
         var md5Hash = sBuilder.ToString();
 
-        var storage = storageFactory.GetStorage(_tenantId, "talk");
+        var storage = await storageFactory.GetStorageAsync(_tenantId, "talk");
 
         if (storage != null && await storage.IsDirectoryAsync(md5Hash))
         {
@@ -216,32 +207,46 @@ public class RemoveProgressItem : DistributedTaskProgress
         }
     }
 
-    private void SendSuccessNotify(StudioNotifyService studioNotifyService, MessageService messageService, MessageTarget messageTarget, string userName, long docsSpace, long crmSpace, long mailSpace, long talkSpace)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, MessageTarget messageTarget, string userName)
+    {
+        await userPhotoManager.RemovePhotoAsync(FromUser);
+        await userManager.DeleteUserAsync(FromUser);
+
+        if (_httpHeaders != null)
+        {
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), _httpHeaders, userName);
+        }
+        else
+        {
+            await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), userName);
+        }
+    }
+
+    private async Task SendSuccessNotifyAsync(StudioNotifyService studioNotifyService, MessageService messageService, MessageTarget messageTarget, string userName, UsageSpaceWrapper wrapper)
     {
         if (_notify)
         {
-            studioNotifyService.SendMsgRemoveUserDataCompleted(_currentUserId, User, userName,
-                                                                        docsSpace, crmSpace, mailSpace, talkSpace);
+            await studioNotifyService.SendMsgRemoveUserDataCompletedAsync(_currentUserId, User, userName, wrapper.DocsSpace, 0, 0, 0);
         }
 
         if (_httpHeaders != null)
         {
-            messageService.Send(_httpHeaders, MessageAction.UserDataRemoving, messageTarget.Create(FromUser), new[] { userName });
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDataRemoving, messageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            messageService.Send(MessageAction.UserDataRemoving, messageTarget.Create(FromUser), userName);
+            await messageService.SendAsync(MessageAction.UserDataRemoving, messageTarget.Create(FromUser), userName);
         }
     }
 
-    private void SendErrorNotify(StudioNotifyService studioNotifyService, string errorMessage, string userName)
+    private async Task SendErrorNotifyAsync(StudioNotifyService studioNotifyService, string errorMessage, string userName)
     {
         if (!_notify)
         {
             return;
         }
 
-        studioNotifyService.SendMsgRemoveUserDataFailed(_currentUserId, User, userName, errorMessage);
+        await studioNotifyService.SendMsgRemoveUserDataFailedAsync(_currentUserId, User, userName, errorMessage);
     }
 }
 
@@ -251,9 +256,11 @@ public class RemoveProgressItemScope
     private readonly TenantManager _tenantManager;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly MessageService _messageService;
+    private readonly FileStorageService _fileStorageService;
     private readonly StudioNotifyService _studioNotifyService;
     private readonly SecurityContext _securityContext;
     private readonly UserManager _userManager;
+    private readonly UserPhotoManager _userPhotoManager;
     private readonly MessageTarget _messageTarget;
     private readonly WebItemManagerSecurity _webItemManagerSecurity;
     private readonly StorageFactory _storageFactory;
@@ -263,9 +270,11 @@ public class RemoveProgressItemScope
     public RemoveProgressItemScope(TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         MessageService messageService,
+        FileStorageService fileStorageService,
         StudioNotifyService studioNotifyService,
         SecurityContext securityContext,
         UserManager userManager,
+        UserPhotoManager userPhotoManager,
         MessageTarget messageTarget,
         WebItemManagerSecurity webItemManagerSecurity,
         StorageFactory storageFactory,
@@ -275,9 +284,11 @@ public class RemoveProgressItemScope
         _tenantManager = tenantManager;
         _coreBaseSettings = coreBaseSettings;
         _messageService = messageService;
+        _fileStorageService = fileStorageService;
         _studioNotifyService = studioNotifyService;
         _securityContext = securityContext;
         _userManager = userManager;
+        _userPhotoManager = userPhotoManager;
         _messageTarget = messageTarget;
         _webItemManagerSecurity = webItemManagerSecurity;
         _storageFactory = storageFactory;
@@ -288,9 +299,11 @@ public class RemoveProgressItemScope
     public void Deconstruct(out TenantManager tenantManager,
         out CoreBaseSettings coreBaseSettings,
         out MessageService messageService,
+        out FileStorageService fileStorageService,
         out StudioNotifyService studioNotifyService,
         out SecurityContext securityContext,
         out UserManager userManager,
+        out UserPhotoManager userPhotoManager,
         out MessageTarget messageTarget,
         out WebItemManagerSecurity webItemManagerSecurity,
         out StorageFactory storageFactory,
@@ -300,9 +313,11 @@ public class RemoveProgressItemScope
         tenantManager = _tenantManager;
         coreBaseSettings = _coreBaseSettings;
         messageService = _messageService;
+        fileStorageService = _fileStorageService;
         studioNotifyService = _studioNotifyService;
         securityContext = _securityContext;
         userManager = _userManager;
+        userPhotoManager = _userPhotoManager;
         messageTarget = _messageTarget;
         webItemManagerSecurity = _webItemManagerSecurity;
         storageFactory = _storageFactory;

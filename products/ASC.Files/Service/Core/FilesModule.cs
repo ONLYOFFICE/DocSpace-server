@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
+using Constants = ASC.Feed.Constants;
 using FeedModule = ASC.Feed.Aggregator.Modules.FeedModule;
 
 namespace ASC.Files.Service.Core;
@@ -39,30 +41,30 @@ public class FilesModule : FeedModule
     private const string SharedFileItem = Constants.SharedFileItem;
 
     private readonly FileSecurity _fileSecurity;
-    private readonly FilesLinkUtility _filesLinkUtility;
     private readonly IFileDao<int> _fileDao;
     private readonly IFolderDao<int> _folderDao;
     private readonly UserManager _userManager;
+    private readonly TenantUtil _tenantUtil;
 
     public FilesModule(
         TenantManager tenantManager,
         UserManager userManager,
         WebItemSecurity webItemSecurity,
-        FilesLinkUtility filesLinkUtility,
         FileSecurity fileSecurity,
-        IDaoFactory daoFactory)
+        IDaoFactory daoFactory,
+        TenantUtil tenantUtil)
         : base(tenantManager, webItemSecurity)
     {
         _fileDao = daoFactory.GetFileDao<int>();
         _folderDao = daoFactory.GetFolderDao<int>();
         _userManager = userManager;
-        _filesLinkUtility = filesLinkUtility;
         _fileSecurity = fileSecurity;
+        _tenantUtil = tenantUtil;
     }
 
-    public override bool VisibleFor(Feed.Aggregator.Feed feed, object data, Guid userId)
+    public override async Task<bool> VisibleForAsync(Feed.Aggregator.Feed feed, object data, Guid userId)
     {
-        if (!_webItemSecurity.IsAvailableForUser(ProductID, userId))
+        if (!await _webItemSecurity.IsAvailableForUserAsync(ProductID, userId))
         {
             return false;
         }
@@ -80,7 +82,7 @@ public class FilesModule : FeedModule
             }
 
             var owner = (Guid)feed.Target;
-            var groupUsers = _userManager.GetUsersByGroup(owner).Select(x => x.Id).ToList();
+            var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
             if (groupUsers.Count == 0)
             {
                 groupUsers.Add(owner);
@@ -93,12 +95,12 @@ public class FilesModule : FeedModule
             targetCond = true;
         }
 
-        return targetCond && _fileSecurity.CanReadAsync(file, userId).Result;
+        return targetCond && await _fileSecurity.CanReadAsync(file, userId);
     }
 
-    public override async Task VisibleFor(List<Tuple<FeedRow, object>> feed, Guid userId)
+    public override async Task VisibleForAsync(List<Tuple<FeedRow, object>> feed, Guid userId)
     {
-        if (!_webItemSecurity.IsAvailableForUser(ProductID, userId))
+        if (!await _webItemSecurity.IsAvailableForUserAsync(ProductID, userId))
         {
             return;
         }
@@ -116,7 +118,7 @@ public class FilesModule : FeedModule
         foreach (var f in feed1.Where(r => r.Item1.Feed.Target != null && !(r.Item3 != null && r.Item3.Owner == userId)))
         {
             var file = f.Item2;
-            if (IsTarget(f.Item1.Feed.Target, userId) && !files.Any(r => r.UniqID.Equals(file.UniqID)))
+            if (await IsTargetAsync(f.Item1.Feed.Target, userId) && !files.Any(r => r.UniqID.Equals(file.UniqID)))
             {
                 files.Add(file);
             }
@@ -126,7 +128,7 @@ public class FilesModule : FeedModule
 
         foreach (var f in feed1)
         {
-            if (IsTarget(f.Item1.Feed.Target, userId) && canRead.Any(r => r.Item1.Id.Equals(f.Item2.Id)))
+            if (await IsTargetAsync(f.Item1.Feed.Target, userId) && canRead.Any(r => r.Item1.Id.Equals(f.Item2.Id)))
             {
                 f.Item1.Users.Add(userId);
             }
@@ -140,7 +142,7 @@ public class FilesModule : FeedModule
             .Where(f => f.ShareRecord == null)
             .ToListAsync();
 
-        var folderIDs = files.Select(r => r.File.ParentId).ToList();
+        var folderIDs = files.Select(r => r.File.ParentId).Distinct().ToList();
         var folders = await _folderDao.GetFoldersAsync(folderIDs, checkShare: false).ToListAsync();
         var roomsIds = await _folderDao.GetParentRoomsAsync(folderIDs).ToDictionaryAsync(k => k.FolderId, v => v.ParentRoomId);
 
@@ -150,7 +152,7 @@ public class FilesModule : FeedModule
 
     public override async Task<IEnumerable<int>> GetTenantsWithFeeds(DateTime fromTime)
     {
-        return await _fileDao.GetTenantsWithFeedsAsync(fromTime).ToListAsync();
+        return await _fileDao.GetTenantsWithFeedsAsync(fromTime, false).ToListAsync();
     }
 
     private Feed.Aggregator.Feed ToFeed(FileWithShare tuple, Folder<int> parentFolder, int roomId)
@@ -161,10 +163,10 @@ public class FilesModule : FeedModule
 
         if (shareRecord != null)
         {
-            var feed = new Feed.Aggregator.Feed(shareRecord.Owner, shareRecord.TimeStamp, true)
+            var feed = new Feed.Aggregator.Feed(shareRecord.Owner, shareRecord.TimeStamp)
             {
                 Item = SharedFileItem,
-                ItemId = string.Format("{0}_{1}", file.Id, shareRecord.Subject),
+                ItemId = $"{file.Id}_{shareRecord.Subject}",
                 Product = Product,
                 Module = Name,
                 Title = file.Title,
@@ -174,7 +176,7 @@ public class FilesModule : FeedModule
                 AdditionalInfo2 = file.Encrypted ? "Encrypted" : string.Empty,
                 Keywords = file.Title,
                 Target = shareRecord.Subject,
-                GroupId = GetGroupId(SharedFileItem, shareRecord.Owner, file.ParentId.ToString()),
+                GroupId = GetGroupId(SharedFileItem, shareRecord.Owner, shareRecord.TimeStamp, file.ParentId.ToString()),
                 ContextId = contextId
             };
 
@@ -182,11 +184,12 @@ public class FilesModule : FeedModule
         }
 
         var updated = file.Version != 1;
+        var fileModifiedUtc = _tenantUtil.DateTimeToUtc(file.ModifiedOn);
 
-        return new Feed.Aggregator.Feed(file.ModifiedBy, file.ModifiedOn, true)
+        return new Feed.Aggregator.Feed(file.ModifiedBy, fileModifiedUtc)
         {
             Item = FileItem,
-            ItemId = string.Format("{0}_{1}", file.Id, file.Version > 1 ? 1 : 0),
+            ItemId = $"{file.Id}_{(file.Version > 1 ? file.Version : 0)}",
             Product = Product,
             Module = Name,
             Action = updated ? FeedAction.Updated : FeedAction.Created,
@@ -196,12 +199,12 @@ public class FilesModule : FeedModule
             AdditionalInfo = file.ContentLengthString,
             AdditionalInfo2 = file.Encrypted ? "Encrypted" : string.Empty,
             Keywords = file.Title,
-            GroupId = GetGroupId(FileItem, file.ModifiedBy, file.ParentId.ToString(), updated ? 1 : 0),
+            GroupId = GetGroupId(FileItem, file.ModifiedBy, fileModifiedUtc, file.ParentId.ToString(), updated ? 1 : 0),
             ContextId = contextId
         };
     }
 
-    private bool IsTarget(object target, Guid userId)
+    private async Task<bool> IsTargetAsync(object target, Guid userId)
     {
         if (target == null)
         {
@@ -209,7 +212,7 @@ public class FilesModule : FeedModule
         }
 
         var owner = (Guid)target;
-        var groupUsers = _userManager.GetUsersByGroup(owner).Select(x => x.Id).ToList();
+        var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
         if (groupUsers.Count == 0)
         {
             groupUsers.Add(owner);

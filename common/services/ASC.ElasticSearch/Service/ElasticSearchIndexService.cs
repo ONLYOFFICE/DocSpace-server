@@ -59,7 +59,7 @@ public class ElasticSearchIndexService : BackgroundService
             {
                 while (_isStarted)
                 {
-                    await Task.Delay(10000);
+                    await Task.Delay(10000, stoppingToken);
                 }
                 await IndexAll(true);
             }, CacheNotifyAction.Any);
@@ -69,7 +69,7 @@ public class ElasticSearchIndexService : BackgroundService
             _logger.ErrorSubscribeOnStart(e);
         }
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var factoryIndexer = scope.ServiceProvider.GetService<FactoryIndexer>();
 
         while (!factoryIndexer.CheckState(false))
@@ -79,7 +79,7 @@ public class ElasticSearchIndexService : BackgroundService
                 return;
             }
 
-            await Task.Delay(10000);
+            await Task.Delay(10000, stoppingToken);
         }
 
         var service = scope.ServiceProvider.GetService<ElasticSearchService>();
@@ -93,7 +93,7 @@ public class ElasticSearchIndexService : BackgroundService
         }
     }
 
-    public async Task IndexProduct(IFactoryIndexer product, bool reindex)
+    public async Task IndexProductAsync(IFactoryIndexer product, bool reindex)
     {
         if (reindex)
         {
@@ -105,7 +105,7 @@ public class ElasticSearchIndexService : BackgroundService
                 }
 
                 _logger.DebugProductReindex(product.IndexName);
-                product.ReIndex();
+                await product.ReIndexAsync();
             }
             catch (Exception e)
             {
@@ -122,7 +122,7 @@ public class ElasticSearchIndexService : BackgroundService
 
             _logger.DebugProduct(product.IndexName);
             _indexNotify.Publish(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
-            await product.IndexAll();
+            await product.IndexAllAsync();
         }
         catch (Exception e)
         {
@@ -138,16 +138,16 @@ public class ElasticSearchIndexService : BackgroundService
 
             IEnumerable<Type> wrappers;
 
-            using (var scope = _serviceScopeFactory.CreateScope())
+            await using (var scope = _serviceScopeFactory.CreateAsyncScope())
             {
                 wrappers = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().Select(r => r.GetType()).ToList();
             }
 
             await Parallel.ForEachAsync(wrappers, async (wrapper, token) =>
             {
-                using (var scope = _serviceScopeFactory.CreateScope())
+                await using (var scope = _serviceScopeFactory.CreateAsyncScope())
                 {
-                    await IndexProduct((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
+                    await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
                 }
             });
 

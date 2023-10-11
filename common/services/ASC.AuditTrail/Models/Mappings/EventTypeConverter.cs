@@ -24,29 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Tenants;
+
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
-internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEventDto>,
-                                  ITypeConverter<AuditEventQuery, AuditEventDto>
+internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
+                                  ITypeConverter<AuditEventQuery, AuditEvent>
 {
     private readonly UserFormatter _userFormatter;
     private readonly AuditActionMapper _auditActionMapper;
     private readonly MessageTarget _messageTarget;
+    private readonly TenantUtil _tenantUtil;
 
     public EventTypeConverter(
         UserFormatter userFormatter,
         AuditActionMapper actionMapper,
-        MessageTarget messageTarget)
+        MessageTarget messageTarget,
+        TenantUtil tenantUtil)
     {
         _userFormatter = userFormatter;
         _auditActionMapper = actionMapper;
         _messageTarget = messageTarget;
+        _tenantUtil = tenantUtil;
     }
 
-    public LoginEventDto Convert(LoginEventQuery source, LoginEventDto destination, ResolutionContext context)
+    public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
     {
-        var result = context.Mapper.Map<LoginEventDto>(source.Event);
+        var result = context.Mapper.Map<LoginEvent>(source.Event);
 
         if (source.Event.DescriptionRaw != null)
         {
@@ -84,14 +89,17 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEventDt
 
         result.ActionText = _auditActionMapper.GetActionText(_auditActionMapper.GetMessageMaps(result.Action), result);
 
+        result.Date = _tenantUtil.DateTimeFromUtc(result.Date);
+        result.IP = result.IP.Split(':').Length > 1 ? result.IP.Split(':')[0] : result.IP;
+
         return result;
     }
 
-    public AuditEventDto Convert(AuditEventQuery source, AuditEventDto destination, ResolutionContext context)
+    public AuditEvent Convert(AuditEventQuery source, AuditEvent destination, ResolutionContext context)
     {
         var target = source.Event.Target;
         source.Event.Target = null;
-        var result = context.Mapper.Map<AuditEventDto>(source.Event);
+        var result = context.Mapper.Map<AuditEvent>(source.Event);
 
         result.Target = _messageTarget.Parse(target);
 
@@ -137,6 +145,35 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEventDt
             result.ActionTypeText = _auditActionMapper.GetActionTypeText(map);
             result.Product = _auditActionMapper.GetProductText(map);
             result.Module = _auditActionMapper.GetModuleText(map);
+        }
+
+
+        result.Date = _tenantUtil.DateTimeFromUtc(result.Date);
+        if (!string.IsNullOrEmpty(result.IP))
+        {
+            var ipSplited = result.IP.Split(':');
+            if (ipSplited.Length > 1)
+            {
+                result.IP = ipSplited[0];
+            }
+        }
+
+        if (map?.ProductType == ProductType.Documents)
+        {
+            var rawNotificationInfo = result.Description?.LastOrDefault();
+
+            if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
+            {
+                var notificationInfo = System.Text.Json.JsonSerializer.Deserialize<AdditionalNotificationInfo>(rawNotificationInfo);
+
+                result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
+                    !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;
+            }
+        }
+
+        if (string.IsNullOrEmpty(result.Context))
+        {
+            result.Context = result.Module;
         }
 
         return result;

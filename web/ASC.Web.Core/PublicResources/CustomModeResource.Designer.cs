@@ -63,13 +63,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to ____onlyoffice.io. Now you can:
+        ///Welcome to ONLYOFFICE DocSpace! Your user profile has been successfully added to &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Now you can:
         ///
-        ///*#* Work with other users in the room you are invited to: *view-only, review, collaboration, custom rooms*.
+        ///* Work with other users in the room you are invited to: *collaboration rooms for real-time co-authoring or custom rooms with flexible settings for any purpose*.
         ///
-        ///*# Work with files of different formats*: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.
+        ///* *Work with files of different formats*: text documents, spreadsheets, presentations, digital forms, PDFs, e-books, multimedia.
         ///
-        ///*# Collaborate on documents* with two co-editing modes: real-time or paragraph-locking. Track changes, communicate in real-time usin [rest of string was truncated]&quot;;.
+        ///* *Collaborate on documents* with two co-editing mo [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_whitelabel_user_welcome_custom_mode_v1 {
             get {
@@ -103,7 +103,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Click the button below and log in* to your cloud.
         ///
-        ///$GreenButton
+        ///$OrangeButton
         ///
         ///The link is valid for 7 days.
         ///
@@ -120,7 +120,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Want to change the password on your cloud office account? Click the button below to confirm.
         ///
-        ///$GreenButton
+        ///$OrangeButton
         ///
         ///The link is valid for 7 days.
         ///
@@ -139,8 +139,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///If you can&apos;t open the link, please copy the following &quot;$InviteLink&quot;:&quot;$InviteLink&quot; and paste it into your browser address bar.
         ///
-        ///Sincerely,
-        ///ONLYOFFICE team.
+        ///$TrulyYours.
         /// </summary>
         public static string pattern_personal_custom_mode_confirmation {
             get {
@@ -168,11 +167,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///The process of removing data from user &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; has been successfully completed.
         ///
-        ///The deletion of personal data allowed to free:
-        ///
-        ///# Documents - $DocsSpace
-        ///# Mail - $MailSpace
-        ///# Talk - $TalkSpace.
+        ///The deletion of personal data allowed to free $DocsSpace.
         /// </summary>
         public static string pattern_remove_user_data_completed_custom_mode {
             get {

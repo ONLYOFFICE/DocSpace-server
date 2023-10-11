@@ -1,5 +1,7 @@
 ﻿namespace ASC.AuditTrail.Types;
 
+/// <summary>
+/// </summary>
 [EnumExtensions]
 public enum EntryType
 {
@@ -27,5 +29,7 @@ public enum EntryType
     FieldDescription,
     OpportunityMilestone,
     User,
-    Group
+    Group,
+    Room,
+    Tag
 }

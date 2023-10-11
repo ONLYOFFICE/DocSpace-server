@@ -26,7 +26,10 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// </summary>
 [EnumExtensions]
+[JsonConverter(typeof(FileShareConverter))]
 public enum FileShare
 {
     None,
@@ -39,7 +42,8 @@ public enum FileShare
     FillForms,
     CustomFilter,
     RoomAdmin,
-    Editing
+    Editing,
+    Collaborator
 }
 
 public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<FileShare>

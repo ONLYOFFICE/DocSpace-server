@@ -87,6 +87,7 @@ public interface IFileDao<T>
     /// <param name="subjectID"></param>
     /// <param name="searchText"></param>
     /// <param name="searchInContent"></param>
+    /// <param name="checkShared"></param>
     /// <returns></returns>
     IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool checkShared = false);
 
@@ -108,11 +109,16 @@ public interface IFileDao<T>
     /// <param name="searchText"> </param>
     /// <param name="searchInContent"></param>
     /// <param name="withSubfolders"> </param>
+    /// <param name="exludeSubject"> </param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <param name="roomId"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
-    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool withSubfolders = false, bool exludeSubject = false);
+    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent,
+        bool withSubfolders = false, bool exludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
     /// Get stream of file
@@ -236,6 +242,7 @@ public interface IFileDao<T>
 
     Task<ChunkedUploadSession<T>> CreateUploadSessionAsync(File<T> file, long contentLength);
     Task<File<T>> UploadChunkAsync(ChunkedUploadSession<T> uploadSession, Stream chunkStream, long chunkLength);
+    Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     #endregion
 
@@ -244,12 +251,13 @@ public interface IFileDao<T>
     /// <summary>
     /// Set created by
     /// </summary>
-    /// <param name="fileIds"></param>
+    /// <param name="oldOwnerId"></param>
     /// <param name="newOwnerId"></param>
-    Task ReassignFilesAsync(T[] fileIds, Guid newOwnerId);
+    /// <param name="exceptFolderIds"></param>
+    Task ReassignFilesAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<T> exceptFolderIds);
 
     /// <summary>
-    /// Search files in SharedWithMe & Projects
+    /// Search files in SharedWithMe &amp; Projects
     /// </summary>
     /// <param name="parentIds"></param>
     /// <param name="filterType"></param>
@@ -283,7 +291,9 @@ public interface IFileDao<T>
 
     Task<bool> ContainChangesAsync(T fileId, int fileVersion);
 
-    Task SaveThumbnailAsync(File<T> file, Stream thumbnail, int width, int height);
+    Task SetThumbnailStatusAsync(File<T> file, Thumbnail status);
+
+    string GetUniqThumbnailPath(File<T> file, int width, int height);
 
     Task<Stream> GetThumbnailAsync(File<T> file, int width, int height);
 
@@ -291,11 +301,14 @@ public interface IFileDao<T>
 
     IAsyncEnumerable<FileWithShare> GetFeedsAsync(int tenant, DateTime from, DateTime to);
 
-    IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime);
+    IAsyncEnumerable<int> GetTenantsWithFeedsAsync(DateTime fromTime, bool includeSecurity);
 
     Task<EntryProperties> GetProperties(T fileId);
 
     Task SaveProperties(T fileId, EntryProperties entryProperties);
+
+    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent, bool withSubfolders = false,
+        bool excludeSubject = false, T roomId = default);
 
     #endregion
 }

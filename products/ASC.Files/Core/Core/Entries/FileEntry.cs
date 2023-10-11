@@ -24,9 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using static ASC.Files.Core.Security.FileSecurity;
+
 namespace ASC.Files.Core;
 
-[Serializable]
 public abstract class FileEntry : ICloneable
 {
     [JsonIgnore]
@@ -84,6 +85,8 @@ public abstract class FileEntry : ICloneable
     public abstract bool IsNew { get; set; }
     public FileEntryType FileEntryType { get; set; }
     public IEnumerable<Tag> Tags { get; set; }
+    public string OriginTitle { get; set; }
+    public string OriginRoomTitle { get; set; }
 
     private string _modifiedByString;
     private string _createByString;
@@ -104,17 +107,20 @@ public interface IFileEntry<in T>
     string UniqID { get; }
 }
 
-
-[Serializable]
 public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
 {
     public T Id { get; set; }
     public T ParentId { get; set; }
+    public T OriginId { get; set; }
+    public T OriginRoomId { get; set; }
+
+    public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+
     private T _folderIdDisplay;
     private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly SettingsManager _settingsManager;
     private readonly FilesSettingsHelper _filesSettingsHelper;
     private readonly FileDateTime _fileDateTime;
+
 
     protected FileEntry() { }
 
@@ -122,45 +128,34 @@ public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
         FileHelper fileHelper,
         Global global,
         GlobalFolderHelper globalFolderHelper,
-        SettingsManager settingsManager,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime) : base(fileHelper, global)
     {
         _globalFolderHelper = globalFolderHelper;
-        _settingsManager = settingsManager;
         _filesSettingsHelper = filesSettingsHelper;
         _fileDateTime = fileDateTime;
     }
 
     public T FolderIdDisplay
     {
-        get
-        {
-            if (_folderIdDisplay != null)
-            {
-                return _folderIdDisplay;
-            }
-
-            return ParentId;
-        }
+        get => !EqualityComparer<T>.Default.Equals(_folderIdDisplay, default) ? _folderIdDisplay : ParentId;
         set => _folderIdDisplay = value;
     }
 
-    public string DeletedPermanentlyOnString
+    public DateTime DeletedPermanentlyOn
     {
         get
         {
-            if (!ModifiedOn.Equals(default(DateTime)) && Equals(FolderIdDisplay, _globalFolderHelper.FolderTrash) && _filesSettingsHelper.AutomaticallyCleanUp.IsAutoCleanUp)
+            if (!ModifiedOn.Equals(default) && Equals(FolderIdDisplay, _globalFolderHelper.FolderTrashAsync.Result) && _filesSettingsHelper.AutomaticallyCleanUp.IsAutoCleanUp)
             {
-                var deletedPermanentlyOn = _fileDateTime.GetModifiedOnWithAutoCleanUp(ModifiedOn, _filesSettingsHelper.AutomaticallyCleanUp.Gap);
-                return deletedPermanentlyOn.ToString("g");
+                return _fileDateTime.GetModifiedOnWithAutoCleanUp(ModifiedOn, _filesSettingsHelper.AutomaticallyCleanUp.Gap);
             }
-            else
-            {
-                return null;
-            }
+
+            return default;
         }
     }
+
+    public string DeletedPermanentlyOnString => DeletedPermanentlyOn != default ? DeletedPermanentlyOn.ToString("g") : null;
 
     public bool DenyDownload { get; set; }
 
@@ -183,7 +178,7 @@ public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode();
+        return HashCode.Combine(Id, FileEntryType);
     }
 
     public override string ToString()

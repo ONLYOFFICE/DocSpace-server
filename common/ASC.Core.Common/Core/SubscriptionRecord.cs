@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Core;
 
 public partial class SubscriptionRecord : IMapFrom<Subscription>
@@ -31,6 +33,10 @@ public partial class SubscriptionRecord : IMapFrom<Subscription>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Subscription, SubscriptionRecord>()
-            .ForMember(dest => dest.Subscribed, opt => opt.MapFrom(src => !src.Unsubscribed));
+            .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.Recipient))
+            .ForMember(dest => dest.Subscribed, opt => opt.MapFrom(src => !src.Unsubscribed))
+            .ForMember(dest => dest.ActionId, opt => opt.MapFrom(src => src.Action))
+            .ForMember(dest => dest.ObjectId, opt => opt.MapFrom(src => src.Object))
+            .ForMember(dest => dest.SourceId, opt => opt.MapFrom(src => src.Source));
     }
 }

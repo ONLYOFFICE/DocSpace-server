@@ -42,12 +42,14 @@ public interface ITagDao<T>
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names);
     Task<IEnumerable<Tag>> SaveTags(IEnumerable<Tag> tag, Guid createdBy = default);
-    Task<IEnumerable<Tag>> SaveTags(Tag tag);
+    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag);
     Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo);
     Task UpdateNewTags(IEnumerable<Tag> tag, Guid createdBy = default);
     Task UpdateNewTags(Tag tag);
+    Task IncrementNewTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default);
     Task RemoveTagsAsync(IEnumerable<int> tagsIds);
     Task RemoveTagsAsync(FileEntry<T> entry, IEnumerable<int> tagsIds);
     Task RemoveTags(IEnumerable<Tag> tag);
     Task RemoveTags(Tag tag);
+    Task<int> RemoveTagLinksAsync(T entryId, FileEntryType entryType, TagType tagType);
 }

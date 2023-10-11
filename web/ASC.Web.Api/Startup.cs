@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Core;
+
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
 namespace ASC.Web.Api;
 
 public class Startup : BaseStartup
@@ -32,15 +36,19 @@ public class Startup : BaseStartup
 
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
-
+        WebhooksEnabled = true;
     }
 
     public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
 
-        services.AddHostedService<LdapNotifyService>();
-        DIHelper.TryAdd<LdapNotifyService>();
+        if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
+        {
+            services.AddHostedService<LdapNotifyService>();
+            DIHelper.TryAdd<LdapNotifyService>();
+        }
+
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
 
@@ -49,5 +57,36 @@ public class Startup : BaseStartup
 
         services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
         services.AddScoped<CountRoomCheckerStatistic>();
+
+        DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
+
+        services.AddStartupTask<CspStartupTask>()
+                   .TryAddSingleton(services);
+    }
+
+    public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        base.Configure(app, env);
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("logoUploader.ashx"),
+            appBranch =>
+            {
+                appBranch.UseLogoUploader();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("payment.ashx"),
+            appBranch =>
+            {
+                appBranch.UseAccountHandler();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().StartsWith(UrlShortRewriter.BasePath),
+            appBranch =>
+            {
+                appBranch.UseUrlShortRewriter();
+            });
     }
 }

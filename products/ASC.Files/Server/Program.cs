@@ -52,6 +52,7 @@ var logger = LogManager.Setup()
 try
 {
     logger.Info("Configuring web host ({applicationContext})...", AppName);
+
     builder.Host.ConfigureDefault();
 
     builder.WebHost.ConfigureDefaultKestrel((hostingContext, serverOptions) =>
@@ -66,16 +67,14 @@ try
 
     startup.ConfigureServices(builder.Services);
 
-    builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-    {
-        startup.ConfigureContainer(containerBuilder);
-    });
+    builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
     var app = builder.Build();
 
     startup.Configure(app, app.Environment);
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
+
     await app.RunWithTasksAsync();
 }
 catch (Exception ex)

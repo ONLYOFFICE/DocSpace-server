@@ -47,6 +47,7 @@ public class FileUploader
     private readonly IServiceProvider _serviceProvider;
     private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
     private readonly FileTrackerHelper _fileTracker;
+    private readonly SocketManager _socketManager;
 
     public FileUploader(
         FilesSettingsHelper filesSettingsHelper,
@@ -66,7 +67,8 @@ public class FileUploader
         EntryManager entryManager,
         IServiceProvider serviceProvider,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
-        FileTrackerHelper fileTracker)
+        FileTrackerHelper fileTracker,
+        SocketManager socketManager)
     {
         _filesSettingsHelper = filesSettingsHelper;
         _fileUtility = fileUtility;
@@ -86,11 +88,12 @@ public class FileUploader
         _serviceProvider = serviceProvider;
         _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
         _fileTracker = fileTracker;
+        _socketManager = socketManager;
     }
 
-    public Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data)
+    public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data)
     {
-        return ExecAsync(folderId, title, contentLength, data, !_filesSettingsHelper.UpdateIfExist);
+        return await ExecAsync(folderId, title, contentLength, data, !_filesSettingsHelper.UpdateIfExist);
     }
 
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
@@ -176,7 +179,7 @@ public class FileUploader
     {
         return file != null
                && await _fileSecurity.CanEditAsync(file)
-               && !_userManager.IsUser(_authContext.CurrentAccount.ID)
+               && !await _userManager.IsUserAsync(_authContext.CurrentAccount.ID)
                && !await _entryManager.FileLockedForMeAsync(file.Id)
                && !_fileTracker.IsEditing(file.Id)
                && file.RootFolderType != FolderType.TRASH
@@ -213,9 +216,9 @@ public class FileUploader
                     newFolder.ParentId = folderId;
 
                     folderId = await folderDao.SaveFolderAsync(newFolder);
-
                     folder = await folderDao.GetFolderAsync(folderId);
-                    _filesMessageService.Send(folder, MessageAction.FolderCreated, folder.Title);
+                    await _socketManager.CreateFolderAsync(folder);
+                    _ = _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
                 }
 
                 folderId = folder.Id;
@@ -292,10 +295,10 @@ public class FileUploader
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
         uploadSession.Location = _filesLinkUtility.GetUploadChunkLocationUrl(uploadSession.Id);
-        uploadSession.TenantId = _tenantManager.GetCurrentTenant().Id;
+        uploadSession.TenantId = await _tenantManager.GetCurrentTenantIdAsync();
         uploadSession.UserId = _authContext.CurrentAccount.ID;
         uploadSession.FolderId = folderId;
-        uploadSession.CultureName = Thread.CurrentThread.CurrentUICulture.Name;
+        uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
 
@@ -316,7 +319,7 @@ public class FileUploader
 
         if (chunkLength > _setupInfo.ChunkUploadSize)
         {
-            throw FileSizeComment.GetFileSizeException(_setupInfo.MaxUploadSize(_tenantManager, _maxTotalSizeStatistic));
+            throw FileSizeComment.GetFileSizeException(await _setupInfo.MaxUploadSize(_tenantManager, _maxTotalSizeStatistic));
         }
 
         var maxUploadSize = await GetMaxFileSizeAsync(uploadSession.FolderId, uploadSession.BytesTotal > 0);
@@ -331,7 +334,7 @@ public class FileUploader
         var dao = _daoFactory.GetFileDao<T>();
         await dao.UploadChunkAsync(uploadSession, stream, chunkLength);
 
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
+        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
             var linkDao = _daoFactory.GetLinkDao();
             await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
@@ -359,11 +362,11 @@ public class FileUploader
         await _chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
     }
 
-    private Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)
+    private async Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
 
-        return folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
+        return await folderDao.GetMaxUploadSizeAsync(folderId, chunkedUpload);
     }
 
     #endregion

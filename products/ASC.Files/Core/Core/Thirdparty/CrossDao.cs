@@ -26,22 +26,25 @@
 
 namespace ASC.Files.Core.Thirdparty;
 
-[Scope(Additional = typeof(CrossDaoExtension))]
+[Scope]
 internal class CrossDao //Additional SharpBox
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly SetupInfo _setupInfo;
     private readonly FileConverter _fileConverter;
+    private readonly SocketManager _socketManager;
     private readonly ThumbnailSettings _thumbnailSettings;
     public CrossDao(
         IServiceProvider serviceProvider,
         SetupInfo setupInfo,
-            FileConverter fileConverter,
-            ThumbnailSettings thumbnailSettings)
+        FileConverter fileConverter,
+        ThumbnailSettings thumbnailSettings,
+        SocketManager socketManager)
     {
         _serviceProvider = serviceProvider;
         _setupInfo = setupInfo;
         _fileConverter = fileConverter;
+        _socketManager = socketManager;
         _thumbnailSettings = thumbnailSettings;
     }
 
@@ -61,6 +64,7 @@ internal class CrossDao //Additional SharpBox
 
         var securityDao = _serviceProvider.GetService<ISecurityDao<TFrom>>();
         var tagDao = _serviceProvider.GetService<ITagDao<TFrom>>();
+        var globalStore = _serviceProvider.GetService<GlobalStore>();
 
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFile);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFile);
@@ -73,13 +77,14 @@ internal class CrossDao //Additional SharpBox
         toFile.Title = fromFile.Title;
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
+        toFile.ThumbnailStatus = fromFile.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
 
         fromFile.Id = fromConverter(fromFile.Id);
 
         var mustConvert = !string.IsNullOrEmpty(fromFile.ConvertedType);
-        using (var fromFileStream = mustConvert
-                                        ? await _fileConverter.ExecAsync(fromFile)
-                                        : await fromFileDao.GetFileStreamAsync(fromFile))
+        await using (var fromFileStream = mustConvert
+                         ? await _fileConverter.ExecAsync(fromFile)
+                         : await fromFileDao.GetFileStreamAsync(fromFile))
         {
             toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
             toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
@@ -89,11 +94,13 @@ internal class CrossDao //Additional SharpBox
         {
             foreach (var size in _thumbnailSettings.Sizes)
             {
-                using (var thumbnail = await fromFileDao.GetThumbnailAsync(fromFile, size.Width, size.Height))
-                {
-                    await toFileDao.SaveThumbnailAsync(toFile, thumbnail, size.Width, size.Height);
-                }
+                await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
+                                      fromFileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
+                                      String.Empty,
+                                      toFileDao.GetUniqThumbnailPath(toFile, size.Width, size.Height));
             }
+
+            await toFileDao.SetThumbnailStatusAsync(toFile, Thumbnail.Created);
 
             toFile.ThumbnailStatus = Thumbnail.Created;
         }
@@ -151,6 +158,11 @@ internal class CrossDao //Additional SharpBox
         var toFolderId = toFolder != null
                              ? toFolder.Id
                              : await toFolderDao.SaveFolderAsync(toFolder1);
+
+        if (toFolder == null)
+        {
+            await _socketManager.CreateFolderAsync(toFolder1);
+        }
 
         var foldersToCopy = await fromFolderDao.GetFoldersAsync(fromConverter(fromFolderId)).ToListAsync();
         var fileIdsToCopy = await fromFileDao.GetFilesAsync(fromConverter(fromFolderId)).ToListAsync();
@@ -216,7 +228,10 @@ internal class CrossDao //Additional SharpBox
 
             if (copyException == null)
             {
-                await fromFolderDao.DeleteFolderAsync(fromConverter(fromFolderId));
+                var id = fromConverter(fromFolderId);
+                var folder = await fromFolderDao.GetFolderAsync(id);
+                await fromFolderDao.DeleteFolderAsync(id);
+                await _socketManager.DeleteFolder(folder);
             }
         }
 
@@ -226,18 +241,5 @@ internal class CrossDao //Additional SharpBox
         }
 
         return await toFolderDao.GetFolderAsync(toConverter(toFolderId));
-    }
-}
-
-public static class CrossDaoExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<SharpBoxDaoSelector>();
-        services.TryAdd<SharePointDaoSelector>();
-        services.TryAdd<OneDriveDaoSelector>();
-        services.TryAdd<GoogleDriveDaoSelector>();
-        services.TryAdd<DropboxDaoSelector>();
-        services.TryAdd<BoxDaoSelector>();
     }
 }

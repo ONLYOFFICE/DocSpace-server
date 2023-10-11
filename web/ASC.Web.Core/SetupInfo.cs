@@ -38,6 +38,8 @@ public class SetupInfo
     public string DemoOrder { get; private set; }
     public string RequestTraining { get; private set; }
     public string ZendeskKey { get; private set; }
+    public string BookTrainingEmail { get; private set; }
+    public string DocumentationEmail { get; private set; }
     public string UserVoiceURL { get; private set; }
     public string MainLogoURL { get; private set; }
     public string MainLogoMailTmplURL { get; private set; }
@@ -49,9 +51,9 @@ public class SetupInfo
     /// <summary>
     /// Max possible file size for not chunked upload. Less or equal than 100 mb.
     /// </summary>
-    public long MaxUploadSize(TenantManager tenantManager, MaxTotalSizeStatistic maxTotalSizeStatistic)
+    public async Task<long> MaxUploadSize(TenantManager tenantManager, MaxTotalSizeStatistic maxTotalSizeStatistic)
     {
-        return Math.Min(AvailableFileSize, MaxChunkedUploadSize(tenantManager, maxTotalSizeStatistic));
+        return Math.Min(AvailableFileSize, await MaxChunkedUploadSize(tenantManager, maxTotalSizeStatistic));
     }
 
     public long AvailableFileSize
@@ -61,9 +63,10 @@ public class SetupInfo
     }
 
     public string TeamlabSiteRedirect { get; private set; }
-    public long ChunkUploadSize { get; private set; }
+    public long ChunkUploadSize { get; set; }
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
+    public string LegalTerms { get; private set; }
     public string NoTenantRedirectURL { get; private set; }
     public string NotifyAddress { get; private set; }
     public string TipsAddress { get; private set; }
@@ -119,7 +122,9 @@ public class SetupInfo
         StatisticTrackURL = GetAppSettings("web.track-url", string.Empty);
         UserVoiceURL = GetAppSettings("web.uservoice", string.Empty);
         DemoOrder = GetAppSettings("web.demo-order", string.Empty);
-        ZendeskKey = GetAppSettings("web.zendesk-key", string.Empty);
+        ZendeskKey = GetAppSettings("web:zendesk-key", string.Empty);
+        BookTrainingEmail = GetAppSettings("web:book-training-email", string.Empty);
+        DocumentationEmail = GetAppSettings("web:documentation-email", string.Empty);
         RequestTraining = GetAppSettings("web.request-training", string.Empty);
         MainLogoURL = GetAppSettings("web.logo.main", string.Empty);
         MainLogoMailTmplURL = GetAppSettings("web.logo.mail.tmpl", string.Empty);
@@ -146,11 +151,12 @@ public class SetupInfo
         AvailableFileSize = GetAppSettings("web:available-file-size", 100L * 1024L * 1024L);
         AvailableFileSize = GetAppSettings("web.available-file-size", 100L * 1024L * 1024L);
 
-        TeamlabSiteRedirect = GetAppSettings("web.teamlab-site", string.Empty);
+        TeamlabSiteRedirect = GetAppSettings("web:teamlab-site", string.Empty);
         ChunkUploadSize = GetAppSettings("files:uploader:chunk-size", 10 * 1024 * 1024);
         ProviderMaxUploadSize = GetAppSettings("files:provider:max-upload-size", 1024L * 1024L * 1024L);
         ThirdPartyAuthEnabled = string.Equals(GetAppSettings("web:thirdparty-auth", "true"), "true");
         NoTenantRedirectURL = GetAppSettings("web.notenant-url", "");
+        LegalTerms = GetAppSettings("web:legalterms", "");
 
         NotifyAddress = GetAppSettings("web.promo-url", string.Empty);
         TipsAddress = GetAppSettings("web.promo-tips-url", string.Empty);
@@ -163,9 +169,9 @@ public class SetupInfo
         SalesEmail = GetAppSettings("web.payment.email", "sales@onlyoffice.com");
         _webAutotestSecretEmail = (configuration["web:autotest:secret-email"] ?? "").Trim();
 
-        RecaptchaPublicKey = GetAppSettings("web.recaptcha.public-key", null);
-        RecaptchaPrivateKey = GetAppSettings("web.recaptcha.private-key", "");
-        RecaptchaVerifyUrl = GetAppSettings("web.recaptcha.verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
+        RecaptchaPublicKey = GetAppSettings("web:recaptcha:public-key", null);
+        RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
+        RecaptchaVerifyUrl = GetAppSettings("web:recaptcha:verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
 
         _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new char[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
@@ -173,8 +179,8 @@ public class SetupInfo
         ControlPanelUrl = GetAppSettings("web:controlpanel:url", "");
         FontOpenSansUrl = GetAppSettings("web.font.opensans.url", "");
         StartProductList = GetAppSettings("web.start.product.list", "");
-        SsoSamlLoginUrl = GetAppSettings("web.sso.saml.login.url", "");
-        SsoSamlLogoutUrl = GetAppSettings("web.sso.saml.logout.url", "");
+        SsoSamlLoginUrl = GetAppSettings("web:sso:saml:login:url", "");
+        SsoSamlLogoutUrl = GetAppSettings("web:sso:saml:logout:url", "");
 
         _hideSettings = GetAppSettings("web.hide-settings", string.Empty).Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -201,12 +207,12 @@ public class SetupInfo
         return _hideSettings == null || !_hideSettings.Contains(settings, StringComparer.CurrentCultureIgnoreCase);
     }
 
-    public long MaxChunkedUploadSize(TenantManager tenantManager, MaxTotalSizeStatistic maxTotalSizeStatistic)
+    public async Task<long> MaxChunkedUploadSize(TenantManager tenantManager, MaxTotalSizeStatistic maxTotalSizeStatistic)
     {
-        var diskQuota = tenantManager.GetCurrentTenantQuota();
+        var diskQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         if (diskQuota != null)
         {
-            var usedSize = maxTotalSizeStatistic.GetValue().Result;
+            var usedSize = await maxTotalSizeStatistic.GetValueAsync();
             var freeSize = Math.Max(diskQuota.MaxTotalSize - usedSize, 0);
             return Math.Min(freeSize, diskQuota.MaxFileSize);
         }

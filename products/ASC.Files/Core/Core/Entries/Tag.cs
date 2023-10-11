@@ -39,10 +39,10 @@ public enum TagType
     Template = 32,
     Custom = 64,
     Pin = 128,
+    Origin = 256
 }
 
-[Serializable]
-[DebuggerDisplay("{TagName} ({Id}) entry {EntryType} ({EntryId})")]
+[DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
 public sealed class Tag : IMapFrom<DbFilesTag>
 {
     public string Name { get; set; }
@@ -112,6 +112,15 @@ public sealed class Tag : IMapFrom<DbFilesTag>
     public static Tag Pin<T>(Guid owner, FileEntry<T> entry)
     {
         return new Tag("pin", TagType.Pin, owner, 0).AddEntry(entry);
+    }
+
+    public static Tag Origin<T>(T entryId, FileEntryType type, T originId, Guid owner)
+    {
+        return new Tag(originId.ToString(), TagType.Origin, owner, 0)
+        {
+            EntryId = entryId,
+            EntryType = type
+        };
     }
 
     public override bool Equals(object obj)

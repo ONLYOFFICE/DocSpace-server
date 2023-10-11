@@ -49,7 +49,7 @@ public class UsersInRoomStatistic : ITenantQuotaFeatureStat<UsersInRoomFeature, 
         _serviceProvider = serviceProvider;
     }
 
-    public Task<int> GetValue()
+    public Task<int> GetValueAsync()
     {
         return Task.FromResult(0);
     }
@@ -65,6 +65,6 @@ public class UsersInRoomStatistic : ITenantQuotaFeatureStat<UsersInRoomFeature, 
             return 0;
         }
 
-        return await securityDao.GetPureShareRecordsAsync(folder).CountAsync();
+        return await securityDao.GetPureSharesCountAsync(folder, ShareFilterType.User, null);
     }
 }

@@ -28,28 +28,43 @@
 
 namespace ASC.Web.Core.Quota;
 
-public class CountRoomAdminChecker : TenantQuotaFeatureCheckerCount<CountRoomAdminFeature>
+public class CountPaidUserChecker : TenantQuotaFeatureCheckerCount<CountPaidUserFeature>
 {
+    private readonly ITariffService _tariffService;
+
     public override string Exception => Resource.TariffsFeature_manager_exception;
 
-    public CountRoomAdminChecker(ITenantQuotaFeatureStat<CountRoomAdminFeature, int> tenantQuotaFeatureStatistic, TenantManager tenantManager) : base(tenantQuotaFeatureStatistic, tenantManager)
+    public CountPaidUserChecker(ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic, TenantManager tenantManager, ITariffService tariffService) : base(tenantQuotaFeatureStatistic, tenantManager)
     {
+        _tariffService = tariffService;
     }
 
+    public override async Task CheckAddAsync(int tenantId, int newValue)
+    {
+        if ((await _tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
+        {
+            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "paid users");
+        }
+
+        await base.CheckAddAsync(tenantId, newValue);
+    }
 }
 
-public class CountRoomAdminStatistic : ITenantQuotaFeatureStat<CountRoomAdminFeature, int>
+public class CountPaidUserStatistic : ITenantQuotaFeatureStat<CountPaidUserFeature, int>
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public CountRoomAdminStatistic(IServiceProvider serviceProvider)
+    public CountPaidUserStatistic(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public Task<int> GetValue()
+    public async Task<int> GetValueAsync()
     {
-        var _userManager = _serviceProvider.GetService<UserManager>();
-        return Task.FromResult(_userManager.GetUsersByGroup(ASC.Core.Users.Constants.GroupManager.ID).Length);
+        var userManager = _serviceProvider.GetService<UserManager>();
+        var adminsCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupManager.ID)).Length;
+        var collaboratorsCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupCollaborator.ID)).Length;
+
+        return adminsCount + collaboratorsCount;
     }
 }

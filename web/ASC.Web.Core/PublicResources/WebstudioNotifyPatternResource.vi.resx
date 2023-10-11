@@ -58,54 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ActionCreateBlog" xml:space="preserve">
-    <value>Blog đã được tạo lúc</value>
-  </data>
-  <data name="ActionCreateBookmark" xml:space="preserve">
-    <value>Bookmark được tạo lúc</value>
-  </data>
-  <data name="ActionCreateCase" xml:space="preserve">
-    <value>Trường hợp CRM đã được tạo lúc</value>
-  </data>
-  <data name="ActionCreateComment" xml:space="preserve">
-    <value>Bình luận được thêm lúc</value>
-  </data>
-  <data name="ActionCreateContact" xml:space="preserve">
-    <value>Liên hệ CRM đã được tạo lúc</value>
-  </data>
-  <data name="ActionCreateDeal" xml:space="preserve">
-    <value>Cơ hội CRM đã được tạo lúc</value>
-  </data>
-  <data name="ActionCreateDiscussion" xml:space="preserve">
-    <value>Thảo luận đã được tạo tại</value>
-  </data>
-  <data name="ActionCreateEvent" xml:space="preserve">
-    <value>Sự kiện đã được tạo tại</value>
-  </data>
-  <data name="ActionCreateFile" xml:space="preserve">
-    <value>Tài liệu đã được tạo/đăng tải lên tại</value>
-  </data>
-  <data name="ActionCreateFolder" xml:space="preserve">
-    <value>Thư mục đã được tạo tại</value>
-  </data>
-  <data name="ActionCreateForum" xml:space="preserve">
-    <value>Diễn đàn được tạo tại</value>
-  </data>
-  <data name="ActionCreateForumPoll" xml:space="preserve">
-    <value>Thăm dò ý kiến đã được tạo tại</value>
-  </data>
-  <data name="ActionCreateForumPost" xml:space="preserve">
-    <value>Bài viết đã được tạo lúc</value>
-  </data>
-  <data name="ActionCreateMilestone" xml:space="preserve">
-    <value>Mốc sự kiện đã được tạo tại</value>
-  </data>
-  <data name="ActionCreateProject" xml:space="preserve">
-    <value>Dự án được tạo tại</value>
-  </data>
-  <data name="ActionCreateTask" xml:space="preserve">
-    <value>Nhiệm vụ được tạo tại</value>
-  </data>
   <data name="ButtonAccessControlPanel" xml:space="preserve">
     <value>Truy cập Control Panel</value>
   </data>
@@ -127,9 +79,6 @@
   <data name="ButtonSelectPricingPlans" xml:space="preserve">
     <value>Chọn Gói dịch vụ ngay bây giờ</value>
   </data>
-  <data name="LinkLearnMore" xml:space="preserve">
-    <value>Tìm hiểu thêm &gt;&gt;</value>
-  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Kích hoạt email của bạn cho cổng "${__VirtualRootPath}":"$InviteLink".
 
@@ -148,7 +97,7 @@ Thân gửi $OwnerName,
 
 Một file sao lưu chứa dữ liệu từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn đã được tạo.
 
-Để tìm hiểu thêm về quy trình sao lưu, vui lòng tham khảo hướng dẫn người dùng "Sao lưu dữ liệu":"http://helpcenter.onlyoffice.com/tipstricks/data-backup-restore.aspx" của chúng tôi.
+Để tìm hiểu thêm về quy trình sao lưu, vui lòng tham khảo hướng dẫn người dùng "Sao lưu dữ liệu":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" của chúng tôi.
 
 
 Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support.onlyoffice.com":"http://support.onlyoffice.com"
@@ -162,7 +111,6 @@ ONLYOFFICE™ Support Team
 
 "$__AuthorName":"$__AuthorUrl" đã tham gia cổng thông tin của bạn tại "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-
 ^Bạn nhận được email này vì bạn là quản trị viên của cổng "${__VirtualRootPath}":"${__VirtualRootPath}". Nếu bạn không muốn nhận thông báo về người dùng mới, vui lòng điều chỉnh "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^
 
 h1.Yêu cầu thay đổi mật khẩu cho cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -171,7 +119,7 @@ h1.Yêu cầu thay đổi mật khẩu cho cổng "${__VirtualRootPath}":"${__Vi
 
 Vui lòng truy cập liên kết dưới đây để thay đổi mật khẩu của bạn:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi mật khẩu trong khoảng thời gian đó.
 
@@ -184,7 +132,7 @@ Bạn đã yêu cầu thay đổi điện thoại di động được dùng đ�
 
 Vui lòng truy cập liên kết dưới đây để thay đổi điện thoại di động của bạn:
 
-$GreenButton
+$OrangeButton
 
 Nếu bạn không muốn thay đổi điện thoại di động hoặc nhận được email này do nhầm lẫn, vui lòng bỏ qua nó hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu chi tiết.</value>
   </data>
@@ -197,7 +145,7 @@ Thân gửi $OwnerName,
 
 Vui lòng truy cập liên kết dưới đây để xác nhận hoạt động:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi người sở hữu cổng thông tin trong khoảng thời gian đó.</value>
   </data>
@@ -210,10 +158,94 @@ Thân gửi $OwnerName,
 
 Vui lòng truy cập liên kết dưới đây để xác nhận hoạt động:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi địa chỉ cổng thông tin trong khoảng thời gian đó.</value>
   </data>
+  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>Xin chào, $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>Xin chào, $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>Xin chào, $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+ </data>
+  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
+    <value>Xin chào, $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+ </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Tin nhắn từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -230,7 +262,7 @@ Bạn đã yêu cầu tham gia cổng "${__VirtualRootPath}":"$InviteLink" tại
 
 Để chấp nhận lời mời hãy nhập tên và mật khẩu của bạn vào liên kết sau:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có giá trị trong 48 giờ. Vui lòng hoàn tất thao tác này trong khoảng thời gian đó.</value>
   </data>
@@ -282,7 +314,7 @@ Thân gửi $OwnerName,
 
 Bạn đã yêu cầu tạm dừng hoạt động cổng "${__VirtualRootPath}":"${__VirtualRootPath}". Vui lòng truy cập liên kết dưới đây để xác nhận hoạt động:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình dừng hoạt động cổng thông tin trong khoảng thời gian đó.
 
@@ -310,7 +342,7 @@ Trước khi xóa cổng thông tin này, hãy đảm bảo rằng thanh toán t
 
 Nếu bạn vẫn muốn xoá cổng "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn, vui lòng truy cập liên kết bên dưới để xác nhận thao tác:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình xóa cổng thông tin trong khoảng thời gian đó.
 
@@ -327,7 +359,7 @@ Thân gửi $UserDisplayName,
 
 Địa chỉ cổng thông tin $PortalUrl của bạn đã được thay đổi sang địa chỉ mới "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-*Lưu ý*: Hiện tại sẽ không thể truy cập vào tất cả các liên kết tài liệu đã chia sẻ cũng như các thiết lập DNS và tùy chọn đăng nhập một lần sẽ ngừng hoạt động cho đến khi bạn thay đổi chúng. Các liên kết iCal của bên thứ ba được thêm vào lịch của bạn cũng sẽ ngừng cập nhật cho đến khi bạn tải lại chúng.</value>
+*Lưu ý*: Thiết lập DNS và tùy chọn đăng nhập một lần sẽ ngừng hoạt động cho đến khi bạn thay đổi chúng.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Xóa hồ sơ khỏi cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -336,7 +368,7 @@ Bạn đã yêu cầu xóa vĩnh viễn hồ sơ của bạn khỏi cổng "${__
 
 Nếu bạn vẫn muốn xóa hồ sơ của mình, vui lòng truy cập liên kết dưới đây để xác nhận hoạt động:
 
-$GreenButton
+$OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình xóa hồ sơ trong khoảng thời gian đó.</value>
   </data>
@@ -368,7 +400,7 @@ h3.Chức vụ
 $Position
 
 h3.Email
-"$UserEmail":"mailto:$UserEmail"
+$UserEmailailto:$UserEmail"
 
 h3.Điện thoại
 $Phone
@@ -377,7 +409,16 @@ h3.Website của Công ty
 $Website
 
 h3.Tên Công ty
-$CompanyTitle</value>
+$CompanyTitle
+
+h3.Quy mô công ty
+$CompanySize
+
+h3.Yêu cầu nội dung
+$Body
+
+h3.Địa chỉ cổng
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
   <data name="pattern_restore_started" xml:space="preserve">
     <value>h1.Đã bắt đầu khôi phục cổng
@@ -403,24 +444,12 @@ ONLYOFFICE™ Support Team
 ^Nếu bạn không muốn nhận thông báo về cập nhật hồ sơ, vui lòng điều chỉnh "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
-    <value>h1.Có gì mới trên cổng "${__VirtualRootPath}":"${__VirtualRootPath}" vào ngày $Date
+    <value>h1.Đây là những điều mới trong DocSpace của bạn vào $Date
 
 #foreach($activity in $Activities)
+$activity
 
-h2.$activity.Key
-
-#foreach($whatsNewActivity in $activity.Value)
-#foreach($b in $whatsNewActivity.BreadCrumbs) h3.$b
-#end "$whatsNewActivity.Title":"$whatsNewActivity.URL"
-*Tác giả*: "$whatsNewActivity.UserName":"$whatsNewActivity.UserAbsoluteURL", $whatsNewActivity.Action: $whatsNewActivity.Date.ToShortTimeString()
-
-
-#end
-
-#end
-
-
-^Nếu bạn không muốn nhận thông báo về các sự kiện mới trên cổng "${__VirtualRootPath}":"${__VirtualRootPath}", vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
+#end</value>
   </data>
   <data name="pattern_smtp_test" xml:space="preserve">
     <value>Tin nhắn SMTP thử nghiệm
@@ -456,6 +485,18 @@ Trân trọng,
   </data>
   <data name="subject_dns_change" xml:space="preserve">
     <value>${LetterLogoText}. Thay đổi địa chỉ cổng</value>
+  </data>
+  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
   </data>
   <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Thông báo của người dùng đến các quản trị viên</value>
@@ -503,15 +544,1275 @@ Trân trọng,
     <value>${LetterLogoText}. Đã bắt đầu khôi phục</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
-    <value>${__ VirtualRootPath} thông báo thay đổi hồ sơ cổng thông tin</value>
-  </data>
-  <data name="subject_send_whats_new" xml:space="preserve">
-    <value>Có gì mới trên cổng thông tin của bạn vào ngày $Date</value>
+    <value>${__VirtualRootPath} thông báo thay đổi hồ sơ cổng thông tin</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>Tin nhắn SMTP thử nghiệm</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Đã thêm người dùng mới vào cổng ${LetterLogoText}</value>
+  </data>
+  <data name="ActionFileCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một tài liệu mới: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionNewComment" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã thêm nhận xét mới vào phiên bản tài liệu: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileUploaded" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionRoomRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã đổi tên phòng: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tạo một phòng mới: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã bị xóa khỏi phòng: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEdited" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã chỉnh sửa tài liệu: &lt;a href={1}&gt;{2}&lt;/a&gt; trong phòng: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionRoomRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã xóa phòng: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserAddedToRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã được thêm vào phòng: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionRoomArchived" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã chuyển phòng: &lt;a href={1}&gt;{2}&lt;/a&gt; đến sao lưu - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã được chỉ định vai trò của &lt;b&gt;{1}&lt;/b&gt; trong phòng: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserCreated" xml:space="preserve">
+    <value>Đã thêm người dùng DocSpace mới: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUsersUpdatedType" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã thay đổi mức truy cập của người dùng &lt;b&gt;{1}&lt;/b&gt; thành &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserUpdated" xml:space="preserve">
+    <value>Người dùng DocSpace đã được cập nhật: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="AcceptDocSpace" xml:space="preserve">
+    <value>CHẤP NHẬN</value>
+  </data>
+  <data name="ButtonAccept" xml:space="preserve">
+    <value>Chấp nhận</value>
+  </data>
+  <data name="ButtonConfirmEmail" xml:space="preserve">
+    <value>XÁC NHẬN</value>
+  </data>
+  <data name="ButtonConfirm" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+    <value>Cộng tác trong DocSpace</value>
+  </data>
+  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+    <value>Xác nhận Lời mời DocSpace</value>
+  </data>
+  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <value>Xác nhận Phòng Mời</value>
+  </data>
+  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <value>Truy cập Phần Thanh toán</value>
+  </data>
+  <data name="pattern_change_password_v115" xml:space="preserve">
+    <value>Bạn muốn thay đổi mật khẩu cho tài khoản ONLYOFFICE của mình? Hãy nhấp vào nút bên dưới để xác nhận.
+
+$OrangeButton
+
+Liên kết có hiệu lực trong 7 ngày.
+
+Bạn không muốn thay đổi mật khẩu? Xin hãy bỏ qua tin nhắn này</value>
+  </data>
+  <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 7 ngày):
+
+$OrangeButton
+
+Tận hưởng một cách cộng tác tài liệu mới!
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 7 ngày):
+
+$OrangeButton
+
+Tận hưởng một cách cộng tác tài liệu mới!
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 7 ngày):
+
+$OrangeButton
+
+Gói dịch vụ hiện tại của bạn là STARTUP. Nó hoàn toàn miễn phí và bao gồm:
+
+* 1 quản trị viên, 2 người dùng cấp cao
+* Lên đến 12 phòng
+* Không giới hạn số lượng người dùng trong mỗi phòng
+* Dung lượng lưu trữ 2 GB
+
+Tận hưởng một cách cộng tác tài liệu mới!
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 7 ngày):
+
+$OrangeButton
+
+Tận hưởng một cách cộng tác tài liệu mới!
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
+
+# Để làm việc trên các tài liệu ngoại tuyến trên Windows, Linux và Mac, hãy tải "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx".
+
+#Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" hay "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
+
+*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+
+*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com": "http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
+
+*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+
+*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
+
+*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+
+*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
+
+*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+
+*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
+
+* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+
+* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+
+* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+
+Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
+
+Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
+
+_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
+
+* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+
+* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+
+* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+
+Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
+
+Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
+
+_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
+
+* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+
+* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+
+* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+
+Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
+
+Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
+
+_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
+
+* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+
+* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+
+* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+
+Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
+
+Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
+
+_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_user_activation_v1" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
+
+* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+
+* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+
+* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+
+* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+
+$OrangeButton
+
+Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_for_sales_notify" xml:space="preserve">
+    <value>h1.Tin nhắn từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Tên: $UserName
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
+
+# Để làm việc trên các tài liệu ngoại tuyến trên Windows, Linux và Mac, hãy tải "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx".
+
+#Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" hay "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
+
+# Để làm việc trên các tài liệu ngoại tuyến trên Windows, Linux và Mac, hãy tải "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx".
+
+#Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" hay "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_personal_already_exist" xml:space="preserve">
+    <value>Xin chào! 
+Đã có người cố đăng ký tài khoản "ONLYOFFICE Personal":"$PortalUrl" mới bằng email này. Nếu đó là bạn, chúng tôi muốn thông báo cho bạn rằng tài khoản đã tồn tại — hãy chuyển sang ONLYOFFICE Personal và đăng nhập.
+Nếu bạn bị mất mật khẩu, bạn có thể khôi phục nó trên "trang khôi phục mật khẩu":"$LinkToRecovery".
+Nếu bạn không đăng ký một tài khoản mới, có lẽ người khác đã làm điều đó do nhầm lẫn. Trong trường hợp này, vui lòng bỏ qua email này.
+
+Chúc bạn một ngày tốt lành!
+Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="pattern_personal_change_password_v115" xml:space="preserve">
+    <value>Bạn muốn thay đổi mật khẩu cho tài khoản ONLYOFFICE Personal của mình? Hãy nhấp vào nút bên dưới để xác nhận.
+
+$OrangeButton 
+
+Liên kết có hiệu lực trong 7 ngày.
+
+Bạn không muốn thay đổi mật khẩu? Xin hãy bỏ qua tin nhắn này.</value>
+  </data>
+  <data name="pattern_portal_delete_success_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace của bạn đã được hủy kích hoạt thành công. Xin lưu ý rằng tất cả dữ liệu của bạn sẽ bị xóa theo "Chính sách Bảo mật":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
+
+Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng? Xin hãy chia sẻ trải nghiệm của bạn với chúng tôi.
+ 
+$OrangeButton
+
+Cảm ơn và chúc bạn may mắn!
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Hãy điều chỉnh cài đặt bảo mật của ONLYOFFICE DocSpace của bạn để giúp nó an toàn hơn:
+
+* Tăng độ mạnh cho mật khẩu.
+
+* Cho phép xác thực hai yếu tố và Đăng nhập một lần.
+
+* Xác định tên miền thư đáng tin cậy và xác định thời gian cho phiên đăng nhập.
+
+* Hạn chế quyền truy cập từ các địa chỉ IP cụ thể. 
+
+* Cho phép hoặc hạn chế tin nhắn quản trị. 
+
+* Quản lý quyền truy cập của quản trị viên.
+
+* Thực hiện sao lưu dữ liệu.
+
+$OrangeButton
+
+Xin hãy truy cập "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi để tìm hiểu thêm về cách định cấu hình và quản lý ONLYOFFICE DocSpace của bạn. Bạn cũng có thể tham khảo nó khi có câu hỏi về tính năng.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>Bạn chưa vào ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" trong hơn nửa năm. 
+
+Vì bạn đã quyết định không sử dụng nó nữa, ONLYOFFICE DocSpace của bạn và tất cả dữ liệu sẽ bị xóa theo "Chính sách Bảo mật":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
+
+Chúng tôi mong nhận được phản hồi của bạn. Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng ONLYOFFICE DocSpace?
+
+$OrangeButton
+
+Nếu bạn cho rằng đây chỉ là sai sót và muốn tiếp tục sử dụng ONLYOFFICE DocSpace, xin vui lòng liên hệ với "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_docspace_invite" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới cho tài khoản của bạn.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Xin vui lòng lưu ý rằng thời gian ân hạn $PaymentDelay ngày cho ONLYOFFICE DocSpace của bạn đã được kích hoạt.
+
+Hãy đảm bảo thanh toán cho gói đăng ký Business của bạn trước khi hết thời gian ân hạn. Như vậy, bạn sẽ có thể tiếp tục sử dụng tất cả các quyền lợi của ONLYOFFICE DocSpace của mình.
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Xin vui lòng lưu ý rằng gói đăng ký ONLYOFFICE DocSpace của bạn sẽ hết hạn sau ba ngày. Sau đó, thời gian ân hạn của $PaymentDelay ngày sẽ được kích hoạt.
+
+Chúng tôi mong bạn thanh toán gói dịch vụ Business của bạn ngay và tiếp tục sử dụng tất cả các quyền lợi của ONLYOFFICE DocSpace.
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Xin vui lòng lưu ý rằng thời gian ân hạn $PaymentDelay ngày cho ONLYOFFICE DocSpace của bạn đã hết.
+
+Hãy đảm bảo thanh toán cho gói dịch vụ Business của bạn càng sớm càng tốt. Như vậy, bạn sẽ có thể sử dụng tất cả các quyền lợi của ONLYOFFICE DocSpace của mình như trước đây.
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Xin vui lòng lưu ý rằng thời gian ân hạn $PaymentDelay ngày cho ONLYOFFICE DocSpace của bạn sẽ hết hạn vào ngày mai.
+
+Hãy đảm bảo thanh toán cho gói dịch vụ Business của bạn ngay hôm nay. Như vậy, bạn sẽ có thể tiếp tục sử dụng tất cả các quyền lợi của ONLYOFFICE DocSpace của mình.
+
+$OrangeButton
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_saas_room_invite" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia phòng $Message tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới cho tài khoản của bạn.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>Có gì mới trên cổng thông tin của bạn vào ngày $Date</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>Xác nhận thay đổi email của bạn</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>Xác nhận thay đổi mật khẩu của bạn</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}. Thông báo Bảo mật</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>Tham gia ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>Tham gia ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>Tham gia ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>Tham gia ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>Tham gia ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>Tham gia ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
+  </data>
+  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
+    <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
+  </data>
+  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+  </data>
+  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+  </data>
+  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+  </data>
+  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+  </data>
+  <data name="ButtonChangeEmail" xml:space="preserve">
+    <value>Thay đổi địa chỉ email</value>
+  </data>
+  <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
+    <value>Xác nhận cập nhật chủ sở hữu cổng thông tin</value>
+  </data>
+  <data name="ButtonActivateEmail" xml:space="preserve">
+    <value>Nhấp vào đây để kích hoạt địa chỉ email của bạn</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace đã bị hủy kích hoạt</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>ONLYOFFICE DocSpace của bạn sẽ bị xóa</value>
+  </data>
+  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
+    <value>Xác nhận thay đổi địa chỉ cổng thông tin</value>
+  </data>
+  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <value>Xác nhận chấm dứt tài khoản</value>
+  </data>
+  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <value>Vô hiệu hóa cổng thông tin</value>
+  </data>
+  <data name="ButtonDeletePortal" xml:space="preserve">
+    <value>Xóa cổng thông tin</value>
+  </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Nhấp vào đây để tham gia cổng thông tin</value>
+  </data>
+  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <value>Để Lại Phản Hồi</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace của bạn được kích hoạt</value>
+  </data>
+  <data name="ButtonChangePassword" xml:space="preserve">
+    <value>Thay đổi mật khẩu</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Đăng ký gói dịch vụ ONLYOFFICE DocSpace của bạn sắp hết hạn</value>
+  </data>
+  <data name="ButtonChangePhone" xml:space="preserve">
+    <value>Thay đổi số điện thoại di động</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Xóa hồ sơ</value>
+  </data>
+  <data name="ButtonRenewNow" xml:space="preserve">
+    <value>Gia hạn ngay</value>
+  </data>
+  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <value>Bắt đầu dùng thử miễn phí</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>Định cấu hình ONLYOFFICE DocSpace của bạn</value>
+  </data>
+  <data name="ButtonUseDiscount" xml:space="preserve">
+    <value>Sử dụng giảm giá</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace của bạn đã hết hạn</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Thời gian ân hạn cho ONLYOFFICE DocSpace của bạn sẽ hết hạn vào ngày mai</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>Bạn được mời tham gia ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Quá trình mã hóa đã hoàn tất</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Quá trình mã hóa đã bắt đầu</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Quá trình mã hóa không thành công</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Quá trình giải mã đã hoàn tất</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Quá trình giải mã đã bắt đầu</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Quá trình giải mã không thành công</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>Tham gia ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>Tham gia ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>Tham gia ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_personal_already_exist" xml:space="preserve">
+    <value>Đăng nhập vào tài khoản ONLYOFFICE Cá nhân của bạn</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Xóa dữ liệu người dùng không thành công</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Phân chia lại dữ liệu người dùng không thành công</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>Người dùng đã xóa hồ sơ của mình</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}. Tạo hộp thư</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}. Thay đổi mật khẩu hộp thư</value>
+  </data>
+  <data name="subject_personal_profile_delete" xml:space="preserve">
+    <value>Chấm dứt tài khoản ONLYOFFICE Cá nhân</value>
+  </data>
+  <data name="subject_personal_confirmation" xml:space="preserve">
+    <value>ONLYOFFICE Cá nhân. Vui lòng kích hoạt địa chỉ email của bạn</value>
+  </data>
+  <data name="subject_personal_after_registration1" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE Cá nhân</value>
+  </data>
+  <data name="subject_personal_activate" xml:space="preserve">
+    <value>Chào mừng bạn đến với ONLYOFFICE dành cho cá nhân!</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>Tham gia ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Đã hoàn thành xóa dữ liệu người dùng</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>Yêu cầu phòng kinh doanh</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>Khám phá gói dịch vụ trả phí của ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>Khám phá gói dịch vụ trả phí của ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>Khám phá gói dịch vụ trả phí của ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>Khám phá gói dịch vụ trả phí của ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="pattern_mailbox_created" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Quản trị viên đã tạo một hộp thư &lt;b&gt;$Address&lt;/b&gt; mới cho bạn tại cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Sử dụng các cài đặt sau cho các email khách khác:
+Đăng nhập: &lt;b&gt;$Login&lt;/b&gt;
+Mật khẩu: "&lt;b&gt;đặt mật khẩu&lt;/b&gt;":"$MyStaffLink"
+
+Thư Đến (IMAP): 
+Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
+Cổng thông tin: &lt;b&gt;$ImapPort&lt;/b&gt;
+SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+
+Thư Đi (SMTP): 
+Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
+Cổng thông tin: &lt;b&gt;$SmtpPort&lt;/b&gt;
+SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+Yêu cầu xác thực: &lt;b&gt;Có&lt;/b&gt;
+
+Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
+  </data>
+  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Mật khẩu cho hộp thư &lt;b&gt;$Address&lt;/b&gt; đã được thay đổi.
+
+Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
+  </data>
+  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Quản trị viên đã tạo một hộp thư &lt;b&gt;$Address&lt;/b&gt; mới cho bạn tại cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
+  </data>
+  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <value>h1.Di chuyển cổng thông tin
+h1."$PortalUrl":"$PortalUrl"
+
+Cổng thông tin của bạn đã được di chuyển đến một miền mới. Xin vui lòng khôi phục quyền truy cập của bạn vào cổng thông tin bằng cách đặt mật khẩu sẽ được sử dụng để đăng nhập.
+
+Vui lòng làm theo các liên kết dưới đây để thiết lập mật khẩu của bạn cho tài khoản:
+$OrangeButton
+
+*Lưu ý*: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn tất quá trình khôi phục quyền truy cập trong khoảng thời gian đó.
+
+Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin "$PortalUrl":"$PortalUrl" của bạn để tìm hiểu thông tin.</value>
+  </data>
+  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}"  với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+"$ActivateUrl":"$ActivateUrl"
+
+Liên kết chỉ có hiệu lực trong 7 ngày.
+
+Bạn sẽ nhận được thêm nhiều mẹo về cách sử dụng văn phòng web của bạn. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.</value>
+  </data>
+  <data name="pattern_personal_after_registration1" xml:space="preserve">
+    <value>h1.Chào mừng bạn đến với ONLYOFFICE Cá nhân
+
+Bạn vừa tạo văn phòng cá nhân của mình trên đám mây.
+
+h3.Đó là một không gian làm việc ảo, nơi bạn có thể chỉnh sửa và lưu trữ tài liệu, làm việc với chúng từ bất cứ nơi nào cung cấp quyền truy cập cho bạn bè hoặc đồng nghiệp của bạn.
+
+h3.Để bắt đầu nhanh, đây là những gì bạn có thể làm trong ONLYOFFICE:
+
+- Tạo, xem và chỉnh sửa tài liệu văn bản, bảng tính, bản trình chiếu.
+
+- Làm việc với tất cả các định dạng phổ biến. Khả năng tương thích cao nhất với các tập tin MS Office.
+
+- Tạo và đồng chỉnh sửa "biểu mẫu sẵn sàng để điền":"https://www.onlyoffice.com/form-creator.aspx".
+
+- Chia sẻ và cộng tác trên các tài liệu trực tuyến.
+
+- Sử dụng các plugin khác nhau để áp dụng các tính năng bổ sung.
+
+- Dễ dàng truy cập đám mây Cá nhân của bạn thông qua "Tiện ích mở rộng của Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+
+Bạn cũng có thể chỉnh sửa tài liệu ngoại tuyến với "trình chỉnh sửa cho máy tính để bàn":"https://www.onlyoffice.com/download-desktop.aspx" miễn phí của chúng tôi hoặc nhận bộ chỉnh sửa cho thiết bị "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" hoặc "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" của bạn.
+
+Trân trọng,
+Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="pattern_personal_change_email_v115" xml:space="preserve">
+    <value>Bạn muốn thay đổi email trên tài khoản ONLYOFFICE của mình?
+
+Hãy nhấp vào nút bên dưới và đăng nhập* vào đám mây của bạn.
+
+$OrangeButton
+
+Liên kết có hiệu lực trong 7 ngày.
+
+*Nếu bạn không đăng nhập ONLYOFFICE trên trình duyệt này, bạn sẽ cần phải sử dụng email cũ của bạn để xác nhận. 
+
+Bạn không muốn thay đổi email của mình? Xin hãy bỏ qua tin nhắn này.</value>
+  </data>
+  <data name="pattern_personal_confirmation" xml:space="preserve">
+    <value>Xin chào,
+
+Bạn vừa đăng ký một tài khoản tại giải pháp ONLYOFFICE để sử dụng cá nhân. Hãy nhấp vào "đây":"$InviteLink" để xác nhận đăng ký và tạo mật khẩu.
+
+Nếu bạn không thể mở liên kết, vui lòng sao chép "$InviteLink":"$InviteLink" sau và dán nó vào thanh địa chỉ trình duyệt của bạn.
+
+Trân trọng,
+Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="pattern_personal_profile_delete" xml:space="preserve">
+    <value>Bạn đã yêu cầu chấm dứt tài khoản của mình tại personal.onlyoffice.com. Hãy làm theo liên kết để hoàn thành yêu cầu (liên kết hiệu lực trong 7 ngày): 
+
+$OrangeButton
+
+*Lưu ý*: Sau khi xóa, tài khoản của bạn và tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn theo "Chính sách quyền riêng tư":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
+
+"Đọc thêm về việc chấm dứt tài khoản":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+
+Bỏ qua email này nếu bạn không muốn tiếp tục. 
+
+Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi tại "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+
+Trân trọng,
+Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <value>Vô hiệu hóa cổng [${__VirtualRootPath}](${__VirtualRootPath})
+
+Kính gửi $OwnerName,
+
+Bạn đã yêu cầu tạm thời vô hiệu hóa cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) của mình. Vui lòng làm theo liên kết dưới đây để xác nhận thao tác:
+
+$OrangeButton
+
+_Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn tất quá trình vô hiệu hóa cổng thông tin trong khoảng thời gian đó.
+
+Bạn có thể kích hoạt lại cổng thông tin của mình bất cứ lúc nào bằng cách nhấp vào liên kết sau:
+[Kích hoạt lại cổng thông tin]($ ActivateUrl) (liên kết này không có giới hạn thời gian)
+
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại  [support@onlyoffice.com](mailto:support@onlyoffice.com)
+
+Trân trọng,
+Nhóm hỗ trợ ONLYOFFICE™
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>Xóa cổng thong tin [${__VirtualRootPath}](${__VirtualRootPath})
+
+Kính gửi $OwnerName,
+
+Bạn đã yêu cầu xóa vĩnh viễn cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) của mình.
+
+_Quan trọng! Tất cả dữ liệu được lưu trữ trên cổng thông tin của bạn, cũng như thông tin đăng ký của bạn sẽ bị mất và không thể được phục hồi._
+
+#if($AutoRenew == "True")
+Trước khi bạn xóa cổng thông tin, xin vui lòng đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong [tài khoản Avangate] của mình ](https://secure.avangate.com/myaccount/").
+#end
+
+Nếu bạn vẫn muốn xóa cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) của mình, vui lòng nhấp vào liên kết bên dưới để xác nhận thao tác:
+
+$OrangeButton
+
+_Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn tất quá trình xóa cổng thông tin trong khoảng thời gian đó.
+
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại  [support@onlyoffice.com](mailto:support@onlyoffice.com)
+
+Trân trọng,
+Nhóm hỗ trợ ONLYOFFICE™
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>Người dùng "$FromUserName":"$FromUserLink" đã xóa hồ sơ của mình và hồ sơ này hiện đã bị chặn. Tất cả các tập tin của người dùng vẫn được phân cho anh/cô ấy và chiếm không gian đĩa. 
+
+Bạn có thể phân lại tài liệu của người dùng này được chia sẻ với những người khác cho một người dùng đang hoạt động khác hoặc xóa chúng để giải phóng dung lượng ổ đĩa cổng thông tin.
+
+Vui lòng truy cập hồ sơ người dùng bằng "liên kết này":"$FromUserLink" để phân lại tài liệu cho người dùng khác hoặc xóa dữ liệu.</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>Hồ sơ của bạn tại [${__VirtualRootPath}](${__VirtualRootPath}) đã được thay đổi
+
+Kính gửi $UserName,
+
+Thông tin hồ sơ người dùng của bạn tại [${__VirtualRootPath}](${__VirtualRootPath}) đã được thay đổi bởi [$__AuthorName]($__AuthorUrl).
+
+Để xem hồ sơ của bạn, hãy dùng liên kết dưới đây:
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Quá trình phân lại dữ liệu từ người dùng "$FromUserName":"$ FromUserLink" cho người dùng "$ ToUserName":"$ ToUserLink" không thành công.
+
+Thông báo ngoại lệ: $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Quá trình xóa dữ liệu của người dùng "$FromUserName":"$ FromUserLink" đã được hoàn thành.
+
+Việc xóa dữ liệu cá nhân được phép cho các tính năng miễn phí:
+
+# Documents - $DocsSpace
+# CRM - $CrmSpace
+# Mail - $MailSpace
+# Talk - $TalkSpace</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Quá trình xóa dữ liệu cho người dùng "$FromUserName":"$ FromUserLink" không thành công.
+
+Thông báo ngoại lệ: $Message</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.Yêu cầu thuế SAAS cho "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.Tên
+$UserName
+
+h3.Họ
+$UserLastName
+
+h3.Chức vụ
+$Position
+
+h3.Email
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Điện thoại
+$Phone
+
+h3.Trang web của công ty
+$Website
+
+h3.Tên Công ty
+$CompanyTitle
+
+h3.Quy mô Công ty
+$CompanySize
+
+h3.Nội dung yêu cầu
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.Khôi phục cổng thông tin
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Cổng thông tin của bạn đã được khôi phục. Để truy cập vào nó, bạn cần phải thiết lập một mật khẩu mới:
+
+$OrangeButton
+
+*Lưu ý*: liên kết này chỉ có giá trị trong 7 ngày. 
+
+Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn để tìm hiểu thông tin.</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>Xin chào! 
+
+Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}"  với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Thỉnh thoảng chúng tôi cũng sẽ gửi cho bạn các mẹo hữu ích và tin tức ONLYOFFICE mới nhất. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.
+
+Trân trọng, 
+Nhóm ONLYOFFICE
+"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>Thông báo thay đổi hồ sơ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) 
+
+[$__AuthorName]($__AuthorUrl) đã thay đổi thông tin hồ sơ của mình tại cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Quá trình giải mã tập tin trên cổng thông tin "${PortalUrl}":"${PortalUrl}" của bạn không thành công.
+
+Không thể giải mã một số tập tin. Xem thêm chi tiết trong "Bảng điều khiển":"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Quá trình giải mã tập tin đã được bắt đầu trên cổng thông tin "${PortalUrl}":"${PortalUrl}" của bạn.
+
+Việc giải mã có thể mất một thời gian, vì vậy cổng thông tin sẽ tạm thời không khả dụng. Ngay sau khi việc giải mã kết thúc, bạn sẽ có thể làm việc lại với dữ liệu của mình.</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Quá trình giải mã tập tin trên cổng thông tin "${PortalUrl}":"${PortalUrl}" của bạn đã được hoàn thành.
+
+Cổng thông tin của bạn đã hoạt động trở lại.</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Quá trình mã hóa tập tin trên cổng thông tin "${PortalUrl}":"${PortalUrl}" đã không thành công.
+
+Không thể mã hóa một số tập tin. Xem thêm chi tiết trong "Bảng điều khiển":"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Quá trình mã hóa tập tin đã được bắt đầu trên cổng thông tin "${PortalUrl}":"${PortalUrl}" của bạn.
+
+Việc mã hóa có thể mất một thời gian, vì vậy cổng thông tin sẽ tạm thời không khả dụng. Ngay sau khi việc mã hóa kết thúc, bạn sẽ có thể làm việc lại với dữ liệu của mình.</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Quá trình mã hóa tập tin trên cổng thông tin "${PortalUrl}":"${PortalUrl}" của bạn đã được hoàn thành.
+
+Cổng thông tin của bạn đã hoạt động trở lại.</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>Người dùng mới được thêm vào cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath})
+[$__ AuthorName]($__ AuthorUrl) đã tham gia cổng thông tin của bạn tại [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>Kính gửi $UserName,
+
+Bạn đã được mời tham gia văn phòng web an toàn và bảo mật của công ty bạn, điều này sẽ tăng cường sự hợp tác của bạn. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}". Bạn có thể cân nhắc việc thêm liên kết này vào dấu trang của bạn, bạn có thể sử dụng nó rất nhiều.
+
+Hãy chấp nhận lời mời bằng cách dùng liên kết bên dưới và sử dụng thông tin đăng nhập và mật khẩu của bạn từ tài khoản công ty để đăng nhập. 
+
+$OrangeButton
+
+Liên kết chỉ có hiệu lực trong 7 ngày.</value>
+  </data>
+  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <value>Tin nhắn từ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath})
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+$__AuthorName đã mời bạn làm người dùng khách của "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Liên kết chỉ có hiệu lực trong 7 ngày.
+
+Bạn sẽ nhận được thêm nhiều mẹo về cách sử dụng văn phòng web của bạn. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.</value>
+  </data>
+  <data name="pattern_personal_activate" xml:space="preserve">
+    <value>Xin chào $UserName!
+Bạn đã đăng ký thành công tại ONLYOFFICE Cá nhân "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Kết nối bộ nhớ đám mây yêu thích của bạn: Dropbox, Google Drive, OneDrive hoặc Box để tạo một không gian làm việc duy nhất giúp các tài liệu của bạn có thể truy cập từ mọi nơi.
+
+Tìm hiểu thêm về ONLYOFFICE Cá nhân trên "blog của chúng tôi":"$TagBlogLink".
+
+Chúng tôi rất vui được phục vụ bạn. Hãy theo dõi!
+
+Trân trọng,
+Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}" với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+$OrangeButton
+
+Liên kết chỉ có hiệu lực trong 7 ngày.
+
+Bạn sẽ nhận được thêm nhiều mẹo về cách sử dụng văn phòng web của bạn. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.</value>
+  </data>
+  <data name="pattern_change_tfa" xml:space="preserve">
+    <value>h1.Thông báo Bảo mật
+
+Cấu hình của ứng dụng xác thực mà bạn sử dụng để vào ${LetterLogoText} cổng thông tin đã được đặt lại.
+
+Vui lòng nhấp vào nút bên dưới để truy cập trang đăng nhập cổng thông tin và định cấu hình ứng dụng xác thực:
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_change_email_v115" xml:space="preserve">
+    <value>Có phải bạn muốn thay đổi email cho tài khoản ${LetterLogoText} của mình?
+
+Hãy nhấp vào nút bên dưới và đăng nhập* vào đám mây của bạn.
+
+$OrangeButton
+
+Liên kết có hiệu lực trong 7 ngày.
+
+*Nếu bạn không đăng nhập ${LetterLogoText} trên trình duyệt này, bạn sẽ cần phải sử dụng email cũ của bạn để xác nhận. Nếu bạn không nhớ nó, hãy liên hệ với quản trị viên cổng thông tin của bạn.
+
+Bạn không muốn thay đổi email của mình? Xin hãy bỏ qua tin nhắn này.</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>Đã tạo bản sao lưu cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) 
+
+Kính gửi $OwnerName,
+
+Tập tin sao lưu chứa dữ liệu từ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) của bạn đã được tạo.
+
+Để tìm hiểu thêm về quy trình sao lưu, xin vui lòng tham khảo hướng dẫn sử dụng [Sao lưu dữ liệu](${__HelpLink}/tipstricks/data-backup-restore.aspx) của chúng tôi.
+
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [support.onlyoffice.com](http://support.onlyoffice.com)
+
+Trân trọng,
+Nhóm hỗ trợ ONLYOFFICE™
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="ButtonChangeTfa" xml:space="preserve">
+    <value>Định cấu hình ứng dụng xác thực</value>
   </data>
 </root>

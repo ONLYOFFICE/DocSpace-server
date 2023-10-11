@@ -37,7 +37,7 @@ public class DnsSettings
     private readonly StudioNotifyService _studioNotifyService;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly MessageService _messageService;
-    private readonly TenantExtra _tenantExtra;
+    private readonly CspSettingsHelper _cspSettingsHelper;
 
     public DnsSettings(
         PermissionContext permissionContext,
@@ -48,7 +48,7 @@ public class DnsSettings
         StudioNotifyService studioNotifyService,
         CommonLinkUtility commonLinkUtility,
         MessageService messageService,
-        TenantExtra tenantExtra)
+        CspSettingsHelper cspSettingsHelper)
     {
         _permissionContext = permissionContext;
         _tenantManager = tenantManager;
@@ -58,10 +58,10 @@ public class DnsSettings
         _studioNotifyService = studioNotifyService;
         _commonLinkUtility = commonLinkUtility;
         _messageService = messageService;
-        _tenantExtra = tenantExtra;
+        _cspSettingsHelper = cspSettingsHelper;
     }
 
-    public string SaveDnsSettings(string dnsName, bool enableDns)
+    public async Task<string> SaveDnsSettingsAsync(string dnsName, bool enableDns)
     {
         try
         {
@@ -70,21 +70,25 @@ public class DnsSettings
                 throw new Exception(Resource.ErrorNotAllowedOption);
             }
 
-            _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+            await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
 
-            var tenant = _tenantManager.GetCurrentTenant();
+            var tenant = await _tenantManager.GetCurrentTenantAsync();
 
             if (!enableDns || string.IsNullOrEmpty(dnsName))
             {
                 dnsName = null;
             }
 
-            if (dnsName == null || CheckCustomDomain(dnsName))
+            if (dnsName == null || await CheckCustomDomainAsync(dnsName))
             {
                 if (_coreBaseSettings.Standalone)
                 {
+                    var oldDomain = tenant.GetTenantDomain(_coreSettings);
+
                     tenant.MappedDomain = dnsName;
-                    _tenantManager.SaveTenant(tenant);
+                    await _tenantManager.SaveTenantAsync(tenant);
+
+                    await _cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(_coreSettings));
                     return null;
                 }
 
@@ -92,10 +96,10 @@ public class DnsSettings
                 {
                     var portalAddress = $"http://{tenant.Alias ?? string.Empty}.{_coreSettings.BaseDomain}";
 
-                    var u = _userManager.GetUsers(tenant.OwnerId);
-                    _studioNotifyService.SendMsgDnsChange(tenant, GenerateDnsChangeConfirmUrl(u.Email, dnsName, tenant.Alias, ConfirmType.DnsChange), portalAddress, dnsName);
+                    var u = await _userManager.GetUsersAsync(tenant.OwnerId);
+                    await _studioNotifyService.SendMsgDnsChangeAsync(tenant, await GenerateDnsChangeConfirmUrlAsync(u.Email, dnsName, tenant.Alias, ConfirmType.DnsChange), portalAddress, dnsName);
 
-                    _messageService.Send(MessageAction.DnsSettingsUpdated);
+                    await _messageService.SendAsync(MessageAction.DnsSettingsUpdated);
                     return string.Format(Resource.DnsChangeMsg, string.Format("<a href=\"mailto:{0}\">{0}</a>", u.Email.HtmlEncode()));
                 }
 
@@ -110,7 +114,7 @@ public class DnsSettings
         }
     }
 
-    private bool CheckCustomDomain(string domain)
+    private async Task<bool> CheckCustomDomainAsync(string domain)
     {
         if (string.IsNullOrEmpty(domain))
         {
@@ -129,7 +133,7 @@ public class DnsSettings
         {
             try
             {
-                _tenantManager.CheckTenantAddress(test.Host);
+                await _tenantManager.CheckTenantAddressAsync(test.Host);
             }
             catch (TenantTooShortException ex)
             {
@@ -150,12 +154,12 @@ public class DnsSettings
         return false;
     }
 
-    private string GenerateDnsChangeConfirmUrl(string email, string dnsName, string tenantAlias, ConfirmType confirmType)
+    private async Task<string> GenerateDnsChangeConfirmUrlAsync(string email, string dnsName, string tenantAlias, ConfirmType confirmType)
     {
         var postfix = string.Join(string.Empty, new[] { dnsName, tenantAlias });
 
         var sb = new StringBuilder();
-        sb.Append(_commonLinkUtility.GetConfirmationEmailUrl(email, confirmType, postfix));
+        sb.Append(await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, confirmType, postfix));
         if (!string.IsNullOrEmpty(dnsName))
         {
             sb.AppendFormat("&dns={0}", dnsName);

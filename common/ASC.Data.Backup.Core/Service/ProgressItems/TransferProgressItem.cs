@@ -50,8 +50,6 @@
 */
 
 
-using ConfigurationProvider = ASC.Data.Backup.Utils.ConfigurationProvider;
-
 namespace ASC.Data.Backup.Services;
 
 [Transient]
@@ -61,23 +59,24 @@ public class TransferProgressItem : BaseBackupProgressItem
     private readonly ILogger<TransferProgressItem> _logger;
     private readonly NotifyHelper _notifyHelper;
     private TransferPortalTask _transferPortalTask;
+    private IConfiguration _configuration;
 
     public TransferProgressItem(
         ILogger<TransferProgressItem> logger,
         IServiceScopeFactory serviceScopeFactory,
-        NotifyHelper notifyHelper) :
+        NotifyHelper notifyHelper,
+        IConfiguration configuration) :
         base(logger, serviceScopeFactory)
     {
         _logger = logger;
         _notifyHelper = notifyHelper;
         BackupProgressItemEnum = BackupProgressItemEnum.Transfer;
+        _configuration = configuration;
     }
 
     public string TargetRegion { get; set; }
     public bool Notify { get; set; }
     public string TempFolder { get; set; }
-    public Dictionary<string, string> ConfigPaths { get; set; }
-    public string CurrentRegion { get; set; }
     public int Limit { get; set; }
 
     public void Init(
@@ -85,16 +84,12 @@ public class TransferProgressItem : BaseBackupProgressItem
         int tenantId,
         string tempFolder,
         int limit,
-        bool notify,
-        string currentRegion,
-        Dictionary<string, string> configPaths)
+        bool notify)
     {
         TenantId = tenantId;
         TargetRegion = targetRegion;
         Notify = notify;
         TempFolder = tempFolder;
-        ConfigPaths = configPaths;
-        CurrentRegion = currentRegion;
         Limit = limit;
 
     }
@@ -102,19 +97,19 @@ public class TransferProgressItem : BaseBackupProgressItem
     protected override async Task DoJob()
     {
         var tempFile = PathHelper.GetTempFileName(TempFolder);
-        var tenant = _tenantManager.GetTenant(TenantId);
+        var tenant = await _tenantManager.GetTenantAsync(TenantId);
         var alias = tenant.Alias;
 
         try
         {
-            using var scope = _serviceScopeProvider.CreateScope();
+            await using var scope = _serviceScopeProvider.CreateAsyncScope();
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             _transferPortalTask = scope.ServiceProvider.GetService<TransferPortalTask>();
 
 
-            _notifyHelper.SendAboutTransferStart(tenant, TargetRegion, Notify);
+            await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
             var transferProgressItem = _transferPortalTask;
-            transferProgressItem.Init(TenantId, ConfigPaths[CurrentRegion], ConfigPaths[TargetRegion], Limit, TempFolder);
+            transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
             transferProgressItem.ProgressChanged += (sender, args) =>
             {
                 Percentage = args.Progress;
@@ -124,7 +119,7 @@ public class TransferProgressItem : BaseBackupProgressItem
             await transferProgressItem.RunJob();
 
             Link = GetLink(alias, false);
-            _notifyHelper.SendAboutTransferComplete(tenant, TargetRegion, Link, !Notify, transferProgressItem.ToTenantId);
+            await _notifyHelper.SendAboutTransferCompleteAsync(tenant, TargetRegion, Link, !Notify, transferProgressItem.ToTenantId);
 
             PublishChanges();
         }
@@ -134,7 +129,7 @@ public class TransferProgressItem : BaseBackupProgressItem
             Exception = error;
 
             Link = GetLink(alias, true);
-            _notifyHelper.SendAboutTransferError(tenant, TargetRegion, Link, !Notify);
+            await _notifyHelper.SendAboutTransferErrorAsync(tenant, TargetRegion, Link, !Notify);
         }
         finally
         {
@@ -156,7 +151,8 @@ public class TransferProgressItem : BaseBackupProgressItem
 
     private string GetLink(string alias, bool isErrorLink)
     {
-        return "https://" + alias + "." + ConfigurationProvider.Open(ConfigPaths[isErrorLink ? CurrentRegion : TargetRegion]).AppSettings.Settings["core:base-domain"].Value;
+        var domain = isErrorLink ? "core:base-domain" : $"{TargetRegion}:core:base-domain";
+        return "https://" + alias + "." + _configuration[domain];
     }
 
     public override object Clone()

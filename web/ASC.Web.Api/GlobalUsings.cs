@@ -67,6 +67,7 @@ global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Quota;
@@ -85,15 +86,21 @@ global using ASC.Data.Backup.EF.Context;
 global using ASC.Data.Storage.Configuration;
 global using ASC.Data.Storage.Encryption;
 global using ASC.Data.Storage.Migration;
+global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
 global using ASC.Feed;
 global using ASC.Feed.Data;
+global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
+global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Services.OFormService;
+global using ASC.Files.Core.VirtualRooms;
 global using ASC.Geolocation;
 global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
@@ -114,8 +121,10 @@ global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.Mobile;
+global using ASC.Web.Core.Notify;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
+global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Core.Sms;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
@@ -143,16 +152,21 @@ global using AutoMapper;
 
 global using Google.Authenticator;
 
+global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
+
 global using MailKit.Security;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Primitives;
 
 global using MimeKit;
+
+global using ProtoBuf;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 global using static ASC.Security.Cryptography.EmailValidationKeyProvider;

@@ -47,15 +47,12 @@ public class NotifyServiceCfg
 {
     public string ConnectionStringName { get; set; }
     public int StoreMessagesDays { get; set; }
-    public string ServerRoot { get; set; }
     public NotifyServiceCfgProcess Process { get; set; }
     public List<NotifyServiceCfgSender> Senders { get; set; }
     public List<NotifyServiceCfgScheduler> Schedulers { get; set; }
 
     public void Init(IServiceProvider serviceProvider)
     {
-        ServerRoot = string.IsNullOrEmpty(ServerRoot) ? "http://*/" : ServerRoot;
-
         Process.Init();
 
         foreach (var s in Senders)
@@ -69,15 +66,19 @@ public class NotifyServiceCfg
 
             }
         }
-        foreach (var s in Schedulers)
-        {
-            try
-            {
-                s.Init();
-            }
-            catch (Exception)
-            {
 
+        if (Schedulers != null)
+        {
+            foreach (var s in Schedulers)
+            {
+                try
+                {
+                    s.Init();
+                }
+                catch (Exception)
+                {
+
+                }
             }
         }
     }

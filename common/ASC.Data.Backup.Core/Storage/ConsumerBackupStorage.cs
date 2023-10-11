@@ -27,40 +27,62 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class ConsumerBackupStorage : IBackupStorage
+public class ConsumerBackupStorage : IBackupStorage, IGetterWriteOperator
 {
-    private const string Domain = "backup";
-
     private IDataStore _store;
     private readonly StorageSettingsHelper _storageSettingsHelper;
+    private readonly TempPath _tempPath;
+    private readonly SetupInfo _setupInfo;
+    private readonly StorageFactory _storageFactory;
 
-    public ConsumerBackupStorage(StorageSettingsHelper storageSettingsHelper)
+    private bool _isTemporary;
+    private string Domain { get => _isTemporary ? "" : "backup"; }
+    private CommonChunkedUploadSessionHolder _sessionHolder;
+
+    public ConsumerBackupStorage(
+        StorageSettingsHelper storageSettingsHelper,
+        TempPath tempPath,
+        SetupInfo setupInfo,
+        StorageFactory storageFactory)
     {
         _storageSettingsHelper = storageSettingsHelper;
+        _tempPath = tempPath;
+        _setupInfo = setupInfo;
+        _storageFactory = storageFactory;
     }
 
-    public void Init(IReadOnlyDictionary<string, string> storageParams)
+    public async Task InitAsync(IReadOnlyDictionary<string, string> storageParams)
     {
         var settings = new StorageSettings { Module = storageParams["module"], Props = storageParams.Where(r => r.Key != "module").ToDictionary(r => r.Key, r => r.Value) };
-        _store = _storageSettingsHelper.DataStore(settings);
+        _store = await _storageSettingsHelper.DataStoreAsync(settings);
+        _sessionHolder = new CommonChunkedUploadSessionHolder(_tempPath, _store, Domain, _setupInfo.ChunkUploadSize);
     }
 
-    public async Task<string> Upload(string storageBasePath, string localPath, Guid userId)
+    public async Task InitAsync(int tenant)
     {
-        using var stream = File.OpenRead(localPath);
+        _isTemporary = true;
+        _store = await _storageFactory.GetStorageAsync(tenant, "backup");
+        _sessionHolder = new CommonChunkedUploadSessionHolder(_tempPath, _store, Domain, _setupInfo.ChunkUploadSize);
+    }
+
+    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)
+    {
+        await using var stream = File.OpenRead(localPath);
         var storagePath = Path.GetFileName(localPath);
         await _store.SaveAsync(Domain, storagePath, stream, ACL.Private);
         return storagePath;
     }
 
-    public async Task Download(string storagePath, string targetLocalPath)
+    public async Task<string> DownloadAsync(string storagePath, string targetLocalPath)
     {
-        using var source = await _store.GetReadStreamAsync(Domain, storagePath);
-        using var destination = File.OpenWrite(targetLocalPath);
+        var tempPath = Path.Combine(targetLocalPath, Path.GetFileName(storagePath));
+        await using var source = await _store.GetReadStreamAsync(Domain, storagePath);
+        await using var destination = File.OpenWrite(tempPath);
         await source.CopyToAsync(destination);
+        return tempPath;
     }
 
-    public async Task Delete(string storagePath)
+    public async Task DeleteAsync(string storagePath)
     {
         if (await _store.IsFileAsync(Domain, storagePath))
         {
@@ -68,7 +90,7 @@ public class ConsumerBackupStorage : IBackupStorage
         }
     }
 
-    public async Task<bool> IsExists(string storagePath)
+    public async Task<bool> IsExistsAsync(string storagePath)
     {
         if (_store != null)
         {
@@ -80,8 +102,30 @@ public class ConsumerBackupStorage : IBackupStorage
         }
     }
 
-    public async Task<string> GetPublicLink(string storagePath)
+    public async Task<string> GetPublicLinkAsync(string storagePath)
     {
-        return (await _store.GetInternalUriAsync(Domain, storagePath, TimeSpan.FromDays(1), null)).AbsoluteUri;
+        if (_isTemporary)
+        {
+            return (await _store.GetPreSignedUriAsync(Domain, storagePath, TimeSpan.FromDays(1), null)).ToString();
+        }
+        else
+        {
+            return (await _store.GetInternalUriAsync(Domain, storagePath, TimeSpan.FromDays(1), null)).AbsoluteUri;
+        }
+    }
+
+    public async Task<IDataWriteOperator> GetWriteOperatorAsync(string storageBasePath, string title, Guid userId)
+    {
+        var session = new CommonChunkedUploadSession(-1)
+        {
+            TempPath = title,
+            UploadId = await _store.InitiateChunkedUploadAsync(Domain, title)
+        };
+        return _store.CreateDataWriteOperator(session, _sessionHolder, true);
+    }
+
+    public Task<string> GetBackupExtensionAsync(string storageBasePath)
+    {
+        return Task.FromResult(_store.GetBackupExtension(true));
     }
 }

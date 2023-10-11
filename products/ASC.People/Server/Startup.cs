@@ -32,6 +32,7 @@ public class Startup : BaseStartup
 
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment) : base(configuration, hostEnvironment)
     {
+        WebhooksEnabled = true;
     }
 
     public override void ConfigureServices(IServiceCollection services)
@@ -44,5 +45,14 @@ public class Startup : BaseStartup
 
         services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
         services.AddScoped<UsersInRoomStatistic>();
+
+        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
+        services.AddScoped<CountRoomChecker>();
+
+        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
+        services.AddScoped<CountRoomCheckerStatistic>();
+
+        DIHelper.TryAdd<ReassignProgressItem>();
+        DIHelper.TryAdd<RemoveProgressItem>();
     }
 }

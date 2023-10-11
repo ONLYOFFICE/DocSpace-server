@@ -112,4 +112,49 @@
   <data name="DefaultUserTitle" xml:space="preserve">
     <value>Posição</value>
   </data>
+  <data name="CommonGuest" xml:space="preserve">
+    <value>Convidado(a)</value>
+  </data>
+  <data name="DefaultGuest" xml:space="preserve">
+    <value>Convidado(a)</value>
+  </data>
+  <data name="EducationGuest" xml:space="preserve">
+    <value>Convidado(a)</value>
+  </data>
+  <data name="EducationGroupHead" xml:space="preserve">
+    <value>Líder de grupo</value>
+  </data>
+  <data name="EducationGroups" xml:space="preserve">
+    <value>Grupos</value>
+  </data>
+  <data name="EducationGuests" xml:space="preserve">
+    <value>Convidados</value>
+  </data>
+  <data name="EducationGroup" xml:space="preserve">
+    <value>Grupo</value>
+  </data>
+  <data name="CommonGuests" xml:space="preserve">
+    <value>Convidados</value>
+  </data>
+  <data name="DefaultGuests" xml:space="preserve">
+    <value>Convidados</value>
+  </data>
+  <data name="EducationRegDate" xml:space="preserve">
+    <value>Data de registo</value>
+  </data>
+  <data name="EducationUserTitle" xml:space="preserve">
+    <value>Título</value>
+  </data>
+  <data name="EducationAddUsers" xml:space="preserve">
+    <value>Adicionar Docentes/Estudantes</value>
+  </data>
+  <data name="EducationSchemaName" xml:space="preserve">
+    <value>Instituição de Ensino</value>
+  </data>
+  <data name="EducationUser" xml:space="preserve">
+    <value>Docente/Estudante</value>
+  </data>
+  <data name="EducationUsers" xml:space="preserve">
+    <value>Docentes/Estudantes</value>
+  </data>
 </root>

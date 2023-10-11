@@ -46,17 +46,11 @@ public enum ProviderTypes
 [Scope]
 internal class ProviderAccountDao : IProviderDao
 {
-    private int _tenantID;
     protected int TenantID
     {
         get
         {
-            if (_tenantID == 0)
-            {
-                _tenantID = _tenantManager.GetCurrentTenant().Id;
-            }
-
-            return _tenantID;
+            return _tenantManager.GetCurrentTenant().Id;
         }
     }
 
@@ -102,6 +96,19 @@ internal class ProviderAccountDao : IProviderDao
         return providersInfo.SingleAsync().AsTask();
     }
 
+    public async Task<IProviderInfo> GetProviderInfoByEntryIdAsync(string entryId)
+    {
+        try
+        {
+            var id = Selectors.Pattern.Match(entryId).Groups["id"].Value;
+            return await GetProviderInfoAsync(int.Parse(id));
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public virtual IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync()
     {
         return GetProvidersInfoInternalAsync();
@@ -117,10 +124,7 @@ internal class ProviderAccountDao : IProviderDao
         try
         {
             var filesDbContext = _dbContextFactory.CreateDbContext();
-            var thirdpartyAccounts = filesDbContext.ThirdpartyAccount
-                .Where(r => r.TenantId == TenantID)
-                .Where(r => r.UserId == userId)
-                .AsAsyncEnumerable();
+            var thirdpartyAccounts = Queries.ThirdpartyAccountsAsync(filesDbContext, TenantID, userId);
 
             return thirdpartyAccounts.Select(ToProviderInfo);
         }
@@ -132,22 +136,12 @@ internal class ProviderAccountDao : IProviderDao
         }
     }
 
-    static readonly Func<FilesDbContext, int, int, FolderType, Guid, string, IAsyncEnumerable<DbFilesThirdpartyAccount>> _getProvidersInfoQuery =
-        EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int linkId, FolderType folderType, Guid userId, string searchText) =>
-        ctx.ThirdpartyAccount
-        .AsNoTracking()
-        .Where(r => r.TenantId == tenantId)
-        .Where(r => !(folderType == FolderType.USER || folderType == FolderType.DEFAULT && linkId == -1) || r.UserId == userId || r.FolderType == FolderType.ThirdpartyBackup)
-        .Where(r => linkId == -1 || r.Id == linkId)
-        .Where(r => folderType == FolderType.DEFAULT && !(r.FolderType == FolderType.ThirdpartyBackup && linkId == -1) || r.FolderType == folderType)
-        .Where(r => searchText == "" || r.Title.ToLower().Contains(searchText)));
-
     private IAsyncEnumerable<IProviderInfo> GetProvidersInfoInternalAsync(int linkId = -1, FolderType folderType = FolderType.DEFAULT, string searchText = null)
     {
         try
         {
             var filesDbContext = _dbContextFactory.CreateDbContext();
-            return _getProvidersInfoQuery(filesDbContext, TenantID, linkId, folderType, _securityContext.CurrentAccount.ID, GetSearchText(searchText))
+            return Queries.ThirdpartyAccountsByFilterAsync(filesDbContext, TenantID, linkId, folderType, _securityContext.CurrentAccount.ID, GetSearchText(searchText))
                 .Select(ToProviderInfo);
         }
         catch (Exception e)
@@ -157,7 +151,7 @@ internal class ProviderAccountDao : IProviderDao
         }
     }
 
-    public virtual Task<int> SaveProviderInfoAsync(string providerKey, string customerTitle, AuthData authData, FolderType folderType)
+    public virtual async Task<int> SaveProviderInfoAsync(string providerKey, string customerTitle, AuthData authData, FolderType folderType)
     {
         ProviderTypes prKey;
         try
@@ -169,11 +163,6 @@ internal class ProviderAccountDao : IProviderDao
             throw new ArgumentException("Unrecognize ProviderType");
         }
 
-        return InternalSaveProviderInfoAsync(providerKey, customerTitle, authData, folderType, prKey);
-    }
-
-    private async Task<int> InternalSaveProviderInfoAsync(string providerKey, string customerTitle, AuthData authData, FolderType folderType, ProviderTypes prKey)
-    {
         authData = GetEncodedAccesToken(authData, prKey);
 
         if (!await CheckProviderInfoAsync(ToProviderInfo(0, prKey, customerTitle, authData, _securityContext.CurrentAccount.ID, folderType, _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow()))))
@@ -196,7 +185,7 @@ internal class ProviderAccountDao : IProviderDao
             Url = authData.Url ?? ""
         };
 
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
         var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdpartyAccount);
         await filesDbContext.SaveChangesAsync();
 
@@ -210,12 +199,9 @@ internal class ProviderAccountDao : IProviderDao
 
     public async Task<bool> UpdateProviderInfoAsync(int linkId, FolderType rootFolderType)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
-        var forUpdate = await filesDbContext.ThirdpartyAccount
-            .Where(r => r.Id == linkId)
-            .Where(r => r.TenantId == TenantID)
-            .FirstOrDefaultAsync();
+        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
 
         if (forUpdate == null)
         {
@@ -223,19 +209,35 @@ internal class ProviderAccountDao : IProviderDao
         }
 
         forUpdate.FolderType = rootFolderType;
+        filesDbContext.Update(forUpdate);
 
         await filesDbContext.SaveChangesAsync();
 
         return true;
     }
 
-    public async Task<bool> UpdateProviderInfoAsync(int linkId, string folderId, FolderType roomType, bool @private)
+    public async Task<bool> UpdateProviderInfoAsync(int linkId, bool hasLogo)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var forUpdate = await filesDbContext.ThirdpartyAccount
-            .Where(r => r.Id == linkId)
-            .Where(r => r.TenantId == TenantID)
-            .FirstOrDefaultAsync();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
+
+        if (forUpdate == null)
+        {
+            return false;
+        }
+
+        forUpdate.HasLogo = hasLogo;
+        filesDbContext.Update(forUpdate);
+
+        await filesDbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> UpdateProviderInfoAsync(int linkId, string title, string folderId, FolderType roomType, bool @private)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
 
         if (forUpdate == null)
         {
@@ -246,6 +248,8 @@ internal class ProviderAccountDao : IProviderDao
         forUpdate.FolderId = folderId;
         forUpdate.FolderType = FolderType.VirtualRooms;
         forUpdate.Private = @private;
+        forUpdate.Title = title;
+        filesDbContext.Update(forUpdate);
 
         await filesDbContext.SaveChangesAsync();
 
@@ -254,42 +258,29 @@ internal class ProviderAccountDao : IProviderDao
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, AuthData authData)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var tenantId = TenantID;
+        var login = authData.Login ?? "";
+        var password = EncryptPassword(authData.Password);
+        var token = EncryptPassword(authData.Token ?? "");
+        var url = authData.Url ?? "";
 
-        var forUpdate = await filesDbContext.ThirdpartyAccount
-            .Where(r => r.Id == linkId)
-            .Where(r => r.TenantId == TenantID)
-            .ToListAsync();
+        var forUpdateCount = await Queries.UpdateThirdpartyAccountsAsync(filesDbContext, tenantId, linkId, login, password, token, url);
 
-        foreach (var f in forUpdate)
-        {
-            f.UserName = authData.Login ?? "";
-            f.Password = EncryptPassword(authData.Password);
-            f.Token = EncryptPassword(authData.Token ?? "");
-            f.Url = authData.Url ?? "";
-        }
-
-        await filesDbContext.SaveChangesAsync();
-
-        return forUpdate.Count == 1 ? linkId : default;
+        return forUpdateCount == 1 ? linkId : default;
     }
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData newAuthData, FolderType folderType, Guid? userId = null)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
         var authData = new AuthData();
         if (newAuthData != null && !newAuthData.IsEmpty())
         {
-            var querySelect =
-                filesDbContext.ThirdpartyAccount
-                .Where(r => r.TenantId == TenantID)
-                .Where(r => r.Id == linkId);
-
             DbFilesThirdpartyAccount input;
             try
             {
-                input = await querySelect.SingleAsync();
+                input = await Queries.ThirdpartyAccountByLinkIdAsync(filesDbContext, TenantID, linkId);
             }
             catch (Exception e)
             {
@@ -319,12 +310,10 @@ internal class ProviderAccountDao : IProviderDao
             }
         }
 
-        var toUpdate = await filesDbContext.ThirdpartyAccount
-            .Where(r => r.Id == linkId)
-            .Where(r => r.TenantId == TenantID)
-            .ToListAsync();
+        var toUpdate = Queries.ThirdpartyAccountsByLinkIdAsync(filesDbContext, TenantID, linkId);
+        var toUpdateCount = 0;
 
-        foreach (var t in toUpdate)
+        await foreach (var t in toUpdate)
         {
             if (!string.IsNullOrEmpty(customerTitle))
             {
@@ -348,27 +337,23 @@ internal class ProviderAccountDao : IProviderDao
                 t.Token = EncryptPassword(authData.Token ?? "");
                 t.Url = authData.Url ?? "";
             }
+
+            toUpdateCount++;
         }
 
         await filesDbContext.SaveChangesAsync();
 
-        return toUpdate.Count == 1 ? linkId : default;
+        return toUpdateCount == 1 ? linkId : default;
     }
 
     public virtual async Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData newAuthData)
     {
-        using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var querySelect =
-                filesDbContext.ThirdpartyAccount
-                .AsQueryable()
-                .Where(r => r.TenantId == TenantID)
-                .Where(r => r.FolderType == FolderType.ThirdpartyBackup);
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
 
         DbFilesThirdpartyAccount thirdparty;
         try
         {
-            thirdparty = await querySelect.SingleAsync().ConfigureAwait(false);
+            thirdparty = await Queries.ThirdpartyBackupAccountAsync(filesDbContext, TenantID);
         }
         catch (Exception e)
         {
@@ -410,53 +395,29 @@ internal class ProviderAccountDao : IProviderDao
             thirdparty.Url = newAuthData.Url ?? "";
         }
 
-        await filesDbContext.SaveChangesAsync().ConfigureAwait(false);
+        filesDbContext.Update(thirdparty);
+        await filesDbContext.SaveChangesAsync();
 
         return thirdparty.Id;
     }
 
     public virtual async Task RemoveProviderInfoAsync(int linkId)
     {
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
         await strategy.ExecuteAsync(async () =>
         {
             using var filesDbContext = _dbContextFactory.CreateDbContext();
-            using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            using var tr = await filesDbContext.Database.BeginTransactionAsync();
+
             var folderId = (await GetProviderInfoAsync(linkId)).RootFolderId;
+            var entryIDs = await Queries.HashIdsAsync(filesDbContext, TenantID, folderId).ToListAsync();
 
-            var entryIDs = await filesDbContext.ThirdpartyIdMapping
-            .Where(r => r.TenantId == TenantID)
-            .Where(r => r.Id.StartsWith(folderId))
-            .Select(r => r.HashId)
-            .ToListAsync();
+            await Queries.DeleteDbFilesSecuritiesAsync(filesDbContext, TenantID, entryIDs);
+            await Queries.DeleteDbFilesTagLinksAsync(filesDbContext, TenantID, entryIDs);
+            await Queries.DeleteThirdpartyAccountsByLinkIdAsync(filesDbContext, TenantID, linkId);
 
-            var forDelete = await filesDbContext.Security
-            .Where(r => r.TenantId == TenantID)
-            .Where(r => entryIDs.Any(a => a == r.EntryId))
-            .ToListAsync();
-
-            filesDbContext.Security.RemoveRange(forDelete);
-            await filesDbContext.SaveChangesAsync();
-
-            var linksForDelete = await filesDbContext.TagLink
-            .Where(r => r.TenantId == TenantID)
-            .Where(r => entryIDs.Any(e => e == r.EntryId))
-            .ToListAsync();
-
-            filesDbContext.TagLink.RemoveRange(linksForDelete);
-            await filesDbContext.SaveChangesAsync();
-
-            var accountsForDelete = await filesDbContext.ThirdpartyAccount
-            .Where(r => r.Id == linkId)
-            .Where(r => r.TenantId == TenantID)
-            .ToListAsync();
-
-            filesDbContext.ThirdpartyAccount.RemoveRange(accountsForDelete);
-            await filesDbContext.SaveChangesAsync();
-
-            await tx.CommitAsync();
+            await tr.CommitAsync();
         });
     }
 
@@ -496,6 +457,7 @@ internal class ProviderAccountDao : IProviderDao
         var folderId = input.FolderId;
         var createOn = _tenantUtil.DateTimeFromUtc(input.CreateOn);
         var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token);
+        var hasLogo = input.HasLogo;
 
         if (key == ProviderTypes.Box)
         {
@@ -505,7 +467,7 @@ internal class ProviderAccountDao : IProviderDao
             }
 
             var box = _serviceProvider.GetService<BoxProviderInfo>();
-            box.ID = id;
+            box.ProviderId = id;
             box.CustomerTitle = providerTitle;
             box.Owner = owner == Guid.Empty ? _securityContext.CurrentAccount.ID : owner;
             box.ProviderKey = input.Provider;
@@ -515,6 +477,7 @@ internal class ProviderAccountDao : IProviderDao
             box.FolderType = folderType;
             box.FolderId = folderId;
             box.Private = privateRoom;
+            box.HasLogo = hasLogo;
 
             return box;
         }
@@ -527,7 +490,7 @@ internal class ProviderAccountDao : IProviderDao
             }
 
             var drop = _serviceProvider.GetService<DropboxProviderInfo>();
-            drop.ID = id;
+            drop.ProviderId = id;
             drop.CustomerTitle = providerTitle;
             drop.Owner = owner == Guid.Empty ? _securityContext.CurrentAccount.ID : owner;
             drop.ProviderKey = input.Provider;
@@ -537,6 +500,7 @@ internal class ProviderAccountDao : IProviderDao
             drop.FolderType = folderType;
             drop.FolderId = folderId;
             drop.Private = privateRoom;
+            drop.HasLogo = hasLogo;
 
             return drop;
         }
@@ -549,7 +513,7 @@ internal class ProviderAccountDao : IProviderDao
             }
 
             var sh = _serviceProvider.GetService<SharePointProviderInfo>();
-            sh.ID = id;
+            sh.ProviderId = id;
             sh.CustomerTitle = providerTitle;
             sh.Owner = owner == Guid.Empty ? _securityContext.CurrentAccount.ID : owner;
             sh.ProviderKey = input.Provider;
@@ -559,6 +523,7 @@ internal class ProviderAccountDao : IProviderDao
             sh.FolderType = folderType;
             sh.FolderId = folderId;
             sh.Private = privateRoom;
+            sh.HasLogo = hasLogo;
 
             return sh;
         }
@@ -571,7 +536,7 @@ internal class ProviderAccountDao : IProviderDao
             }
 
             var gd = _serviceProvider.GetService<GoogleDriveProviderInfo>();
-            gd.ID = id;
+            gd.ProviderId = id;
             gd.CustomerTitle = providerTitle;
             gd.Owner = owner == Guid.Empty ? _securityContext.CurrentAccount.ID : owner;
             gd.ProviderKey = input.Provider;
@@ -581,6 +546,7 @@ internal class ProviderAccountDao : IProviderDao
             gd.FolderType = folderType;
             gd.FolderId = folderId;
             gd.Private = privateRoom;
+            gd.HasLogo = hasLogo;
 
             return gd;
         }
@@ -593,7 +559,7 @@ internal class ProviderAccountDao : IProviderDao
             }
 
             var od = _serviceProvider.GetService<OneDriveProviderInfo>();
-            od.ID = id;
+            od.ProviderId = id;
             od.CustomerTitle = providerTitle;
             od.Owner = owner == Guid.Empty ? _securityContext.CurrentAccount.ID : owner;
             od.ProviderKey = input.Provider;
@@ -603,6 +569,7 @@ internal class ProviderAccountDao : IProviderDao
             od.FolderType = folderType;
             od.FolderId = folderId;
             od.Private = privateRoom;
+            od.HasLogo = hasLogo;
 
             return od;
         }
@@ -623,7 +590,7 @@ internal class ProviderAccountDao : IProviderDao
         }
 
         var sharpBoxProviderInfo = _serviceProvider.GetService<SharpBoxProviderInfo>();
-        sharpBoxProviderInfo.ID = id;
+        sharpBoxProviderInfo.ProviderId = id;
         sharpBoxProviderInfo.CustomerTitle = providerTitle;
         sharpBoxProviderInfo.Owner = owner == Guid.Empty ? _securityContext.CurrentAccount.ID : owner;
         sharpBoxProviderInfo.ProviderKey = input.Provider;
@@ -633,6 +600,7 @@ internal class ProviderAccountDao : IProviderDao
         sharpBoxProviderInfo.FolderType = folderType;
         sharpBoxProviderInfo.FolderId = folderId;
         sharpBoxProviderInfo.Private = privateRoom;
+        sharpBoxProviderInfo.HasLogo = hasLogo;
 
         return sharpBoxProviderInfo;
     }
@@ -781,4 +749,106 @@ public static class ProviderAccountDaoExtension
         services.TryAdd<OneDriveProviderInfo>();
         services.TryAdd<SharpBoxProviderInfo>();
     }
+}
+
+
+static file class Queries
+{
+    public static readonly Func<FilesDbContext, int, Guid, IAsyncEnumerable<DbFilesThirdpartyAccount>>
+        ThirdpartyAccountsAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid userId) =>
+                ctx.ThirdpartyAccount
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.UserId == userId));
+
+    public static readonly
+        Func<FilesDbContext, int, int, FolderType, Guid, string, IAsyncEnumerable<DbFilesThirdpartyAccount>>
+        ThirdpartyAccountsByFilterAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int linkId, FolderType folderType, Guid userId, string searchText) =>
+                ctx.ThirdpartyAccount
+                    
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => !(folderType == FolderType.USER || folderType == FolderType.DEFAULT && linkId == -1) ||
+                                r.UserId == userId || r.FolderType == FolderType.ThirdpartyBackup)
+                    .Where(r => linkId == -1 || r.Id == linkId)
+                    .Where(r => folderType == FolderType.DEFAULT &&
+                        !(r.FolderType == FolderType.ThirdpartyBackup && linkId == -1) || r.FolderType == folderType)
+                    .Where(r => searchText == "" || r.Title.ToLower().Contains(searchText)));
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdpartyAccountAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int linkId) =>
+                ctx.ThirdpartyAccount
+                    .Where(r => r.Id == linkId)
+                    .Where(r => r.TenantId == tenantId)
+                    .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>>
+        UpdateThirdpartyAccountsAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int linkId, string login, string password, string token, string url) =>
+                ctx.ThirdpartyAccount
+                    .Where(r => r.Id == linkId)
+                    .Where(r => r.TenantId == tenantId)
+                    .ExecuteUpdate(f => f
+                        .SetProperty(p => p.UserName, login)
+                        .SetProperty(p => p.Password, password)
+                        .SetProperty(p => p.Token, token)
+                        .SetProperty(p => p.Url, url)));
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>>
+        ThirdpartyAccountByLinkIdAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int linkId) =>
+                ctx.ThirdpartyAccount
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id == linkId)
+                    .Single());
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesThirdpartyAccount>>
+        ThirdpartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int linkId) =>
+                ctx.ThirdpartyAccount
+                    .AsTracking()
+                    .Where(r => r.Id == linkId)
+                    .Where(r => r.TenantId == tenantId));
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>>
+        DeleteThirdpartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int linkId) =>
+                ctx.ThirdpartyAccount
+                    .AsTracking()
+                    .Where(r => r.Id == linkId)
+                    .Where(r => r.TenantId == tenantId)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, Task<DbFilesThirdpartyAccount>> ThirdpartyBackupAccountAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.ThirdpartyAccount
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FolderType == FolderType.ThirdpartyBackup)
+                    .Single());
+
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> HashIdsAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string folderId) =>
+                ctx.ThirdpartyIdMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id.StartsWith(folderId))
+                    .Select(r => r.HashId));
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>>
+        DeleteDbFilesSecuritiesAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> entryIDs) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => entryIDs.Any(a => a == r.EntryId))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>>
+        DeleteDbFilesTagLinksAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<string> entryIDs) =>
+                ctx.TagLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => entryIDs.Any(e => e == r.EntryId))
+                    .ExecuteDelete());
 }

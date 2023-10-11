@@ -62,7 +62,6 @@ public class CustomEndpointDataSource : EndpointDataSource
                 {
                     var order = constraintRouteAttr != null ? r.Order : r.Order + 2;
                     endpoints.Add(new RouteEndpoint(r.RequestDelegate, RoutePatternFactory.Parse(r.RoutePattern.RawText, defaults, policies), order + 1, r.Metadata, r.DisplayName));
-                    endpoints.Add(new RouteEndpoint(r.RequestDelegate, RoutePatternFactory.Parse(r.RoutePattern.RawText + ".{format}", defaults, policies), order, r.Metadata, r.DisplayName));
                 }
 
             }).ToList();
@@ -76,12 +75,51 @@ public class CustomEndpointDataSource : EndpointDataSource
 
 public static class EndpointExtension
 {
-    public static IEndpointRouteBuilder MapCustom(this IEndpointRouteBuilder endpoints)
+    public static async Task<IEndpointRouteBuilder> MapCustomAsync(this IEndpointRouteBuilder endpoints, bool webhooksEnabled = false, IServiceProvider serviceProvider = null)
     {
         endpoints.MapControllers();
+
+        if (webhooksEnabled && serviceProvider != null)
+        {
+            await endpoints.RegisterWebhooks(serviceProvider);
+        }
+
         var sources = endpoints.DataSources.First();
         endpoints.DataSources.Clear();
         endpoints.DataSources.Add(new CustomEndpointDataSource(sources));
+
+        return endpoints;
+    }
+
+    private static async Task<IEndpointRouteBuilder> RegisterWebhooks(this IEndpointRouteBuilder endpoints, IServiceProvider serviceProvider)
+    {
+        var toRegister = endpoints.DataSources.First().Endpoints
+            .Cast<RouteEndpoint>()
+            .SelectMany(r =>
+            {
+                var result = new List<Webhook>();
+                var httpMethodMetadata = r.Metadata.OfType<HttpMethodMetadata>().FirstOrDefault();
+                var disabled = r.Metadata.OfType<WebhookDisableAttribute>().FirstOrDefault();
+
+                if (disabled == null && httpMethodMetadata != null)
+                {
+                    foreach (var httpMethod in httpMethodMetadata.HttpMethods)
+                    {
+                        result.Add(new Webhook { Method = httpMethod, Route = r.RoutePattern.RawText.ToLower() });
+                    }
+                }
+                return result;
+            })
+            .Where(r => DbWorker.MethodList.Contains(r.Method))
+            .DistinctBy(r => $"{r.Method}|{r.Route}")
+            .ToList();
+
+        using var scope = serviceProvider.CreateScope();
+        var dbWorker = scope.ServiceProvider.GetService<DbWorker>();
+        if (dbWorker != null)
+        {
+            await dbWorker.Register(toRegister);
+        }
 
         return endpoints;
     }

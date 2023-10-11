@@ -26,41 +26,41 @@
 
 namespace ASC.Data.Reassigns;
 
+/// <summary>
+/// </summary>
 [Transient]
 public class ReassignProgressItem : DistributedTaskProgress
 {
+    /// <summary>The user whose data is reassigned</summary>
+    /// <type>System.Guid, System</type>
     public Guid FromUser { get; private set; }
+
+    /// <summary>The user to whom this data is reassigned</summary>
+    /// <type>System.Guid, System</type>
     public Guid ToUser { get; private set; }
 
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IDictionary<string, StringValues> _httpHeaders;
-    private readonly int _tenantId;
-    private readonly Guid _currentUserId;
-    private readonly bool _deleteProfile;
 
-    //private readonly IFileStorageService _docService;
-    //private readonly ProjectsReassign _projectsReassign;
+    private IDictionary<string, StringValues> _httpHeaders;
+    private int _tenantId;
+    private Guid _currentUserId;
+    private bool _notify;
+    private bool _deleteProfile;
 
-    public ReassignProgressItem(
-        IServiceScopeFactory serviceScopeFactory,
-            IDictionary<string, StringValues> httpHeaders,
-            int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool deleteProfile)
+    public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
+    }
+
+    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
+    {
         _httpHeaders = httpHeaders;
-
-        //_docService = Web.Files.Classes.Global.FileStorageService;
-        //_projectsReassign = new ProjectsReassign();
-
         _tenantId = tenantId;
         FromUser = fromUserId;
         ToUser = toUserId;
         _currentUserId = currentUserId;
+        _notify = notify;
         _deleteProfile = deleteProfile;
-
-        //_docService = Web.Files.Classes.Global.FileStorageService;
-        //_projectsReassign = new ProjectsReassign();
-
         Id = QueueWorkerReassign.GetProgressItemId(tenantId, fromUserId);
         Status = DistributedTaskStatus.Created;
         Exception = null;
@@ -70,75 +70,78 @@ public class ReassignProgressItem : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var queueWorkerRemove = scope.ServiceProvider.GetService<QueueWorkerRemove>();
-        var (tenantManager, coreBaseSettings, messageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, messageTarget, options) = scopeClass;
+        var (tenantManager, coreBaseSettings, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, messageTarget, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
-        tenantManager.SetCurrentTenant(_tenantId);
+        await tenantManager.SetCurrentTenantAsync(_tenantId);
 
         try
         {
-            Percentage = 0;
-            Status = DistributedTaskStatus.Running;
+            await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            securityContext.AuthenticateMeWithoutCookie(_currentUserId);
+            SetPercentageAndCheckCancellation(5, true);
 
-            logger.LogInformation("reassignment of data from {fromUser} to {toUser}", FromUser, ToUser);
+            await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
-            logger.LogInformation("reassignment of data from documents");
+            SetPercentageAndCheckCancellation(10, true);
 
-
-            //_docService.ReassignStorage(_fromUserId, _toUserId);
-            Percentage = 33;
-            PublishChanges();
-
-            logger.LogInformation("reassignment of data from projects");
-
-            //_projectsReassign.Reassign(_fromUserId, _toUserId);
-            Percentage = 66;
-            PublishChanges();
-
-            if (!coreBaseSettings.CustomMode)
-            {
-                logger.LogInformation("reassignment of data from crm");
-
-                //using (var scope = DIHelper.Resolve(_tenantId))
-                //{
-                //    var crmDaoFactory = scope.Resolve<CrmDaoFactory>();
-                //    crmDaoFactory.ContactDao.ReassignContactsResponsible(_fromUserId, _toUserId);
-                //    crmDaoFactory.DealDao.ReassignDealsResponsible(_fromUserId, _toUserId);
-                //    crmDaoFactory.TaskDao.ReassignTasksResponsible(_fromUserId, _toUserId);
-                //    crmDaoFactory.CasesDao.ReassignCasesResponsible(_fromUserId, _toUserId);
-                //}
-                Percentage = 99;
-                PublishChanges();
-            }
-
-            SendSuccessNotify(userManager, studioNotifyService, messageService, messageTarget, displayUserSettingsHelper);
-
-            Percentage = 100;
-            Status = DistributedTaskStatus.Completed;
+            List<int> personalFolderIds = null;
 
             if (_deleteProfile)
             {
-                await DeleteUserProfile(userManager, userPhotoManager, messageService, messageTarget, displayUserSettingsHelper, queueWorkerRemove);
+                await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
             }
+            else
+            {
+                personalFolderIds = await fileStorageService.GetPersonalFolderIdsAsync<int>(FromUser);
+            }
+
+            SetPercentageAndCheckCancellation(30, true);
+
+            await fileStorageService.ReassignProvidersAsync<string>(FromUser, ToUser);
+
+            SetPercentageAndCheckCancellation(50, true);
+
+            await fileStorageService.ReassignFoldersAsync<int>(FromUser, ToUser, personalFolderIds);
+
+            SetPercentageAndCheckCancellation(70, true);
+
+            await fileStorageService.ReassignFilesAsync<int>(FromUser, ToUser, personalFolderIds);
+
+            SetPercentageAndCheckCancellation(90, true);
+
+            await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, messageTarget, displayUserSettingsHelper);
+
+            SetPercentageAndCheckCancellation(95, true);
+
+            if (_deleteProfile)
+            {
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, messageTarget, displayUserSettingsHelper);
+            }
+
+            SetPercentageAndCheckCancellation(100, false);
+
+            Status = DistributedTaskStatus.Completed;
+        }
+        catch (OperationCanceledException)
+        {
+            Status = DistributedTaskStatus.Canceled;
+            throw;
         }
         catch (Exception ex)
         {
             logger.ErrorReassignProgressItem(ex);
             Status = DistributedTaskStatus.Failted;
             Exception = ex;
-            SendErrorNotify(userManager, studioNotifyService, ex.Message);
+            await SendErrorNotifyAsync(userManager, studioNotifyService, ex.Message);
         }
         finally
         {
-            logger.LogInformation("data reassignment is complete");
+            logger.LogInformation($"data reassignment {Status.ToString().ToLowerInvariant()}");
             IsCompleted = true;
+            PublishChanges();
         }
-
-        PublishChanges();
     }
 
     public object Clone()
@@ -146,50 +149,64 @@ public class ReassignProgressItem : DistributedTaskProgress
         return MemberwiseClone();
     }
 
-    private void SendSuccessNotify(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, MessageTarget messageTarget, DisplayUserSettingsHelper displayUserSettingsHelper)
+    private void SetPercentageAndCheckCancellation(double percentage, bool publish)
     {
-        var fromUser = userManager.GetUsers(FromUser);
-        var toUser = userManager.GetUsers(ToUser);
+        Percentage = percentage;
 
-        studioNotifyService.SendMsgReassignsCompleted(_currentUserId, fromUser, toUser);
+        if (publish)
+        {
+            PublishChanges();
+        }
+
+        CancellationToken.ThrowIfCancellationRequested();
+    }
+
+    private async Task SendSuccessNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, MessageTarget messageTarget, DisplayUserSettingsHelper displayUserSettingsHelper)
+    {
+        var fromUser = await userManager.GetUsersAsync(FromUser);
+        var toUser = await userManager.GetUsersAsync(ToUser);
+
+        if (_notify)
+        {
+            await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, fromUser, toUser);
+        }
 
         var fromUserName = fromUser.DisplayUserName(false, displayUserSettingsHelper);
         var toUserName = toUser.DisplayUserName(false, displayUserSettingsHelper);
 
         if (_httpHeaders != null)
         {
-            messageService.Send(_httpHeaders, MessageAction.UserDataReassigns, messageTarget.Create(FromUser), new[] { fromUserName, toUserName });
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDataReassigns, messageTarget.Create(FromUser), _httpHeaders, new[] { fromUserName, toUserName });
         }
         else
         {
-            messageService.Send(MessageAction.UserDataReassigns, messageTarget.Create(FromUser), fromUserName, toUserName);
+            await messageService.SendAsync(MessageAction.UserDataReassigns, messageTarget.Create(FromUser), fromUserName, toUserName);
         }
     }
 
-    private void SendErrorNotify(UserManager userManager, StudioNotifyService studioNotifyService, string errorMessage)
+    private async Task SendErrorNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, string errorMessage)
     {
-        var fromUser = userManager.GetUsers(FromUser);
-        var toUser = userManager.GetUsers(ToUser);
+        var fromUser = await userManager.GetUsersAsync(FromUser);
+        var toUser = await userManager.GetUsersAsync(ToUser);
 
-        studioNotifyService.SendMsgReassignsFailed(_currentUserId, fromUser, toUser, errorMessage);
+        await studioNotifyService.SendMsgReassignsFailedAsync(_currentUserId, fromUser, toUser, errorMessage);
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, MessageTarget messageTarget, DisplayUserSettingsHelper displayUserSettingsHelper, QueueWorkerRemove queueWorkerRemove)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, MessageTarget messageTarget, DisplayUserSettingsHelper displayUserSettingsHelper)
     {
-        var user = userManager.GetUsers(FromUser);
+        var user = await userManager.GetUsersAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
-        await userPhotoManager.RemovePhoto(user.Id);
-        await userManager.DeleteUser(user.Id);
-        queueWorkerRemove.Start(_tenantId, user, _currentUserId, false);
+        await userPhotoManager.RemovePhotoAsync(user.Id);
+        await userManager.DeleteUserAsync(user.Id);
 
         if (_httpHeaders != null)
         {
-            messageService.Send(_httpHeaders, MessageAction.UserDeleted, messageTarget.Create(FromUser), new[] { userName });
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            messageService.Send(MessageAction.UserDeleted, messageTarget.Create(FromUser), userName);
+            await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), userName);
         }
     }
 }
@@ -200,6 +217,7 @@ public class ReassignProgressItemScope
     private readonly TenantManager _tenantManager;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly MessageService _messageService;
+    private readonly FileStorageService _fileStorageService;
     private readonly StudioNotifyService _studioNotifyService;
     private readonly SecurityContext _securityContext;
     private readonly UserManager _userManager;
@@ -211,6 +229,7 @@ public class ReassignProgressItemScope
     public ReassignProgressItemScope(TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         MessageService messageService,
+        FileStorageService fileStorageService,
         StudioNotifyService studioNotifyService,
         SecurityContext securityContext,
         UserManager userManager,
@@ -222,6 +241,7 @@ public class ReassignProgressItemScope
         _tenantManager = tenantManager;
         _coreBaseSettings = coreBaseSettings;
         _messageService = messageService;
+        _fileStorageService = fileStorageService;
         _studioNotifyService = studioNotifyService;
         _securityContext = securityContext;
         _userManager = userManager;
@@ -234,6 +254,7 @@ public class ReassignProgressItemScope
     public void Deconstruct(out TenantManager tenantManager,
         out CoreBaseSettings coreBaseSettings,
         out MessageService messageService,
+        out FileStorageService fileStorageService,
         out StudioNotifyService studioNotifyService,
         out SecurityContext securityContext,
         out UserManager userManager,
@@ -245,6 +266,7 @@ public class ReassignProgressItemScope
         tenantManager = _tenantManager;
         coreBaseSettings = _coreBaseSettings;
         messageService = _messageService;
+        fileStorageService = _fileStorageService;
         studioNotifyService = _studioNotifyService;
         securityContext = _securityContext;
         userManager = _userManager;

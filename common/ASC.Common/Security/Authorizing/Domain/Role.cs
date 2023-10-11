@@ -26,7 +26,6 @@
 
 namespace ASC.Common.Security.Authorizing;
 
-[Serializable]
 public sealed class Role : IRole
 {
     public const string Everyone = "Everyone";
@@ -40,6 +39,7 @@ public sealed class Role : IRole
     public string AuthenticationType => "ASC";
     public bool IsAuthenticated => false;
 
+    public string Key => ID.ToString();
 
     public Role(Guid id, string name)
     {

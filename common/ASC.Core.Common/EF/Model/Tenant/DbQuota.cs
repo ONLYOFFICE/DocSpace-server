@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Core.Common.EF;
 
 public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
 {
-    public int Tenant { get; set; }
+    public int TenantId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string Features { get; set; }
@@ -38,7 +40,7 @@ public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
 
     public override object[] GetKeys()
     {
-        return new object[] { Tenant };
+        return new object[] { TenantId };
     }
 
     public void Mapping(Profile profile)
@@ -52,34 +54,76 @@ public static class DbQuotaExtension
     {
         modelBuilder
             .Add(MySqlAddDbQuota, Provider.MySql)
-            .Add(PgSqlAddDbQuota, Provider.PostgreSql)
+            .Add(PgSqlAddDbQuota, Provider.PostgreSql);
+
+        modelBuilder
             .HasData(
                 new DbQuota
                 {
-                    Tenant = -1,
+                    TenantId = -1,
                     Name = "trial",
                     Description = null,
-                    Features = "trial,audit,ldap,sso,whitelabel,restore,total_size:107374182400,file_size:100,manager:1",
+                    Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1",
                     Price = 0,
                     ProductId = null,
                     Visible = false
                 },
                 new DbQuota
                 {
-                    Tenant = -2,
+                    TenantId = -2,
                     Name = "admin",
                     Description = null,
-                    Features = "audit,ldap,sso,whitelabel,restore,total_size:107374182400,file_size:1024,manager:1",
-                    Price = 30,
+                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1",
+                    Price = 15,
                     ProductId = "1002",
                     Visible = true
                 },
                 new DbQuota
                 {
-                    Tenant = -3,
+                    TenantId = -3,
                     Name = "startup",
                     Description = null,
-                    Features = "free,total_size:2147483648,manager:1,room:12,usersInRoom:3",
+                    Features = "free,oauth,total_size:2147483648,manager:3,room:12",
+                    Price = 0,
+                    ProductId = null,
+                    Visible = false
+                },
+                new DbQuota
+                {
+                    TenantId = -4,
+                    Name = "disk",
+                    Description = null,
+                    Features = "total_size:1073741824",
+                    Price = 0,
+                    ProductId = "1004",
+                    Visible = false
+                },
+                new DbQuota
+                {
+                    TenantId = -5,
+                    Name = "admin1",
+                    Description = null,
+                    Features = "manager:1",
+                    Price = 0,
+                    ProductId = "1005",
+                    Visible = false
+                },
+                new DbQuota
+                {
+                    TenantId = -6,
+                    Name = "subscription",
+                    Description = null,
+                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024",
+                    Price = 0,
+                    ProductId = "1001",
+                    Visible = false
+                },
+                new DbQuota
+                {
+                    TenantId = -7,
+                    Name = "nonprofit",
+                    Description = null,
+                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -93,13 +137,13 @@ public static class DbQuotaExtension
     {
         modelBuilder.Entity<DbQuota>(entity =>
         {
-            entity.HasKey(e => e.Tenant)
+            entity.HasKey(e => e.TenantId)
                 .HasName("PRIMARY");
 
             entity.ToTable("tenants_quota")
                 .HasCharSet("utf8");
 
-            entity.Property(e => e.Tenant)
+            entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
                 .ValueGeneratedNever();
 
@@ -140,12 +184,12 @@ public static class DbQuotaExtension
     {
         modelBuilder.Entity<DbQuota>(entity =>
         {
-            entity.HasKey(e => e.Tenant)
+            entity.HasKey(e => e.TenantId)
                 .HasName("tenants_quota_pkey");
 
             entity.ToTable("tenants_quota", "onlyoffice");
 
-            entity.Property(e => e.Tenant)
+            entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
                 .ValueGeneratedNever();
 

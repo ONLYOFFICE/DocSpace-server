@@ -24,48 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SixLabors.ImageSharp.Processing;
+
+using ASC.Data.Storage;
+using ASC.Data.Storage.DiscStorage;
 
 namespace ASC.Files.ThumbnailBuilder;
-
-[Singletone]
-public class BuilderQueue<T>
-{
-    private readonly ThumbnailSettings _config;
-    private readonly ILogger _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public BuilderQueue(IServiceScopeFactory serviceScopeFactory, ILoggerProvider log, ThumbnailSettings settings)
-    {
-        _logger = log.CreateLogger("ASC.Files.ThumbnailBuilder");
-        _serviceScopeFactory = serviceScopeFactory;
-        _config = settings;
-    }
-
-    public async Task BuildThumbnails(IEnumerable<FileData<T>> filesWithoutThumbnails)
-    {
-        try
-        {
-            await Parallel.ForEachAsync(
-            filesWithoutThumbnails,
-            new ParallelOptions { MaxDegreeOfParallelism = _config.MaxDegreeOfParallelism },
-                async (fileData, token) =>
-            {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var commonLinkUtilitySettings = scope.ServiceProvider.GetService<CommonLinkUtilitySettings>();
-                commonLinkUtilitySettings.ServerUri = fileData.BaseUri;
-
-                var builder = scope.ServiceProvider.GetService<Builder<T>>();
-                await builder.BuildThumbnail(fileData);
-            }
-        );
-        }
-        catch (Exception exception)
-        {
-            _logger.ErrorBuildThumbnailsCount(filesWithoutThumbnails.Count(), exception);
-        }
-    }
-}
 
 [Scope]
 public class Builder<T>
@@ -79,10 +42,12 @@ public class Builder<T>
     private readonly Global _global;
     private readonly PathProvider _pathProvider;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly ThumbnailSettings _thumbnailSettings;
     private readonly SocketManager _socketManager;
     private readonly FFmpegService _fFmpegService;
     private readonly TempPath _tempPath;
+    private readonly TempStream _tempStream;
+    private readonly StorageFactory _storageFactory;
+    private IDataStore _dataStore;
 
     private readonly List<string> _imageFormatsCanBeCrop = new List<string>
             {
@@ -102,7 +67,8 @@ public class Builder<T>
         FFmpegService fFmpegService,
         TempPath tempPath,
         SocketManager socketManager,
-        ThumbnailSettings thumbnailSettings)
+        TempStream tempStream,
+        StorageFactory storageFactory)
     {
         _config = settings;
         _tenantManager = tenantManager;
@@ -115,15 +81,18 @@ public class Builder<T>
         _clientFactory = clientFactory;
         _fFmpegService = fFmpegService;
         _tempPath = tempPath;
+        _tempStream = tempStream;
+        _storageFactory = storageFactory;
         _socketManager = socketManager;
-        _thumbnailSettings = thumbnailSettings;
     }
 
     internal async Task BuildThumbnail(FileData<T> fileData)
     {
         try
         {
-            _tenantManager.SetCurrentTenant(fileData.TenantId);
+            await _tenantManager.SetCurrentTenantAsync(fileData.TenantId);
+
+            _dataStore = await _storageFactory.GetStorageAsync(fileData.TenantId, FileConstant.StorageModule, (IQuotaController)null);
 
             var fileDao = _daoFactory.GetFileDao<T>();
             if (fileDao == null)
@@ -138,10 +107,6 @@ public class Builder<T>
         catch (Exception exception)
         {
             _logger.ErrorBuildThumbnailsTenantId(fileData.TenantId, exception);
-        }
-        finally
-        {
-            FileDataQueue.Queue.TryRemove(fileData.FileId, out _);
         }
     }
 
@@ -167,35 +132,33 @@ public class Builder<T>
                 return;
             }
 
-            var ext = FileUtility.GetFileExtension(file.Title);
-
-            if (!CanCreateThumbnail(ext) || file.Encrypted || file.RootFolderType == FolderType.TRASH || file.ContentLength > _config.AvailableFileSize)
+            if (!CanCreateThumbnail(file))
             {
                 file.ThumbnailStatus = Core.Thumbnail.NotRequired;
-                foreach (var size in _thumbnailSettings.Sizes)
-                {
-                    await fileDao.SaveThumbnailAsync(file, null, size.Width, size.Height);
-                }
+
+                await fileDao.SetThumbnailStatusAsync(file, Core.Thumbnail.NotRequired);
 
                 return;
             }
+
+            await fileDao.SetThumbnailStatusAsync(file, Core.Thumbnail.Creating);
+
+            var ext = FileUtility.GetFileExtension(file.Title);
 
             if (IsVideo(ext))
             {
                 await MakeThumbnailFromVideo(fileDao, file);
             }
+            else if (IsImage(ext))
+            {
+                await MakeThumbnailFromImage(fileDao, file);
+            }
             else
             {
-
-                if (IsImage(ext))
-                {
-                    await CropImage(fileDao, file);
-                }
-                else
-                {
-                    await MakeThumbnail(fileDao, file);
-                }
+                await MakeThumbnailFromDocs(fileDao, file);
             }
+
+            await fileDao.SetThumbnailStatusAsync(file, Core.Thumbnail.Created);
 
             var newFile = await fileDao.GetFileStableAsync(file.Id);
 
@@ -207,10 +170,8 @@ public class Builder<T>
             if (file != null)
             {
                 file.ThumbnailStatus = Core.Thumbnail.Error;
-                foreach (var size in _thumbnailSettings.Sizes)
-                {
-                    await fileDao.SaveThumbnailAsync(file, null, size.Width, size.Height);
-                }
+
+                await fileDao.SetThumbnailStatusAsync(file, Core.Thumbnail.Error);
             }
         }
     }
@@ -222,39 +183,51 @@ public class Builder<T>
         var thumbPath = _tempPath.GetTempFileName("jpg");
         var tempFilePath = _tempPath.GetTempFileName(Path.GetExtension(file.Title));
 
-        using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+        try
         {
-            await streamFile.CopyToAsync(fileStream);
+            await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            {
+                await streamFile.CopyToAsync(fileStream);
+            }
+
+            await _fFmpegService.CreateThumbnail(tempFilePath, thumbPath);
+
+            await using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            {
+                await CropAsync(fileDao, file, streamThumb);
+            }
         }
-
-        await _fFmpegService.CreateThumbnail(tempFilePath, thumbPath);
-
-        using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+        finally
         {
-            await Crop(fileDao, file, streamThumb);
-        }
+            if (Path.Exists(thumbPath))
+            {
+                File.Delete(thumbPath);
+            }
 
-        File.Delete(thumbPath);
-        File.Delete(tempFilePath);
+            if (Path.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
     }
 
-    private async Task MakeThumbnail(IFileDao<T> fileDao, File<T> file)
+    private async Task MakeThumbnailFromDocs(IFileDao<T> fileDao, File<T> file)
     {
         foreach (var w in _config.Sizes)
         {
             _logger.DebugMakeThumbnail1(file.Id.ToString());
 
             string thumbnailUrl = null;
+            var resultPercent = 0;
             var attempt = 1;
 
             do
             {
                 try
                 {
-                    var (result, url) = await GetThumbnailUrl(file, _global.DocThumbnailExtension.ToString(), w.Width, w.Height);
-                    thumbnailUrl = url;
+                    (resultPercent, thumbnailUrl) = await GetThumbnailUrl(file, _global.DocThumbnailExtension.ToString(), w.Width, w.Height);
 
-                    if (result)
+                    if (resultPercent == 100)
                     {
                         break;
                     }
@@ -268,19 +241,27 @@ public class Builder<T>
                         {
                             if (documentServiceException.Code == DocumentServiceException.ErrorCode.ConvertPassword)
                             {
-                                throw new Exception(string.Format("MakeThumbnail: FileId: {0}. Encrypted file.", file.Id));
+                                throw new Exception(String.Format("MakeThumbnail: FileId: {0}. Encrypted file.", file.Id), exception);
                             }
                             if (documentServiceException.Code == DocumentServiceException.ErrorCode.Convert)
                             {
-                                throw new Exception(string.Format("MakeThumbnail: FileId: {0}. Could not convert.", file.Id));
+                                throw new Exception(String.Format("MakeThumbnail: FileId: {0}. Could not convert.", file.Id), exception);
                             }
                         }
+                        else
+                        {
+                            _logger.WarningMakeThumbnail(file.Id.ToString(), thumbnailUrl, resultPercent, attempt, exception);
+                        }
+                    }
+                    else
+                    {
+                        _logger.WarningMakeThumbnail(file.Id.ToString(), thumbnailUrl, resultPercent, attempt, exception);
                     }
                 }
 
                 if (attempt >= _config.AttemptsLimit)
                 {
-                    throw new Exception(string.Format("MakeThumbnail: FileId: {0}. Attempts limmit exceeded.", file.Id));
+                    throw new Exception(string.Format("MakeThumbnail: FileId: {0}, ThumbnailUrl: {1}, ResultPercent: {2}. Attempts limmit exceeded.", file.Id, thumbnailUrl, resultPercent));
                 }
                 else
                 {
@@ -292,17 +273,17 @@ public class Builder<T>
             }
             while (string.IsNullOrEmpty(thumbnailUrl));
 
-            await SaveThumbnail(fileDao, file, thumbnailUrl, w.Width, w.Height);
+            await SaveThumbnail(fileDao, file, thumbnailUrl, w.Width, w.Height, w.ResizeMode, AnchorPositionMode.Top);
         }
     }
 
-    private async Task<(bool, string)> GetThumbnailUrl(File<T> file, string toExtension, int width, int height)
+    private async Task<(int, string)> GetThumbnailUrl(File<T> file, string toExtension, int width, int height)
     {
-        var fileUri = _pathProvider.GetFileStreamUrl(file);
-        fileUri = _documentServiceConnector.ReplaceCommunityAdress(fileUri);
+        var fileUri = await _pathProvider.GetFileStreamUrlAsync(file);
+        fileUri = await _documentServiceConnector.ReplaceCommunityAdressAsync(fileUri);
 
         var fileExtension = file.ConvertedExtension;
-        var docKey = _documentServiceHelper.GetDocKey(file);
+        var docKey = await _documentServiceHelper.GetDocKeyAsync(file);
         var thumbnail = new ThumbnailData
         {
             Aspect = 2,
@@ -330,13 +311,13 @@ public class Builder<T>
             }
         };
 
-        var (operationResultProgress, url) = await _documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false);
+        var (operationResultProgress, url, _) = await _documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false);
 
         operationResultProgress = Math.Min(operationResultProgress, 100);
-        return (operationResultProgress == 100, url);
+        return (operationResultProgress, url);
     }
 
-    private async Task SaveThumbnail(IFileDao<T> fileDao, File<T> file, string thumbnailUrl, int width, int height)
+    private async Task SaveThumbnail(IFileDao<T> fileDao, File<T> file, string thumbnailUrl, int width, int height, ResizeMode resizeMode, AnchorPositionMode anchorPositionMode = AnchorPositionMode.Center)
     {
         _logger.DebugMakeThumbnail3(file.Id.ToString(), thumbnailUrl);
 
@@ -345,15 +326,26 @@ public class Builder<T>
 
         var httpClient = _clientFactory.CreateClient();
         using var response = httpClient.Send(request);
-        using (var stream = await response.Content.ReadAsStreamAsync())
+        await using (var stream = await response.Content.ReadAsStreamAsync())
         {
             using (var sourceImg = await Image.LoadAsync(stream))
             {
-                await CropAsync(sourceImg, fileDao, file, width, height);
+                await CropAsync(sourceImg, fileDao, file, width, height, resizeMode, anchorPositionMode);
             }
         }
 
         _logger.DebugMakeThumbnail4(file.Id.ToString());
+    }
+
+    public bool CanCreateThumbnail(File<T> file)
+    {
+        var ext = FileUtility.GetFileExtension(file.Title);
+
+        if (!CanCreateThumbnail(ext) || file.Encrypted || file.RootFolderType == FolderType.TRASH) return false;
+        if (IsVideo(ext) && file.ContentLength > _config.MaxVideoFileSize) return false;
+        if (IsImage(ext) && file.ContentLength > _config.MaxImageFileSize) return false;
+
+        return true;
     }
 
     private bool CanCreateThumbnail(string extention)
@@ -371,46 +363,51 @@ public class Builder<T>
         return _fFmpegService.ExistFormat(extention);
     }
 
-    private async Task CropImage(IFileDao<T> fileDao, File<T> file)
+    private async Task MakeThumbnailFromImage(IFileDao<T> fileDao, File<T> file)
     {
         _logger.DebugCropImage(file.Id.ToString());
 
-        using (var stream = await fileDao.GetFileStreamAsync(file))
+        await using (var stream = await fileDao.GetFileStreamAsync(file))
         {
-            await Crop(fileDao, file, stream);
+            await CropAsync(fileDao, file, stream);
         }
 
         _logger.DebugCropImageSuccessfullySaved(file.Id.ToString());
     }
 
-    private async Task Crop(IFileDao<T> fileDao, File<T> file, Stream stream)
+    private async Task CropAsync(IFileDao<T> fileDao, File<T> file, Stream stream)
     {
-        using (var sourceImg = await Image.LoadAsync(stream))
+        using var sourceImg = await Image.LoadAsync(stream);
+
+        if (_dataStore is DiscDataStore)
         {
-            //var tasks = new List<Task>();
-
-            //foreach (var w in config.Sizes)
-            //{
-            //    tasks.Add(CropAsync(sourceImg, fileDao, file, w.Width, w.Height));
-            //}
-
-            //await Task.WhenAll(tasks.ToArray());
-
-            //await Parallel.ForEachAsync(config.Sizes, (w, b) => CropAsync(sourceImg, fileDao, file, w.Width, w.Height));
-
             foreach (var w in _config.Sizes)
             {
-                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height);
+                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
             }
+        }
+        else
+        {
+            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, t) =>
+            {
+                await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
+            });
         }
 
         GC.Collect();
     }
 
-    private async ValueTask CropAsync(Image sourceImg, IFileDao<T> fileDao, File<T> file, int width, int height)
+    private async ValueTask CropAsync(Image sourceImg,
+                                      IFileDao<T> fileDao,
+                                      File<T> file,
+                                      int width,
+                                      int height,
+                                      ResizeMode resizeMode,
+                                      AnchorPositionMode anchorPositionMode = AnchorPositionMode.Center)
     {
-        using var targetImg = GetImageThumbnail(sourceImg, width);
-        using var targetStream = new MemoryStream();
+        using var targetImg = GetImageThumbnail(sourceImg, width, height, resizeMode, anchorPositionMode);
+        await using var targetStream = _tempStream.Create();
+
         switch (_global.ThumbnailExtension)
         {
             case ThumbnailExtension.bmp:
@@ -438,11 +435,21 @@ public class Builder<T>
                 await targetImg.SaveAsWebpAsync(targetStream);
                 break;
         }
-        await fileDao.SaveThumbnailAsync(file, targetStream, width, height);
+
+        await _dataStore.SaveAsync(fileDao.GetUniqThumbnailPath(file, width, height), targetStream);
     }
 
-    private Image GetImageThumbnail(Image sourceBitmap, int thumbnaillWidth)
+    private Image GetImageThumbnail(Image sourceBitmap, int thumbnaillWidth, int thumbnaillHeight, ResizeMode resizeMode, AnchorPositionMode anchorPositionMode)
     {
-        return sourceBitmap.Clone(x => x.BackgroundColor(Color.White).Resize(thumbnaillWidth, 0));
+        return sourceBitmap.Clone(x =>
+        {
+            x.Resize(new ResizeOptions
+            {
+                Size = new Size(thumbnaillWidth, thumbnaillHeight),
+                Mode = resizeMode,
+                Position = anchorPositionMode,
+                Sampler = KnownResamplers.Lanczos8
+            });
+        });
     }
 }

@@ -30,24 +30,21 @@ class TelegramSenderSink : Sink
 {
     private readonly string _senderName = Configuration.Constants.NotifyTelegramSenderSysName;
     private readonly INotifySender _sender;
-    private readonly IServiceProvider _serviceProvider;
 
-    public TelegramSenderSink(INotifySender sender, IServiceProvider serviceProvider)
+    public TelegramSenderSink(INotifySender sender)
     {
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-        _serviceProvider = serviceProvider;
     }
 
 
-    public override async Task<SendResponse> ProcessMessage(INoticeMessage message)
+    public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope scope)
     {
         try
         {
             const SendResult result = SendResult.OK;
 
-            using var scope = _serviceProvider.CreateScope();
-            var m = scope.ServiceProvider.GetRequiredService<TelegramSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
-            await _sender.Send(m);
+            var m = await scope.ServiceProvider.GetRequiredService<TelegramSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
+            await _sender.SendAsync(m);
 
             return new SendResponse(message, _senderName, result);
         }
@@ -68,7 +65,7 @@ public class TelegramSenderSinkMessageCreator : SinkMessageCreator
         _tenantManager = tenantManager;
     }
 
-    public override NotifyMessage CreateNotifyMessage(INoticeMessage message, string senderName)
+    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
         var m = new NotifyMessage
         {
@@ -80,7 +77,7 @@ public class TelegramSenderSinkMessageCreator : SinkMessageCreator
             CreationDate = DateTime.UtcNow,
         };
 
-        var tenant = _tenantManager.GetCurrentTenant(false);
+        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
         m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
 
         return m;

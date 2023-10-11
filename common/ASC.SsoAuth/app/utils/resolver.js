@@ -18,15 +18,17 @@
 "use strict";
 
 const config = require("../../config").get(),
-// ReSharper disable once InconsistentNaming
-      URL = require("url");
+    logger = require("../log.js");
+    URL = require("url");
 
 // ReSharper disable once InconsistentNaming
-module.exports = function (logger) {
+module.exports = function () {
 
     function getBaseUrl(req) {
-        const url = req.headers["x-rewriter-url"] || req.protocol + "://" + req.get("host");
-        return url;
+        const proto = req.headers['x-forwarded-proto']?.split(',').shift();
+        const host = req.headers['x-forwarded-host']?.split(',').shift();
+
+        return `${proto}://${host}`;
     }
 
     function getPortalSsoHandlerUrl(req) {
@@ -60,25 +62,26 @@ module.exports = function (logger) {
     }
 
     const ErrorMessageKey = {
+        Error: 1,
         SsoError: 17,
         SsoAuthFailed: 18,
         SsoAttributesNotFound: 19,
     };
 
     function getPortalAuthErrorUrl(req, errorKey) {
-        const url = getPortalAuthUrl(req) + "?am=" + errorKey;
+        const url = getBaseUrl(req) + "/login/error?messageKey=" + errorKey;
         logger.debug("getPortalAuthErrorUrl: " + url);
         return url;
     }
 
     function getPortalErrorUrl(req) {
-        const url = getBaseUrl(req) + "/500.aspx";
+        const url = getBaseUrl(req) + "/login/error?messageKey=" + ErrorMessageKey.Error;
         logger.debug("getPortal500Url: " + url);
         return url;
     }
 
     function getPortal404Url(req) {
-        const url = getBaseUrl(req) + "/404.aspx";
+        const url = getBaseUrl(req) + "/login/error?messageKey=" + ErrorMessageKey.SsoError;
         logger.debug("getPortal404Url: " + url);
         return url;
     }

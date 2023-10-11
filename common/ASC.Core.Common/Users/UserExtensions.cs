@@ -40,18 +40,29 @@ public static class UserExtensions
 
     public static bool IsMe(this UserInfo ui, AuthContext authContext)
     {
-        return ui != null && ui.Id == authContext.CurrentAccount.ID;
+        return IsMe(ui, authContext.CurrentAccount.ID);
     }
 
-    public static bool IsDocSpaceAdmin(this UserManager userManager, Guid id)
+    public static bool IsMe(this UserInfo user, Guid id)
     {
-        var ui = userManager.GetUsers(id);
-        return userManager.IsDocSpaceAdmin(ui);
+        return user != null && user.Id == id;
     }
 
-    public static bool IsDocSpaceAdmin(this UserManager userManager, UserInfo ui)
+    public static async Task<bool> IsDocSpaceAdminAsync(this UserManager userManager, Guid id)
     {
-        return ui != null && userManager.IsUserInGroup(ui.Id, Constants.GroupAdmin.ID);
+        var ui = await userManager.GetUsersAsync(id);
+        return await userManager.IsDocSpaceAdminAsync(ui);
+    }
+
+    public static async Task<bool> IsDocSpaceAdminAsync(this UserManager userManager, UserInfo ui)
+    {
+        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupAdmin.ID);
+    }
+
+    public static async Task<bool> IsUserAsync(this UserManager userManager, Guid id)
+    {
+        var ui = await userManager.GetUsersAsync(id);
+        return await userManager.IsUserAsync(ui);
     }
 
     public static bool IsUser(this UserManager userManager, Guid id)
@@ -60,19 +71,35 @@ public static class UserExtensions
         return userManager.IsUser(ui);
     }
 
+    public static async Task<bool> IsUserAsync(this UserManager userManager, UserInfo ui)
+    {
+        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupUser.ID);
+    }
+
     public static bool IsUser(this UserManager userManager, UserInfo ui)
     {
         return ui != null && userManager.IsUserInGroup(ui.Id, Constants.GroupUser.ID);
     }
 
-    public static bool IsOutsider(this UserManager userManager, Guid id)
+    public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, UserInfo userInfo)
     {
-        return userManager.IsUser(id) && id == Constants.OutsideUser.Id;
+        return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupCollaborator.ID);
+    }
+    
+    public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, Guid id)
+    {
+        var userInfo = await userManager.GetUsersAsync(id);
+        return await userManager.IsCollaboratorAsync(userInfo);
     }
 
-    public static bool IsOutsider(this UserManager userManager, UserInfo ui)
+    public static async Task<bool> IsOutsiderAsync(this UserManager userManager, Guid id)
     {
-        return userManager.IsUser(ui) && ui.Id == Constants.OutsideUser.Id;
+        return await userManager.IsUserAsync(id) && id == Constants.OutsideUser.Id;
+    }
+
+    public static async Task<bool> IsOutsiderAsync(this UserManager userManager, UserInfo ui)
+    {
+        return await userManager.IsUserAsync(ui) && ui.Id == Constants.OutsideUser.Id;
     }
 
     public static bool IsLDAP(this UserInfo ui)
@@ -94,6 +121,19 @@ public static class UserExtensions
         }
 
         return !string.IsNullOrEmpty(ui.SsoNameId);
+    }
+
+    public static async Task<EmployeeType> GetUserTypeAsync(this UserManager userManager, Guid id)
+    {
+        if ((await userManager.GetUsersAsync(id)).Equals(Constants.LostUser))
+        {
+            return EmployeeType.User;
+        }
+        
+        return await userManager.IsDocSpaceAdminAsync(id) ? EmployeeType.DocSpaceAdmin : 
+            await userManager.IsUserAsync(id) ? EmployeeType.User : 
+            await userManager.IsCollaboratorAsync(id) ? EmployeeType.Collaborator :
+            EmployeeType.RoomAdmin;
     }
 
     private const string _extMobPhone = "extmobphone";

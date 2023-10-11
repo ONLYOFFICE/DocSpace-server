@@ -32,77 +32,66 @@ public class ThumbnailBuilderService : BackgroundService
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ThumbnailSettings _thumbnailSettings;
     private readonly ILogger<ThumbnailBuilderService> _logger;
-    private readonly BuilderQueue<int> _builderQueue;
+    private readonly ChannelReader<FileData<int>> _channelReader;
 
     public ThumbnailBuilderService(
-        BuilderQueue<int> builderQueue,
         IServiceScopeFactory serviceScopeFactory,
         ILogger<ThumbnailBuilderService> logger,
-        ThumbnailSettings settings)
+        ThumbnailSettings settings,
+        ChannelReader<FileData<int>> channelReader)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _thumbnailSettings = settings;
         _logger = logger;
-        _builderQueue = builderQueue;
+        _channelReader = channelReader;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.InformationThumbnailWorkerRunnig();
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await Procedure(stoppingToken);
-        }
+        stoppingToken.Register(() => _logger.InformationThumbnailWorkerStopping());
 
-        _logger.InformationThumbnailWorkerStopping();
-    }
+        var fetchedData = new List<FileData<int>>();
 
-    private async Task Procedure(CancellationToken stoppingToken)
-    {
         _logger.TraceProcedureStart();
 
-        if (stoppingToken.IsCancellationRequested)
+        var readers = new List<ChannelReader<FileData<int>>>() {
+            _channelReader 
+        };
+
+        if (((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.3)) > 0)
         {
-            return;
+            var splitter = _channelReader.Split(2, (n, i, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
+            var premiumChannels = splitter[0].Split((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.7), null, stoppingToken);
+            var freeChannel = splitter[1].Split((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.3), null, stoppingToken);
+            readers = premiumChannels.Union(freeChannel).ToList();
         }
 
-        //var configSection = (ConfigSection)ConfigurationManager.GetSection("thumbnailBuilder") ?? new ConfigSection();
-        //CommonLinkUtility.Initialize(configSection.ServerRoot, false);
+        var tasks = new List<Task>();
 
-        var filesWithoutThumbnails = FileDataQueue.Queue.Select(pair => pair.Value).ToList();
-
-        if (filesWithoutThumbnails.Count == 0)
+        for (var i = 0; i < readers.Count; i++)
         {
-            _logger.TraceProcedureWaiting(_thumbnailSettings.LaunchFrequency);
+            var reader = readers[i];
 
-            await Task.Delay(TimeSpan.FromSeconds(_thumbnailSettings.LaunchFrequency), stoppingToken);
+            tasks.Add(Task.Run(async () =>
+            {
+                await foreach (var fileData in reader.ReadAllAsync(stoppingToken))
+                {
+                    await using var scope = _serviceScopeFactory.CreateAsyncScope();
 
-            return;
+                    var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
+                    commonLinkUtility.ServerUri = fileData.BaseUri;
+
+                    var builder = scope.ServiceProvider.GetService<Builder<int>>();
+
+                    await builder.BuildThumbnail(fileData);
+                }
+            }, stoppingToken));
         }
 
-        using (var scope = _serviceScopeFactory.CreateScope())
-        {
-            var fileDataProvider = scope.ServiceProvider.GetService<FileDataProvider>();
-            var premiumTenants = fileDataProvider.GetPremiumTenants();
-
-            filesWithoutThumbnails = filesWithoutThumbnails
-                .OrderByDescending(fileData => Array.IndexOf(premiumTenants, fileData.TenantId))
-                .ToList();
-
-            await _builderQueue.BuildThumbnails(filesWithoutThumbnails);
-        }
-
-        _logger.TraceProcedureFinish();
+        await Task.WhenAll(tasks);
     }
-}
 
-public static class WorkerExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<FileDataProvider>();
-        services.TryAdd<BuilderQueue<int>>();
-        services.TryAdd<Builder<int>>();
-    }
+
 }

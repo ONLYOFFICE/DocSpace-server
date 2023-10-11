@@ -34,26 +34,24 @@ public class BackupWorker
     public string TempFolder { get; set; }
 
     private DistributedTaskQueue _progressQueue;
-    private string _currentRegion;
-    private Dictionary<string, string> _configPaths;
     private int _limit;
     private string _upgradesPath;
-    private readonly ILogger<BackupWorker> _logger;
     private readonly TempPath _tempPath;
+    private readonly SetupInfo _setupInfo;
     private readonly IServiceProvider _serviceProvider;
     private readonly object _synchRoot = new object();
 
     public BackupWorker(
-        ILogger<BackupWorker> logger,
         IDistributedTaskQueueFactory queueFactory,
         IServiceProvider serviceProvider,
-        TempPath tempPath)
+        TempPath tempPath,
+        SetupInfo setupInfo)
     {
         _serviceProvider = serviceProvider;
-        _logger = logger;
         _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
         _tempPath = tempPath;
         TempFolder = Path.Combine(_tempPath.GetTempPath(), "backup");
+        _setupInfo = setupInfo;
     }
 
     public void Start(BackupSettings settings)
@@ -65,16 +63,7 @@ public class BackupWorker
 
         _limit = settings.Limit;
         _upgradesPath = settings.UpgradesPath;
-        _currentRegion = settings.WebConfigs.CurrentRegion;
-        _configPaths = settings.WebConfigs.Elements.ToDictionary(el => el.Region, el => PathHelper.ToRootedConfigPath(el.Path));
-        _configPaths[_currentRegion] = PathHelper.ToRootedConfigPath(settings.WebConfigs.CurrentPath);
-
-        var invalidConfigPath = _configPaths.Values.FirstOrDefault(path => !File.Exists(path));
-
-        if (invalidConfigPath != null)
-        {
-            _logger.WarningCanNotBackupFile(invalidConfigPath);
-        }
+        _setupInfo.ChunkUploadSize = settings.ChunkSize;
     }
 
     public void Stop()
@@ -108,7 +97,7 @@ public class BackupWorker
 
                 item = _serviceProvider.GetService<BackupProgressItem>();
 
-                item.Init(request, false, TempFolder, _limit, _currentRegion, _configPaths);
+                item.Init(request, false, TempFolder, _limit);
 
                 _progressQueue.EnqueueTask(item);
             }
@@ -133,7 +122,8 @@ public class BackupWorker
             if (item == null)
             {
                 item = _serviceProvider.GetService<BackupProgressItem>();
-                item.Init(schedule, false, TempFolder, _limit, _currentRegion, _configPaths);
+
+                item.Init(schedule, true, TempFolder, _limit);
 
                 _progressQueue.EnqueueTask(item);
             }
@@ -201,7 +191,7 @@ public class BackupWorker
             if (item == null)
             {
                 item = _serviceProvider.GetService<RestoreProgressItem>();
-                item.Init(request, TempFolder, _upgradesPath, _currentRegion, _configPaths);
+                item.Init(request, TempFolder, _upgradesPath);
 
                 _progressQueue.EnqueueTask(item);
             }
@@ -223,7 +213,7 @@ public class BackupWorker
             if (item == null)
             {
                 item = _serviceProvider.GetService<TransferProgressItem>();
-                item.Init(targetRegion, tenantId, TempFolder, _limit, notify, _currentRegion, _configPaths);
+                item.Init(targetRegion, tenantId, TempFolder, _limit, notify);
 
                 _progressQueue.EnqueueTask(item);
             }
@@ -232,7 +222,7 @@ public class BackupWorker
         }
     }
 
-    internal static string GetBackupHash(string path)
+    internal static string GetBackupHashSHA(string path)
     {
         using (var sha256 = SHA256.Create())
         using (var fileStream = File.OpenRead(path))
@@ -241,6 +231,43 @@ public class BackupWorker
             var hash = sha256.ComputeHash(fileStream);
             return BitConverter.ToString(hash).Replace("-", string.Empty);
         }
+    }
+
+    internal static string GetBackupHashMD5(string path, long chunkSize)
+    {
+        using (var md5 = MD5.Create())
+        using (var fileStream = File.OpenRead(path))
+        {var multipartSplitCount = 0;
+                var splitCount = fileStream.Length / chunkSize;
+                var mod = (int)(fileStream.Length - chunkSize * splitCount);
+                IEnumerable<byte> concatHash = new byte[] { };
+
+                for (var i = 0; i < splitCount; i++)
+                {
+                    var offset = i == 0 ? 0 : chunkSize * i;
+                    var chunk = GetChunk(fileStream, offset, (int)chunkSize);
+                    var hash = md5.ComputeHash(chunk);
+                    concatHash = concatHash.Concat(hash);
+                    multipartSplitCount++;
+                }
+                if (mod != 0)
+                {
+                    var chunk = GetChunk(fileStream, chunkSize * splitCount, mod);
+                    var hash = md5.ComputeHash(chunk);
+                    concatHash = concatHash.Concat(hash);
+                    multipartSplitCount++;
+                }
+                var multipartHash = BitConverter.ToString(md5.ComputeHash(concatHash.ToArray())).Replace("-", string.Empty);
+                return multipartHash + "-" + multipartSplitCount;
+        }
+    }
+
+    private static byte[] GetChunk(Stream sourceStream, long offset, int count)
+    {
+        var buffer = new byte[count];
+        sourceStream.Position = offset;
+        sourceStream.Read(buffer, 0, count);
+        return buffer;
     }
 
     private BackupProgress ToBackupProgress(BaseBackupProgressItem progressItem)

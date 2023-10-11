@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Globalization;
 global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
@@ -34,9 +35,13 @@ global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;
+global using ASC.Api.Core.Security;
+global using ASC.Api.Core.Routing;
 global using ASC.Api.Utils;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Common.Log;
+global using ASC.Common.Threading;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -72,6 +77,7 @@ global using ASC.Web.Core.Mobile;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
+global using ASC.Web.Core.Utility;
 global using ASC.Web.Files;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
@@ -79,20 +85,20 @@ global using ASC.Web.Studio.Utility;
 
 global using Autofac;
 
-global using Microsoft.AspNetCore.Authorization;
-global using Microsoft.AspNetCore.Builder;
-global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using Microsoft.Extensions.Logging;
 
 global using SixLabors.ImageSharp;
 global using SixLabors.ImageSharp.Formats;
 
 global using Module = ASC.Api.Core.Module;
 global using SecurityContext = ASC.Core.SecurityContext;
+global using AllowAnonymousAttribute = Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute;
+global using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
+global using HttpDeleteAttribute = Microsoft.AspNetCore.Mvc.HttpDeleteAttribute;
+global using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
+global using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
+global using HttpPutAttribute = Microsoft.AspNetCore.Mvc.HttpPutAttribute;

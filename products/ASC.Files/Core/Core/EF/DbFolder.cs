@@ -44,6 +44,10 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
     public bool Private { get; set; }
+    public bool HasLogo { get; set; }
+    public string Color { get; set; }
+
+    public DbTenant Tenant { get; set; }
 
     [Ignore]
     public string IndexName => Tables.Folder;
@@ -58,6 +62,8 @@ public static class DbFolderExtension
 {
     public static ModelBuilderWrapper AddDbFolder(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<DbFolder>().Navigation(e => e.Tenant).AutoInclude(false);
+
         modelBuilder
             .Add(MySqlAddDbFolder, Provider.MySql)
                 .Add(PgSqlAddDbFolder, Provider.PostgreSql);
@@ -79,6 +85,12 @@ public static class DbFolderExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId })
                 .HasDatabaseName("parent_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
+                .HasDatabaseName("tenant_id_parent_id_title");
+
+            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
+                .HasDatabaseName("tenant_id_parent_id_modified_on");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
@@ -129,7 +141,17 @@ public static class DbFolderExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Private).HasColumnName("private");
+            entity.Property(e => e.Private)
+                .HasColumnName("private")
+                .HasDefaultValueSql("'0'");
+
+            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+
+            entity.Property(e => e.Color)
+                .HasColumnName("color")
+                .HasColumnType("char(6)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
     public static void PgSqlAddDbFolder(this ModelBuilder modelBuilder)
@@ -143,6 +165,12 @@ public static class DbFolderExtension
 
             entity.HasIndex(e => new { e.TenantId, e.ParentId })
                 .HasDatabaseName("parent_id");
+
+            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
+                .HasDatabaseName("tenant_id_parent_id_title");
+
+            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
+                .HasDatabaseName("tenant_id_parent_id_modified_on");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
@@ -178,6 +206,8 @@ public static class DbFolderExtension
                 .HasMaxLength(400);
 
             entity.Property(e => e.Private).HasColumnName("private");
+
+            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
         });
     }
 }

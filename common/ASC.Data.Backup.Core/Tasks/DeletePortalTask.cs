@@ -34,13 +34,12 @@ public class DeletePortalTask : PortalTaskBase
         DbFactory dbFactory,
         ILogger<DeletePortalTask> logger,
         int tenantId,
-        string configPath,
         StorageFactory storageFactory,
         StorageFactoryConfig storageFactoryConfig,
         ModuleProvider moduleProvider)
         : base(dbFactory, logger, storageFactory, storageFactoryConfig, moduleProvider)
     {
-        Init(tenantId, configPath);
+        Init(tenantId);
         _logger = logger;
     }
 
@@ -57,7 +56,7 @@ public class DeletePortalTask : PortalTaskBase
 
         if (ProcessStorage)
         {
-            await DoDeleteStorage();
+            await DoDeleteStorageAsync();
         }
 
         _logger.DebugEndDelete(TenantId);
@@ -84,18 +83,18 @@ public class DeletePortalTask : PortalTaskBase
         _logger.DebugEndDeleteDataForModule(module.ModuleName);
     }
 
-    private async Task DoDeleteStorage()
+    private async Task DoDeleteStorageAsync()
     {
         _logger.DebugBeginDeleteStorage();
-        var storageModules = StorageFactoryConfig.GetModuleList(ConfigPath).Where(IsStorageModuleAllowed).ToList();
+        var storageModules = StorageFactoryConfig.GetModuleList().Where(IsStorageModuleAllowed).ToList();
         var modulesProcessed = 0;
         foreach (var module in storageModules)
         {
-            var storage = StorageFactory.GetStorage(ConfigPath, TenantId, module);
-            var domains = StorageFactoryConfig.GetDomainList(ConfigPath, module);
+            var storage = await StorageFactory.GetStorageAsync(TenantId, module);
+            var domains = StorageFactoryConfig.GetDomainList(module);
             foreach (var domain in domains)
             {
-                await ActionInvoker.Try(async state => await storage.DeleteFilesAsync((string)state, "\\", "*.*", true), domain, 5,
+                await ActionInvoker.TryAsync(async state => await storage.DeleteFilesAsync((string)state, "\\", "*.*", true), domain, 5,
                               onFailure: error => _logger.WarningCanNotDeleteFilesForDomain(domain, error));
             }
             await storage.DeleteFilesAsync("\\", "*.*", true);

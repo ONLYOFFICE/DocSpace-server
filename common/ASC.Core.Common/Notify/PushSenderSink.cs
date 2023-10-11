@@ -35,30 +35,25 @@ class PushSenderSink : Sink
     private static readonly string _senderName = Constants.NotifyPushSenderSysName;
     private readonly INotifySender _sender;
 
-    public PushSenderSink(INotifySender sender, IServiceProvider serviceProvider)
+    public PushSenderSink(INotifySender sender)
     {
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-        _serviceProvider = serviceProvider;
     }
 
-    private readonly IServiceProvider _serviceProvider;
-
-    public override async Task<SendResponse> ProcessMessage(INoticeMessage message)
+    public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope scope)
     {
         try
         {
 
             var result = SendResult.OK;
-            using var scope = _serviceProvider.CreateScope();
-
-            var m = scope.ServiceProvider.GetRequiredService<PushSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
+            var m = await scope.ServiceProvider.GetRequiredService<PushSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
             if (string.IsNullOrEmpty(m.Reciever))
             {
                 result = SendResult.IncorrectRecipient;
             }
             else
             {
-                await _sender.Send(m);
+                await _sender.SendAsync(m);
             }
 
             return new SendResponse(message, Constants.NotifyPushSenderSysName, result);
@@ -93,16 +88,16 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
         _userManager = userManager;
     }
 
-    public override NotifyMessage CreateNotifyMessage(INoticeMessage message, string senderName)
+    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
-        var tenant = _tenantManager.GetCurrentTenant(false);
+        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
         if (tenant == null)
         {
-            _tenantManager.SetCurrentTenant(Tenant.DefaultTenant);
-            tenant = _tenantManager.GetCurrentTenant(false);
+            await _tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
+            tenant = await _tenantManager.GetCurrentTenantAsync(false);
         }      
 
-        var user = _userManager.GetUsers(new Guid(message.Recipient.ID));
+        var user = await _userManager.GetUsersAsync(new Guid(message.Recipient.ID));
         var username = user.UserName;
 
         var fromTag = message.Arguments.FirstOrDefault(x => x.Tag.Equals("MessageFrom"));
@@ -117,7 +112,7 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
         var notifyData = new NotifyData()
         {
             Email = user.Email,
-            Portal = _tenantManager.GetCurrentTenant().TrustedDomains.FirstOrDefault(),
+            Portal = (await _tenantManager.GetCurrentTenantAsync()).TrustedDomains.FirstOrDefault(),
             OriginalUrl = originalUrl != null && originalUrl.Value != null ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {

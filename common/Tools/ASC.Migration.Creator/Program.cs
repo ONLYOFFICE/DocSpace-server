@@ -32,34 +32,12 @@ var options = new WebApplicationOptions
 
 var builder = WebApplication.CreateBuilder(options);
 
-builder.WebHost.ConfigureAppConfiguration((hostContext, config) =>
-{
-    config.AddJsonFile($"appsettings.json", true)
+builder.Configuration.AddJsonFile($"appsettings.creator.json", true)
                .AddCommandLine(args);
-});
 
-builder.WebHost.ConfigureServices((hostContext, services) =>
-{
-    services.AddScoped<EFLoggerFactory>();
-    services.AddBaseDbContext<AccountLinkContext>();
-    services.AddBaseDbContext<CoreDbContext>();
-    services.AddBaseDbContext<TenantDbContext>();
-    services.AddBaseDbContext<UserDbContext>();
-    services.AddBaseDbContext<TelegramDbContext>();
-    services.AddBaseDbContext<CustomDbContext>();
-    services.AddBaseDbContext<WebstudioDbContext>();
-    services.AddBaseDbContext<InstanceRegistrationContext>();
-    services.AddBaseDbContext<IntegrationEventLogContext>();
-    services.AddBaseDbContext<FeedDbContext>();
-    services.AddBaseDbContext<MessagesContext>();
-    services.AddBaseDbContext<WebhooksDbContext>();
-    services.AddBaseDbContext<MessagesContext>();
-    services.AddBaseDbContext<BackupsContext>();
-    services.AddBaseDbContext<FilesDbContext>();
-    services.AddBaseDbContext<NotifyDbContext>();
-    services.AddBaseDbContext<UrlShortenerFakeDbContext>();
-    services.AddBaseDbContext<FirebaseDbContext>();
-});
+builder.Services.AddScoped<EFLoggerFactory>();
+builder.Services.AddBaseDbContext<MigrationContext>();
+builder.Services.AddBaseDbContext<TeamlabSiteContext>();
 
 var app = builder.Build();
 

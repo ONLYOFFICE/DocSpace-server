@@ -24,6 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.IO;
+
+using ASC.Common.Web;
+
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Primitives;
+
 namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler
@@ -41,20 +48,20 @@ public class StorageHandler
         _checkAuth = checkAuth;
     }
 
-    public Task Invoke(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider)
+    public async ValueTask InvokeAsync(HttpContext context, TenantManager tenantManager, SecurityContext securityContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider)
     {
-        if (_checkAuth && !securityContext.IsAuthenticated)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            return Task.CompletedTask;
-        }
-
-        var storage = storageFactory.GetStorage(tenantManager.GetCurrentTenant().Id, _module);
+        var storage = await storageFactory.GetStorageAsync((await tenantManager.GetCurrentTenantAsync()).Id, _module);
         var path = CrossPlatform.PathCombine(_path, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
         var header = context.Request.Query[Constants.QueryHeader].FirstOrDefault() ?? "";
-
         var auth = context.Request.Query[Constants.QueryAuth].FirstOrDefault() ?? "";
         var storageExpire = storage.GetExpire(_domain);
+
+        if (_checkAuth && !securityContext.IsAuthenticated && !await SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
+            || _module == "backup" && !securityContext.IsAuthenticated)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            return;
+        }
 
         if (storageExpire != TimeSpan.Zero && storageExpire != TimeSpan.MinValue && storageExpire != TimeSpan.MaxValue || !string.IsNullOrEmpty(auth))
         {
@@ -64,19 +71,14 @@ public class StorageHandler
                 expire = storageExpire.TotalMinutes.ToString(CultureInfo.InvariantCulture);
             }
 
-            var validateResult = emailValidationKeyProvider.ValidateEmailKey(path + "." + header + "." + expire, auth ?? "", TimeSpan.FromMinutes(Convert.ToDouble(expire)));
+            var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(path + "." + header + "." + expire, auth ?? "", TimeSpan.FromMinutes(Convert.ToDouble(expire)));
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                return Task.CompletedTask;
+                return;
             }
         }
 
-        return InternalInvoke(context, storage, path, header);
-    }
-
-    private async Task InternalInvoke(HttpContext context, IDataStore storage, string path, string header)
-    {
         if (!await storage.IsFileAsync(_domain, path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -85,7 +87,10 @@ public class StorageHandler
 
         var headers = header.Length > 0 ? header.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
 
-        if (storage.IsSupportInternalUri)
+        const int bigSize = 5 * 1024 * 1024;
+        var fileSize = await storage.GetFileSizeAsync(_domain, path);
+
+        if (storage.IsSupportInternalUri && bigSize < fileSize)
         {
             var uri = await storage.GetInternalUriAsync(_domain, path, TimeSpan.FromMinutes(15), headers);
 
@@ -97,7 +102,24 @@ public class StorageHandler
             return;
         }
 
+        //if (!String.IsNullOrEmpty(context.Request.Query["_"]))
+        //{
+        //    context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
+        //}
+
+        //var etag = await storage.GetFileEtagAsync(_domain, path);
+
+        //if (string.Equals(context.Request.Headers["If-None-Match"], etag))
+        //{
+        //    context.Response.StatusCode = (int)HttpStatusCode.NotModified;
+
+        //    return;
+        //}
+
+        //context.Response.Headers.ETag = etag;
+
         string encoding = null;
+
         if (storage is DiscDataStore && await storage.IsFileAsync(_domain, path + ".gz"))
         {
             path += ".gz";
@@ -115,7 +137,7 @@ public class StorageHandler
 
             context.Response.Headers[toCopy] = h.Substring(toCopy.Length + 1);
         }
-
+                
         try
         {
             context.Response.ContentType = MimeMapping.GetMimeMapping(path);
@@ -130,13 +152,55 @@ public class StorageHandler
             context.Response.Headers["Content-Encoding"] = encoding;
         }
 
-        using (var stream = await storage.GetReadStreamAsync(_domain, path))
+
+        long offset = 0;
+        var length = ProcessRangeHeader(context, fileSize, ref offset);
+
+        context.Response.Headers["Connection"] = "Keep-Alive";
+        context.Response.Headers["Content-Length"] = length.ToString(CultureInfo.InvariantCulture);
+
+        await using (var stream = await storage.GetReadStreamAsync(_domain, path, offset))
         {
+            var responseBufferingFeature = context.Features.Get<IHttpResponseBodyFeature>();
+            responseBufferingFeature?.DisableBuffering();
+
             await stream.CopyToAsync(context.Response.Body);
         }
 
         await context.Response.Body.FlushAsync();
         await context.Response.CompleteAsync();
+    }
+
+    private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
+    {
+        if (context == null) throw new ArgumentNullException();
+        if (context.Request.Headers["Range"] == StringValues.Empty) return fullLength;
+
+        long endOffset = -1;
+
+        var range = context.Request.Headers["Range"][0].Split(new[] { '=', '-' });
+        offset = Convert.ToInt64(range[1]);
+        if (range.Count() > 2 && !string.IsNullOrEmpty(range[2]))
+        {
+            endOffset = Convert.ToInt64(range[2]);
+        }
+        if (endOffset < 0 || endOffset >= fullLength)
+        {
+            endOffset = fullLength - 1;
+        }
+
+        var length = endOffset - offset + 1;
+
+        if (length <= 0) throw new HttpException(HttpStatusCode.BadRequest, "Wrong Range header");
+
+        if (length < fullLength)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
+        }
+        context.Response.Headers["Accept-Ranges"] = "bytes";
+        context.Response.Headers["Content-Range"] = string.Format(" bytes {0}-{1}/{2}", offset, endOffset, fullLength);
+
+        return length;
     }
 
     private string GetRouteValue(string name, HttpContext context)
@@ -158,13 +222,13 @@ public static class StorageHandlerExtensions
 
         if (!builder.DataSources.Any(r => r.Endpoints.Any(e => e.DisplayName == url)))
         {
-            builder.MapGet(url, handler.Invoke);
+            builder.MapGet(url, handler.InvokeAsync);
 
             var newUrl = url.Replace("{0}", "{t1}/{t2}/{t3}");
 
             if (newUrl != url)
             {
-                builder.MapGet(url, handler.Invoke);
+                builder.MapGet(url, handler.InvokeAsync);
             }
         }
 

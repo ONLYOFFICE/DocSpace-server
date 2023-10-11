@@ -28,11 +28,18 @@ global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
+global using ASC.Common.IntegrationEvents.Events;
 global using ASC.Core.Notify;
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Log;
 global using ASC.Notify;
+global using ASC.Notify.Extension;
+global using ASC.Studio.Notify;
 global using ASC.Web.Studio.Core.Notify;
 
 global using Autofac;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using NLog;

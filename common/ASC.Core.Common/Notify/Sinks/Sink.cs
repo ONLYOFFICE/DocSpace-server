@@ -28,17 +28,17 @@ namespace ASC.Notify.Sinks;
 
 public abstract class SinkMessageCreator
 {
-    public abstract NotifyMessage CreateNotifyMessage(INoticeMessage message, string senderName);
+    public abstract Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName);
 }
 
 public abstract class Sink : ISink
 {
     public ISink NextSink { get; set; }
 
-    public abstract Task<SendResponse> ProcessMessage(INoticeMessage message);
+    public abstract Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope);
 
-    public virtual async Task ProcessMessageAsync(INoticeMessage message)
+    public virtual async Task ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope)
     {
-        await NextSink.ProcessMessageAsync(message);
+        await NextSink.ProcessMessageAsync(message, serviceScope);
     }
 }

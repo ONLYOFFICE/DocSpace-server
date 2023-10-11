@@ -60,7 +60,7 @@ public class NotifyRequest
         _log = options.CreateLogger("ASC.Notify");
     }
 
-    internal bool Intercept(InterceptorPlace place, IServiceScope serviceScope)
+    internal async Task<bool> Intercept(InterceptorPlace place, IServiceScope serviceScope)
     {
         var result = false;
         foreach (var interceptor in _interceptors)
@@ -69,7 +69,7 @@ public class NotifyRequest
             {
                 try
                 {
-                    if (interceptor.PreventSend(this, place, serviceScope))
+                    if (await interceptor.PreventSend(this, place, serviceScope))
                     {
                         result = true;
                     }
@@ -125,14 +125,9 @@ public class NotifyRequest
         return new NoticeMessage(recipient, NotifyAction, ObjectID);
     }
 
-    public IActionProvider GetActionProvider(IServiceScope scope)
+    public async Task<IPatternProvider> GetPatternProvider(IServiceScope scope)
     {
-        return ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetActionProvider();
-    }
-
-    public IPatternProvider GetPatternProvider(IServiceScope scope)
-    {
-        return ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetPatternProvider();
+        return await ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetPatternProvider(this);
     }
 
     public IRecipientProvider GetRecipientsProvider(IServiceScope scope)
@@ -143,5 +138,32 @@ public class NotifyRequest
     public ISubscriptionProvider GetSubscriptionProvider(IServiceScope scope)
     {
         return ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetSubscriptionProvider();
+    }
+
+    public async Task<CultureInfo> GetCulture(TenantManager tenantManager, UserManager userManager)
+    {
+        var tagCulture = Arguments.FirstOrDefault(a => a.Tag == "Culture");
+        if (tagCulture != null)
+        {
+            return CultureInfo.GetCultureInfo((string)tagCulture.Value);
+        }
+
+        CultureInfo culture = null;
+
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+
+        if (tenant != null)
+        {
+            culture = tenant.GetCulture();
+        }
+
+        var user = await userManager.SearchUserAsync(Recipient.ID);
+
+        if (!Core.Users.Constants.LostUser.Equals(user) && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
+
+        return culture;
     }
 }

@@ -31,21 +31,17 @@ class JabberSenderSink : Sink
     private static readonly string _senderName = Configuration.Constants.NotifyMessengerSenderSysName;
     private readonly INotifySender _sender;
 
-    public JabberSenderSink(INotifySender sender, IServiceProvider serviceProvider)
+    public JabberSenderSink(INotifySender sender)
     {
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-        _serviceProvider = serviceProvider;
     }
 
-    private readonly IServiceProvider _serviceProvider;
-
-    public override async Task<SendResponse> ProcessMessage(INoticeMessage message)
+    public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope scope)
     {
         try
         {
             var result = SendResult.OK;
-            using var scope = _serviceProvider.CreateScope();
-            var m = scope.ServiceProvider.GetRequiredService<JabberSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
+            var m = await scope.ServiceProvider.GetRequiredService<JabberSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
 
             if (string.IsNullOrEmpty(m.Reciever))
             {
@@ -53,7 +49,7 @@ class JabberSenderSink : Sink
             }
             else
             {
-                await _sender.Send(m);
+                await _sender.SendAsync(m);
             }
 
             return new SendResponse(message, _senderName, result);
@@ -77,9 +73,9 @@ public class JabberSenderSinkMessageCreator : SinkMessageCreator
         _userManager = userManager;
     }
 
-    public override NotifyMessage CreateNotifyMessage(INoticeMessage message, string senderName)
+    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
-        var username = _userManager.GetUsers(new Guid(message.Recipient.ID)).UserName;
+        var username = (await _userManager.GetUsersAsync(new Guid(message.Recipient.ID))).UserName;
 
         var m = new NotifyMessage
         {
@@ -91,7 +87,7 @@ public class JabberSenderSinkMessageCreator : SinkMessageCreator
             CreationDate = DateTime.UtcNow,
         };
 
-        var tenant = _tenantManager.GetCurrentTenant(false);
+        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
         m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
         return m;
     }

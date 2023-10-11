@@ -37,37 +37,35 @@ public class MigrationCreator
 
     public void RunCreateMigrations(Options options)
     {
-        var counter = 0;
-
-        foreach (var projectInfo in Solution.GetProjects(options.Path))
+        foreach (var providerInfo in options.Providers)
         {
-            var ctxTypesFinder = new ProjectInfoContextFinder(projectInfo);
+            CreateMigration(options, typeof(MigrationContext), providerInfo);
+        }
+        
+        foreach (var providerInfo in options.TeamlabsiteProviders)
+        {
+            CreateMigration(options, typeof(TeamlabSiteContext), providerInfo);
+        }
+        
+        Console.WriteLine($"Update migrations");
+    }
 
-            foreach (var contextType in ctxTypesFinder.GetDependetContextsTypes())
-            {
-                foreach (var providerInfo in options.Providers)
-                {
-                    var providerInfoProjectPath = Solution.GetProviderProjectPath(options.Path, providerInfo);
-                    var dbContextActivator = new DbContextActivator(_serviceProvider);
-                    var context = dbContextActivator.CreateInstance(contextType, providerInfo);
+    private void CreateMigration(Options options, Type contextType, ProviderInfo providerInfo)
+    {
+        var dbContextActivator = new DbContextActivator(_serviceProvider);
+        var context = dbContextActivator.CreateInstance(contextType, providerInfo);
 
-                    var modelDiffChecker = new ModelDifferenceChecker(context);
+        var modelDiffChecker = new ModelDifferenceChecker(context);
 
-                    if (!modelDiffChecker.IsDifferent())
-                    {
-                        continue;
-                    }
-
-                    context = dbContextActivator.CreateInstance(contextType, providerInfo); //Hack: refresh context
-
-                    var migrationGenerator = new MigrationGenerator(context, providerInfo.Provider, providerInfoProjectPath);
-                    migrationGenerator.Generate();
-
-                    counter++;
-                }
-            }
+        if (!modelDiffChecker.IsDifferent())
+        {
+            return;
         }
 
-        Console.WriteLine($"Created {counter} migrations");
+        context = dbContextActivator.CreateInstance(contextType, providerInfo); //Hack: refresh context
+
+        var providerInfoProjectPath = Solution.GetProviderProjectPath(options.Path, providerInfo);
+        var migrationGenerator = new MigrationGenerator(context, providerInfo.Provider, providerInfoProjectPath);
+        migrationGenerator.Generate();
     }
 }

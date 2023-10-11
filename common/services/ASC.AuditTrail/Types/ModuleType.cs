@@ -1,5 +1,7 @@
 ﻿namespace ASC.AuditTrail.Types;
 
+/// <summary>
+/// </summary>
 [EnumExtensions]
 public enum ModuleType
 {
@@ -29,5 +31,6 @@ public enum ModuleType
     Reports,
     ProjectsSettings,
     General,
-    Products
+    Products,
+    Rooms
 }

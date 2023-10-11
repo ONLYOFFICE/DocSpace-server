@@ -32,13 +32,22 @@ public enum Provider
     MySql
 }
 
-public static class BaseDbContextExtension
+public class InstallerOptionsAction
 {
-    public static void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
+    private readonly string _region;
+    private readonly string _nameConnectionString;
+
+    public InstallerOptionsAction(string region, string nameConnectionString)
+    {
+        _region = region;
+        _nameConnectionString = nameConnectionString;
+    }
+
+    public void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationExtension(sp.GetRequiredService<IConfiguration>());
         var migrateAssembly = configuration["testAssembly"];
-        var connectionString = configuration.GetConnectionStrings("default");
+        var connectionString = configuration.GetConnectionStrings(_nameConnectionString, _region);
         var loggerFactory = sp.GetRequiredService<EFLoggerFactory>();
 
         optionsBuilder.UseLoggerFactory(loggerFactory);
@@ -58,6 +67,7 @@ public static class BaseDbContextExtension
         switch (_provider)
         {
             case Provider.MySql:
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
                 optionsBuilder.ReplaceService<IMigrationsSqlGenerator, CustomMySqlMigrationsSqlGenerator>();
                 optionsBuilder.UseMySql(connectionString.ConnectionString, ServerVersion.AutoDetect(connectionString.ConnectionString), providerOptions =>
                 {
@@ -71,6 +81,7 @@ public static class BaseDbContextExtension
                 });
                 break;
             case Provider.PostgreSql:
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
                 optionsBuilder.UseNpgsql(connectionString.ConnectionString, providerOptions =>
                 {
                     if (!string.IsNullOrEmpty(migrateAssembly))
@@ -81,21 +92,30 @@ public static class BaseDbContextExtension
                 break;
         }
     }
+}
 
-    public static void AddBaseDbContextPool<T>(this IServiceCollection services) where T : DbContext
+public static class BaseDbContextExtension
+{
+    public static IServiceCollection AddBaseDbContextPool<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext
     {
-        services.AddPooledDbContextFactory<T>(OptionsAction);
+        var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
+        services.AddPooledDbContextFactory<T>(installerOptionsAction.OptionsAction);
+
+        return services;
     }
 
-    public static void AddBaseDbContext<T>(this IServiceCollection services) where T : DbContext
+    public static IServiceCollection AddBaseDbContext<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext
     {
-        services.AddDbContext<T>(OptionsAction);
+        var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
+        services.AddDbContext<T>(installerOptionsAction.OptionsAction);
+
+        return services;
     }
 
-    public static T AddOrUpdate<T, TContext>(this TContext b, Expression<Func<TContext, DbSet<T>>> expressionDbSet, T entity) where T : BaseEntity where TContext : DbContext
+    public static T AddOrUpdate<T, TContext>(this TContext b, DbSet<T> dbSet, T entity) where T : BaseEntity where TContext : DbContext
     {
-        var dbSet = expressionDbSet.Compile().Invoke(b);
-        var existingBlog = dbSet.Find(entity.GetKeys());
+        var keys = entity.GetKeys();
+        var existingBlog = dbSet.Find(keys);
         if (existingBlog == null)
         {
             return dbSet.Add(entity).Entity;
@@ -103,7 +123,7 @@ public static class BaseDbContextExtension
         else
         {
             b.Entry(existingBlog).CurrentValues.SetValues(entity);
-
+            b.Entry(existingBlog).State = EntityState.Modified;
             return entity;
         }
     }
@@ -121,7 +141,7 @@ public static class BaseDbContextExtension
         else
         {
             b.Entry(existingBlog).CurrentValues.SetValues(entity);
-
+            b.Entry(existingBlog).State = EntityState.Modified;
             return entity;
         }
     }

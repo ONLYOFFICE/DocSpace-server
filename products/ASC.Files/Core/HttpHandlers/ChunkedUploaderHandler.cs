@@ -51,7 +51,9 @@ public class ChunkedUploaderHandlerService
     private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
     private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
     private readonly SocketManager _socketManager;
+    private readonly FileDtoHelper _filesWrapperHelper;
     private readonly ILogger<ChunkedUploaderHandlerService> _logger;
+    private readonly AuthContext _authContext;
 
     public ChunkedUploaderHandlerService(
         ILogger<ChunkedUploaderHandlerService> logger,
@@ -64,7 +66,9 @@ public class ChunkedUploaderHandlerService
         InstanceCrypto instanceCrypto,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         ChunkedUploadSessionHelper chunkedUploadSessionHelper,
-        SocketManager socketManager)
+        SocketManager socketManager,
+        FileDtoHelper filesWrapperHelper,
+        AuthContext authContext)
     {
         _tenantManager = tenantManager;
         _fileUploader = fileUploader;
@@ -76,18 +80,16 @@ public class ChunkedUploaderHandlerService
         _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
         _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
         _socketManager = socketManager;
+        _filesWrapperHelper = filesWrapperHelper;
         _logger = logger;
+        _authContext = authContext;
     }
 
     public async Task Invoke(HttpContext context)
     {
         try
         {
-            var uploadSession = await _chunkedUploadSessionHolder.GetSessionAsync<int>(context.Request.Query["uid"]);
-            if (uploadSession != null)
-            {
-                await Invoke<int>(context);
-            }
+            await Invoke<int>(context);
         }
         catch (Exception)
         {
@@ -110,12 +112,12 @@ public class ChunkedUploaderHandlerService
 
             if (!await TryAuthorizeAsync(request))
             {
-                await WriteError(context, "Can't authorize given initiate session request or session with specified upload id already expired");
+                await WriteError(context, "Not authorized or session with specified upload id already expired");
 
                 return;
             }
 
-            if (_tenantManager.GetCurrentTenant().Status != TenantStatus.Active)
+            if ((await _tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
             {
                 await WriteError(context, "Can't perform upload for deleted or transfering portals");
 
@@ -141,8 +143,8 @@ public class ChunkedUploaderHandlerService
 
                     if (resumedSession.BytesUploaded == resumedSession.BytesTotal)
                     {
-                        await WriteSuccess(context, ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                        _filesMessageService.Send(resumedSession.File, MessageAction.FileUploaded, resumedSession.File.Title);
+                        await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
+                        _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
                         await _socketManager.CreateFileAsync(resumedSession.File);
                     }
@@ -172,32 +174,21 @@ public class ChunkedUploaderHandlerService
 
     private async Task<bool> TryAuthorizeAsync<T>(ChunkedRequestHelper<T> request)
     {
-        if (request.Type(_instanceCrypto) == ChunkedRequestType.Initiate)
+        if (!_authContext.IsAuthenticated)
         {
-            _tenantManager.SetCurrentTenant(request.TenantId);
-            _securityContext.AuthenticateMeWithoutCookie(_authManager.GetAccountByID(_tenantManager.GetCurrentTenant().Id, request.AuthKey(_instanceCrypto)));
-            var cultureInfo = request.CultureInfo(_setupInfo);
-            if (cultureInfo != null)
-            {
-                Thread.CurrentThread.CurrentUICulture = cultureInfo;
+            return false;
             }
 
+        if (request.Type(_instanceCrypto) == ChunkedRequestType.Initiate)
+        {
             return true;
         }
 
         if (!string.IsNullOrEmpty(request.UploadId))
         {
             var uploadSession = await _chunkedUploadSessionHolder.GetSessionAsync<T>(request.UploadId);
-            if (uploadSession != null)
+            if (uploadSession != null && _authContext.CurrentAccount.ID == uploadSession.UserId)
             {
-                _tenantManager.SetCurrentTenant(uploadSession.TenantId);
-                _securityContext.AuthenticateMeWithoutCookie(_authManager.GetAccountByID(_tenantManager.GetCurrentTenant().Id, uploadSession.UserId));
-                var culture = _setupInfo.GetPersonalCulture(uploadSession.CultureName).Value;
-                if (culture != null)
-                {
-                    Thread.CurrentThread.CurrentUICulture = culture;
-                }
-
                 return true;
             }
         }
@@ -220,10 +211,15 @@ public class ChunkedUploaderHandlerService
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonConvert.SerializeObject(new { success, data, message }));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions()
+        {
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }));
     }
 
-    private static object ToResponseObject<T>(File<T> file)
+    private async Task<object> ToResponseObject<T>(File<T> file)
     {
         return new
         {
@@ -232,7 +228,8 @@ public class ChunkedUploaderHandlerService
             version = file.Version,
             title = file.Title,
             provider_key = file.ProviderKey,
-            uploaded = true
+            uploaded = true,
+            file = await _filesWrapperHelper.GetAsync(file)
         };
     }
 }
@@ -252,12 +249,10 @@ public class ChunkedRequestHelper<T>
     private IFormFile _file;
     private int? _tenantId;
     private long? _fileContentLength;
-    private Guid? _authKey;
-    private CultureInfo _cultureInfo;
 
     public ChunkedRequestType Type(InstanceCrypto instanceCrypto)
     {
-        if (_request.Query["initiate"] == "true" && IsAuthDataSet(instanceCrypto) && IsFileDataSet())
+        if (_request.Query["initiate"] == "true" && IsFileDataSet())
         {
             return ChunkedRequestType.Initiate;
         }
@@ -294,21 +289,35 @@ public class ChunkedRequestHelper<T>
         }
     }
 
-    public Guid AuthKey(InstanceCrypto instanceCrypto)
+    public T FolderId
     {
-        if (!_authKey.HasValue)
+        get
         {
-            _authKey = !string.IsNullOrEmpty(_request.Query["userid"])
-                            ? new Guid(instanceCrypto.Decrypt(_request.Query["userid"]))
-                            : Guid.Empty;
-        }
+            var queryValue = _request.Query[FilesLinkUtility.FolderId];
 
-        return _authKey.Value;
+            if (queryValue.Count == 0)
+            {
+                return default(T);
+            }
+
+            return IdConverter.Convert<T>(queryValue[0]);
+        }
     }
 
-    public T FolderId => (T)Convert.ChangeType(_request.Query[FilesLinkUtility.FolderId], typeof(T));
+    public T FileId
+    {
+        get
+        {
+            var queryValue = _request.Query[FilesLinkUtility.FileId];
 
-    public T FileId => (T)Convert.ChangeType(_request.Query[FilesLinkUtility.FileId], typeof(T));
+            if (queryValue.Count == 0)
+            {
+                return default(T);
+            }
+
+            return IdConverter.Convert<T>(queryValue[0]);
+        }
+    }
 
     public string FileName => _request.Query[FilesLinkUtility.FileTitle];
 
@@ -329,22 +338,6 @@ public class ChunkedRequestHelper<T>
     public long ChunkSize => File.Length;
 
     public Stream ChunkStream => File.OpenReadStream();
-
-    public CultureInfo CultureInfo(SetupInfo setupInfo)
-    {
-        if (_cultureInfo != null)
-        {
-            return _cultureInfo;
-        }
-
-        var culture = _request.Query["culture"];
-        if (string.IsNullOrEmpty(culture))
-        {
-            culture = "en-US";
-        }
-
-        return _cultureInfo = setupInfo.GetPersonalCulture(culture).Value;
-    }
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
 
@@ -369,11 +362,6 @@ public class ChunkedRequestHelper<T>
     public ChunkedRequestHelper(HttpRequest request)
     {
         _request = request ?? throw new ArgumentNullException(nameof(request));
-    }
-
-    private bool IsAuthDataSet(InstanceCrypto instanceCrypto)
-    {
-        return TenantId > -1 && AuthKey(instanceCrypto) != Guid.Empty;
     }
 
     private bool IsFileDataSet()

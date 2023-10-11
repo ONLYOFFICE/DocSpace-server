@@ -36,7 +36,7 @@ public class Startup : BaseWorkerStartup
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
     }
-        
+
     public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
@@ -63,15 +63,13 @@ public class Startup : BaseWorkerStartup
         services.AddHostedService<FeedAggregatorService>();
         DIHelper.TryAdd<FeedAggregatorService>();
 
-        services.AddHostedService<FeedCleanerService>();
-        DIHelper.TryAdd<FeedCleanerService>();
+        //services.AddHostedService<FeedCleanerService>();
+        //DIHelper.TryAdd<FeedCleanerService>();
 
-        DIHelper.TryAdd<FileDataQueue>();
-
-        services.AddActivePassiveHostedService<FileConverterService<int>>();
+        services.AddActivePassiveHostedService<FileConverterService<int>>(DIHelper);
         DIHelper.TryAdd<FileConverterService<int>>();
 
-        services.AddActivePassiveHostedService<FileConverterService<string>>();
+        services.AddActivePassiveHostedService<FileConverterService<string>>(DIHelper);
         DIHelper.TryAdd<FileConverterService<string>>();
 
         services.AddHostedService<ThumbnailBuilderService>();
@@ -91,10 +89,28 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<SecurityContext>();
         DIHelper.TryAdd<TenantManager>();
         DIHelper.TryAdd<UserManager>();
+        DIHelper.TryAdd<SocketServiceClient>();
+        DIHelper.TryAdd<FileStorageService>();
+        DIHelper.TryAdd<Builder<int>>();
+
+        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
+        services.AddScoped<CountRoomChecker>();
+
+        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
+        services.AddScoped<CountRoomCheckerStatistic>();
+
+        services.AddScoped<UsersInRoomChecker>();
+
+        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
+
+        services.AddScoped<UsersInRoomStatistic>();
+
 
         services.AddBaseDbContextPool<FilesDbContext>();
 
+        services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
+        }
 
     }
-
-}

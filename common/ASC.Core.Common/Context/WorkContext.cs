@@ -44,14 +44,12 @@ public class WorkContext
     private readonly PushSender _pushSender;
     private static bool _notifyStarted;
     private static bool? _isMono;
-    private static string _monoVersion;
-
 
     public NotifyContext NotifyContext { get; private set; }
     public NotifyEngine NotifyEngine { get; private set; }
 
     public static string[] DefaultClientSenders => new[] { Constants.NotifyEMailSenderSysName };
-
+    public event Action<NotifyContext, INotifyClient> NotifyClientRegistration;
     public static bool IsMono
     {
         get
@@ -63,20 +61,10 @@ public class WorkContext
 
             var monoRuntime = Type.GetType("Mono.Runtime");
             _isMono = monoRuntime != null;
-            if (monoRuntime != null)
-            {
-                var dispalayName = monoRuntime.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
-                if (dispalayName != null)
-                {
-                    _monoVersion = dispalayName.Invoke(null, null) as string;
-                }
-            }
 
             return _isMono.Value;
         }
     }
-
-    public static string MonoVersion => IsMono ? _monoVersion : null;
 
     public WorkContext(
         IServiceProvider serviceProvider,
@@ -123,7 +111,7 @@ public class WorkContext
             INotifySender emailSender = _notifyServiceSender;
             INotifySender telegramSender = _telegramSender;
             INotifySender pushSender = _pushSender;
-            
+
 
             var postman = _configuration["core:notify:postman"];
 
@@ -150,10 +138,10 @@ public class WorkContext
                 emailSender.Init(properties);
             }
 
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyEMailSenderSysName, new EmailSenderSink(emailSender, _serviceProvider));
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyMessengerSenderSysName, new JabberSenderSink(jabberSender, _serviceProvider));
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyTelegramSenderSysName, new TelegramSenderSink(telegramSender, _serviceProvider));
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyPushSenderSysName, new PushSenderSink(pushSender, _serviceProvider));
+            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyEMailSenderSysName, new EmailSenderSink(emailSender));
+            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyMessengerSenderSysName, new JabberSenderSink(jabberSender));
+            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyTelegramSenderSysName, new TelegramSenderSink(telegramSender));
+            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyPushSenderSysName, new PushSenderSink(pushSender));
 
             NotifyEngine.AddAction<NotifyTransferRequest>();
 
@@ -161,15 +149,24 @@ public class WorkContext
         }
     }
 
-    public void RegisterSendMethod(Action<DateTime> method, string cron)
+    public void RegisterSendMethod(Func<DateTime, Task> method, string cron)
     {
         NotifyEngine.RegisterSendMethod(method, cron);
     }
 
-    public void UnregisterSendMethod(Action<DateTime> method)
+    public void UnregisterSendMethod(Func<DateTime, Task> method)
     {
         NotifyEngine.UnregisterSendMethod(method);
+    }
 
+    public INotifyClient RegisterClient(IServiceProvider serviceProvider, INotifySource source)
+    {
+        //ValidateNotifySource(source);
+        var client = serviceProvider.GetService<NotifyClientImpl>();
+        client.Init(source);
+        NotifyClientRegistration?.Invoke(NotifyContext, client);
+
+        return client;
     }
 }
 
@@ -191,9 +188,9 @@ public class NotifyTransferRequest : INotifyEngineAction
         }
     }
 
-    public void BeforeTransferRequest(NotifyRequest request)
+    public async Task BeforeTransferRequestAsync(NotifyRequest request)
     {
-        request.Properties.Add("Tenant", _tenantManager.GetCurrentTenant(false));
+        request.Properties.Add("Tenant", await _tenantManager.GetCurrentTenantAsync(false));
     }
 }
 
@@ -207,5 +204,6 @@ public static class WorkContextExtension
         dIHelper.TryAdd<JabberSenderSinkMessageCreator>();
         dIHelper.TryAdd<PushSenderSinkMessageCreator>();
         dIHelper.TryAdd<EmailSenderSinkMessageCreator>();
+        dIHelper.TryAdd<NotifyClientImpl>();
     }
 }

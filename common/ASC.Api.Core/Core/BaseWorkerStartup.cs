@@ -50,13 +50,16 @@ public class BaseWorkerStartup
         services.AddBaseDbContextPool<TenantDbContext>();
         services.AddBaseDbContextPool<UserDbContext>();
         services.AddBaseDbContextPool<TelegramDbContext>();
+        services.AddBaseDbContextPool<FirebaseDbContext>();
         services.AddBaseDbContextPool<CustomDbContext>();
+        services.AddBaseDbContextPool<UrlShortenerDbContext>();
         services.AddBaseDbContextPool<WebstudioDbContext>();
         services.AddBaseDbContextPool<InstanceRegistrationContext>();
         services.AddBaseDbContextPool<IntegrationEventLogContext>();
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<WebPluginDbContext>();
 
         services.RegisterFeature();
 
@@ -78,9 +81,15 @@ public class BaseWorkerStartup
         services.AddHttpClient();
 
         DIHelper.Configure(services);
+
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
+        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
     }
 
-    private IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
+    protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
     {
         return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
     }

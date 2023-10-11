@@ -148,20 +148,20 @@ public class MigrateOperation : DistributedTaskProgress
             _logger.DebugTenant(_tenantId);
             Status = DistributedTaskStatus.Running;
 
-            using var scope = _serviceProvider.CreateScope();
+            await using var scope = _serviceProvider.CreateAsyncScope();
             var tempPath = scope.ServiceProvider.GetService<TempPath>();
             var scopeClass = scope.ServiceProvider.GetService<MigrateOperationScope>();
             var (tenantManager, securityContext, storageFactory, options, storageSettingsHelper, settingsManager) = scopeClass;
-            var tenant = tenantManager.GetTenant(_tenantId);
+            var tenant = await tenantManager.GetTenantAsync(_tenantId);
             tenantManager.SetCurrentTenant(tenant);
 
-            securityContext.AuthenticateMeWithoutCookie(tenant.OwnerId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
 
             foreach (var module in _modules)
             {
-                var oldStore = storageFactory.GetStorage(_configPath, _tenantId, module);
-                var store = storageFactory.GetStorageFromConsumer(_configPath, _tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
-                var domains = _storageFactoryConfig.GetDomainList(_configPath, module).ToList();
+                var oldStore = await storageFactory.GetStorageAsync(_tenantId, module);
+                var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
+                var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
                 var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store);
 
@@ -194,9 +194,9 @@ public class MigrateOperation : DistributedTaskProgress
                 MigrationPublish();
             }
 
-            settingsManager.Save(_settings);
+            await settingsManager.SaveAsync(_settings);
             tenant.SetStatus(TenantStatus.Active);
-            tenantManager.SaveTenant(tenant);
+            await tenantManager.SaveTenantAsync(tenant);
 
             Status = DistributedTaskStatus.Completed;
         }

@@ -34,6 +34,9 @@ public class WebhooksConfig : BaseEntity
     public int TenantId { get; set; }
     public string Uri { get; set; }
     public bool Enabled { get; set; }
+    public bool SSL { get; set; }
+
+    public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()
     {
@@ -45,6 +48,8 @@ public static class WebhooksConfigExtension
 {
     public static ModelBuilderWrapper AddWebhooksConfig(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<WebhooksConfig>().Navigation(e => e.Tenant).AutoInclude(false);
+
         modelBuilder
             .Add(MySqlAddWebhooksConfig, Provider.MySql)
             .Add(PgSqlAddWebhooksConfig, Provider.PostgreSql);
@@ -68,13 +73,14 @@ public static class WebhooksConfigExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("int unsigned");
+                .HasColumnName("tenant_id");
 
             entity.Property(e => e.Uri)
-                .HasMaxLength(50)
                 .HasColumnName("uri")
-                .HasDefaultValueSql("''");
+                .HasDefaultValueSql("''")
+                .HasColumnType("text")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SecretKey)
                 .HasMaxLength(50)
@@ -88,6 +94,11 @@ public static class WebhooksConfigExtension
 
             entity.Property(e => e.Enabled)
                 .HasColumnName("enabled")
+                .HasDefaultValueSql("'1'")
+                .HasColumnType("tinyint(1)");
+
+            entity.Property(e => e.SSL)
+                .HasColumnName("ssl")
                 .HasDefaultValueSql("'1'")
                 .HasColumnType("tinyint(1)");
         });
@@ -110,11 +121,9 @@ public static class WebhooksConfigExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("int unsigned");
+                 .HasColumnName("tenant_id");
 
             entity.Property(e => e.Uri)
-                .HasMaxLength(50)
                 .HasColumnName("uri")
                 .HasDefaultValueSql("''");
 
@@ -131,6 +140,16 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.Enabled)
                 .HasColumnName("enabled")
                 .HasDefaultValueSql("true");
+
+            entity.Property(e => e.SSL)
+                .HasColumnName("ssl")
+                .HasDefaultValueSql("true");
         });
     }
+}
+
+public class WebhooksConfigWithStatus
+{
+    public WebhooksConfig WebhooksConfig { get; set; }
+    public int? Status { get; set; }
 }

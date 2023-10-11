@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.Notify;
-[Serializable]
+
 class FirebaseApiKey
 {
     private readonly IConfiguration _configuration;
@@ -49,7 +49,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase:projectId"] ?? "";
+            return _configuration["firebase-mobile:projectId"] ?? "";
         }
     }
     [JsonProperty("private_key_id")]
@@ -57,7 +57,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase:privateKeyId"] ?? "";
+            return _configuration["firebase-mobile:privateKeyId"] ?? "";
         }
     }
     [JsonProperty("private_key")]
@@ -65,7 +65,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase:privateKey"] ?? "";
+            return _configuration["firebase-mobile:privateKey"] ?? "";
         }
     }
     [JsonProperty("client_email")]
@@ -73,7 +73,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase:clientEmail"] ?? "";
+            return _configuration["firebase-mobile:clientEmail"] ?? "";
         }
     }
     [JsonProperty("client_id")]
@@ -81,7 +81,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase:clientId"] ?? "";
+            return _configuration["firebase-mobile:clientId"] ?? "";
         }
     }
     [JsonProperty("auth_uri")]
@@ -113,7 +113,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase:x509CertUrl"] ?? "";
+            return _configuration["firebase-mobile:x509CertUrl"] ?? "";
         }
     }
 }

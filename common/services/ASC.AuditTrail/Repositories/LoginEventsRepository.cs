@@ -32,18 +32,21 @@ public class LoginEventsRepository
     private readonly TenantManager _tenantManager;
     private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
     private readonly IMapper _mapper;
+    private readonly GeolocationHelper _geolocationHelper;
 
     public LoginEventsRepository(
         TenantManager tenantManager,
         IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper)
+        IMapper mapper,
+        GeolocationHelper geolocationHelper)
     {
         _tenantManager = tenantManager;
         _dbContextFactory = dbContextFactory;
         _mapper = mapper;
+        _geolocationHelper = geolocationHelper;
     }
 
-    public IEnumerable<LoginEventDto> GetByFilter(
+    public async Task<IEnumerable<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
         MessageAction? action = null,
         DateTime? fromDate = null,
@@ -51,8 +54,8 @@ public class LoginEventsRepository
         int startIndex = 0,
         int limit = 0)
     {
-        var tenant = _tenantManager.GetCurrentTenant().Id;
-        using var messagesContext = _dbContextFactory.CreateDbContext();
+        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var messagesContext = _dbContextFactory.CreateDbContext();
 
         var query =
             from q in messagesContext.LoginEvents
@@ -108,21 +111,13 @@ public class LoginEventsRepository
             }
         }
 
-        return _mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEventDto>>(query.ToList());
-    }
+        var events = _mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEvent>>(await query.ToListAsync());
 
-    public int GetCount(int tenant, DateTime? from = null, DateTime? to = null)
-    {
-        using var messagesContext = _dbContextFactory.CreateDbContext();
-        var query = messagesContext.LoginEvents
-            .Where(l => l.TenantId == tenant);
-
-        if (from.HasValue && to.HasValue)
+        foreach (var e in events)
         {
-            query = query.Where(l => l.Date >= from & l.Date <= to);
+            await _geolocationHelper.AddGeolocationAsync(e);
         }
-
-        return query.Count();
+        return events;
     }
 }
 

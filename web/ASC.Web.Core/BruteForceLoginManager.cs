@@ -33,32 +33,125 @@ public class BruteForceLoginManager
     private readonly UserManager _userManager;
     private readonly TenantManager _tenantManager;
     private readonly IDistributedCache _distributedCache;
-    private static readonly object _lock = new object();
+    private readonly SetupInfo _setupInfo;
+    private readonly Recaptcha _recaptcha;
+    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
-    public BruteForceLoginManager(SettingsManager settingsManager, UserManager userManager, TenantManager tenantManager, IDistributedCache distributedCache)
+    public BruteForceLoginManager(SettingsManager settingsManager,
+        UserManager userManager,
+        TenantManager tenantManager,
+        IDistributedCache distributedCache,
+        SetupInfo setupInfo,
+        Recaptcha recaptcha)
     {
         _settingsManager = settingsManager;
         _userManager = userManager;
         _tenantManager = tenantManager;
         _distributedCache = distributedCache;
+        _setupInfo = setupInfo;
+        _recaptcha = recaptcha;
     }
 
-    public UserInfo Attempt(string login, string passwordHash, string requestIp, out bool showRecaptcha)
+    public async Task<(bool, bool)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
+    {
+        var blockCacheKey = GetBlockCacheKey(key, requestIp);
+        
+        if (GetFromCache<string>(blockCacheKey) != null)
+        {
+            if (throwException)
+            {
+                throw new BruteForceCredentialException(exceptionMessage);
+            }
+
+            return (false, true);
+        }
+
+        try
+        {
+            await _semaphore.WaitAsync();
+            
+            if (GetFromCache<string>(blockCacheKey) != null)
+            {
+                throw new BruteForceCredentialException(exceptionMessage);
+            }
+
+            var historyCacheKey = GetHistoryCacheKey(key, requestIp);
+            var settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
+            var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+
+            var now = DateTime.UtcNow;
+            var checkTime = now.Subtract(settings.CheckPeriod);
+
+            history = history.Where(item => item > checkTime).ToList();
+            history.Add(now);
+
+            var showRecaptcha = history.Count > settings.AttemptCount - 1;
+
+            if (history.Count > settings.AttemptCount)
+            {
+                SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
+                await _distributedCache.RemoveAsync(historyCacheKey);
+
+                if (throwException)
+                {
+                    throw new BruteForceCredentialException(exceptionMessage);
+                }
+
+                return (false, showRecaptcha);
+            }
+
+            SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+
+            return (true, showRecaptcha);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async Task DecrementAsync(string key, string requestIp)
+    {
+        try
+        {
+            await _semaphore.WaitAsync();
+
+            var settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
+            var historyCacheKey = GetHistoryCacheKey(key, requestIp);
+            var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
+
+            if (history.Count > 0)
+            {
+                history.RemoveAt(history.Count - 1);
+            }
+
+            SetToCache(historyCacheKey, history, DateTime.UtcNow.Add(settings.CheckPeriod));
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async Task<UserInfo> AttemptAsync(string login, string passwordHash, string requestIp, string recaptchaResponse)
     {
         UserInfo user = null;
 
-        showRecaptcha = true;
+        var secretEmail = SetupInfo.IsSecretEmail(login);
+
+        var recaptchaPassed = secretEmail || await CheckRecaptchaAsync(recaptchaResponse, requestIp);
 
         var blockCacheKey = GetBlockCacheKey(login, requestIp);
 
-        if (GetFromCache<string>(blockCacheKey) != null)
+        if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
         {
             throw new BruteForceCredentialException();
         }
 
-        lock (_lock)
+        try
         {
-            if (GetFromCache<string>(blockCacheKey) != null)
+            await _semaphore.WaitAsync();
+            if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException();
             }
@@ -67,20 +160,17 @@ public class BruteForceLoginManager
             var now = DateTime.UtcNow;
             LoginSettingsWrapper settings = null;
             List<DateTime> history = null;
-            var secretEmail = SetupInfo.IsSecretEmail(login);
 
-            if (!secretEmail)
+            if (!recaptchaPassed)
             {
                 historyCacheKey = GetHistoryCacheKey(login, requestIp);
 
-                settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
+                settings = new LoginSettingsWrapper(await _settingsManager.LoadAsync<LoginSettings>());
                 var checkTime = now.Subtract(settings.CheckPeriod);
 
                 history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
                 history = history.Where(item => item > checkTime).ToList();
                 history.Add(now);
-
-                showRecaptcha = history.Count > settings.AttemptCount - 1;
 
                 if (history.Count > settings.AttemptCount)
                 {
@@ -92,8 +182,8 @@ public class BruteForceLoginManager
                 SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
 
-            user = _userManager.GetUsersByPasswordHash(
-                   _tenantManager.GetCurrentTenant().Id,
+            user = await _userManager.GetUsersByPasswordHashAsync(
+                   await _tenantManager.GetCurrentTenantIdAsync(),
                    login,
                    passwordHash);
 
@@ -102,15 +192,42 @@ public class BruteForceLoginManager
                 throw new Exception("user not found");
             }
 
-            if (!secretEmail)
+            if (!recaptchaPassed)
             {
                 history.RemoveAt(history.Count - 1);
 
                 SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
         }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
 
         return user;
+    }
+
+    private async Task<bool> CheckRecaptchaAsync(string recaptchaResponse, string requestIp)
+    {
+        var recaptchaPassed = false;
+
+        if (!string.IsNullOrEmpty(_setupInfo.RecaptchaPublicKey) &&
+            !string.IsNullOrEmpty(_setupInfo.RecaptchaPrivateKey) &&
+            !string.IsNullOrEmpty(recaptchaResponse))
+        {
+            recaptchaPassed = await _recaptcha.ValidateRecaptchaAsync(recaptchaResponse, requestIp);
+
+            if (!recaptchaPassed)
+            {
+                throw new RecaptchaException();
+            }
+        }
+
+        return recaptchaPassed;
     }
 
     private T GetFromCache<T>(string key)

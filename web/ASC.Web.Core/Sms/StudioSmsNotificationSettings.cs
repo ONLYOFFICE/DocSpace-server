@@ -26,7 +26,6 @@
 
 namespace ASC.Web.Studio.Core.SMS;
 
-[Serializable]
 public class StudioSmsNotificationSettings : TfaSettingsBase<StudioSmsNotificationSettings>
 {
     [JsonIgnore]
@@ -65,14 +64,14 @@ public class StudioSmsNotificationSettingsHelper : TfaSettingsHelperBase<StudioS
         _tenantManager = tenantManager;
     }
 
-    public bool IsVisibleAndAvailableSettings()
+    public async Task<bool> IsVisibleAndAvailableSettingsAsync()
     {
-        return IsVisibleSettings && IsAvailableSettings();
+        return IsVisibleSettings && await IsAvailableSettingsAsync();
     }
 
-    public bool IsAvailableSettings()
+    public async Task<bool> IsAvailableSettingsAsync()
     {
-        var quota = _tenantManager.GetCurrentTenantQuota();
+        var quota = await _tenantManager.GetCurrentTenantQuotaAsync();
         return _coreBaseSettings.Standalone
                 || ((!quota.Trial || _setupInfo.SmsTrial)
                     && !quota.NonProfit

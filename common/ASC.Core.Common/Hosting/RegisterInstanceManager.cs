@@ -33,6 +33,7 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
 {
     private readonly IRegisterInstanceDao<T> _registerInstanceRepository;
     private readonly int _timeUntilUnregisterInSeconds;
+    private readonly bool _isSingletoneMode;
     public RegisterInstanceManager(IRegisterInstanceDao<T> registerInstanceRepository,
                                    IConfiguration configuration)
     {
@@ -42,10 +43,18 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
         {
             _timeUntilUnregisterInSeconds = 15;
         }
+
+        if (!bool.TryParse(configuration["core:hosting:singletonMode"], out _isSingletoneMode))
+        {
+            _isSingletoneMode = true;
+        }
+
     }
     public async Task Register(string instanceId)
     {
-        var instances = await _registerInstanceRepository.GetAll();
+        if (_isSingletoneMode) return;
+
+        var instances = await _registerInstanceRepository.GetAllAsync();
         var registeredInstance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
 
         var instance = registeredInstance ?? new InstanceRegistration
@@ -66,17 +75,19 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
             }
         }
 
-        await _registerInstanceRepository.AddOrUpdate(instance);
+        await _registerInstanceRepository.AddOrUpdateAsync(instance);
     }
 
     public async Task UnRegister(string instanceId)
     {
-        await _registerInstanceRepository.Delete(instanceId);
+        await _registerInstanceRepository.DeleteAsync(instanceId);
     }
 
     public async Task<bool> IsActive(string instanceId)
     {
-        var instances = await _registerInstanceRepository.GetAll();
+        if (_isSingletoneMode) return await Task.FromResult(true);
+
+        var instances = await _registerInstanceRepository.GetAllAsync();
         var instance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
 
         return instance is not null && instance.IsActive;
@@ -84,12 +95,14 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
 
     public async Task<List<string>> DeleteOrphanInstances()
     {
-        var instances = await _registerInstanceRepository.GetAll();
+        if (_isSingletoneMode) return await Task.FromResult(new List<string>());
+
+        var instances = await _registerInstanceRepository.GetAllAsync();
         var oldRegistrations = instances.Where(IsOrphanInstance).ToList();
 
         foreach (var instanceRegistration in oldRegistrations)
         {
-            await _registerInstanceRepository.Delete(instanceRegistration.InstanceRegistrationId);
+            await _registerInstanceRepository.DeleteAsync(instanceRegistration.InstanceRegistrationId);
         }
 
         return oldRegistrations.Select(x => x.InstanceRegistrationId).ToList();
