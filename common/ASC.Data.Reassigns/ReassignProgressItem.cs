@@ -47,8 +47,6 @@ public class ReassignProgressItem : DistributedTaskProgress
     private bool _notify;
     private bool _deleteProfile;
 
-    private CancellationToken _cancellationToken;
-
     public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -68,13 +66,6 @@ public class ReassignProgressItem : DistributedTaskProgress
         Exception = null;
         Percentage = 0;
         IsCompleted = false;
-    }
-
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
-    {
-        _cancellationToken = cancellationToken;
-
-        await base.RunJob(distributedTask, cancellationToken);
     }
 
     protected override async Task DoJob()
@@ -167,7 +158,7 @@ public class ReassignProgressItem : DistributedTaskProgress
             PublishChanges();
         }
 
-        _cancellationToken.ThrowIfCancellationRequested();
+        CancellationToken.ThrowIfCancellationRequested();
     }
 
     private async Task SendSuccessNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, MessageTarget messageTarget, DisplayUserSettingsHelper displayUserSettingsHelper)
@@ -185,11 +176,11 @@ public class ReassignProgressItem : DistributedTaskProgress
 
         if (_httpHeaders != null)
         {
-            await messageService.SendAsync(_httpHeaders, MessageAction.UserDataReassigns, messageTarget.Create(FromUser), new[] { fromUserName, toUserName });
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDataReassigns, messageTarget.Create(FromUser), _httpHeaders, new[] { fromUserName, toUserName });
         }
         else
         {
-           await messageService.SendAsync(MessageAction.UserDataReassigns, messageTarget.Create(FromUser), fromUserName, toUserName);
+            await messageService.SendAsync(MessageAction.UserDataReassigns, messageTarget.Create(FromUser), fromUserName, toUserName);
         }
     }
 
@@ -211,7 +202,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
         if (_httpHeaders != null)
         {
-            await messageService.SendAsync(_httpHeaders, MessageAction.UserDeleted, messageTarget.Create(FromUser), new[] { userName });
+            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, messageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {

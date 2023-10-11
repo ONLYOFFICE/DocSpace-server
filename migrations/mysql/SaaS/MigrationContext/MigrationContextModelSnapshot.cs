@@ -724,7 +724,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -3,
-                            Features = "free,total_size:2147483648,manager:3,room:12",
+                            Features = "free,oauth,total_size:2147483648,manager:3,room:12",
                             Name = "startup",
                             Price = 0m,
                             Visible = false
@@ -1651,6 +1651,85 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.ToTable("tenants_version", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebPlugin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Author")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("author");
+
+                    b.Property<Guid>("CreateBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("create_by");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("Enabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("enabled")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<string>("HomePage")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("home_page");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("image");
+
+                    b.Property<string>("License")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("license");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PluginName")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("plugin_name");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("text")
+                        .HasColumnName("scopes");
+
+                    b.Property<bool>("System")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("system")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Version")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("tenant");
+
+                    b.ToTable("webplugins", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8mb4");
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioIndex", b =>
@@ -6774,6 +6853,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbCoreSettings", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebPlugin", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

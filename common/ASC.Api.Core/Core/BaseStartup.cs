@@ -216,7 +216,8 @@ public abstract class BaseStartup
                 .AddBaseDbContextPool<IntegrationEventLogContext>()
                 .AddBaseDbContextPool<FeedDbContext>()
                 .AddBaseDbContextPool<MessagesContext>()
-                .AddBaseDbContextPool<WebhooksDbContext>();
+                .AddBaseDbContextPool<WebhooksDbContext>()
+                .AddBaseDbContextPool<WebPluginDbContext>();
 
         if (AddAndUseSession)
         {
@@ -372,6 +373,12 @@ public abstract class BaseStartup
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
         services.AddBillingHttpClient();
+
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
+        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
 
 
         if (!_hostEnvironment.IsDevelopment())
