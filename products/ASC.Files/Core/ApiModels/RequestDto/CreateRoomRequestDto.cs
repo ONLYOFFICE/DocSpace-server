@@ -53,16 +53,4 @@ public class CreateRoomRequestDto
     /// <summary>Private room or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
-
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
-    public IEnumerable<FileShareParams> Share { get; set; }
-
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
-
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string SharingMessage { get; set; }
 }
