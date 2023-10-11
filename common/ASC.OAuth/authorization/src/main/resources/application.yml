@@ -1,12 +1,13 @@
 server:
-  port: 8080
+  host: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
   servlet:
     session:
       tracking-modes: cookie
 
 spring:
   application:
-    name: authorization
+    name: ASC.Identity
   profiles:
     active: ${PROFILE:dev}
   datasource:
