@@ -160,25 +160,6 @@ public class TenantQuotaController : IQuotaController
                 await _maxTotalSizeChecker.CheckAddAsync(_tenant, CurrentSize + size);
             }
         }
-        //TODO 
-        /* var quotaSettings = TenantUserQuotaSettings.Load();
-
-            if (quotaSettings.EnableUserQuota)
-            {
-                var userQuotaSettings = UserQuotaSettings.LoadForUser(ownedId);
-                var quotaLimit = userQuotaSettings.UserQuota;
-
-                if (quotaLimit != -1)
-                {
-                    var userUsedSpace = Math.Max(0, CoreContext.TenantManager.FindUserQuotaRows(_tenant, ownedId).Where(r => !string.IsNullOrEmpty(r.Tag)).Where(r => r.Tag != Guid.Empty.ToString()).Sum(r => r.Counter));
-
-                    if (quotaLimit - userUsedSpace < size)
-                    {
-                        throw new TenantQuotaException(string.Format("Exceeds the maximum file size ({0}MB)", BytesToMegabytes(quotaLimit)));
-                    }
-                }
-            }
-         */
     }
 
 

@@ -363,8 +363,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
             var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
-                var roomQuotaLimit = currentRoom.Quota == -2 ? quotaRoomSettings.DefaultQuota : currentRoom.Quota; //TODO
-                if (roomQuotaLimit != -1)
+                var roomQuotaLimit = currentRoom.Quota <= quotaRoomSettings.DefaultQuota ? quotaRoomSettings.DefaultQuota : currentRoom.Quota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
                     if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                     {
@@ -385,7 +385,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 if (userQuotaLimit != UserQuotaSettings.NoQuota)
                 {
-                    var userUsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(TenantID, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+                    var userUsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(TenantID, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
                     if (userQuotaLimit - userUsedSpace < file.ContentLength)
                     {
@@ -808,8 +808,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
             var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
-                var roomQuotaLimit = toFolder.Quota == -2 ? quotaRoomSettings.DefaultQuota : toFolder.Quota; //TODO
-                if (roomQuotaLimit != -1)
+                var roomQuotaLimit = toFolder.Quota <= quotaRoomSettings.DefaultQuota ? quotaRoomSettings.DefaultQuota : toFolder.Quota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
                     if (roomQuotaLimit - toFolder.Counter < fileContentLength)
                     {

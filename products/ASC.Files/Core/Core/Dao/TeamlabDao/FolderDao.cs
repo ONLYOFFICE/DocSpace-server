@@ -853,10 +853,10 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         var toUpdate = await Queries.FolderAsync(filesDbContext, TenantID, folder.Id);
 
         toUpdate.Quota = quota >= -1 ? quota : -2;
-
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
 
+        filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
         _ = _factoryIndexer.IndexAsync(toUpdate);
