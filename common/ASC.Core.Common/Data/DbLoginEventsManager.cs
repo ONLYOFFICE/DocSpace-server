@@ -76,7 +76,6 @@ public class DbLoginEventsManager
 
             _cache.Insert($"{GuidLoginEvent} - {id}", loginEvent, TimeSpan.FromMinutes(10));
         }
-
         return loginEvent;
     }
 
