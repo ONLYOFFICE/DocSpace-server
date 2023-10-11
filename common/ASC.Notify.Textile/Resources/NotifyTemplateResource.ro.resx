@@ -118,8 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Acest mesaj de e-mail este generat automat, vă rugăm să nu răspundeţi la acesta scrisiare.&lt;br /&gt;Ați primit acest e-mail pentru că sunteți un utilizator înregistrat al spațiului &lt;a href="{0}" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Faceți clic aici pentru a dezactiva notificările DocSpace prin e-mail: &lt;a href="{1}"  target="_blank"&gt;Unsubscribe&lt;/a&gt;
+    <value>Acest mesaj de e-mail este generat automat, vă rugăm să nu răspundeţi la acesta scrisiare.&lt;br /&gt;Ați primit acest e-mail pentru că sunteți un utilizator înregistrat al spațiului &lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
+&lt;br /&gt; Faceți clic aici pentru a dezactiva notificările DocSpace prin e-mail: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Unsubscribe&lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">

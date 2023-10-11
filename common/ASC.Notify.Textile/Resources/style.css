@@ -37,6 +37,7 @@ p
 ol li, ul li {
     font-size: 14px;
     line-height: 18px;
+    text-align: left;
 }
 
 a, p a

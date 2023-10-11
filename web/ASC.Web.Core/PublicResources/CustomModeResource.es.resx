@@ -89,7 +89,7 @@ Equipo de ONLYOFFICE</value>
 
 Haga clic en el siguiente botón e inicie sesión* en su nube.
 
-$GreenButton
+$OrangeButton
 
 El enlace es válido durante 7 días.
 
@@ -164,7 +164,7 @@ La eliminación de datos personales permitió liberar $DocsSpace</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>¿Desea cambiar la contraseña de su cuenta de la oficina en la nube? Haga clic en el botón de abajo para confirmar.
 
-$GreenButton
+$OrangeButton
 
 El enlace es válido durante 7 días.
 
@@ -183,7 +183,7 @@ El enlace es válido durante 7 días.
  
 * *Conectar cualquier almacenamiento en la nube* y trabajar sin cambiar de aplicación.
  
-$GreenButton
+$OrangeButton
  
 Si necesita ayuda, consulte nuestro "Centro de Ayuda":"https://helpcenter.onlyoffice.com/" o pregunte a nuestro "equipo de soporte":"https://www.onlyoffice.com/es/support-contact-form.aspx".
  

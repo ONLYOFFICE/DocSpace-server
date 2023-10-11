@@ -151,8 +151,8 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Deze e-mail is automatisch gegenereerd en u hoeft deze niet te beantwoorden.&lt;br /&gt;U ontvangt deze e-mail omdat u een geregistreerde gebruiker bent van&lt;a href="{0}" target="_blank"&gt; DocSpace&lt;/a&gt;
-&lt;br /&gt;Als u deze e-mails niet meer wilt ontvangen, klik dan op de volgende link: &lt;a href="{1}"  target="_blank"&gt;Afmelden&lt;/a&gt;
+    <value>Deze e-mail is automatisch gegenereerd en u hoeft deze niet te beantwoorden.&lt;br /&gt;U ontvangt deze e-mail omdat u een geregistreerde gebruiker bent van&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;
+&lt;br /&gt;Als u deze e-mails niet meer wilt ontvangen, klik dan op de volgende link: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Afmelden&lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
