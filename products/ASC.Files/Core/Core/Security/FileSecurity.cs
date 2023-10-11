@@ -538,7 +538,7 @@ public class FileSecurity : IFileSecurity
 
     private async Task<IEnumerable<Guid>> WhoCanAsync<T>(FileEntry<T> entry, FilesSecurityActions action)
     {
-        var shares = await GetSharesAsync(entry);
+        var shares = (await GetSharesAsync(entry)).Where(r => !r.IsLink);
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
 
         FileShareRecord[] defaultRecords;
