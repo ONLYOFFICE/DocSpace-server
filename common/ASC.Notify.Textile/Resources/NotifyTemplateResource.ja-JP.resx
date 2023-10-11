@@ -59,8 +59,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>このメールは自動的に生成されるので、回答する必要はありません。&lt;br /&gt;&lt;a href="{0}" target="_blank"&gt;DocSpace&lt;/a&gt;の登録ユーザーであるため、このメールを受け取りました。
-&lt;br /&gt;DocSpaceの通知メールの配信を停止するには、ここをクリックしてください： &lt;a href="{1}"  target="_blank"&gt;購読中止&lt;/a&gt;
+    <value>このメールは自動的に生成されるので、回答する必要はありません。&lt;br /&gt;&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;DocSpace&lt;/a&gt;の登録ユーザーであるため、このメールを受け取りました。
+&lt;br /&gt;DocSpaceの通知メールの配信を停止するには、ここをクリックしてください： &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;購読中止&lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">

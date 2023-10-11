@@ -239,8 +239,8 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>تم ارسال هذا البريد بشكل آلي ولا يجب عليك الرد عليه..&lt;br /&gt;لقد تلقيت هذا البريد لأنك مستخدم مسجل في&lt;a href="{0}" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; اضغط هنا لإلغاء الاشتراك من خدمة اشعارات : &lt;a DocSpace  href="{1}"  target="_blank"&gt;إلغاء الاشتراك &lt;/a&gt;
+    <value>تم ارسال هذا البريد بشكل آلي ولا يجب عليك الرد عليه..&lt;br /&gt;لقد تلقيت هذا البريد لأنك مستخدم مسجل في&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
+&lt;br /&gt; اضغط هنا لإلغاء الاشتراك من خدمة اشعارات : &lt;a DocSpace  href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;إلغاء الاشتراك &lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">

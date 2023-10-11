@@ -210,8 +210,8 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Este email foi gerado automaticamente e não precisa de responder ao mesmo.&lt;br /&gt;Recebeu este email porque é um utilizador registado do &lt;a href="{0}" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Clique aqui para cancelar a subscrição aos emails de notificação do DocSpace: &lt;a href="{1}"  target="_blank"&gt; Cancelar assinatura&lt;/a&gt;
+    <value>Este email foi gerado automaticamente e não precisa de responder ao mesmo.&lt;br /&gt;Recebeu este email porque é um utilizador registado do &lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
+&lt;br /&gt; Clique aqui para cancelar a subscrição aos emails de notificação do DocSpace: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; Cancelar assinatura&lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
