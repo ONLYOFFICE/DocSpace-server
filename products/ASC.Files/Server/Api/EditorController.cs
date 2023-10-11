@@ -40,8 +40,11 @@ public class EditorControllerInternal : EditorController<int>
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-        : base(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ExternalShare externalShare,
+        AuthContext authContext)
+        : base(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility,
+            filesLinkUtility, folderDtoHelper, fileDtoHelper, externalShare, authContext)
     {
     }
 }
@@ -62,8 +65,11 @@ public class EditorControllerThirdparty : EditorController<string>
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-        : base(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        ExternalShare externalShare,
+        AuthContext authContext)
+        : base(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility,
+            filesLinkUtility, folderDtoHelper, fileDtoHelper, externalShare, authContext)
     {
         _thirdPartySelector = thirdPartySelector;
     }
@@ -130,6 +136,8 @@ public abstract class EditorController<T> : ApiControllerBase
     private readonly IMapper _mapper;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
+    private readonly ExternalShare _externalShare;
+    private readonly AuthContext _authContext;
 
     public EditorController(
         FileStorageService fileStorageService,
@@ -142,7 +150,9 @@ public abstract class EditorController<T> : ApiControllerBase
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
+        FileDtoHelper fileDtoHelper, 
+        ExternalShare externalShare, 
+        AuthContext authContext) : base(folderDtoHelper, fileDtoHelper)
     {
         _fileStorageService = fileStorageService;
         _documentServiceHelper = documentServiceHelper;
@@ -153,6 +163,8 @@ public abstract class EditorController<T> : ApiControllerBase
         _mapper = mapper;
         _commonLinkUtility = commonLinkUtility;
         _filesLinkUtility = filesLinkUtility;
+        _externalShare = externalShare;
+        _authContext = authContext;
     }
 
     /// <summary>
@@ -244,9 +256,18 @@ public abstract class EditorController<T> : ApiControllerBase
             }
         }
 
-        if (!file.Encrypted && !file.ProviderEntry)
+        if (_authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry)
         {
-            await _entryManager.MarkAsRecent(file);
+            var linkId = await _externalShare.GetLinkIdAsync();
+
+            if (linkId != default && file.RootFolderType == FolderType.USER)
+            {
+                await _entryManager.MarkAsRecentByLink(file, linkId);
+            }
+            else if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+            {
+                await _entryManager.MarkAsRecent(file);
+            }
         }
 
         configuration.Token = _documentServiceHelper.GetSignature(configuration);

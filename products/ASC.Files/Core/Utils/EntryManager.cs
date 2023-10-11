@@ -1891,6 +1891,30 @@ public class EntryManager
         };
     }
 
+    public async Task MarkAsRecentByLink<T>(File<T> file, Guid linkId)
+    {
+        var tagDao = _daoFactory.GetTagDao<T>();
+        var userId = _authContext.CurrentAccount.ID;
+        var linkIdString = linkId.ToString();
+
+        var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, new[] { file })
+            .ToDictionaryAsync(k => k.Name);
+
+        if (tags.Count > 0)
+        {
+            var toRemove = tags.Values.Where(t => t.Name != linkIdString);
+
+            await tagDao.RemoveTags(toRemove);
+        }
+
+        if (!tags.ContainsKey(linkIdString))
+        {
+            var tag = Tag.RecentByLink(_authContext.CurrentAccount.ID, linkId, file);
+
+            await tagDao.SaveTagsAsync(tag);
+        }
+    }
+
     public async Task MarkAsRecent<T>(File<T> file)
     {
         if (file.Encrypted || file.ProviderEntry)

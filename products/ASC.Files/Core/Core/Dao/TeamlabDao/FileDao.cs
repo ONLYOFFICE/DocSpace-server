@@ -804,7 +804,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 if (deleteLinks)
                 {
-                    await Queries.DeleteExternalLinks(filesDbContext, TenantID, fileId.ToString());
+                    await Queries.DeleteTagLinksByTypeAsync(filesDbContext, TenantID, fileId.ToString(), TagType.RecentByLink);
+                    await Queries.DeleteTagsAsync(filesDbContext, TenantID);
                 }
 
                 await foreach (var f in fromFolders)
@@ -1906,6 +1907,18 @@ static file class Queries
                     .Where(r => r.EntryId == fileId && r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
+    public static readonly Func<FilesDbContext, int, string, TagType, Task<int>> DeleteTagLinksByTypeAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string fileId, TagType type) =>
+                ctx.Tag
+                    .Where(t => t.TenantId == tenantId)
+                    .Where(t => t.Type == type)
+                    .Join(ctx.TagLink, t => t.Id, l => l.TagId, (t, l) => l)
+                    .Where(l => l.EntryId == fileId)
+                    .Where(l => l.EntryType == FileEntryType.File)
+                    .ExecuteDelete());
+                
+
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFile>> DbFilesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId) =>
@@ -2147,15 +2160,5 @@ static file class Queries
                 ctx.FilesProperties
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
-                    .ExecuteDelete());
-
-    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteExternalLinks =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string entryId) =>
-                ctx.Security
-                    .Where(s => s.TenantId == tenantId)
-                    .Where(s => s.EntryId == entryId)
-                    .Where(s => s.EntryType == FileEntryType.File)
-                    .Where(s => s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
 }
