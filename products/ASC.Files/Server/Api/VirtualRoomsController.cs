@@ -832,9 +832,11 @@ public class VirtualRoomsCommonController : ApiControllerBase
     }
 
     [HttpPost("rooms/indexexport/{id}")]
-    public void StartRoomIndexExportAsync(int id)
+    public async Task StartRoomIndexExportAsync(int id)
     {
         ErrorIfNotDocSpace();
+
+        await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
         var tenantId = _apiContext.Tenant.Id;
         var userId = _authContext.CurrentAccount.ID;

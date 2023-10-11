@@ -107,7 +107,6 @@ public class DocumentBuilderScriptHelper
             }
         };
 
-
         items.AddRange(entries.OfType<FileEntry<T>>().Select(item => new
         {
             index = "1.N",

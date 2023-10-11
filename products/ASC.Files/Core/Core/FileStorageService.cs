@@ -3383,7 +3383,6 @@ public class FileStorageService //: IFileStorageService
         return string.Empty; //TODO: Studio.UserControls.Common.HelpCenter.HelpCenter.RenderControlToString();
     }
 
-
     private IFolderDao<T> GetFolderDao<T>()
     {
         return _daoFactory.GetFolderDao<T>();
