@@ -60,3 +60,45 @@ ALTER TABLE identity_clients
 ALTER TABLE identity_clients
 	ADD CONSTRAINT UK_client_secret
 	UNIQUE (client_secret);
+
+CREATE EVENT IF NOT EXISTS delete_invalidated_clients
+ON SCHEDULE EVERY 1 hour
+ON COMPLETION PRESERVE
+    DO
+      DELETE FROM identity_clients ic WHERE ic.invalidated = 1;
+
+CREATE EVENT IF NOT EXISTS delete_invalidated_consents
+ON SCHEDULE EVERY 1 hour
+ON COMPLETION PRESERVE
+    DO
+      DELETE FROM identity_consents ic WHERE ic.invalidated = 1;
+
+CREATE EVENT IF NOT EXISTS delete_invalidated_authorization
+ON SCHEDULE EVERY 1 hour
+ON COMPLETION PRESERVE
+    DO
+      DELETE FROM identity_authorizations ia WHERE ia.invalidated = 1;
+
+DROP TRIGGER IF EXISTS update_entry_authorizations;
+
+CREATE TRIGGER update_entry_authorizations
+BEFORE UPDATE ON identity_authorizations
+FOR EACH ROW
+BEGIN
+  IF new.modified_at <= old.modified_at
+  THEN
+   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
+  END IF;
+END;
+
+DROP TRIGGER IF EXISTS update_entry_consents;
+
+CREATE TRIGGER update_entry_consents
+BEFORE UPDATE ON identity_consents
+FOR EACH ROW
+BEGIN
+  IF new.modified_at <= old.modified_at
+  THEN
+   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
+  END IF;
+END;
