@@ -498,6 +498,6 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public Task SetCustomOrder(string fileId, string parentFolderId, int order)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 }
