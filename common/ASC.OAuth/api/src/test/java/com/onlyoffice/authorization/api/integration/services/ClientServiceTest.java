@@ -3,7 +3,6 @@ package com.onlyoffice.authorization.api.integration.services;
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.dto.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.entities.Client;
-import com.onlyoffice.authorization.api.entities.Tenant;
 import com.onlyoffice.authorization.api.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.services.ClientService;
 import lombok.SneakyThrows;
@@ -16,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
-import java.sql.Statement;
 
 import static org.junit.Assert.*;
 
@@ -34,14 +32,11 @@ public class ClientServiceTest extends ContainerBase {
     @BeforeEach
     @SneakyThrows
     void beforeEach() {
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate("INSERT INTO tenants_tenants " + "VALUES (1, 'mock', 'mock')");
-        statement.close();
         clientRepository.save(Client
                 .builder()
                         .clientId("client")
                         .clientSecret("secret")
-                        .tenant(Tenant.builder().id(1).build())
+                        .tenant(1)
                         .invalidated(false)
                         .enabled(true)
                         .scopes("accounts:read")
@@ -53,9 +48,6 @@ public class ClientServiceTest extends ContainerBase {
     @SneakyThrows
     void afterEach() {
         clientRepository.findAll().forEach(c -> clientRepository.delete(c));
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate("DELETE FROM tenants_tenants t WHERE t.id = 1");
-        statement.close();
     }
 
     @Test

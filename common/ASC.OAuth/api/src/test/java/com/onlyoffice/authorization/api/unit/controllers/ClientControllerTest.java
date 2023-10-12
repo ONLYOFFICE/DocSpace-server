@@ -56,7 +56,7 @@ public class ClientControllerTest {
                         .build());
         MockHttpServletResponse response = mvc.perform(
                         MockMvcRequestBuilders.get("/api/2.0/clients")
-                                .header("X-Tenant", 1)
+                                .header("X-Tenant", "1")
                                 .queryParam("page", "0")
                                 .queryParam("limit", "5")
                                 .accept(MediaType.APPLICATION_JSON))
@@ -70,7 +70,7 @@ public class ClientControllerTest {
                 .willReturn(ClientDTO.builder().clientId("mock").tenant(1).build());
         MockHttpServletResponse response = mvc.perform(
                         MockMvcRequestBuilders.get("/api/2.0/clients/mock")
-                                .header("X-Tenant", 1)
+                                .header("X-Tenant", "1")
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -105,7 +105,7 @@ public class ClientControllerTest {
                                                 .scopes(Set.of("mock"))
                                                 .build()).
                                         getJson())
-                                .header("X-Tenant", 1)
+                                .header("X-Tenant", "1")
                 ).andReturn().getResponse();
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
     }

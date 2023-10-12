@@ -6,8 +6,6 @@ import com.onlyoffice.authorization.api.messaging.listeners.ClientListener;
 import com.onlyoffice.authorization.api.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.services.ClientService;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
-import java.sql.Statement;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -32,23 +29,6 @@ public class ClientListenerTest extends ContainerBase {
     private ClientService clientService;
     @Autowired
     private ClientRepository clientRepository;
-
-    @BeforeEach
-    @SneakyThrows
-    void beforeEach() {
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate("INSERT INTO tenants_tenants " + "VALUES (1, 'mock', 'mock')");
-        statement.close();
-    }
-
-    @AfterEach
-    @SneakyThrows
-    void afterEach() {
-        clientRepository.findAll().forEach(c -> clientRepository.delete(c));
-        Statement statement = dataSource.getConnection().createStatement();
-        statement.executeUpdate("DELETE FROM tenants_tenants t WHERE t.id = 1");
-        statement.close();
-    }
 
     @Test
     @SneakyThrows

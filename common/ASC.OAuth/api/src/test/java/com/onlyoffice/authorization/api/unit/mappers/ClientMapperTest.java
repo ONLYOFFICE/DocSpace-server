@@ -1,7 +1,6 @@
 package com.onlyoffice.authorization.api.unit.mappers;
 
 import com.onlyoffice.authorization.api.entities.Client;
-import com.onlyoffice.authorization.api.entities.Tenant;
 import com.onlyoffice.authorization.api.mappers.ClientMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,7 +27,7 @@ public class ClientMapperTest {
             .redirectUri("redirect")
             .logoutRedirectUri("logoutredirect")
             .scopes("scopes")
-            .tenant(Tenant.builder().id(1).build())
+            .tenant(1)
             .enabled(true)
             .invalidated(false)
             .build();

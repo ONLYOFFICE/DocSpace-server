@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,12 +20,12 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
            SELECT c FROM Client c WHERE c.clientId=:id AND c.invalidated=false
            """)
     Optional<Client> findById(@Param("id") String id);
-    int deleteByClientIdAndTenantId(String id, int tenantId);
+    int deleteByClientIdAndTenant(String id, int tenant);
     @EntityGraph(attributePaths = {"scopes", "tenant"})
-    Optional<Client> findClientByClientIdAndTenantId(String id, int tenantId);
-    Page<Client> findAllByTenantId(int tenantId, Pageable pageable);
+    Optional<Client> findClientByClientIdAndTenant(String id, int tenantId);
+    Page<Client> findAllByTenant(int tenant, Pageable pageable);
     @Query("""
-           UPDATE Client c SET c.clientSecret=:secret WHERE c.clientId=:clientId AND c.tenant.id=:tenant
+           UPDATE Client c SET c.clientSecret=:secret WHERE c.clientId=:clientId AND c.tenant=:tenant
            """)
     @Modifying
     void regenerateClientSecretByClientId(@Param("clientId") String clientId, @Param("tenant") int tenant, @Param("secret") String secret);

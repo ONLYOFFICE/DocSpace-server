@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface ClientPersistenceRetrievalUsecases {
     Optional<Client> findById(String id);
-    Page<Client> findAllByTenantId(int tenantId, Pageable pageable);
-    Optional<Client> findClientByClientIdAndTenantId(String clientId, int tenantId);
+    Page<Client> findAllByTenant(int tenantId, Pageable pageable);
+    Optional<Client> findClientByClientIdAndTenant(String clientId, int tenant);
 }

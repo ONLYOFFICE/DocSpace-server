@@ -74,7 +74,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean deleteClient(String id, int tenantId) {
         log.info("deleting a client with id {} for tenant {}", id, tenantId);
-        if (mutationUsecases.deleteByClientIdAndTenantId(id, tenantId) < 1)
+        if (mutationUsecases.deleteByClientIdAndTenant(id, tenantId) < 1)
             throw new ClientNotFoundException(String
                     .format("could not find client with client id %s for %d", id, tenantId));
         return true;
@@ -128,7 +128,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
         log.info("trying to update a client with id {} for tenant {}", clientId, tenant);
-        var c = retrievalUsecases.findClientByClientIdAndTenantId(clientId, tenant)
+        var c = retrievalUsecases.findClientByClientIdAndTenant(clientId, tenant)
                 .orElseThrow(() -> new ClientNotFoundException(String
                         .format("could not find client with client id %s for %d", clientId, tenant)));
         ClientMapper.INSTANCE.update(c, clientDTO);
@@ -179,7 +179,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     public PaginationDTO getTenantClients(int tenantId, int page, int limit) {
         log.info("trying to get tenant {} clients with page {} and limit {}", tenantId, page, limit);
         var data = retrievalUsecases
-                .findAllByTenantId(tenantId, Pageable.ofSize(limit).withPage(page));
+                .findAllByTenant(tenantId, Pageable.ofSize(limit).withPage(page));
 
         var builder = PaginationDTO
                 .<ClientDTO>builder()

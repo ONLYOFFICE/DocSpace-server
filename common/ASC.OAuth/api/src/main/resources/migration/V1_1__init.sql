@@ -13,7 +13,7 @@ CREATE TABLE identity_authorizations (
 	authorization_code_value text,
 	authorization_grant_type varchar(255),
 	authorized_scopes varchar(1000),
-	invalidated bit,
+	invalidated tinyint(1),
 	modified_at datetime(6),
 	principal_name varchar(255),
 	refresh_token_expires_at datetime(6),
@@ -26,27 +26,28 @@ CREATE TABLE identity_authorizations (
 ) engine=InnoDB;
 
 CREATE TABLE identity_clients (
-	authentication_method varchar(100),
 	client_id varchar(36) not null,
+	authentication_method varchar(100),
 	client_issued_at datetime(6),
-	client_secret varchar(36) not null,
+	client_secret varchar(255),
 	description varchar(255),
+	enabled tinyint(1),
+	invalidated tinyint(1),
 	logo_url varchar(255),
 	logout_redirect_uri tinytext,
 	client_name varchar(255),
 	policy_url varchar(255),
-	redirect_uri tinytext not null,
-	scopes tinytext not null,
+	redirect_uri tinytext,
+	scopes tinytext,
+	tenant_id integer,
 	terms_url varchar(255),
-	tenant_id integer not null,
-	invalidated bit,
 	primary key (client_id)
 ) engine=InnoDB;
 
 CREATE TABLE identity_consents (
 	principal_name varchar(255) not null,
 	registered_client_id varchar(255) not null,
-	invalidated bit,
+	invalidated tinyint(1),
 	modified_at datetime(6),
 	scopes tinytext,
 	primary key (principal_name, registered_client_id)
@@ -59,56 +60,3 @@ ALTER TABLE identity_clients
 ALTER TABLE identity_clients
 	ADD CONSTRAINT UK_client_secret
 	UNIQUE (client_secret);
-
-ALTER TABLE identity_clients
-	ADD CONSTRAINT FK_tenant_id__id
-	FOREIGN KEY (tenant_id)
-	REFERENCES tenants_tenants (id);
-
-DROP EVENT IF EXISTS delete_invalidated_consents;
-DROP EVENT IF EXISTS delete_invalidated_authorization;
-DROP EVENT IF EXISTS delete_invalidated_clients;
-
-CREATE EVENT delete_invalidated_consents
-ON schedule at current_timestamp + interval 1 hour
-    DO
-		DELETE FROM identity_consents ic WHERE ic.invalidated = 1;
-
-CREATE EVENT delete_invalidated_authorization
-ON schedule at current_timestamp + interval 1 hour
-    DO
-      DELETE FROM identity_authorizations ia WHERE ia.invalidated = 1;
-
-CREATE EVENT delete_invalidated_clients
-ON schedule at current_timestamp + interval 1 hour
-    DO
-      DELETE FROM identity_clients ic WHERE ic.invalidated = 1;
-
-DROP TRIGGER IF EXISTS update_entry_authorizations;
-DROP TRIGGER IF EXISTS update_entry_consents;
-
-DELIMITER $$
-CREATE TRIGGER update_entry_authorizations
-BEFORE UPDATE ON identity_authorizations
-FOR EACH ROW
-BEGIN
-  IF new.modified_at <= old.modified_at
-  THEN
-   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
-  END IF;
-
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE TRIGGER update_entry_consents
-BEFORE UPDATE ON identity_consents
-FOR EACH ROW
-BEGIN
-  IF new.modified_at <= old.modified_at
-  THEN
-   SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Warning: updated date can not be before than existing date!';
-  END IF;
-
-END$$
-DELIMITER ;

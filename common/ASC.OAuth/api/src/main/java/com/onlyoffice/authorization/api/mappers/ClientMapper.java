@@ -4,7 +4,6 @@ import com.onlyoffice.authorization.api.dto.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.dto.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.dto.response.ClientDTO;
 import com.onlyoffice.authorization.api.entities.Client;
-import com.onlyoffice.authorization.api.entities.Tenant;
 import com.onlyoffice.authorization.api.messaging.messages.ClientMessage;
 import org.bouncycastle.util.Strings;
 import org.mapstruct.*;
@@ -24,10 +23,6 @@ public interface ClientMapper {
 
     default String map(Set<String> value) {
         return String.join(",", value);
-    }
-
-    default Tenant map(int value) {
-        return Tenant.builder().id(value).build();
     }
 
     @Mappings({
@@ -55,12 +50,10 @@ public interface ClientMapper {
     })
     ClientDTO fromCommandToQuery(CreateClientDTO client);
     @Mappings({
-            @Mapping(source = "tenant.id", target = "tenant"),
             @Mapping(source = "enabled", target = "enabled"),
     })
     ClientDTO fromEntityToQuery(Client client);
     @Mappings({
-            @Mapping(source = "tenant", target = "tenant.id"),
             @Mapping(source = "enabled", target = "enabled"),
     })
     Client fromQueryToEntity(ClientDTO client);

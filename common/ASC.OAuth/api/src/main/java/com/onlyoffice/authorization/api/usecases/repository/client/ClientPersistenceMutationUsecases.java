@@ -6,5 +6,5 @@ public interface ClientPersistenceMutationUsecases {
     Client saveClient(Client entity);
     void regenerateClientSecretByClientId(String clientId, int tenantId, String secret);
     void changeActivation(String clientId, boolean enabled);
-    int deleteByClientIdAndTenantId(String id, int tenantId);
+    int deleteByClientIdAndTenant(String id, int tenantId);
 }

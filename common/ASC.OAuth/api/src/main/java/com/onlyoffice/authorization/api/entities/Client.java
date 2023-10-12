@@ -25,10 +25,13 @@ public class Client {
     @Column(name = "client_secret", unique = true, length = 36)
     private String clientSecret;
     @Column(name = "terms_url")
+    @Lob
     private String termsUrl;
     @Column(name = "policy_url")
+    @Lob
     private String policyUrl;
     @Column(name = "logo_url")
+    @Lob
     private String logoUrl;
     @Column(name = "client_issued_at")
     @CreatedDate
@@ -44,9 +47,8 @@ public class Client {
     @Column(name = "scopes")
     @Lob
     private String scopes;
-    @ManyToOne
-    @JoinColumn(name="tenant_id", nullable=false)
-    private Tenant tenant;
+    @Column(name = "tenant_id")
+    private int tenant;
     @Column(name = "enabled")
     private Boolean enabled;
     @Column(name = "invalidated")
