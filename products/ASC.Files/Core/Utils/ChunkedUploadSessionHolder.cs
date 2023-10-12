@@ -61,10 +61,20 @@ public class ChunkedUploadSessionHolder
 
     public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
-        await using var stream = await (await CommonSessionHolderAsync(false)).GetStreamAsync(sessionId);
-        var chunkedUploadSession = ChunkedUploadSession<T>.Deserialize(stream, _fileHelper);
-
-        return chunkedUploadSession;
+        try
+        {
+            await _semaphore.WaitAsync();
+            await using var stream = await (await CommonSessionHolderAsync(false)).GetStreamAsync(sessionId);
+            return ChunkedUploadSession<T>.Deserialize(stream, _fileHelper);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<ChunkedUploadSession<T>> CreateUploadSessionAsync<T>(File<T> file, long contentLength)
@@ -87,7 +97,11 @@ public class ChunkedUploadSessionHolder
         {
             await _semaphore.WaitAsync();
 
-            var updatedUploadSession = await GetSessionAsync<T>(uploadSession.Id);
+            ChunkedUploadSession<T> updatedUploadSession = null;
+            await using (var stream = await (await CommonSessionHolderAsync(false)).GetStreamAsync(uploadSession.Id))
+            {
+                updatedUploadSession = ChunkedUploadSession<T>.Deserialize(stream, _fileHelper);
+            }
 
             uploadSession.BytesUploaded = updatedUploadSession.BytesUploaded + bytesUploaded;
 
