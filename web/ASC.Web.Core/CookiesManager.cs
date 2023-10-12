@@ -295,7 +295,6 @@ public class CookiesManager
             if (isSuccess)
             {
                 await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
-                _dbLoginEventsManager.ResetCache(tenantId, userId);
             }
         }
 
@@ -322,7 +321,6 @@ public class CookiesManager
             if (isSuccess)
             {
                 await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
-                await _dbLoginEventsManager.ResetCacheAsync();
             }
         }
     }
