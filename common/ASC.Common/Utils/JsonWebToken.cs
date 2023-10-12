@@ -39,22 +39,34 @@ public static class JsonWebToken
         return encoder.Encode(payload, key);
     }
 
-    public static string Decode(string token, string key, bool verify = true, bool baseSerializer = false)
+    public static string Decode(string token, string key, bool verify = true)
     {
-        var (serializer, algorithm, urlEncoder) = GetSettings(baseSerializer);
-
-        var provider = new UtcDateTimeProvider();
-        IJwtValidator validator = new JwtValidator(serializer, provider);
-
-        var decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+        var decoder = CreateDecoder();
 
         return decoder.Decode(token, key, verify);
     }
 
-    private static (IJsonSerializer, IJwtAlgorithm, IBase64UrlEncoder) GetSettings(bool baseSerializer = false)
+    public static string Decode(string token)
+    {
+        var decoder = CreateDecoder();
+
+        return decoder.Decode(token);
+    }
+
+    private static JwtDecoder CreateDecoder()
+    {
+        var (serializer, algorithm, urlEncoder) = GetSettings();
+
+        var provider = new UtcDateTimeProvider();
+        IJwtValidator validator = new JwtValidator(serializer, provider);
+
+        return new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+    }
+
+    private static (IJsonSerializer, IJwtAlgorithm, IBase64UrlEncoder) GetSettings()
     {
 #pragma warning disable CS0618 // Type or member is obsolete
-        return (baseSerializer ? new JsonNetSerializer() : new JwtSerializer(), new HMACSHA256Algorithm(), new JwtBase64UrlEncoder());
+        return (new JwtSerializer(), new HMACSHA256Algorithm(), new JwtBase64UrlEncoder());
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 }

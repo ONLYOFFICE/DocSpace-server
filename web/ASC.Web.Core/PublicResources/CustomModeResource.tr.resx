@@ -130,7 +130,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
 
@@ -141,7 +141,7 @@ ONLYOFFICE Ekibi
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Bulut ofis hesabınızın şifresini değiştirmek mi istiyorsunuz? Onaylamak için aşağıdaki düğmeyi tıklayın.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -178,7 +178,7 @@ ONLYOFFICE ekibi</value>
 
 Aşağıdaki düğmeye tıklayın ve bulutunuzda oturum açın*.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
