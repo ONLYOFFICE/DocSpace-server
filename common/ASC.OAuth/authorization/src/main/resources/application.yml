@@ -6,8 +6,11 @@ server:
       tracking-modes: cookie
 
 spring:
+  cloud:
+    config:
+      enabled: false
   application:
-    name: ASC.Identity
+    name: ASC.Identity.Authorization
   profiles:
     active: ${PROFILE:dev}
   datasource:
