@@ -80,7 +80,7 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
 
             await _securityContext.AuthenticateMeWithoutCookieAsync(account);
 
-            var (script, tempFileName, outputFileName) = await _documentBuilderScriptHelper.GetScript(@event.CreateBy, @event.RoomId);
+            var (script, tempFileName, outputFileName) = await _documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
 
             var task = _serviceProvider.GetService<DocumentBuilderTask<int>>();
 

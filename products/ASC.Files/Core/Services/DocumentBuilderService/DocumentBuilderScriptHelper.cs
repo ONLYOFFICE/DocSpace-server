@@ -64,7 +64,7 @@ public class DocumentBuilderScriptHelper
         _pathProvider = pathProvider;
     }
 
-    private async Task<(object data, string outputFileName)> GetDataObject<T>(Guid userId, T roomId)
+    private async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(Guid userId, T roomId)
     {
         var user = await _userManager.GetUsersAsync(userId);
 
@@ -72,10 +72,11 @@ public class DocumentBuilderScriptHelper
 
         var room = await folderDao.GetFolderAsync(roomId);
 
-        var outputFileName = GetOutputFileName(room.Title);
+        var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
 
         //TODO: think about loop by N
-        var (entries, total) = await _entryManager.GetEntriesAsync(room, 0, int.MaxValue, FilterType.None, false, Guid.Empty, string.Empty, false, true, null);
+        //TODO: sort by custom order
+        var (entries, total) = await _entryManager.GetEntriesAsync(room, 0, -1, FilterType.None, false, Guid.Empty, string.Empty, false, true, new OrderBy(SortedByType.DateAndTimeCreation, true));
 
         var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
 
@@ -190,18 +191,13 @@ public class DocumentBuilderScriptHelper
         return $"temp{DateTime.UtcNow.Ticks}.xlsx";
     }
 
-    private static string GetOutputFileName(string title)
-    {
-        return $"{title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
-    }
-
-    private static string ReadTemplateFromEmbeddedResource()
+    private static string ReadTemplateFromEmbeddedResource(string templateFileName)
     {
         var assembly = Assembly.GetExecutingAssembly();
 
         var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
 
-        var resourceName = $"{templateNamespace}.ScriptTemplates.RoomIndex.docbuilder";
+        var resourceName = $"{templateNamespace}.ScriptTemplates.{templateFileName}";
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
 
@@ -215,13 +211,13 @@ public class DocumentBuilderScriptHelper
         return streamReader.ReadToEnd();
     }
 
-    public async Task<(string script, string tempFileName, string outputFileName)> GetScript<T>(Guid userId, T roomId)
+    public async Task<(string script, string tempFileName, string outputFileName)> GetRoomIndexExportScript<T>(Guid userId, T roomId)
     {
-        var script = ReadTemplateFromEmbeddedResource() ?? throw new Exception("Template not found");
+        var script = ReadTemplateFromEmbeddedResource("RoomIndexExport.docbuilder") ?? throw new Exception("Template not found");
 
         var tempFileName = GetTempFileName();
 
-        var (data, outputFileName) = await GetDataObject(userId, roomId);
+        var (data, outputFileName) = await GetRoomIndexExportData(userId, roomId);
 
         script = script.Replace("${tempFileName}", tempFileName)
                      .Replace("${inputData}", JsonConvert.SerializeObject(data));

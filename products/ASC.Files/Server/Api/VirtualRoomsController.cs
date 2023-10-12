@@ -852,6 +852,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
     {
         ErrorIfNotDocSpace();
 
+        //TODO: check indexing settings
         await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
         var tenantId = _apiContext.Tenant.Id;
