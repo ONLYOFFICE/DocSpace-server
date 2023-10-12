@@ -124,7 +124,7 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
@@ -139,7 +139,7 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
@@ -154,7 +154,7 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
@@ -169,13 +169,13 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:
  
 * 1 administrator, 2 utilizatori avansați
 * Până la 12 săli
-*  Un număr nelimitat de utilizatori în fiecare sală
+* Un număr nelimitat de utilizatori în fiecare sală
 * 2 GB de spațiu de stocare
  
 Descoperiți un nou mod de colaborare asupra documentelor!
@@ -187,7 +187,7 @@ Echipa ONLYOFFICE
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE? Faceți clic pe butonul de mai jos pentru a confirma.
  
-$GreenButton
+$OrangeButton
  
 Linkul este valabil timp de 7 zile.
  
@@ -219,7 +219,7 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
@@ -238,7 +238,7 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
@@ -257,7 +257,7 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
@@ -270,7 +270,7 @@ Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay�
  
 Aveţi grijă să efectuaţi plata abonamentului dvs Business înainte de expirarea perioadei de graţie Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -310,7 +310,7 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
@@ -384,7 +384,7 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -395,7 +395,7 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -406,7 +406,7 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -417,7 +417,7 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -436,7 +436,7 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
@@ -457,7 +457,7 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
@@ -478,7 +478,7 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
@@ -499,7 +499,7 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
@@ -556,7 +556,7 @@ Echipa ONLYOFFICE</value>
  
 De ce v-ați decis să părăsiți? Împărtășiți-ne experiența dumneavoastră.
  
-$GreenButton
+$OrangeButton
  
 Vă mulțumim și succese!
  
@@ -583,7 +583,7 @@ Configurați setările de securitate ale spațiului dvs ONLYOFFICE DocSpace pent
  
 * Creați copii de rezervă.
  
-$GreenButton
+$OrangeButton
  
 Vizitați Centru de ajutor:"https://helpcenter.onlyoffice.com/" pentru a afla mai multe despre configurarea și gestionarea spațiului dvs ONLYOFFICE DocSpace. Sunteți binevenit să consultați Centru de ajutor de fiecare dată când aveți întrebări cu privire la funcționalități.
  
@@ -598,7 +598,7 @@ Deoarece ați decis să nu-l mai utilizați, spațiul dvs ONLYOFFICE DocSpace ș
  
 Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ONLYOFFICE DocSpace?
  
-$GreenButton
+$OrangeButton
  
 Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ONLYOFFICE DocSpace, contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
  
@@ -611,7 +611,7 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
  
@@ -626,7 +626,7 @@ Vă rugăm să țineți cont de faptul că abonamentul dumneavoastră ONLYOFFICE
  
 Vă recomandăm să plătiți abonamentul dvs Business acum pentru a utiliza în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -639,7 +639,7 @@ Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay 
  
 Asigurați-vă că plătiți abonamentul dvs Business cât mai curând posibil. Astfel, veți putea folosi în continuare toate beneficiile oferite de ONLYOFFICE DocSpace ca înainte.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -652,7 +652,7 @@ Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay 
  
 Asigurați-vă că plătiți abonamentul dvs Business astăzi. Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -663,7 +663,7 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la sala $Message la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
  
@@ -674,7 +674,7 @@ Echipa ONLYOFFICE
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE Personal? Faceți clic pe butonul de mai jos pentru a confirma.
  
-$GreenButton 
+$OrangeButton 
  
 Linkul este valabil timp de 7 zile.
  
