@@ -1628,6 +1628,7 @@ public class FileStorageService //: IFileStorageService
         var fileDao = _daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
         file.NotFoundIfNull();
+        ErrorIf(!await _fileSecurity.CanEditAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
         await fileDao.SetCustomOrder(fileId, file.ParentId, order);
     }
 
@@ -1636,6 +1637,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = _daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
         folder.NotFoundIfNull();
+        ErrorIf(!await _fileSecurity.CanEditAsync(folder), FilesCommonResource.ErrorMassage_SecurityException);
         await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
     }
 
