@@ -5790,7 +5790,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.Core.EF.DbFileOrder", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFileOrder", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -5823,7 +5823,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.Core.EF.DbRoomSettings", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
                 {
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -7145,7 +7145,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Feed");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.Core.EF.DbFileOrder", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFileOrder", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -7156,11 +7156,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.Core.EF.DbRoomSettings", b =>
+            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
                 {
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
                         .WithOne("Settings")
-                        .HasForeignKey("ASC.Files.Core.Core.EF.DbRoomSettings", "RoomId")
+                        .HasForeignKey("ASC.Files.Core.EF.DbRoomSettings", "RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Core.EF;
-
 using Document = ASC.ElasticSearch.Document;
 
 namespace ASC.Files.Core.Data;
@@ -1573,10 +1571,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 SortedByType.Type => orderBy.IsAsc
                     ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1))
                     : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1)),
-                SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (file, order) => new { folder = file, order })
-                    .Where(r => r.order.EntryType == FileEntryType.File && r.order.TenantId == r.folder.TenantId)
+                SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (file, order) => new { file, order })
+                    .Where(r => r.order.EntryType == FileEntryType.File && r.order.TenantId == r.file.TenantId)
                     .OrderBy(r => r.order.Order)
-                    .Select(r => r.folder),
+                    .Select(r => r.file),
                 _ => q.OrderBy(r => r.Title)
             };
 

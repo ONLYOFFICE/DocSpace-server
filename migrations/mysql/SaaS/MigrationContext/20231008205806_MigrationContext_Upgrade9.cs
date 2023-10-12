@@ -10,18 +10,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "color",
-                table: "files_folder");
-
-            migrationBuilder.DropColumn(
-                name: "has_logo",
-                table: "files_folder");
-
-            migrationBuilder.DropColumn(
-                name: "private",
-                table: "files_folder");
-
             migrationBuilder.CreateTable(
                 name: "files_order",
                 columns: table => new
@@ -50,7 +38,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     room_id = table.Column<int>(type: "int", nullable: false),
                     tenant_id = table.Column<int>(type: "int", nullable: false),
-                    @private = table.Column<bool>(name: "private", type: "tinyint(1)", nullable: false, defaultValueSql: "'0'"),
+                    @private = table.Column<bool>(name: "private", type: "tinyint(1)", nullable: false, defaultValueSql: "0"),
                     has_logo = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "0"),
                     color = table.Column<string>(type: "char(6)", nullable: true, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
@@ -84,17 +72,25 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "files_room_settings",
                 column: "room_id",
                 unique: true);
+
+            migrationBuilder.Sql("insert into files_room_settings (room_id, tenant_id, private, has_logo, color) select id, tenant_id, private, has_logo, color where folder_type in (15,16,17,18,19,22)");
+            
+            migrationBuilder.DropColumn(
+                name: "color",
+                table: "files_folder");
+
+            migrationBuilder.DropColumn(
+                name: "has_logo",
+                table: "files_folder");
+
+            migrationBuilder.DropColumn(
+                name: "private",
+                table: "files_folder");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "files_order");
-
-            migrationBuilder.DropTable(
-                name: "files_room_settings");
-
             migrationBuilder.AddColumn<string>(
                 name: "color",
                 table: "files_folder",
@@ -115,7 +111,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "files_folder",
                 type: "tinyint(1)",
                 nullable: false,
-                defaultValueSql: "'0'");
+                defaultValueSql: "0");
+            
+            migrationBuilder.DropTable(
+                name: "files_order");
+
+            migrationBuilder.DropTable(
+                name: "files_room_settings");
         }
     }
 }

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Core.EF;
-
 namespace ASC.Files.Core.Data;
 
 [Scope]
@@ -1228,18 +1226,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     protected IQueryable<DbFolderQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> dbFiles)
     {
-        // return from r in dbFiles
-        //     select r, (from a in (from f in filesDbContext.Folders
-        //                 where f.Id ==
-        //                       (from t in filesDbContext.Tree
-        //                           where t.FolderId == r.ParentId
-        //                           orderby t.Level descending
-        //                           select t.ParentId
-        //                       ).FirstOrDefault()
-        //                 where f.TenantId == r.TenantId
-        //                 select f
-        //             ) select a)
-    
         return dbFiles
             .Select(r => new DbFolderQuery
             {
@@ -1293,7 +1279,23 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                     ).FirstOrDefault(),
                 Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom) &&
                          filesDbContext.Security.Any(s =>
-                             s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.Folder && s.SubjectType == SubjectType.PrimaryExternalLink)
+                             s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.Folder && s.SubjectType == SubjectType.PrimaryExternalLink),
+                Order = (
+                    from f in filesDbContext.FileOrder
+                    where (
+                        from rs in filesDbContext.RoomSettings 
+                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                            (from t in filesDbContext.Tree
+                                where t.FolderId == r.ParentId
+                                orderby t.Level descending
+                                select t.ParentId
+                            ).Skip(1).FirstOrDefault()
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                    select f.Order
+                ).FirstOrDefault(),
+                Settings = (from f in filesDbContext.RoomSettings 
+                    where f.TenantId == r.TenantId && f.RoomId == r.Id 
+                    select f).FirstOrDefault()
             });
     }
 
