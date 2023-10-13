@@ -852,8 +852,12 @@ public class VirtualRoomsCommonController : ApiControllerBase
     {
         ErrorIfNotDocSpace();
 
-        //TODO: check indexing settings
-        await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+        var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+
+        if (!room.SettingsIndexing)
+        {
+            throw new NotSupportedException("Folder indexing is turned off");
+        }
 
         var tenantId = _apiContext.Tenant.Id;
         var userId = _authContext.CurrentAccount.ID;
