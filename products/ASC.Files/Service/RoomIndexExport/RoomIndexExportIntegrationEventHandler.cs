@@ -68,25 +68,32 @@ public class RoomIndexExportIntegrationEventHandler : IIntegrationEventHandler<R
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (@event.Terminate)
+            try
             {
-                _documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
-                return;
+                if (@event.Terminate)
+                {
+                    _documentBuilderTaskManager.TerminateTask(@event.TenantId, @event.CreateBy);
+                    return;
+                }
+
+                await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
+
+                var account = await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy);
+
+                await _securityContext.AuthenticateMeWithoutCookieAsync(account);
+
+                var (script, tempFileName, outputFileName) = await _documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
+
+                var task = _serviceProvider.GetService<DocumentBuilderTask<int>>();
+
+                task.Init(@event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
+
+                _documentBuilderTaskManager.StartTask(task);
             }
-
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-
-            var account = await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy);
-
-            await _securityContext.AuthenticateMeWithoutCookieAsync(account);
-
-            var (script, tempFileName, outputFileName) = await _documentBuilderScriptHelper.GetRoomIndexExportScript(@event.CreateBy, @event.RoomId);
-
-            var task = _serviceProvider.GetService<DocumentBuilderTask<int>>();
-
-            task.Init(@event.TenantId, @event.CreateBy, script, tempFileName, outputFileName);
-
-            _documentBuilderTaskManager.StartTask(task);
+            catch (Exception ex)
+            {
+                _logger.ErrorWithException(ex);
+            }
         }
     }
 }
