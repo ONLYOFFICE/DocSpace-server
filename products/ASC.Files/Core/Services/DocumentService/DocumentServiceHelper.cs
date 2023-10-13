@@ -365,14 +365,7 @@ public class DocumentServiceHelper
             return null;
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                     new JwtSerializer(),
-                                     new JwtBase64UrlEncoder());
-#pragma warning restore CS0618 // Type or member is obsolete
-
-
-        return encoder.Encode(payload, _fileUtility.SignatureSecret);
+        return JsonWebToken.Encode(payload, _fileUtility.SignatureSecret);
     }
 
 

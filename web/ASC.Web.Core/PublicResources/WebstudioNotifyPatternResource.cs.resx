@@ -86,7 +86,7 @@ Ahoj!
 
 Jste zváni, abyste se připojili k "${__VirtualRootPath}":"$InviteLink" života na portálu, potřebujete aktivovat Vaší e-mailovou adresu. To se provádí z bezpečnostních důvodů.
 
-$GreenButton
+$OrangeButton
 
 Tento odkaz je platný pouze 7 dní. V této lhůtě prosím dokončete Vaší e-mailovou aktivaci.</value>
   </data>
@@ -112,7 +112,7 @@ Požádali jste o změnu hesla používaného pro vstup do "${__VirtualRootPath}
 
 Prosím, pro změnu Vašeho hesla následujte odkaz níže:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze po dobu 7 dní: Prosím, proveďte změnu hesla v rozmezí tohoto období.
 
@@ -125,7 +125,7 @@ Požádali jste o změnu mobilního telefonu používaného pro vstup do ${Lette
 
 Prosím následujte odkaz níže, abyste změnili Váš mobilní telefon:
 
-$GreenButton
+$OrangeButton
 
 Pokud nechcete změnit svůj mobilní telefon nebo jste tento e-mail obdrželi omylem, ignorujte ho nebo kontaktujte svého správce portálu a zjistěte podrobnosti.</value>
   </data>
@@ -138,7 +138,7 @@ Byla podaná žádost o změnu "${__VirtualRootPath}":"${__VirtualRootPath}" vla
 
 Postupujte prosím podle následujícího odkazu:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, proveďte proces změny vlastníka portálu v tomto období.</value>
   </data>
@@ -151,7 +151,7 @@ Byla podaná žádost o změnu "${__VirtualRootPath}":"${__VirtualRootPath}" adr
 
 Postupujte prosím podle následujícího odkazu:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, proveďte proces změny vlastníka portálu v tomto období.</value>
   </data>
@@ -171,7 +171,7 @@ Požádali jste o připojení k "${__VirtualRootPath}":"$InviteLink" portálu na
 
 Pro akceptaci pozvánky zadejte prosím své jméno a heslo na následujícím odkaze:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 48 hodin. Prosím, dokončete operaci v této době.</value>
   </data>
@@ -188,7 +188,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/cs/support-contact-form.aspx".
 
@@ -209,7 +209,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/cs/support-contact-form.aspx".
 
@@ -230,7 +230,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/cs/support-contact-form.aspx".
 
@@ -251,7 +251,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/cs/support-contact-form.aspx".
 
@@ -304,7 +304,7 @@ Vážený $OwnerName,
 
 Požádali jste o dočasnou deaktivaci Vašeho "${__VirtualRootPath}":"${__VirtualRootPath}" portálu. Prosím postupujte podle odkazu níže, abyste potvrdil operaci:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, dokončete v této době deaktivaci portálu.
 
@@ -354,7 +354,7 @@ Požádali jste o trvalé odstranění Vašeho profilu z "${__VirtualRootPath}":
 
 Pokud stále chcete odstranit Váš profil, prosím následujte odkaz níže pro potvrzení operace:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Prosím, dokončete proces vymazání profilu v tomto období.</value>
   </data>
@@ -583,7 +583,7 @@ tým ONLYOFFICE</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Chcete změnit heslo k účtu ONLYOFFICE? Pro potvrzení klikněte na tlačítko níže.
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný 7 dní.
 
@@ -596,7 +596,7 @@ Právě jste vytvořili ONLYOFFICE DocSpace, centrum dokumentů, kde můžete po
 
 Potvrďte prosím svůj e-mail (odkaz je platný 7 dní):
 
-$GreenButton
+$OrangeButton
 
 Užijte si nový způsob spolupráce na dokumentech!
 
@@ -611,7 +611,7 @@ Právě jste vytvořili ONLYOFFICE DocSpace, centrum dokumentů, kde můžete po
 
 Potvrďte prosím svůj e-mail (odkaz je platný 7 dní):
 
-$GreenButton
+$OrangeButton
 
 Užijte si nový způsob spolupráce na dokumentech!
 
@@ -626,7 +626,7 @@ Právě jste vytvořili ONLYOFFICE DocSpace, centrum dokumentů, kde můžete po
 
 Potvrďte prosím svůj e-mail (odkaz je platný 7 dní):
 
-$GreenButton
+$OrangeButton
 
 Užijte si nový způsob spolupráce na dokumentech!
 
@@ -641,7 +641,7 @@ Právě jste vytvořili ONLYOFFICE DocSpace, centrum dokumentů, kde můžete po
 
 Potvrďte prosím svůj e-mail (odkaz je platný 7 dní):
 
-$GreenButton
+$OrangeButton
 
 Aktuálně využíváte tarifní plán STARTUP. Je zcela zdarma a zahrnuje:
 
@@ -682,7 +682,7 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 *#4. Připojte úložiště třetích stran. * Připojte libovolné cloudové úložiště a pracujte bez přepínání mezi aplikacemi.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
@@ -701,7 +701,7 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 *#4. Připojte úložiště třetích stran. * Připojte libovolné cloudové úložiště a pracujte bez přepínání mezi aplikacemi.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
@@ -720,7 +720,7 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 *#4. Připojte úložiště třetích stran. * Připojte libovolné cloudové úložiště a pracujte bez přepínání mezi aplikacemi.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
@@ -739,7 +739,7 @@ Doufáme, že se vám používání ONLYOFFICE DocSpace bude líbit. Nabízíme 
 
 *#4. Připojte úložiště třetích stran. * Připojte libovolné cloudové úložiště a pracujte bez přepínání mezi aplikacemi.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
@@ -834,7 +834,7 @@ Tým ONLYOFFICE
 
 Jste zváni, abyste se připojili k ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -845,7 +845,7 @@ Tým ONLYOFFICE
 
 Jste zváni, abyste se připojili k ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -856,7 +856,7 @@ Tým ONLYOFFICE
 
 Jste zváni, abyste se připojili k ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -867,7 +867,7 @@ Tým ONLYOFFICE
 
 Jste zváni, abyste se připojili k ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -886,7 +886,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -907,7 +907,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -928,7 +928,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -949,7 +949,7 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -1004,7 +1004,7 @@ Tým ONLYOFFICE</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Chcete změnit heslo ke svému osobnímu účtu ONLYOFFICE? Pro potvrzení klikněte na tlačítko níže.
 
-$GreenButton 
+$OrangeButton 
 
 Odkaz je platný 7 dní.
 
@@ -1015,7 +1015,7 @@ Nechcete měnit heslo? Tuto zprávu ignorujte.</value>
 
 Proč jste se rozhodli odejít? Podělte se s námi o své zkušenosti.
  
-$GreenButton
+$OrangeButton
 
 Děkujeme a přejeme hodně štěstí!
 
@@ -1042,7 +1042,7 @@ Upravte nastavení zabezpečení svého prostoru ONLYOFFICE DocSpace, aby byl be
 
 * Provádějte zálohování dat.
 
-$GreenButton
+$OrangeButton
 
 Navštivte naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/", kde se dozvíte více o konfiguraci a správě svého prostoru ONLYOFFICE DocSpace. Můžete do něj také nahlédnout, pokud máte dotazy týkající se funkcí.
 
@@ -1057,7 +1057,7 @@ Vzhledem k tomu, že jste se rozhodli jej již nepoužívat, bude váš ONLYOFFI
 
 Budeme vděční za vaši zpětnou vazbu. Proč jste se rozhodli přestat používat ONLYOFFICE DocSpace?
 
-$GreenButton
+$OrangeButton
 
 Pokud si myslíte, že se jedná o chybu, a chcete nadále používat službu ONLYOFFICE DocSpace, obraťte se na náš "tým podpory":"https://www.onlyoffice.com/support-contact-form.aspx". 
 
@@ -1070,7 +1070,7 @@ Tým ONLYOFFICE
 
 Jste zváni, abyste se připojili k ONLYOFFICE DocSpace na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 Po kliknutí na odkaz s pozvánkou nastavte nové heslo k účtu.
 
@@ -1085,7 +1085,7 @@ Vezměte prosím na vědomí, že je aktivována doba odkladu $PaymentDelay pro 
 
 Nezapomeňte zaplatit předplatné Business před uplynutím doby odkladu. Budete tak moci dále využívat všechny výhody svého prostoru ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -1098,7 +1098,7 @@ Vezměte prosím na vědomí, že vaše předplatné služby ONLYOFFICE DocSpace
 
 Doporučujeme vám zaplatit předplatné Business nyní a nadále využívat všechny výhody vašeho ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -1111,7 +1111,7 @@ Vezměte prosím na vědomí, že doba odkladu $PaymentDelay dnů pro váš ONLY
 
 Nezapomeňte zaplatit předplatné Business co nejdříve. Budete tak moci využívat všechny výhody svého ONLYOFFICE DocSpace jako dosud.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -1124,7 +1124,7 @@ Vezměte prosím na vědomí, že zítra vyprší doba odkladu $PaymentDelay pro
 
 Nezapomeňte zaplatit předplatné Business ještě dnes. Budete tak moci dále využívat všechny výhody svého ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
@@ -1135,7 +1135,7 @@ Tým ONLYOFFICE
 
 Jste zváni do místnosti $Message na adrese "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvánku kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 Po kliknutí na odkaz s pozvánkou nastavte nové heslo k účtu.
 
@@ -1235,7 +1235,7 @@ tým podpory ONLYOFFICE™
 
 Klikněte na tlačítko níže a přihlaste se* do svého cloudu.
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný 7 dní.
 
@@ -1250,14 +1250,14 @@ Konfigurace aplikace autentizátoru, kterou používáte pro vstup do portálu $
 
 Kliknutím na tlačítko níže přejdete na přihlašovací stránku portálu a nakonfigurujete aplikaci autentizátoru:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
 jste zváni, abyste se připojili k "${__VirtualRootPath}":"${__VirtualRootPath}" jako hostující uživatel. Přijměte pozvání kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný pouze 7 dní.
 
@@ -1268,7 +1268,7 @@ Získáte další tipy, jak používat webovou kancelář. Odběry můžete kdyk
 
 $__AuthorName vás pozval jako hostujícího uživatele na "${__VirtualRootPath}":"${__VirtualRootPath}". Přijměte pozvání kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný pouze 7 dní.
 
@@ -1324,7 +1324,7 @@ h1."$PortalUrl":"$PortalUrl"
 Váš portál byl přesunut na novou doménu. Obnovte prosím svůj přístup k portálu zadáním hesla, které bude použito pro přihlášení.
 
 Heslo k účtu nastavíte pomocí níže uvedeného odkazu:
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní. Během této doby dokončete proces obnovení přístupu.
 
@@ -1385,7 +1385,7 @@ tým ONLYOFFICE</value>
 
 Klikněte na tlačítko níže a přihlaste se* do svého cloudu.
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný 7 dní.
 
@@ -1406,7 +1406,7 @@ tým ONLYOFFICE</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Požádali jste o ukončení svého účtu na personal.onlyoffice.com. Žádost dokončete pomocí odkazu (odkaz je aktivní po dobu 7 dnů): 
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: Po smazání bude váš účet a všechny údaje s ním spojené trvale vymazány v souladu s naším "Prohlášením o ochraně osobních údajů":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
@@ -1426,7 +1426,7 @@ Vážený $OwnerName,
 
 požádali jste o dočasnou deaktivaci svého portálu [${__VirtualRootPath}](${__VirtualRootPath}). Operaci potvrďte na níže uvedeném odkazu:
 
-$GreenButton
+$OrangeButton
 
 _Poznámka_: tento odkaz je platný pouze 7 dní. Během této doby dokončete proces deaktivace portálu.
 
@@ -1454,7 +1454,7 @@ Před odstraněním portálu se ujistěte, že je vypnutá automatická fakturac
 
 Pokud přesto chcete svůj portál [${__VirtualRootPath}](${__VirtualRootPath}) odstranit, potvrďte operaci pomocí níže uvedeného odkazu:
 
-$GreenButton
+$OrangeButton
 
 _Poznámka_: tento odkaz je platný pouze 7 dní. V této lhůtě dokončete proces odstranění portálu.
 
@@ -1513,7 +1513,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Váš portál byl obnoven. Pro přístup k němu je třeba nastavit nové heslo:
 
-$GreenButton
+$OrangeButton
 
 *Poznámka*: tento odkaz je platný pouze 7 dní.
 
@@ -1524,7 +1524,7 @@ Pokud jste tento e-mail obdrželi omylem, ignorujte jej nebo kontaktujte správc
 
 Jste zváni, abyste se připojili k "${__VirtualRootPath}":"${__VirtualRootPath}" jako hostující uživatel. Přijměte pozvání kliknutím na odkaz:
 
-$GreenButton
+$OrangeButton
 
 Jednou za čas vám také zašleme užitečné tipy a novinky z ONLYOFFICE. Odběry můžete kdykoli zrušit na stránce svého profilu a také je znovu povolit.
 
@@ -1590,7 +1590,7 @@ Byli jste pozváni do bezpečné webové kanceláře vaší společnosti, která
 
 Přijměte pozvánku pomocí níže uvedeného odkazu a přihlaste se pomocí přihlašovacího jména a hesla z firemního účtu. 
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný pouze 7 dní.</value>
   </data>

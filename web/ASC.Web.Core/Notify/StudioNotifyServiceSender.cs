@@ -162,7 +162,7 @@ public class StudioNotifyWorker
         await client.SendNoticeToAsync(
             (NotifyAction)item.Action,
             item.ObjectId,
-            item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses.ToArray(), r.CheckActivation)).ToArray(),
+            item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses?.ToArray(), r.CheckActivation)).ToArray(),
             item.SenderNames.Count > 0 ? item.SenderNames.ToArray() : null,
             item.CheckSubsciption,
             item.Tags.Select(r => new TagValue(r.Key, r.Value)).ToArray());

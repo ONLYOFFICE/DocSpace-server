@@ -95,7 +95,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -116,7 +116,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -137,7 +137,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -158,7 +158,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -173,7 +173,7 @@ Sveiki!
 
 Lai uzsāktu darbu portālā "${__VirtualRootPath}":"$InviteLink", jums drošības nolūkos ir jāaktivizē sava e-pasta adrese.
 
-$GreenButton
+$OrangeButton
 
 Šī saite ir derīga vienīgi 7 dienas. Lūdzu, pa šo laiku pabeidziet e-pasta aktivizāciju.</value>
   </data>
@@ -200,7 +200,7 @@ Ir pieprasīta paroles maiņa, kuru izmantojāt, lai ieietu "${__VirtualRootPath
 
 Lai mainītu paroli, sekojiet šai saitei:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Pabeidziet paroles maiņas procesu šajā laikā. 
 
@@ -213,7 +213,7 @@ Jūs pieprasījāt mainīt mobilo tālruni, ko ievadīt portālā ${LetterLogoTe
 
 Lai to izdarītu, sekojiet saitei:
 
-$GreenButton
+$OrangeButton
 
 Ja nevēlaties mainīt mobilā tālruņa numuru vai saņēmāt šo ziņu kļūdas dēļ, lūdzu, ignorējiet to vai sazinieties ar portāla administratoru, lai uzzinātu sīkāk.</value>
   </data>
@@ -226,7 +226,7 @@ Ir saņemts pieprasījums mainīt portāla "${__VirtualRootPath}":"${__VirtualRo
 
 Lai apstiprinātu darbību, spiediet zemāk esošo saiti:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet portāla īpašnieka maiņu.</value>
   </data>
@@ -239,7 +239,7 @@ Ir saņemts pieprasījums mainīt "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
 Lai apstiprinātu operāciju, lūdzu, sekojiet zemāk esošajai saitei:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, pabeidziet portāla adreses maiņu šajā laikā.</value>
   </data>
@@ -259,7 +259,7 @@ Jūs lūdzāt pievienoties "${__VirtualRootPath}":"$InviteLink" portālam ${Lett
 
 Lai pieņemtu uzaicinājumu, lūdzu, sekojiet šai saitei un ievadiet savu vārdu un uzvārdu:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga 48 stundas. Lūdzu, šajā laikā pabeidziet šo darbību.</value>
   </data>
@@ -310,7 +310,7 @@ Sveicināti, $OwnerName,
 
 Jūs esat pieprasījuši īslaicīgu sava"${__VirtualRootPath}":"${__VirtualRootPath}" portāla deaktivizāciju. Lūdzu, sekojiet saitei, lai apstiprinātu darbību:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet portāla deaktivizāciju.
 
@@ -338,7 +338,7 @@ Pirms portāla dzēšanas pārliecinieties, ka automātiskais rēķins ir izslē
 
 Ja joprojām vēlaties dzēst savu "${__VirtualRootPath}":"${__VirtualRootPath}" portālu, lūdzu, sekojiet zemāk esošajai saitei, lai apstiprinātu operāciju:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet portāla dzēšanas procesu. 
 
@@ -364,7 +364,7 @@ Jūs esat pieprasījuši neatgriezeniski dzēst savu profilu no "${__VirtualRoot
 
 Ja vēlaties dzēst savu profilu, lūdzu, sekojiet zemāk esošajai saitei, lai apstiprinātu darbību: 
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet profila dzēšanu.</value>
   </data>
@@ -629,7 +629,7 @@ ONLYOFFICE komanda</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt paroli savā ONLYOFFICE kontā? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -642,7 +642,7 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Izbaudiet jaunu dokumentu sadarbības veidu!
 
@@ -657,7 +657,7 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Izbaudiet jaunu dokumentu sadarbības veidu!
 
@@ -672,7 +672,7 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Izbaudiet jaunu dokumentu sadarbības veidu!
 
@@ -687,7 +687,7 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Jūsu pašreizējais tarifu plāns ir STARTUP. Tas ir pilnīgi bezmaksas un ietver:
 
@@ -728,7 +728,7 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
@@ -747,7 +747,7 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
@@ -766,7 +766,7 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
@@ -785,7 +785,7 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
@@ -880,7 +880,7 @@ ONLYOFFICE komanda
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -891,7 +891,7 @@ ONLYOFFICE komanda
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -902,7 +902,7 @@ ONLYOFFICE komanda
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -913,7 +913,7 @@ ONLYOFFICE komanda
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -932,7 +932,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "tbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -953,7 +953,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "tbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -974,7 +974,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -995,7 +995,7 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -1050,7 +1050,7 @@ ONLYOFFICE komanda</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt paroli savā ONLYOFFICE Personal kontā? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
 
-$GreenButton 
+$OrangeButton 
 
 Saite ir derīga septiņas dienas.
 
@@ -1061,7 +1061,7 @@ Vai nevēlaties mainīt paroli? Vienkārši ignorējiet šo ziņojumu.</value>
 
 Kāds jums ir iemesls aiziet? Dalieties savā pieredzē ar mums.
  
-$GreenButton
+$OrangeButton
 
 Pateicamies un vēlam veiksmi!
 
@@ -1088,7 +1088,7 @@ Pielāgojiet sava ONLYOFFICE DocSpace drošības iestatījumus, lai padarītu to
 
 * Veiciet datu dublēšanu.
 
-$GreenButton
+$OrangeButton
 
 Apmeklējiet mūsu palīdzības centru: https://helpcenter.onlyoffice.com/, lai uzzinātu vairāk par ONLYOFFICE DocSpace konfigurēšanu un pārvaldību. Aicinām konsultēties arī tad, ja jums ir jautājumi par funkcionalitāti.
 
@@ -1103,7 +1103,7 @@ Tā kā nolēmt vairs to neizmantot, jūsu ONLYOFFICE DocSpace un visi dati tiks
 
 Mēs būsim pateicīgi par jūsu atsauksmi. Kāpēc nolēmāt pārtraukt lietot ONLYOFFICE DocSpace?
 
-$GreenButton
+$OrangeButton
 
 Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ONLYOFFICE DocSpace, sazinieties ar mūsu "atbalsta komandu":"https://www.onlyoffice.com/support-contact-form.aspx".
 
@@ -1116,7 +1116,7 @@ ONLYOFFICE komanda
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli savam kontam.
 
@@ -1131,7 +1131,7 @@ ONLYOFFICE komanda
 
 Pārliecinieties, ka apmaksājiet Business abonementu pirms pagarinājuma perioda beigām. Tādējādi jūs varēsiet turpināt izmantot visas ONLYOFFICE DocSpace priekšrocības.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1144,7 +1144,7 @@ ONLYOFFICE komanda
 
 Mēs iesakām samaksāt jūsu Business abonementu tagad un turpināt izmantot visas jūsu ONLYOFFICE DocSpace priekšrocības.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1157,7 +1157,7 @@ ONLYOFFICE komanda
 
 Pārliecinieties, ka apmaksājat savu Business abonementu, cik drīz vien iespējams. Tādējādi jūs varēsiet izmantot visas ONLYOFFICE DocSpace priekšrocības tāpat kā iepriekš.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1170,7 +1170,7 @@ ONLYOFFICE komanda
 
 Noteikti apmaksājiet Business abonementu jau šodien. Tādējādi jūs varēsiet turpināt izmantot visas ONLYOFFICE DocSpace priekšrocības.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1181,7 +1181,7 @@ ONLYOFFICE komanda
 
 Jūs esat uzaicināts (-a) pievienoties $Message room šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli savam kontam.
 
@@ -1446,7 +1446,7 @@ ONLYOFFICE™ atbalsta komanda
 
 Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -1461,14 +1461,14 @@ Autentificētāja lietotnes konfigurācija, ko izmantojat, lai ieietu ${LetterLo
 
 Noklikšķiniet uz tālāk redzamās pogas, lai pārietu uz portāla pieteikšanās lapu un konfigurētu autentificētāja lietojumprogrammu:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Sveiki, $UserName!
 
 Jūs esat uzaicināts pievienoties "${__VirtualRootPath}":"${__VirtualRootPath}" kā viesis. Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga tikai septiņas dienas.
 
@@ -1479,7 +1479,7 @@ Jūs saņemsiet vairāk padomu par to, kā izmantot savu tīmekļa biroju. Abone
 
 $__AuthorName uzaicināja jūs kā viesi "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga tikai septiņas dienas.
 
@@ -1535,7 +1535,7 @@ h1."$PortalUrl":"$PortalUrl"
 Jūsu portāls ir migrēts uz jaunu domēnu. Atjaunojiet piekļuvi portālam, norādot paroli, kas tiks izmantota pierakstoties.
 
 Lūdzu, izmantojiet tālāk norādīto saiti, lai iestatītu konta paroli:
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai septiņas dienas. Pabeidziet piekļuves atjaunošanas procesu šajā periodā.
 
@@ -1596,7 +1596,7 @@ ONLYOFFICE komanda</value>
 
 Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -1617,7 +1617,7 @@ ONLYOFFICE komanda</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Jūs pieprasījāt pārtraukt konta darbību personal.onlyoffice.com. Lai pabeigtu pieprasījumu, izmantojiet saiti (saite ir aktīva septiņas dienas): 
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: pēc izdzēšanas jūsu konts un visi ar to saistītie dati tiks neatgriezeniski izdzēsti saskaņā ar mūsu "Paziņojumu par konfidencialitāti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
 
@@ -1637,7 +1637,7 @@ Cien. $OwnerName,
 
 Jūs pieprasījāt sava [${__VirtualRootPath}](${__VirtualRootPath}) portāla pagaidu deaktivizāciju. Izmantojiet tālāk norādīto saiti, lai apstiprinātu darbību:
 
-$GreenButton
+$OrangeButton
 
 _Note_: šī saite ir derīga tikai septiņas dienas. Pabeidziet portāla deaktivizēšanas procesu šajā periodā.
 
@@ -1665,7 +1665,7 @@ Pirms izdzēst portālu, pārliecinieties, vai automātiska norēķināšanās i
 
 Ja joprojām vēlies izdzēst savu [${__VirtualRootPath}](${__VirtualRootPath}) portālu, izmantojiet tālāk norādīto saiti, lai apstiprinātu darbību:
 
-$GreenButton
+$OrangeButton
 
 _Note_: šī saite ir derīga tikai septiņas dienas. Pabeidziet portāla dzēšanas procesu šajā periodā.
 
@@ -1728,7 +1728,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Jūsu portāls ir atjaunots. Lai tai piekļūtu, ir jāiestata jauna parole:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai septiņas dienas. 
 
@@ -1739,7 +1739,7 @@ Ja šo e-pasta ziņojumu saņēmāt kļūdas dēļ, ignorējiet to vai sazinieti
 
 Jūs esat uzaicināts pievienoties "${__VirtualRootPath}":"${__VirtualRootPath}" kā viesis. Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Mēs arī nosūtīsim jums noderīgus padomus un jaunākās ONLYOFFICE ziņas. Abonementus jebkurā brīdī varat atcelt savā profila lapā, kā arī atkārtoti iespējot tos.
 
@@ -1805,7 +1805,7 @@ Jūs esat uzaicināts pievienoties sava uzņēmuma drošajam tīmekļa birojam, 
 
 Apstipriniet uzaicinājumu, noklikšķinot uz tālāk norādītās saites, un pierakstoties izmantojot uzņēmuma konta lietotājvārdu un paroli. 
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga tikai septiņas dienas.</value>
   </data>

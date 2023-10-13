@@ -39,7 +39,6 @@ public class WebPluginSettings
     private string _extension;
     private string[] _allow;
     private string[] _assetExtensions;
-    private string _systemUrl;
 
     public bool Enabled
     {

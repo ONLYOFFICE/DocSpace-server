@@ -88,11 +88,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
 
     public override LoginProfile GetLoginProfile(string accessToken)
     {
-#pragma warning disable CS0618 // Type or member is obsolete
-        var tokenPayloadString = JwtBuilder.Create()
-                                .WithAlgorithm(new HMACSHA256Algorithm())
-                                .Decode(accessToken);
-#pragma warning restore CS0618 // Type or member is obsolete
+        var tokenPayloadString = JsonWebToken.Decode(accessToken);
         var tokenPayload = JObject.Parse(tokenPayloadString);
         if (tokenPayload == null)
         {

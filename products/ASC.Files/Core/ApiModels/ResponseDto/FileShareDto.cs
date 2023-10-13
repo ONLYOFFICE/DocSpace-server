@@ -72,9 +72,9 @@ public class FileShareLink
     public ApiDateTime ExpirationDate { get; set; }
     public LinkType LinkType { get; set; }
     public string Password { get; set; }
-    public bool? Disabled { get; set; }
     public bool? DenyDownload { get; set; }
     public bool? IsExpired { get; set; }
+    public bool Primary { get; set; }
 }
 
 public enum LinkType
@@ -123,15 +123,16 @@ public class FileShareDtoHelper
                     ShareLink = aceWrapper.Link,
                     ExpirationDate = date.HasValue && date.Value != default ? _apiDateTimeHelper.Get(date) : null,
                     Password = aceWrapper.FileShareOptions?.Password,
-                    Disabled = aceWrapper.FileShareOptions?.Disabled is true ? true : expired,
                     DenyDownload = aceWrapper.FileShareOptions?.DenyDownload,
                     LinkType = aceWrapper.SubjectType switch
                     {
                         SubjectType.InvitationLink => LinkType.Invitation,
                         SubjectType.ExternalLink => LinkType.External,
+                        SubjectType.PrimaryExternalLink => LinkType.External,
                         _ => LinkType.Invitation
                     },
-                    IsExpired = expired
+                    IsExpired = expired,
+                    Primary = aceWrapper.SubjectType == SubjectType.PrimaryExternalLink
                 };
             }
             else

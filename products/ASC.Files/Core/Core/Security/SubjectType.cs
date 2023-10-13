@@ -32,7 +32,9 @@ public enum ShareFilterType
     User = 0,
     InvitationLink = 1,
     ExternalLink = 2,
-    Link = InvitationLink | ExternalLink
+    AdditionalExternalLink = 4,
+    PrimaryExternalLink = 8,
+    Link = InvitationLink | ExternalLink | AdditionalExternalLink | PrimaryExternalLink
 }
 
 public enum SubjectType
@@ -41,4 +43,5 @@ public enum SubjectType
     ExternalLink = 1,
     Group = 2,
     InvitationLink = 3,
+    PrimaryExternalLink = 4
 }
