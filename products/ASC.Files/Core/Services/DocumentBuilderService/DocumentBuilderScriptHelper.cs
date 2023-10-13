@@ -39,6 +39,7 @@ public class DocumentBuilderScriptHelper
     private readonly FileUtility _fileUtility;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly PathProvider _pathProvider;
+    private readonly BreadCrumbsManager _breadCrumbsManager;
 
     public DocumentBuilderScriptHelper(
         UserManager userManager,
@@ -50,7 +51,8 @@ public class DocumentBuilderScriptHelper
         FilesLinkUtility filesLinkUtility,
         FileUtility fileUtility,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        PathProvider pathProvider)
+        PathProvider pathProvider,
+        BreadCrumbsManager breadCrumbsManager)
     {
         _userManager = userManager;
         _daoFactory = daoFactory;
@@ -62,35 +64,31 @@ public class DocumentBuilderScriptHelper
         _fileUtility = fileUtility;
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _pathProvider = pathProvider;
+        _breadCrumbsManager = breadCrumbsManager;
     }
 
     private async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(Guid userId, T roomId)
     {
         var user = await _userManager.GetUsersAsync(userId);
 
-        var folderDao = _daoFactory.GetFolderDao<T>();
-
-        var room = await folderDao.GetFolderAsync(roomId);
+        var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
 
         var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
 
         //TODO: think about loop by N
-        //TODO: sort by custom order
-        var (entries, total) = await _entryManager.GetEntriesAsync(room, 0, -1, FilterType.None, false, Guid.Empty, string.Empty, false, true, new OrderBy(SortedByType.DateAndTimeCreation, true));
+        var (entries, total) = await _entryManager.GetEntriesAsync(room, 0, -1, FilterType.None, false, Guid.Empty, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+
+        var typedEntries = entries.OfType<FileEntry<T>>();
+
+        var foldersIndex = await GetFoldersIndex(roomId, typedEntries);
 
         var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
-        var mainBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1);
-        var lightBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08);
-        var mainFontColor = ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1);
-
         var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
         var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
-
-        var fullAbsoluteLogoPath = _commonLinkUtility.GetFullAbsolutePath(logoPath);
 
         var items = new List<object>
         {
@@ -100,7 +98,6 @@ public class DocumentBuilderScriptHelper
                 name = room.Title,
                 url = _commonLinkUtility.GetFullAbsolutePath(_pathProvider.GetRoomsUrl(room.Id.ToString())),
                 type = FilesCommonResource.RoomIndex_Room,
-                pages = (string)null,
                 size = (string)null,
                 author = room.CreateByString,
                 created = room.CreateOnString,
@@ -108,18 +105,24 @@ public class DocumentBuilderScriptHelper
             }
         };
 
-        items.AddRange(entries.OfType<FileEntry<T>>().Select(item => new
+        foreach (var entry in typedEntries)
         {
-            index = "1.N",
-            name = item.Title,
-            url = _commonLinkUtility.GetFullAbsolutePath(item.FileEntryType == FileEntryType.Folder ? _pathProvider.GetRoomsUrl(item.Id.ToString()) : _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, item.Title, item.Id)),
-            type = item.FileEntryType == FileEntryType.Folder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(item.Title),
-            pages = item.FileEntryType == FileEntryType.Folder ? null : "1",
-            size = item.FileEntryType == FileEntryType.Folder ? null : Math.Round(((File<T>)item).ContentLength/1024d/1024d, 2).ToString(CultureInfo.InvariantCulture),
-            author = item.CreateByString,
-            created = item.CreateOnString,
-            modified = item.ModifiedOnString
-        }));
+            var isFolder = entry.FileEntryType == FileEntryType.Folder;
+            var index = isFolder ? foldersIndex[entry.Id].Order : string.Join(".", foldersIndex[entry.ParentId].Order, foldersIndex[entry.ParentId].ChildFoldersCount + entry.Order);
+            var url = isFolder ? _pathProvider.GetRoomsUrl(entry.Id.ToString()) : _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, entry.Title, entry.Id);
+
+            items.Add(new
+            {
+                index = index.TrimStart('.'),
+                name = entry.Title,
+                url = _commonLinkUtility.GetFullAbsolutePath(url),
+                type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
+                size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 2).ToString(CultureInfo.InvariantCulture),
+                author = entry.CreateByString,
+                created = entry.CreateOnString,
+                modified = entry.ModifiedOnString
+            });
+        }
 
         var data = new
         {
@@ -132,7 +135,6 @@ public class DocumentBuilderScriptHelper
                 index = FilesCommonResource.RoomIndex_Index,
                 name = FilesCommonResource.RoomIndex_Name,
                 type = FilesCommonResource.RoomIndex_Type,
-                pages = FilesCommonResource.RoomIndex_Pages,
                 size = FilesCommonResource.RoomIndex_Size,
                 author = FilesCommonResource.RoomIndex_Author,
                 created = FilesCommonResource.RoomIndex_Created,
@@ -143,13 +145,13 @@ public class DocumentBuilderScriptHelper
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
             },
 
-            logoSrc = fullAbsoluteLogoPath,
+            logoSrc = _commonLinkUtility.GetFullAbsolutePath(logoPath),
 
             themeColors = new
             {
-                mainBgColor,
-                lightBgColor,
-                mainFontColor
+                mainBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
+                lightBgColor = ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
+                mainFontColor = ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1)
             },
 
             info = new
@@ -164,6 +166,43 @@ public class DocumentBuilderScriptHelper
         };
 
         return (data, outputFileName);
+    }
+
+    private class FolderIndex
+    {
+        public int ChildFoldersCount;
+        public string Order;
+
+        public FolderIndex(int childFoldersCount, string order)
+        {
+            ChildFoldersCount = childFoldersCount;
+            Order = order;
+        }
+    }
+
+    private async Task<Dictionary<T, FolderIndex>> GetFoldersIndex<T>(T roomId, IEnumerable<FileEntry<T>> entries)
+    {
+        var result = new Dictionary<T, FolderIndex>() { { roomId, new FolderIndex(0, string.Empty) } };
+
+        foreach (var entry in entries.Where(x => x.FileEntryType == FileEntryType.Folder))
+        {
+            if (result.ContainsKey(entry.ParentId))
+            {
+                result[entry.ParentId] = new FolderIndex(result[entry.ParentId].ChildFoldersCount + 1, result[entry.ParentId].Order);
+            }
+            else
+            {
+                var order = await _breadCrumbsManager.GetBreadCrumbsOrderAsync(entry.ParentId);
+                result[entry.ParentId] = new FolderIndex(1, order);
+            }
+
+            if (!result.ContainsKey(entry.Id))
+            {
+                result.Add(entry.Id, new FolderIndex(0, string.Join(".", result[entry.ParentId].Order, entry.Order)));
+            }
+        }
+
+        return result;
     }
 
     private static int[] ConvertHtmlColorToRgb(string color, double opacity)
