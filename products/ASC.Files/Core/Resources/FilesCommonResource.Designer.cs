@@ -1222,15 +1222,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pages.
-        /// </summary>
-        public static string RoomIndex_Pages {
-            get {
-                return ResourceManager.GetString("RoomIndex_Pages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Room.
         /// </summary>
         public static string RoomIndex_Room {

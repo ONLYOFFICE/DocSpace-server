@@ -511,9 +511,6 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="RoomIndex_Name" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="RoomIndex_Pages" xml:space="preserve">
-    <value>Pages</value>
-  </data>
   <data name="RoomIndex_Room" xml:space="preserve">
     <value>Room</value>
   </data>
