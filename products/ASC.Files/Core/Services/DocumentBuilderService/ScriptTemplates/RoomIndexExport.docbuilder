@@ -30,10 +30,9 @@ function customizeWorksheet() {
     oWorksheet.SetColumnWidth(1, 45.5);
     oWorksheet.SetColumnWidth(2, 13);
     oWorksheet.SetColumnWidth(3, 13);
-    oWorksheet.SetColumnWidth(4, 13);
+    oWorksheet.SetColumnWidth(4, 23);
     oWorksheet.SetColumnWidth(5, 23);
     oWorksheet.SetColumnWidth(6, 23);
-    oWorksheet.SetColumnWidth(7, 23);
 }
 
 function prepareInfo() {
@@ -89,7 +88,6 @@ function prepareData(startColIndex, startRowIndex) {
                 { "value": inputData.resources.index, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": inputData.resources.name, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": inputData.resources.type, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
-                { "value": inputData.resources.pages, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": inputData.resources.size, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": inputData.resources.author, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": inputData.resources.created, "bold": true, "fontColor": colors.mainFontColor, "bgColor": colors.mainBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
@@ -108,7 +106,6 @@ function prepareData(startColIndex, startRowIndex) {
                 { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.type, "bold": !item.type.startsWith('.'), "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
-                { "value": item.pages, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.size, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.numberFormat },
                 { "value": item.author, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
                 { "value": item.created, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat },
@@ -117,8 +114,7 @@ function prepareData(startColIndex, startRowIndex) {
         });
     }
 
-    var pagesSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + inputData.data.length) + ")";
-    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 4) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 4) + (currentRowIndex + inputData.data.length) + ")";
+    var sizeSum = "=SUM(" + toColumnName(currentColIndex + 3) + (currentRowIndex + 1) + ":" + toColumnName(currentColIndex + 3) + (currentRowIndex + inputData.data.length) + ")";
 
     dataTable.push({ height: 19.5, dataArray: [] });
 
@@ -128,7 +124,6 @@ function prepareData(startColIndex, startRowIndex) {
             null,
             null,
             { "value": inputData.resources.total, "bold": true, valign: "center", "borderColor": defaultBorderColorWhite },
-            { "value": pagesSum, "bold": true, "bgColor": defaultBgColorGray, halign: "center", valign: "center", "borderColor": defaultBorderColorWhite },
             { "value": sizeSum, "bold": true, "bgColor": defaultBgColorGray, halign: "center", valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.numberFormat },
             null,
             null,
@@ -206,7 +201,7 @@ function writeTable(table) {
 }
 
 function writeImg() {
-    oWorksheet.AddImage(inputData.logoSrc, 87 * 36000, 10 * 36000, 8, -87 * 36000, 0, 10 * 36000);
+    oWorksheet.AddImage(inputData.logoSrc, 87 * 36000, 10 * 36000, 7, -87 * 36000, 0, 10 * 36000);
 }
 
 
