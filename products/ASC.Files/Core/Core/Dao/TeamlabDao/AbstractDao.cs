@@ -198,6 +198,12 @@ public class AbstractDao
             if (fileOrder.ParentFolderId == parentFolderId)
             {
                 var currentOrder = fileOrder.Order;
+
+                if (currentOrder == order)
+                {
+                    return;
+                }
+                
                 if (currentOrder > order)
                 {
                     await Queries.IncreaseFileOrderAsync(filesDbContext, TenantID, parentFolderId, order, currentOrder);
@@ -280,10 +286,7 @@ static file class Queries
         (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
             ctx.FileOrder
                 .AsTracking()
-                .Where(r => r.TenantId == tenantId)
-                .Where(r => r.EntryId == entryId)
-                .Where(r => r.EntryType == entryType)
-                .FirstOrDefault());
+                .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
 
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> GetLastFileOrderAsync =

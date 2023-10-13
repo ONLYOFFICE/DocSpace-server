@@ -642,11 +642,14 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                     await tagDao.RemoveTagLinksAsync(folderId, FileEntryType.Folder, TagType.Origin);
                 }
 
-                await DeleteCustomOrder(filesDbContext, folderId);
 
                 if (!trashId.Equals(toFolderId))
                 {
                     await SetCustomOrder(filesDbContext, folderId, toFolderId);
+                }
+                else
+                {
+                    await DeleteCustomOrder(filesDbContext, folderId);
                 }
 
                 await filesDbContext.SaveChangesAsync();
@@ -1474,7 +1477,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);
     }
 
-    public async Task DeleteCustomOrder(FilesDbContext filesDbContext, int folderId)
+    private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int folderId)
     {
         await DeleteCustomOrder(filesDbContext, folderId, FileEntryType.Folder);
     }
