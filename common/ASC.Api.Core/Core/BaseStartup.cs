@@ -413,8 +413,6 @@ public abstract class BaseStartup
 
         app.UseAuthentication();
 
-        app.UseRateLimiter();
-
         app.UseAuthorization();
 
         app.UseCultureMiddleware();
