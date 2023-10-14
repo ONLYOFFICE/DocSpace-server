@@ -1360,7 +1360,12 @@ internal class FileDao : AbstractDao, IFileDao<int>
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
         await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
     }
-
+    
+    public async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId)
+    {
+        await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
+    }
+    
     private async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
     {
         await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);

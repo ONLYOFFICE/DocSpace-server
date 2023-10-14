@@ -312,5 +312,7 @@ public interface IFileDao<T>
 
     Task SetCustomOrder(T fileId, T parentFolderId, int order);
 
+    Task InitCustomOrder(IEnumerable<T> fileIds, T parentFolderId);
+
     #endregion
 }

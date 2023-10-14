@@ -500,4 +500,9 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
     {
         return Task.CompletedTask;
     }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
 }

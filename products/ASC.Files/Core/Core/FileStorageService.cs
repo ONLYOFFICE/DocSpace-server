@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using OrderBy = ASC.Files.Core.OrderBy;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -2911,8 +2913,6 @@ public class FileStorageService //: IFileStorageService
     public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing)
     {
         var folderDao = GetFolderDao<T>();
-        var fileDao = GetFileDao<T>();
-
         var room = await folderDao.GetFolderAsync(folderId);
 
         ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
@@ -2938,21 +2938,15 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
         ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
         
-        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.CustomOrder, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
-        for (var i = 0; i < folders.Count; i++)
+        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.DateAndTime, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
+        await folderDao.InitCustomOrder(folders, folderId);
+        
+        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.DateAndTime, true), FilterType.None, false, Guid.Empty, null, false).Select(r=> r.Id).ToListAsync();
+        await fileDao.InitCustomOrder(files, folderId);
+        
+        foreach (var t in folders)
         {
-            await folderDao.SetCustomOrder(folders[i], folderId, i + 1);
-        }
-
-        var files = await fileDao.GetFilesAsync(folderId).ToListAsync();
-        for (var i = 0; i < files.Count; i++)
-        {
-            await fileDao.SetCustomOrder(files[i], folderId, i + 1);
-        }
-            
-        for (var i = 0; i < folders.Count; i++)
-        {
-            await ReOrder(folders[i]);
+            await ReOrder(t);
         }
 
         return room;

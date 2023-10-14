@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Core.Core.Thirdparty;
 
+/// <inheritdoc />
 [Scope]
 internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFolderDao<string>
     where TFile : class, TItem
@@ -680,6 +681,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
     }
 
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }

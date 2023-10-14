@@ -551,4 +551,11 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         var folderDao = selector.GetFolderDao(folderId);
         await folderDao.SetCustomOrder(folderId, parentFolderId, order);
     }
+
+    public async Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    {
+        var selector = _selectorFactory.GetSelector(parentFolderId);
+        var folderDao = selector.GetFolderDao(parentFolderId);
+        await folderDao.InitCustomOrder(folderIds, parentFolderId);
+    }
 }

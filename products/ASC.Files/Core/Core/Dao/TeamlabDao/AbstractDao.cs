@@ -232,6 +232,24 @@ public class AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
 
+    internal async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId, FileEntryType entryType)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        await Queries.ClearFileOrderAsync(filesDbContext, TenantID, parentFolderId, entryType);
+        
+        await filesDbContext.FileOrder.AddRangeAsync(fileIds.Select((r, i) => new DbFileOrder
+        {
+            TenantId = TenantID,
+            ParentFolderId = parentFolderId,
+            EntryId = r,
+            EntryType = entryType,
+            Order = i + 1
+        }));
+        
+        await filesDbContext.SaveChangesAsync();
+    }
+    
     internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
     {
         var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId, fileEntryType);
@@ -287,6 +305,13 @@ static file class Queries
             ctx.FileOrder
                 .AsTracking()
                 .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
+
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task> ClearFileOrderAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && r.ParentFolderId == parentFolderId)
+                .ExecuteDelete());
 
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> GetLastFileOrderAsync =

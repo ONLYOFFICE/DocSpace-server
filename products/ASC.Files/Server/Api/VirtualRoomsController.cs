@@ -570,7 +570,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         return await _folderDtoHelper.GetAsync(room);
     }
     
-    [HttpPut("rooms/{id}/order")]
+    [HttpPut("rooms/{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(T id)
     {
         ErrorIfNotDocSpace();

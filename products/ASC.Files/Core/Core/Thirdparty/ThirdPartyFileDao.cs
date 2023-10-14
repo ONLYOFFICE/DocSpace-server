@@ -676,6 +676,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
     {
         return Task.CompletedTask;
     }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

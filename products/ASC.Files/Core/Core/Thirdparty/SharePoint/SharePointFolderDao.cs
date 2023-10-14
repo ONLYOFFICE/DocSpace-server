@@ -450,6 +450,11 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
     {
         return Task.CompletedTask;
     }
+
+    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries

@@ -1472,6 +1472,11 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         await SetCustomOrder(filesDbContext, folderId, parentFolderId, order);
     }
 
+    public async Task InitCustomOrder(IEnumerable<int> folderIds, int parentFolderId)
+    {
+        await InitCustomOrder(folderIds, parentFolderId, FileEntryType.Folder);
+    }
+    
     private async Task SetCustomOrder(FilesDbContext filesDbContext, int folderId, int parentFolderId, int order = 0)
     {
         await SetCustomOrder(filesDbContext, folderId, parentFolderId, FileEntryType.Folder, order);

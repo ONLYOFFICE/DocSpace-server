@@ -504,5 +504,12 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
         await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
+    public async Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        var selector = _selectorFactory.GetSelector(parentFolderId);
+        var fileDao = selector.GetFileDao(parentFolderId);
+        await fileDao.InitCustomOrder(fileIds, parentFolderId);
+    }
+
     #endregion
 }
