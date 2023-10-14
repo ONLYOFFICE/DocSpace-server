@@ -185,6 +185,13 @@ public class AbstractDao
 
     internal async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
     {
+        var indexing = await Queries.IsIndexingAsync(filesDbContext, TenantID, parentFolderId, fileEntryType);
+        
+        if(!indexing)
+        {
+            return;
+        }
+
         var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId, fileEntryType);
 
         if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
@@ -299,6 +306,18 @@ static file class Queries
                     .Select(r => r.Id)
                     .FirstOrDefault());
 
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<bool>> IsIndexingAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
+            (from rs in ctx.RoomSettings 
+                where rs.TenantId == tenantId && rs.RoomId ==
+                    (from t in ctx.Tree
+                        where t.FolderId == parentFolderId
+                        orderby t.Level descending
+                        select t.ParentId
+                    ).Skip(1).FirstOrDefault()
+                select rs.Indexing).FirstOrDefault());
+    
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<DbFileOrder>> GetFileOrderAsync =
     Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
         (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>

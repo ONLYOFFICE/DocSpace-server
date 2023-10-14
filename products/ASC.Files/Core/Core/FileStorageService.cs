@@ -2918,17 +2918,25 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
         ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
 
-        if (room.SettingsIndexing != indexing)
+        if (DocSpaceHelper.IsRoom(room.FolderType))
         {
-            room.SettingsIndexing = indexing;
-            await folderDao.SaveFolderAsync(room);
+            if (room.SettingsIndexing != indexing)
+            {
+                if (indexing)
+                {
+                    await ReOrder(room.Id, true);
+                }
+                
+                room.SettingsIndexing = indexing;
+                await folderDao.SaveFolderAsync(room);
+            }
         }
-        
+
         return room;
     }
     
     
-    public async Task<Folder<T>> ReOrder<T>(T folderId)
+    public async Task<Folder<T>> ReOrder<T>(T folderId, bool subfolders = false)
     {        
         var folderDao = GetFolderDao<T>();
         var fileDao = GetFileDao<T>();
@@ -2943,10 +2951,13 @@ public class FileStorageService //: IFileStorageService
         
         var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.DateAndTime, true), FilterType.None, false, Guid.Empty, null, false).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
-        
-        foreach (var t in folders)
+
+        if (subfolders)
         {
-            await ReOrder(t);
+            foreach (var t in folders)
+            {
+                await ReOrder(t, true);
+            }
         }
 
         return room;
