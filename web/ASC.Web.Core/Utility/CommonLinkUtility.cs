@@ -529,6 +529,44 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
     }
 
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper, bool inCurrentCulture = true)
+    {
+        if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
+        {
+            return string.Empty;
+        }
+
+        var url = additionalWhiteLabelSettingsHelper.DefaultFeedbackAndSupportUrl;
+
+        if (string.IsNullOrEmpty(url))
+        {
+            return string.Empty;
+        }
+
+        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+    }
+
+    public string GetSiteLink(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    {
+        var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
+
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
+    }
+
+    public string GetSupportEmail(MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper)
+    {
+        var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
+
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
+    }
+
+    public string GetSalesEmail(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+    {
+        var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
+
+        return string.IsNullOrEmpty(mail) ? string.Empty : mail;
+    }
+
     public string GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
     {
         var settings = settingsManager.LoadForDefaultTenant<AdditionalWhiteLabelSettings>();

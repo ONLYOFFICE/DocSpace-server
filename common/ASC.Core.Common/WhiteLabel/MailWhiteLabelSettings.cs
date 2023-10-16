@@ -136,7 +136,7 @@ public class MailWhiteLabelSettingsHelper
     {
         get
         {
-            var email = _configuration["web:support:email"];
+            var email = _configuration["web:support-email"];
 
             return !string.IsNullOrEmpty(email) ? email : "support@onlyoffice.com";
         }
@@ -146,7 +146,7 @@ public class MailWhiteLabelSettingsHelper
     {
         get
         {
-            var email = _configuration["web:payment:email"];
+            var email = _configuration["core:payment:email"];
 
             return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
         }

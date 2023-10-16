@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Common.Caching;
 
 [Singletone]
@@ -53,13 +52,11 @@ public class AscCacheNotify
 public class AscCache : ICache
 {
     private readonly IMemoryCache _memoryCache;
-    private readonly ConcurrentDictionary<string, object> _memoryCacheKeys;
     private static CancellationTokenSource _resetCacheToken = new CancellationTokenSource();
 
     public AscCache(IMemoryCache memoryCache)
     {
         _memoryCache = memoryCache;
-        _memoryCacheKeys = new ConcurrentDictionary<string, object>();
     }
 
     public T Get<T>(string key) where T : class
@@ -82,9 +79,9 @@ public class AscCache : ICache
         _memoryCache.Remove(key);
     }
 
-    public void Remove(Regex pattern)
+    public void Remove(ConcurrentDictionary<string, object> dictionaryKey, Regex pattern)
     {
-        var copy = _memoryCacheKeys.ToDictionary(p => p.Key, p => p.Value);
+        var copy = dictionaryKey.ToDictionary(p => p.Key, p => p.Value);
         var keys = copy.Select(p => p.Key).Where(k => pattern.IsMatch(k));
 
         foreach (var key in keys)
@@ -150,7 +147,6 @@ public class AscCache : ICache
     private void Insert(string key, object value, TimeSpan? sligingExpiration = null, DateTime? absolutExpiration = null, Action<object, object, EvictionReason, object> evictionCallback = null)
     {
         var options = new MemoryCacheEntryOptions()
-            .RegisterPostEvictionCallback(EvictionCallback)
             .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token));
 
         if (sligingExpiration.HasValue)
@@ -169,11 +165,5 @@ public class AscCache : ICache
         }
 
         _memoryCache.Set(key, value, options);
-        _memoryCacheKeys.TryAdd(key, null);
-    }
-
-    private void EvictionCallback(object key, object value, EvictionReason reason, object state)
-    {
-        _memoryCacheKeys.TryRemove(key.ToString(), out _);
     }
 }
