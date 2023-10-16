@@ -20,6 +20,7 @@ import com.onlyoffice.authorization.api.usecases.service.client.ClientCreationUs
 import com.onlyoffice.authorization.api.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.usecases.service.client.ClientRetrieveUsecases;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.data.domain.Pageable;
@@ -81,11 +82,12 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     }
 
 
+    @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO saveClient(ClientMessage message) {
         log.info("trying to create a new client");
         message.setClientId(UUID.randomUUID().toString());
-        message.setClientSecret(UUID.randomUUID().toString());
+        message.setClientSecret(cipher.encrypt(UUID.randomUUID().toString()));
         log.info("a new client's client id is {}", message.getClientId());
         return ClientMapper.INSTANCE.fromEntityToQuery(mutationUsecases
                 .saveClient(ClientMapper.INSTANCE.fromMessageToEntity(message)));
@@ -117,7 +119,9 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             client.setClientSecret(cipher.encrypt(secret));
             client.setTenant(tenant);
             this.amqpTemplate.convertAndSend(configuration.getClient().getExchange(),
-                    configuration.getClient().getRouting(), ClientMapper.INSTANCE.fromQueryToMessage(client));
+                    configuration.getClient().getRouting(),
+                    ClientMapper.INSTANCE.fromQueryToMessage(client));
+            client.setClientSecret(secret);
             return client;
         } catch (Exception e) {
             throw new ClientCreationException(String
@@ -135,11 +139,13 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         return ClientMapper.INSTANCE.fromEntityToQuery(c);
     }
 
+    @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public SecretDTO regenerateSecret(String clientId, int tenant) {
         log.info("regenerating client's secret for tenant {} by client id {}", tenant, clientId);
         String secret = UUID.randomUUID().toString();
-        mutationUsecases.regenerateClientSecretByClientId(clientId, tenant, secret);
+        mutationUsecases.regenerateClientSecretByClientId(clientId,
+                tenant, cipher.encrypt(secret));
         return SecretDTO.builder().clientSecret(secret).build();
     }
 

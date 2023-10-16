@@ -36,7 +36,7 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.crypto.Cip
     private static final int SALT_LENGTH_BYTE = 16;
     private static final String ALGORITHM_TYPE = "AES";
     private static final int KEY_LENGTH = 128;
-    private static final int ITERATION_COUNT = 1500; // Min 1000
+    private static final int ITERATION_COUNT = 1200; // Min 1000
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
     private final ApplicationConfiguration configuration;
 
