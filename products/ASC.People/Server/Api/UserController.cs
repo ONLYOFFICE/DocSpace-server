@@ -64,6 +64,7 @@ public class UserController : PeopleControllerBase
     private readonly CountUserChecker _countUserChecker;
     private readonly UsersInRoomChecker _usersInRoomChecker;
     private readonly IUrlShortener _urlShortener;
+    private readonly FileSecurityCommon _fileSecurityCommon;
 
     public UserController(
         ICache cache,
@@ -105,7 +106,8 @@ public class UserController : PeopleControllerBase
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
         IQuotaService quotaService,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener,
+        FileSecurityCommon fileSecurityCommon)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _cache = cache;
@@ -142,6 +144,7 @@ public class UserController : PeopleControllerBase
         _quotaService = quotaService;
         _usersQuotaSyncOperation = usersQuotaSyncOperation;
         _urlShortener = urlShortener;
+        _fileSecurityCommon = fileSecurityCommon;
     }
 
     /// <summary>
@@ -475,6 +478,13 @@ public class UserController : PeopleControllerBase
             throw new Exception("The user is not suspended");
         }
 
+        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+
+        if (await _fileSecurityCommon.IsDocSpaceAdministratorAsync(user.Id) && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
+        {
+            throw new SecurityException();
+        }
+        
         await CheckReassignProccessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
