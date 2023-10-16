@@ -1042,55 +1042,58 @@ public class FileSecurity : IFileSecurity
                 break;
         }
 
-        FileShareRecord ace;
+        var ace = e.ShareRecord;
 
-        if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-            (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId, isRoom), out var value)) || 
-            _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await _externalShare.GetLinkIdAsync(), isRoom), out value))
+        if (ace == null)
         {
-            ace = value.Clone();
-            ace.EntryId = e.Id;
-        }
-        else
-        {
-            var subjects = new List<Guid>();
-            if (shares == null)
+            if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId, isRoom), out var value)) || 
+                _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await _externalShare.GetLinkIdAsync(), isRoom), out value))
             {
-                subjects = await GetUserSubjectsAsync(userId);
-                shares = await GetSharesAsync(e, subjects);
-            }
-
-            if (e.FileEntryType == FileEntryType.File)
-            {
-                ace = shares
-                    .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
-                    .FirstOrDefault(r => Equals(r.EntryId, e.Id.ToString()) && r.EntryType == FileEntryType.File);
-
-                if (ace == null)
-                {
-                    // share on parent folders
-                    ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
-                        .OrderBy(r => r, new SubjectComparer(subjects))
-                        .ThenBy(r => r.Level)
-                        .FirstOrDefault();
-                }
+                ace = value.Clone();
+                ace.EntryId = e.Id;
             }
             else
             {
-                ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenBy(r => r.Level)
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
-                    .FirstOrDefault();
-            }
-            
-            if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-                ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
-            {
-                var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+                var subjects = new List<Guid>();
+                if (shares == null)
+                {
+                    subjects = await GetUserSubjectsAsync(userId);
+                    shares = await GetSharesAsync(e, subjects);
+                }
 
-                _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id, isRoom), ace);
+                if (e.FileEntryType == FileEntryType.File)
+                {
+                    ace = shares
+                        .OrderBy(r => r, new SubjectComparer(subjects))
+                        .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
+                        .FirstOrDefault(r => Equals(r.EntryId, e.Id.ToString()) && r.EntryType == FileEntryType.File);
+
+                    if (ace == null)
+                    {
+                        // share on parent folders
+                        ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
+                            .OrderBy(r => r, new SubjectComparer(subjects))
+                            .ThenBy(r => r.Level)
+                            .FirstOrDefault();
+                    }
+                }
+                else
+                {
+                    ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
+                        .OrderBy(r => r, new SubjectComparer(subjects))
+                        .ThenBy(r => r.Level)
+                        .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
+                        .FirstOrDefault();
+                }
+            
+                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                    ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                {
+                    var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+
+                    _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id, isRoom), ace);
+                }
             }
         }
 
