@@ -221,7 +221,7 @@ public class CookiesManager
         if (lifeTime > 0)
         {
             settings.Index += 1;
-            settings.LifeTime = lifeTime;
+            settings.LifeTime = lifeTime > 9999 ? 9999 : lifeTime;
         }
         else
         {
