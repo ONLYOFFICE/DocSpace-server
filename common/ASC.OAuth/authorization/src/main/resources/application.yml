@@ -5,12 +5,13 @@ server:
     session:
       tracking-modes: cookie
 
+docspace:
+  server:
+    url: ${DOCSPACE_ADDRESS:127.0.0.1}
+
 spring:
-  cloud:
-    config:
-      enabled: false
   application:
-    name: ASC.Identity.Authorization
+    name: ${SPRING_APPLICATION_NAME:ASC.Identity.Authorization}
   profiles:
     active: ${PROFILE:dev}
   datasource:
@@ -18,10 +19,6 @@ spring:
     username: ${JDBC_USER_NAME:root}
     password: ${JDBC_PASSWORD:my-secret-pw}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
   rabbitmq:
     host: ${RABBIT_HOST:127.0.0.1}
     port: ${RABBIT_PORT:5672}
@@ -35,32 +32,39 @@ spring:
           max-attempts: 3
           max-interval: 3000
           multiplier: 3.0
-
-application:
-  server:
-    url: http://onlyoffice-oauth-authorization:8080
-
-docspace:
-  server:
-    url: http://${DOCSPACE_ADDRESS:127.0.0.1}
-
-messaging:
-  rabbitmq:
-    configuration:
-      authorization:
-        exchange: authorization.exchange
-        queue: authorization.queue
-        routing: authorization.routing
-        deadExchange: authorization.dead.exchange
-        deadQueue: authorization.dead.queue
-        deadRouting: authorization.dead.routing
-      consent:
-        exchange: consent.exchange
-        queue: consent.queue
-        routing: consent.routing
-        deadExchange: consent.dead.exchange
-        deadQueue: consent.dead.queue
-        deadRouting: consent.dead.routing
+    messaging:
+      configuration:
+        properties:
+          authorization:
+            exchange: authorization.exchange
+            queue: authorization.queue
+            routing: authorization.routing
+            deadExchange: authorization.dead.exchange
+            deadQueue: authorization.dead.queue
+            deadRouting: authorization.dead.routing
+          consent:
+            exchange: consent.exchange
+            queue: consent.queue
+            routing: consent.routing
+            deadExchange: consent.dead.exchange
+            deadQueue: consent.dead.queue
+            deadRouting: consent.dead.routing
+  security:
+    oauth2:
+      server:
+        issuer: ${ISSUER_ADDRESS:http://127.0.0.1:8080}
+      registered:
+        client:
+          accessTokenMinutesTTL: ${REGISTERED_CLIENT_ACCESS_TOKEN_TTL:60}
+          refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
+          authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
+  cloud:
+    config:
+      enabled: false
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
 
 resilience4j:
   bulkhead:
