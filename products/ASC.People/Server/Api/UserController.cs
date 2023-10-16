@@ -367,7 +367,6 @@ public class UserController : PeopleControllerBase
             var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
             await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
-            _logger.Debug(link);
         }
 
         var result = new List<EmployeeDto>();
