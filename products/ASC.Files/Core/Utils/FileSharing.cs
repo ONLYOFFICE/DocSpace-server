@@ -102,7 +102,7 @@ public class FileSharingAceHelper
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
         }
-
+        
         var handledAces = new List<Tuple<EventType, AceWrapper>>(aceWrappers.Count);
         var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
@@ -113,10 +113,11 @@ public class FileSharingAceHelper
         string warning = null;
         var shares = await _fileSecurity.GetPureSharesAsync(entry, aceWrappers.Select(a => a.Id))
             .ToDictionaryAsync(r => r.Subject);
+        var currentUserId = _authContext.CurrentAccount.ID;
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (w.Id == _authContext.CurrentAccount.ID)
+            if (entry.CreateBy == currentUserId && w.Id == currentUserId)
             {
                 continue;
             }
