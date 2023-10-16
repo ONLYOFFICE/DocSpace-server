@@ -1,8 +1,8 @@
-package com.onlyoffice.authorization.external.caching;
+package com.onlyoffice.authorization.external.caching.hazelcast;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import com.onlyoffice.authorization.external.caching.configuration.authotization.CacheAuthorizationMapConfig;
+import com.onlyoffice.authorization.external.caching.configuration.hazelcast.HazelcastCacheAuthorizationMapConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -23,7 +23,7 @@ public class AuthorizationCache {
         log.info("adding authorization to the cache");
         MDC.clear();
         IMap<String, OAuth2Authorization> map = hazelcastInstance
-                .getMap(CacheAuthorizationMapConfig.AUTHORIZATIONS);
+                .getMap(HazelcastCacheAuthorizationMapConfiguration.AUTHORIZATIONS);
         return map.putIfAbsent(key, authorization);
     }
 
@@ -32,7 +32,7 @@ public class AuthorizationCache {
         log.info("getting authorization from the cache");
         MDC.clear();
         IMap<String, OAuth2Authorization> map = hazelcastInstance
-                .getMap(CacheAuthorizationMapConfig.AUTHORIZATIONS);
+                .getMap(HazelcastCacheAuthorizationMapConfiguration.AUTHORIZATIONS);
         return map.get(key);
     }
 
@@ -41,7 +41,7 @@ public class AuthorizationCache {
         log.info("removing authorization from the map");
         MDC.clear();
         IMap<String, OAuth2Authorization> map = hazelcastInstance
-                .getMap(CacheAuthorizationMapConfig.AUTHORIZATIONS);
+                .getMap(HazelcastCacheAuthorizationMapConfiguration.AUTHORIZATIONS);
         map.evict(key);
     }
 }

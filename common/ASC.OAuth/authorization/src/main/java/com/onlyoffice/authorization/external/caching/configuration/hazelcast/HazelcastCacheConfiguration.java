@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.external.caching.configuration;
+package com.onlyoffice.authorization.external.caching.configuration.hazelcast;
 
 import com.hazelcast.config.*;
 import com.hazelcast.core.Hazelcast;
@@ -20,7 +20,7 @@ import java.util.UUID;
  */
 @Configuration
 @Slf4j
-public class CacheConfiguration {
+public class HazelcastCacheConfiguration {
     @Bean
     public HazelcastInstance hazelcastInstance(Config config) {
         return Hazelcast.newHazelcastInstance(config);

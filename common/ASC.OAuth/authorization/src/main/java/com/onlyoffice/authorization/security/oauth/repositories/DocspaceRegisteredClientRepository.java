@@ -10,6 +10,8 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Repository;
@@ -21,12 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@Transactional(
-        readOnly = true,
-        timeout = 2000
-)
+@Transactional(readOnly = true, timeout = 2000)
 public class DocspaceRegisteredClientRepository implements RegisteredClientRepository {
     private final ClientRetrieveUsecases retrieveUsecases;
+
+    private final CacheManager cacheManager;
 
     public void save(RegisteredClient registeredClient) {
         MDC.put("client_id", registeredClient.getClientId());
@@ -39,6 +40,13 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findById(String id) {
         MDC.put("client id", id);
+        var cached = cacheManager.getCache("registered_clients").get(id);
+        if (cached != null && (cached instanceof RegisteredClient client)) {
+            log.info("found client in memory");
+            MDC.clear();
+            return client;
+        }
+
         log.info("trying to find registered client");
         try {
             return retrieveUsecases.getClientById(id);
@@ -50,9 +58,17 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
         }
     }
 
+    @Cacheable(value = "clients")
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findByClientId(String clientId) {
         MDC.put("client_id", clientId);
+        var cached = cacheManager.getCache("registered_clients").get(clientId);
+        if (cached != null && (cached instanceof RegisteredClient client)) {
+            log.info("found client in memory");
+            MDC.clear();
+            return client;
+        }
+
         log.info("trying to find registered client");
         try {
             return retrieveUsecases.getClientByClientId(clientId);

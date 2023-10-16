@@ -13,7 +13,7 @@ import com.onlyoffice.authorization.core.usecases.repositories.AuthorizationPers
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationCleanupUsecases;
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationCreationUsecases;
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationRetrieveUsecases;
-import com.onlyoffice.authorization.external.caching.AuthorizationCache;
+import com.onlyoffice.authorization.external.caching.hazelcast.AuthorizationCache;
 import com.onlyoffice.authorization.external.messaging.configuration.RabbitMQConfiguration;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
@@ -51,10 +51,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(
-        readOnly = true,
-        timeout = 2000
-)
+@Transactional(readOnly = true, timeout = 2000)
 public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationService, AuthorizationRetrieveUsecases,
         AuthorizationCreationUsecases, AuthorizationCleanupUsecases {
     private final RabbitMQConfiguration configuration;

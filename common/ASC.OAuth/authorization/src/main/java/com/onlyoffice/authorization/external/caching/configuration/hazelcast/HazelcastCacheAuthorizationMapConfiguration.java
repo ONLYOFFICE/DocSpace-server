@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.external.caching.configuration.authotization;
+package com.onlyoffice.authorization.external.caching.configuration.hazelcast;
 
 import com.hazelcast.config.*;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 @Getter
 @Setter
-public class CacheAuthorizationMapConfig {
+public class HazelcastCacheAuthorizationMapConfiguration {
     public static final String AUTHORIZATIONS = "authorization";
     private int mapSizeMB = 100;
     private int mapSecondsTTL = 50;
