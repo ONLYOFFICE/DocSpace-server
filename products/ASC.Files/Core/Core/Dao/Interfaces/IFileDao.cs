@@ -313,5 +313,11 @@ public interface IFileDao<T>
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, T roomId = default);
 
+    IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1);
+
+    Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool searchInContent, bool excludeSubject);
+
     #endregion
 }

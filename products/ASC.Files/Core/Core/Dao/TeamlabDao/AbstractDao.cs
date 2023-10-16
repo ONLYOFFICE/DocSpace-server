@@ -168,15 +168,30 @@ public class AbstractDao
         return result;
     }
 
-    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearhTypeEnum searhTypeEnum) where T : IDbSearch
+    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearhTypeEnum searchTypeEnum) where T : IDbSearch
     {
         var lowerText = GetSearchText(text);
 
-        return searhTypeEnum switch
+        return searchTypeEnum switch
         {
             SearhTypeEnum.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
             SearhTypeEnum.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
             SearhTypeEnum.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
+            _ => query,
+        };
+    }
+    
+    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, string text, SearhTypeEnum searchTypeEnum) 
+        where TQuery : IQueryResult<TEntry> 
+        where TEntry: IDbSearch
+    {
+        var lowerText = GetSearchText(text);
+
+        return searchTypeEnum switch
+        {
+            SearhTypeEnum.Start => query.Where(r => r.Entry.Title.ToLower().StartsWith(lowerText)),
+            SearhTypeEnum.End => query.Where(r => r.Entry.Title.ToLower().EndsWith(lowerText)),
+            SearhTypeEnum.Any => query.Where(r => r.Entry.Title.ToLower().Contains(lowerText)),
             _ => query,
         };
     }

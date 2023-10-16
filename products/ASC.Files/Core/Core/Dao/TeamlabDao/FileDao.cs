@@ -1328,6 +1328,53 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await storage.GetReadStreamAsync(string.Empty, path, 0);
     }
 
+    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+    {
+        if (filterType == FilterType.FoldersOnly)
+        {
+            yield break;
+        }
+        
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        
+        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+
+        q = await GetFilesQueryWithFilters(q, orderBy, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject);
+        
+        if (offset > 0)
+        {
+            q = q.Skip(offset);
+        }
+
+        if (count > 0)
+        {
+            q = q.Take(count);
+        }
+
+        await foreach (var file in FromQuery(filesDbContext, q).AsAsyncEnumerable())
+        {
+            yield return _mapper.Map<DbFileQuery, File<int>>(file);
+        }
+    }
+
+    public async Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, bool searchInContent, bool excludeSubject)
+    {
+        if (filterType == FilterType.FoldersOnly)
+        {
+            return 0;
+        }
+        
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        
+        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        
+        q = await GetFilesQueryWithFilters(q, null, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject);
+
+        return await q.CountAsync();
+    }
+
     private string GetThumnailName(int width, int height)
     {
         return $"{ThumbnailTitle}.{width}x{height}.{_global.ThumbnailExtension}";
@@ -1446,6 +1493,26 @@ internal class FileDao : AbstractDao, IFileDao<int>
                         where f.TenantId == r.TenantId
                         select f
                           ).FirstOrDefault()
+            });
+    }
+
+    private static IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<FileByTagQuery> dbFilesByTag)
+    {
+        return dbFilesByTag
+            .Select(r => new DbFileQuery
+            {
+                File = r.Entry,
+                Root = (from f in filesDbContext.Folders
+                        where f.Id ==
+                              (from t in filesDbContext.Tree
+                                  where t.FolderId == r.Entry.ParentId
+                                  orderby t.Level descending
+                                  select t.ParentId
+                              ).FirstOrDefault()
+                        where f.TenantId == r.Entry.TenantId
+                        select f
+                    ).FirstOrDefault(),
+                SharedRecord = r.Security
             });
     }
     
@@ -1626,6 +1693,108 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
         return q;
     }
+    
+    private async Task<IQueryable<T>> GetFilesQueryWithFilters<T>(IQueryable<T> q, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, 
+        bool searchInContent, bool excludeSubject) 
+        where T: IQueryResult<DbFile>
+    {
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            var func = GetFuncForSearch(null, orderBy, filterType, subjectGroup, subjectId, searchText, searchInContent);
+
+            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
+
+            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(expression);
+            
+            q = success 
+                ? q.Where(r => searchIds.Contains(r.Entry.Id)) 
+                : BuildSearch<T, DbFile>(q, searchText, SearhTypeEnum.Any);
+        }
+        
+        q = orderBy == null
+            ? q
+            : orderBy.SortedBy switch
+            {
+                SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateBy) : q.OrderByDescending(r => r.Entry.CreateBy),
+                SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ContentLength) : q.OrderByDescending(r => r.Entry.ContentLength),
+                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Entry.Title) : q.OrderByDescending(r => r.Entry.Title),
+                SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ModifiedOn) : q.OrderByDescending(r => r.Entry.ModifiedOn),
+                SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateOn) : q.OrderByDescending(r => r.Entry.CreateOn),
+                SortedByType.Type => orderBy.IsAsc
+                    ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1))
+                    : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', -1)),
+                _ => q.OrderBy(r => r.Entry.Title)
+            };
+
+        if (subjectId != Guid.Empty)
+        {
+            if (subjectGroup)
+            {
+                var users = (await _userManager.GetUsersByGroupAsync(subjectId)).Select(u => u.Id).ToArray();
+                q = q.Where(r => users.Contains(r.Entry.CreateBy));
+            }
+            else
+            {
+                q = excludeSubject ? q.Where(r => r.Entry.CreateBy != subjectId) : q.Where(r => r.Entry.CreateBy == subjectId);
+            }
+        }
+
+        switch (filterType)
+        {
+            case FilterType.OFormOnly:
+            case FilterType.OFormTemplateOnly:
+            case FilterType.DocumentsOnly:
+            case FilterType.ImagesOnly:
+            case FilterType.PresentationsOnly:
+            case FilterType.SpreadsheetsOnly:
+            case FilterType.ArchiveOnly:
+            case FilterType.MediaOnly:
+                q = q.Where(r => r.Entry.Category == (int)filterType);
+                break;
+            case FilterType.ByExtension:
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    q = BuildSearch<T, DbFile>(q, searchText, SearhTypeEnum.Any);
+                }
+                break;
+        }
+
+        return q;
+    }
+    
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(Guid? tagOwner, TagType tagType, FilesDbContext filesDbContext)
+    {
+        IQueryable<FileByTagQuery> query;
+        
+        var initQuery = GetFileQuery(filesDbContext, r => r.CurrentVersion)
+            .Join(filesDbContext.TagLink, f => f.Id.ToString(), l => l.EntryId,
+                (file, tagLink) => new { file, tagLink.EntryType, tagLink.TagId })
+            .Where(r => r.EntryType == FileEntryType.File)
+            .Join(filesDbContext.Tag, r => r.TagId, t => t.Id,
+                (fileWithTagLink, tag) => new { fileWithTagLink.file, tag })
+            .Where(r => r.tag.Type == tagType);
+
+        if (tagType == TagType.RecentByLink)
+        {
+            query = initQuery .Join(filesDbContext.Security, r => r.tag.Name, s => s.Subject.ToString(), 
+                    (fileWithTag, security) => new { fileWithTag, security, 
+                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate")})
+                .Where(r => r.security.Share != FileShare.Restrict && 
+                            !(r.expirationDate != DateTime.MinValue && r.expirationDate < DateTime.UtcNow))
+                .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, Security = r.security});
+        }
+        else
+        {
+            query = initQuery.Select(r => new FileByTagQuery { Entry = r.file, Tag = r.tag });
+        }
+
+        if (tagOwner.HasValue)
+        {
+            query = query.Where(r => r.Tag.Owner == tagOwner.Value);
+        }
+
+        return query;
+    }
 }
 
 public class DbFileQuery
@@ -1633,12 +1802,14 @@ public class DbFileQuery
     public DbFile File { get; set; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public DbFilesSecurity SharedRecord { get; set; }
 }
 
-public class DbFileDeny
+public class FileByTagQuery : IQueryResult<DbFile>
 {
-    public bool DenyDownload { get; set; }
-    public bool DenySharing { get; set; }
+    public DbFile Entry { get; set; }
+    public DbFilesTag Tag { get; set; }
+    public DbFilesSecurity Security { get; set; }
 }
 
 public class DbFileQueryWithSecurity
