@@ -6,7 +6,7 @@ package com.onlyoffice.authorization.security.configuration;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.onlyoffice.authorization.security.crypto.JwksKeyPairGenerator;
+import com.onlyoffice.authorization.security.crypto.jwks.JwksKeyPairGenerator;
 import com.onlyoffice.authorization.security.oauth.providers.DocspaceAuthenticationProvider;
 import jakarta.servlet.RequestDispatcher;
 import lombok.RequiredArgsConstructor;

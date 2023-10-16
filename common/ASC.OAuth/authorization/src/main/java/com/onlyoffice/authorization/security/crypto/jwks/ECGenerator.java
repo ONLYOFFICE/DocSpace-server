@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.security.crypto;
+package com.onlyoffice.authorization.security.crypto.jwks;
 
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;

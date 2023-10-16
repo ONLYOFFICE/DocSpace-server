@@ -3,15 +3,14 @@
  */
 package com.onlyoffice.authorization.security.oauth.repositories;
 
-import com.onlyoffice.authorization.core.exceptions.EntityNotFoundException;
 import com.onlyoffice.authorization.core.exceptions.ReadOnlyOperationException;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
+import com.onlyoffice.authorization.security.crypto.aes.Cipher;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Repository;
@@ -25,9 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, timeout = 2000)
 public class DocspaceRegisteredClientRepository implements RegisteredClientRepository {
-    private final ClientRetrieveUsecases retrieveUsecases;
-
+    private final Cipher cipher;
     private final CacheManager cacheManager;
+
+    private final ClientRetrieveUsecases retrieveUsecases;
 
     public void save(RegisteredClient registeredClient) {
         MDC.put("client_id", registeredClient.getClientId());
@@ -40,7 +40,8 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findById(String id) {
         MDC.put("client id", id);
-        var cached = cacheManager.getCache("registered_clients").get(id);
+        var cache = cacheManager.getCache("registered_clients");
+        var cached = cache.get(id);
         if (cached != null && (cached instanceof RegisteredClient client)) {
             log.info("found client in memory");
             MDC.clear();
@@ -49,8 +50,13 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
 
         log.info("trying to find registered client");
         try {
-            return retrieveUsecases.getClientById(id);
-        } catch (EntityNotFoundException e) {
+            var client = retrieveUsecases.getClientById(id);
+            client = RegisteredClient.from(client)
+                    .clientSecret(cipher.decrypt(client.getClientSecret()))
+                    .build();
+            cache.put(id, client);
+            return client;
+        } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         } finally {
@@ -58,11 +64,11 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
         }
     }
 
-    @Cacheable(value = "clients")
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findByClientId(String clientId) {
         MDC.put("client_id", clientId);
-        var cached = cacheManager.getCache("registered_clients").get(clientId);
+        var cache = cacheManager.getCache("registered_clients");
+        var cached = cache.get(clientId);
         if (cached != null && (cached instanceof RegisteredClient client)) {
             log.info("found client in memory");
             MDC.clear();
@@ -71,8 +77,13 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
 
         log.info("trying to find registered client");
         try {
-            return retrieveUsecases.getClientByClientId(clientId);
-        } catch (EntityNotFoundException e) {
+            var client = retrieveUsecases.getClientByClientId(clientId);
+            client = RegisteredClient.from(client)
+                    .clientSecret(cipher.decrypt(client.getClientSecret()))
+                    .build();
+            cache.put(clientId, client);
+            return client;
+        } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         } finally {

@@ -21,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @ConfigurationProperties("spring.security.oauth2.server")
 public class ApplicationConfiguration {
     private final String login = "/oauth2/login";
+    private String cipherSecret = "secret";
     private String issuer;
 
     @Bean

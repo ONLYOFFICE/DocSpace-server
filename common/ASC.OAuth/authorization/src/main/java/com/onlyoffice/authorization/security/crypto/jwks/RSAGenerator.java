@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.security.crypto;
+package com.onlyoffice.authorization.security.crypto.jwks;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
