@@ -41,4 +41,6 @@ public class RoomInvitationRequestDto
     /// <summary>Message to send when notifying about the shared room</summary>
     /// <type>System.String, System</type>
     public string Message { get; set; }
+
+    public string Culture { get; set; }
 }

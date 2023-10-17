@@ -90,7 +90,7 @@ public class FileSharingAceHelper
         _urlShortener = urlShortener;
     }
 
-    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings)
+    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
     {
         if (entry == null)
         {
@@ -335,7 +335,7 @@ public class FileSharingAceHelper
             if (entry.RootFolderType is FolderType.USER or FolderType.Privacy
                && notify)
             {
-                await _notifyClient.SendShareNoticeAsync(entry, recipients, message);
+                await _notifyClient.SendShareNoticeAsync(entry, recipients, message, culture);
             }
         }
 

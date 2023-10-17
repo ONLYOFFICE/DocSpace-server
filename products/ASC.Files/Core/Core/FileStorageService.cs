@@ -2569,7 +2569,7 @@ public class FileStorageService //: IFileStorageService
         return link;
     }
 
-    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify)
+    public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null)
     {
         var fileDao = GetFileDao<T>();
         var folderDao = GetFolderDao<T>();
@@ -2591,7 +2591,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                var result = await _fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings);
+                var result = await _fileSharingAceHelper.SetAceObjectAsync(aceCollection.Aces, entry, notify, aceCollection.Message, aceCollection.AdvancedSettings, culture);
                 warning ??= result.Warning;
 
                 if (!result.Changed)
