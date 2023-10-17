@@ -3506,9 +3506,8 @@ public class FileStorageService //: IFileStorageService
             return (await _fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
         }
 
-        linkId = result.Item2.Id;
-
         var (eventType, ace) = result;
+        linkId = ace.Id;
 
         if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && entry is Folder<T> { FolderType: FolderType.PublicRoom })
         {
