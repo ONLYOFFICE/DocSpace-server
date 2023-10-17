@@ -178,14 +178,16 @@ public class MessageSettingsController : BaseSettingsController
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
-        if (string.IsNullOrEmpty(inDto.Message))
+        var message = HtmlUtil.ToPlainText(inDto.Message);
+
+        if (string.IsNullOrEmpty(message))
         {
             throw new Exception(Resource.ErrorEmptyMessage);
         }
 
         CheckCache("sendadmmail");
 
-        await _studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, inDto.Message);
+        await _studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message);
         await _messageService.SendAsync(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;
