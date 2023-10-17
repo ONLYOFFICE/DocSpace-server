@@ -302,7 +302,7 @@ public class FileUploader
         uploadSession.Encrypted = encrypted;
         uploadSession.KeepVersion = keepVersion;
 
-        await _chunkedUploadSessionHolder.StoreSessionAsync(uploadSession);
+        _chunkedUploadSessionHolder.StoreSession(uploadSession);
 
         return uploadSession;
     }
@@ -340,7 +340,7 @@ public class FileUploader
             await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
 
             await _fileMarker.MarkAsNewAsync(uploadSession.File);
-            await _chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
+            _chunkedUploadSessionHolder.RemoveSession(uploadSession);
         }
 
         return uploadSession;
@@ -355,7 +355,7 @@ public class FileUploader
     {
         await _daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 
-        await _chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
+        _chunkedUploadSessionHolder.RemoveSession(uploadSession);
     }
 
     private async Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)
