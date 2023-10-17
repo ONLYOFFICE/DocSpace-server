@@ -493,7 +493,7 @@ public class FileStorageService //: IFileStorageService
         return await InternalCreateNewFolderAsync(parentId, title);
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
         ArgumentNullException.ThrowIfNull(title, nameof(title));
 
@@ -516,10 +516,10 @@ public class FileStorageService //: IFileStorageService
 
         var room = roomType switch
         {
-            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private),
-            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private),
-            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private),
-            _ => await CreateCustomRoomAsync(title, parentId, @private),
+            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
+            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
+            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
+            _ => await CreateCustomRoomAsync(title, parentId, @private, indexing),
         };
 
         if (@private)
@@ -530,16 +530,16 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private)
+    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
     {
-        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private);
+        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private, indexing);
 
         _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         
         return room;
     }
 
-    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
         ArgumentNullException.ThrowIfNull(title, nameof(title));
         ArgumentNullException.ThrowIfNull(parentId, nameof(parentId));
@@ -568,10 +568,10 @@ public class FileStorageService //: IFileStorageService
 
         var result = roomType switch
         {
-            RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private), FolderType.CustomRoom),
-            RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private), FolderType.EditingRoom),
-            RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private), FolderType.PublicRoom),
-            _ => (await CreateCustomRoomAsync(title, parentId, @private), FolderType.CustomRoom),
+            RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
+            RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
+            RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private, indexing), FolderType.PublicRoom),
+            _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
         };
 
         ErrorIf(result.Item1.Id.Equals(result.Item1.RootId), FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
@@ -586,17 +586,17 @@ public class FileStorageService //: IFileStorageService
         return result.Item1;
     }
 
-    private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy)
+    private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.CustomRoom, privacy);
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.CustomRoom, privacy, indexing);
     }
 
-    private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy)
+    private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy);
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy, indexing);
     }
 
-    private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false)
+    private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false)
     {
         var folderDao = GetFolderDao<T>();
 
@@ -617,6 +617,7 @@ public class FileStorageService //: IFileStorageService
             newFolder.FolderType = folderType;
             newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
             newFolder.SettingsColor = _roomLogoManager.GetRandomColour();
+            newFolder.SettingsIndexing = indexing;
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             var folder = await folderDao.GetFolderAsync(folderId);
 
