@@ -22,7 +22,7 @@ public class InMemoryCacheConfiguration {
                 return new ConcurrentMapCache(
                         name,
                         CacheBuilder.newBuilder()
-                                .expireAfterWrite(10, TimeUnit.SECONDS)
+                                .expireAfterWrite(120, TimeUnit.SECONDS)
                                 .maximumSize(100)
                                 .build().asMap(),
                         false);
