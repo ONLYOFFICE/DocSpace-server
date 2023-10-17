@@ -281,20 +281,15 @@ public class ExternalShare
     {
         await _cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
     }
-
-    public string GetUrlWithShare(string url)
-    {
-        return GetUrlWithShareAsync(url).Result;
-    }
     
-    public async Task<string> GetUrlWithShareAsync(string url)
+    public string GetUrlWithShare(string url, string key = null)
     {
-        if (string.IsNullOrEmpty(url) || await GetLinkIdAsync() == default)
+        if (string.IsNullOrEmpty(url))
         {
             return url;
         }
 
-        var key = GetKey();
+        key ??= GetKey();
 
         if (string.IsNullOrEmpty(key))
         {
@@ -309,7 +304,7 @@ public class ExternalShare
         return uriBuilder.ToString();
     }
     
-    private async Task<string> CreateShareKeyAsync(Guid linkId)
+    public async Task<string> CreateShareKeyAsync(Guid linkId)
     {
         return Signature.Create(linkId, await GetDbKeyAsync());
     }
