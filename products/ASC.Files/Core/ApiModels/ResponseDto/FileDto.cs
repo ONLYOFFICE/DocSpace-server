@@ -110,6 +110,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessability, System.Boolean}, System.Collections</type>
     public IDictionary<Accessability, bool> ViewAccessability { get; set; }
+    
+    public string RequestToken { get; set; }
 
     protected internal override FileEntryType EntryType { get => FileEntryType.File; }
 
@@ -235,9 +237,15 @@ public class FileDtoHelper : FileEntryDtoHelper
 
         try
         {
-            result.ViewUrl = await _externalShare.GetUrlWithShareAsync(_commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
+            if (file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink })
+            {
+                result.RequestToken = await _externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+            }
+            
+            result.ViewUrl = _externalShare.GetUrlWithShare(_commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
-            result.WebUrl = await _externalShare.GetUrlWithShareAsync(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id, file.Version)));
+            result.WebUrl = _externalShare.GetUrlWithShare(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id, file.Version)),
+                result.RequestToken);
 
             result.ThumbnailStatus = file.ThumbnailStatus;
 
@@ -246,8 +254,8 @@ public class FileDtoHelper : FileEntryDtoHelper
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
                 result.ThumbnailUrl =
-                    await _externalShare.GetUrlWithShareAsync(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
-                                                              $"&hash={cacheKey}");
+                    _externalShare.GetUrlWithShare(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) +
+                                                              $"&hash={cacheKey}", result.RequestToken);
             }
         }
         catch (Exception)
