@@ -3501,19 +3501,22 @@ public class FileStorageService //: IFileStorageService
 
         var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options, _actions[SubjectType.ExternalLink]);
 
-        if (result != null)
+        if (result == null)
         {
-            linkId = result.Item2.Id;
+            return (await _fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
         }
-        
-        if (result != null && result.Item1 == EventType.Remove && result.Item2.SubjectType == SubjectType.PrimaryExternalLink)
+
+        var (eventType, ace) = result;
+        linkId = ace.Id;
+
+        if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && entry is Folder<T> { FolderType: FolderType.PublicRoom })
         {
             linkId = Guid.NewGuid();
             
             await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle }, 
                 _actions[SubjectType.ExternalLink]);
         }
-        
+
         return (await _fileSharing.GetPureSharesAsync(entry, new[] { linkId }).FirstOrDefaultAsync());
     }
 
