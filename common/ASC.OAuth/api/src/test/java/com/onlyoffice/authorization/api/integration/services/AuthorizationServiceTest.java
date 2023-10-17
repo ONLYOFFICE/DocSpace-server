@@ -1,6 +1,7 @@
 package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
+import com.onlyoffice.authorization.api.entities.Authorization;
 import com.onlyoffice.authorization.api.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.messaging.messages.AuthorizationMessage;
 import com.onlyoffice.authorization.api.repositories.AuthorizationRepository;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
@@ -32,6 +35,8 @@ public class AuthorizationServiceTest extends ContainerBase {
     void beforeEach() {
         authorizationService.saveAuthorization(AuthorizationMessage
                 .builder()
+                .registeredClientId("mock")
+                .principalName("mock")
                 .accessTokenExpiresAt(Date.from(Instant.now()))
                 .accessTokenIssuedAt(Date.from(Instant.now()))
                 .accessTokenMetadata("mock")
@@ -53,16 +58,17 @@ public class AuthorizationServiceTest extends ContainerBase {
     }
 
     @Test
+    @Transactional
     void shouldGetAuthorization() {
-        var a = authorizationRepository.findById("mock");
+        var a = authorizationRepository.findById(new Authorization.AuthorizationId("mock", "mock"));
         assertNotNull(a);
     }
 
     @Test
     void shouldDeleteAuthorization() {
-        var a = authorizationRepository.findById("mock");
+        var a = authorizationRepository.findById(new Authorization.AuthorizationId("mock", "mock"));
         authorizationService.deleteAuthorization(AuthorizationMapper.INSTANCE.toDTO(a.get()));
-        a = authorizationRepository.findById("mock");
+        a = authorizationRepository.findById(new Authorization.AuthorizationId("mock", "mock"));
         assertTrue(a.isEmpty());
     }
 }

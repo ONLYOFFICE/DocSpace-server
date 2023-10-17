@@ -7,7 +7,7 @@ server:
 
 docspace:
   server:
-    url: ${DOCSPACE_ADDRESS:127.0.0.1}
+    url: ${DOCSPACE_ADDRESS:http://127.0.0.1}
 
 spring:
   application:

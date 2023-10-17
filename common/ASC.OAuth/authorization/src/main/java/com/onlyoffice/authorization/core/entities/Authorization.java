@@ -7,25 +7,30 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  *
  */
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Immutable
 @Entity
+@Immutable
+@IdClass(Authorization.AuthorizationId.class)
 @Table(name = "identity_authorizations")
 public class Authorization {
-    @Id
-    @Column
+    @Column(unique = true)
     private String id;
+    @Id
     @Column(name = "registered_client_id")
     private String registeredClientId;
+    @Id
     @Column(name = "principal_name")
     private String principalName;
     @Column(name = "authorization_grant_type")
@@ -74,4 +79,28 @@ public class Authorization {
     private Timestamp modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
+    @PrePersist
+    private void prePersist() {
+        this.invalidated = false;
+    }
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class AuthorizationId implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String registeredClientId;
+        private String principalName;
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Authorization.AuthorizationId that = (Authorization.AuthorizationId) o;
+            return registeredClientId.equals(that.registeredClientId) && principalName.equals(that.principalName);
+        }
+
+        public int hashCode() {
+            return Objects.hash(registeredClientId, principalName);
+        }
+    }
 }

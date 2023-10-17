@@ -2,7 +2,6 @@ package com.onlyoffice.authorization.api.services;
 
 import com.onlyoffice.authorization.api.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.messaging.messages.AuthorizationMessage;
-import com.onlyoffice.authorization.api.repositories.AuthorizationRepository;
 import com.onlyoffice.authorization.api.usecases.repository.authorization.AuthorizationPersistenceMutationUsecases;
 import com.onlyoffice.authorization.api.usecases.service.authorization.AuthorizationCleanupUsecases;
 import com.onlyoffice.authorization.api.usecases.service.authorization.AuthorizationCreationUsecases;

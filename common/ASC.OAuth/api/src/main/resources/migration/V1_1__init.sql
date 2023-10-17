@@ -1,5 +1,6 @@
 CREATE TABLE identity_authorizations (
-	id varchar(255) not null,
+	principal_name varchar(255) not null,
+	registered_client_id varchar(255) not null,
 	access_token_expires_at datetime(6),
 	access_token_issued_at datetime(6),
 	access_token_metadata text,
@@ -13,17 +14,20 @@ CREATE TABLE identity_authorizations (
 	authorization_code_value text,
 	authorization_grant_type varchar(255),
 	authorized_scopes varchar(1000),
+	id varchar(255),
 	invalidated tinyint(1),
 	modified_at datetime(6),
-	principal_name varchar(255),
 	refresh_token_expires_at datetime(6),
 	refresh_token_issued_at datetime(6),
 	refresh_token_metadata text,
 	refresh_token_value text,
-	registered_client_id varchar(255),
 	state varchar(500),
-	primary key (id)
+	primary key (principal_name, registered_client_id)
 ) engine=InnoDB;
+
+ALTER TABLE identity_authorizations
+	ADD CONSTRAINT UK_id
+	UNIQUE (id);
 
 CREATE TABLE identity_clients (
 	client_id varchar(36) not null,
