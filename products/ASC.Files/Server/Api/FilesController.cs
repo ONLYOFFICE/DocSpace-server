@@ -464,6 +464,12 @@ public abstract class FilesController<T> : ApiControllerBase
     {
         return _fileStorageService.SetFileProperties(fileId, _mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto));
     }
+
+    [HttpPut("{fileId}/order")]
+    public async Task SetOrder(T fileId, OrderRequestDto inDto)
+    {
+        await _fileStorageService.SetFileOrder(fileId, inDto.Order);
+    }
 }
 
 public class FilesControllerCommon : ApiControllerBase

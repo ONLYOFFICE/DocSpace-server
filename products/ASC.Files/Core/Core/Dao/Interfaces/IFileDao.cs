@@ -310,5 +310,9 @@ public interface IFileDao<T>
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, T roomId = default);
 
+    Task SetCustomOrder(T fileId, T parentFolderId, int order);
+
+    Task InitCustomOrder(IEnumerable<T> fileIds, T parentFolderId);
+
     #endregion
 }

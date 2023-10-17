@@ -45,6 +45,8 @@ public class FilesDbContext : DbContext
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<DbFileOrder> FileOrder { get; set; }
+    public DbSet<DbRoomSettings> RoomSettings { get; set; }
 
     public FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : base(dbContextOptions) { }
 
@@ -66,7 +68,9 @@ public class FilesDbContext : DbContext
             .AddDbFilesProperties()
             .AddDbTenant()
             .AddFilesConverts()
+            .AddDbFileOrder()
             .AddUser()
+            .AddDbRoomSettings()
             .AddDbFunctions();
     }
 }

@@ -109,7 +109,7 @@ public class RoomLogoManager
         await SaveWithProcessAsync(stringId, data, -1, new Point(x, y), new Size(width, height));
         await RemoveTempAsync(fileName);
 
-        room.HasLogo = true;
+        room.SettingsHasLogo = true;
 
         if (room.ProviderEntry)
         {
@@ -143,7 +143,7 @@ public class RoomLogoManager
         try
         {
             await (await GetDataStoreAsync()).DeleteFilesAsync(string.Empty, $"{ProcessFolderId(stringId)}*.*", false);
-            room.HasLogo = false;
+            room.SettingsHasLogo = false;
 
             if (room.ProviderEntry)
             {
@@ -169,11 +169,11 @@ public class RoomLogoManager
 
     public async ValueTask<Logo> GetLogoAsync<T>(Folder<T> room)
     {
-        if (!room.HasLogo)
+        if (!room.SettingsHasLogo)
         {
-            if (string.IsNullOrEmpty(room.Color))
+            if (string.IsNullOrEmpty(room.SettingsColor))
             {
-                room.Color = GetRandomColour();
+                room.SettingsColor = GetRandomColour();
 
                 var folderDao = _daoFactory.GetFolderDao<T>();
                 await folderDao.SaveFolderAsync(room);
@@ -185,7 +185,7 @@ public class RoomLogoManager
                 Large = string.Empty,
                 Medium = string.Empty,
                 Small = string.Empty,
-                Color = room.Color
+                Color = room.SettingsColor
             };
         }
 
