@@ -667,17 +667,17 @@ public class TariffService : ITariffService
         return result;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(params string[] productIds)
+    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId = "", params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
         try
         {
-            var key = "biling-prices" + string.Join(",", productIds);
+            var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
             var result = _cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
             if (result == null)
             {
-                result = _billingClient.GetProductPriceInfo(productIds);
+                result = _billingClient.GetProductPriceInfo(partnerId, productIds);
                 _cache.Insert(key, result, DateTime.Now.AddHours(1));
             }
 

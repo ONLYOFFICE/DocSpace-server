@@ -198,13 +198,18 @@ public class BillingClient
         return changed;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(params string[] productIds)
+    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId, params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
         var parameters = productIds.Select(pid => Tuple.Create("ProductId", pid)).ToList();
         parameters.Add(Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()));
 
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            parameters.Add(Tuple.Create("PartnerId", partnerId));
+        }
+        
         var result = Request("GetProductsPrices", null, parameters.ToArray());
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 
