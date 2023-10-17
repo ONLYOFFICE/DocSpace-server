@@ -303,7 +303,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
             }
-            else if (!isRoom && folder.Private && !await CompliesPrivateRoomRulesAsync(folder, toFolderParents))
+            else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(folder, toFolderParents))
             {
                 this[Err] = FilesCommonResource.ErrorMassage_SecurityException_MoveFolder;
             }
@@ -840,11 +840,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
         else
         {
-            entryParentRoom = await FolderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.Private && DocSpaceHelper.IsRoom(f.FolderType));
+            entryParentRoom = await FolderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && DocSpaceHelper.IsRoom(f.FolderType));
             _parentRooms.Add(entry.ParentId, entryParentRoom);
         }
 
-        var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.Private && DocSpaceHelper.IsRoom(f.FolderType));
+        var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.SettingsPrivate && DocSpaceHelper.IsRoom(f.FolderType));
 
         if (entryParentRoom == null && toFolderParentRoom == null)
         {

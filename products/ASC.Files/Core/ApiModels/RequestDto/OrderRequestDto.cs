@@ -24,40 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Helpers;
-
-public static class DocSpaceHelper
+namespace ASC.Files.Core.ApiModels.RequestDto;
+public class OrderRequestDto
 {
-    public static bool IsRoom(FolderType folderType)
-    {
-        return folderType is 
-            FolderType.CustomRoom or 
-            FolderType.EditingRoom or 
-            FolderType.ReviewRoom or 
-            FolderType.ReadOnlyRoom or 
-            FolderType.FillingFormsRoom or
-            FolderType.PublicRoom;
-    }
-
-    public static RoomType? GetRoomType(FolderType folderType)
-    {
-        return folderType switch
-        {
-            FolderType.FillingFormsRoom => RoomType.FillingFormsRoom,
-            FolderType.EditingRoom => RoomType.EditingRoom,
-            FolderType.ReviewRoom => RoomType.ReviewRoom,
-            FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
-            FolderType.CustomRoom => RoomType.CustomRoom,
-            FolderType.PublicRoom => RoomType.PublicRoom,
-            _ => null,
-        };
-    }
-
-    public static async Task<bool> LocatedInPrivateRoomAsync<T>(File<T> file, IFolderDao<T> folderDao)
-    {
-        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.FirstOrDefault(f => IsRoom(f.FolderType));
-
-        return room is { SettingsPrivate: true };
-    }
+    public int Order { get; set; }
 }

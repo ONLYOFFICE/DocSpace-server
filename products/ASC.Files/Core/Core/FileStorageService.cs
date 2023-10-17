@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using OrderBy = ASC.Files.Core.OrderBy;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -491,7 +493,7 @@ public class FileStorageService //: IFileStorageService
         return await InternalCreateNewFolderAsync(parentId, title);
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
         ArgumentNullException.ThrowIfNull(title, nameof(title));
 
@@ -514,10 +516,10 @@ public class FileStorageService //: IFileStorageService
 
         var room = roomType switch
         {
-            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private),
-            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private),
-            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private),
-            _ => await CreateCustomRoomAsync(title, parentId, @private),
+            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
+            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
+            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
+            _ => await CreateCustomRoomAsync(title, parentId, @private, indexing),
         };
 
         if (@private)
@@ -528,16 +530,16 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private)
+    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
     {
-        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private);
+        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private, indexing);
 
         _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         
         return room;
     }
 
-    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
         ArgumentNullException.ThrowIfNull(title, nameof(title));
         ArgumentNullException.ThrowIfNull(parentId, nameof(parentId));
@@ -566,10 +568,10 @@ public class FileStorageService //: IFileStorageService
 
         var result = roomType switch
         {
-            RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private), FolderType.CustomRoom),
-            RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private), FolderType.EditingRoom),
-            RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private), FolderType.PublicRoom),
-            _ => (await CreateCustomRoomAsync(title, parentId, @private), FolderType.CustomRoom),
+            RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
+            RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
+            RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private, indexing), FolderType.PublicRoom),
+            _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
         };
 
         ErrorIf(result.Item1.Id.Equals(result.Item1.RootId), FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
@@ -584,17 +586,17 @@ public class FileStorageService //: IFileStorageService
         return result.Item1;
     }
 
-    private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy)
+    private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.CustomRoom, privacy);
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.CustomRoom, privacy, indexing);
     }
 
-    private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy)
+    private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy);
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy, indexing);
     }
 
-    private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false)
+    private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false)
     {
         var folderDao = GetFolderDao<T>();
 
@@ -613,8 +615,9 @@ public class FileStorageService //: IFileStorageService
             newFolder.Title = title;
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
-            newFolder.Private = parent.Private ? parent.Private : privacy;
-            newFolder.Color = _roomLogoManager.GetRandomColour();
+            newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
+            newFolder.SettingsColor = _roomLogoManager.GetRandomColour();
+            newFolder.SettingsIndexing = indexing;
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             var folder = await folderDao.GetFolderAsync(folderId);
 
@@ -1619,6 +1622,24 @@ public class FileStorageService //: IFileStorageService
 
             return folder.Id.ToString();
         }
+    }
+
+    public async Task SetFileOrder<T>(T fileId, int order)
+    {
+        var fileDao = _daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+        file.NotFoundIfNull();
+        ErrorIf(!await _fileSecurity.CanEditAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
+        await fileDao.SetCustomOrder(fileId, file.ParentId, order);
+    }
+
+    public async Task SetFolderOrder<T>(T folderId, int order)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        folder.NotFoundIfNull();
+        ErrorIf(!await _fileSecurity.CanEditAsync(folder), FilesCommonResource.ErrorMassage_SecurityException);
+        await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
     }
 
     public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
@@ -2890,6 +2911,59 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
+    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing)
+    {
+        var folderDao = GetFolderDao<T>();
+        var room = await folderDao.GetFolderAsync(folderId);
+
+        ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+        ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
+
+        if (DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            if (room.SettingsIndexing != indexing)
+            {
+                if (indexing)
+                {
+                    await ReOrder(room.Id, true);
+                }
+                
+                room.SettingsIndexing = indexing;
+                await folderDao.SaveFolderAsync(room);
+            }
+        }
+
+        return room;
+    }
+    
+    
+    public async Task<Folder<T>> ReOrder<T>(T folderId, bool subfolders = false)
+    {        
+        var folderDao = GetFolderDao<T>();
+        var fileDao = GetFileDao<T>();
+
+        var room = await folderDao.GetFolderAsync(folderId);
+
+        ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+        ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
+        
+        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
+        await folderDao.InitCustomOrder(folders, folderId);
+        
+        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, false).Select(r=> r.Id).ToListAsync();
+        await fileDao.InitCustomOrder(files, folderId);
+
+        if (subfolders)
+        {
+            foreach (var t in folders)
+            {
+                await ReOrder(t, true);
+            }
+        }
+
+        return room;
+    }
+    
     public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
     {
         ErrorIf(!_authContext.IsAuthenticated, FilesCommonResource.ErrorMassage_SecurityException);

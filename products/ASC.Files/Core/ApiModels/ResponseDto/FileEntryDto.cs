@@ -100,6 +100,8 @@ public abstract class FileEntryDto
     /// <type>System.Nullable{System.Int32}, System</type>
     public int? ProviderId { get; set; }
 
+    public string Order { get; set; }
+
     protected FileEntryDto(FileEntry entry)
     {
         Title = entry.Title;
