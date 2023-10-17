@@ -30,5 +30,6 @@ public enum SearchArea
 {
     Active,
     Archive,
-    Any
+    Any,
+    RecentByLinks
 }

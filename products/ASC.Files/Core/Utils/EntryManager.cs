@@ -424,10 +424,27 @@ public class EntryManager
         }
         else if (parent.FolderType == FolderType.Recent)
         {
-            var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, searchInContent);
-            entries.AddRange(files);
+            if (searchArea == SearchArea.RecentByLinks)
+            {
+                var fileDao = _daoFactory.GetFileDao<T>();
+                var userId = _authContext.CurrentAccount.ID;
 
-            CalculateTotal();
+                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject);
+                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
+                
+                entries.AddRange(files);
+
+                total = await filesTotalCountTask;
+
+                return (entries, total);
+            }
+            else
+            {
+                var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, searchInContent);
+                entries.AddRange(files);
+
+                CalculateTotal();
+            }
         }
         else if (parent.FolderType == FolderType.Favorites)
         {
