@@ -51,7 +51,7 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
         if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin())
             throw new BadCredentialsException("Invalid docspace authorization");
 
-        return new UsernamePasswordAuthenticationToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), null);
+        return new UsernamePasswordAuthenticationToken(me.getResponse().getEmail(), UUID.randomUUID().toString(), null);
     }
 
     public boolean supports(Class<?> authentication) {
