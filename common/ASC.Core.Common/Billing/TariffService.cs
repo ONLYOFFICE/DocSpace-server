@@ -476,7 +476,7 @@ public class TariffService : ITariffService
         return payments;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
+    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
     {
         List<TenantQuota> newQuotas = new();
 
@@ -516,6 +516,7 @@ public class TariffService : ITariffService
                             "__Tenant__",
                             productIds.ToArray(),
                             affiliateId,
+                            partnerId,
                             null,
                             !string.IsNullOrEmpty(currency) ? "__Currency__" : null,
                             !string.IsNullOrEmpty(language) ? "__Language__" : null,
@@ -549,7 +550,7 @@ public class TariffService : ITariffService
         return result;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int? tenant, int quotaId, string affiliateId, string currency = null, string language = null, string customerId = null, string quantity = null)
+    public async Task<Uri> GetShoppingUriAsync(int? tenant, int quotaId, string affiliateId,  string partnerId, string currency = null, string language = null, string customerId = null, string quantity = null)
     {
         var quota = await _quotaService.GetTenantQuotaAsync(quotaId);
         if (quota == null)
@@ -573,12 +574,19 @@ public class TariffService : ITariffService
                                                .Select(q => q.ProductId)
                                                .ToArray();
 
+                    Tenant t = null;
+                    if (tenant.HasValue)
+                    {
+                        t = await _tenantService.GetTenantAsync(tenant.Value);
+                    }
+                    
                     urls =
                         _billingClient.GetPaymentUrls(
                             tenant.HasValue ? await _coreSettings.GetKeyAsync(tenant.Value) : null,
                             products,
-                            tenant.HasValue ? await _coreSettings.GetAffiliateIdAsync(tenant.Value) : affiliateId,
-                            tenant.HasValue ? await _coreSettings.GetCampaignAsync(tenant.Value) : null,
+                            t != null && !string.IsNullOrWhiteSpace(t.AffiliateId) ? t.AffiliateId : affiliateId,
+                            t != null && !string.IsNullOrWhiteSpace(t.PartnerId) ? t.PartnerId : partnerId,
+                            t != null && !string.IsNullOrWhiteSpace(t.Campaign) ? t.Campaign : null,
                             !string.IsNullOrEmpty(currency) ? "__Currency__" : null,
                             !string.IsNullOrEmpty(language) ? "__Language__" : null,
                             !string.IsNullOrEmpty(customerId) ? "__CustomerID__" : null,
@@ -612,7 +620,7 @@ public class TariffService : ITariffService
         return null;
     }
 
-    public Uri GetShoppingUri(string[] productIds, string affiliateId = null, string currency = null, string language = null, string customerId = null, string quantity = null)
+    public Uri GetShoppingUri(string[] productIds, string affiliateId = null, string partnerId = null, string currency = null, string language = null, string customerId = null, string quantity = null)
     {
         var key = "shopingurl" + string.Join("_", productIds) + (!string.IsNullOrEmpty(affiliateId) ? "_" + affiliateId : "");
         var url = _cache.Get<string>(key);
@@ -628,6 +636,7 @@ public class TariffService : ITariffService
                             null,
                             productIds,
                             affiliateId,
+                            partnerId,
                             null,
                             !string.IsNullOrEmpty(currency) ? "__Currency__" : null,
                             !string.IsNullOrEmpty(language) ? "__Language__" : null,
