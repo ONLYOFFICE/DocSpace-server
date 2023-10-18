@@ -88,6 +88,6 @@ public class MessageTarget
     public IEnumerable<string> GetItems() { return _items.ToList(); }
     public override string ToString()
     {
-        return string.Join(",", _items);
+        return _items != null ? string.Join(",", _items) : null;
     }
 }
