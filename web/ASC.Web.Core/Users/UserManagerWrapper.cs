@@ -117,7 +117,7 @@ public sealed class UserManagerWrapper
         return Equals(foundUser, Constants.LostUser) || foundUser.Id == userId;
     }
 
-    public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type)
+    public async Task<UserInfo> AddInvitedUserAsync(string email, EmployeeType type, string culture)
     {
         var mail = new MailAddress(email);
 
@@ -134,6 +134,7 @@ public sealed class UserManagerWrapper
             FirstName = string.Empty,
             ActivationStatus = EmployeeActivationStatus.Pending,
             Status = EmployeeStatus.Active,
+            CultureName = culture
         };
 
         user.UserName = await MakeUniqueNameAsync(user);

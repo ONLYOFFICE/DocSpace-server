@@ -365,8 +365,8 @@ public class UserController : PeopleControllerBase
                 continue;
             }
 
-            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type);
-            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID);
+            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
+            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
             await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
@@ -1065,7 +1065,7 @@ public class UserController : PeopleControllerBase
                     continue;
                 }
 
-                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID);
+                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID, user.GetCulture()?.Name);
                 var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
                 await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
