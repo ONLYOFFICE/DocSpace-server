@@ -42,6 +42,7 @@ public class LoginController {
     ) {
         var loginUrl = String.format("redirect:%s", UriComponentsBuilder
                 .fromUriString(this.docspaceURL.toString())
+                .path("login")
                 .queryParam("client_id", clientId)
                 .queryParam("type", "oauth2")
                 .build());
