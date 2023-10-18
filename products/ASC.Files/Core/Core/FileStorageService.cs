@@ -405,12 +405,12 @@ public class FileStorageService //: IFileStorageService
                 {
                     if (f is Folder<string> f1)
                     {
-                        return (object)f1.Id;
+                        return (object)new { f1.Id, f1.Title, RoomType = DocSpaceHelper.GetRoomType(f1.FolderType) };
                     }
 
                     if (f is Folder<int> f2)
                     {
-                        return f2.Id;
+                        return new { f2.Id, f2.Title, RoomType = DocSpaceHelper.GetRoomType(f2.FolderType) };
                     }
                 }
 
