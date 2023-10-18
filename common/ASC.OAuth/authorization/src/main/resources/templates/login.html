@@ -6,33 +6,14 @@
     <meta charset="UTF-8">
     <title>ONLYOFFICE</title>
 </head>
-<body>
+<body onload="document.getElementById('form-login').submit();">
 <div style="visibility: hidden;">
     <form
             method="post"
             role="form"
             id="form-login"
             th:action="@{/oauth2/login}"
-            class="form-horizontal"
-    >
-        <input
-                type="text"
-                id="username"
-                name="username"
-                class="form-control"
-                placeholder="Enter email address"
-        />
-        <input
-                type="password"
-                id="password"
-                name="password"
-                class="form-control"
-                placeholder="Enter password"
-        />
-    </form>
+    />
 </div>
-<script>
-    document.getElementById('form-login').submit();
-</script>
 </body>
 </html>
