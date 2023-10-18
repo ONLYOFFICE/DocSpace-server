@@ -1,9 +1,15 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.configuration.messaging;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ *
+ */
 @Getter
 @Setter
 @ToString

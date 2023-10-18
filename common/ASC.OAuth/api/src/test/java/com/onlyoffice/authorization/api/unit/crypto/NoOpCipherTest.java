@@ -1,11 +1,17 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.unit.crypto;
 
-import com.onlyoffice.authorization.api.crypto.NoOpCipher;
+import com.onlyoffice.authorization.api.security.crypto.NoOpCipher;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+/**
+ *
+ */
 @ActiveProfiles("test")
 public class NoOpCipherTest {
     private NoOpCipher cipher = new NoOpCipher();

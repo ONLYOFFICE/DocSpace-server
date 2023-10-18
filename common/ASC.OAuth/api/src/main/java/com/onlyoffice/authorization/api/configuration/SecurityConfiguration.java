@@ -1,6 +1,9 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.configuration;
 
-import com.onlyoffice.authorization.api.filters.CheckAuthCookieFilter;
+import com.onlyoffice.authorization.api.security.filters.CheckAuthCookieFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ *
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

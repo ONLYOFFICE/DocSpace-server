@@ -1,3 +1,6 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.configuration;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +13,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
 
+/**
+ *
+ */
 @Configuration
 @ConfigurationProperties(prefix = "application")
 @Getter

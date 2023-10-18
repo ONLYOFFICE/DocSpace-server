@@ -1,12 +1,15 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.unit.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.controllers.ClientController;
-import com.onlyoffice.authorization.api.dto.request.CreateClientDTO;
-import com.onlyoffice.authorization.api.dto.response.ClientDTO;
-import com.onlyoffice.authorization.api.dto.response.PaginationDTO;
-import com.onlyoffice.authorization.api.services.ClientService;
+import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.ClientDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.PaginationDTO;
+import com.onlyoffice.authorization.api.external.controllers.ClientController;
+import com.onlyoffice.authorization.api.ports.services.ClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+/**
+ *
+ */
 @ExtendWith(MockitoExtension.class)
 public class ClientControllerTest {
     private MockMvc mvc;
@@ -87,7 +93,7 @@ public class ClientControllerTest {
                 .build());
         given(applicationConfiguration.getScopes())
                 .willReturn(List.of(new ApplicationConfiguration
-                        .ScopeConfiguration("mock", "mock")));
+                        .ScopeConfiguration("mock", "mock", "mock")));
         MockHttpServletResponse response = mvc.perform(
                         MockMvcRequestBuilders.post("/api/2.0/clients")
                                 .contentType(MediaType.APPLICATION_JSON)

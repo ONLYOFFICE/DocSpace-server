@@ -1,6 +1,9 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.unit.controllers;
 
-import com.onlyoffice.authorization.api.controllers.ScopeController;
+import com.onlyoffice.authorization.api.external.controllers.ScopeController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +18,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ *
+ */
 @ExtendWith(MockitoExtension.class)
 public class ScopeControllerTest {
     private MockMvc mvc;

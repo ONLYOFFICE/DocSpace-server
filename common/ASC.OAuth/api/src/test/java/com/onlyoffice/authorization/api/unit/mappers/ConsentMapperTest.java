@@ -1,8 +1,11 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.unit.mappers;
 
-import com.onlyoffice.authorization.api.entities.Consent;
-import com.onlyoffice.authorization.api.mappers.ConsentMapper;
-import com.onlyoffice.authorization.api.messaging.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.core.entities.Consent;
+import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
+import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -12,6 +15,9 @@ import java.time.Instant;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+/**
+ *
+ */
 @ActiveProfiles("test")
 public class ConsentMapperTest {
     @Test

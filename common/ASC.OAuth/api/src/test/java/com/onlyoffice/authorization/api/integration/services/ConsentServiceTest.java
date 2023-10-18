@@ -1,11 +1,14 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
-import com.onlyoffice.authorization.api.entities.Consent;
-import com.onlyoffice.authorization.api.mappers.ConsentMapper;
-import com.onlyoffice.authorization.api.messaging.messages.ConsentMessage;
-import com.onlyoffice.authorization.api.repositories.ConsentRepository;
-import com.onlyoffice.authorization.api.services.ConsentService;
+import com.onlyoffice.authorization.api.core.entities.Consent;
+import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
+import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.ports.repositories.ConsentRepository;
+import com.onlyoffice.authorization.api.ports.services.ConsentService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,9 @@ import java.time.Instant;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/**
+ *
+ */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

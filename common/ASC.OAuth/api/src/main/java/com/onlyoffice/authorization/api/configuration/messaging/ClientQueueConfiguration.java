@@ -1,3 +1,6 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.configuration.messaging;
 
 import lombok.Getter;
@@ -8,6 +11,9 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ *
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor

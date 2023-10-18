@@ -1,10 +1,13 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
-import com.onlyoffice.authorization.api.dto.request.ChangeClientActivationDTO;
-import com.onlyoffice.authorization.api.entities.Client;
-import com.onlyoffice.authorization.api.repositories.ClientRepository;
-import com.onlyoffice.authorization.api.services.ClientService;
+import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
+import com.onlyoffice.authorization.api.core.entities.Client;
+import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
+import com.onlyoffice.authorization.api.ports.services.ClientService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,9 @@ import javax.sql.DataSource;
 
 import static org.junit.Assert.*;
 
+/**
+ *
+ */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

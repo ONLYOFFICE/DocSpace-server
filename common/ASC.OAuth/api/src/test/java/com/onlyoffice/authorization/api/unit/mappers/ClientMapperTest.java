@@ -1,7 +1,10 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.unit.mappers;
 
-import com.onlyoffice.authorization.api.entities.Client;
-import com.onlyoffice.authorization.api.mappers.ClientMapper;
+import com.onlyoffice.authorization.api.core.entities.Client;
+import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -10,6 +13,9 @@ import java.time.Instant;
 
 import static org.junit.Assert.assertNotNull;
 
+/**
+ *
+ */
 @ActiveProfiles("test")
 public class ClientMapperTest {
     private Timestamp iat = Timestamp.from(Instant.now());

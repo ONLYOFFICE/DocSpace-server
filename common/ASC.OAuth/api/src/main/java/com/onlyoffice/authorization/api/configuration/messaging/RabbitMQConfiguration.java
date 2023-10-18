@@ -1,7 +1,10 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.configuration.messaging;
 
-import com.onlyoffice.authorization.api.messaging.messages.AuthorizationMessage;
-import com.onlyoffice.authorization.api.messaging.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.core.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
+/**
+ *
+ */
 @Configuration
 @ConfigurationProperties(prefix = "messaging.rabbitmq.configuration")
 @Getter

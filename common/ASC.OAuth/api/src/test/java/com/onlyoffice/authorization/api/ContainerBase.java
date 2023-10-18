@@ -1,3 +1,6 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -5,6 +8,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 
+/**
+ *
+ */
 public class ContainerBase {
     private static MySQLContainer sqlContainer;
     private static RabbitMQContainer rabbitContainer;

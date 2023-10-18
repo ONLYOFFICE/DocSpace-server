@@ -1,7 +1,10 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.unit.crypto;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.crypto.AesGcmCipher;
+import com.onlyoffice.authorization.api.security.crypto.AesGcmCipher;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -9,6 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+/**
+ *
+ */
 @ActiveProfiles("test")
 public class AesGcmCipherTest {
     private AesGcmCipher cipher = new AesGcmCipher(new ApplicationConfiguration());

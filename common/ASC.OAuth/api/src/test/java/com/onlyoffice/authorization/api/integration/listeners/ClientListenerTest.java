@@ -1,10 +1,13 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.integration.listeners;
 
 import com.onlyoffice.authorization.api.ContainerBase;
-import com.onlyoffice.authorization.api.dto.request.CreateClientDTO;
-import com.onlyoffice.authorization.api.messaging.listeners.ClientListener;
-import com.onlyoffice.authorization.api.repositories.ClientRepository;
-import com.onlyoffice.authorization.api.services.ClientService;
+import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
+import com.onlyoffice.authorization.api.external.listeners.ClientListener;
+import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
+import com.onlyoffice.authorization.api.ports.services.ClientService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,9 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ *
+ */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

@@ -1,15 +1,19 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.configuration.messaging;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ *
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor
