@@ -865,6 +865,12 @@ public class FileSecurity : IFileSecurity
 
     private async Task<bool> FilterEntry<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord> shares, bool isOutsider, bool isUser, bool isAuthenticated, bool isDocSpaceAdmin, bool isCollaborator)
     {
+        if (!_authContext.IsAuthenticated && e.RootFolderType != FolderType.USER && 
+            action is not (FilesSecurityActions.Read or FilesSecurityActions.Download))
+        {
+            return false;
+        }
+        
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
@@ -1276,11 +1282,7 @@ public class FileSecurity : IFileSecurity
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access == FileShare.Editing)
-                        {
-                            return true;
-                        }
-                        break;
+                        return false;
                     default:
                         if (e.Access == FileShare.RoomAdmin ||
                             (e.Access == FileShare.Collaborator && e.CreateBy == _authContext.CurrentAccount.ID))
