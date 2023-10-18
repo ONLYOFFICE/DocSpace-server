@@ -230,34 +230,54 @@ public class StudioNotifyService
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(_displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl)
+    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
     {
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
         var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
 
+        var tags = new List<ITagValue>
+        { 
+            new TagValue(Tags.Message, roomTitle),
+            new TagValue(Tags.InviteLink, confirmationUrl),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours) 
+        };
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+        
         await _client.SendNoticeToAsync(
             Actions.SaasRoomInvite,
                 await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
-                new TagValue(Tags.Message, roomTitle),
-                new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
+                tags.ToArray());
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl)
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
     {
         var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
         var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
+
+        var tags = new List<ITagValue>() 
+        {
+                new TagValue(Tags.InviteLink, confirmationUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif"))
+        };
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
 
         await _client.SendNoticeToAsync(
             Actions.SaasDocSpaceInvite,
                 await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
-                new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
-                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")));
+                tags.ToArray());
     }
 
     #endregion
@@ -725,7 +745,7 @@ public class StudioNotifyService
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
                 new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
-                new TagValue(Tags.OwnerName, owner.DisplayUserName(_displayUserSettingsHelper)));
+                    new TagValue(Tags.OwnerName, owner.DisplayUserName(_displayUserSettingsHelper)));
     }
 
     #endregion

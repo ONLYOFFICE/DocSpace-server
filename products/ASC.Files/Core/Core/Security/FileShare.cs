@@ -72,3 +72,30 @@ public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<F
         writer.WriteNumberValue((int)value);
     }
 }
+
+public static partial class FileShareExtensions
+{
+    public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
+    {
+        var prefix = useRoomFormat ? "RoleEnum_" : "AceStatusEnum_";
+
+        switch (fileShare)
+        {
+            case FileShare.Read:
+            case FileShare.ReadWrite:
+            case FileShare.CustomFilter:
+            case FileShare.Review:
+            case FileShare.FillForms:
+            case FileShare.Comment:
+            case FileShare.Restrict:
+            case FileShare.RoomAdmin:
+            case FileShare.Editing:
+            case FileShare.Collaborator:
+            case FileShare.Varies:
+            case FileShare.None:
+                return FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo);
+            default:
+                return string.Empty;
+        }
+    }
+}

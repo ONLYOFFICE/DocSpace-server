@@ -211,10 +211,17 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         needToMark.AddRange(moveOrCopyFilesTask);
 
-        foreach (var folder in moveOrCopyFoldersTask)
+        if (toFolder.FolderType != FolderType.Archive)
         {
-            needToMark.AddRange(await GetFilesAsync(scope, folder));
-            await socketManager.CreateFolderAsync(folder);
+            foreach (var folder in moveOrCopyFoldersTask)
+            {
+                if (!DocSpaceHelper.IsRoom(folder.FolderType))
+                {
+                    needToMark.AddRange(await GetFilesAsync(scope, folder));
+                }
+
+                await socketManager.CreateFolderAsync(folder);
+            }
         }
 
         var ntm = needToMark.Distinct();
@@ -470,7 +477,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         await _semaphore.WaitAsync();
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-
+                                        await socketManager.DeleteFolder(folder);
+                                        
                                         var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                     }

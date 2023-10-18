@@ -85,7 +85,7 @@ public class FilesMessageService
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, params string[] description)
     {
-        description = description.Append(FileStorageService.GetAccessString(userRole)).ToArray();
+        description = description.Append(FileShareExtensions.GetAccessString(userRole)).ToArray();
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
@@ -127,7 +127,7 @@ public class FilesMessageService
             description = description.Append(additionalParam).ToArray();
         }
 
-        await _messageService.SendAsync(action, _messageTarget.Create(entry.Id), description);
+        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create(entry.Id), null, description);
     }
 
     public async Task SendAsync<T1, T2>(MessageAction action, FileEntry<T1> entry1, FileEntry<T2> entry2, IDictionary<string, StringValues> headers, params string[] description)

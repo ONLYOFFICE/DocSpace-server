@@ -399,14 +399,14 @@ module.exports = function (app, config) {
         req.providersInfo.mapping
       );
 
-      logger.info(`SSO User ${JSON.stringify(user)} machineKey=${machineKey}`);
+      logger.info(`SSO User ${JSON.stringify(user)}`);
 
       // Use the parseResult can do customized action
 
       const data = coder.encodeData(user, machineKey);
 
       if (!data) {
-        logger.error("EncodeData response is EMPTY", user, machineKey);
+        logger.error("EncodeData response is EMPTY", user);
         return res.redirect(
           urlResolver.getPortalAuthErrorUrl(
             req,
@@ -517,12 +517,12 @@ module.exports = function (app, config) {
 
       const queryData = req.query["data"];
 
-      logger.info(`sendLogoutRequest: data: ${queryData} machineKey=${machineKey}`);
+      logger.info(`sendLogoutRequest: data: ${queryData}`);
 
       const userData = coder.decodeData(queryData, machineKey);
 
       if (!userData) {
-        logger.error("DecodeData response is EMPTY", queryData, machineKey);
+        logger.error("DecodeData response is EMPTY", queryData);
         return res.redirect(urlResolver.getPortal500Url(req));
       }
 
@@ -607,12 +607,12 @@ module.exports = function (app, config) {
 
   const sendPortalLogout = async (user, req) => {
     try {
-      logger.info(`sendPortalLogout: SSO User ${JSON.stringify(user)} machineKey=${machineKey}`);
+      logger.info(`sendPortalLogout: SSO User ${JSON.stringify(user)}`);
 
       const data = coder.encodeData(user, machineKey);
 
       if (!data) {
-        throw new Error("EncodeData response is EMPTY", user, machineKey);
+        throw new Error("EncodeData response is EMPTY", user);
         //return res.redirect(urlResolver.getPortal500Url(req));
       }
 
