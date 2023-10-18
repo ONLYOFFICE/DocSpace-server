@@ -7,7 +7,6 @@ import com.onlyoffice.authorization.external.configuration.DocspaceConfiguration
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,22 +34,5 @@ public class LoginController {
             return String.format("redirect:%s", docspaceConfiguration.getUrl());
 
         return "login";
-    }
-
-    @GetMapping("/authorized")
-    public String authorized(
-            @RequestParam(name = "error", required = false) String error,
-            @RequestParam(name = "error_description", required = false) String description
-    ) {
-        log.info("authorized redirect");
-        if (error != null && !error.isBlank() && description != null && !description.isBlank()) {
-            MDC.put("error", error);
-            MDC.put("description", description);
-            log.warn("authorization error has occurred");
-            MDC.clear();
-            return "error";
-        }
-
-        return "authorized";
     }
 }
