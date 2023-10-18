@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
-import java.time.Instant;
+import java.sql.Timestamp;
 
 /**
  *
@@ -30,21 +30,30 @@ public class Client {
     @Column(name = "client_id")
     private String clientId;
     @Column(name = "client_name")
-    private String clientName;
+    private String name;
+    private String description;
     @Column(name = "client_secret")
     private String clientSecret;
+    @Column(name = "terms_url")
+    private String termsUrl;
+    @Column(name = "policy_url")
+    private String policyUrl;
+    @Column(name = "logo_url")
+    private String logoUrl;
     @Column(name = "client_issued_at")
-    private Instant clientIssuedAt;
+    private Timestamp clientIssuedAt;
     @Column(name = "authentication_method")
-    private String clientAuthenticationMethod;
+    private String authenticationMethod;
     @Column(name = "redirect_uri")
     private String redirectUri;
     @Column(name = "logout_redirect_uri")
-    private String postLogoutRedirectUri;
+    private String logoutRedirectUri;
     @Column(name = "scopes")
     private String scopes;
     @Column(name = "tenant_id")
-    private Integer tenantId;
+    private int tenant;
+    @Column(name = "enabled")
+    private Boolean enabled;
     @Column(name = "invalidated")
     private Boolean invalidated;
 }

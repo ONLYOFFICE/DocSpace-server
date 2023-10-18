@@ -50,10 +50,10 @@ public class ClientService implements ClientRetrieveUsecases {
     private RegisteredClient toObject(Client client) {
         return RegisteredClient.withId(client.getClientId())
                 .clientId(client.getClientId())
-                .clientIdIssuedAt(client.getClientIssuedAt())
+                .clientIdIssuedAt(client.getClientIssuedAt().toInstant())
                 .clientSecret(client.getClientSecret())
-                .clientName(client.getClientName())
-                .clientAuthenticationMethod(client.getClientAuthenticationMethod()
+                .clientName(client.getName())
+                .clientAuthenticationMethod(client.getAuthenticationMethod()
                         .equals(DEFAULT_CLIENT_AUTHENTICATION_METHOD) ?
                         ClientAuthenticationMethod.CLIENT_SECRET_POST :
                         ClientAuthenticationMethod.CLIENT_SECRET_JWT
