@@ -35,5 +35,6 @@ public class ApplicationConfiguration {
     public static class ScopeConfiguration {
         private String name;
         private String description;
+        private String group;
     }
 }

@@ -14,4 +14,5 @@ public class ScopeDTO implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
     private String description;
+    private String group;
 }

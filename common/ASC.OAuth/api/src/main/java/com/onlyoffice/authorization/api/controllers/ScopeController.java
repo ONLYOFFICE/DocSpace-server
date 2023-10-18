@@ -34,6 +34,7 @@ public class ScopeController {
                         .builder()
                         .name(s.getName())
                         .description(s.getDescription())
+                        .group(s.getGroup())
                         .build()
                 )
                 .collect(Collectors.toSet());

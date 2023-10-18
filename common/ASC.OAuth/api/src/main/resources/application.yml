@@ -11,10 +11,36 @@ application:
   scopes:
     -
       name: accounts:read
-      description: read accounts
+      description: View all account
+      group: Accounts
     -
       name: accounts:write
-      description: write accounts
+      description: View and manage all accounts
+      group: Accounts
+    -
+      name: rooms:read
+      description: View all rooms
+      group: Rooms
+    -
+      name: rooms:write
+      description: View and manage all rooms
+      group: Rooms
+    -
+      name: accounts.self:read
+      description: View basic information about your profile
+      group: Profiles
+    -
+      name: accounts.self:write
+      description: View and manage basic information about your profile
+      group: Profiles
+    -
+      name: files.read
+      description: View all files and folders
+      group: Files
+    -
+      name: files.write
+      description: View and manage all files and folders
+      group: Files
 
 docspace:
   server:
