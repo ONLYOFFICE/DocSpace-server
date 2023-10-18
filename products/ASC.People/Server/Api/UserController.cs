@@ -1581,7 +1581,7 @@ public class UserController : PeopleControllerBase
             }
         }
 
-        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.CreateFromGroupValues(users.Select(x => x.Id.ToString())),
+        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.Create(users.Select(x => x.Id)),
         users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
 
         foreach (var user in users)
