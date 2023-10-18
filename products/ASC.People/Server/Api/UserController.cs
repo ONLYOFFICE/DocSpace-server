@@ -445,8 +445,7 @@ public class UserController : PeopleControllerBase
             await _cookiesManager.ResetUserCookieAsync(userid);
             await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-
-        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(Tenant.Id, userid);
+        
         return await _employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
