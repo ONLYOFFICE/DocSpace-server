@@ -183,7 +183,7 @@ public class PaymentController : ControllerBase
     {
         var currency = await _regionHelper.GetCurrencyFromRequestAsync();
         var result = (await _tenantManager.GetProductPriceInfoAsync())
-            .ToDictionary(pr => pr.Key, pr => pr.Value.ContainsKey(currency) ? pr.Value[currency] : 0);
+            .ToDictionary(pr => pr.Key, pr => pr.Value.TryGetValue(currency, out var value) ? value : 0);
         return result;
     }
 
