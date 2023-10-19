@@ -4,6 +4,7 @@
 package com.onlyoffice.authorization.ports.services;
 
 import com.onlyoffice.authorization.core.entities.Client;
+import com.onlyoffice.authorization.core.exceptions.ClientPermissionException;
 import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistenceQueryUsecases;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.security.oauth.configuration.RegisteredClientConfiguration;
@@ -33,18 +34,26 @@ public class ClientService implements ClientRetrieveUsecases {
     private final RegisteredClientConfiguration configuration;
     private final ClientPersistenceQueryUsecases clientUsecases;
 
-    public RegisteredClient getClientById(String id) throws RuntimeException {
+    public RegisteredClient getClientById(String id) throws ClientPermissionException {
         MDC.put("id", id);
         log.info("trying to get client by id");
         MDC.clear();
-        return toObject(clientUsecases.getById(id));
+        var client = clientUsecases.getById(id);
+        if (!client.getEnabled())
+            throw new ClientPermissionException(String
+                    .format("client with id %s is disabled", id));
+        return toObject(client);
     }
 
-    public RegisteredClient getClientByClientId(String clientId) throws RuntimeException {
+    public RegisteredClient getClientByClientId(String clientId) throws ClientPermissionException {
         MDC.put("client_id", clientId);
         log.info("trying to get client by client_id");
         MDC.clear();
-        return toObject(clientUsecases.getClientByClientId(clientId));
+        var client = clientUsecases.getClientByClientId(clientId);
+        if (!client.getEnabled())
+            throw new ClientPermissionException(String
+                    .format("client with client_id %s is disabled", clientId));
+        return toObject(client);
     }
 
     private RegisteredClient toObject(Client client) {
