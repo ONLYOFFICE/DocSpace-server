@@ -30,6 +30,8 @@ namespace ASC.Web.Files.Utils;
 [Scope]
 public class FileSharingAceHelper
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
+    
     private readonly FileSecurity _fileSecurity;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly FileUtility _fileUtility;
@@ -183,6 +185,7 @@ public class FileSharingAceHelper
 
                 try
                 {
+                    await _semaphore.WaitAsync();
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
                         await _countPaidUserChecker.CheckAppend();
@@ -211,7 +214,11 @@ public class FileSharingAceHelper
                     warning ??= e.Message;
                     continue;
                 }
-
+                finally
+                {
+                    _semaphore.Release();
+                }
+                
                 if (emailInvite)
                 {
                     try
@@ -379,7 +386,7 @@ public class FileSharingAceHelper
 
 [Scope]
 public class FileSharingHelper
-{
+{    
     public FileSharingHelper(
         Global global,
         GlobalFolderHelper globalFolderHelper,

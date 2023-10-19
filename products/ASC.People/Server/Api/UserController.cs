@@ -28,6 +28,7 @@ namespace ASC.People.Api;
 
 public class UserController : PeopleControllerBase
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private Tenant Tenant => _apiContext.Tenant;
 
     private readonly ICache _cache;
@@ -316,15 +317,23 @@ public class UserController : PeopleControllerBase
         {
             var success = int.TryParse(linkData.RoomId, out var id);
 
-            if (success)
+            try
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                await _semaphore.WaitAsync();
+                if (success)
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                }
+                else
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
-            else
+            finally
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                _semaphore.Release();
             }
         }
 
@@ -1454,18 +1463,26 @@ public class UserController : PeopleControllerBase
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            if (isUser && !await _userManager.IsUserAsync(user) && canBeGuestFlag)
+            try
             {
-                await _countUserChecker.CheckAppend();
-                await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-                _webItemSecurityCache.ClearCache(Tenant.Id);
-            }
+                await _semaphore.WaitAsync();
+                if (isUser && !await _userManager.IsUserAsync(user) && canBeGuestFlag)
+                {
+                    await _countUserChecker.CheckAppend();
+                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                }
 
-            if (!self && !isUser && await _userManager.IsUserAsync(user))
+                if (!self && !isUser && await _userManager.IsUserAsync(user))
+                {
+                    await _countPaidUserChecker.CheckAppend();
+                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                }
+            }
+            finally
             {
-                await _countPaidUserChecker.CheckAppend();
-                await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                _webItemSecurityCache.ClearCache(Tenant.Id);
+                _semaphore.Release();
             }
         }
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -1514,18 +1531,26 @@ public class UserController : PeopleControllerBase
                 case EmployeeStatus.Active:
                     if (user.Status == EmployeeStatus.Terminated)
                     {
-                        if (!await _userManager.IsUserAsync(user))
+                        try
                         {
-                            await _countPaidUserChecker.CheckAppend();
+                            await _semaphore.WaitAsync();
+                            if (!await _userManager.IsUserAsync(user))
+                            {
+                                await _countPaidUserChecker.CheckAppend();
+                            }
+                            else
+                            {
+                                await _countUserChecker.CheckAppend();
+                            }
+
+                            user.Status = EmployeeStatus.Active;
+
+                            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                         }
-                        else
+                        finally
                         {
-                            await _countUserChecker.CheckAppend();
+                            _semaphore.Release();
                         }
-
-                        user.Status = EmployeeStatus.Active;
-
-                        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                     }
                     break;
                 case EmployeeStatus.Terminated:

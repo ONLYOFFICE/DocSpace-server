@@ -29,6 +29,7 @@ namespace ASC.Web.Files.Services.WCFService;
 [Scope]
 public class FileStorageService //: IFileStorageService
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly CompressToArchive _compressToArchive;
     private readonly OFormRequestManager _oFormRequestManager;
     private readonly ThirdPartySelector _thirdPartySelector;
@@ -493,39 +494,47 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
-        ArgumentNullException.ThrowIfNull(title, nameof(title));
-
-        await _countRoomChecker.CheckAppend();
-
-        if (@private && (share == null || !share.Any()))
+        try
         {
-            throw new ArgumentNullException(nameof(share));
+            await _semaphore.WaitAsync();
+            ArgumentNullException.ThrowIfNull(title, nameof(title));
+
+            await _countRoomChecker.CheckAppend();
+
+            if (@private && (share == null || !share.Any()))
+            {
+                throw new ArgumentNullException(nameof(share));
+            }
+
+            List<AceWrapper> aces = null;
+
+            if (@private)
+            {
+                aces = await GetFullAceWrappersAsync(share);
+                await CheckEncryptionKeysAsync(aces);
+            }
+
+            var parentId = await _globalFolderHelper.GetFolderVirtualRooms();
+
+            var room = roomType switch
+            {
+                RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private),
+                RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private),
+                RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private),
+                _ => await CreateCustomRoomAsync(title, parentId, @private),
+            };
+
+            if (@private)
+            {
+                await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
+            }
+
+            return room;
         }
-
-        List<AceWrapper> aces = null;
-
-        if (@private)
+        finally
         {
-            aces = await GetFullAceWrappersAsync(share);
-            await CheckEncryptionKeysAsync(aces);
+            _semaphore.Release();
         }
-
-        var parentId = await _globalFolderHelper.GetFolderVirtualRooms();
-
-        var room = roomType switch
-        {
-            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private),
-            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private),
-            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private),
-            _ => await CreateCustomRoomAsync(title, parentId, @private),
-        };
-
-        if (@private)
-        {
-            await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
-        }
-
-        return room;
     }
 
     private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private)

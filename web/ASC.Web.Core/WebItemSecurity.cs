@@ -26,6 +26,7 @@
 
 using static ASC.Web.Core.Sms.SmsKeyStorage;
 
+using Constants = ASC.Core.Users.Constants;
 using SecurityAction = ASC.Common.Security.Authorizing.Action;
 
 namespace ASC.Web.Core;
@@ -82,7 +83,8 @@ public class WebItemSecurityCache
 
 [Scope]
 public class WebItemSecurity
-{
+{    
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private static readonly SecurityAction _read = new SecurityAction(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false, true);
 
     private readonly UserManager _userManager;
@@ -286,21 +288,29 @@ public class WebItemSecurity
 
         if (administrator)
         {
-            if (await _userManager.IsUserInGroupAsync(userid, ASC.Core.Users.Constants.GroupUser.ID))
+            try
             {
-                await _countPaidUserChecker.CheckAppend();
-                await _userManager.RemoveUserFromGroupAsync(userid, ASC.Core.Users.Constants.GroupUser.ID);
-            }
-
-            if (productid == WebItemManager.PeopleProductID)
-            {
-                foreach (var ace in GetPeopleModuleActions(userid))
+                await _semaphore.WaitAsync();
+                if (await _userManager.IsUserInGroupAsync(userid, Constants.GroupUser.ID))
                 {
-                    await _authorizationManager.AddAceAsync(ace);
+                    await _countPaidUserChecker.CheckAppend();
+                    await _userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
                 }
-            }
 
-            await _userManager.AddUserIntoGroupAsync(userid, productid);
+                if (productid == WebItemManager.PeopleProductID)
+                {
+                    foreach (var ace in GetPeopleModuleActions(userid))
+                    {
+                        await _authorizationManager.AddAceAsync(ace);
+                    }
+                }
+
+                await _userManager.AddUserIntoGroupAsync(userid, productid);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         else
         {
