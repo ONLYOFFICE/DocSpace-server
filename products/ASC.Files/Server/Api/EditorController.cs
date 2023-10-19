@@ -256,25 +256,27 @@ public abstract class EditorController<T> : ApiControllerBase
             }
         }
 
-        if (_authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry)
-        {
-            var linkId = await _externalShare.GetLinkIdAsync();
-
-            if (linkId != default && file.RootFolderType == FolderType.USER)
-            {
-                await _entryManager.MarkAsRecentByLink(file, linkId);
-            }
-            else if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
-            {
-                await _entryManager.MarkAsRecent(file);
-            }
-        }
-
         configuration.Token = _documentServiceHelper.GetSignature(configuration);
 
         var result = _mapper.Map<Configuration<T>, ConfigurationDto<T>>(configuration);
         result.EditorUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.DocServiceApiUrl);
         result.File = await _fileDtoHelper.GetAsync(file);
+        
+        if (_authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
+            && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
+        {
+            var linkId = await _externalShare.GetLinkIdAsync();
+
+            if (linkId != default && file.RootFolderType == FolderType.USER && file.CreateBy != _authContext.CurrentAccount.ID)
+            {
+                await _entryManager.MarkAsRecentByLink(file, linkId);
+            }
+            else
+            {
+                await _entryManager.MarkAsRecent(file);
+            }
+        }
+        
         return result;
     }
 
