@@ -146,6 +146,33 @@
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.az.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ar-SA.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.el-GR.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.hy-AM.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.ar-SA.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesCommonResource.hy-AM.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.ar-SA.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.hy-AM.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.ar-SA.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.hy-AM.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Services\NotifyService\patterns.xml" />

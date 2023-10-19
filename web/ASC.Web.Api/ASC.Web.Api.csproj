@@ -42,6 +42,18 @@
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\whitelabel.svg" />
+      <EmbeddedResource Update="Core\AuditResource.ar-SA.resx">
+        <DependentUpon>AuditResource.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Core\AuditResource.hy-AM.resx">
+        <DependentUpon>AuditResource.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Core\AuditResource.ko-KR.resx">
+        <DependentUpon>AuditResource.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Core\AuditResource.pt.resx">
+        <DependentUpon>AuditResource.resx</DependentUpon>
+      </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
