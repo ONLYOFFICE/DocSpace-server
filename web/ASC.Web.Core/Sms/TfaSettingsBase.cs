@@ -118,7 +118,7 @@ public abstract class TfaSettingsHelperBase<T> where T : TfaSettingsBase<T>, new
             if (value)
             {
                 settings = _settingsManager.Load<T>();
-                settings.EnableSetting = value;
+                settings.EnableSetting = true;
             }
             else
             {

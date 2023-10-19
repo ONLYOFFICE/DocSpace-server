@@ -182,7 +182,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         if (driveFile == null)
         {
-            return (null, editable);
+            return (null, false);
         }
 
         var jsonFile = JObject.Parse(driveFile);
@@ -309,12 +309,8 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             httpClient = _clientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
 
             _logger.DebugGoogleDriveAppSaveFileStream2(result);
         }
@@ -774,12 +770,8 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
 
             _logger.DebugGoogleDriveAppCreateFileResponse(result);
 
