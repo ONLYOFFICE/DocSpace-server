@@ -134,7 +134,8 @@ public class FileSharingAceHelper
             
             if (entryType == FileEntryType.File)
             {
-                if (entry.RootFolderType != FolderType.USER)
+                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.None) && !_fileUtility.CanWebView(entry.Title)) 
+                    || entry.RootFolderType != FolderType.USER)
                 {
                     continue;
                 }
