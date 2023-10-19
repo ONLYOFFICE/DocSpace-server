@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Security;
+
 namespace ASC.Data.Backup;
 
 [Scope]
@@ -39,6 +41,8 @@ public class BackupAjaxHandler
     private readonly ConsumerFactory _consumerFactory;
     private readonly BackupService _backupService;
     private readonly StorageFactory _storageFactory;
+    private readonly IDaoFactory _daoFactory;
+    private readonly FileSecurity _fileSecurity;
 
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup.tmp";
@@ -55,7 +59,9 @@ public class BackupAjaxHandler
         SecurityContext securityContext,
         UserManager userManager,
         ConsumerFactory consumerFactory,
-        StorageFactory storageFactory)
+        StorageFactory storageFactory,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity)
     {
         _tenantManager = tenantManager;
         _messageService = messageService;
@@ -67,6 +73,8 @@ public class BackupAjaxHandler
         _consumerFactory = consumerFactory;
         _backupService = backupService;
         _storageFactory = storageFactory;
+        _daoFactory = daoFactory;
+        _fileSecurity = fileSecurity;
     }
 
     public async Task StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams)
@@ -135,6 +143,22 @@ public class BackupAjaxHandler
         await DemandPermissionsBackupAsync();
 
         return await _backupService.GetBackupHistoryAsync(await GetCurrentTenantIdAsync());
+    }
+
+    public async Task CheckAccessToFolderAsync<T>(T folderId)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await _fileSecurity.CanCreateAsync(folder))
+        {
+            throw new System.Security.SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+        }
     }
 
     public async Task CreateScheduleAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams)
