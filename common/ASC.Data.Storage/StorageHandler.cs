@@ -118,7 +118,7 @@ public class StorageHandler
 
         //context.Response.Headers.ETag = etag;
 
-        if (storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
+        if (securityContext.IsAuthenticated && storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
