@@ -24,21 +24,44 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amqp.Framing;
+using System.Text.Json.Nodes;
+
+using ASC.Core.Common;
+using ASC.EventBus.Abstractions;
+using ASC.Files.Core.IntegrationEvents.Events;
+
+using Newtonsoft.Json;
+
+using Tweetinvi.Core.Events;
+
+using static DotNetOpenAuth.OpenId.Extensions.AttributeExchange.WellKnownAttributes;
+using ASC.Core;
+
 namespace ASC.Files.Api;
 
 public class OperationController : ApiControllerBase
 {
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
     private readonly FileStorageService _fileStorageService;
+    private readonly IEventBus _eventBus;
+    private readonly TenantManager _tenantManager;
+    private readonly AuthContext _authContext;
 
     public OperationController(
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileStorageService fileStorageService) : base(folderDtoHelper, fileDtoHelper)
+        FileStorageService fileStorageService,
+        IEventBus eventBus,
+        TenantManager tenantManager, 
+        AuthContext authContext) : base(folderDtoHelper, fileDtoHelper)
     {
         _fileOperationDtoHelper = fileOperationDtoHelper;
         _fileStorageService = fileStorageService;
+        _eventBus = eventBus;
+        _tenantManager = tenantManager;
+        _authContext = authContext;
     }
 
     /// <summary>
@@ -92,7 +115,24 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        foreach (var e in await _fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content))
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds.ToList());
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var DestFolderId = inDto.DestFolderId.ToString();
+        _eventBus.Publish(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            DeleteAfter = inDto.DeleteAfter,
+            Ic = true,
+            FolderIds = folderIntIds,
+            FileIds = fileIntIds,
+            FileIdsString = fileStringIds,
+            FolderIdsString = folderStringIds,
+            Content = inDto.Content,
+            ConflictResolveType = inDto.ConflictResolveType,
+            DestFolderId = DestFolderId
+        });
+
+        foreach (var e in _fileStorageService.GetTasksStatuses())
         {
             yield return await _fileOperationDtoHelper.GetAsync(e);
         }
@@ -111,9 +151,20 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var tasks = await _fileStorageService.DeleteItemsAsync("delete", inDto.FileIds.ToList(), inDto.FolderIds.ToList(), false, inDto.DeleteAfter, inDto.Immediately);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds.ToList());
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        foreach (var e in tasks)
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        _eventBus.Publish(new DeleteIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            DeleteAfter = inDto.DeleteAfter,
+            Immediately = inDto.Immediately,
+            FolderIds = folderIntIds,
+            FileIds = fileIntIds,
+            FileIdsString = fileStringIds,
+            FolderIdsString = folderStringIds
+        });
+        foreach (var e in _fileStorageService.GetTasksStatuses())
         {
             yield return await _fileOperationDtoHelper.GetAsync(e);
         }

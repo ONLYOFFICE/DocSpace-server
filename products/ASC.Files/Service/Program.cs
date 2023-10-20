@@ -68,6 +68,8 @@ try
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
     eventBus.Subscribe<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
+    eventBus.Subscribe<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
+    eventBus.Subscribe<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

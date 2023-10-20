@@ -174,7 +174,38 @@ public class FileOperationsManager
             }
         }
     }
+    public async Task<List<FileOperationResult>> MoveOrCopy(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, JsonElement destFolderId, bool copy, FileConflictResolveType resolveType, bool holdResult, IDictionary<string, StringValues> headers,
+        ExternalShareData externalShareData, bool content = false)
+    {
+        if (content)
+        {
+            await GetContent(folderIntIds, fileIntIds);
+            await GetContent(folderStringIds, fileStringIds);
+        }
 
+        var op1 = new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenant, destFolderId, copy, resolveType, externalShareData, holdResult, headers), _thumbnailSettings);
+        var op2 = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenant, destFolderId, copy, resolveType, externalShareData, holdResult, headers), _thumbnailSettings);
+        var op = new FileMoveCopyOperation(_serviceProvider, op2, op1);
+
+        return QueueTask(userId, op);
+
+        async Task GetContent<T1>(List<T1> folderIds, List<T1> fileIds)
+        {
+            var copyFolderIds = folderIds.ToList();
+            folderIds.Clear();
+
+            using var scope = _serviceProvider.CreateScope();
+            var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+            var fileDao = daoFactory.GetFileDao<T1>();
+            var folderDao = daoFactory.GetFolderDao<T1>();
+
+            foreach (var folderId in copyFolderIds)
+            {
+                folderIds.AddRange(await folderDao.GetFoldersAsync(folderId).Select(r => r.Id).ToListAsync());
+                fileIds.AddRange(await fileDao.GetFilesAsync(folderId).ToListAsync());
+            }
+        }
+    }
     public List<FileOperationResult> Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
         bool isEmptyTrash = false)
     {
@@ -182,11 +213,9 @@ public class FileOperationsManager
         return QueueTask(userId, op);
     }
 
-    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, List<JsonElement> folders, List<JsonElement> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
+    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool isEmptyTrash = false)
     {
-        var (folderIntIds, folderStringIds) = GetIds(folders);
-        var (fileIntIds, fileStringIds) = GetIds(files);
 
         var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
         var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);

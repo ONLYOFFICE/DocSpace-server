@@ -76,6 +76,8 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<ThumbnailBuilderService>();
 
         DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
+        DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+        DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
 
         services.AddHostedService<Launcher>();
         DIHelper.TryAdd<Launcher>();
