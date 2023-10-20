@@ -38,6 +38,7 @@ public interface IDataStore
     string GetBackupExtension(bool isConsumerStorage = false);
 
     IQuotaController QuotaController { get; set; }
+    IDataStoreValidator DataStoreValidator { get; set; }
 
     TimeSpan GetExpire(string domain);
 
@@ -323,7 +324,7 @@ public interface IDataStore
 #pragma warning restore 1591
 
 
-    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props);
+    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator);
     IDataStore SetQuotaController(IQuotaController controller);
 
     Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);
