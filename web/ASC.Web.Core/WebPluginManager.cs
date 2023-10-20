@@ -341,7 +341,7 @@ public class WebPluginManager
 
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
-        var disabledPlugins = systemWebPluginSettings?.DisabledPlugins ?? new List<string>();
+        var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
         var storage = await GetPluginStorageAsync(Tenant.DefaultTenant);
 
@@ -366,7 +366,7 @@ public class WebPluginManager
 
                 webPlugin.TenantId = Tenant.DefaultTenant;
                 webPlugin.System = true;
-                webPlugin.Enabled = !disabledPlugins.Contains(webPlugin.Name);
+                webPlugin.Enabled = enabledPlugins.Contains(webPlugin.Name);
 
                 systemPlugins.Add(webPlugin);
             }
@@ -383,7 +383,7 @@ public class WebPluginManager
     {
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
-        var disabledPlugins = systemWebPluginSettings?.DisabledPlugins ?? new List<string>();
+        var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
         var storage = await GetPluginStorageAsync(Tenant.DefaultTenant);
 
@@ -409,7 +409,7 @@ public class WebPluginManager
 
         webPlugin.TenantId = Tenant.DefaultTenant;
         webPlugin.System = true;
-        webPlugin.Enabled = !disabledPlugins.Contains(webPlugin.Name);
+        webPlugin.Enabled = enabledPlugins.Contains(webPlugin.Name);
 
         return webPlugin;
     }
@@ -420,18 +420,18 @@ public class WebPluginManager
 
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
-        var disabledPlugins = systemWebPluginSettings?.DisabledPlugins ?? new List<string>();
+        var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
         if (enabled)
         {
-            disabledPlugins.Remove(name);
+            enabledPlugins.Add(name);
         }
         else
         {
-            disabledPlugins.Add(name);
+            enabledPlugins.Remove(name);
         }
 
-        systemWebPluginSettings.DisabledPlugins = disabledPlugins.Any() ? disabledPlugins : null;
+        systemWebPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
 
         await _settingsManager.SaveForDefaultTenantAsync(systemWebPluginSettings);
 
