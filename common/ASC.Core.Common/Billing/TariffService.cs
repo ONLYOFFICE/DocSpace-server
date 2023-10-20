@@ -554,26 +554,31 @@ public class TariffService : ITariffService
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
-        try
+        var def = productIds
+            .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
+            .ToDictionary(e => e.ProductId, e => e.Prices);
+
+        if (_billingClient.Configured)
         {
-            var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
-            var result = _cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
-            if (result == null)
+            try
             {
-                result = _billingClient.GetProductPriceInfo(partnerId, productIds);
-                _cache.Insert(key, result, DateTime.Now.AddHours(1));
+                var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
+                var result = _cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
+                if (result == null)
+                {
+                    result = _billingClient.GetProductPriceInfo(partnerId, productIds);
+                    _cache.Insert(key, result, DateTime.Now.AddHours(1));
+                }
+
+                return result;
             }
-
-            return result;
+            catch (Exception error)
+            {
+                LogError(error);
+            }
         }
-        catch (Exception error)
-        {
-            LogError(error);
 
-            return productIds
-                .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
-                .ToDictionary(e => e.ProductId, e => e.Prices);
-        }
+        return def;
     }
 
     public async Task<Uri> GetAccountLinkAsync(int tenant, string backUrl)
