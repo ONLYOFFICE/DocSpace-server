@@ -44,7 +44,7 @@ application:
 
 docspace:
   server:
-    url: http://${DOCSPACE_ADDRESS:127.0.0.1}
+    url: ${DOCSPACE_ADDRESS:http://127.0.0.1}
 
 messaging:
   rabbitmq:

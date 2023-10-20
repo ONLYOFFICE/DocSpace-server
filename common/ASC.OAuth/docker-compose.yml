@@ -20,7 +20,6 @@ services:
       RABBIT_USER_NAME: ${RABBIT_USER_NAME}
       RABBIT_PASSWORD: ${RABBIT_PASSWORD}
       DOCSPACE_ADDRESS: ${DOCSPACE_ADDRESS}
-      FRONTEND_ADDRESS: ${FRONTEND_ADDRESS}
   onlyoffice-oauth-api:
     build:
       context: ./
@@ -39,6 +38,7 @@ services:
       RABBIT_PORT: ${RABBIT_PORT}
       RABBIT_USER_NAME: ${RABBIT_USER_NAME}
       RABBIT_PASSWORD: ${RABBIT_PASSWORD}
+      DOCSPACE_ADDRESS: ${DOCSPACE_ADDRESS}
 
 networks:
   default:
