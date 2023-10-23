@@ -69,6 +69,12 @@ public class FileSecurity : IFileSecurity
                     }
                 },
                 {
+                    SubjectType.Group, new HashSet<FileShare>
+                    {
+                        FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
+                    }  
+                },
+                {
                     SubjectType.InvitationLink, new HashSet<FileShare>
                     {
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
@@ -127,6 +133,12 @@ public class FileSecurity : IFileSecurity
                     }
                 },
                 {
+                    SubjectType.Group, new HashSet<FileShare>
+                    {
+                        FileShare.FillForms, FileShare.Read, FileShare.None
+                    }
+                },
+                {
                     SubjectType.InvitationLink, new HashSet<FileShare>
                     {
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
@@ -141,6 +153,12 @@ public class FileSecurity : IFileSecurity
                     SubjectType.User, new HashSet<FileShare>
                     {
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.Group, new HashSet<FileShare>
+                    {
+                        FileShare.Editing, FileShare.Read, FileShare.None
                     }
                 },
                 {
@@ -161,6 +179,12 @@ public class FileSecurity : IFileSecurity
                     }
                 },
                 {
+                    SubjectType.Group, new HashSet<FileShare>
+                    {
+                        FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
+                    }
+                },
+                {
                     SubjectType.InvitationLink, new HashSet<FileShare>
                     {
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
@@ -175,6 +199,12 @@ public class FileSecurity : IFileSecurity
                     SubjectType.User, new HashSet<FileShare>
                     {
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.Group, new HashSet<FileShare>
+                    {
+                        FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
                     }
                 },
                 {
