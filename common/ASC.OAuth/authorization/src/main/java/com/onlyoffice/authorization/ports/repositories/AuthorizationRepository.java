@@ -18,6 +18,7 @@ import java.util.Optional;
 public interface AuthorizationRepository extends Repository<Authorization, String>,
         AuthorizationPersistenceQueryUsecases {
     Optional<Authorization> findById(String id);
+    Optional<Authorization> findByRegisteredClientIdAndPrincipalName(String registeredClientId, String principalName);
     Optional<Authorization> findByState(String state);
     Optional<Authorization> findByAuthorizationCodeValue(String authorizationCode);
     Optional<Authorization> findByAccessTokenValue(String accessToken);
@@ -33,6 +34,12 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
         return this.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String
                         .format("could not find authorization with id %s", id)));
+    }
+
+    default Authorization getByPrincipalNameAndRegisteredClientId(String principalName, String registeredClientId) throws RuntimeException {
+        return this.findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
+                .orElseThrow(() -> new EntityNotFoundException(String
+                        .format("could not find authorization with principal %s and client id %s", principalName, registeredClientId)));
     }
 
     default Authorization getByState(String state) throws EntityNotFoundException {
