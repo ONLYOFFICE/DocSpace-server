@@ -40,7 +40,7 @@ public class ApplicationConfiguration {
     @NoArgsConstructor
     public static class ScopeConfiguration {
         private String name;
-        private String description;
         private String group;
+        private String type;
     }
 }

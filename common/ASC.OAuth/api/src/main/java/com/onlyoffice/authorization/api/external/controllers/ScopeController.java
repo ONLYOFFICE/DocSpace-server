@@ -39,7 +39,7 @@ public class ScopeController {
                 .map(s -> ScopeDTO
                         .builder()
                         .name(s.getName())
-                        .description(s.getDescription())
+                        .type(s.getType())
                         .group(s.getGroup())
                         .build()
                 )

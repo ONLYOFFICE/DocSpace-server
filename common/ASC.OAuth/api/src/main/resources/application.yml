@@ -11,36 +11,36 @@ application:
   scopes:
     -
       name: accounts:read
-      description: View all account
-      group: Accounts
+      group: accounts
+      type: read
     -
       name: accounts:write
-      description: View and manage all accounts
-      group: Accounts
+      group: accounts
+      type: write
     -
       name: rooms:read
-      description: View all rooms
-      group: Rooms
+      group: rooms
+      type: read
     -
       name: rooms:write
-      description: View and manage all rooms
-      group: Rooms
+      group: rooms
+      type: write
     -
       name: accounts.self:read
-      description: View basic information about your profile
-      group: Profiles
+      group: profiles
+      type: read
     -
       name: accounts.self:write
-      description: View and manage basic information about your profile
-      group: Profiles
+      group: profiles
+      type: write
     -
-      name: files.read
-      description: View all files and folders
-      group: Files
+      name: files:read
+      group: files
+      type: read
     -
-      name: files.write
-      description: View and manage all files and folders
-      group: Files
+      name: files:write
+      group: files
+      type: write
 
 docspace:
   server:
