@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -33,11 +34,13 @@ public class AuthorizationConsentController {
 
     @GetMapping(value = "/oauth2/consent")
     @InvalidateSession
-    public String consent() {
+    public String consent(@CookieValue(name = "client_id") String clientId) {
         log.info("got a new consent request");
         return String.format("redirect:%s", UriComponentsBuilder
                 .fromUriString(this.docspaceURL.toString())
-                .path("oauth2/consent")
+                .path("login/consent")
+                .queryParam("type", "oauth2")
+                .queryParam("client_id", clientId)
                 .build());
     }
 }
