@@ -65,6 +65,9 @@ public class AuthorizationServerConfiguration {
             dispatcher.forward(request, response);
         }, new AntPathRequestMatcher(applicationConfiguration.getLogin())));
 
+        http.cors(c -> c.disable());
+        http.csrf(c -> c.disable());
+
         return http.build();
     }
 

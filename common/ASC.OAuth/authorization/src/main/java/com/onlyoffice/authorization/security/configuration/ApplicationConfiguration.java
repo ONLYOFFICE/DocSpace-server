@@ -39,6 +39,8 @@ public class ApplicationConfiguration {
                                 .loginProcessingUrl(login)
                                 .permitAll())
                 .logout(l -> l.disable())
+                .csrf(c -> c.disable())
+                .cors(c -> c.disable())
                 .addFilterBefore(clientFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
