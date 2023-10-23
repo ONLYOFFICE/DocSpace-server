@@ -41,6 +41,7 @@ public class GroupsController : ControllerBase
     private readonly MessageService _messageService;
     private readonly MessageTarget _messageTarget;
     private readonly PermissionContext _permissionContext;
+    private readonly FileSecurity _fileSecurity;
 
     public GroupsController(
         UserManager userManager,
@@ -48,7 +49,8 @@ public class GroupsController : ControllerBase
         GroupFullDtoHelper groupFullDtoHelper,
         MessageService messageService,
         MessageTarget messageTarget,
-        PermissionContext permissionContext)
+        PermissionContext permissionContext, 
+        FileSecurity fileSecurity)
     {
         _userManager = userManager;
         _apiContext = apiContext;
@@ -56,6 +58,7 @@ public class GroupsController : ControllerBase
         _messageService = messageService;
         _messageTarget = messageTarget;
         _permissionContext = permissionContext;
+        _fileSecurity = fileSecurity;
     }
 
     /// <summary>
@@ -216,6 +219,7 @@ public class GroupsController : ControllerBase
         var group = await GetGroupInfoAsync(id);
 
         await _userManager.DeleteGroupAsync(id);
+        await _fileSecurity.RemoveSubjectAsync<int>(id);
 
         await _messageService.SendAsync(MessageAction.GroupDeleted, _messageTarget.Create(group.ID), group.Name);
 
