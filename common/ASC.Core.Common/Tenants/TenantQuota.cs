@@ -33,7 +33,7 @@ namespace ASC.Core.Tenants;
 [DebuggerDisplay("{TenantId} {Name}")]
 public class TenantQuota : IMapFrom<DbQuota>
 {
-    public static readonly TenantQuota Default = new TenantQuota(Tenant.DefaultTenant)
+    public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
         Name = "Default",
         MaxFileSize = 25 * 1024 * 1024, // 25Mb

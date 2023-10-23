@@ -266,7 +266,7 @@ public class PhotoController : PeopleControllerBase
                     }
 
                     var mainPhoto = await _userPhotoManager.SaveOrUpdatePhoto(userId, data);
-                    var userInfo = _userManager.GetUsers(userId);
+                    var userInfo = await _userManager.GetUsersAsync(userId);
                     var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
                     result.Data =

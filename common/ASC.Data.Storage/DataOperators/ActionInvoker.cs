@@ -29,17 +29,6 @@ namespace ASC.Data.Storage.DataOperators;
 public static class ActionInvoker
 {
     public static void Try(
-        Action action,
-        int maxAttempts,
-        Action<Exception> onFailure = null,
-        Action<Exception> onAttemptFailure = null,
-        int sleepMs = 1000,
-        bool isSleepExponential = true)
-    {
-        Try(state => action(), null, maxAttempts, onFailure, onAttemptFailure, sleepMs, isSleepExponential);
-    }
-
-    public static void Try(
         Action<object> action,
         object state,
         int maxAttempts,

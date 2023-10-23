@@ -37,7 +37,7 @@ public class IPGeolocationInfo
     public string Continent { get; set; }
 
 
-    public static readonly IPGeolocationInfo Default = new IPGeolocationInfo
+    public static readonly IPGeolocationInfo Default = new()
     {
         Key = string.Empty,
         City = string.Empty,

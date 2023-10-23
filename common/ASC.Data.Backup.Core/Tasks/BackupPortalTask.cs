@@ -62,7 +62,7 @@ public class BackupPortalTask : PortalTaskBase
 
     public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(toFilePath);
+        ArgumentException.ThrowIfNullOrEmpty(toFilePath);
 
         BackupFilePath = toFilePath;
         Limit = limit;
@@ -242,7 +242,7 @@ public class BackupPortalTask : PortalTaskBase
             {
                 var t = tables[i + j];
                 tasks.Add(Task.Run(() => DumpTableScheme(t, schemeDir, connectionString)));
-                if (!excluded.Any(t.StartsWith))
+                if (!excluded.Exists(t.StartsWith))
                 {
                     tasks.Add(Task.Run(() => DumpTableData(t, dataDir, dict[t], connectionString)));
                 }
@@ -260,11 +260,11 @@ public class BackupPortalTask : PortalTaskBase
 
     private async Task<IEnumerable<BackupFileInfo>> GetFiles(int tenantId)
     {
-        await using var backupRecordContext = _dbContextFactory.CreateDbContext();
+        await using var backupRecordContext = await _dbContextFactory.CreateDbContextAsync();
         var exclude = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
 
         var files = (await GetFilesToProcess(tenantId)).ToList();
-        files = files.Where(f => !exclude.Any(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/"))).ToList();
+        files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/"))).ToList();
         return files;
 
     }
@@ -352,10 +352,6 @@ public class BackupPortalTask : PortalTaskBase
                 var command = connection.CreateCommand();
                 command.CommandText = string.Format($"SHOW COLUMNS FROM `{t}`");
                 columns = ExecuteList(command).Select(r => "`" + Convert.ToString(r[0]) + "`").ToList();
-                if (command.CommandText.Contains("tenants_quota") || command.CommandText.Contains("webstudio_settings"))
-                {
-
-                }
             }
 
             using (var connection = DbFactory.OpenConnection())
@@ -626,10 +622,10 @@ public class BackupPortalTask : PortalTaskBase
     {
         var files = (await GetFilesToProcess(TenantId)).ToList();
 
-        await using var backupRecordContext = _dbContextFactory.CreateDbContext();
+        await using var backupRecordContext = await _dbContextFactory.CreateDbContextAsync();
         var exclude = await Queries.BackupRecordsAsync(backupRecordContext, TenantId).ToListAsync();
 
-        files = files.Where(f => !exclude.Any(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/"))).ToList();
+        files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/"))).ToList();
 
         return files.GroupBy(file => file.Module).ToList();
     }

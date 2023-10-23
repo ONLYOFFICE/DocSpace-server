@@ -40,13 +40,13 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
 
     /// <summary>Theme</summary>
     /// <type>ASC.Web.Core.Users.DarkThemeSettingsEnum, ASC.Core.Common</type>
-    public DarkThemeSettingsEnum Theme { get; set; }
+    public DarkThemeSettingsType Theme { get; set; }
 
     public DarkThemeSettings GetDefault()
     {
         return new DarkThemeSettings
         {
-            Theme = DarkThemeSettingsEnum.System,
+            Theme = DarkThemeSettingsType.System,
         };
     }
 }
@@ -54,7 +54,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
 /// <summary>
 /// </summary>
 [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
-public enum DarkThemeSettingsEnum
+public enum DarkThemeSettingsType
 {
     Base,
     Dark,

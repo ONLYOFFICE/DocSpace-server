@@ -53,13 +53,12 @@ internal class LinkDao : AbstractDao, ILinkDao
               coreConfiguration,
               settingsManager,
               authContext,
-              serviceProvider,
-              cache)
+              serviceProvider)
     { }
 
     public async Task AddLinkAsync(string sourceId, string linkedId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink()
         {
@@ -74,7 +73,7 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task<string> GetSourceAsync(string linkedId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         linkedId = (await MappingIDAsync(linkedId)).ToString();
 
@@ -85,7 +84,7 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task<string> GetLinkedAsync(string sourceId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         sourceId = (await MappingIDAsync(sourceId)).ToString();
 
@@ -96,7 +95,7 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task DeleteLinkAsync(string sourceId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         sourceId = (await MappingIDAsync(sourceId)).ToString();
 
@@ -109,7 +108,7 @@ internal class LinkDao : AbstractDao, ILinkDao
 
     public async Task DeleteAllLinkAsync(string fileId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         fileId = (await MappingIDAsync(fileId)).ToString();
 

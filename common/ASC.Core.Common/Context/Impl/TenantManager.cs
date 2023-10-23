@@ -39,13 +39,13 @@ public class TenantManager
     internal IQuotaService QuotaService { get; set; }
     internal ITariffService TariffService { get; set; }
 
-    private static readonly List<string> _thisCompAddresses = new List<string>();
+    private static readonly List<string> _thisCompAddresses = new();
 
     internal IHttpContextAccessor HttpContextAccessor { get; set; }
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal CoreSettings CoreSettings { get; set; }
 
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     static TenantManager()
     {

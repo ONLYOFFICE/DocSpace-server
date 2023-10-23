@@ -47,7 +47,7 @@ public class BackupFileUploadHandler
             {
                 throw new ArgumentException("Access denied.");
             }
-            var tenantId = tenantManager.GetCurrentTenant().Id;
+            var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
             var path = await backupAjaxHandler.GetTmpFilePathAsync();
             if (context.Request.Query["Init"].ToString() == "true")
             {

@@ -42,7 +42,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
     private const string _bunchRightNodeStartTrash = "files/trash/";
     private const string _bunchRightNodeStartPrivacy = "files/privacy/";
 
-    private static readonly Regex _regexIsInteger = new Regex(@"^\d+$", RegexOptions.Compiled);
+    private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
     private readonly Helpers _helpers;
     private readonly ILogger<ModuleProvider> _logger;
     private readonly TableInfo[] _tables = new[]
@@ -300,7 +300,7 @@ public class FilesModuleSpecifics2 : ModuleSpecificsBase
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _rels;
 
-    private static readonly Regex _regexIsInteger = new Regex(@"^\d+$", RegexOptions.Compiled);
+    private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
     private const string _tagStartMessage = "Message";
     private const string _tagStartTask = "Task";
     private const string _tagStartProject = "Project";

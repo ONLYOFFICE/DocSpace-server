@@ -371,12 +371,12 @@ public class ThirdpartyController : ApiControllerBase
             };
 
             var httpClient = _httpClientFactory.CreateClient();
-            using (var response = httpClient.Send(request))
-            await using (var stream = response.Content.ReadAsStream())
+            using (var response = await httpClient.SendAsync(request))
+            await using (var stream = await response.Content.ReadAsStreamAsync())
             {
                 var buffer = new byte[512];
                 int bytesRead;
-                while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
                     memstream.Write(buffer, 0, bytesRead);
                 }

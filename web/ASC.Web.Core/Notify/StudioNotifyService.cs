@@ -109,23 +109,23 @@ public class StudioNotifyService
     public async Task SendRequestTariffAsync(bool license, string fname, string lname, string title, string email, string phone, string ctitle, string csize, string site, string message)
     {
         fname = (fname ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(fname);
+        ArgumentException.ThrowIfNullOrEmpty(fname);
 
         lname = (lname ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(lname);
+        ArgumentException.ThrowIfNullOrEmpty(lname);
 
         title = (title ?? "").Trim();
         email = (email ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
 
         phone = (phone ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(phone);
+        ArgumentException.ThrowIfNullOrEmpty(phone);
 
         ctitle = (ctitle ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(ctitle);
+        ArgumentException.ThrowIfNullOrEmpty(ctitle);
 
         csize = (csize ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(csize);
+        ArgumentException.ThrowIfNullOrEmpty(csize);
         site = (site ?? "").Trim();
         if (string.IsNullOrEmpty(site) && !_coreBaseSettings.CustomMode)
         {
@@ -807,7 +807,7 @@ public class StudioNotifyService
             var userId = u.Id;
             var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(u.Email, ConfirmType.EmailActivation, null, userId);
 
-            _settingsManager.Save(new FirstEmailConfirmSettings() { IsFirst = true });
+            await _settingsManager.SaveAsync(new FirstEmailConfirmSettings() { IsFirst = true });
 
             var culture = GetCulture(u);
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", culture);

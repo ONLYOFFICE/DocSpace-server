@@ -26,7 +26,7 @@
 
 namespace ASC.Notify;
 
-[Singletone]
+[Singleton]
 public class ServiceLauncher : BackgroundService
 {
     private readonly StudioNotifyServiceSender _studioNotifyServiceSender;

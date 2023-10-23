@@ -98,7 +98,7 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
             rooms = rooms.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
@@ -240,12 +240,12 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
         var folder = GetFolderById(folderId);
         var id = MakeId(folder);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
             {
                 await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);

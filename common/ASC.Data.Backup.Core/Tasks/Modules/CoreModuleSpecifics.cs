@@ -144,7 +144,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
     {
         var relationList = relations.ToList();
 
-        if (relationList.All(x => x.ChildTable == "core_subscription" && x.ChildColumn == "object" && x.ParentTable.StartsWith("projects_")))
+        if (relationList.TrueForAll(x => x.ChildTable == "core_subscription" && x.ChildColumn == "object" && x.ParentTable.StartsWith("projects_")))
         {
             var valParts = Convert.ToString(value).Split('_');
 
@@ -166,9 +166,9 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
             return true;
         }
 
-        if (relationList.All(x => x.ChildTable == "core_subscription" && x.ChildColumn == "recipient")
-            || relationList.All(x => x.ChildTable == "core_subscriptionmethod" && x.ChildColumn == "recipient")
-            || relationList.All(x => x.ChildTable == "core_acl" && x.ChildColumn == "subject"))
+        if (relationList.TrueForAll(x => x.ChildTable == "core_subscription" && x.ChildColumn == "recipient")
+            || relationList.TrueForAll(x => x.ChildTable == "core_subscriptionmethod" && x.ChildColumn == "recipient")
+            || relationList.TrueForAll(x => x.ChildTable == "core_acl" && x.ChildColumn == "subject"))
         {
             var strVal = Convert.ToString(value);
             if (_helpers.IsEmptyOrSystemUser(strVal) || _helpers.IsEmptyOrSystemGroup(strVal))

@@ -50,8 +50,8 @@ public abstract class PortalTaskBase
     protected ModuleProvider ModuleProvider { get; set; }
     protected DbFactory DbFactory { get; set; }
 
-    protected readonly List<ModuleName> _ignoredModules = new List<ModuleName>();
-    protected readonly List<string> _ignoredTables = new List<string>(); //todo: add using to backup and transfer tasks
+    protected readonly List<ModuleName> _ignoredModules = new();
+    protected readonly List<string> _ignoredTables = new(); //todo: add using to backup and transfer tasks
 
     protected PortalTaskBase(DbFactory dbFactory, ILogger logger, StorageFactory storageFactory, StorageFactoryConfig storageFactoryConfig, ModuleProvider moduleProvider)
     {
@@ -348,13 +348,13 @@ public abstract class PortalTaskBase
                                     if (innerValues[i] != "''")
                                     {
                                         var sw = new StringWriter();
-                                        sw.Write("0x");
+                                        await sw.WriteAsync("0x");
                                         foreach (var b in Encoding.UTF8.GetBytes(innerValues[i].Trim('\'')))
                                         {
                                             sw.Write("{0:x2}", b);
                                         }
 
-                                        innerValues[i] = string.Format("CONVERT({0} USING utf8)", sw.ToString());
+                                        innerValues[i] = string.Format("CONVERT({0} USING utf8)", sw);
                                     }
                                 }
                                 if (flag1)
@@ -371,7 +371,7 @@ public abstract class PortalTaskBase
                                 }
                             }
 
-                            commandText = string.Join(",", innerValues).ToString();
+                            commandText = string.Join(",", innerValues);
                             command = connection.CreateCommand();
                             command.CommandText = commandText;
                             await command.ExecuteNonQueryAsync();

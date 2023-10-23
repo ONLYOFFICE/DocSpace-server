@@ -34,7 +34,7 @@ public class LoginSettings : ISettings<LoginSettings>
 
     public int CheckPeriod { get; set; }
 
-    public Guid ID => new Guid("{588C7E01-8D41-4FCE-9779-D4126E019765}");
+    public Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
 
     public LoginSettings GetDefault()
     {

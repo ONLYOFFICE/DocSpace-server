@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage.Encryption;
 
-[Singletone]
+[Singleton]
 public class EncryptionWorker
 {
     private readonly object _locker;
@@ -72,7 +72,7 @@ public class EncryptionWorker
         _queue.DequeueTask(GetCacheId());
     }
 
-    public string GetCacheId()
+    private string GetCacheId()
     {
         return typeof(EncryptionOperation).FullName;
     }
@@ -81,6 +81,6 @@ public class EncryptionWorker
     {
         var progress = _queue.GetAllTasks<EncryptionOperation>().FirstOrDefault();
 
-        return progress.Percentage;
+        return progress?.Percentage;
     }
 }

@@ -102,7 +102,7 @@ public class StudioNotifyServiceHelper
                     recipient.CheckActivation = d.CheckActivation;
                 }
 
-                if (r is IRecipientsGroup g)
+                if (r is IRecipientsGroup)
                 {
                     recipient.IsGroup = true;
                 }

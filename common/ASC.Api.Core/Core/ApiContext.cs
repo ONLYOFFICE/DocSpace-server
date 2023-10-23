@@ -34,7 +34,6 @@ public class ApiContext : ICloneable
     private readonly IHttpContextAccessor _httpContextAccessor;
     public string[] Fields { get; set; }
     public string[] FilterValues { get; set; }
-    public bool FromCache { get; set; }
     public Tenant Tenant => _tenant ??= _tenantManager.GetCurrentTenant(_httpContextAccessor?.HttpContext);
     public long? TotalCount
     {

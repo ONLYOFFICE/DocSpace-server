@@ -48,7 +48,7 @@ public class DavResponse
 
     public override string ToString()
     {
-        return StatusCode.ToString() + " " + Error;
+        return StatusCode + " " + Error;
     }
 
 }

@@ -55,7 +55,7 @@ public class DistributedTaskProgress : DistributedTask
 
     protected CancellationToken CancellationToken { get; set; }
 
-    public virtual async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
+    public virtual async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         Percentage = 0;
         Status = DistributedTaskStatus.Running;

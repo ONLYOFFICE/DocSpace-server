@@ -98,14 +98,14 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     #region Logo available sizes
 
-    public static readonly Size LogoLightSmallSize = new Size(422, 48);
-    public static readonly Size LogoLoginPageSize = new Size(772, 88);
-    public static readonly Size LogoFaviconSize = new Size(32, 32);
-    public static readonly Size LogoDocsEditorSize = new Size(172, 40);
-    public static readonly Size LogoDocsEditorEmbedSize = new Size(172, 40);
-    public static readonly Size LogoLeftMenuSize = new Size(56, 56);
-    public static readonly Size LogoAboutPageSize = new Size(442, 48);
-    public static readonly Size LogoNotificationSize = new Size(386, 44);
+    public static readonly Size LogoLightSmallSize = new(422, 48);
+    public static readonly Size LogoLoginPageSize = new(772, 88);
+    public static readonly Size LogoFaviconSize = new(32, 32);
+    public static readonly Size LogoDocsEditorSize = new(172, 40);
+    public static readonly Size LogoDocsEditorEmbedSize = new(172, 40);
+    public static readonly Size LogoLeftMenuSize = new(56, 56);
+    public static readonly Size LogoAboutPageSize = new(442, 48);
+    public static readonly Size LogoNotificationSize = new(386, 44);
     public static Size GetSize(WhiteLabelLogoTypeEnum type)
     {
         return type switch
@@ -823,7 +823,7 @@ public class TenantWhiteLabelSettingsHelper
         try
         {
             using var stream = new MemoryStream(data);
-            using var img = Image.Load(stream);
+            using var img = await Image.LoadAsync(stream);
 
             if (size != img.Size)
             {
@@ -848,7 +848,7 @@ public class TenantWhiteLabelSettingsHelper
 
     #region Save for Resource replacement
 
-    private static readonly List<int> _appliedTenants = new List<int>();
+    private static readonly List<int> _appliedTenants = new();
 
     public async Task ApplyAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
     {

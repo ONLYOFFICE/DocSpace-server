@@ -42,7 +42,7 @@ public class EmailValidationKeyProvider
     public TimeSpan ValidVisitLinkInterval { get; }
 
     private readonly ILogger<EmailValidationKeyProvider> _logger;
-    private static readonly DateTime _from = new DateTime(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime _from = new(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
     private readonly MachinePseudoKeys _machinePseudoKeys;
     private readonly TenantManager _tenantManager;
 
@@ -81,7 +81,7 @@ public class EmailValidationKeyProvider
 
     public string GetEmailKey(int tenantId, string email)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
 
         email = FormatEmail(tenantId, email);
 
@@ -122,7 +122,7 @@ public class EmailValidationKeyProvider
 
     private async Task<ValidationResult> ValidateEmailKeyInternalAsync(string email, string key, TimeSpan validInterval)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
 
         email = FormatEmail(await _tenantManager.GetCurrentTenantIdAsync(), email);

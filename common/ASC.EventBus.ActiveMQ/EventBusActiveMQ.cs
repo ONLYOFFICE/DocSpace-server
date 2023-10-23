@@ -73,7 +73,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             _persistentConnection.TryConnect();
         }
 
-        using (var session = _persistentConnection.CreateSession())
+        using (_persistentConnection.CreateSession())
         {
             var messageSelector = $"eventName='{eventName}'";
 
@@ -101,11 +101,11 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             _persistentConnection.TryConnect();
         }
 
-        var policy = Policy.Handle<SocketException>()
-                            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                            {
-                                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
-                            });
+        Policy.Handle<SocketException>()
+            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            {
+                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
+            });
 
         using (var session = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge))
         {

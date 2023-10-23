@@ -26,7 +26,7 @@
 
 namespace ASC.Files.AutoCleanUp;
 
-[Singletone]
+[Singleton]
 public class Worker
 {
     private readonly ILogger<Worker> _logger;

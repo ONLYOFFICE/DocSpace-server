@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone(Additional = typeof(StorageConfigExtension))]
+[Singleton(Additional = typeof(StorageConfigExtension))]
 public class StorageFactoryConfig
 {
     private readonly Configuration.Storage _section;
@@ -77,7 +77,7 @@ public static class StorageFactoryExtenstion
         //}
 
         var section = builder.ServiceProvider.GetService<Configuration.Storage>();
-        var pathUtils = builder.ServiceProvider.GetService<PathUtils>();
+        builder.ServiceProvider.GetService<PathUtils>();
         if (section != null)
         {
             if (section.Module != null)

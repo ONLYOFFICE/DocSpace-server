@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.Data;
 
-[Singletone(Additional = typeof(MessagesRepositoryExtension))]
+[Singleton(Additional = typeof(MessagesRepositoryExtension))]
 public class MessagesRepository : IDisposable
 {
     private DateTime _lastSave = DateTime.UtcNow;
@@ -38,8 +38,7 @@ public class MessagesRepository : IDisposable
     private readonly ILogger<MessagesRepository> _logger;
     private readonly Timer _timer;
     private readonly int _cacheLimit;
-    private readonly HashSet<MessageAction> _forceSaveAuditActions = new HashSet<MessageAction>
-        { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
+    private readonly HashSet<MessageAction> _forceSaveAuditActions = new() { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
@@ -95,7 +94,7 @@ public class MessagesRepository : IDisposable
             }
 
             using var scope = _serviceScopeFactory.CreateScope();
-            await using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
 
             if ((int)message.Action < 2000)
             {
@@ -151,7 +150,7 @@ public class MessagesRepository : IDisposable
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
-        await using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+        await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
 
         var dict = new Dictionary<string, ClientInfo>();
 

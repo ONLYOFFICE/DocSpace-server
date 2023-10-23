@@ -429,7 +429,6 @@ public class StudioPeriodicNotify
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                var dueDateIsNotMax = actualEndDate != DateTime.MaxValue;
                 var dueDate = actualEndDate.Date;
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;

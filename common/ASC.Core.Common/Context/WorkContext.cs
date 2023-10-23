@@ -29,10 +29,10 @@ using NotifyContext = ASC.Notify.Context;
 
 namespace ASC.Core;
 
-[Singletone]
+[Singleton]
 public class WorkContext
 {
-    private static readonly object _syncRoot = new object();
+    private static readonly object _syncRoot = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfiguration _configuration;
     private readonly DispatchEngine _dispatchEngine;

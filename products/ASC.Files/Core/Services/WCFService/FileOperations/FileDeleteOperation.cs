@@ -61,17 +61,15 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _immediately;
     private readonly bool _isEmptyTrash;
     private readonly IDictionary<string, StringValues> _headers;
-    private readonly ThumbnailSettings _thumbnailSettings;
 
     public FileDeleteOperation(
-        IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData, ThumbnailSettings thumbnailSettings)
+        IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
         _ignoreException = fileOperationData.IgnoreException;
         _immediately = fileOperationData.Immediately;
         _headers = fileOperationData.Headers;
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
-        _thumbnailSettings = thumbnailSettings;
         this[OpType] = (int)FileOperationType.Delete;
     }
 

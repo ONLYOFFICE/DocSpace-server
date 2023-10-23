@@ -29,7 +29,7 @@ using AuthConst = ASC.Common.Security.Authorizing.Constants;
 
 namespace ASC.Core.Users;
 
-[Singletone]
+[Singleton]
 public sealed class Constants
 {
     public Constants(IConfiguration configuration)
@@ -61,27 +61,27 @@ public sealed class Constants
 
     #region system group and category groups
 
-    public static readonly Guid SysGroupCategoryId = new Guid("{7717039D-FBE9-45ad-81C1-68A1AA10CE1F}");
+    public static readonly Guid SysGroupCategoryId = new("{7717039D-FBE9-45ad-81C1-68A1AA10CE1F}");
 
-    public static readonly GroupInfo GroupEveryone = new GroupInfo(SysGroupCategoryId)
+    public static readonly GroupInfo GroupEveryone = new(SysGroupCategoryId)
     {
         ID = AuthConst.Everyone.ID,
         Name = AuthConst.Everyone.Name,
     };
 
-    public static readonly GroupInfo GroupUser = new GroupInfo(SysGroupCategoryId)
+    public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
         ID = AuthConst.User.ID,
         Name = AuthConst.User.Name,
     };
 
-    public static readonly GroupInfo GroupManager = new GroupInfo(SysGroupCategoryId)
+    public static readonly GroupInfo GroupManager = new(SysGroupCategoryId)
     {
         ID = AuthConst.RoomAdmin.ID,
         Name = AuthConst.RoomAdmin.Name,
     };
 
-    public static readonly GroupInfo GroupAdmin = new GroupInfo(SysGroupCategoryId)
+    public static readonly GroupInfo GroupAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConst.DocSpaceAdmin.ID,
         Name = AuthConst.DocSpaceAdmin.Name,
@@ -102,7 +102,7 @@ public sealed class Constants
             GroupCollaborator,
         };
 
-    public static readonly UserInfo LostUser = new UserInfo
+    public static readonly UserInfo LostUser = new()
     {
         Id = new Guid("{4A515A15-D4D6-4b8e-828E-E0586F18F3A3}"),
         FirstName = "Unknown",
@@ -110,7 +110,7 @@ public sealed class Constants
         ActivationStatus = EmployeeActivationStatus.NotActivated
     };
 
-    public static readonly UserInfo OutsideUser = new UserInfo
+    public static readonly UserInfo OutsideUser = new()
     {
         Id = new Guid("{E78F4C20-2F3B-4A9D-AD13-5F298BD5A3BA}"),
         FirstName = "Outside",
@@ -120,7 +120,7 @@ public sealed class Constants
 
     public UserInfo NamingPoster { get; }
 
-    public static readonly GroupInfo LostGroupInfo = new GroupInfo
+    public static readonly GroupInfo LostGroupInfo = new()
     {
         ID = new Guid("{74B9CBD1-2412-4e79-9F36-7163583E9D3A}"),
         Name = "Unknown"
@@ -131,15 +131,15 @@ public sealed class Constants
 
     #region authorization rules module to work with users
 
-    public static readonly Action Action_EditUser = new Action(
+    public static readonly Action Action_EditUser = new(
         new Guid("{EF5E6790-F346-4b6e-B662-722BC28CB0DB}"),
         "Edit user information");
 
-    public static readonly Action Action_AddRemoveUser = new Action(
+    public static readonly Action Action_AddRemoveUser = new(
         new Guid("{D5729C6F-726F-457e-995F-DB0AF58EEE69}"),
         "Add/Remove user");
 
-    public static readonly Action Action_EditGroups = new Action(
+    public static readonly Action Action_EditGroups = new(
         new Guid("{1D4FEEAC-0BF3-4aa9-B096-6D6B104B79B5}"),
         "Edit categories and groups");
 

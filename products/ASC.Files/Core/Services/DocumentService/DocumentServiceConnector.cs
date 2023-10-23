@@ -143,7 +143,6 @@ public class DocumentServiceConnector
                                            string inputScript,
                                            bool isAsync)
     {
-        var urls = new Dictionary<string, string>();
         string scriptUrl = null;
         if (!string.IsNullOrEmpty(inputScript))
         {
@@ -341,7 +340,6 @@ public class DocumentServiceConnector
             return url;
         }
 
-        var urlRewriterQuery = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
         var query = HttpUtility.ParseQueryString(uri.Query);
         //        query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
         uri.Query = query.ToString();
@@ -382,7 +380,6 @@ public class DocumentServiceConnector
             return url;
         }
 
-        var urlRewriterQuery = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
         var query = HttpUtility.ParseQueryString(uri.Query);
         //query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
         uri.Query = query.ToString();

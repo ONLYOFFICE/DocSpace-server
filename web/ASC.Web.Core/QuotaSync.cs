@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Studio.Core.Quota;
 
-[Singletone(Additional = typeof(QuotaSyncOperationExtension))]
+[Singleton(Additional = typeof(QuotaSyncOperationExtension))]
 public class QuotaSyncOperation
 {
 

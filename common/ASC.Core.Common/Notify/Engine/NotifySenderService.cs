@@ -28,7 +28,7 @@ using System.Threading.Channels;
 
 namespace ASC.Core.Common.Notify.Engine;
 
-[Singletone]
+[Singleton]
 public class NotifySenderService : BackgroundService
 {
     private readonly NotifyEngine _notifyEngine;

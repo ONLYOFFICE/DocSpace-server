@@ -59,7 +59,7 @@ public class TransferProgressItem : BaseBackupProgressItem
     private readonly ILogger<TransferProgressItem> _logger;
     private readonly NotifyHelper _notifyHelper;
     private TransferPortalTask _transferPortalTask;
-    private IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
 
     public TransferProgressItem(
         ILogger<TransferProgressItem> logger,
@@ -70,7 +70,7 @@ public class TransferProgressItem : BaseBackupProgressItem
     {
         _logger = logger;
         _notifyHelper = notifyHelper;
-        BackupProgressItemEnum = BackupProgressItemEnum.Transfer;
+        BackupProgressItemType = BackupProgressItemType.Transfer;
         _configuration = configuration;
     }
 

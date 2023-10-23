@@ -40,8 +40,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
     protected const int AllSpec = AllSpecInt;
     protected const int NoSpec = NoSpecInt;
 
-    private static readonly Hashtable _monthMap = new Hashtable(20);
-    private static readonly Hashtable _dayMap = new Hashtable(60);
+    private static readonly Hashtable _monthMap = new(20);
+    private static readonly Hashtable _dayMap = new(60);
     [NonSerialized] protected bool _calendardayOfMonth;
     [NonSerialized] protected bool _calendardayOfWeek;
 
@@ -180,8 +180,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     {
         long difference = 1000;
 
-        var lastDate =
-            new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second).AddSeconds(-1);
+        var lastDate = new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second).AddSeconds(-1);
 
         while (difference == 1000)
         {
@@ -251,7 +250,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
             var exprOn = Second;
 
 
-#if NET_20                string[] exprsTok = expression.Trim().Split(new char[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+#if NET_20
+                string[] exprsTok = expression.Trim().Split(new char[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 #else
             var exprsTok = expression.Trim().Split(new[] { ' ', '\t', '\r', '\n' });
 #endif

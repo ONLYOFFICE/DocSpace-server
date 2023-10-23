@@ -37,11 +37,10 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
     public override string Scopes => "email,public_profile";
 
     private const string FacebookProfileUrl = "https://graph.facebook.com/v2.7/me?fields=email,id,birthday,link,first_name,last_name,gender,timezone,locale";
-
-    public FacebookLoginProvider() { }
-
+    
     private readonly RequestHelper _requestHelper;
-
+    
+    public FacebookLoginProvider() { }
     public FacebookLoginProvider(
         OAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,

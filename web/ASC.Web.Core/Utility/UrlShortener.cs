@@ -97,7 +97,7 @@ public class OnlyoShortener : IUrlShortener
     {
         if (Uri.IsWellFormedUriString(shareLink, UriKind.Absolute))
         {
-            var context = _contextFactory.CreateDbContext();
+            var context = await _contextFactory.CreateDbContextAsync();
             var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.Link == shareLink);
             if (link != null)
             {

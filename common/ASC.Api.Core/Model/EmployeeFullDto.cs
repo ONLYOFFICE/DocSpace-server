@@ -148,7 +148,7 @@ public class EmployeeFullDto : EmployeeDto
 
     /// <summary>Theme</summary>
     /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsEnum}, System</type>
-    public DarkThemeSettingsEnum? Theme { get; set; }
+    public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>Quota limit</summary>
     /// <type>System.Int64, System</type>

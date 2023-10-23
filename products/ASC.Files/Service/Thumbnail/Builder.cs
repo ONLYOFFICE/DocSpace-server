@@ -49,8 +49,8 @@ public class Builder<T>
     private readonly StorageFactory _storageFactory;
     private IDataStore _dataStore;
 
-    private readonly List<string> _imageFormatsCanBeCrop = new List<string>
-            {
+    private readonly List<string> _imageFormatsCanBeCrop = new()
+    {
                 ".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp",
             };
 
@@ -325,7 +325,7 @@ public class Builder<T>
         request.RequestUri = new Uri(thumbnailUrl);
 
         var httpClient = _clientFactory.CreateClient();
-        using var response = httpClient.Send(request);
+        using var response = await httpClient.SendAsync(request);
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {
             using (var sourceImg = await Image.LoadAsync(stream))

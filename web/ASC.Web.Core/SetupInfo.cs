@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Studio.Core;
 
-[Singletone]
+[Singleton]
 public class SetupInfo
 {
     private static string _webAutotestSecretEmail;

@@ -37,8 +37,7 @@ public abstract class BaseStorage : IDataStore
     internal bool Cache { get; set; }
     internal DataList DataList { get; set; }
     internal string Tenant { get; set; }
-    internal Dictionary<string, TimeSpan> DomainsExpires { get; set; }
-        = new Dictionary<string, TimeSpan>();
+    internal Dictionary<string, TimeSpan> DomainsExpires { get; set; } = new();
     protected ILogger Logger { get; set; }
 
     protected readonly TempStream _tempStream;
@@ -79,7 +78,7 @@ public abstract class BaseStorage : IDataStore
 
     public TimeSpan GetExpire(string domain)
     {
-        return DomainsExpires.ContainsKey(domain) ? DomainsExpires[domain] : DomainsExpires[string.Empty];
+        return DomainsExpires.TryGetValue(domain, out var expire) ? expire : DomainsExpires[string.Empty];
     }
 
     public async Task<Uri> GetUriAsync(string path)
@@ -175,13 +174,22 @@ public abstract class BaseStorage : IDataStore
         }
         return await SaveAsync(domain, path, stream);
     }
-
-    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName);
-
-
+    
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                             string contentDisposition);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+    
+    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName)
+    {
+        return await SaveAsync(string.Empty, path, stream, attachmentFileName);
+    }
+
+    public async Task<Uri> SaveAsync(string path, Stream stream)
+    {
+        return await SaveAsync(string.Empty, path, stream);
+    }
+    
+    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName);
 
     #region chunking
 
@@ -223,8 +231,8 @@ public abstract class BaseStorage : IDataStore
     public abstract Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive);
     public abstract Task DeleteFilesAsync(string domain, List<string> paths);
     public abstract Task DeleteFilesAsync(string domain, string folderPath, DateTime fromDate, DateTime toDate);
-    public abstract Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir);
-    public abstract Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true);
+    public abstract Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir);
+    public abstract Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
     public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
     public abstract IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive);
     public abstract IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive);
@@ -236,24 +244,14 @@ public abstract class BaseStorage : IDataStore
     public abstract Task<long> GetDirectorySizeAsync(string domain, string path);
     public abstract Task<long> ResetQuotaAsync(string domain);
     public abstract Task<long> GetUsedQuotaAsync(string domain);
-    public abstract Task<Uri> CopyAsync(string srcdomain, string path, string newdomain, string newpath);
-    public abstract Task CopyDirectoryAsync(string srcdomain, string dir, string newdomain, string newdir);
+    public abstract Task<Uri> CopyAsync(string srcDomain, string path, string newDomain, string newPath);
+    public abstract Task CopyDirectoryAsync(string srcDomain, string dir, string newDomain, string newDir);
 
     public async Task<Stream> GetReadStreamAsync(string path)
     {
         return await GetReadStreamAsync(string.Empty, path);
     }
-
-    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName)
-    {
-        return await SaveAsync(string.Empty, path, stream, attachmentFileName);
-    }
-
-    public async Task<Uri> SaveAsync(string path, Stream stream)
-    {
-        return await SaveAsync(string.Empty, path, stream);
-    }
-
+    
     public async Task DeleteAsync(string path)
     {
         await DeleteAsync(string.Empty, path);
@@ -264,9 +262,9 @@ public abstract class BaseStorage : IDataStore
         await DeleteFilesAsync(string.Empty, folderPath, pattern, recursive);
     }
 
-    public async Task<Uri> MoveAsync(string srcpath, string newdomain, string newpath)
+    public async Task<Uri> MoveAsync(string srcPath, string newDomain, string newPath)
     {
-        return await MoveAsync(string.Empty, srcpath, newdomain, newpath);
+        return await MoveAsync(string.Empty, srcPath, newDomain, newPath);
     }
 
     public async Task<(Uri, string)> SaveTempAsync(Stream stream)
@@ -319,14 +317,14 @@ public abstract class BaseStorage : IDataStore
         return await GetDirectorySizeAsync(string.Empty, path);
     }
 
-    public async Task<Uri> CopyAsync(string path, string newdomain, string newpath)
+    public async Task<Uri> CopyAsync(string path, string newDomain, string newPath)
     {
-        return await CopyAsync(string.Empty, path, newdomain, newpath);
+        return await CopyAsync(string.Empty, path, newDomain, newPath);
     }
 
-    public async Task CopyDirectoryAsync(string dir, string newdomain, string newdir)
+    public async Task CopyDirectoryAsync(string dir, string newDomain, string newDir)
     {
-        await CopyDirectoryAsync(string.Empty, dir, newdomain, newdir);
+        await CopyDirectoryAsync(string.Empty, dir, newDomain, newDir);
     }
 
     public virtual IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
@@ -378,8 +376,8 @@ public abstract class BaseStorage : IDataStore
     }
 
     public abstract Task<string> GetFileEtagAsync(string domain, string path);
-    
-    internal class MonoUri : Uri
+
+    private class MonoUri : Uri
     {
         public MonoUri(Uri baseUri, string relativeUri)
             : base(baseUri, relativeUri) { }

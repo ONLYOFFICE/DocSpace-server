@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.Settings;
 
-[Singletone]
+[Singleton]
 public class DbSettingsManagerCache
 {
     public ICache Cache { get; }
@@ -109,25 +109,30 @@ public class SettingsManager
         var settingsInstance = ActivatorUtilities.CreateInstance<T>(_serviceProvider);
         return settingsInstance.GetDefault();
     }
-
-    public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
-    {
-        return await LoadAsync<T>(TenantID, Guid.Empty);
-    }
-
+    
     public T Load<T>() where T : class, ISettings<T>
     {
         return Load<T>(TenantID, Guid.Empty);
     }
 
-    public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
-    {
-        return await LoadAsync<T>(TenantID, userId);
-    }
-
     public T Load<T>(Guid userId) where T : class, ISettings<T>
     {
         return Load<T>(TenantID, userId);
+    }
+    
+    public T Load<T>(int tenantId) where T : class, ISettings<T>
+    {
+        return Load<T>(tenantId, Guid.Empty);
+    }
+    
+    public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
+    {
+        return await LoadAsync<T>(TenantID, Guid.Empty);
+    }
+    
+    public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
+    {
+        return await LoadAsync<T>(TenantID, userId);
     }
 
     public async Task<T> LoadAsync<T>(UserInfo user) where T : class, ISettings<T>
@@ -138,11 +143,6 @@ public class SettingsManager
     public async Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
     {
         return await LoadAsync<T>(tenantId, Guid.Empty);
-    }
-
-    public T Load<T>(int tenantId) where T : class, ISettings<T>
-    {
-        return Load<T>(tenantId, Guid.Empty);
     }
 
     public async Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
@@ -169,20 +169,11 @@ public class SettingsManager
     {
         return await SaveAsync(data, TenantID, Guid.Empty);
     }
-
-    public bool Save<T>(T data) where T : class, ISettings<T>
-    {
-        return Save(data, TenantID, Guid.Empty);
-    }
+    
 
     public async Task<bool> SaveAsync<T>(T data, Guid userId) where T : class, ISettings<T>
     {
         return await SaveAsync(data, TenantID, userId);
-    }
-
-    public bool Save<T>(T data, Guid userId) where T : class, ISettings<T>
-    {
-        return Save(data, TenantID, userId);
     }
 
     public async Task<bool> SaveAsync<T>(T data, UserInfo user) where T : class, ISettings<T>
@@ -195,6 +186,16 @@ public class SettingsManager
         return await SaveAsync(data, tenantId, Guid.Empty);
     }
 
+    public bool Save<T>(T data) where T : class, ISettings<T>
+    {
+        return Save(data, TenantID, Guid.Empty);
+    }
+    
+    public bool Save<T>(T data, Guid userId) where T : class, ISettings<T>
+    {
+        return Save(data, TenantID, userId);
+    }
+    
     public async Task<bool> SaveForDefaultTenantAsync<T>(T data) where T : class, ISettings<T>
     {
         return await SaveAsync(data, Tenant.DefaultTenant);
@@ -237,7 +238,7 @@ public class SettingsManager
                 return settings;
             }
 
-            await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+            await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
             var result = await Queries.DataAsync(webstudioDbContext, tenantId, def.ID, userId);
 
             if (result != null)
@@ -261,7 +262,7 @@ public class SettingsManager
         return def;
     }
 
-    internal T Load<T>(int tenantId, Guid userId) where T : class, ISettings<T>
+    private T Load<T>(int tenantId, Guid userId) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
         var key = def.ID.ToString() + tenantId + userId;
@@ -302,7 +303,7 @@ public class SettingsManager
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         try
         {

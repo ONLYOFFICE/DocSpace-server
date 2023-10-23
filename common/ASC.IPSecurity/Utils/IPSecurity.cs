@@ -166,7 +166,7 @@ public class IPSecurity
                 }
             }
 
-            var hostName = Dns.GetHostName();
+            Dns.GetHostName();
             var hostAddresses = Dns.GetHostAddresses(Dns.GetHostName());
 
             var localIPs = new List<IPAddress> { IPAddress.IPv6Loopback, IPAddress.Loopback };

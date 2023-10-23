@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Helpers;
 
-[Singletone]
+[Singleton]
 public class ThirdpartyConfigurationData
 {
     private readonly IConfiguration _configuration;

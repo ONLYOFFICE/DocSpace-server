@@ -26,7 +26,7 @@
 
 namespace TMResourceData;
 
-[Singletone]
+[Singleton]
 public class WhiteLabelHelper
 {
     private readonly ILogger _logger;
@@ -56,7 +56,7 @@ public class WhiteLabelHelper
     {
         try
         {
-            _whiteLabelDictionary.TryRemove(tenantId, out var text);
+            _whiteLabelDictionary.TryRemove(tenantId, out _);
         }
         catch (Exception e)
         {

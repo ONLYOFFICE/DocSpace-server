@@ -815,25 +815,21 @@ public class FileSecurity : IFileSecurity
 
     private bool CheckDenyDownload<T>(FileEntry<T> entry)
     {
-        return entry.DenyDownload
-            ? entry.Access != FileShare.Read && entry.Access != FileShare.Comment
-            : true;
+        return !entry.DenyDownload || entry.Access != FileShare.Read && entry.Access != FileShare.Comment;
     }
 
     private bool CheckDenySharing<T>(FileEntry<T> entry)
     {
-        return entry.DenySharing
-            ? entry.Access != FileShare.ReadWrite
-            : true;
+        return !entry.DenySharing || entry.Access != FileShare.ReadWrite;
     }
 
     private async IAsyncEnumerable<Tuple<FileEntry<T>, bool>> CanAsync<T>(IAsyncEnumerable<FileEntry<T>> entry, Guid userId, FilesSecurityActions action)
     {
         await foreach (var r in SetSecurity(entry, userId))
         {
-            if (r.Security != null && r.Security.ContainsKey(action))
+            if (r.Security != null && r.Security.TryGetValue(action, out var security))
             {
-                yield return new Tuple<FileEntry<T>, bool>(r, r.Security[action]);
+                yield return new Tuple<FileEntry<T>, bool>(r, security);
             }
             else
             {
@@ -1609,7 +1605,7 @@ public class FileSecurity : IFileSecurity
 
             await foreach (var x in files)
             {
-                if (fileIds.TryGetValue(x.Id, out var access))
+                if (fileIds.TryGetValue(x.Id, out _))
                 {
                     x.Access = fileIds[x.Id];
                     x.FolderIdDisplay = share;
@@ -1632,7 +1628,7 @@ public class FileSecurity : IFileSecurity
 
             await foreach (var folder in folders)
             {
-                if (folderIds.TryGetValue(folder.Id, out var access))
+                if (folderIds.TryGetValue(folder.Id, out _))
                 {
                     folder.Access = folderIds[folder.Id];
                     folder.FolderIdDisplay = share;
@@ -1683,7 +1679,7 @@ public class FileSecurity : IFileSecurity
         foreach (var e in data)
         {
             yield return e;
-        };
+        }
     }
 
     public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)
@@ -1811,7 +1807,7 @@ public class FileSecurity : IFileSecurity
 
         var linkId = await _externalShare.GetLinkIdAsync();
 
-        if (linkId != default)
+        if (linkId != Guid.Empty)
         {
             result.Add(linkId);
         }

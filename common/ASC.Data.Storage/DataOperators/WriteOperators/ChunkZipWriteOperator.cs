@@ -73,7 +73,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);
-            fileStream.Dispose();
+            await fileStream.DisposeAsync();
         }
     }
 
@@ -109,7 +109,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         var buffer = new byte[chunkUploadSize];
         int bytesRead;
         _fileStream.Position = 0;
-        while ((bytesRead = _fileStream.Read(buffer, 0, (int)chunkUploadSize)) > 0)
+        while ((bytesRead = await _fileStream.ReadAsync(buffer, 0, (int)chunkUploadSize)) > 0)
         {
             using (var theMemStream = new MemoryStream())
             {
@@ -133,7 +133,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                     _gZipOutputStream.baseOutputStream_ = _fileStream;
 
                     await theMemStream.CopyToAsync(_fileStream);
-                    _fileStream.Flush();
+                    await _fileStream.FlushAsync();
                 }
             }
         }
@@ -146,10 +146,10 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     public async ValueTask DisposeAsync()
     {
         _tarOutputStream.Close();
-        _tarOutputStream.Dispose();
+        await _tarOutputStream.DisposeAsync();
 
         await UploadAsync(true);
-        _fileStream.Dispose();
+        await _fileStream.DisposeAsync();
 
         Hash = BitConverter.ToString(_sha.Hash).Replace("-", string.Empty);
         _sha.Dispose();

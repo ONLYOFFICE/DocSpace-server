@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.Novell.Extensions;
 
-[Singletone]
+[Singleton]
 public class NovellLdapEntryExtension
 {
     private readonly ILogger<NovellLdapEntryExtension> _logger;

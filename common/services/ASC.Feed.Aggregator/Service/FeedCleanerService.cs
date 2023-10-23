@@ -26,10 +26,10 @@
 
 namespace ASC.Feed.Aggregator.Service;
 
-[Singletone]
+[Singleton]
 public class FeedCleanerService : FeedBaseService
 {
-    protected override string LoggerName { get; set; } = "ASC.Feed.Cleaner";
+    protected override string LoggerName { get; } = "ASC.Feed.Cleaner";
 
     public FeedCleanerService(
         FeedSettings feedSettings,

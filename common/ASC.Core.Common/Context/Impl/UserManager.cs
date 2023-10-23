@@ -30,7 +30,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core;
 
-[Singletone]
+[Singleton]
 public class UserManagerConstants
 {
     public IDictionary<Guid, UserInfo> SystemUsers { get; }
@@ -325,7 +325,7 @@ public class UserManager
 
         if (32 <= id.Length)
         {
-            var guid = default(Guid);
+            var guid = Guid.Empty;
             try
             {
                 guid = new Guid(id);
@@ -333,7 +333,7 @@ public class UserManager
             catch (FormatException) { }
             catch (OverflowException) { }
 
-            if (guid != default)
+            if (guid != Guid.Empty)
             {
                 result = await GetUsersAsync(guid);
             }
@@ -352,16 +352,11 @@ public class UserManager
         return result;
     }
 
-    public async Task<UserInfo[]> SearchAsync(string text, EmployeeStatus status)
-    {
-        return await SearchAsync(text, status, Guid.Empty);
-    }
-
     public async Task<UserInfo[]> SearchAsync(string text, EmployeeStatus status, Guid groupId)
     {
         if (text == null || text.Trim().Length == 0)
         {
-            return new UserInfo[0];
+            return Array.Empty<UserInfo>();
         }
 
         var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -377,7 +372,7 @@ public class UserManager
         var findUsers = new List<UserInfo>();
         foreach (var user in users)
         {
-            var properties = new string[]
+            var properties = new[]
             {
                     user.LastName ?? string.Empty,
                     user.FirstName ?? string.Empty,
@@ -425,7 +420,7 @@ public class UserManager
 
         var (name, value) = ("", -1);
 
-        if (!IsUserInGroup(oldUserData.Id, Constants.GroupUser.ID) &&
+        if (!await IsUserInGroupAsync(oldUserData.Id, Constants.GroupUser.ID) &&
             oldUserData.Status != u.Status)
         {
             (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
@@ -523,14 +518,14 @@ public class UserManager
             {
                 var userAuthorization = oldUserData.Email.ToLower() + ":" + _instanceCrypto.Encrypt(oldUserData.Email);
                 var requestUrlBook = _cardDavAddressbook.GetRadicaleUrl(myUri, newUser.Email.ToLower(), true, true);
-                var collection = await _cardDavAddressbook.GetCollection(requestUrlBook, userAuthorization, myUri.ToString());
+                var collection = await _cardDavAddressbook.GetCollection(requestUrlBook, userAuthorization, myUri);
                 if (collection.Completed && collection.StatusCode != 404)
                 {
                     await _cardDavAddressbook.Delete(myUri, newUser.Id, newUser.Email, tenant.Id);
                 }
                 foreach (var email in allUserEmails)
                 {
-                    var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), email.ToLower(), true, true, itemID: newUser.Id.ToString());
+                    var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri, email.ToLower(), true, true, itemID: newUser.Id.ToString());
                     try
                     {
                         var davItemRequest = new DavRequest()
@@ -598,9 +593,9 @@ public class UserManager
 
         try
         {
-            var curreMail = delUser.Email.ToLower();
-            var currentAccountPaswd = _instanceCrypto.Encrypt(curreMail);
-            var userAuthorization = curreMail + ":" + currentAccountPaswd;
+            var currentMail = delUser.Email.ToLower();
+            var currentAccountPassword = _instanceCrypto.Encrypt(currentMail);
+            var userAuthorization = currentMail + ":" + currentAccountPassword;
             var rootAuthorization = _cardDavAddressbook.GetSystemAuthorization();
             var myUri = (_accessor?.HttpContext != null) ? _accessor.HttpContext.Request.GetDisplayUrl() :
                 (_cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
@@ -610,7 +605,7 @@ public class UserManager
 
             if (rootAuthorization != null)
             {
-                var addBookCollection = await _cardDavAddressbook.GetCollection(requestUrlBook, userAuthorization, myUri.ToString());
+                var addBookCollection = await _cardDavAddressbook.GetCollection(requestUrlBook, userAuthorization, myUri);
                 if (addBookCollection.Completed && addBookCollection.StatusCode != 404)
                 {
                     var davbookRequest = new DavRequest()
@@ -624,7 +619,7 @@ public class UserManager
 
                 foreach (var email in davUsersEmails)
                 {
-                    var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), email.ToLower(), true, true, itemID: delUser.Id.ToString());
+                    var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri, email.ToLower(), true, true, itemID: delUser.Id.ToString());
                     try
                     {
                         var davItemRequest = new DavRequest()
@@ -676,17 +671,12 @@ public class UserManager
         return await GetUserGroupsAsync(id, IncludeType.Distinct, Guid.Empty);
     }
 
-    public async Task<List<GroupInfo>> GetUserGroupsAsync(Guid id, Guid categoryID)
-    {
-        return await GetUserGroupsAsync(id, IncludeType.Distinct, categoryID);
-    }
-
     public async Task<List<GroupInfo>> GetUserGroupsAsync(Guid userID, IncludeType includeType)
     {
         return await GetUserGroupsAsync(userID, includeType, null);
     }
 
-    internal async Task<List<GroupInfo>> GetUserGroupsAsync(Guid userID, IncludeType includeType, Guid? categoryId)
+    private async Task<List<GroupInfo>> GetUserGroupsAsync(Guid userID, IncludeType includeType, Guid? categoryId)
     {
         if (_coreBaseSettings.Personal)
         {
@@ -1085,7 +1075,7 @@ public class UserManager
         {
             Id = g.ID,
             Name = g.Name,
-            ParentId = g.Parent != null ? g.Parent.ID : Guid.Empty,
+            ParentId = g.Parent?.ID ?? Guid.Empty,
             CategoryId = g.CategoryID,
             Sid = g.Sid
         };

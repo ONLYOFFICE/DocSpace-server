@@ -193,7 +193,7 @@ public class SmtpSettingsController : ControllerBase
 
         var settings = _mapper.Map<SmtpSettings, SmtpSettingsDto>(await _coreConfiguration.GetDefaultSmtpSettingsAsync());
 
-        var tenant = _tenantManager.GetCurrentTenant();
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
 
         _smtpOperation.StartSmtpJob(settings, tenant, _securityContext.CurrentAccount.ID);
 

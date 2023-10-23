@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.Sms;
 
-[Singletone]
+[Singleton]
 public class SmsKeyStorageCache
 {
     private readonly ICacheNotify<SmsKeyCacheKey> _keyCacheNotify;
@@ -51,7 +51,7 @@ public class SmsKeyStorage
     private readonly int _keyLength;
     public readonly TimeSpan StoreInterval;
     private readonly int _attemptCount;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly ICache _keyCache;
     private readonly ICache _checkCache;
@@ -92,7 +92,7 @@ public class SmsKeyStorage
     public async Task<(bool, string)> GenerateKeyAsync(string phone)
     {
         string key = null;
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(phone);
+        ArgumentException.ThrowIfNullOrEmpty(phone);
 
         try
         {

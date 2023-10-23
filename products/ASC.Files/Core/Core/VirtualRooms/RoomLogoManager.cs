@@ -280,7 +280,7 @@ public class RoomLogoManager
         try
         {
             using var stream = new MemoryStream(data);
-            using var img = Image.Load(stream);
+            using var img = await Image.LoadAsync(stream);
 
             if (size.Item2 != img.Size)
             {

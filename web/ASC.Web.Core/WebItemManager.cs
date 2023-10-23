@@ -34,7 +34,7 @@ public enum ItemAvailableState
     All = Normal | Disabled
 }
 
-[Singletone]
+[Singleton]
 public class WebItemManager
 {
     private readonly ILogger _log;

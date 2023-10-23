@@ -82,7 +82,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _notifyHelper = notifyHelper;
         _coreBaseSettings = coreBaseSettings;
 
-        BackupProgressItemEnum = BackupProgressItemEnum.Restore;
+        BackupProgressItemType = BackupProgressItemType.Restore;
     }
 
     public BackupStorageType StorageType { get; set; }

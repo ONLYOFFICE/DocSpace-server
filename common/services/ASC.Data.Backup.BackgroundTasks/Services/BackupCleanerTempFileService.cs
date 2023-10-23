@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Singletone]
+[Singleton]
 public class BackupCleanerTempFileService : BackgroundService
 {
     private readonly string _tempFolder;

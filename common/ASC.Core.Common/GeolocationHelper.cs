@@ -91,7 +91,7 @@ public class GeolocationHelper
 
             if (fromCache != null) return fromCache;
 
-            await using var dbContext = _dbContextFactory.CreateDbContext();
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
             var addrType = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "ipv4" : "ipv6";
 

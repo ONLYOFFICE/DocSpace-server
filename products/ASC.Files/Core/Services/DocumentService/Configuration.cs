@@ -77,7 +77,7 @@ public class CoEditingConfig
 /// </summary>
 public class Configuration<T>
 {
-    internal static readonly Dictionary<FileType, string> DocType = new Dictionary<FileType, string>
+    internal static readonly Dictionary<FileType, string> DocType = new()
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },

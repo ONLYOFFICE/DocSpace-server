@@ -29,7 +29,7 @@ namespace Textile;
 public partial class TextileFormatter
 {
     private readonly Regex _velocityArguments =
-        new Regex("nostyle(?<arg>.*?)/nostyle", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        new("nostyle(?<arg>.*?)/nostyle", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     private string ArgMatchReplace(Match match)
     {

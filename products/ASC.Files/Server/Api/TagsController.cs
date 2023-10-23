@@ -64,7 +64,6 @@ public abstract class TagsController<T> : ApiControllerBase
     {
         _fileStorageService = fileStorageService;
         _entryManager = entryManager;
-        _fileDtoHelper = fileDtoHelper;
     }
 
     /// <summary>

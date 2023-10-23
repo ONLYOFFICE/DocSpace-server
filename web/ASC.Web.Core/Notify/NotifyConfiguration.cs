@@ -28,13 +28,13 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singletone(Additional = typeof(WorkContextExtension))]
+[Singleton(Additional = typeof(WorkContextExtension))]
 public class NotifyConfiguration
 {
     private static bool _configured;
-    private static readonly object _locker = new object();
-    private static readonly Regex _urlReplacer = new Regex(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex _textileLinkReplacer = new Regex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly object _locker = new();
+    private static readonly Regex _urlReplacer = new(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex _textileLinkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
     private readonly NotifyEngine _notifyEngine;
     private readonly WorkContext _workContext;
 
@@ -180,7 +180,7 @@ public class ProductSecurityInterceptor
             var u = Constants.LostUser;
             if (!(_coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID))
             {
-                var tenant = _tenantManager.GetCurrentTenant();
+                await _tenantManager.GetCurrentTenantAsync();
 
                 u = await _userManager.SearchUserAsync(r.Recipient.ID);
 

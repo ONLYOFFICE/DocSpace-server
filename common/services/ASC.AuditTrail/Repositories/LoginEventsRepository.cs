@@ -55,7 +55,7 @@ public class LoginEventsRepository
         int limit = 0)
     {
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var messagesContext = _dbContextFactory.CreateDbContext();
+        await using var messagesContext = await _dbContextFactory.CreateDbContextAsync();
 
         var query =
             from q in messagesContext.LoginEvents

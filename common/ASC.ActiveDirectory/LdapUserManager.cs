@@ -282,7 +282,7 @@ public class LdapUserManager
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                    var ldapNotifyHelper = scope.ServiceProvider.GetRequiredService<LdapNotifyService>();
+                    scope.ServiceProvider.GetRequiredService<LdapNotifyService>();
                     var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
                     source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
@@ -375,8 +375,6 @@ public class LdapUserManager
         {
             return;
         }
-
-        var ldapUserContacts = ldapUser.Contacts;
 
         var newContacts = new List<string>(ldapUser.ContactsList);
 

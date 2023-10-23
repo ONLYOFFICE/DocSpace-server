@@ -154,19 +154,19 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
     private class GoogleEmailAddress
     {
-        public GoogleMetadata Metadata { get; set; } = new GoogleMetadata();
+        public GoogleMetadata Metadata { get; set; } = new();
         public string Value { get; set; }
     }
 
     private class GoogleGender
     {
-        public GoogleMetadata Metadata { get; set; } = new GoogleMetadata();
+        public GoogleMetadata Metadata { get; set; } = new();
         public string Value { get; set; }
     }
 
     private class GoogleName
     {
-        public GoogleMetadata Metadata { get; set; } = new GoogleMetadata();
+        public GoogleMetadata Metadata { get; set; } = new();
         public string DisplayName { get; set; }
         public string FamilyName { get; set; }
         public string GivenName { get; set; }

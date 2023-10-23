@@ -34,7 +34,7 @@ public class SubscriptionManager
     private readonly ISubscriptionService _service;
     private readonly TenantManager _tenantManager;
     private readonly ICache _cache;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
     public static readonly List<Guid> Groups = Groups = new List<Guid>
     {
         Constants.DocSpaceAdmin.ID,

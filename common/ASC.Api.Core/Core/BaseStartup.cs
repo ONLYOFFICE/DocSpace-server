@@ -46,7 +46,7 @@ public abstract class BaseStartup
     protected bool LoadConsumers { get; } = true;
     protected bool WebhooksEnabled { get; set; }
 
-    public BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
@@ -297,7 +297,7 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
-        var authBuilder = services.AddAuthentication(options =>
+        services.AddAuthentication(options =>
         {
             options.DefaultScheme = MultiAuthSchemes;
             options.DefaultChallengeScheme = MultiAuthSchemes;

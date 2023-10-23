@@ -52,7 +52,7 @@ public class ThirdPartyController : ControllerBase
     /// <path>api/2.0/thirdparty/{provider}</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("{provider}")]
-    public object Get(LoginProviderEnum provider)
+    public object Get(LoginProvider provider)
     {
         var desktop = HttpContext.Request.Query["desktop"] == "true";
         var additionals = new Dictionary<string, string>();
@@ -64,7 +64,7 @@ public class ThirdPartyController : ControllerBase
 
         switch (provider)
         {
-            case LoginProviderEnum.Google:
+            case LoginProvider.Google:
                 return _oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
                                                                     GoogleLoginProvider.GoogleScopeDrive,
                                                                     new Dictionary<string, string>
@@ -73,7 +73,7 @@ public class ThirdPartyController : ControllerBase
                                                                     { "prompt", "consent" }
                                                                         }, additionalStateArgs: additionals);
 
-            case LoginProviderEnum.Dropbox:
+            case LoginProvider.Dropbox:
                 return _oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
                                                     additionalArgs: new Dictionary<string, string>
                                                         {
@@ -81,20 +81,20 @@ public class ThirdPartyController : ControllerBase
                                                                         { "token_access_type","offline" }
                                                         }, additionalStateArgs: additionals);
 
-            case LoginProviderEnum.Docusign:
+            case LoginProvider.Docusign:
                 return _oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
                                                                         DocuSignLoginProvider.DocuSignLoginProviderScopes,
                                                                         new Dictionary<string, string>
                                                                             {
                                                                         { "prompt", "login" }
                                                                             }, additionalStateArgs: additionals);
-            case LoginProviderEnum.Box:
+            case LoginProvider.Box:
                 return _oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals);
 
-            case LoginProviderEnum.OneDrive:
+            case LoginProvider.OneDrive:
                 return _oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals);
 
-            case LoginProviderEnum.Wordpress:
+            case LoginProvider.Wordpress:
                 return _oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(additionalStateArgs: additionals);
 
         }

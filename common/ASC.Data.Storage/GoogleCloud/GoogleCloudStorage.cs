@@ -127,10 +127,10 @@ public class GoogleCloudStorage : BaseStorage
 
     private async Task<Uri> InternalGetInternalUriAsync(string domain, string path, TimeSpan expire)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
-        var preSignedURL = await FromCredentialStream(stream).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
+        var preSignedURL = await (await FromCredentialStreamAsync(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
 
         return MakeUri(preSignedURL);
     }
@@ -148,7 +148,7 @@ public class GoogleCloudStorage : BaseStorage
     {
         var tempStream = _tempStream.Create();
 
-        var storage = GetStorage();
+        var storage = await GetStorageAsync();
 
         await storage.DownloadObjectAsync(_bucket, MakePath(domain, path), tempStream);
 
@@ -202,7 +202,7 @@ public class GoogleCloudStorage : BaseStorage
                     ? MimeMapping.GetMimeMapping(Path.GetFileName(path))
                     : contentType;
 
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var uploadObjectOptions = new UploadObjectOptions
         {
@@ -232,7 +232,7 @@ public class GoogleCloudStorage : BaseStorage
             uploaded.ContentDisposition = "attachment";
         }
 
-        storage.UpdateObject(uploaded);
+        await storage.UpdateObjectAsync(uploaded);
 
         //           InvalidateCloudFront(MakePath(domain, path));
 
@@ -243,7 +243,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task DeleteAsync(string domain, string path)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var key = MakePath(domain, path);
         var size = await GetFileSizeAsync(domain, path);
@@ -255,7 +255,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task DeleteFilesAsync(string domain, string folderPath, string pattern, bool recursive)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         IAsyncEnumerable<Google.Apis.Storage.v1.Data.Object> objToDel;
 
@@ -313,7 +313,7 @@ public class GoogleCloudStorage : BaseStorage
             return;
         }
 
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         foreach (var e in keysToDel)
         {
@@ -328,7 +328,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task DeleteFilesAsync(string domain, string folderPath, DateTime fromDate, DateTime toDate)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objToDel = GetObjectsAsync(domain, folderPath, true)
                       .Where(x => x.UpdatedDateTimeOffset >= fromDate && x.UpdatedDateTimeOffset <= toDate);
@@ -340,11 +340,11 @@ public class GoogleCloudStorage : BaseStorage
         }
     }
 
-    public override async Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir)
+    public override async Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir)
     {
-        using var storage = GetStorage();
-        var srckey = MakePath(srcdomain, srcdir);
-        var dstkey = MakePath(newdomain, newdir);
+        using var storage = await GetStorageAsync();
+        var srckey = MakePath(srcDomain, srcDir);
+        var dstkey = MakePath(newDomain, newDir);
 
         var objects = storage.ListObjects(_bucket, srckey);
 
@@ -352,7 +352,7 @@ public class GoogleCloudStorage : BaseStorage
         {
             await storage.CopyObjectAsync(_bucket, srckey, _bucket, dstkey, new CopyObjectOptions
             {
-                DestinationPredefinedAcl = GetDomainACL(newdomain)
+                DestinationPredefinedAcl = GetDomainACL(newDomain)
             });
 
             await storage.DeleteObjectAsync(_bucket, srckey);
@@ -360,25 +360,25 @@ public class GoogleCloudStorage : BaseStorage
         }
     }
 
-    public override async Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true)
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
-        var srcKey = MakePath(srcdomain, srcpath);
-        var dstKey = MakePath(newdomain, newpath);
-        var size = await GetFileSizeAsync(srcdomain, srcpath);
+        var srcKey = MakePath(srcDomain, srcPath);
+        var dstKey = MakePath(newDomain, newPath);
+        var size = await GetFileSizeAsync(srcDomain, srcPath);
 
         storage.CopyObject(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
         {
-            DestinationPredefinedAcl = GetDomainACL(newdomain)
+            DestinationPredefinedAcl = GetDomainACL(newDomain)
         });
 
-        await DeleteAsync(srcdomain, srcpath);
+        await DeleteAsync(srcDomain, srcPath);
 
-        await QuotaUsedDeleteAsync(srcdomain, size);
-        await QuotaUsedAddAsync(newdomain, size, quotaCheckFileSize);
+        await QuotaUsedDeleteAsync(srcDomain, size);
+        await QuotaUsedAddAsync(newDomain, size, quotaCheckFileSize);
 
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
     public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
@@ -430,7 +430,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<bool> IsFileAsync(string domain, string path)
     {
-        var storage = GetStorage();
+        var storage = await GetStorageAsync();
 
         var objects = await storage.ListObjectsAsync(_bucket, MakePath(domain, path)).ReadPageAsync(1);
 
@@ -444,7 +444,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objToDel = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, path));
@@ -466,7 +466,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<long> GetFileSizeAsync(string domain, string path)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var obj = await storage.GetObjectAsync(_bucket, MakePath(domain, path));
 
@@ -475,7 +475,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<long> GetDirectorySizeAsync(string domain, string path)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objToDel = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, path));
@@ -495,7 +495,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<long> ResetQuotaAsync(string domain)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objects = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, string.Empty));
@@ -523,7 +523,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<long> GetUsedQuotaAsync(string domain)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objects = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, string.Empty));
@@ -541,31 +541,31 @@ public class GoogleCloudStorage : BaseStorage
         return result;
     }
 
-    public override async Task<Uri> CopyAsync(string srcdomain, string srcpath, string newdomain, string newpath)
+    public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
-        var size = await GetFileSizeAsync(srcdomain, srcpath);
+        var size = await GetFileSizeAsync(srcDomain, srcpath);
 
         var options = new CopyObjectOptions
         {
-            DestinationPredefinedAcl = GetDomainACL(newdomain)
+            DestinationPredefinedAcl = GetDomainACL(newDomain)
         };
 
-        await storage.CopyObjectAsync(_bucket, MakePath(srcdomain, srcpath), _bucket, MakePath(newdomain, newpath), options);
+        await storage.CopyObjectAsync(_bucket, MakePath(srcDomain, srcpath), _bucket, MakePath(newDomain, newPath), options);
 
-        await QuotaUsedAddAsync(newdomain, size);
+        await QuotaUsedAddAsync(newDomain, size);
 
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task CopyDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir)
+    public override async Task CopyDirectoryAsync(string srcDomain, string srcdir, string newDomain, string newDir)
     {
-        var srckey = MakePath(srcdomain, srcdir);
-        var dstkey = MakePath(newdomain, newdir);
+        var srckey = MakePath(srcDomain, srcdir);
+        var dstkey = MakePath(newDomain, newDir);
         //List files from src
 
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objects = storage.ListObjectsAsync(_bucket, srckey);
 
@@ -573,16 +573,16 @@ public class GoogleCloudStorage : BaseStorage
         {
             await storage.CopyObjectAsync(_bucket, srckey, _bucket, dstkey, new CopyObjectOptions
             {
-                DestinationPredefinedAcl = GetDomainACL(newdomain)
+                DestinationPredefinedAcl = GetDomainACL(newDomain)
             });
 
-            await QuotaUsedAddAsync(newdomain, Convert.ToInt64(obj.Size));
+            await QuotaUsedAddAsync(newDomain, Convert.ToInt64(obj.Size));
         }
     }
 
     public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var buffered = _tempStream.GetBuffered(stream);
 
@@ -610,7 +610,7 @@ public class GoogleCloudStorage : BaseStorage
 
         using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
         var signDuration = expires.Date == DateTime.MinValue ? expires.TimeOfDay : expires.Subtract(DateTime.UtcNow);
-        var preSignedURL = await FromCredentialStream(mStream)
+        var preSignedURL = await (await FromCredentialStreamAsync(mStream))
             .SignAsync(RequestTemplate.FromBucket(_bucket).WithObjectName(MakePath(domain, path)), Options.FromDuration(signDuration));
 
         //TODO: CNAME!
@@ -619,7 +619,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var objects = storage.ListObjectsAsync(_bucket, MakePath(domain, path));
 
@@ -653,7 +653,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<string> InitiateChunkedUploadAsync(string domain, string path)
     {
-        using var storage = GetStorage();
+        using var storage = await GetStorageAsync();
 
         var tempUploader = storage.CreateObjectUploader(_bucket, MakePath(domain, path), null, new MemoryStream());
 
@@ -861,7 +861,7 @@ public class GoogleCloudStorage : BaseStorage
 
     public override async Task<string> GetFileEtagAsync(string domain, string path)
     {
-        var storage = GetStorage();
+        var storage = await GetStorageAsync();
         var objectName = MakePath(domain, path);
 
         var obj = await storage.GetObjectAsync(_bucket, objectName);

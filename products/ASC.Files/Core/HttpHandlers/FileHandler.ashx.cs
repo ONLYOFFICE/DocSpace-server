@@ -240,10 +240,10 @@ public class FileHandlerService
             var session = await _externalShare.ParseDownloadSessionKeyAsync(sessionKey);
             var sessionId = await _externalShare.GetSessionIdAsync();
 
-            if (session != null && sessionId != default && session.Id == sessionId &&
+            if (session != null && sessionId != Guid.Empty && session.Id == sessionId &&
                 (await _externalShare.ValidateAsync(session.LinkId)) == Status.Ok)
             {
-                path = string.Format(@"{0}\{1}\{2}", session.LinkId, session.Id, filename);
+                path = $@"{session.LinkId}\{session.Id}\{filename}";
             }
             else
             {
@@ -253,7 +253,7 @@ public class FileHandlerService
         }
         else
         {
-            path = string.Format(@"{0}\{1}", _securityContext.CurrentAccount.ID, filename);
+            path = $@"{_securityContext.CurrentAccount.ID}\{filename}";
         }
 
         var store = await _globalStore.GetStoreAsync();
@@ -279,7 +279,6 @@ public class FileHandlerService
 
         try
         {
-            var flushed = false;
             await using (var readStream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path))
             {
                 long offset = 0;
@@ -290,7 +289,7 @@ public class FileHandlerService
                     readStream.Seek(offset, SeekOrigin.Begin);
                 }
 
-                await SendStreamByChunksAsync(context, length, filename, readStream, flushed);
+                await SendStreamByChunksAsync(context, length, filename, readStream, false);
             }
 
             await context.Response.Body.FlushAsync();
@@ -350,7 +349,7 @@ public class FileHandlerService
                 var linkId = await _externalShare.GetLinkIdAsync();
 
                 if (!(_fileUtility.CanImageView(file.Title) || _fileUtility.CanMediaView(file.Title) || FileUtility.GetFileExtension(file.Title) == ".pdf") ||
-                    linkId == default || !await _fileSecurity.CanReadAsync(file, linkId))
+                    linkId == Guid.Empty || !await _fileSecurity.CanReadAsync(file, linkId))
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     return;
@@ -582,7 +581,7 @@ public class FileHandlerService
 
         long endOffset = -1;
 
-        var range = context.Request.Headers["Range"].FirstOrDefault().Split(new[] { '=', '-' });
+        var range = context.Request.Headers["Range"].FirstOrDefault().Split('=', '-');
         offset = Convert.ToInt64(range[1]);
         if (range.Length > 2 && !string.IsNullOrEmpty(range[2]))
         {
@@ -606,7 +605,7 @@ public class FileHandlerService
             context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
         }
         context.Response.Headers.Add("Accept-Ranges", "bytes");
-        context.Response.Headers.Add("Content-Range", string.Format(" bytes {0}-{1}/{2}", offset, endOffset, fullLength));
+        context.Response.Headers.Add("Content-Range", $" bytes {offset}-{endOffset}/{fullLength}");
 
         return length;
     }

@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Helpers;
 
-[Singletone]
+[Singleton]
 public class FileUtilityConfiguration
 {
     private readonly IConfiguration _configuration;
@@ -140,8 +140,8 @@ public class FileUtilityConfiguration
 
     public Dictionary<FileType, string> InternalExtension
     {
-        get => new Dictionary<FileType, string>
-            {
+        get => new()
+        {
                 { FileType.Document, _configuration["files:docservice:internal-doc"] ?? ".docx" },
                 { FileType.Spreadsheet, _configuration["files:docservice:internal-xls"] ?? ".xlsx" },
                 { FileType.Presentation, _configuration["files:docservice:internal-ppt"] ?? ".pptx" }
@@ -495,7 +495,7 @@ public class FileUtility
                 return _extsConvertible;
             }
 
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
 
             foreach (var item in list)
@@ -650,8 +650,8 @@ public class FileUtility
     private readonly FileUtilityConfiguration _fileUtilityConfiguration;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    public static readonly List<string> ExtsArchive = new List<string>
-            {
+    public static readonly List<string> ExtsArchive = new()
+    {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
                 ".jar", ".lha", ".lzh", ".pak", ".pk3",
@@ -659,8 +659,8 @@ public class FileUtility
                 ".z", ".zoo"
             };
 
-    public static readonly List<string> ExtsVideo = new List<string>
-            {
+    public static readonly List<string> ExtsVideo = new()
+    {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
                 ".mkv", ".mov", ".mp4", ".mpeg",
@@ -668,8 +668,8 @@ public class FileUtility
                 ".vob", ".webm", ".wmv"
             };
 
-    public static readonly List<string> ExtsAudio = new List<string>
-            {
+    public static readonly List<string> ExtsAudio = new()
+    {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
                 ".mid", ".mka", ".mp3", ".mpc",
@@ -677,16 +677,16 @@ public class FileUtility
                 ".raw", ".wav", ".wma"
             };
 
-    public static readonly List<string> ExtsImage = new List<string>
-            {
+    public static readonly List<string> ExtsImage = new()
+    {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
                 ".png", ".ppm", ".rgb", ".svg", ".xbm", ".xpm", ".xwd",
                 ".svgt", ".svgy", ".gdraw", ".webp"
             };
 
-    public static readonly List<string> ExtsSpreadsheet = new List<string>
-            {
+    public static readonly List<string> ExtsSpreadsheet = new()
+    {
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
                 ".ods", ".fods", ".ots", ".csv",
@@ -694,8 +694,8 @@ public class FileUtility
                 ".gsheet"
             };
 
-    public static readonly List<string> ExtsPresentation = new List<string>
-            {
+    public static readonly List<string> ExtsPresentation = new()
+    {
                 ".pps", ".ppsx", ".ppsm",
                 ".ppt", ".pptx", ".pptm",
                 ".pot", ".potx", ".potm",
@@ -704,8 +704,8 @@ public class FileUtility
                 ".gslides"
             };
 
-    public static readonly List<string> ExtsDocument = new List<string>
-            {
+    public static readonly List<string> ExtsDocument = new()
+    {
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
                 ".odt", ".fodt", ".ott", ".rtf", ".txt",
@@ -715,18 +715,18 @@ public class FileUtility
                 ".gdoc"
             };
 
-    public static readonly List<string> ExtsFormTemplate = new List<string>
-            {
+    public static readonly List<string> ExtsFormTemplate = new()
+    {
                 ".docxf"
             };
 
-    public static readonly List<string> ExtsOForm = new List<string>
-            {
+    public static readonly List<string> ExtsOForm = new()
+    {
                 ".oform"
             };
 
-    public static readonly List<string> ExtsTemplate = new List<string>
-            {
+    public static readonly List<string> ExtsTemplate = new()
+    {
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",

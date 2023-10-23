@@ -249,11 +249,11 @@ public class CspSettingsHelper
 
 public class CspOptions
 {
-    public List<string> Script { get; set; } = new List<string>();
-    public List<string> Style { get; set; } = new List<string>();
-    public List<string> Img { get; set; } = new List<string>();
-    public List<string> Frame { get; set; } = new List<string>();
-    public List<string> Def { get; set; } = new List<string>();
+    public List<string> Script { get; set; } = new();
+    public List<string> Style { get; set; } = new();
+    public List<string> Img { get; set; } = new();
+    public List<string> Frame { get; set; } = new();
+    public List<string> Def { get; set; } = new();
 
     public CspOptions()
     {

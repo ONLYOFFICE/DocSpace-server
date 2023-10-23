@@ -30,7 +30,7 @@ using File = System.IO.File;
 
 namespace ASC.Web.Files.Services.FFmpegService;
 
-[Singletone]
+[Singleton]
 public class FFmpegService
 {
     public List<string> MustConvertable
@@ -47,7 +47,7 @@ public class FFmpegService
     }
 
     private readonly List<string> _convertableMedia;
-    private readonly List<string> _fFmpegExecutables = new List<string>() { "ffmpeg", "avconv" };
+    private readonly List<string> _fFmpegExecutables = new() { "ffmpeg", "avconv" };
     private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
@@ -185,6 +185,6 @@ public class FFmpegService
 
         await ProcessLog(process.StandardError.BaseStream);
 
-        process.WaitForExit();
+        await process.WaitForExitAsync();
     }
 }

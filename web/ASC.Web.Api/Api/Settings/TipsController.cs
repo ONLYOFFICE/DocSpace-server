@@ -90,7 +90,7 @@ public class TipsController : BaseSettingsController
                 request.Content = new StringContent(body);
 
                 var httpClient = _clientFactory.CreateClient();
-                using var response = httpClient.Send(request);
+                using var response = await httpClient.SendAsync(request);
 
             }
             catch (Exception e)

@@ -64,7 +64,7 @@ public class DistributedTask
     /// <type>System.Object, System</type>
     public Exception Exception
     {
-        get => new Exception(_exeption);
+        get => new(_exeption);
         set => _exeption = value?.Message ?? "";
     }
 

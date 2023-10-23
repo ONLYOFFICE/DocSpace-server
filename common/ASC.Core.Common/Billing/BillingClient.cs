@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Billing;
 
-[Singletone]
+[Singleton]
 public class BillingClient
 {
     public readonly bool Configured;

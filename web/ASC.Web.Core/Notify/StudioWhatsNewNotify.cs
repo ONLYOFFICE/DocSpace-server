@@ -44,7 +44,7 @@ public class StudioWhatsNewNotify
     private readonly WorkContext _workContext;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly IServiceProvider _serviceProvider;
-    public static readonly List<MessageAction?> DailyActions = new List<MessageAction?>()
+    public static readonly List<MessageAction?> DailyActions = new()
     {
         MessageAction.FileCreated,
         MessageAction.FileUpdatedRevisionComment,
@@ -56,7 +56,7 @@ public class StudioWhatsNewNotify
         MessageAction.UserUpdated
     };
 
-    public static readonly List<MessageAction?> RoomsActivityActions = new List<MessageAction?>()
+    public static readonly List<MessageAction?> RoomsActivityActions = new()
     {
          MessageAction.FileUploaded,
          MessageAction.UserFileUpdated,
@@ -215,7 +215,6 @@ public class StudioWhatsNewNotify
 
         var date = activityInfo.Data;
         var userName = user.DisplayUserName(_displayUserSettingsHelper);
-        var userEmail = user.Email;
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
         var fileTitle = HtmlUtil.GetText(activityInfo.FileTitle, 512);

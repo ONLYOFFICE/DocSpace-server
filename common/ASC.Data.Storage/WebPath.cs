@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone]
+[Singleton]
 public class WebPathSettings
 {
     private readonly IEnumerable<Appender> _appenders;

@@ -30,9 +30,9 @@ namespace ASC.ElasticSearch;
 public class Selector<T> where T : class, ISearchItem
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new QueryContainerDescriptor<T>();
-    private SortDescriptor<T> _sortContainerDescriptor = new SortDescriptor<T>();
-    private QueryContainer _queryContainer = new QueryContainer();
+    private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new();
+    private SortDescriptor<T> _sortContainerDescriptor = new();
+    private QueryContainer _queryContainer = new();
     private int _limit = 1000, _offset;
 
     public Selector(IServiceProvider serviceProvider)

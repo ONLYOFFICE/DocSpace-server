@@ -28,7 +28,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singletone]
+[Singleton]
 public class ThumbnailSettings
 {
     public ThumbnailSettings(ConfigurationExtension configuration)

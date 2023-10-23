@@ -42,7 +42,7 @@ public enum FileStatus
 
 [Transient]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
-public class File<T> : FileEntry<T>, IFileEntry<T>
+public class File<T> : FileEntry<T>, IFileEntry
 {
     private FileStatus _status;
 

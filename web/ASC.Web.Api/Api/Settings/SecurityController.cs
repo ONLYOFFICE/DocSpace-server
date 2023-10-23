@@ -121,7 +121,6 @@ public class SecurityController : BaseSettingsController
             }
 
             yield return s;
-
         }
     }
 
@@ -158,12 +157,8 @@ public class SecurityController : BaseSettingsController
     public object GetEnabledModules()
     {
         var EnabledModules = _webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.Normal)
-                                    .Where(item => !item.IsSubItem() && item.Visible)
-                                    .Select(item => new
-                                    {
-                                        id = item.ProductClassName.HtmlEncode(),
-                                        title = item.Name.HtmlEncode()
-                                    });
+            .Where(item => !item.IsSubItem() && item.Visible)
+            .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
 
         return EnabledModules;
     }
@@ -214,7 +209,6 @@ public class SecurityController : BaseSettingsController
         await _messageService.SendAsync(MessageAction.PasswordStrengthSettingsUpdated);
 
         return userPasswordSettings;
-
     }
 
     /// <summary>
@@ -254,11 +248,14 @@ public class SecurityController : BaseSettingsController
             {
                 if (info.Groups.Any())
                 {
-                    await _messageService.SendAsync(MessageAction.GroupsOpenedProductAccess, productName, info.Groups.Select(x => x.Name));
+                    await _messageService.SendAsync(MessageAction.GroupsOpenedProductAccess, productName,
+                        info.Groups.Select(x => x.Name));
                 }
+
                 if (info.Users.Any())
                 {
-                    await _messageService.SendAsync(MessageAction.UsersOpenedProductAccess, productName, info.Users.Select(x => HttpUtility.HtmlDecode(x.DisplayName)));
+                    await _messageService.SendAsync(MessageAction.UsersOpenedProductAccess, productName,
+                        info.Users.Select(x => HttpUtility.HtmlDecode(x.DisplayName)));
                 }
             }
         }
@@ -287,10 +284,7 @@ public class SecurityController : BaseSettingsController
 
         foreach (var item in inDto.Items)
         {
-            if (!itemList.ContainsKey(item.Key))
-            {
-                itemList.Add(item.Key, item.Value);
-            }
+            itemList.TryAdd(item.Key, item.Value);
         }
 
         var defaultPageSettings = await _settingsManager.LoadAsync<StudioDefaultPageSettings>();
@@ -302,7 +296,7 @@ public class SecurityController : BaseSettingsController
 
             if (item.Value)
             {
-                if (WebItemManager[productId] is IProduct webItem || productId == WebItemManager.MailProductID)
+                if (WebItemManager[productId] is IProduct || productId == WebItemManager.MailProductID)
                 {
                     var productInfo = await _webItemSecurity.GetSecurityInfoAsync(item.Key);
                     var selectedGroups = productInfo.Groups.Select(group => group.ID).ToList();
@@ -385,7 +379,8 @@ public class SecurityController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
 
-        var isStartup = !_coreBaseSettings.CustomMode && _tenantExtra.Saas && (await _tenantManager.GetCurrentTenantQuotaAsync()).Free;
+        var isStartup = !_coreBaseSettings.CustomMode && _tenantExtra.Saas &&
+                        (await _tenantManager.GetCurrentTenantQuotaAsync()).Free;
         if (isStartup)
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Administrator");
@@ -397,13 +392,19 @@ public class SecurityController : BaseSettingsController
 
         if (inDto.ProductId == Guid.Empty)
         {
-            var messageAction = inDto.Administrator ? MessageAction.AdministratorOpenedFullAccess : MessageAction.AdministratorDeleted;
-            await _messageService.SendAsync(messageAction, _messageTarget.Create(admin.Id), admin.DisplayUserName(false, _displayUserSettingsHelper));
+            var messageAction = inDto.Administrator
+                ? MessageAction.AdministratorOpenedFullAccess
+                : MessageAction.AdministratorDeleted;
+            await _messageService.SendAsync(messageAction, _messageTarget.Create(admin.Id),
+                admin.DisplayUserName(false, _displayUserSettingsHelper));
         }
         else
         {
-            var messageAction = inDto.Administrator ? MessageAction.ProductAddedAdministrator : MessageAction.ProductDeletedAdministrator;
-            await _messageService.SendAsync(messageAction, _messageTarget.Create(admin.Id), GetProductName(inDto.ProductId), admin.DisplayUserName(false, _displayUserSettingsHelper));
+            var messageAction = inDto.Administrator
+                ? MessageAction.ProductAddedAdministrator
+                : MessageAction.ProductDeletedAdministrator;
+            await _messageService.SendAsync(messageAction, _messageTarget.Create(admin.Id),
+                GetProductName(inDto.ProductId), admin.DisplayUserName(false, _displayUserSettingsHelper));
         }
 
         return new { inDto.ProductId, inDto.UserId, inDto.Administrator };
@@ -433,10 +434,12 @@ public class SecurityController : BaseSettingsController
         {
             throw new ArgumentOutOfRangeException(nameof(attemptsCount));
         }
+
         if (checkPeriod < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(checkPeriod));
         }
+
         if (blockTime < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(blockTime));
@@ -444,9 +447,7 @@ public class SecurityController : BaseSettingsController
 
         var settings = new LoginSettings
         {
-            AttemptCount = attemptsCount,
-            CheckPeriod = checkPeriod,
-            BlockTime = blockTime
+            AttemptCount = attemptsCount, CheckPeriod = checkPeriod, BlockTime = blockTime
         };
 
         await _settingsManager.SaveAsync(settings);

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class SmtpSender : INotifySender
 {
     protected ILogger _logger;
@@ -78,19 +78,19 @@ public class SmtpSender : INotifySender
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 
-                smtpClient.Connect(_host, _port,
+                await smtpClient.ConnectAsync(_host, _port,
                     _ssl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
                 if (_credentials != null)
                 {
-                    smtpClient.Authenticate(_credentials);
+                    await smtpClient.AuthenticateAsync(_credentials);
                 }
                 else if (_saslMechanism != null)
                 {
-                    smtpClient.Authenticate(_saslMechanism);
+                    await smtpClient.AuthenticateAsync(_saslMechanism);
                 }
 
-                smtpClient.Send(mail);
+                await smtpClient.SendAsync(mail);
                 result = NoticeSendResult.OK;
             }
             catch (Exception e)
@@ -148,7 +148,7 @@ public class SmtpSender : INotifySender
         {
             if (smtpClient.IsConnected)
             {
-                smtpClient.Disconnect(true);
+                await smtpClient.DisconnectAsync(true);
             }
 
             smtpClient.Dispose();

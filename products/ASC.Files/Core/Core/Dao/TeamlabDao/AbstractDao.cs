@@ -37,7 +37,6 @@ public class AbstractDao
         }
     }
 
-    protected readonly ICache _cache;
     protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     protected readonly UserManager _userManager;
     protected readonly TenantManager _tenantManager;
@@ -61,10 +60,8 @@ public class AbstractDao
         CoreConfiguration coreConfiguration,
         SettingsManager settingsManager,
         AuthContext authContext,
-        IServiceProvider serviceProvider,
-        ICache cache)
+        IServiceProvider serviceProvider)
     {
-        _cache = cache;
         _dbContextFactory = dbContextFactory;
         _userManager = userManager;
         _tenantManager = tenantManager;
@@ -94,7 +91,7 @@ public class AbstractDao
 
     protected async Task GetRecalculateFilesCountUpdateAsync(int folderId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var folders = await Queries.FoldersAsync(filesDbContext, TenantID, folderId).ToListAsync();
 
         foreach (var f in folders)
@@ -102,11 +99,6 @@ public class AbstractDao
             f.FilesCount = await Queries.FilesCountAsync(filesDbContext, f.TenantId, f.Id);
         }
         await filesDbContext.SaveChangesAsync();
-    }
-
-    protected ValueTask<object> MappingIDAsync(object id)
-    {
-        return MappingIDAsync(id, false);
     }
 
     protected ValueTask<object> MappingIDAsync(object id, bool saveIfNotExist = false)
@@ -128,11 +120,6 @@ public class AbstractDao
 
     protected int MappingIDAsync(int id)
     {
-        return MappingIDAsync(id, false);
-    }
-
-    protected int MappingIDAsync(int id, bool saveIfNotExist = false)
-    {
         return id;
     }
 
@@ -141,13 +128,13 @@ public class AbstractDao
         object result;
 
         var sId = id.ToString();
-        if (Selectors.All.Any(s => sId.StartsWith(s.Id)))
+        if (Selectors.All.Exists(s => sId.StartsWith(s.Id)))
         {
             result = Regex.Replace(BitConverter.ToString(Hasher.Hash(id.ToString(), HashAlg.MD5)), "-", "").ToLower();
         }
         else
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             result = await Queries.IdAsync(filesDbContext, TenantID, id.ToString());
         }
 
@@ -160,7 +147,7 @@ public class AbstractDao
                 TenantId = TenantID
             };
 
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyIdMapping, newItem);
             await filesDbContext.SaveChangesAsync();
         }
@@ -168,22 +155,22 @@ public class AbstractDao
         return result;
     }
 
-    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearhTypeEnum searhTypeEnum) where T : IDbSearch
+    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearchType searchType) where T : IDbSearch
     {
         var lowerText = GetSearchText(text);
 
-        return searhTypeEnum switch
+        return searchType switch
         {
-            SearhTypeEnum.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
-            SearhTypeEnum.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
-            SearhTypeEnum.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
+            SearchType.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
+            SearchType.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
+            SearchType.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
             _ => query,
         };
     }
 
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
 
-    internal enum SearhTypeEnum
+    internal enum SearchType
     {
         Start,
         End,

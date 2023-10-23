@@ -32,13 +32,13 @@ public interface INotifyEngineAction
     void AfterTransferRequest(NotifyRequest request);
 }
 
-[Singletone]
+[Singleton]
 public class NotifyEngine
 {
     private readonly ILogger _logger;
     private readonly Context _context;
-    internal readonly List<SendMethodWrapper> SendMethods = new List<SendMethodWrapper>();
-    private readonly Dictionary<string, IPatternStyler> _stylers = new Dictionary<string, IPatternStyler>();
+    internal readonly List<SendMethodWrapper> SendMethods = new();
+    private readonly Dictionary<string, IPatternStyler> _stylers = new();
     private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions;
 
@@ -59,7 +59,7 @@ public class NotifyEngine
     internal void RegisterSendMethod(Func<DateTime, Task> method, string cron)
     {
         ArgumentNullException.ThrowIfNull(method);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(cron);
+        ArgumentException.ThrowIfNullOrEmpty(cron);
 
         var w = new SendMethodWrapper(method, cron, _logger);
         lock (SendMethods)

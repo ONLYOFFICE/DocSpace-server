@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks.Service.Services;
 
-[Singletone]
+[Singleton]
 public class WorkerService : BackgroundService
 {
     private readonly ILogger<WorkerService> _logger;

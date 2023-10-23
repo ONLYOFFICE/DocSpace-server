@@ -154,10 +154,10 @@ public class PeopleNamesItem
 [Scope]
 public class CustomNamingPeople
 {
-    private static readonly object _locked = new object();
+    private static readonly object _locked = new();
     private static bool _loaded;
 
-    private static readonly List<PeopleNamesItem> _items = new List<PeopleNamesItem>();
+    private static readonly List<PeopleNamesItem> _items = new();
     private readonly SettingsManager _settingsManager;
 
     public CustomNamingPeople(SettingsManager settingsManager)

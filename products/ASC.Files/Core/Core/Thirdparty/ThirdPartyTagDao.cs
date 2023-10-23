@@ -60,7 +60,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
     {
         var folderId = _daoSelector.ConvertId(parentFolder.Id);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
         if (!entryIds.Any())

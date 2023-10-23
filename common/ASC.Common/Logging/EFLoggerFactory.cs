@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Logging;
 
-[Singletone]
+[Singleton]
 public class EFLoggerFactory : ILoggerFactory
 {
     private readonly ILogger _logger;
@@ -93,7 +93,7 @@ public class EFLogger : ILogger
 
     class EFLogEvent : IEnumerable<KeyValuePair<string, object>>
     {
-        readonly List<KeyValuePair<string, object>> _properties = new List<KeyValuePair<string, object>>();
+        readonly List<KeyValuePair<string, object>> _properties = new();
 
         public string Message { get; }
 
@@ -109,10 +109,9 @@ public class EFLogger : ILogger
 
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-        public EFLogEvent WithProperty(string name, object value)
+        public void WithProperty(string name, object value)
         {
             _properties.Add(new KeyValuePair<string, object>(name, value));
-            return this;
         }
 
         public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, e) => l.Message;

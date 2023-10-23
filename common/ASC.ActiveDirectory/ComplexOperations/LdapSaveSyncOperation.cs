@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.ComplexOperations;
 
-[Singletone(Additional = typeof(LdapOperationExtension))]
+[Singleton(Additional = typeof(LdapOperationExtension))]
 public class LdapSaveSyncOperation
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";

@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core;
 
-[Singletone]
+[Singleton]
 public class WebPluginCache
 {
     private readonly ICache _сache;
@@ -204,7 +204,7 @@ public class WebPluginManager
             using (var stream = zipFile.GetInputStream(configFile))
             using (var reader = new StreamReader(stream))
             {
-                var configContent = reader.ReadToEnd();
+                var configContent = await reader.ReadToEndAsync();
 
                 var options = new JsonSerializerOptions
                 {
@@ -355,7 +355,7 @@ public class WebPluginManager
 
                 using var reader = new StreamReader(readStream);
 
-                var configContent = reader.ReadToEnd();
+                var configContent = await reader.ReadToEndAsync();
 
                 var options = new JsonSerializerOptions
                 {
@@ -398,7 +398,7 @@ public class WebPluginManager
 
         using var reader = new StreamReader(readStream);
 
-        var configContent = reader.ReadToEnd();
+        var configContent = await reader.ReadToEndAsync();
 
         var options = new JsonSerializerOptions
         {

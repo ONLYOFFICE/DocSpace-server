@@ -28,18 +28,18 @@ namespace ASC.Notify.Textile;
 
 public class MarkDownStyler : IPatternStyler
 {
-    static readonly Regex _velocityArguments = new Regex(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-    static readonly Regex _linkReplacer = new Regex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
-    static readonly Regex _divPTagReplacer = new Regex(@"(<(p|div).*?>)|(<\/(p|div)>)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled | RegexOptions.Singleline);
-    static readonly Regex _tagReplacer = new Regex(@"<(.|\n)*?>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled | RegexOptions.Singleline);
-    static readonly Regex _multiLineBreaksReplacer = new Regex(@"(?:\r\n|\r(?!\n)|(?!<\r)\n){3,}", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _symbolReplacer = new Regex(@"\[(.*?)]\(([^()]*)\)|[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _linkSymbolReplacer = new Regex(@"[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _boldReplacer = new Regex(@"<(strong|\/strong)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _strikeThroughReplacer = new Regex(@"<(s|\/s)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _underLineReplacer = new Regex(@"<(u|\/u)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _italicReplacer = new Regex(@"<(em|\/em)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _hTMLLinkReplacer = new Regex(@"<a.*?href=""(.*?)"".*?>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _velocityArguments = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+    static readonly Regex _linkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
+    static readonly Regex _divPTagReplacer = new(@"(<(p|div).*?>)|(<\/(p|div)>)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled | RegexOptions.Singleline);
+    static readonly Regex _tagReplacer = new(@"<(.|\n)*?>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled | RegexOptions.Singleline);
+    static readonly Regex _multiLineBreaksReplacer = new(@"(?:\r\n|\r(?!\n)|(?!<\r)\n){3,}", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _symbolReplacer = new(@"\[(.*?)]\(([^()]*)\)|[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _linkSymbolReplacer = new(@"[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _boldReplacer = new(@"<(strong|\/strong)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _strikeThroughReplacer = new(@"<(s|\/s)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _underLineReplacer = new(@"<(u|\/u)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _italicReplacer = new(@"<(em|\/em)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    static readonly Regex _hTMLLinkReplacer = new(@"<a.*?href=""(.*?)"".*?>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public void ApplyFormating(NoticeMessage message)
     {

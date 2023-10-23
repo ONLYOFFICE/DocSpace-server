@@ -62,7 +62,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (globalStore, filesLinkUtility, _, _, _, log) = scopeClass;
+        var (globalStore, filesLinkUtility, _, _, _, _) = scopeClass;
         var stream = _tempStream.Create();
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
@@ -82,11 +82,11 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             stream.Position = 0;
             var fileName = FileConstant.DownloadTitle + archiveExtension;
 
-            var thidpartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
+            var thirdPartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thidpartyFolderOnly || daoFolderOnly) && (thidpartyFolderOnly != daoFolderOnly))
+            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
-                if (thidpartyFolderOnly)
+                if (thirdPartyFolderOnly)
                 {
                     fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title, archiveExtension);
                 }
@@ -115,12 +115,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 var sessionId = await externalShare.GetSessionIdAsync();
                 var linkId = await externalShare.GetLinkIdAsync();
 
-                if (sessionId == default || linkId == default)
+                if (sessionId == Guid.Empty || linkId == Guid.Empty)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
                 }
 
-                path = string.Format(@"{0}\{1}\{2}", linkId, sessionId, fileName);
+                path = $@"{linkId}\{sessionId}\{fileName}";
                 sessionKey = await externalShare.CreateDownloadSessionKeyAsync();
             }
 
@@ -244,12 +244,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         var title = file.Title;
 
-        if (_files.TryGetValue(file.Id, out var convertToExt))
+        if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
-            if (!string.IsNullOrEmpty(convertToExt))
-            {
-                title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+            title = FileUtility.ReplaceFileExtension(title, convertToExt);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -349,7 +346,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (_, _, _, fileConverter, filesMessageService, _) = scopeClass;
+        var (_, _, _, fileConverter, _, _) = scopeClass;
         var FileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
         using (var compressTo = scope.ServiceProvider.GetService<CompressToArchive>())
@@ -388,12 +385,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                             continue;
                         }
 
-                        if (_files.TryGetValue(file.Id, out convertToExt))
+                        if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
                         {
-                            if (!string.IsNullOrEmpty(convertToExt))
-                            {
-                                newtitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                            }
+                            newtitle = FileUtility.ReplaceFileExtension(path, convertToExt);
                         }
                     }
 
@@ -486,7 +480,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
 internal class ItemNameValueCollection<T>
 {
-    private readonly Dictionary<string, List<T>> _dic = new Dictionary<string, List<T>>();
+    private readonly Dictionary<string, List<T>> _dic = new();
 
 
     public IEnumerable<string> AllKeys => _dic.Keys;

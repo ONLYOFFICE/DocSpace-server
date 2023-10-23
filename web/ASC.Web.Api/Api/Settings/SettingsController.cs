@@ -28,7 +28,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class SettingsController : BaseSettingsController
 {
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private Tenant Tenant { get { return ApiContext.Tenant; } }
 
     private readonly MessageService _messageService;

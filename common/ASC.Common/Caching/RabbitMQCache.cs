@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
 {
     private IConnection _connection;
@@ -40,7 +40,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
 
-    private readonly object _lock = new object();
+    private readonly object _lock = new();
     private bool _disposed;
 
     public RabbitMQCache(IConfiguration configuration, ILogger<RabbitMQCache<T>> logger)

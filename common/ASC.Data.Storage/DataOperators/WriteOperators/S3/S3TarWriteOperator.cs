@@ -66,7 +66,7 @@ public class S3TarWriteOperator : IDataWriteOperator
             if (fileStream != null)
             {
                 await WriteEntryAsync(tarKey, fileStream);
-                fileStream.Dispose();
+                await fileStream.DisposeAsync();
             }
         }
     }

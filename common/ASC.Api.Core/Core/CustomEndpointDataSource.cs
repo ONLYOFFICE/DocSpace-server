@@ -39,7 +39,7 @@ public class CustomEndpointDataSource : EndpointDataSource
             .SelectMany(r =>
             {
                 var endpoints = new List<RouteEndpoint>();
-                var constraintRouteAttr = r.Metadata.OfType<ConstraintRoute>().FirstOrDefault();
+                var constraintRouteAttr = r.Metadata.OfType<ConstraintRouteAttribute>().FirstOrDefault();
 
                 if (r.RoutePattern.Parameters.Any() && constraintRouteAttr != null)
                 {

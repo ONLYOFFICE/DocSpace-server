@@ -31,7 +31,7 @@ public class NovellLdapSearcher : IDisposable
 {
     protected readonly ILogger<NovellLdapSearcher> _logger;
     private LdapCertificateConfirmRequest _certificateConfirmRequest;
-    private static readonly object _rootSync = new object();
+    private static readonly object _rootSync = new();
     private readonly IConfiguration _configuration;
     private readonly NovellLdapEntryExtension _novellLdapEntryExtension;
     private LdapConnection _ldapConnection;

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.Notify;
 
-[Singletone]
+[Singleton]
 public class TelegramServiceClient : ITelegramService
 {
     private readonly ICacheNotify<RegisterUserProto> _cacheRegisterUser;

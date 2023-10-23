@@ -56,7 +56,7 @@ public class BackupCode
 [Scope]
 public class TfaManager
 {
-    private static readonly TwoFactorAuthenticator _tfa = new TwoFactorAuthenticator();
+    private static readonly TwoFactorAuthenticator _tfa = new();
     private ICache Cache { get; set; }
 
     private readonly SettingsManager _settingsManager;

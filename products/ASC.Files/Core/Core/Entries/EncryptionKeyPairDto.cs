@@ -68,8 +68,8 @@ public class EncryptionKeyPairDtoHelper
 
     public async Task SetKeyPairAsync(string publicKey, string privateKeyEnc)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(publicKey);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(privateKeyEnc);
+        ArgumentException.ThrowIfNullOrEmpty(publicKey);
+        ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
         var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(user))

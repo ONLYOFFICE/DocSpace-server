@@ -72,7 +72,7 @@ public class ElasticSearchIndexService : BackgroundService
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var factoryIndexer = scope.ServiceProvider.GetService<FactoryIndexer>();
 
-        while (!factoryIndexer.CheckState(false))
+        while (!await factoryIndexer.CheckStateAsync(false))
         {
             if (stoppingToken.IsCancellationRequested)
             {
@@ -121,7 +121,7 @@ public class ElasticSearchIndexService : BackgroundService
             }
 
             _logger.DebugProduct(product.IndexName);
-            _indexNotify.Publish(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
+            await _indexNotify.PublishAsync(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
             await product.IndexAllAsync();
         }
         catch (Exception e)
@@ -152,7 +152,7 @@ public class ElasticSearchIndexService : BackgroundService
             });
 
 
-            _indexNotify.Publish(new IndexAction() { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
+            await _indexNotify.PublishAsync(new IndexAction() { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
             _isStarted = false;
         }
         catch (Exception e)

@@ -70,7 +70,7 @@ public class RestorePortalTask : PortalTaskBase
 
     public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(fromFilePath);
+        ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
         if (!File.Exists(fromFilePath))
         {

@@ -51,16 +51,9 @@
 
 namespace ASC.Data.Backup.Services;
 
-public static class BackupProgressItemEnumConverter
+public enum BackupProgressItemType
 {
-    public static BackupProgressEnum Convert(this BackupProgressItemType backupProgressItemType)
-    {
-        return backupProgressItemType switch
-        {
-            BackupProgressItemType.Backup => BackupProgressEnum.Backup,
-            BackupProgressItemType.Restore => BackupProgressEnum.Restore,
-            BackupProgressItemType.Transfer => BackupProgressEnum.Transfer,
-            _ => BackupProgressEnum.Backup
-        };
-    }
+    Backup,
+    Restore,
+    Transfer
 }

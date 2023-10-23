@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Api.Core;
 
-[Singletone(Additional = typeof(SmtpOperationExtension))]
+[Singleton(Additional = typeof(SmtpOperationExtension))]
 public class SmtpOperation
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "smtp";

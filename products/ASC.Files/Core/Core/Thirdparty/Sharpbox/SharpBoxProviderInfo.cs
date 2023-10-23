@@ -130,8 +130,7 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
 [Transient]
 internal class SharpBoxStorageDisposableWrapper : IDisposable
 {
-    private readonly ConcurrentDictionary<int, CloudStorage> _storages =
-        new ConcurrentDictionary<int, CloudStorage>();
+    private readonly ConcurrentDictionary<int, CloudStorage> _storages = new();
 
     public SharpBoxStorageDisposableWrapper()
     { }

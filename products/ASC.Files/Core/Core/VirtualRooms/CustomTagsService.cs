@@ -56,7 +56,7 @@ public class CustomTagsService
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
         }
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(name);
+        ArgumentException.ThrowIfNullOrEmpty(name);
 
         var tagDao = _daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).ToListAsync();

@@ -679,7 +679,7 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
     }
 }
 
-[Singletone]
+[Singleton]
 public class SharePointProviderInfoHelper
 {
     private readonly TimeSpan _cacheExpiration;

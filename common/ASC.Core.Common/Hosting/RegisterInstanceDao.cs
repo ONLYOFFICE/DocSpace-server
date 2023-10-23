@@ -42,7 +42,7 @@ public class RegisterInstanceDao<T> : IRegisterInstanceDao<T> where T : IHostedS
 
     public async Task AddOrUpdateAsync(InstanceRegistration obj)
     {
-        await using var instanceRegistrationContext = _dbContextFactory.CreateDbContext();
+        await using var instanceRegistrationContext = await _dbContextFactory.CreateDbContextAsync();
         var inst = await instanceRegistrationContext.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
 
         if (inst == null)
@@ -84,13 +84,13 @@ public class RegisterInstanceDao<T> : IRegisterInstanceDao<T> where T : IHostedS
 
     public async Task<IEnumerable<InstanceRegistration>> GetAllAsync()
     {
-        await using var instanceRegistrationContext = _dbContextFactory.CreateDbContext();
+        await using var instanceRegistrationContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.InstanceRegistrationsAsync(instanceRegistrationContext, typeof(T).GetFormattedName()).ToListAsync();
     }
 
     public async Task DeleteAsync(string instanceId)
     {
-        await using var instanceRegistrationContext = _dbContextFactory.CreateDbContext();
+        await using var instanceRegistrationContext = await _dbContextFactory.CreateDbContextAsync();
         var item = await instanceRegistrationContext.InstanceRegistrations.FindAsync(instanceId);
 
         if (item == null)

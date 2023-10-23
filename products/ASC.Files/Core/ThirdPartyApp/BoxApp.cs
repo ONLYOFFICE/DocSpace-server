@@ -349,14 +349,11 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         var boxUserId = context.Request.Query["userId"];
 
-        if (_authContext.IsAuthenticated)
+        if (_authContext.IsAuthenticated && !(await CurrentUserAsync(boxUserId)))
         {
-            if (!(await CurrentUserAsync(boxUserId)))
-            {
-                _logger.DebugBoxAppLogout(boxUserId);
-                _cookiesManager.ClearCookies(CookiesType.AuthKey);
-                _authContext.Logout();
-            }
+            _logger.DebugBoxAppLogout(boxUserId);
+            _cookiesManager.ClearCookies(CookiesType.AuthKey);
+            _authContext.Logout();
         }
 
         if (!_authContext.IsAuthenticated)

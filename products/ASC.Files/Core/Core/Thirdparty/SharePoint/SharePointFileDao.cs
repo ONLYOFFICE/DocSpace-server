@@ -346,7 +346,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public async Task<bool> IsExistAsync(string title, Microsoft.SharePoint.Client.Folder folder)
+    public async Task<bool> IsExistAsync(string title, Folder folder)
     {
         var files = await SharePointProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
 

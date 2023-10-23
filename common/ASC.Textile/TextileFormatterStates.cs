@@ -29,8 +29,8 @@ public partial class TextileFormatter
 {
     #region State Registration
 
-    private static readonly List<Type> _registeredStates = new List<Type>();
-    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = new List<FormatterStateAttribute>();
+    private static readonly List<Type> _registeredStates = new();
+    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = new();
 
     public static void RegisterFormatterState(Type formatterStateType)
     {
@@ -58,8 +58,8 @@ public partial class TextileFormatter
 
     #region State Management
 
-    private readonly List<Type> _disabledFormatterStates = new List<Type>();
-    private readonly Stack<FormatterState> _stackOfStates = new Stack<FormatterState>();
+    private readonly List<Type> _disabledFormatterStates = new();
+    private readonly Stack<FormatterState> _stackOfStates = new();
 
     private bool IsFormatterStateEnabled(Type type)
     {

@@ -39,7 +39,7 @@ public class CommonChunkedUploadSession : ICloneable
     public Guid UserId { get; set; }
     public bool UseChunks { get; set; }
     public string CultureName { get; set; }
-    public Dictionary<string, object> Items { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object> Items { get; set; } = new();
 
     [JsonIgnore]
     public string TempPath

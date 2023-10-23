@@ -26,20 +26,19 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Singletone]
+[Singleton]
 public class BackupWorker
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "backup";
 
-    public string TempFolder { get; set; }
+    public string TempFolder { get; }
 
     private DistributedTaskQueue _progressQueue;
     private int _limit;
     private string _upgradesPath;
-    private readonly TempPath _tempPath;
     private readonly SetupInfo _setupInfo;
     private readonly IServiceProvider _serviceProvider;
-    private readonly object _synchRoot = new object();
+    private readonly object _syncRoot = new();
 
     public BackupWorker(
         IDistributedTaskQueueFactory queueFactory,
@@ -49,8 +48,7 @@ public class BackupWorker
     {
         _serviceProvider = serviceProvider;
         _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-        _tempPath = tempPath;
-        TempFolder = Path.Combine(_tempPath.GetTempPath(), "backup");
+        TempFolder = Path.Combine(tempPath.GetTempPath(), "backup");
         _setupInfo = setupInfo;
     }
 
@@ -68,8 +66,13 @@ public class BackupWorker
 
     public void Stop()
     {
-        if (_progressQueue != null)
+        lock (_syncRoot)
         {
+            if (_progressQueue == null)
+            {
+                return;
+            }
+
             var tasks = _progressQueue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
 
             foreach (var t in tasks)
@@ -83,9 +86,9 @@ public class BackupWorker
 
     public BackupProgress StartBackup(StartBackupRequest request)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
-            var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId && t.BackupProgressItemEnum == BackupProgressItemEnum.Backup);
+            var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
             if (item != null && item.IsCompleted)
             {
@@ -110,11 +113,11 @@ public class BackupWorker
 
     public void StartScheduledBackup(BackupSchedule schedule)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
-            var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == schedule.TenantId && t.BackupProgressItemEnum == BackupProgressItemEnum.Backup);
+            var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == schedule.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _progressQueue.DequeueTask(item.Id);
                 item = null;
@@ -132,31 +135,31 @@ public class BackupWorker
 
     public BackupProgress GetBackupProgress(int tenantId)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
-            return ToBackupProgress(_progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemEnum == BackupProgressItemEnum.Backup));
+            return ToBackupProgress(_progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup));
         }
     }
 
     public BackupProgress GetTransferProgress(int tenantId)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
-            return ToBackupProgress(_progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemEnum == BackupProgressItemEnum.Transfer));
+            return ToBackupProgress(_progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Transfer));
         }
     }
 
     public BackupProgress GetRestoreProgress(int tenantId)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
-            return ToBackupProgress(_progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemEnum == BackupProgressItemEnum.Restore));
+            return ToBackupProgress(_progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
     }
 
     public void ResetBackupError(int tenantId)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
             var progress = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
@@ -168,7 +171,7 @@ public class BackupWorker
 
     public void ResetRestoreError(int tenantId)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
             var progress = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
@@ -180,7 +183,7 @@ public class BackupWorker
 
     public BackupProgress StartRestore(StartRestoreRequest request)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
             var item = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId);
             if (item != null && item.IsCompleted)
@@ -201,10 +204,10 @@ public class BackupWorker
 
     public BackupProgress StartTransfer(int tenantId, string targetRegion, bool notify)
     {
-        lock (_synchRoot)
+        lock (_syncRoot)
         {
             var item = _progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _progressQueue.DequeueTask(item.Id);
                 item = null;
@@ -282,10 +285,10 @@ public class BackupWorker
             Progress = (int)progressItem.Percentage,
             Error = progressItem.Exception != null ? progressItem.Exception.Message : "",
             TenantId = progressItem.TenantId,
-            BackupProgressEnum = progressItem.BackupProgressItemEnum.Convert()
+            BackupProgressEnum = progressItem.BackupProgressItemType.Convert()
         };
 
-        if ((progressItem.BackupProgressItemEnum == BackupProgressItemEnum.Backup || progressItem.BackupProgressItemEnum == BackupProgressItemEnum.Transfer) && progressItem.Link != null)
+        if ((progressItem.BackupProgressItemType == BackupProgressItemType.Backup || progressItem.BackupProgressItemType == BackupProgressItemType.Transfer) && progressItem.Link != null)
         {
             progress.Link = progressItem.Link;
         }

@@ -83,10 +83,10 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
-    public FileOperation<T1, string> ThirdPartyOperation { get; set; }
-    public FileOperation<T2, int> DaoOperation { get; set; }
+    protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
+    protected FileOperation<T2, int> DaoOperation { get; set; }
 
-    public ComposeFileOperation(
+    protected ComposeFileOperation(
         IServiceProvider serviceProvider,
         FileOperation<T1, string> thirdPartyOperation,
         FileOperation<T2, int> daoOperation)
@@ -97,12 +97,12 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
         this[Hold] = ThirdPartyOperation[Hold] || DaoOperation[Hold];
     }
 
-    public override async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
+    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         if (ThirdPartyOperation.Files.Any() || ThirdPartyOperation.Folders.Any())
         {
             ThirdPartyOperation.Publication = PublishChanges;
-            await ThirdPartyOperation.RunJob(_, cancellationToken);
+            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
         }
         else
         {
@@ -112,7 +112,7 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
         if (DaoOperation.Files.Any() || DaoOperation.Folders.Any())
         {
             DaoOperation.Publication = PublishChanges;
-            await DaoOperation.RunJob(_, cancellationToken);
+            await DaoOperation.RunJob(distributedTask, cancellationToken);
         }
         else
         {

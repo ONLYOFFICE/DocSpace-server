@@ -167,7 +167,7 @@ public class AdditionalWhiteLabelSettingsHelper
 
 /// <summary>
 /// </summary>
-[Singletone]
+[Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit
 {
     private readonly IConfiguration _configuration;

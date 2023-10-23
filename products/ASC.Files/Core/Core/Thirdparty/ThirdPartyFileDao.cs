@@ -373,12 +373,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
 
         var id = Dao.MakeId(Dao.GetId(file));
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
             {
                 await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
@@ -443,7 +443,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
             throw new Exception(errorFolder.Error);
         }
 
-        var fromFolderId = Dao.GetParentFolderId(file);
+        Dao.GetParentFolderId(file);
 
         var newTitle = await Dao.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
         var storage = await ProviderInfo.StorageAsync;

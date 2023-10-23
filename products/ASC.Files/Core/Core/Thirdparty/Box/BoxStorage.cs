@@ -33,7 +33,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 {
     private BoxClient _boxClient;
 
-    private readonly List<string> _boxFields = new List<string> { "created_at", "modified_at", "name", "parent", "size" };
+    private readonly List<string> _boxFields = new() { "created_at", "modified_at", "name", "parent", "size" };
 
     public bool IsOpened { get; private set; }
     private readonly TempStream _tempStream;
@@ -139,7 +139,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
             await tempBuffer.FlushAsync();
             tempBuffer.Seek(offset, SeekOrigin.Begin);
 
-            str.Dispose();
+            await str.DisposeAsync();
         }
 
         return tempBuffer;

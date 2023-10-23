@@ -164,7 +164,7 @@ public class EncryptionOperation : DistributedTaskProgress
             using var reader = new StreamReader(stream);
             string line;
 
-            while ((line = reader.ReadLine()) != null)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
                 encryptedFiles.Add(line);
             }

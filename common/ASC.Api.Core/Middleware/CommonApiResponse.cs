@@ -33,15 +33,13 @@ public abstract class CommonApiResponse
     public int Status { get; set; }
     public HttpStatusCode StatusCode { get; set; }
 
-    public CommonApiResponse()
+    protected CommonApiResponse()
     {
-
     }
 
     protected CommonApiResponse(HttpStatusCode statusCode)
     {
         StatusCode = statusCode;
-
     }
 }
 
@@ -121,7 +119,7 @@ public class SuccessApiResponse : CommonApiResponse
 
         Links = new List<Link>(1)
         {
-            new Link()
+            new()
             {
                 Href = httpContext.Request.GetDisplayUrl(),
                 Action = httpContext.Request.Method

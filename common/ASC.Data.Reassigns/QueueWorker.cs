@@ -28,7 +28,7 @@ namespace ASC.Data.Reassigns;
 
 public class QueueWorker<T> where T : DistributedTaskProgress
 {
-    private readonly object _synchRoot = new object();
+    private readonly object _synchRoot = new();
 
     protected readonly IServiceProvider _serviceProvider;
     protected readonly DistributedTaskQueue _queue;

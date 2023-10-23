@@ -149,7 +149,7 @@ public class CookieStorage
             string.Empty, //login
             tenant,
             string.Empty, //password
-            GetUserDepenencySalt(),
+            GetUserDependencySalt(),
             userid.ToString("N"),
             indexTenant,
             expires.ToString(DateTimeFormat, CultureInfo.InvariantCulture),
@@ -159,18 +159,18 @@ public class CookieStorage
         return _instanceCrypto.Encrypt(s);
     }
 
-    private string GetUserDepenencySalt()
+    private string GetUserDependencySalt()
     {
         var data = string.Empty;
         try
         {
-            if (_httpContext?.Request != null)
+            if (_httpContext is { Request: not null, Connection.RemoteIpAddress: not null })
             {
                 data = _httpContext.Connection.RemoteIpAddress.ToString();
             }
         }
         catch { }
 
-        return Hasher.Base64Hash(data ?? string.Empty, HashAlg.SHA256);
+        return Hasher.Base64Hash(data, HashAlg.SHA256);
     }
 }

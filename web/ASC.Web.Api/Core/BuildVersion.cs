@@ -43,14 +43,6 @@ public class BuildVersion
     /// <type>System.String, System</type>
     public string DocumentServer { get; set; }
 
-    /// <summary>Mail Server version</summary>
-    /// <type>System.String, System</type>
-    public string MailServer { get; set; }
-
-    /// <summary>XMPP server version</summary>
-    /// <type>System.String, System</type>
-    public string XmppServer { get; set; }
-
     [JsonIgnore]
     private readonly IConfiguration _configuration;
 
@@ -73,8 +65,6 @@ public class BuildVersion
 
         DocSpace = GetDocSpaceVersion();
         DocumentServer = await GetDocumentVersionAsync();
-        MailServer = GetMailServerVersion();
-        XmppServer = GetXmppServerVersion();
 
         return this;
     }
@@ -92,45 +82,5 @@ public class BuildVersion
         }
 
         return await _documentServiceConnector.GetVersionAsync();
-    }
-
-    private static string GetMailServerVersion()
-    {
-        //TODO
-        return "";
-        /*
-        try
-        {
-               
-            var engineFactory = new EngineFactory(
-                CoreContext.TenantManager.GetCurrentTenant().Id,
-                SecurityContext.CurrentAccount.ID.ToString());
-
-            var version = engineFactory.ServerEngine.GetServerVersion();
-            return version;
-            }
-        catch (Exception e)
-        {
-            LogManager.GetLogger("ASC").Warn(e.Message, e);
-        }
-
-        return null;*/
-    }
-
-    private static string GetXmppServerVersion()
-    {
-        //try
-        //{
-        //    if (ConfigurationManagerExtension.AppSettings["web.talk"] != "true")
-        //        return null;
-
-        //    return new JabberServiceClient().GetVersion();
-        //}
-        //catch (Exception e)
-        //{
-        //    LogManager.GetLogger("ASC").Warn(e.Message, e);
-        //}
-
-        return null;
     }
 }

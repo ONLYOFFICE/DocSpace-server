@@ -62,7 +62,7 @@ public class DbTenantService : ITenantService
 
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(DateTime from, bool active = true)
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = tenantDbContext.Tenants.AsQueryable();
 
         if (active)
@@ -92,7 +92,7 @@ public class DbTenantService : ITenantService
 
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await tenantDbContext.Tenants
             .Where(r => ids.Contains(r.Id) && r.Status == TenantStatus.Active)
@@ -102,10 +102,10 @@ public class DbTenantService : ITenantService
 
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(login);
+        ArgumentException.ThrowIfNullOrEmpty(login);
 
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
-        await using var userDbContext = _userDbContextFactory.CreateDbContext();//TODO: remove
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var userDbContext = await _userDbContextFactory.CreateDbContextAsync();//TODO: remove
         IQueryable<TenantUserSecurity> query() => tenantDbContext.Tenants
                 
                 .Where(r => r.Status == TenantStatus.Active)
@@ -162,7 +162,7 @@ public class DbTenantService : ITenantService
 
     public async Task<Tenant> GetTenantAsync(int id)
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await tenantDbContext.Tenants
             .Where(r => r.Id == id)
             .ProjectTo<Tenant>(_mapper.ConfigurationProvider)
@@ -180,11 +180,11 @@ public class DbTenantService : ITenantService
 
     public async Task<Tenant> GetTenantAsync(string domain)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(domain);
+        ArgumentException.ThrowIfNullOrEmpty(domain);
 
         domain = domain.ToLowerInvariant();
 
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await tenantDbContext.Tenants
             .Where(r => r.Alias == domain || r.MappedDomain == domain)
@@ -196,7 +196,7 @@ public class DbTenantService : ITenantService
 
     public Tenant GetTenant(string domain)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(domain);
+        ArgumentException.ThrowIfNullOrEmpty(domain);
 
         domain = domain.ToLowerInvariant();
 
@@ -223,7 +223,7 @@ public class DbTenantService : ITenantService
 
     public async Task<Tenant> GetTenantForStandaloneWithoutAliasAsync(string ip)
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await tenantDbContext.Tenants
             .OrderBy(a => a.Status)
@@ -237,7 +237,7 @@ public class DbTenantService : ITenantService
         ArgumentNullException.ThrowIfNull(tenant);
             DbTenant dbTenant = null;
 
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         if (!string.IsNullOrEmpty(tenant.MappedDomain))
         {
@@ -306,7 +306,7 @@ public class DbTenantService : ITenantService
     {
         var postfix = auto ? "_auto_deleted" : "_deleted";
 
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var alias = await Queries.GetAliasAsync(tenantDbContext, id);
 
@@ -328,7 +328,7 @@ public class DbTenantService : ITenantService
 
     public async Task PermanentlyRemoveTenantAsync(int id)
     {
-        using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenant = await tenantDbContext.Tenants.SingleOrDefaultAsync(r => r.Id == id);
         tenantDbContext.Tenants.Remove(tenant);
         await tenantDbContext.SaveChangesAsync();
@@ -336,14 +336,14 @@ public class DbTenantService : ITenantService
 
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.TenantVersionsAsync(tenantDbContext).ToListAsync();
     }
 
 
     public async Task<byte[]> GetTenantSettingsAsync(int tenant, string key)
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.SettingValueAsync(tenantDbContext, tenant, key);
     }
 
@@ -356,7 +356,7 @@ public class DbTenantService : ITenantService
 
     public async Task SetTenantSettingsAsync(int tenant, string key, byte[] data)
     {
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         if (data == null || data.Length == 0)
         {
             var settings = await Queries.CoreSettingsAsync(tenantDbContext, tenant, key);
@@ -421,7 +421,7 @@ public class DbTenantService : ITenantService
             _tenantDomainValidator.ValidateDomainCharacters(domain);
         }
 
-        await using var tenantDbContext = _dbContextFactory.CreateDbContext();
+        await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         // forbidden or exists
         var exists = false;
 

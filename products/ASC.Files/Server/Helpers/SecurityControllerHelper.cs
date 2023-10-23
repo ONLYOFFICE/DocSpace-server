@@ -60,7 +60,7 @@ public class SecurityControllerHelper : FilesHelperBase
 
     public async Task<string> GenerateSharedLinkAsync<T>(T fileId, FileShare share)
     {
-        var file = await GetFileInfoAsync(fileId);
+        await GetFileInfoAsync(fileId);
 
         var tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T> { });
         var sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
@@ -69,7 +69,7 @@ public class SecurityControllerHelper : FilesHelperBase
         {
             var list = new List<AceWrapper>
             {
-                new AceWrapper
+                new()
                 {
                     Id = FileConstant.ShareLinkId,
                     SubjectGroup = true,

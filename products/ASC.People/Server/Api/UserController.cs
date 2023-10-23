@@ -595,7 +595,7 @@ public class UserController : PeopleControllerBase
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.IndexOf(query, StringComparison.OrdinalIgnoreCase) > -1 || (x.LastName != null && x.LastName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) ||
-                                (x.UserName != null && x.UserName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.Email != null && x.Email.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.ContactsList != null && x.ContactsList.Any(y => y.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1)));
+                                (x.UserName != null && x.UserName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.Email != null && x.Email.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.ContactsList != null && x.ContactsList.Exists(y => y.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1)));
 
         await foreach (var item in list)
         {
@@ -1306,7 +1306,7 @@ public class UserController : PeopleControllerBase
             await _userManager.UpdateUserInfoAsync(u);
 
             if (activationstatus == EmployeeActivationStatus.Activated
-                && u.IsOwner(_tenantManager.GetCurrentTenant()))
+                && u.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
             {
                 var settings = _settingsManager.Load<FirstEmailConfirmSettings>();
 
@@ -1315,7 +1315,7 @@ public class UserController : PeopleControllerBase
                     await _studioNotifyService.SendAdminWelcomeAsync(u);
 
                     settings.IsFirst = false;
-                    _settingsManager.Save(settings);
+                    await _settingsManager.SaveAsync(settings);
                 }
             }
 
@@ -1687,7 +1687,7 @@ public class UserController : PeopleControllerBase
                 }
             }
 
-            var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
             await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 

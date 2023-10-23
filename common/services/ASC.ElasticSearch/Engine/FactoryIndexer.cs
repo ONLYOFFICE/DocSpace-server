@@ -26,7 +26,7 @@
 
 namespace ASC.ElasticSearch;
 
-[Singletone]
+[Singleton]
 public class FactoryIndexerHelper
 {
     public DateTime LastIndexed { get; set; }
@@ -92,7 +92,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     {
         IReadOnlyCollection<T> result = null;
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<T>();
 
@@ -118,7 +118,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     {
         List<int> result = null;
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<int>();
 
@@ -145,7 +145,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         List<int> result = null;
         long total;
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<int>();
             total = 0;
@@ -172,13 +172,13 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<bool> CanIndexByContentAsync(T t)
     {
-        return Support(t) && await _searchSettingsHelper.CanIndexByContentAsync<T>();
+        return await SupportAsync(t) && await _searchSettingsHelper.CanIndexByContentAsync<T>();
     }
 
     public async Task<bool> Index(T data, bool immediately = true)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
             return false;
         }
@@ -200,7 +200,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task Index(List<T> data, bool immediately = true, int retry = 0)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || data.Count == 0)
+        if (!await SupportAsync(t) || data.Count == 0)
         {
             return;
         }
@@ -281,7 +281,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || data.Count == 0)
+        if (!await SupportAsync(t) || data.Count == 0)
         {
             return;
         }
@@ -408,7 +408,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
             return;
         }
@@ -427,7 +427,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
             return;
         }

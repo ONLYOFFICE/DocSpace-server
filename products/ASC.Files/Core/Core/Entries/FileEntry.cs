@@ -102,12 +102,12 @@ public abstract class FileEntry : ICloneable
     }
 }
 
-public interface IFileEntry<in T>
+public interface IFileEntry
 {
     string UniqID { get; }
 }
 
-public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
+public abstract class FileEntry<T> : FileEntry, IFileEntry
 {
     public T Id { get; set; }
     public T ParentId { get; set; }

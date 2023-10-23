@@ -255,12 +255,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
         var folder = await _dao.GetFolderAsync(folderId);
         var id = _dao.MakeId(folder);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
             {
                 await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
@@ -530,69 +530,63 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem> : BaseFolderDao, IFold
 
     public Task<string> GetFolderIDUserAsync(bool createIfNotExists, Guid? userId)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDShareAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
 
     public Task<string> GetFolderIDRecentAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDFavoritesAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDTemplatesAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDTrashAsync(bool createIfNotExists, Guid? userId)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
-
-    public string GetFolderIDPhotos(bool createIfNotExists)
-    {
-        return null;
-    }
-
-
+    
     public Task<string> GetFolderIDProjectsAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDVirtualRooms(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDArchive(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetBunchObjectIDAsync(string folderID)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<string> folderIDs)
     {
-        return null;
+        return Task.FromResult<Dictionary<string, string>>(null);
     }
 
     public IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to)

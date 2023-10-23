@@ -62,7 +62,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     public string SiteUrl { get; set; }
 
     [JsonIgnore]
-    public Guid ID => new Guid("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
+    public Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
 
     public MailWhiteLabelSettings(IConfiguration configuration)
     {
@@ -112,7 +112,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     }
 }
 
-[Singletone]
+[Singleton]
 public class MailWhiteLabelSettingsHelper
 {
     private readonly IConfiguration _configuration;

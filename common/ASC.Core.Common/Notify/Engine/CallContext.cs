@@ -32,7 +32,7 @@ namespace ASC.Common.Notify.Engine;
 /// </summary>
 public static class CallContext
 {
-    static readonly ConcurrentDictionary<string, AsyncLocal<object>> _state = new ConcurrentDictionary<string, AsyncLocal<object>>();
+    static readonly ConcurrentDictionary<string, AsyncLocal<object>> _state = new();
 
     /// <summary>
     /// Stores a given object and associates it with the specified name.

@@ -39,7 +39,7 @@ public interface IThirdPartyApp
 public class ThirdPartySelector
 {
     public const string AppAttr = "app";
-    public static readonly Regex AppRegex = new Regex("^" + AppAttr + @"-(\S+)\|(\S+)$", RegexOptions.Singleline | RegexOptions.Compiled);
+    public static readonly Regex AppRegex = new("^" + AppAttr + @"-(\S+)\|(\S+)$", RegexOptions.Singleline | RegexOptions.Compiled);
     private readonly ConsumerFactory _consumerFactory;
 
     public ThirdPartySelector(ConsumerFactory consumerFactory)

@@ -62,7 +62,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         _requestHelper = requestHelper;
     }
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {

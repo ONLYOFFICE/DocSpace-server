@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core;
 
-[Singletone]
+[Singleton]
 public class WebPluginSettings
 {
     public WebPluginSettings(ConfigurationExtension configuration)

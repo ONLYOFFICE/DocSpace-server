@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Billing;
 
-[Singletone]
+[Singleton]
 public class TenantExtraConfig
 {
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -54,7 +54,7 @@ public class TenantExtraConfig
     }
 }
 
-[Singletone]
+[Singleton]
 public class TariffServiceStorage
 {
     private static readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(5);
@@ -300,7 +300,7 @@ public class TariffService : ITariffService
 
                 tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new Quota(quota.TenantId, 1) },
+                    Quotas = new List<Quota> { new(quota.TenantId, 1) },
                     DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod)
                 };
 
@@ -540,7 +540,7 @@ public class TariffService : ITariffService
             return null;
         }
 
-        var result = new Uri(url.ToString()
+        var result = new Uri(url
                                .Replace("__Tenant__", HttpUtility.UrlEncode(await _coreSettings.GetKeyAsync(tenant)))
                                .Replace("__Currency__", HttpUtility.UrlEncode(currency ?? ""))
                                .Replace("__Language__", HttpUtility.UrlEncode((language ?? "").ToLower()))
@@ -611,7 +611,7 @@ public class TariffService : ITariffService
 
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
-        await using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var r = await Queries.TariffAsync(coreDbContext, tenant, id);
 
@@ -637,7 +637,7 @@ public class TariffService : ITariffService
         {
             try
             {
-                await using var dbContext = _dbContextFactory.CreateDbContext();
+                await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
                 var stamp = tariffInfo.DueDate;
                 if (stamp.Equals(DateTime.MaxValue))
@@ -712,7 +712,7 @@ public class TariffService : ITariffService
     {
         const int tenant = Tenant.DefaultTenant;
 
-        await using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
         await Queries.UpdateTariffs(coreDbContext, tenant);
 
         ClearCache(tenant);
@@ -804,7 +804,7 @@ public class TariffService : ITariffService
                 unlimTariff.DueDate = tariff.DueDate;
                 unlimTariff.Quotas = new List<Quota>()
                 {
-                    new Quota(defaultQuota.TenantId, 1)
+                    new(defaultQuota.TenantId, 1)
                 };
 
                 tariff = unlimTariff;

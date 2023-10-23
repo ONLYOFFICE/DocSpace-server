@@ -81,7 +81,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
 
         var claims = new List<Claim>()
         {
-                new Claim(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
+                new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };
 
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)

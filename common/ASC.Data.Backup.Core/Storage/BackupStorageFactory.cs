@@ -68,7 +68,7 @@ public class BackupStorageFactory
 
     public async Task<IBackupStorage> GetBackupStorageAsync(BackupStorageType type, int tenantId, Dictionary<string, string> storageParams)
     {
-        var settings = _configuration.GetSetting<BackupSettings>("backup");
+        _configuration.GetSetting<BackupSettings>("backup");
 
         switch (type)
         {

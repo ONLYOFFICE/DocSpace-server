@@ -77,7 +77,7 @@ public class LogoUploader
                 else
                 {
                     using (var stream = new MemoryStream(data))
-                    using (var image = Image.Load(stream))
+                    using (var image = await Image.LoadAsync(stream))
                     {
                         var actualSize = image.Size;
                         if (actualSize.Height != size.Height && actualSize.Width != size.Width)

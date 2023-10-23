@@ -183,7 +183,7 @@ public class PaymentController : ControllerBase
     {
         var currency = await _regionHelper.GetCurrencyFromRequestAsync();
         var result = (await _tenantManager.GetProductPriceInfoAsync())
-            .ToDictionary(pr => pr.Key, pr => pr.Value.ContainsKey(currency) ? pr.Value[currency] : 0);
+            .ToDictionary(pr => pr.Key, pr => pr.Value.TryGetValue(currency, out var value) ? value : 0);
         return result;
     }
 
@@ -278,7 +278,7 @@ public class PaymentController : ControllerBase
 
     internal void CheckCache(string basekey)
     {
-        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString() + basekey;
+        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress + basekey;
 
         if (_memoryCache.TryGetValue<int>(key, out var count))
         {

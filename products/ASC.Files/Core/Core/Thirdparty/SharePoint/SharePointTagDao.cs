@@ -47,7 +47,7 @@ internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
     {
         var folderId = DaoSelector.ConvertId(parentFolder.Id);
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var entryIds = await Queries.HashIdsAsync(filesDbContext, PathPrefix).ToListAsync();
 
         if (!entryIds.Any())

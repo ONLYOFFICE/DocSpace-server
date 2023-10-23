@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone]
+[Singleton]
 public class PathUtils
 {
     public IHostEnvironment HostEnvironment { get; }

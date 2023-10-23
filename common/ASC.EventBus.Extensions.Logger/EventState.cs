@@ -24,51 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ActiveDirectory.ComplexOperations.Data;
+namespace ASC.EventBus.Extensions.Logger;
 
-public enum LdapChangeType
+public enum EventState
 {
-    User,
-    Group
+    NotPublished = 0,
+    InProgress = 1,
+    Published = 2,
+    PublishedFailed = 3
 }
 
-public enum LdapItemChangeKey
-{
-    Sid,
-    Name,
-    FirstName,
-    LastName,
-    Mail,
-    Phone,
-    Title,
-    Location,
-    Member
-}
-
-public enum LdapChangeAction
-{
-    None,
-    Skip,
-    Add,
-    AddMember,
-    Merge,
-    Update,
-    Remove,
-    RemoveMember,
-    SaveAsPortal
-}
-
-public static class LdapUserMapping
-{
-    public static readonly List<string> Fields = new()
-    {
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.FirstName),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.LastName),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Mail),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Phone),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Title),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Location),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Sid),
-            Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Member)
-        };
-}

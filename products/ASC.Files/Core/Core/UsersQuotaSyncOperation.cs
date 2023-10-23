@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files;
 
-[Singletone(Additional = typeof(UsersQuotaOperationExtension))]
+[Singleton(Additional = typeof(UsersQuotaOperationExtension))]
 public class UsersQuotaSyncOperation
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";

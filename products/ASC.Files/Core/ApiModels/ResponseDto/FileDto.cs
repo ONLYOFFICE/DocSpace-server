@@ -184,11 +184,10 @@ public class FileDtoHelper : FileEntryDtoHelper
         {
             result.RootFolderType = FolderType.SHARE;
             var folderDao = _daoFactory.GetFolderDao<T>();
-            FileEntry<T> parentFolder;
 
             if (folders != null)
             {
-                var folderWithRight = folders.FirstOrDefault(f => f.Item1.Id.Equals(file.ParentId));
+                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(file.ParentId));
                 if (folderWithRight == null || !folderWithRight.Item2)
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
@@ -196,7 +195,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
             else
             {
-                parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(file.ParentId);
                 if (!await _fileSecurity.CanReadAsync(parentFolder))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();

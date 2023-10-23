@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.RemovePortal;
 
-[Singletone(Additional = typeof(RemovePortalWorkerExtension))]
+[Singleton(Additional = typeof(RemovePortalWorkerExtension))]
 public class RemovePortalWorker
 {
     private readonly object _locker;

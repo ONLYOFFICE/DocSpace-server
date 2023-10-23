@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Singletone]
+[Singleton]
 internal sealed class BackupListenerService : IHostedService
 {
     private readonly ICacheNotify<DeleteSchedule> _cacheDeleteSchedule;

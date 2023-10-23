@@ -204,9 +204,7 @@ public class BackupAjaxHandler
     {
         await DemandPermissionsBackupAsync();
 
-        ScheduleResponse response;
-
-        response = await _backupService.GetScheduleAsync(await GetCurrentTenantIdAsync());
+        var response = await _backupService.GetScheduleAsync(await GetCurrentTenantIdAsync());
         if (response == null)
         {
             return null;
@@ -215,7 +213,7 @@ public class BackupAjaxHandler
         var schedule = new Schedule
         {
             StorageType = response.StorageType,
-            StorageParams = response.StorageParams.ToDictionary(r => r.Key, r => r.Value) ?? new Dictionary<string, string>(),
+            StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
             CronParams = new CronParams(response.Cron),
             BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
             LastBackupTime = response.LastBackupTime

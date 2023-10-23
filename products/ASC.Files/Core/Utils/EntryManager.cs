@@ -39,21 +39,6 @@ public class LockerManager
         _thirdPartySelector = thirdPartySelector;
     }
 
-    public async Task<bool> FileLockedForMe<T>(T fileId, Guid userId = default)
-    {
-        var app = _thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app != null)
-        {
-            return false;
-        }
-
-        userId = userId == default ? _authContext.CurrentAccount.ID : userId;
-        var tagDao = _daoFactory.GetTagDao<T>();
-        var lockedBy = await FileLockedBy(fileId, tagDao);
-
-        return lockedBy != Guid.Empty && lockedBy != userId;
-    }
-
     public async Task<bool> FileLockedForMeAsync<T>(T fileId, Guid userId = default)
     {
         var app = _thirdPartySelector.GetAppByFileId(fileId.ToString());
@@ -62,18 +47,11 @@ public class LockerManager
             return false;
         }
 
-        userId = userId == default ? _authContext.CurrentAccount.ID : userId;
+        userId = userId == Guid.Empty ? _authContext.CurrentAccount.ID : userId;
         var tagDao = _daoFactory.GetTagDao<T>();
         var lockedBy = await FileLockedByAsync(fileId, tagDao);
 
         return lockedBy != Guid.Empty && lockedBy != userId;
-    }
-
-    public async Task<Guid> FileLockedBy<T>(T fileId, ITagDao<T> tagDao)
-    {
-        var tagLock = await tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
-
-        return tagLock != null ? tagLock.Owner : Guid.Empty;
     }
 
     public async Task<Guid> FileLockedByAsync<T>(T fileId, ITagDao<T> tagDao)
@@ -235,7 +213,7 @@ public class EntryStatusManager
                 continue;
             }
 
-            if (tagsNew.Any(r => r.EntryId.Equals(file.Id)))
+            if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
             {
                 file.IsNew = true;
             }
@@ -265,7 +243,7 @@ public class EntryStatusManager
 
         foreach (var folder in folders)
         {
-            if (tagsFavorite.Any(r => r.EntryId.Equals(folder.Id)))
+            if (tagsFavorite.Exists(r => r.EntryId.Equals(folder.Id)))
             {
                 folder.IsFavorite = true;
             }
@@ -729,7 +707,7 @@ public class EntryManager
                 fileId = fileString.Id;
             }
 
-            return listFileIds.IndexOf(fileId.ToString());
+            return listFileIds.IndexOf(fileId);
         });
 
         return result;
@@ -763,24 +741,24 @@ public class EntryManager
         {
             if (tag.EntryType == FileEntryType.File)
             {
-                if (tag.EntryId is int)
+                if (tag.EntryId is int eId)
                 {
-                    fileIdsInt.Add((int)tag.EntryId);
+                    fileIdsInt.Add(eId);
                 }
-                else if (tag.EntryId is string)
+                else if (tag.EntryId is string esId)
                 {
-                    fileIdsString.Add((string)tag.EntryId);
+                    fileIdsString.Add(esId);
                 }
             }
             else
             {
-                if (tag.EntryId is int)
+                if (tag.EntryId is int eId)
                 {
-                    folderIdsInt.Add((int)tag.EntryId);
+                    folderIdsInt.Add(eId);
                 }
-                else if (tag.EntryId is string)
+                else if (tag.EntryId is string esId)
                 {
-                    folderIdsString.Add((string)tag.EntryId);
+                    folderIdsString.Add(esId);
                 }
             }
         }
@@ -1256,11 +1234,9 @@ public class EntryManager
     {
         try
         {
-            var linkDao = _daoFactory.GetLinkDao();
             var fileSourceDao = _daoFactory.GetFileDao<TSource>();
             var fileDraftDao = _daoFactory.GetFileDao<TDraft>();
             var folderSourceDao = _daoFactory.GetFolderDao<TSource>();
-            var folderDraftDao = _daoFactory.GetFolderDao<TDraft>();
 
             if (sourceId == null)
             {
@@ -1664,14 +1640,14 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_NotSupportedFormat);
         }
 
-        var exists = _cache.Get<string>(_updateList + fileId.ToString()) != null;
+        var exists = _cache.Get<string>(_updateList + fileId) != null;
         if (exists)
         {
             throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
         }
         else
         {
-            _cache.Insert(_updateList + fileId.ToString(), fileId.ToString(), TimeSpan.FromMinutes(2));
+            _cache.Insert(_updateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
         }
 
         try
@@ -1728,7 +1704,7 @@ public class EntryManager
             var linkDao = _daoFactory.GetLinkDao();
             await linkDao.DeleteAllLinkAsync(newFile.Id.ToString());
 
-            await _fileMarker.MarkAsNewAsync(newFile); ;
+            await _fileMarker.MarkAsNewAsync(newFile);
 
             await _entryStatusManager.SetFileStatusAsync(newFile);
 
@@ -1802,13 +1778,9 @@ public class EntryManager
         }
         else
         {
-            if (!_fileTracker.IsEditing(lastVersionFile.Id))
+            if (!_fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
-                if (fileVersion.Version == lastVersionFile.Version)
-                {
-                    lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
-                }
-
+                lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
                 //lastVersionFile.VersionGroup++;
             }
@@ -1914,7 +1886,7 @@ public class EntryManager
         foreach (var entry in entries)
         {
             var fileEntry = (FileEntry<int>)entry;
-            var data = originsData.FirstOrDefault(data => data.Entries.Contains(new KeyValuePair<string, FileEntryType>(fileEntry.Id.ToString(), fileEntry.FileEntryType)));
+            var data = originsData.Find(data => data.Entries.Contains(new KeyValuePair<string, FileEntryType>(fileEntry.Id.ToString(), fileEntry.FileEntryType)));
 
             if (data?.OriginRoom != null && DocSpaceHelper.IsRoom(data.OriginRoom.FolderType))
             {

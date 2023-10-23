@@ -311,12 +311,9 @@ public class DocumentServiceTrackerHelper
             }
         }
 
-        if (usersDrop.Count > 0)
+        if (usersDrop.Count > 0 && !await _documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
-            if (!await _documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
-            {
-                _logger.ErrorDocServiceDropFailed(usersDrop);
-            }
+            _logger.ErrorDocServiceDropFailed(usersDrop);
         }
 
         foreach (var removeUserId in users)

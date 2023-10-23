@@ -26,7 +26,7 @@
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singletone(Additional = typeof(FileConverterQueueExtension))]
+[Singleton(Additional = typeof(FileConverterQueueExtension))]
 internal class FileConverterService<T> : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;

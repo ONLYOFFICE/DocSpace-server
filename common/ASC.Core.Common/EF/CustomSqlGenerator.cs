@@ -56,8 +56,6 @@ public class CustomMySqlMigrationsSqlGenerator : MySqlMigrationsSqlGenerator
             Options = MigrationsSqlGenerationOptions.Default;
         }
 
-        var test = migrationCommandListBuilder.GetCommandList();
-
         return migrationCommandListBuilder.GetCommandList();
     }
 
@@ -93,7 +91,7 @@ public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
             _isIndexOperation = true;
         }
 
-        if (_isIndexOperation == true)
+        if (_isIndexOperation)
         {
             _operationContainer += o;
         }
@@ -107,7 +105,7 @@ public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
 
     public override MigrationCommandListBuilder AppendLine(string value)
     {
-        if (_isIndexOperation == true)
+        if (_isIndexOperation)
         {
             AppendIndexOpeartion(_operationContainer);
 

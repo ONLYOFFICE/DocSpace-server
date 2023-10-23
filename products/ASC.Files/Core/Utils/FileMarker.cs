@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Utils;
 
-[Singletone]
+[Singleton]
 public class FileMarkerCache
 {
     private readonly ICache _cache;
@@ -61,7 +61,7 @@ public class FileMarkerCache
     }
 }
 
-[Singletone]
+[Singleton]
 public class FileMarkerHelper
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "file_marker";
@@ -113,7 +113,7 @@ public class FileMarker
     private readonly AuthContext _authContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly FilesSettingsHelper _filesSettingsHelper;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
     private readonly FileMarkerCache _fileMarkerCache;
 
@@ -316,7 +316,7 @@ public class FileMarker
                 var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
                 userIDs.ForEach(userID => RemoveFromCahce(virtualRoomsFolderId, userID));
 
-                var room = parentFolders.Where(f => DocSpaceHelper.IsRoom(f.FolderType)).FirstOrDefault();
+                var room = parentFolders.Find(f => DocSpaceHelper.IsRoom(f.FolderType));
 
                 if (room.CreateBy != obj.CurrentAccountId)
                 {

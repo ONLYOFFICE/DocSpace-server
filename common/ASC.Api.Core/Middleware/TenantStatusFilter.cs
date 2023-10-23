@@ -42,7 +42,7 @@ public class TenantStatusFilter : IAsyncResourceFilter
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        var tenant = _tenantManager.GetCurrentTenant(false);
+        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
         if (tenant == null)
         {
             context.Result = new StatusCodeResult((int)HttpStatusCode.NotFound);

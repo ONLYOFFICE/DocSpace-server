@@ -153,12 +153,10 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
 
         while ((bytesRead = await source.ReadAsync(buffer, 0, (int)_setupInfo.ChunkUploadSize)) > 0)
         {
-            using (var theMemStream = new MemoryStream())
-            {
-                await theMemStream.WriteAsync(buffer, 0, bytesRead);
-                theMemStream.Position = 0;
-                file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
-            }
+            using var theMemStream = new MemoryStream();
+            await theMemStream.WriteAsync(buffer, 0, bytesRead);
+            theMemStream.Position = 0;
+            file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
         }
 
         return file.Id;

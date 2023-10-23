@@ -26,7 +26,7 @@
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singletone]
+[Singleton]
 public class ThumbnailBuilderService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -52,7 +52,7 @@ public class ThumbnailBuilderService : BackgroundService
 
         stoppingToken.Register(() => _logger.InformationThumbnailWorkerStopping());
 
-        var fetchedData = new List<FileData<int>>();
+        new List<FileData<int>>();
 
         _logger.TraceProcedureStart();
 

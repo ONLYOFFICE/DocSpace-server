@@ -90,13 +90,13 @@ public class FilesControllerHelper : FilesHelperBase
         return await _pathProvider.GetFileStreamUrlAsync(file);
     }
 
-    public async IAsyncEnumerable<ConversationResultDto<T>> CheckConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
+    public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync<T>(CheckConversionRequestDto<T> checkConversionRequestDto)
     {
-        var checkConversaion = _fileStorageService.CheckConversionAsync(new List<CheckConversionRequestDto<T>>() { cheqConversionRequestDto }, cheqConversionRequestDto.Sync);
+        var checkConversation = _fileStorageService.CheckConversionAsync(new List<CheckConversionRequestDto<T>> { checkConversionRequestDto }, checkConversionRequestDto.Sync);
 
-        await foreach (var r in checkConversaion)
+        await foreach (var r in checkConversation)
         {
-            var o = new ConversationResultDto<T>
+            var o = new ConversationResultDto
             {
                 Id = r.Id,
                 Error = r.Error,
@@ -220,7 +220,7 @@ public class FilesControllerHelper : FilesHelperBase
         }
     }
 
-    public IAsyncEnumerable<ConversationResultDto<T>> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
+    public IAsyncEnumerable<ConversationResultDto> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
     {
         cheqConversionRequestDto.StartConvert = true;
 

@@ -28,9 +28,9 @@ namespace System;
 
 public static class StringExtension
 {
-    private static readonly Regex _reStrict = new Regex(@"^(([^<>()[\]\\.,;:\s@\""]+"
-              + @"(\.[^<>()[\]\\.,;:\s@\""]+)*)|(\"".+\""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
-              + @"\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$");
+    private static readonly Regex _reStrict = new(@"^(([^<>()[\]\\.,;:\s@\""]+"
+                                                  + @"(\.[^<>()[\]\\.,;:\s@\""]+)*)|(\"".+\""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
+                                                  + @"\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$");
 
 
     public static string HtmlEncode(this string str)

@@ -37,7 +37,7 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 public class FeedController : ControllerBase
 {
-    private readonly FeedReadedDataProvider _feedReadedDataProvider;
+    private readonly FeedReadedDataProvider _feedReadDataProvider;
     private readonly ApiContext _apiContext;
     private readonly ICache _newFeedsCountCache;
     private readonly FeedAggregateDataProvider _feedAggregateDataProvider;
@@ -48,7 +48,7 @@ public class FeedController : ControllerBase
     private readonly FileSecurity _fileSecurity;
 
     public FeedController(
-        FeedReadedDataProvider feedReadedDataProvider,
+        FeedReadedDataProvider feedReadDataProvider,
         ApiContext apiContext,
         ICache newFeedsCountCache,
         FeedAggregateDataProvider feedAggregateDataProvider,
@@ -58,7 +58,7 @@ public class FeedController : ControllerBase
         IDaoFactory daoFactory, 
         FileSecurity fileSecurity)
     {
-        _feedReadedDataProvider = feedReadedDataProvider;
+        _feedReadDataProvider = feedReadDataProvider;
         _apiContext = apiContext;
         _newFeedsCountCache = newFeedsCountCache;
         _feedAggregateDataProvider = feedAggregateDataProvider;
@@ -83,7 +83,7 @@ public class FeedController : ControllerBase
     [HttpPut("read")]
     public async Task Read()
     {
-        await _feedReadedDataProvider.SetTimeReadedAsync();
+        await _feedReadDataProvider.SetTimeReadedAsync();
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ public class FeedController : ControllerBase
 
         if (string.IsNullOrEmpty(id))
         {
-            lastTimeReaded = await _feedReadedDataProvider.GetTimeReadedAsync();
+            lastTimeReaded = await _feedReadDataProvider.GetTimeReadedAsync();
             readedDate = timeReaded != null ? timeReaded.UtcTime : lastTimeReaded;
         }
 
@@ -171,7 +171,7 @@ public class FeedController : ControllerBase
         }
         else if (timeReaded == null)
         {
-            await _feedReadedDataProvider.SetTimeReadedAsync();
+            await _feedReadDataProvider.SetTimeReadedAsync();
             _newFeedsCountCache.Remove(Key);
         }
 
@@ -238,7 +238,7 @@ public class FeedController : ControllerBase
 
         if (!int.TryParse(resultfromCache, out var result))
         {
-            var lastTimeReaded = await _feedReadedDataProvider.GetTimeReadedAsync();
+            var lastTimeReaded = await _feedReadDataProvider.GetTimeReadedAsync();
             result = await _feedAggregateDataProvider.GetNewFeedsCountAsync(lastTimeReaded);
             _newFeedsCountCache.Insert(cacheKey, result.ToString(), DateTime.UtcNow.AddMinutes(3));
         }

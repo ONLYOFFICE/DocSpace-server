@@ -44,7 +44,7 @@ public static class UserPhotoThumbnailManager
 
         var resultBitmaps = new List<ThumbnailItem>();
 
-        (var mainImg, var format) = await thumbnailsData.MainImgBitmapAsync();
+        (var mainImg, _) = await thumbnailsData.MainImgBitmapAsync();
 
         using var img = mainImg;
 
@@ -221,28 +221,28 @@ public class ThumbnailsData
     {
         return new List<ThumbnailItem>
                 {
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.RetinaFotoSize,
                             ImgUrl = await _userPhotoManager.GetRetinaPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.MaxFotoSize,
                             ImgUrl = await _userPhotoManager.GetMaxPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.BigFotoSize,
                             ImgUrl = await _userPhotoManager.GetBigPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.MediumFotoSize,
                             ImgUrl = await _userPhotoManager.GetMediumPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.SmallFotoSize,
                             ImgUrl = await _userPhotoManager.GetSmallPhotoURL(_userId)
                         }

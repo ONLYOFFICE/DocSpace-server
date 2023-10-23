@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Classes;
 
-[Singletone]
+[Singleton]
 public class GlobalNotify
 {
     public ILogger Logger { get; set; }
@@ -140,7 +140,7 @@ public class Global
 
     public const int MaxTitle = 170;
 
-    public static readonly Regex InvalidTitleChars = new Regex("[\t*\\+:\"<>?|\\\\/\\p{Cs}]");
+    public static readonly Regex InvalidTitleChars = new("[\t*\\+:\"<>?|\\\\/\\p{Cs}]");
 
     public bool EnableUploadFilter => bool.TrueString.Equals(_configuration["files:upload-filter"] ?? "false", StringComparison.InvariantCultureIgnoreCase);
 
@@ -363,8 +363,7 @@ public class GlobalFolder
         return IdConverter.Convert<T>(await GetFolderProjectsAsync(daoFactory));
     }
 
-    internal static readonly ConcurrentDictionary<string, int> DocSpaceFolderCache =
-        new ConcurrentDictionary<string, int>();
+    internal static readonly ConcurrentDictionary<string, int> DocSpaceFolderCache = new();
 
     public async ValueTask<int> GetFolderVirtualRoomsAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
     {
@@ -414,8 +413,7 @@ public class GlobalFolder
         return await GetFolderArchiveAsync(daoFactory);
     }
 
-    internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache =
-        new ConcurrentDictionary<string, Lazy<int>>(); /*Use SYNCHRONIZED for cross thread blocks*/
+    internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache = new(); /*Use SYNCHRONIZED for cross thread blocks*/
 
     public async ValueTask<int> GetFolderMyAsync(FileMarker fileMarker, IDaoFactory daoFactory)
     {
@@ -652,7 +650,7 @@ public class GlobalFolder
             return id;
         }
 
-        var cacheKey = string.Format("trash/{0}/{1}", _tenantManager.GetCurrentTenant().Id, _authContext.CurrentAccount.ID);
+        var cacheKey = string.Format("trash/{0}/{1}", (await _tenantManager.GetCurrentTenantAsync()).Id, _authContext.CurrentAccount.ID);
         if (!TrashFolderCache.TryGetValue(cacheKey, out var trashFolderId))
         {
             id = _authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
@@ -716,7 +714,7 @@ public class GlobalFolder
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var culture = my ? userManager.GetUsers(userId).GetCulture() : (await tenantManager.GetCurrentTenantAsync()).GetCulture();
+            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : (await tenantManager.GetCurrentTenantAsync()).GetCulture();
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();

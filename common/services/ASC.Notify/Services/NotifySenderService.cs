@@ -26,7 +26,7 @@
 
 namespace ASC.Notify.Services;
 
-[Singletone]
+[Singleton]
 public class NotifySenderService : BackgroundService
 {
     private readonly DbWorker _db;

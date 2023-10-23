@@ -30,7 +30,7 @@ using StackExchange.Redis;
 
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class RedisCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
 {
     private readonly IRedisDatabase _redis;

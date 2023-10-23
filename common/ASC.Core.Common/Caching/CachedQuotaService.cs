@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 class QuotaServiceCache
 {
     internal const string KeyQuota = "quota";
@@ -113,7 +113,7 @@ class CachedQuotaService : IQuotaService
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
     {
         var q = await Service.SaveTenantQuotaAsync(quota);
-        CacheNotify.Publish(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
+        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
 
         return q;
     }
@@ -126,11 +126,11 @@ class CachedQuotaService : IQuotaService
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
         await Service.SetTenantQuotaRowAsync(row, exchange);
-        CacheNotify.Publish(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
+        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
 
         if (row.UserId != Guid.Empty)
         {
-            CacheNotify.Publish(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
+            await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
         }
     }
 

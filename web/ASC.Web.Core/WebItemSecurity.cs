@@ -31,7 +31,7 @@ using SecurityAction = ASC.Common.Security.Authorizing.Action;
 
 namespace ASC.Web.Core;
 
-[Singletone]
+[Singleton]
 public class WebItemSecurityCache
 {
     private readonly ICache _cache;
@@ -85,7 +85,7 @@ public class WebItemSecurityCache
 public class WebItemSecurity
 {    
     private static readonly SemaphoreSlim _semaphore = new(1);
-    private static readonly SecurityAction _read = new SecurityAction(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false, true);
+    private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false, true);
 
     private readonly UserManager _userManager;
     private readonly AuthContext _authContext;
@@ -186,7 +186,7 @@ public class WebItemSecurity
                 }
                 else
                 {
-                    var hasUsers = (await _authorizationManager.GetAcesAsync(Guid.Empty, _read.ID, securityObj)).Any(a => a.Subject != ASC.Core.Users.Constants.GroupEveryone.ID);
+                    var hasUsers = (await _authorizationManager.GetAcesAsync(Guid.Empty, _read.ID, securityObj)).Any(a => a.Subject != Constants.GroupEveryone.ID);
                     result = await _permissionContext.PermissionResolver.CheckAsync(await _authentication.GetAccountByIDAsync(tenant.Id, @for), securityObj, null, _read) ||
                              (hasUsers && await IsProductAdministratorAsync(securityObj.WebItemId, @for));
                 }
@@ -219,18 +219,18 @@ public class WebItemSecurity
 
         // remove old aces
         await _authorizationManager.RemoveAllAcesAsync(securityObj);
-        var allowToAll = new AzRecord(ASC.Core.Users.Constants.GroupEveryone.ID, _read.ID, AceType.Allow, securityObj.FullId);
+        var allowToAll = new AzRecord(Constants.GroupEveryone.ID, _read.ID, AceType.Allow, securityObj.FullId);
         await _authorizationManager.RemoveAceAsync(allowToAll);
 
         // set new aces
-        if (subjects == null || subjects.Length == 0 || subjects.Contains(ASC.Core.Users.Constants.GroupEveryone.ID))
+        if (subjects == null || subjects.Length == 0 || subjects.Contains(Constants.GroupEveryone.ID))
         {
             if (!enabled && subjects != null && subjects.Length == 0)
             {
                 // users from list with no users equals allow to all users
                 enabled = true;
             }
-            subjects = new[] { ASC.Core.Users.Constants.GroupEveryone.ID };
+            subjects = new[] { Constants.GroupEveryone.ID };
         }
         foreach (var s in subjects)
         {
@@ -255,11 +255,11 @@ public class WebItemSecurity
 
             Users = await infoAsync
                            .SelectAwait(async i => await _userManager.GetUsersAsync(i.Item1))
-                           .Where(u => u.Id != ASC.Core.Users.Constants.LostUser.Id).ToListAsync(),
+                           .Where(u => u.Id != Constants.LostUser.Id).ToListAsync(),
 
             Groups = await infoAsync
                            .SelectAwait(async i => await _userManager.GetGroupInfoAsync(i.Item1))
-                           .Where(g => g.ID != ASC.Core.Users.Constants.LostGroupInfo.ID && g.CategoryID != ASC.Core.Users.Constants.SysGroupCategoryId).ToListAsync()
+                           .Where(g => g.ID != Constants.LostGroupInfo.ID && g.CategoryID != Constants.SysGroupCategoryId).ToListAsync()
         };
     }
 
@@ -274,7 +274,7 @@ public class WebItemSecurity
             .ToList();
         if (result.Count == 0)
         {
-            result.Add(Tuple.Create(ASC.Core.Users.Constants.GroupEveryone.ID, false));
+            result.Add(Tuple.Create(Constants.GroupEveryone.ID, false));
         }
         return result;
     }
@@ -283,7 +283,7 @@ public class WebItemSecurity
     {
         if (productid == Guid.Empty)
         {
-            productid = ASC.Core.Users.Constants.GroupAdmin.ID;
+            productid = Constants.GroupAdmin.ID;
         }
 
         if (administrator)
@@ -314,7 +314,7 @@ public class WebItemSecurity
         }
         else
         {
-            if (productid == ASC.Core.Users.Constants.GroupAdmin.ID)
+            if (productid == Constants.GroupAdmin.ID)
             {
                 var groups = new List<Guid> { WebItemManager.MailProductID };
                 groups.AddRange(_webItemManager.GetItemsAll().OfType<IProduct>().Select(p => p.ID));
@@ -325,7 +325,7 @@ public class WebItemSecurity
                 }
             }
 
-            if (productid == ASC.Core.Users.Constants.GroupAdmin.ID || productid == WebItemManager.PeopleProductID)
+            if (productid == Constants.GroupAdmin.ID || productid == WebItemManager.PeopleProductID)
             {
                 foreach (var ace in GetPeopleModuleActions(userid))
                 {
@@ -341,7 +341,7 @@ public class WebItemSecurity
 
     public async Task<bool> IsProductAdministratorAsync(Guid productid, Guid userid)
     {
-        return await _userManager.IsUserInGroupAsync(userid, ASC.Core.Users.Constants.GroupAdmin.ID) ||
+        return await _userManager.IsUserInGroupAsync(userid, Constants.GroupAdmin.ID) ||
                await _userManager.IsUserInGroupAsync(userid, productid);
     }
 
@@ -350,7 +350,7 @@ public class WebItemSecurity
         var groups = new List<Guid>();
         if (productid == Guid.Empty)
         {
-            groups.Add(ASC.Core.Users.Constants.GroupAdmin.ID);
+            groups.Add(Constants.GroupAdmin.ID);
             groups.AddRange(_webItemManager.GetItemsAll().OfType<IProduct>().Select(p => p.ID));
             groups.Add(WebItemManager.MailProductID);
         }
@@ -371,9 +371,9 @@ public class WebItemSecurity
     {
         return new List<Guid>
                 {
-                    ASC.Core.Users.Constants.Action_AddRemoveUser.ID,
-                    ASC.Core.Users.Constants.Action_EditUser.ID,
-                    ASC.Core.Users.Constants.Action_EditGroups.ID
+                    Constants.Action_AddRemoveUser.ID,
+                    Constants.Action_EditUser.ID,
+                    Constants.Action_EditGroups.ID
                 }.Select(action => new AzRecord(userid, action, AceType.Allow));
     }
 
@@ -406,7 +406,7 @@ public class WebItemSecurity
 
         public static WebItemSecurityObject Create(string id, WebItemManager webItemManager)
         {
-            ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(id);
+            ArgumentException.ThrowIfNullOrEmpty(id);
 
             var itemId = Guid.Empty;
             if (32 <= id.Length)

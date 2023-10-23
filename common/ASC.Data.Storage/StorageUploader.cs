@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone]
+[Singleton]
 public class StorageUploader
 {
     protected readonly DistributedTaskQueue _queue;

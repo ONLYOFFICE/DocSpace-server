@@ -51,7 +51,7 @@ public class StorageController : BaseSettingsController, IDisposable
     private readonly ILogger _log;
     private readonly IEventBus _eventBus;
     private readonly SecurityContext _securityContext;
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private readonly SemaphoreSlim _semaphore = new(1);
 
     public StorageController(
         ILoggerProvider option,
@@ -224,7 +224,7 @@ public class StorageController : BaseSettingsController, IDisposable
 
         foreach (var tenant in tenants)
         {
-            _cacheDeleteSchedule.Publish(new DeleteSchedule() { TenantId = tenant.Id }, CacheNotifyAction.Insert);
+            await _cacheDeleteSchedule.PublishAsync(new DeleteSchedule() { TenantId = tenant.Id }, CacheNotifyAction.Insert);
         }
 
         var settings = await _encryptionSettingsHelper.LoadAsync();
