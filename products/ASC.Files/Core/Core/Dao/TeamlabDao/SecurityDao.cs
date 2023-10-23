@@ -237,16 +237,18 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         var q = await GetPureSharesQuery(entry, filterType, filesDbContext);
 
-        if (filterType == ShareFilterType.User)
+        if (filterType is ShareFilterType.User or ShareFilterType.UserOrGroup)
         {
             var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share);
-
-            var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, 
-                (s, u) => new SecurityUserRecord { Security = s, User = u });
+            
+            var q1 = from security in q
+                join u in filesDbContext.Users on security.Subject equals u.Id into users
+                from user in users.DefaultIfEmpty()
+                select new SecurityUserRecord { Security = security, User = user };
 
             if (status.HasValue)
             {
-                q = q1.Where(s => s.User.ActivationStatus == status.Value)
+                q = q1.Where(s => s.User == null || s.User.ActivationStatus == status.Value)
                     .OrderBy(predicate)
                     .Select(s => s.Security);
             }
@@ -481,8 +483,8 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
         switch (filterType)
         {
-            case ShareFilterType.User:
-                q = q.Where(s => s.SubjectType == SubjectType.User);
+            case ShareFilterType.UserOrGroup:
+                q = q.Where(s => s.SubjectType == SubjectType.User || s.SubjectType == SubjectType.Group);
                 break;
             case ShareFilterType.InvitationLink:
                 q = q.Where(s => s.SubjectType == SubjectType.InvitationLink);
@@ -498,6 +500,12 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
                 break;
             case ShareFilterType.Link:
                 q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
+                break;
+            case ShareFilterType.Group:
+                q = q.Where(s => s.SubjectType == SubjectType.Group);
+                break;
+            case ShareFilterType.User:
+                q = q.Where(s => s.SubjectType == SubjectType.User);
                 break;
         }
 

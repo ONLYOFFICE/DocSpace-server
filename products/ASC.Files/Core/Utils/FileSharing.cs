@@ -132,6 +132,16 @@ public class FileSharingAceHelper
             {
                 w.SubjectType = existedShare.SubjectType;
             }
+
+            if (existedShare == null && w.SubjectType == default)
+            {
+                var group = await _userManager.GetGroupInfoAsync(w.Id);
+
+                if (group.ID != Constants.LostGroupInfo.ID)
+                {
+                    w.SubjectType = SubjectType.Group;
+                }
+            }
             
             if (room != null)
             {
@@ -166,7 +176,7 @@ public class FileSharingAceHelper
                 }
             }
 
-            if (room != null && existedShare is not { IsLink: true } && !w.IsLink)
+            if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
                 var correctAccess = FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses)
                                        && userAccesses.Contains(w.Access);
@@ -884,7 +894,7 @@ public class FileSharing
     
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
     {
-        if (filterType != ShareFilterType.User)
+        if (filterType != ShareFilterType.UserOrGroup)
         {
             yield break;
         }
@@ -936,17 +946,27 @@ public class FileSharing
             w.CanEditAccess = false;
             w.FileShareOptions.Password = await _externalShare.GetPasswordAsync(w.FileShareOptions.Password);
             w.SubjectType = record.SubjectType;
+
+            return w;
+        }
+
+        if (w.SubjectType == SubjectType.Group)
+        {
+            var group = await _userManager.GetGroupInfoAsync(record.Subject);
+            w.SubjectGroup = true;
+            
+            w.SubjectName = group.ID == Constants.GroupEveryone.ID ? FilesCommonResource.Everyone : group.Name;
         }
         else
         {
             var user = await _userManager.GetUsersAsync(record.Subject);
-
             w.SubjectName = user.DisplayUserName(false, _displayUserSettingsHelper);
-            w.Owner = entry.RootFolderType == FolderType.USER
-                ? entry.RootCreateBy == record.Subject
-                : entry.CreateBy == record.Subject;
-            w.LockedRights = record.Subject == _authContext.CurrentAccount.ID;
         }
+            
+        w.Owner = entry.RootFolderType == FolderType.USER
+            ? entry.RootCreateBy == record.Subject
+            : entry.CreateBy == record.Subject;
+        w.LockedRights = record.Subject == _authContext.CurrentAccount.ID;
 
         return w;
     }
