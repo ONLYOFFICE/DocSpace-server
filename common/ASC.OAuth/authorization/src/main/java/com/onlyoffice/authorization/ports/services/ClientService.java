@@ -39,7 +39,7 @@ public class ClientService implements ClientRetrieveUsecases {
         log.info("trying to get client by id");
         MDC.clear();
         var client = clientUsecases.getById(id);
-        if (!client.getEnabled())
+        if (!client.isEnabled())
             throw new ClientPermissionException(String
                     .format("client with id %s is disabled", id));
         return toObject(client);
@@ -50,7 +50,7 @@ public class ClientService implements ClientRetrieveUsecases {
         log.info("trying to get client by client_id");
         MDC.clear();
         var client = clientUsecases.getClientByClientId(clientId);
-        if (!client.getEnabled())
+        if (!client.isEnabled())
             throw new ClientPermissionException(String
                     .format("client with client_id %s is disabled", clientId));
         return toObject(client);
@@ -69,7 +69,9 @@ public class ClientService implements ClientRetrieveUsecases {
                 )
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUris((uris) -> uris.add(client.getRedirectUri()))
+                .redirectUris((uris) -> uris.addAll(Arrays.stream(client
+                                .getRedirectUris().split(","))
+                        .collect(Collectors.toSet())))
                 .scopes((scopes) -> scopes.addAll(Arrays.stream(client
                                 .getScopes().split(","))
                         .collect(Collectors.toSet()))
