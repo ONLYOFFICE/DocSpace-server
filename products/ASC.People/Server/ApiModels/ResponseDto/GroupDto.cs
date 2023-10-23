@@ -30,10 +30,6 @@ namespace ASC.People.ApiModels.ResponseDto;
 /// </summary>
 public class GroupDto
 {
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
-    public string Description { get; set; }
-
     /// <summary>Name</summary>
     /// <type>System.String, System</type>
     public string Name { get; set; }
@@ -76,12 +72,12 @@ public class GroupDto
 public class GroupFullDtoHelper
 {
     private readonly UserManager _userManager;
-    private readonly EmployeeDtoHelper _employeeWraperHelper;
+    private readonly EmployeeDtoHelper _employeeWrapperHelper;
 
-    public GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWraperHelper)
+    public GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper employeeWrapperHelper)
     {
         _userManager = userManager;
-        _employeeWraperHelper = employeeWraperHelper;
+        _employeeWrapperHelper = employeeWrapperHelper;
     }
 
     public async Task<GroupDto> Get(GroupInfo group, bool includeMembers)
@@ -90,19 +86,21 @@ public class GroupFullDtoHelper
         {
             Id = group.ID,
             Category = group.CategoryID,
-            Parent = group.Parent != null ? group.Parent.ID : Guid.Empty,
+            Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
-            Manager = await _employeeWraperHelper.GetAsync(await _userManager.GetUsersAsync(await _userManager.GetDepartmentManagerAsync(group.ID)))
+            Manager = await _employeeWrapperHelper.GetAsync(await _userManager.GetUsersAsync(await _userManager.GetDepartmentManagerAsync(group.ID)))
         };
 
-        if (includeMembers)
+        if (!includeMembers)
         {
-            result.Members = new List<EmployeeDto>();
+            return result;
+        }
 
-            foreach (var m in await _userManager.GetUsersByGroupAsync(group.ID))
-            {
-                result.Members.Add(await _employeeWraperHelper.GetAsync(m));
-            }
+        result.Members = new List<EmployeeDto>();
+
+        foreach (var m in await _userManager.GetUsersByGroupAsync(group.ID))
+        {
+            result.Members.Add(await _employeeWrapperHelper.GetAsync(m));
         }
 
         return result;
