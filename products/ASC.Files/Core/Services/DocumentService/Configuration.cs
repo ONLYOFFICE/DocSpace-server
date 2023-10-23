@@ -599,7 +599,6 @@ public class InfoConfig<T>
         get
         {
             if (Type == EditorType.Embedded
-                || Type == EditorType.External
                 || !_fileSharing.CanSetAccessAsync(_file).Result)
             {
                 return null;
