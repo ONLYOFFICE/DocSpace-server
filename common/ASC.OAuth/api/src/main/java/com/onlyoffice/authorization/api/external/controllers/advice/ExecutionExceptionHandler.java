@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 public class ExecutionExceptionHandler {
     @ExceptionHandler(ExecutionException.class)
     public ResponseEntity<ErrorDTO> handleExecutionException(ExecutionException ex, HttpServletRequest request) {
-        log.error("Exception has occurred: {}", ex.getMessage());
         return new ResponseEntity<ErrorDTO>(ErrorDTO
                 .builder()
                 .reason("could not perform operation")

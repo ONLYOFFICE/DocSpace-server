@@ -6,6 +6,7 @@ package com.onlyoffice.authorization.api.core.transfer.messages;
 import lombok.*;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Set;
 
 /**
@@ -23,12 +24,16 @@ public class ClientMessage implements Serializable {
     private String description;
     private String termsUrl;
     private String policyUrl;
-    private String logoUrl;
+    private String logo;
     private String authenticationMethod;
-    private String redirectUri;
+    private String redirectUris;
     private String logoutRedirectUri;
     private Set<String> scopes;
     private int tenant;
     private boolean enabled;
     private boolean invalidated;
+    private Timestamp createdOn;
+    private String createdBy;
+    private Timestamp modifiedOn;
+    private String modifiedBy;
 }

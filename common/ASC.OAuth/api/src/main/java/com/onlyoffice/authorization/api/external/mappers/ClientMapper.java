@@ -36,6 +36,14 @@ public interface ClientMapper {
                     source = "authenticationMethod",
                     target = "authenticationMethod",
                     defaultValue = "client_secret_post"
+            ),
+            @Mapping(
+                    source = "createdOn",
+                    target = "createdOn"
+            ),
+            @Mapping(
+                    source = "modifiedOn",
+                    target = "modifiedOn"
             )
     })
     Client fromMessageToEntity(ClientMessage message);

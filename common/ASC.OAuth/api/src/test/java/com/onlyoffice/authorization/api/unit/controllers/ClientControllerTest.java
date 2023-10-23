@@ -104,9 +104,9 @@ public class ClientControllerTest {
                                                 .description("mockmockmockmockmockmockmockmockmockmock")
                                                 .termsUrl("https://example.com")
                                                 .policyUrl("https://example.com")
-                                                .logoUrl("https://example.com")
+                                                .logo("https://example.com")
                                                 .authenticationMethod("mock")
-                                                .redirectUri("https://example.com")
+                                                .redirectUris(Set.of("https://example.com"))
                                                 .logoutRedirectUri("https://example.com")
                                                 .scopes(Set.of("mock"))
                                                 .build()).

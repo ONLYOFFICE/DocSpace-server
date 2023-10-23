@@ -6,6 +6,7 @@ package com.onlyoffice.authorization.api.core.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -27,38 +28,48 @@ public class Client {
     private String clientId;
     @Column(name = "client_name")
     private String name;
+    @Lob
     private String description;
-    @Column(name = "client_secret", unique = true, length = 36)
+    @Column(name = "client_secret", unique = true)
     private String clientSecret;
+    @Column(name = "logo", columnDefinition = "LONGTEXT")
+    private String logo;
+    @Column(name = "client_issued_at")
+    @CreatedDate
+    private Timestamp clientIssuedAt;
+    @Column(name = "authentication_method", length = 100)
+    private String authenticationMethod;
+    @Column(name = "tenant_id")
+    private int tenant;
     @Column(name = "terms_url")
     @Lob
     private String termsUrl;
     @Column(name = "policy_url")
     @Lob
     private String policyUrl;
-    @Column(name = "logo_url")
+    @Column(name = "redirect_uris")
     @Lob
-    private String logoUrl;
-    @Column(name = "client_issued_at")
-    @CreatedDate
-    private Timestamp clientIssuedAt;
-    @Column(name = "authentication_method", length = 100)
-    private String authenticationMethod;
-    @Column(name = "redirect_uri")
-    @Lob
-    private String redirectUri;
+    private String redirectUris;
     @Column(name = "logout_redirect_uri")
     @Lob
     private String logoutRedirectUri;
+    @Column(name = "enabled")
+    private boolean enabled;
+    @Column(name = "invalidated")
+    private boolean invalidated;
     @Column(name = "scopes")
     @Lob
     private String scopes;
-    @Column(name = "tenant_id")
-    private int tenant;
-    @Column(name = "enabled")
-    private Boolean enabled;
-    @Column(name = "invalidated")
-    private Boolean invalidated;
+    @Column(name = "created_on")
+    @LastModifiedDate
+    private Timestamp createdOn;
+    @Column(name = "created_by")
+    private String createdBy;
+    @Column(name = "modified_on")
+    @LastModifiedDate
+    private Timestamp modifiedOn;
+    @Column(name = "modified_by")
+    private String modifiedBy;
     @PrePersist
     private void prePersist() {
         this.enabled = true;
@@ -69,5 +80,6 @@ public class Client {
     private void preUpdate() {
         if (this.invalidated)
             this.enabled = false;
+        this.modifiedOn = Timestamp.from(Instant.now());
     }
 }

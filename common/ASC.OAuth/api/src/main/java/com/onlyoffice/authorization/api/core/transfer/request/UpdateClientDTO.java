@@ -21,16 +21,16 @@ import java.util.Set;
 public class UpdateClientDTO implements Serializable {
     private String name;
     private String description;
+    @JsonProperty("logo")
+    private String logo;
+    @JsonProperty("authentication_method")
+    private String authenticationMethod;
     @JsonProperty("terms_url")
     private String termsUrl;
     @JsonProperty("policy_url")
     private String policyUrl;
-    @JsonProperty("logo_url")
-    private String logoUrl;
-    @JsonProperty("authentication_method")
-    private String authenticationMethod;
-    @JsonProperty("redirect_uri")
-    private String redirectUri;
+    @JsonProperty("redirect_uris")
+    private Set<String> redirectUris;
     @JsonProperty("logout_redirect_uri")
     private String logoutRedirectUri;
     private Set<String> scopes;

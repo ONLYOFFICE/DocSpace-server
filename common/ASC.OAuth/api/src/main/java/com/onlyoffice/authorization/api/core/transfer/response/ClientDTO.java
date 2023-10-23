@@ -8,6 +8,7 @@ import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Set;
 
 /**
@@ -29,16 +30,24 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     private String termsUrl;
     @JsonProperty("policy_url")
     private String policyUrl;
-    @JsonProperty("logo_url")
-    private String logoUrl;
+    @JsonProperty("logo")
+    private String logo;
     @JsonProperty("authentication_method")
     private String authenticationMethod;
-    @JsonProperty("redirect_uri")
-    private String redirectUri;
-    @JsonProperty("logout_redirect_uri")
-    private String logoutRedirectUri;
-    private Set<String> scopes;
     private int tenant;
+    @JsonProperty("redirect_uris")
+    private Set<String> redirectUris;
+    @JsonProperty("logout_redirect_uris")
+    private Set<String> logoutRedirectUri;
     private boolean enabled;
     private boolean invalidated;
+    private Set<String> scopes;
+    @JsonProperty("created_on")
+    private Timestamp createdOn;
+    @JsonProperty("created_by")
+    private String createdBy;
+    @JsonProperty("modified_on")
+    private Timestamp modifiedOn;
+    @JsonProperty("modified_by")
+    private String modifiedBy;
 }

@@ -21,8 +21,6 @@ import java.util.concurrent.TimeoutException;
 public class TimeLimiterExceptionHandler {
     @ExceptionHandler(TimeoutException.class)
     public ResponseEntity<ErrorDTO> handleTimeoutException(TimeoutException ex, HttpServletRequest request) {
-        log.warn("Request to path '{}' is blocked due to time-limiting. {}",
-                request.getRequestURI(), ex.getMessage());
         return new ResponseEntity<ErrorDTO>(ErrorDTO
                 .builder()
                 .reason("request timeout")

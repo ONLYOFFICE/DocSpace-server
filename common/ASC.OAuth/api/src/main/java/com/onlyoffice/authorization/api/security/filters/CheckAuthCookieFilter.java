@@ -4,6 +4,7 @@
 package com.onlyoffice.authorization.api.security.filters;
 
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
+import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -60,6 +61,7 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
             return;
         }
 
+        UserContextContainer.context.set(me);
         response.setHeader(X_TENANT_HEADER, String.valueOf(tenant.getResponse().getTenantId()));
         chain.doFilter(request, response);
     }

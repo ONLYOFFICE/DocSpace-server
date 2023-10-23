@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class RateLimiterExceptionHandler {
     @ExceptionHandler(RequestNotPermitted.class)
     public ResponseEntity<ErrorDTO> handleRequestNotPermitted(RequestNotPermitted ex, HttpServletRequest request) {
-        log.warn("Request to path '{}' is blocked due to rate-limiting. {}",
-                request.getRequestURI(), ex.getMessage());
         return new ResponseEntity<ErrorDTO>(ErrorDTO
                 .builder()
                 .reason("too many requests")

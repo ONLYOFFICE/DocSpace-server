@@ -4,24 +4,25 @@
 package com.onlyoffice.authorization.api.ports.services;
 
 import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
-import com.onlyoffice.authorization.api.security.crypto.Cipher;
+import com.onlyoffice.authorization.api.core.exceptions.ClientCreationException;
+import com.onlyoffice.authorization.api.core.exceptions.ClientDeletionException;
+import com.onlyoffice.authorization.api.core.exceptions.ClientNotFoundException;
+import com.onlyoffice.authorization.api.core.transfer.messages.ClientMessage;
 import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.ClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.PaginationDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.SecretDTO;
-import com.onlyoffice.authorization.api.core.exceptions.ClientCreationException;
-import com.onlyoffice.authorization.api.core.exceptions.ClientDeletionException;
-import com.onlyoffice.authorization.api.core.exceptions.ClientNotFoundException;
-import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
-import com.onlyoffice.authorization.api.core.transfer.messages.ClientMessage;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.repository.client.ClientPersistenceRetrievalUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
+import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
+import com.onlyoffice.authorization.api.security.container.UserContextContainer;
+import com.onlyoffice.authorization.api.security.crypto.Cipher;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -64,11 +67,12 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                             .clientId(clientId)
                             .clientSecret(UUID.randomUUID().toString())
                             .scopes(Set.of("***"))
-                            .redirectUri("***")
+                            .redirectUris("***")
+                            .modifiedBy(UserContextContainer.context.get()
+                                    .getResponse().getUserName())
                             .enabled(false)
                             .invalidated(true)
-                            .build()
-            );
+                            .build());
         } catch (RuntimeException e) {
             throw new ClientDeletionException(String
                     .format("could not create a client deletion task: %s", e.getMessage()));
@@ -118,12 +122,22 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         try {
             ClientDTO client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
             var secret = UUID.randomUUID().toString();
+            var now = Timestamp.from(Instant.now());
+            var me = UserContextContainer.context.get()
+                    .getResponse().getUserName();
+
             client.setClientId(UUID.randomUUID().toString());
             client.setClientSecret(cipher.encrypt(secret));
             client.setTenant(tenant);
+            client.setCreatedOn(now);
+            client.setModifiedOn(now);
+            client.setCreatedBy(me);
+            client.setModifiedBy(me);
+
             this.amqpTemplate.convertAndSend(configuration.getClient().getExchange(),
                     configuration.getClient().getRouting(),
                     ClientMapper.INSTANCE.fromQueryToMessage(client));
+
             client.setClientSecret(secret);
             return client;
         } catch (Exception e) {
@@ -139,6 +153,8 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                 .orElseThrow(() -> new ClientNotFoundException(String
                         .format("could not find client with client id %s for %d", clientId, tenant)));
         ClientMapper.INSTANCE.update(c, clientDTO);
+        c.setModifiedBy(UserContextContainer.context.get()
+                .getResponse().getUserName());
         return ClientMapper.INSTANCE.fromEntityToQuery(c);
     }
 
@@ -169,7 +185,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         log.info("trying to get a client with id {} for tenant {}", clientId, tenantId);
         return retrievalUsecases
                 .findById(clientId)
-                .filter(c -> !c.getInvalidated())
+                .filter(c -> !c.isInvalidated())
                 .map(c -> {
                     try {
                         var query = ClientMapper.INSTANCE.fromEntityToQuery(c);
@@ -195,7 +211,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                 .page(page)
                 .limit(limit)
                 .data(data.stream()
-                        .filter(c -> !c.getInvalidated())
+                        .filter(c -> !c.isInvalidated())
                         .map(c -> ClientMapper.INSTANCE.fromEntityToQuery(c))
                         .collect(Collectors.toList()));
 
