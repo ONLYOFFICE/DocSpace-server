@@ -26,6 +26,8 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     @JsonProperty("client_secret")
     private String clientSecret;
     private String description;
+    @JsonProperty("website_url")
+    private String websiteUrl;
     @JsonProperty("terms_url")
     private String termsUrl;
     @JsonProperty("policy_url")
@@ -38,7 +40,7 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     @JsonProperty("redirect_uris")
     private Set<String> redirectUris;
     @JsonProperty("allowed_origins")
-    private Set<String> allowed_origins;
+    private Set<String> allowedOrigins;
     @JsonProperty("logout_redirect_uris")
     private Set<String> logoutRedirectUri;
     private boolean enabled;

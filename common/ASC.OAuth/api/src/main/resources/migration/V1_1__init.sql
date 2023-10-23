@@ -45,6 +45,7 @@ CREATE TABLE identity_clients (
 	modified_by varchar(255),
 	modified_on datetime(6),
 	client_name varchar(255),
+	website_url tinytext,
 	policy_url tinytext,
 	redirect_uris tinytext,
 	scopes tinytext,

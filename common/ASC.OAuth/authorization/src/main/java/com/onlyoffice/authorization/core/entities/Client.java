@@ -42,6 +42,8 @@ public class Client {
     private String authenticationMethod;
     @Column(name = "tenant_id")
     private int tenant;
+    @Column(name = "website_url")
+    private String websiteUrl;
     @Column(name = "terms_url")
     private String termsUrl;
     @Column(name = "policy_url")
@@ -50,6 +52,8 @@ public class Client {
     private String redirectUris;
     @Column(name = "logout_redirect_uri")
     private String logoutRedirectUri;
+    @Column(name = "allowed_origins")
+    private String allowedOrigins;
     @Column(name = "enabled")
     private boolean enabled;
     @Column(name = "invalidated")

@@ -22,11 +22,13 @@ public class ClientMessage implements Serializable {
     private String clientId;
     private String clientSecret;
     private String description;
+    private String websiteUrl;
     private String termsUrl;
     private String policyUrl;
     private String logo;
     private String authenticationMethod;
     private String redirectUris;
+    private String allowedOrigins;
     private String logoutRedirectUri;
     private Set<String> scopes;
     private int tenant;
