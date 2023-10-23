@@ -423,7 +423,7 @@ public class FileMarker
             _semaphore.Release();
         }
 
-        await SendChangeNoticeAsync(updateTags.Concat(newTags), socketManager);
+        await SendChangeNoticeAsync(updateTags.Concat(newTags).ToList(), socketManager);
 
         return;
 

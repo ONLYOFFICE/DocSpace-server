@@ -229,14 +229,14 @@ internal class SubsciptionsStore
     public IEnumerable<SubscriptionRecord> GetSubscriptions(string recipientId, string objectId)
     {
         return recipientId != null ?
-            _recordsByRec.ContainsKey(recipientId) ? _recordsByRec[recipientId].ToList() : new List<SubscriptionRecord>() :
+            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionRecord>() :
             _recordsByObj.ContainsKey(objectId ?? string.Empty) ? _recordsByObj[objectId ?? string.Empty].ToList() : new List<SubscriptionRecord>();
     }
 
     public SubscriptionRecord GetSubscription(string recipientId, string objectId)
     {
-        return _recordsByRec.ContainsKey(recipientId) ?
-            _recordsByRec[recipientId].Where(s => s.ObjectId == (objectId ?? "")).FirstOrDefault() :
+        return _recordsByRec.TryGetValue(recipientId, out var value) ?
+            value.Where(s => s.ObjectId == (objectId ?? "")).FirstOrDefault() :
             null;
     }
 
@@ -270,7 +270,7 @@ internal class SubsciptionsStore
     {
         return string.IsNullOrEmpty(recipientId) ?
             _methods.ToList() :
-            _methodsByRec.ContainsKey(recipientId) ? _methodsByRec[recipientId].ToList() : new List<SubscriptionMethod>();
+            _methodsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionMethod>();
     }
 
     public void SetSubscriptionMethod(SubscriptionMethod m)

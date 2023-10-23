@@ -179,9 +179,9 @@ public class FileDtoHelper : FileEntryDtoHelper
         _externalShare = externalShare;
     }
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
     {
-        var result = await GetFileWrapperAsync(file);
+        var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
         if (file.RootFolderType == FolderType.USER
@@ -214,7 +214,7 @@ public class FileDtoHelper : FileEntryDtoHelper
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -234,6 +234,19 @@ public class FileDtoHelper : FileEntryDtoHelper
         result.DenyDownload = file.DenyDownload;
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
+
+        if (file.Order != 0)
+        {
+            file.Order += foldersCount;
+            if (!string.IsNullOrEmpty(order))
+            {
+                result.Order = string.Join('.', order, file.Order);
+            }
+            else
+            {
+                result.Order = file.Order.ToString();
+            }
+        }
 
         try
         {

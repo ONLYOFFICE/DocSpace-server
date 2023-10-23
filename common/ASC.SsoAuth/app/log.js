@@ -14,13 +14,13 @@ let logpath = config.get("logPath");
 let logLevel = config.get("logLevel") || "debug";
 if (logpath != null) {
   if (!path.isAbsolute(logpath)) {
-    logpath = path.join(__dirname, "..", logpath);
+    logpath = path.join(__dirname, "..", "..", logpath);
   }
 }
 
 const fileName = logpath
   ? path.join(logpath, "web.sso.%DATE%.log")
-  : path.join(__dirname, "..", "..", "..", "Logs", "web.sso.%DATE%.log");
+  : path.join(__dirname, "..", "..", "..", "..", "Logs", "web.sso.%DATE%.log");
 const dirName = path.dirname(fileName);
 
 const aws = config.get("aws").cloudWatch;

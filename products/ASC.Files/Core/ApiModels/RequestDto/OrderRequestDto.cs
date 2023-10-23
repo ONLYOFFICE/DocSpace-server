@@ -25,22 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
-
-/// <summary>
-/// </summary>
-public class RoomInvitationRequestDto
+public class OrderRequestDto
 {
-    /// <summary>Collection of invitation parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.RequestDto.RoomInvitation}, System.Collections.Generic</type>
-    public IEnumerable<RoomInvitation> Invitations { get; set; }
-
-    /// <summary>Notifies users about the shared room or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Notify { get; set; }
-
-    /// <summary>Message to send when notifying about the shared room</summary>
-    /// <type>System.String, System</type>
-    public string Message { get; set; }
-
-    public string Culture { get; set; }
+    public int Order { get; set; }
 }
