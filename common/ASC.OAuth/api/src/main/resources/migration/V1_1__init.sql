@@ -31,6 +31,7 @@ ALTER TABLE identity_authorizations
 
 CREATE TABLE identity_clients (
 	client_id varchar(36) not null,
+	allowed_origins tinytext,
 	authentication_method varchar(100),
 	client_issued_at datetime(6),
 	client_secret varchar(255),

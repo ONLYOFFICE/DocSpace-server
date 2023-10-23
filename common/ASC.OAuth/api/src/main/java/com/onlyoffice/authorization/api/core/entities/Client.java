@@ -50,6 +50,9 @@ public class Client {
     @Column(name = "redirect_uris")
     @Lob
     private String redirectUris;
+    @Column(name = "allowed_origins")
+    @Lob
+    private String allowedOrigins;
     @Column(name = "logout_redirect_uri")
     @Lob
     private String logoutRedirectUri;
