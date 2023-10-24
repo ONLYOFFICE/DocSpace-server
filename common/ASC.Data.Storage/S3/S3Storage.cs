@@ -1115,7 +1115,7 @@ public class S3Storage : BaseStorage
 
     private Uri MakeUri(string preSignedURL)
     {
-        var uri = new Uri(preSignedURL);
+        var uri = new UnencodedUri(preSignedURL);
         var signedPart = uri.PathAndQuery.TrimStart('/');
 
         var baseUri = uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? _bucketSSlRoot : _bucketRoot;
