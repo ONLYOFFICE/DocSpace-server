@@ -113,5 +113,14 @@
     <EmbeddedResource Update="Resources\PeopleResource.zh-CN.resx">
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.ar-SA.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.az.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.hy-AM.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
