@@ -45,7 +45,7 @@ public class BackupAjaxHandler
     private readonly FileSecurity _fileSecurity;
 
     private const string BackupTempModule = "backup_temp";
-    private const string BackupFileName = "backup.tmp";
+    private const string BackupFileName = "backup";
 
     #region backup
 
@@ -283,10 +283,10 @@ public class BackupAjaxHandler
     public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify)
     {
         await DemandPermissionsRestoreAsync();
-
+        var tenantId = await GetCurrentTenantIdAsync();
         var restoreRequest = new StartRestoreRequest
         {
-            TenantId = await GetCurrentTenantIdAsync(),
+            TenantId = tenantId,
             NotifyAfterCompletion = notify,
             StorageParams = storageParams
         };
@@ -302,7 +302,9 @@ public class BackupAjaxHandler
 
             if (restoreRequest.StorageType == BackupStorageType.Local)
             {
-                restoreRequest.FilePathOrId = await GetTmpFilePathAsync();
+                var path = await GetTmpFilePathAsync(tenantId);
+                path = File.Exists(path + "tar.gz") ? path + "tar.gz" : path + "tar";
+                restoreRequest.FilePathOrId = path;
             }
         }
 
@@ -404,7 +406,7 @@ public class BackupAjaxHandler
         return await _tenantManager.GetCurrentTenantIdAsync();
     }
 
-    public async Task<string> GetTmpFilePathAsync()
+    public async Task<string> GetTmpFilePathAsync(int tenantId)
     {
         var discStore = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), BackupTempModule, (IQuotaController)null) as DiscDataStore;
         var folder = discStore.GetPhysicalPath("", "");
@@ -414,7 +416,7 @@ public class BackupAjaxHandler
             Directory.CreateDirectory(folder);
         }
 
-        return Path.Combine(folder, BackupFileName);
+        return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
     /// <summary>
