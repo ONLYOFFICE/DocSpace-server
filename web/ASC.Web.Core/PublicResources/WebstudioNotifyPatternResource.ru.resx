@@ -151,14 +151,12 @@ $OrangeButton
 
 Создан файл резервной копии, содержащий данные с портала "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Чтобы получить дополнительную информацию о процедуре резервного копирования, обратитесь, пожалуйста, к нашей инструкции "Резервное копирование данных":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block".
+Чтобы получить дополнительную информацию о процедуре резервного копирования, обратитесь, пожалуйста, к нашей инструкции "Резервное копирование данных":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
 
 
-Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу "${__SupportLink}":"${__SupportLink}"
 
-С уважением,
-команда ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Создана резервная копия данных портала [${__VirtualRootPath}](${__VirtualRootPath})
@@ -169,7 +167,7 @@ $OrangeButton
 
 Чтобы получить дополнительную информацию о процедуре резервного копирования, обратитесь, пожалуйста, к нашей инструкции [Резервное копирование данных](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу [support.onlyoffice.com](http://support.onlyoffice.com)
+Если у Вас есть какие-то вопросы, Вы всегда можете написать нам по адресу [${__SupportLink}](${__SupportLink})
 
 С уважением,
 команда ONLYOFFICE™
@@ -235,7 +233,10 @@ $OrangeButton
 *Обратите внимание*: эта ссылка действительна только 7 дней. Пожалуйста, выполните изменение адреса портала в течение этого времени.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
+    <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здравствуйте, $UserName!
 
 Вас пригласили на "${__VirtualRootPath}":"${__VirtualRootPath}" в качестве гостя. Примите приглашение, перейдя по ссылке:
 
@@ -246,28 +247,32 @@ $OrangeButton
 Вы будете получать другие полезные советы по использованию виртуального офиса. Вы можете в любой момент отписаться от рассылок или заново подписаться на них на странице вашего профиля.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здравствуйте, $UserName!
 
 Добро пожаловать в ONLYOFFICE DocSpace! Ваш пользовательский профиль успешно добавлен по адресу "${__VirtualRootPath}":"${__VirtualRootPath}". Теперь вы можете:
 
-* Работать вместе с другими пользователями в комнате, в которую вы приглашены: *комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Работать вместе с другими пользователями в комнате, в которую вы приглашены: &lt;b&gt;комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Работать с файлами разных форматов*: текстовые документы, электронные таблицы, презентации, цифровые формы, файлы PDF, электронные книги, мультимедиа.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать с файлами разных форматов&lt;/b&gt;: текстовые документы, электронные таблицы, презентации, цифровые формы, файлы PDF, электронные книги, мультимедиа.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Работать над документами совместно* в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или совершать аудио- и видеозвонки. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать над документами совместно&lt;/b&gt; в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или совершать аудио- и видеозвонки.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Подключить любое облачное хранилище* и работать, не переключаясь между приложениями. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Использовать плагин ИИ-помощник:&lt;/b&gt; составлять краткое изложение текста и переводить тексты, создавать изображения и ключевые слова, анализировать слова и многое другое.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/ru" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/ru/support-contact-form.aspx".
+Если вам требуется помощь, посетите наш "Справочный центр":"${__HelpLink}" или обратитесь в "службу поддержки":"${__SupportLink}".
 
-С уважением, 
-Команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
+    <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здравствуйте, $UserName!
 
 $__AuthorName приглашает вас на "${__VirtualRootPath}":"${__VirtualRootPath}" в качестве гостя. Примите приглашение, перейдя по ссылке:
 
@@ -285,25 +290,26 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+
+Здравствуйте, $UserName!
 
 Добро пожаловать в ONLYOFFICE DocSpace! Ваш пользовательский профиль успешно добавлен по адресу "${__VirtualRootPath}":"${__VirtualRootPath}". Теперь вы можете:
 
-* Работать вместе с другими пользователями в комнате, в которую вы приглашены: *комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Работать вместе с другими пользователями в комнате, в которую вы приглашены: &lt;b&gt;комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Работать с файлами разных форматов*: текстовые документы, электронные таблицы, презентации, цифровые формы, файлы PDF, электронные книги, мультимедиа.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать с файлами разных форматов&lt;/b&gt;: текстовые документы, электронные таблицы, презентации, цифровые формы, файлы PDF, электронные книги, мультимедиа.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Работать над документами совместно* в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или совершать аудио- и видеозвонки. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать над документами совместно&lt;/b&gt; в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или совершать аудио- и видеозвонки.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Подключить любое облачное хранилище* и работать, не переключаясь между приложениями. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Использовать плагин ИИ-помощник:&lt;/b&gt; составлять краткое изложение текста и переводить тексты, создавать изображения и ключевые слова, анализировать слова и многое другое.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/ru" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/ru/support-contact-form.aspx".
+Если вам требуется помощь, посетите наш "Справочный центр":"${__HelpLink}" или обратитесь в "службу поддержки":"${__SupportLink}".
 
-С уважением, 
-Команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_for_admin_notify_tg" xml:space="preserve">
     <value>Сообщение с портала [${__VirtualRootPath}](${__VirtualRootPath})
@@ -368,11 +374,9 @@ $OrangeButton
 При переносе портала в регион $RegionName произошла ошибка. Пожалуйста, повторите попытку позже.
 Сейчас Ваш портал доступен по прежнему адресу "$PortalUrl":"$PortalUrl"
 
-Если у Вас есть какие-либо вопросы, Вы всегда можете обратиться к нам по адресу "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Если у Вас есть какие-либо вопросы, Вы всегда можете обратиться к нам по адресу "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-С уважением,
-команда ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
 ^Чтобы изменить тип оповещения, пожалуйста, настройте "параметры подписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -382,11 +386,9 @@ $OrangeButton
 При переносе портала в другой регион произошла ошибка. Пожалуйста, повторите попытку позже.
 Сейчас Ваш портал доступен по прежнему адресу "$PortalUrl":"$PortalUrl"
 
-Если у Вас есть какие-либо вопросы, Вы всегда можете обратиться к нам по адресу "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Если у Вас есть какие-либо вопросы, Вы всегда можете обратиться к нам по адресу "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-С уважением,
-команда ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
 ^Чтобы изменить тип оповещения, пожалуйста, настройте "параметры подписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -397,11 +399,9 @@ $OrangeButton
 
 *Обратите внимание*: в ходе переноса портал будет недоступен. После того, как перенос завершится, URL-адрес портала изменится, и все ссылки на документы, к которым Вы ранее предоставляли доступ, станут недоступны.
 
-Если у Вас есть какие-либо вопросы, Вы всегда можете обратиться к нам по адресу "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Если у Вас есть какие-либо вопросы, Вы всегда можете обратиться к нам по адресу "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-С уважением,
-команда ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Миграция портала
@@ -417,7 +417,10 @@ $OrangeButton
 Если Вы считаете, что получили это письмо по ошибке, пожалуйста, проигнорируйте его или обратитесь к администратору вашего портала "$PortalUrl":"$PortalUrl" за разъяснениями.</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Здравствуйте!
+    <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здравствуйте!
 
 Вы получили приглашение на "${__VirtualRootPath}":"${__VirtualRootPath}" в качестве гостя. Примите приглашение, перейдя по ссылке:
 
@@ -428,25 +431,26 @@ $OrangeButton
 Вы будете получать полезные советы по использованию виртуального офиса. Вы можете в любой момент отписаться от рассылок или заново подписаться на них на странице вашего профиля.</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+
+Здравствуйте, $UserName!
 
 Добро пожаловать в ONLYOFFICE DocSpace! Ваш пользовательский профиль успешно добавлен по адресу "${__VirtualRootPath}":"${__VirtualRootPath}". Теперь вы можете:
 
-* Работать вместе с другими пользователями в комнате, в которую вы приглашены: *комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Работать вместе с другими пользователями в комнате, в которую вы приглашены: &lt;b&gt;комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Работать с файлами разных форматов*: текстовые документы, электронные таблицы, презентации, цифровые формы, файлы PDF, электронные книги, мультимедиа.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать с файлами разных форматов&lt;/b&gt;: текстовые документы, электронные таблицы, презентации, цифровые формы, файлы PDF, электронные книги, мультимедиа.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Работать над документами совместно* в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или совершать аудио- и видеозвонки. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать над документами совместно&lt;/b&gt; в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или совершать аудио- и видеозвонки.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Подключить любое облачное хранилище* и работать, не переключаясь между приложениями. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Использовать плагин ИИ-помощник:&lt;/b&gt; составлять краткое изложение текста и переводить тексты, создавать изображения и ключевые слова, анализировать слова и многое другое.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/ru" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/ru/support-contact-form.aspx".
+Если вам требуется помощь, посетите наш "Справочный центр":"${__HelpLink}" или обратитесь в "службу поддержки":"${__SupportLink}".
 
-С уважением, 
-Команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Здравствуйте, $UserName
@@ -458,8 +462,7 @@ $OrangeButton
 
 Мы рады, что Вы используете наш сервис. Оставайтесь с нами!
 
-С уважением,
-команда ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_after_registration1" xml:space="preserve">
     <value>h1.Добро пожаловать в тестовое облако для совместной работы Р7-Офис
@@ -1097,49 +1100,52 @@ $OrangeButton
     <value>Вас приглашают стать участником ${__VirtualRootPath}</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+  
+Здравствуйте, $UserName!
+
 Вы создали ONLYOFFICE DocSpace, центр управления документами, где вы можете повысить эффективность совместной работы с командой, клиентами и партнерами. Его адрес: "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Пожалуйста, подтвердите ваш адрес электронной почты (Ссылка действительна в течение 7 дней):
- 
+
 $OrangeButton
- 
-Оцените новый способ совместной работы над документами!
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+* Оцените новый способ совместной работы над документами!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+ 
+Здравствуйте, $UserName!
+
 Вы создали ONLYOFFICE DocSpace, центр управления документами, где вы можете повысить эффективность совместной работы с командой, клиентами и партнерами. Его адрес: "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Пожалуйста, подтвердите ваш адрес электронной почты (Ссылка действительна в течение 7 дней):
- 
+
 $OrangeButton
- 
-Оцените новый способ совместной работы над документами!
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+* Оцените новый способ совместной работы над документами!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+  
+  
+Здравствуйте, $UserName!
+
 Вы создали ONLYOFFICE DocSpace, центр управления документами, где вы можете повысить эффективность совместной работы с командой, клиентами и партнерами. Его адрес: "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Пожалуйста, подтвердите ваш адрес электронной почты (Ссылка действительна в течение 7 дней):
- 
+
 $OrangeButton
- 
-Оцените новый способ совместной работы над документами!
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+* Оцените новый способ совместной работы над документами!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -1182,74 +1188,84 @@ $OrangeButton
 Не хотите менять пароль? Просто проигнорируйте это сообщение</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. Скачайте &lt;span style="color:#FF6F3D;"&gt;бесплатные&lt;/span&gt; приложения ONLYOFFICE
+ 
+
+Здравствуйте, $UserName!
+
 Получите бесплатные приложения ONLYOFFICE для работы с документами на любых устройствах.
- 
-# Для работы с документами офлайн на Windows, Linux и macOS скачайте "десктопные редакторы ONLYOFFICE":"https://www.onlyoffice.com/download-desktop.aspx".
- 
-#Для редактирования документов на мобильных устройствах скачайте приложение ONLYOFFICE Documents для "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" или "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Для работы с документами офлайн скачайте десктопные редакторы ONLYOFFICE для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+  
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Для редактирования документов на мобильных устройствах скачайте приложение ONLYOFFICE Documents для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 советов&lt;/span&gt; для эффективной работы с документами
+ 
+
+Здравствуйте, $UserName!
+
 Мы надеемся, что вам нравится использовать ONLYOFFICE DocSpace. Вот несколько полезных советов о том, как сделать работу с документами более эффективной.
- 
-*#1. Выберите способ работы.* Организуйте рабочий процесс по своему усмотрению, создавая комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач.
- 
-*#2. Работайте с любым контентом.* Храните файлы различных форматов в ваших комнатах и работайте с текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.
- 
-*#3. Работайте над документами вместе эффективно.* Работайте над документами в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживайте изменения, общайтесь онлайн с помощью встроенного чата или аудио- и видеозвонков.
- 
-*#4. Подключайте сторонние облачные хранилища.* Подключайте любые сторонние облачные хранилища и работайте, не переключаясь между приложениями.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Выберите способ работы.&lt;/b&gt; &lt;br/&gt;Организуйте рабочий процесс по своему усмотрению, создавая комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Работайте с любым контентом.&lt;/b&gt;Храните файлы различных форматов в ваших комнатах и работайте с текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Работайте над документами вместе эффективно.&lt;/b&gt; &lt;br/&gt;Работайте над документами в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживайте изменения, общайтесь онлайн с помощью встроенного чата или аудио- и видеозвонков. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Работайте безопасно.&lt;/b&gt; &lt;br/&gt;Настройте доступ ко всему рабочему пространству или отдельным комнатам с помощью гибких прав доступа и ролей пользователей. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Используйте плагин ИИ-помощник.&lt;/b&gt;&lt;br/&gt;Составляйте краткое изложение текста и переводите текст, создавайте изображения и ключевые слова, анализируйте слова и многое другое. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-С уважением, 
-команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 советов&lt;/span&gt; для эффективной работы с документами
+
+
+Здравствуйте, $UserName!
+
 Мы надеемся, что вам нравится использовать ONLYOFFICE DocSpace. Вот несколько полезных советов о том, как сделать работу с документами более эффективной.
- 
-*#1. Выберите способ работы.* Организуйте рабочий процесс по своему усмотрению, создавая комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач.
- 
-*#2. Работайте с любым контентом.* Храните файлы различных форматов в ваших комнатах и работайте с текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.
- 
-*#3. Работайте над документами вместе эффективно.* Работайте над документами в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживайте изменения, общайтесь онлайн с помощью встроенного чата или аудио- и видеозвонков.
- 
-*#4. Подключайте сторонние облачные хранилища.* Подключайте любые сторонние облачные хранилища и работайте, не переключаясь между приложениями.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1 alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Выберите способ работы.&lt;/b&gt; &lt;br/&gt;Организуйте рабочий процесс по своему усмотрению, создавая комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Работайте с любым контентом.&lt;/b&gt;Храните файлы различных форматов в ваших комнатах и работайте с текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2 alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3 alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Работайте над документами вместе эффективно.&lt;/b&gt; &lt;br/&gt;Работайте над документами в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживайте изменения, общайтесь онлайн с помощью встроенного чата или аудио- и видеозвонков. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Работайте безопасно.&lt;/b&gt; &lt;br/&gt;Настройте доступ ко всему рабочему пространству или отдельным комнатам с помощью гибких прав доступа и ролей пользователей. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4 alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5 alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Используйте плагин ИИ-помощник.&lt;/b&gt;&lt;br/&gt;Составляйте краткое изложение текста и переводите текст, создавайте изображения и ключевые слова, анализируйте слова и многое другое. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-С уважением, 
-команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 советов&lt;/span&gt; для эффективной работы с документами
+ 
+ 
+Здравствуйте, $UserName!
+
 Мы надеемся, что вам нравится использовать ONLYOFFICE DocSpace. Вот несколько полезных советов о том, как сделать работу с документами более эффективной.
- 
-*#1. Выберите способ работы.* Организуйте рабочий процесс по своему усмотрению, создавая комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач.
- 
-*#2. Работайте с любым контентом.* Храните файлы различных форматов в ваших комнатах и работайте с текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.
- 
-*#3. Работайте над документами вместе эффективно.* Работайте над документами в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживайте изменения, общайтесь онлайн с помощью встроенного чата или аудио- и видеозвонков.
- 
-*#4. Подключайте сторонние облачные хранилища.* Подключайте любые сторонние облачные хранилища и работайте, не переключаясь между приложениями.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Выберите способ работы.&lt;/b&gt; &lt;br/&gt;Организуйте рабочий процесс по своему усмотрению, создавая комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Работайте с любым контентом.&lt;/b&gt;Храните файлы различных форматов в ваших комнатах и работайте с текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Работайте над документами вместе эффективно.&lt;/b&gt; &lt;br/&gt;Работайте над документами в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживайте изменения, общайтесь онлайн с помощью встроенного чата или аудио- и видеозвонков. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Работайте безопасно.&lt;/b&gt; &lt;br/&gt;Настройте доступ ко всему рабочему пространству или отдельным комнатам с помощью гибких прав доступа и ролей пользователей. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Используйте плагин ИИ-помощник.&lt;/b&gt;&lt;br/&gt;Составляйте краткое изложение текста и переводите текст, создавайте изображения и ключевые слова, анализируйте слова и многое другое. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-С уважением, 
-команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -1271,46 +1287,48 @@ $OrangeButton
 "www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. Узнайте о бизнес-подписке &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+ 
+ 
+Здравствуйте, $UserName!
+
 Вот три простых вопроса, которые помогут нам сделать использование более комфортным для вас.
- 
-* У вас большая команда или много клиентов и партнеров, с которыми вы могли бы совместно работать в ONLYOFFICE DocSpace? 
- 
-* Вы хотели бы создавать любое количество комнат для работы с большим объемом документов? 
- 
-* Вы хотели бы использовать ONLYOFFICE DocSpace под собственным брендом?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;У вас большая команда или много клиентов и партнеров, с которыми вы могли бы совместно работать в ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Вы хотели бы создавать любое количество комнат для работы с большим объемом документов? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Вы хотели бы использовать ONLYOFFICE DocSpace под собственным брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 Если вы ответили «да» хотя бы на один вопрос, выберите тарифный план BUSINESS, который позволит добавлять любое желаемое количество менеджеров в ваш ONLYOFFICE DocSpace, а также применять опции брендинга.
- 
+
 Для этого обратитесь к разделу "Платежи":"$PricingPage" вашего ONLYOFFICE DocSpace. Вы получите индивидуальную ссылку на клиентский портал Stripe, где вы можете легко управлять всеми платежами. 
- 
+
 _Обратите внимание: плательщиком становится тот, кто оплачивает подписку. Вносить изменения в подписку (регулировать количество менеджеров) может только плательщик. Пользователи не получают доступа к платежным реквизитам. Владелец учетной записи ONLYOFFICE DocSpace может переназначить плательщика в любое время позднее. _
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. Узнайте о бизнес-подписке &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+ 
+ 
+Здравствуйте, $UserName!
+
 Вот три простых вопроса, которые помогут нам сделать использование более комфортным для вас.
- 
-* У вас большая команда или много клиентов и партнеров, с которыми вы могли бы совместно работать в ONLYOFFICE DocSpace? 
- 
-* Вы хотели бы создавать любое количество комнат для работы с большим объемом документов? 
- 
-* Вы хотели бы использовать ONLYOFFICE DocSpace под собственным брендом?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;У вас большая команда или много клиентов и партнеров, с которыми вы могли бы совместно работать в ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Вы хотели бы создавать любое количество комнат для работы с большим объемом документов? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Вы хотели бы использовать ONLYOFFICE DocSpace под собственным брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 Если вы ответили «да» хотя бы на один вопрос, выберите тарифный план BUSINESS, который позволит добавлять любое желаемое количество менеджеров в ваш ONLYOFFICE DocSpace, а также применять опции брендинга.
- 
+
 Для этого обратитесь к разделу "Платежи":"$PricingPage" вашего ONLYOFFICE DocSpace. Вы получите индивидуальную ссылку на клиентский портал Stripe, где вы можете легко управлять всеми платежами. 
- 
+
 _Обратите внимание: плательщиком становится тот, кто оплачивает подписку. Вносить изменения в подписку (регулировать количество менеджеров) может только плательщик. Пользователи не получают доступа к платежным реквизитам. Владелец учетной записи ONLYOFFICE DocSpace может переназначить плательщика в любое время позднее. _
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -1326,25 +1344,26 @@ $OrangeButton
 "www.onlyoffice.com":https://onlyoffice.com/ru</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. Узнайте о бизнес-подписке &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+ 
+ 
+Здравствуйте, $UserName!
+
 Вот три простых вопроса, которые помогут нам сделать использование более комфортным для вас.
- 
-* У вас большая команда или много клиентов и партнеров, с которыми вы могли бы совместно работать в ONLYOFFICE DocSpace? 
- 
-* Вы хотели бы создавать любое количество комнат для работы с большим объемом документов? 
- 
-* Вы хотели бы использовать ONLYOFFICE DocSpace под собственным брендом?
- 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;У вас большая команда или много клиентов и партнеров, с которыми вы могли бы совместно работать в ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Вы хотели бы создавать любое количество комнат для работы с большим объемом документов? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Вы хотели бы использовать ONLYOFFICE DocSpace под собственным брендом?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 Если вы ответили «да» хотя бы на один вопрос, выберите тарифный план BUSINESS, который позволит добавлять любое желаемое количество менеджеров в ваш ONLYOFFICE DocSpace, а также применять опции брендинга.
- 
+
 Для этого обратитесь к разделу "Платежи":"$PricingPage" вашего ONLYOFFICE DocSpace. Вы получите индивидуальную ссылку на клиентский портал Stripe, где вы можете легко управлять всеми платежами. 
- 
+
 _Обратите внимание: плательщиком становится тот, кто оплачивает подписку. Вносить изменения в подписку (регулировать количество менеджеров) может только плательщик. Пользователи не получают доступа к платежным реквизитам. Владелец учетной записи ONLYOFFICE DocSpace может переназначить плательщика в любое время позднее. _
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -1368,37 +1387,40 @@ _Обратите внимание: плательщиком становитс�
 "www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Здравствуйте!
- 
+    <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здравствуйте!
+
 Вас пригласили на ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
- 
+
 $OrangeButton
- 
-С уважением,
-Команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Здравствуйте!
- 
+    <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здравствуйте!
+
 Вас пригласили на ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
- 
+
 $OrangeButton
- 
-С уважением,
-Команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>Здравствуйте!
- 
+    <value>h1. Присоединяйтесь к &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Здравствуйте!
+
 Вас пригласили на ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Примите приглашение, перейдя по ссылке:
- 
+
 $OrangeButton
- 
-С уважением,
-Команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Здравствуйте!
@@ -1412,67 +1434,72 @@ $OrangeButton
 "www.onlyoffice.com":http://onlyoffice.com/ru</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Здравствуйте, $UserName!
+
 Добро пожаловать в ONLYOFFICE DocSpace! Ваш пользовательский профиль успешно добавлен на "${__VirtualRootPath}":"${__VirtualRootPath}". Теперь вы можете:
- 
-* Работать с другими пользователями в комнате, в которую вы приглашены*: комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач*.
- 
-* *Работать с разными форматами файлов*: текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.
- 
-* *Совместно работать над документами* в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или аудио- и видеозвонков. 
- 
-* *Подключать любые облачные хранилища* и работать, не переключаясь между приложениями.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Работать с другими пользователями в комнате, в которую вы приглашены: &lt;b&gt;комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать с разными форматами файлов&lt;/b&gt;: текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Совместно работать над документами&lt;/b&gt; в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или аудио- и видеозвонков.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Использовать плагин ИИ-помощник:&lt;/b&gt; составлять краткое изложение текста и переводить тексты, создавать изображения и ключевые слова, анализировать слова и многое другое.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-С уважением, 
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+Если вам требуется помощь, посетите наш "Справочный центр":"${__HelpLink}" или обратитесь в "службу поддержки":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+
+Здравствуйте, $UserName!
+
 Добро пожаловать в ONLYOFFICE DocSpace! Ваш пользовательский профиль успешно добавлен на "${__VirtualRootPath}":"${__VirtualRootPath}". Теперь вы можете:
- 
-* Работать с другими пользователями в комнате, в которую вы приглашены*: комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач*.
- 
-* *Работать с разными форматами файлов*: текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.
- 
-* *Совместно работать над документами* в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или аудио- и видеозвонков. 
- 
-* *Подключать любые облачные хранилища* и работать, не переключаясь между приложениями.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Работать с другими пользователями в комнате, в которую вы приглашены: &lt;b&gt; комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать с разными форматами файлов&lt;/b&gt;: текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Совместно работать над документами&lt;/b&gt; в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или аудио- и видеозвонков.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Использовать плагин ИИ-помощник:&lt;/b&gt; составлять краткое изложение текста и переводить тексты, создавать изображения и ключевые слова, анализировать слова и многое другое.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
 $OrangeButton
- 
-Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-С уважением, 
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+Если вам требуется помощь, посетите наш "Справочный центр":"${__HelpLink}" или обратитесь в "службу поддержки":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. в &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+ 
+
+Здравствуйте, $UserName!
+
 Добро пожаловать в ONLYOFFICE DocSpace! Ваш пользовательский профиль успешно добавлен на "${__VirtualRootPath}":"${__VirtualRootPath}". Теперь вы можете:
- 
-* Работать с другими пользователями в комнате, в которую вы приглашены*: комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач*.
- 
-* *Работать с разными форматами файлов*: текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.
- 
-* *Совместно работать над документами* в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или аудио- и видеозвонков. 
- 
-* *Подключать любые облачные хранилища* и работать, не переключаясь между приложениями.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Работать с другими пользователями в комнате, в которую вы приглашены: &lt;b&gt;комнаты для совместной работы в режиме реального времени или пользовательские комнаты с гибкими настройками для любых задач&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Работать с разными форматами файлов&lt;/b&gt;: текстовыми документами, электронными таблицами, презентациями, цифровыми формами, PDF-файлами, электронными книгами, мультимедиа.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Совместно работать над документами&lt;/b&gt; в одном из режимов совместного редактирования: в режиме реального времени или в режиме блокировки абзацев. Отслеживать изменения, общаться онлайн с помощью встроенного чата или аудио- и видеозвонков.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Использовать плагин ИИ-помощник:&lt;/b&gt; составлять краткое изложение текста и переводить тексты, создавать изображения и ключевые слова, анализировать слова и многое другое.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+
 $OrangeButton
- 
-Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-С уважением, 
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+
+Если вам требуется помощь, посетите наш "Справочный центр":"${__HelpLink}" или обратитесь в "службу поддержки":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -1505,17 +1532,18 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
+    <value>h1. Скачайте &lt;span style="color:#FF6F3D;"&gt;бесплатные&lt;/span&gt; приложения ONLYOFFICE
+ 
+ 
+Здравствуйте, $UserName!
+
 Скачайте бесплатные приложения ONLYOFFICE для работы с документами на любых устройствах.
- 
-# Для работы с документами офлайн на Windows, Linux и macOS скачайте "десктопные редакторы ONLYOFFICE":"https://www.onlyoffice.com/download-desktop.aspx".
- 
-#Для редактирования документов на мобильных устройствах скачайте приложение ONLYOFFICE Documents для "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" или "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-С уважением,
-команда ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/ru</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Для работы с документами офлайн, скачайте десктопные редакторы ONLYOFFICE для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+  
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Для редактирования документов на мобильных устройствах скачайте приложение ONLYOFFICE Documents для&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Здравствуйте, $UserName!
@@ -1756,7 +1784,7 @@ $OrangeButton
     <value>ПРИНЯТЬ</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Несколько советов для эффективной работы с документами</value>
+    <value>5 советов для эффективной работы с документами</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Несколько советов для эффективной работы с документами</value>
@@ -1790,5 +1818,17 @@ $OrangeButton
   </data>
   <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Узнайте о бизнес-подписке на ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>С уважением, команда ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ПОСМОТРЕТЬ ВСЕ ВИДЕО</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Изучите ONLYOFFICE DocSpace еще лучше с помощью видеоинструкций</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>С уважением, команда ONLYOFFICE</value>
   </data>
 </root>

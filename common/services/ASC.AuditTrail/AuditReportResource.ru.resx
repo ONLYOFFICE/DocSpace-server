@@ -724,4 +724,13 @@
   <data name="CityCol" xml:space="preserve">
     <value>Город</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Внешняя ссылка создана: {0}. Роль: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Внешняя ссылка удалена: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Внешняя ссылка обновлена: {0}. Роль: {1}</value>
+  </data>
 </root>
