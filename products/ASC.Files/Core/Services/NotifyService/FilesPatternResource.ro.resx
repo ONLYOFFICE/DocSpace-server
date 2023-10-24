@@ -86,4 +86,70 @@ $Message</value>
  
 $__AuthorName a șters sala: $RoomTitle</value>
   </data>
+  <data name="pattern_DocuSignComplete" xml:space="preserve">
+    <value>h1.Toți semnatarii au finalizat semnarea $DocumentTitle
+ 
+Această notificare vă informează că toți semnării au finalizat semnarea documentului "$DocumentTitle":"$DocumentURL".</value>
+  </data>
+  <data name="pattern_DocuSignStatus" xml:space="preserve">
+    <value>h1. $Message: $DocumentTitle
+ 
+Pentru mai multe informații vă conectați la contul dvs DocuSign.</value>
+  </data>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. Trimiterea corespondenţei a fost finalizată.
+
+Această notificare vă informează despre solicitarea dumneavoastră de a trimite $MailsCount mesaje și  despre finalizarea procedurii de trimitere. $Message
+
+Puteți găsi mesajele care au fost trimise cu succes în folderul  "Mesaje trimise":"$__VirtualRootPath/addons/mail/#sent" din modulul Mail.</value>
+  </data>
+  <data name="pattern_ShareFolder" xml:space="preserve">
+    <value>h1. S-au acordat permisiuni de acces la folderul: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" v-a acordat privilegii următoare de acces la folderul "$DocumentTitle":"$DocumentURL": "$AccessRights". 
+
+$Message</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Toți semnatarii au finalizat semnarea $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Documente. Toți semnatarii au finalizat semnarea [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Documente. Statutul semnării s-a schimbat</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Statutul semnării s-a schimbat</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>Notificare DocSpace. Menționat într-un document</value>
+  </data>
+  <data name="subject_EditorMentions_push" xml:space="preserve">
+    <value>Menționat într-un document</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>Trimiterea finalizată.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Documente. Trimiterea finalizată.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>Notificare DocSpace. Sala a fost ștearsă</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>S-au acordat permisiuni de acces la documentul: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Documente. S-au acordat permisiuni de acces la documentul: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>S-au acordat permisiuni de acces la documentul: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>S-au acordat permisiuni de acces la folderul: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Documente. S-au acordat permisiuni de acces la folderul: [$DocumentTitle]($DocumentURL)</value>
+  </data>
 </root>
