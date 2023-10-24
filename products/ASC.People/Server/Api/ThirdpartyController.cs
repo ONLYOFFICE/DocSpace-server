@@ -28,6 +28,7 @@ namespace ASC.People.Api;
 
 public class ThirdpartyController : ApiControllerBase
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly AccountLinker _accountLinker;
     private readonly CookiesManager _cookiesManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -287,15 +288,24 @@ public class ThirdpartyController : ApiControllerBase
         {
             var success = int.TryParse(linkData.RoomId, out var id);
 
-            if (success)
+
+            try
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                await _semaphore.WaitAsync();
+                if (success)
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                }
+                else
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
-            else
+            finally
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                _semaphore.Release();
             }
         }
     }

@@ -55,7 +55,7 @@ public class GoogleCloudStorage : BaseStorage
     {
     }
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -101,6 +101,8 @@ public class GoogleCloudStorage : BaseStorage
 
         props.TryGetValue("subdir", out _subDir);
 
+        DataStoreValidator = dataStoreValidator;
+        
         return this;
     }
 

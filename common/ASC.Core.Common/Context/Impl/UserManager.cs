@@ -48,7 +48,8 @@ public class UserManagerConstants
 
 [Scope]
 public class UserManager
-{
+{    
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private IDictionary<Guid, UserInfo> SystemUsers => _userManagerConstants.SystemUsers;
 
     private readonly IHttpContextAccessor _accessor;
@@ -479,22 +480,30 @@ public class UserManager
             throw new InvalidOperationException("User already exist.");
         }
 
-        if (type is EmployeeType.User)
+        try
         {
-            await _activeUsersFeatureChecker.CheckAppend();
-        }
-        else if (paidUserQuotaCheck)
-        {
-            await _countPaidUserChecker.CheckAppend();
-        }
+            await _semaphore.WaitAsync();
+            if (type is EmployeeType.User)
+            {
+                await _activeUsersFeatureChecker.CheckAppend();
+            }
+            else if (paidUserQuotaCheck)
+            {
+                await _countPaidUserChecker.CheckAppend();
+            }
 
-        var newUser = await _userService.SaveUserAsync(await _tenantManager.GetCurrentTenantIdAsync(), u);
-        if (syncCardDav)
-        {
-            await SyncCardDavAsync(u, oldUserData, newUser);
-        }
+            var newUser = await _userService.SaveUserAsync(await _tenantManager.GetCurrentTenantIdAsync(), u);
+            if (syncCardDav)
+            {
+                await SyncCardDavAsync(u, oldUserData, newUser);
+            }
 
-        return newUser;
+            return newUser;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     private async Task SyncCardDavAsync(UserInfo u, UserInfo oldUserData, UserInfo newUser)

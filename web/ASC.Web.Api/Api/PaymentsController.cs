@@ -102,6 +102,7 @@ public class PaymentController : ControllerBase
 
         return await _tariffService.GetShoppingUriAsync(Tenant.Id,
             Tenant.AffiliateId,
+            Tenant.PartnerId,
             currency,
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
             (await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).Email,

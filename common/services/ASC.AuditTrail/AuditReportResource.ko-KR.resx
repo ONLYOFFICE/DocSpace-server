@@ -135,13 +135,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>방이 삭제되었습니다</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>링크가 생성되었습니다. 역할: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>링크가 삭제되었습니다</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>링크가 업데이트되었습니다. 역할: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

@@ -30,6 +30,8 @@ namespace ASC.Web.Files.Utils;
 [Scope]
 public class FileSharingAceHelper
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
+    
     private readonly FileSecurity _fileSecurity;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly FileUtility _fileUtility;
@@ -90,7 +92,7 @@ public class FileSharingAceHelper
         _urlShortener = urlShortener;
     }
 
-    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings)
+    public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
     {
         if (entry == null)
         {
@@ -102,7 +104,7 @@ public class FileSharingAceHelper
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
         }
-
+        
         var handledAces = new List<Tuple<EventType, AceWrapper>>(aceWrappers.Count);
         var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
         var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
@@ -113,10 +115,11 @@ public class FileSharingAceHelper
         string warning = null;
         var shares = await _fileSecurity.GetPureSharesAsync(entry, aceWrappers.Select(a => a.Id))
             .ToDictionaryAsync(r => r.Subject);
+        var currentUserId = _authContext.CurrentAccount.ID;
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (w.Id == _authContext.CurrentAccount.ID)
+            if (entry.CreateBy == currentUserId && w.Id == currentUserId)
             {
                 continue;
             }
@@ -182,6 +185,7 @@ public class FileSharingAceHelper
 
                 try
                 {
+                    await _semaphore.WaitAsync();
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
                         await _countPaidUserChecker.CheckAppend();
@@ -210,12 +214,16 @@ public class FileSharingAceHelper
                     warning ??= e.Message;
                     continue;
                 }
-
+                finally
+                {
+                    _semaphore.Release();
+                }
+                
                 if (emailInvite)
                 {
                     try
                     {
-                        var user = await _userManagerWrapper.AddInvitedUserAsync(w.Email, userType);
+                        var user = await _userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture);
                         w.Id = user.Id;
                     }
                     catch (Exception e)
@@ -258,10 +266,10 @@ public class FileSharingAceHelper
 
             if (emailInvite)
             {
-                var link = await _invitationLinkService.GetInvitationLinkAsync(w.Email, share, _authContext.CurrentAccount.ID, entry.Id.ToString());
+                var link = await _invitationLinkService.GetInvitationLinkAsync(w.Email, share, _authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
-                await _studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink);
+                await _studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture);
             }
 
             if (w.Id == FileConstant.ShareLinkId)
@@ -334,7 +342,7 @@ public class FileSharingAceHelper
             if (entry.RootFolderType is FolderType.USER or FolderType.Privacy
                && notify)
             {
-                await _notifyClient.SendShareNoticeAsync(entry, recipients, message);
+                await _notifyClient.SendShareNoticeAsync(entry, recipients, message, culture);
             }
         }
 
@@ -378,7 +386,7 @@ public class FileSharingAceHelper
 
 [Scope]
 public class FileSharingHelper
-{
+{    
     public FileSharingHelper(
         Global global,
         GlobalFolderHelper globalFolderHelper,

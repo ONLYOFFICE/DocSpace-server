@@ -619,13 +619,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Místnost smazána</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Vytvořený odkaz. Role: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Odkaz smazán</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Odkaz aktualizován. Role: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

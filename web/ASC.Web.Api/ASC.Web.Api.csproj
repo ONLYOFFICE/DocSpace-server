@@ -130,5 +130,20 @@
     <EmbeddedResource Update="Core\AuditResource.az.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.ar-SA.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.hy-AM.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.ko-KR.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.pt.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.ro.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

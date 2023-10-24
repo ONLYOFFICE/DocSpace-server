@@ -37,8 +37,7 @@ public class BackupFileUploadHandler
         PermissionContext permissionContext,
         BackupAjaxHandler backupAjaxHandler,
         ICache cache,
-        TenantManager tenantManager,
-        IConfiguration configuration)
+        TenantManager tenantManager)
     {
         BackupFileUploadResult result = null;
         try
@@ -48,7 +47,7 @@ public class BackupFileUploadHandler
                 throw new ArgumentException("Access denied.");
             }
             var tenantId = tenantManager.GetCurrentTenant().Id;
-            var path = await backupAjaxHandler.GetTmpFilePathAsync();
+            var path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
             if (context.Request.Query["Init"].ToString() == "true")
             {
                 long.TryParse(context.Request.Query["totalSize"], out var size);
@@ -65,16 +64,22 @@ public class BackupFileUploadHandler
 
                 try
                 {
-                    if (File.Exists(path))
+                    if (File.Exists(path + "tar.gz"))
                     {
-                        File.Delete(path);
+                        File.Delete(path + "tar.gz");
                     }
-                    cache.Insert($"{tenantId} backupTotalSize", size.ToString(), TimeSpan.FromMinutes(10));
+                    if (File.Exists(path + "tar"))
+                    {
+                        File.Delete(path + "tar");
+                    }
+                    var info = new UploadInfo
+                    {
+                        Ext = context.Request.Query["extension"].ToString() == "tar" ? "tar" : "tar.gz",
+                        Size = size
+                    };
+                    cache.Insert($"{tenantId} backupTotalSize", info, TimeSpan.FromMinutes(20));
 
-                    int.TryParse(configuration["files:uploader:chunk-size"], out var chunkSize);
-                    chunkSize = chunkSize == 0 ? 10 * 1024 * 1024 : chunkSize;
-
-                    result = Success(chunkSize);
+                    result = Success();
                 }
                 catch
                 {
@@ -83,8 +88,8 @@ public class BackupFileUploadHandler
             }
             else
             {
-                long.TryParse(cache.Get<string>($"{tenantId} backupTotalSize"), out var totalSize);
-                if (totalSize <= 0)
+                var info = cache.Get<UploadInfo>($"{tenantId} backupTotalSize");
+                if (info != null)
                 {
                     throw new ArgumentException("Need init upload.");
                 }
@@ -92,10 +97,10 @@ public class BackupFileUploadHandler
                 var file = context.Request.Form.Files[0];
                 using var stream = file.OpenReadStream();
 
-                using var fs = File.Open(path, FileMode.Append);
+                var fs = File.Open(path + info.Ext, FileMode.Append);
                 await stream.CopyToAsync(fs);
 
-                if (fs.Length >= totalSize)
+                if (fs.Length >= info.Size)
                 {
                     cache.Remove($"{tenantId} backupTotalSize");
                     result = Success(endUpload: true);
@@ -117,12 +122,11 @@ public class BackupFileUploadHandler
         }));
     }
 
-    private BackupFileUploadResult Success(int chunk = 0, bool endUpload = false)
+    private BackupFileUploadResult Success(bool endUpload = false)
     {
         return new BackupFileUploadResult
         {
             Success = true,
-            ChunkSize = chunk,
             EndUpload = endUpload
         };
     }
@@ -143,6 +147,12 @@ internal class BackupFileUploadResult
     public string Message { get; set; }
     public int ChunkSize { get; set; }
     public bool EndUpload { get; set; }
+}
+
+internal class UploadInfo
+{
+    public long Size { get; set; }
+    public string Ext { get; set; }
 }
 
 public static class BackupFileUploadHandlerExtensions

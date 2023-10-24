@@ -162,6 +162,10 @@ public class SettingsDto
     /// <type>System.Boolean, System</type>
     public bool CookieSettingsEnabled { get; set; }
 
+    /// <summary>User name validation regex</summary>
+    /// <type>System.String, System</type>
+    public string UserNameRegex { get; set; }
+
     /// <summary>Plugins</summary>
     /// <type>ASC.Web.Api.ApiModel.ResponseDto.PluginsDto, ASC.Web.Api</type>
     public PluginsDto Plugins { get; set; }

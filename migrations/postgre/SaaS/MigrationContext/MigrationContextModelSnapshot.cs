@@ -6412,12 +6412,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("name");
 
-                    b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasColumnName("ssl")
-                        .HasDefaultValueSql("true");
-
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)

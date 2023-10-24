@@ -66,7 +66,7 @@ public class CspSettingsHelper
 
     public async Task<string> Save(IEnumerable<string> domains, bool setDefaultIfEmpty)
     {
-        var tenant = _tenantManager.GetCurrentTenant();
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(_coreSettings);
         List<string> headerKeys = new()
         {
@@ -78,19 +78,20 @@ public class CspSettingsHelper
             var domainsKey = $"{GetKey(domain)}:keys";
             if (_httpContextAccessor.HttpContext != null)
             {
-                var keys = new List<string>()
+                var keys = new List<string>
                 {
                     GetKey(Tenant.HostName)
                 };
 
-                var ips = Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork);
+                var ips = await Dns.GetHostAddressesAsync(Dns.GetHostName(), AddressFamily.InterNetwork);
 
-                foreach (var ip in ips)
+                keys.AddRange(ips.Select(ip => GetKey(ip.ToString())));
+
+                if (_httpContextAccessor.HttpContext.Connection.RemoteIpAddress != null)
                 {
-                    keys.Add(GetKey(ip.ToString()));
+                    keys.Add(GetKey(_httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()));
                 }
 
-                keys.Add(GetKey(_httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()));
                 await _distributedCache.SetStringAsync(domainsKey, string.Join(';', keys));
                 headerKeys.AddRange(keys);
             }
@@ -109,17 +110,18 @@ public class CspSettingsHelper
 
         if (!string.IsNullOrEmpty(headerValue))
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, _) => await _distributedCache.SetStringAsync(headerKey, headerValue));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await _distributedCache.SetStringAsync(headerKey, headerValue, cs));
         }
         else
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, _) => await _distributedCache.RemoveAsync(headerKey));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await _distributedCache.RemoveAsync(headerKey, cs));
         }
 
-        var current = _settingsManager.Load<CspSettings>();
-        current.Domains = domains;
-        current.SetDefaultIfEmpty = setDefaultIfEmpty;
-        _settingsManager.Save(current);
+        await _settingsManager.ManageAsync<CspSettings>(current =>
+        {
+            current.Domains = domains;
+            current.SetDefaultIfEmpty = setDefaultIfEmpty;            
+        });
 
         return headerValue;
     }
@@ -164,6 +166,7 @@ public class CspSettingsHelper
 
         if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage && !string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
         {
+            defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
             defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
         }
 

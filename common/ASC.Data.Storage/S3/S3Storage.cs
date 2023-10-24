@@ -965,7 +965,7 @@ public class S3Storage : BaseStorage
         }
     }
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -1068,11 +1068,13 @@ public class S3Storage : BaseStorage
                 _cdnKeyPairId = props["cdn_keyPairId"];
                 _cdnPrivateKeyPath = props["cdn_privateKeyPath"];
                 CdnDistributionDomain = props["cdn_distributionDomain"];
-        }
+            }
         }
 
         props.TryGetValue("subdir", out _subDir);
 
+        DataStoreValidator = dataStoreValidator;
+        
         return this;
     }
 
@@ -1113,7 +1115,7 @@ public class S3Storage : BaseStorage
 
     private Uri MakeUri(string preSignedURL)
     {
-        var uri = new Uri(preSignedURL);
+        var uri = new UnencodedUri(preSignedURL);
         var signedPart = uri.PathAndQuery.TrimStart('/');
 
         var baseUri = uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? _bucketSSlRoot : _bucketRoot;

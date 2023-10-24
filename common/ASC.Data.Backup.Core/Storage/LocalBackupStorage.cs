@@ -47,8 +47,8 @@ public class LocalBackupStorage : IBackupStorage, IGetterWriteOperator
 
     public Task<string> DownloadAsync(string storagePath, string targetLocalPath)
     {
-        var tempPath = Path.Combine(storagePath, Path.GetFileName(targetLocalPath));
-        File.Copy(storagePath, targetLocalPath, true);
+        var tempPath = Path.Combine(targetLocalPath, Path.GetFileName(storagePath));
+        File.Copy(storagePath, tempPath, true);
         return Task.FromResult(tempPath);
     }
 

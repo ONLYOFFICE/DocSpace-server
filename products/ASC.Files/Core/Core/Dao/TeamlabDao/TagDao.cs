@@ -414,7 +414,7 @@ internal abstract class BaseTagDao<T> : AbstractDao
 
         await foreach (var row in mustBeDeleted)
         {
-            await Queries.DeleteTagLinksByTagLinkDataAsync(filesDbContext, TenantID, row);
+            await Queries.DeleteTagLinksByTagLinkDataAsync(filesDbContext, TenantID, row.Link.TagId, row.Link.EntryId, row.Link.EntryType);
         }
 
         await Queries.DeleteTagAsync(filesDbContext);
@@ -1258,14 +1258,14 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int id) =>
                 ctx.TagLink.Any(r => r.TenantId == tenantId && r.TagId == id));
 
-    public static readonly Func<FilesDbContext, int, TagLinkData, Task<int>> DeleteTagLinksByTagLinkDataAsync =
+    public static readonly Func<FilesDbContext, int, int, string, FileEntryType, Task<int>> DeleteTagLinksByTagLinkDataAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, TagLinkData row) =>
+            (FilesDbContext ctx, int tenantId, int tagId, string entryId, FileEntryType entryType) =>
                 ctx.TagLink
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.TagId == row.Link.TagId)
-                    .Where(r => r.EntryId == row.Link.EntryId)
-                    .Where(r => r.EntryType == row.Link.EntryType)
+                    .Where(r => r.TagId == tagId)
+                    .Where(r => r.EntryId == entryId)
+                    .Where(r => r.EntryType == entryType)
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, Task<int>> DeleteTagAsync =
