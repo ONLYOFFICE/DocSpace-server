@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.net.URI;
+
 /**
  *
  */
-@FeignClient(value = "docspace", url = "${docspace.server.url}")
+@FeignClient(value = "docspace")
 public interface DocspaceClient {
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/@self")
-    DocspaceResponseDTO<MeDTO> getMe(@RequestHeader("Cookie") String cookie);
+    DocspaceResponseDTO<MeDTO> getMe(URI base, @RequestHeader("Cookie") String cookie);
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/portal")
-    DocspaceResponseDTO<TenantDTO> getTenant(@RequestHeader("Cookie") String cookie);
+    DocspaceResponseDTO<TenantDTO> getTenant(URI base, @RequestHeader("Cookie") String cookie);
 }

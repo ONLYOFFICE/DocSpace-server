@@ -42,10 +42,6 @@ application:
       group: files
       type: write
 
-docspace:
-  server:
-    url: ${DOCSPACE_ADDRESS:http://127.0.0.1}
-
 messaging:
   rabbitmq:
     configuration:
@@ -79,6 +75,10 @@ messaging:
         deadRouting: socket.dead.routing
 
 spring:
+  cloud:
+    loadbalancer:
+      ribbon:
+        enable: false
   flyway:
     enabled: true
     baselineOnMigrate: true

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 
 /**
@@ -25,6 +26,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class CheckAuthCookieFilter extends OncePerRequestFilter {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";
+    private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
     private final String X_TENANT_HEADER = "X-Tenant";
 
     private final DocspaceClient docspaceClient;
@@ -34,6 +36,15 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies == null || cookies.length < 1) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
+
+        var addressCookie = Arrays.stream(cookies)
+                .filter(c -> c.getName().equalsIgnoreCase(X_DOCSPACE_ADDRESS))
+                .findFirst();
+
+        if (addressCookie.isEmpty()) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
             return;
         }
 
@@ -49,13 +60,14 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
         var cookie = String.format("%s=%s", authCookie.get().getName(),
                 authCookie.get().getValue());
 
-        var me = docspaceClient.getMe(cookie);
+        var address = URI.create(addressCookie.get().getValue());
+        var me = docspaceClient.getMe(address, cookie);
         if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin()) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
         }
 
-        var tenant = docspaceClient.getTenant(cookie);
+        var tenant = docspaceClient.getTenant(address, cookie);
         if (tenant.getStatusCode() != HttpStatus.OK.value()) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
