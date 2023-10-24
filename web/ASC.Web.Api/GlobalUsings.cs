@@ -43,7 +43,6 @@ global using ASC.ActiveDirectory.ComplexOperations;
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
-global using Microsoft.IdentityModel.Tokens;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Security;
 global using ASC.Api.Settings;
@@ -164,6 +163,7 @@ global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Primitives;
+global using Microsoft.IdentityModel.Tokens;
 
 global using MimeKit;
 
