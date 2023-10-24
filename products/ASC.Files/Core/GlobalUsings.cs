@@ -126,7 +126,6 @@ global using ASC.Files.Thirdparty.Sharpbox;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
-global using ASC.Notify.Engine;
 global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
@@ -186,18 +185,13 @@ global using ICSharpCode.SharpZipLib.GZip;
 global using ICSharpCode.SharpZipLib.Tar;
 global using ICSharpCode.SharpZipLib.Zip;
 
-global using JWT;
-global using JWT.Algorithms;
-global using JWT.Builder;
 global using JWT.Exceptions;
-global using JWT.Serializers;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.EntityFrameworkCore.Infrastructure;
 global using Microsoft.EntityFrameworkCore.Storage;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
@@ -218,8 +212,6 @@ global using Newtonsoft.Json.Linq;
 global using ProtoBuf;
 
 global using SixLabors.ImageSharp;
-
-global using StackExchange.Redis;
 
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;
@@ -246,6 +238,5 @@ global using ContentType = System.Net.Mime.ContentType;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
 global using JsonSerializer = System.Text.Json.JsonSerializer;
 global using JsonTokenType = System.Text.Json.JsonTokenType;
-global using JsonConverter = System.Text.Json.Serialization.JsonConverter;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;

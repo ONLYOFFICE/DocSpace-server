@@ -77,10 +77,8 @@ global using ASC.EventBus.Events;
 global using ASC.Files.Core;
 global using ASC.MessagingSystem.Core;
 global using ASC.Notify.Cron;
-global using ASC.Notify.Engine;
 global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
-global using ASC.Notify.Recipients;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
@@ -89,8 +87,6 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
-
-global using Autofac;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;

@@ -135,7 +135,7 @@ public class FileDto<T> : FileEntryDto<T>
             FolderId = 12334,
             Version = 3,
             VersionGroup = 1,
-            ViewUrl = "http://www.onlyoffice.com/viewfile?fileid=2221"
+            ViewUrl = "https://www.onlyoffice.com/viewfile?fileid=2221"
         };
     }
 }

@@ -105,9 +105,9 @@ class CachedQuotaService : IQuotaService
         return quotas;
     }
 
-    public async Task<TenantQuota> GetTenantQuotaAsync(int tenant)
+    public async Task<TenantQuota> GetTenantQuotaAsync(int id)
     {
-        return (await GetTenantQuotasAsync()).SingleOrDefault(q => q.TenantId == tenant);
+        return (await GetTenantQuotasAsync()).SingleOrDefault(q => q.TenantId == id);
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
@@ -118,7 +118,7 @@ class CachedQuotaService : IQuotaService
         return q;
     }
 
-    public Task RemoveTenantQuotaAsync(int tenant)
+    public Task RemoveTenantQuotaAsync(int id)
     {
         throw new NotImplementedException();
     }

@@ -51,7 +51,7 @@ public class ElasticSearchIndexService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("ElasticSearch Index Service running.");
+        _logger.LogInformation("ElasticSearch Index Service running");
 
         try
         {

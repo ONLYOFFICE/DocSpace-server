@@ -119,7 +119,6 @@ public class NotifySenderService : BackgroundService
         }
         catch (ThreadAbortException)
         {
-            return;
         }
         catch (Exception e)
         {
@@ -164,7 +163,6 @@ public class NotifySenderService : BackgroundService
         }
         catch (ThreadAbortException)
         {
-            return;
         }
         catch (Exception e)
         {

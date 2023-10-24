@@ -185,11 +185,11 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         }
     }
 
-    public async Task<BoxFolder> MoveFolderAsync(string boxFolderId, string newFolderName, string toFolderId)
+    public async Task<BoxFolder> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
         var boxFolderRequest = new BoxFolderRequest
         {
-            Id = boxFolderId,
+            Id = folderId,
             Name = newFolderName,
             Parent = new BoxRequestEntity
             {
@@ -200,11 +200,11 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         return await _boxClient.FoldersManager.UpdateInformationAsync(boxFolderRequest, _boxFields);
     }
 
-    public async Task<BoxFile> MoveFileAsync(string boxFileId, string newFileName, string toFolderId)
+    public async Task<BoxFile> MoveFileAsync(string fileId, string newFileName, string toFolderId)
     {
         var boxFileRequest = new BoxFileRequest
         {
-            Id = boxFileId,
+            Id = fileId,
             Name = newFileName,
             Parent = new BoxRequestEntity
             {
@@ -215,11 +215,11 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         return await _boxClient.FilesManager.UpdateInformationAsync(boxFileRequest, null, _boxFields);
     }
 
-    public async Task<BoxFolder> CopyFolderAsync(string boxFolderId, string newFolderName, string toFolderId)
+    public async Task<BoxFolder> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
         var boxFolderRequest = new BoxFolderRequest
         {
-            Id = boxFolderId,
+            Id = folderId,
             Name = newFolderName,
             Parent = new BoxRequestEntity
             {
@@ -230,11 +230,11 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         return await _boxClient.FoldersManager.CopyAsync(boxFolderRequest, _boxFields);
     }
 
-    public async Task<BoxFile> CopyFileAsync(string boxFileId, string newFileName, string toFolderId)
+    public async Task<BoxFile> CopyFileAsync(string fileId, string newFileName, string toFolderId)
     {
         var boxFileRequest = new BoxFileRequest
         {
-            Id = boxFileId,
+            Id = fileId,
             Name = newFileName,
             Parent = new BoxRequestEntity
             {
@@ -245,16 +245,16 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         return await _boxClient.FilesManager.CopyAsync(boxFileRequest, _boxFields);
     }
 
-    public async Task<BoxFolder> RenameFolderAsync(string boxFolderId, string newName)
+    public async Task<BoxFolder> RenameFolderAsync(string folderId, string newName)
     {
-        var boxFolderRequest = new BoxFolderRequest { Id = boxFolderId, Name = newName };
+        var boxFolderRequest = new BoxFolderRequest { Id = folderId, Name = newName };
 
         return await _boxClient.FoldersManager.UpdateInformationAsync(boxFolderRequest, _boxFields);
     }
 
-    public async Task<BoxFile> RenameFileAsync(string boxFileId, string newName)
+    public async Task<BoxFile> RenameFileAsync(string fileId, string newName)
     {
-        var boxFileRequest = new BoxFileRequest { Id = boxFileId, Name = newName };
+        var boxFileRequest = new BoxFileRequest { Id = fileId, Name = newName };
 
         return await _boxClient.FilesManager.UpdateInformationAsync(boxFileRequest, null, _boxFields);
     }

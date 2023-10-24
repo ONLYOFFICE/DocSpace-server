@@ -306,9 +306,7 @@ public class Builder<T>
                 Bottom = "0mm",
                 Left = "0mm"
             },
-            PageSize = new SpreadsheetLayout.LayoutPageSize
-            {
-            }
+            PageSize = new SpreadsheetLayout.LayoutPageSize()
         };
 
         var (operationResultProgress, url, _) = await _documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false);

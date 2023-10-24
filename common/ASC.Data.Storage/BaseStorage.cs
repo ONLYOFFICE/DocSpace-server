@@ -156,7 +156,7 @@ public abstract class BaseStorage : IDataStore
 
     public virtual Task<Uri> GetCdnPreSignedUriAsync(string domain, string path, TimeSpan expire, IEnumerable<string> headers)
     {
-        return null;
+        return Task.FromResult<Uri>(null);
     }
 
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path);

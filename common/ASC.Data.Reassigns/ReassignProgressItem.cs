@@ -103,11 +103,11 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             SetPercentageAndCheckCancellation(50, true);
 
-            await fileStorageService.ReassignFoldersAsync<int>(FromUser, ToUser, personalFolderIds);
+            await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
             SetPercentageAndCheckCancellation(70, true);
 
-            await fileStorageService.ReassignFilesAsync<int>(FromUser, ToUser, personalFolderIds);
+            await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
             SetPercentageAndCheckCancellation(90, true);
 

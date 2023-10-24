@@ -1427,7 +1427,7 @@ public class UserController : PeopleControllerBase
         user.Notes = inDto.Comment ?? user.Notes;
         user.Sex = ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
             ? true
-            : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? (bool?)false : null)) ?? user.Sex;
+            : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : (bool?)null)) ?? user.Sex;
 
         user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
 

@@ -29,7 +29,7 @@ namespace ASC.ElasticSearch;
 [Singleton]
 public class Client
 {
-    private static volatile ElasticClient _client;
+    private ElasticClient _client;
     private static readonly object _locker = new();
     private readonly ILogger _logger;
     private readonly Settings _settings;

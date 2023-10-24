@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Text.Json;
-global using System.Web;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -43,7 +42,6 @@ global using AutoMapper;
 
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.EntityFrameworkCore.Infrastructure;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;

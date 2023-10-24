@@ -69,7 +69,6 @@ global using ASC.Notify.Recipients;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core;
 global using ASC.Web.Core.PublicResources;
-global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Utility;
 

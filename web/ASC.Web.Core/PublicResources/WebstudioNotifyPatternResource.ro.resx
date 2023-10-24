@@ -130,7 +130,7 @@ Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -145,7 +145,7 @@ Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -160,7 +160,7 @@ Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -182,7 +182,7 @@ Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE? Faceți clic pe butonul de mai jos pentru a confirma.
@@ -204,7 +204,7 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -223,7 +223,7 @@ $OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -242,7 +242,7 @@ $OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -261,7 +261,7 @@ $OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -295,7 +295,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -314,7 +314,7 @@ $OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -335,7 +335,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -356,7 +356,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -377,7 +377,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Bună!
@@ -388,7 +388,7 @@ $OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Bună!
@@ -399,7 +399,7 @@ $OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Bună!
@@ -410,7 +410,7 @@ $OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Bună!
@@ -421,7 +421,7 @@ $OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -442,7 +442,7 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcent
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -463,7 +463,7 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcent
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -484,7 +484,7 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcent
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -505,7 +505,7 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcent
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Mesajul de la "${__VirtualRootPath}": portalul "${__VirtualRootPath}"
@@ -527,7 +527,7 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -540,7 +540,7 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Salut!
@@ -562,7 +562,7 @@ Vă mulțumim și succese!
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -589,7 +589,7 @@ Vizitați Centru de ajutor:"https://helpcenter.onlyoffice.com/" pentru a afla ma
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Nu s-a înregistrat nicio activitate în contul dvs ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" mai mult de 6 luni. 
@@ -604,7 +604,7 @@ Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ONL
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Bună!
@@ -617,7 +617,7 @@ Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru c
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -669,7 +669,7 @@ Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru c
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE Personal? Faceți clic pe butonul de mai jos pentru a confirma.

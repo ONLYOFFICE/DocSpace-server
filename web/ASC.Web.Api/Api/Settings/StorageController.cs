@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
-using ASC.EventBus.Abstractions;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -170,10 +169,6 @@ public class StorageController : BaseSettingsController, IDisposable
             {
                 await StartEncryptionAsync(inDto.NotifyUsers);
             }
-        }
-        catch
-        {
-            throw;
         }
         finally
         {

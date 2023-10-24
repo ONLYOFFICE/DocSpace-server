@@ -542,7 +542,7 @@ public class NovellLdapSearcher : IDisposable
 
                 while (ienum.MoveNext())
                 {
-                    var attribute = (LdapAttribute)ienum.Current;
+                    var attribute = ienum.Current;
                     if (attribute == null)
                     {
                         continue;

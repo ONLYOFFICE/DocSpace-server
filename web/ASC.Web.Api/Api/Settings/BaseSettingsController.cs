@@ -34,7 +34,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute]
 [ApiController]
 [ControllerName("settings")]
-public partial class BaseSettingsController : ControllerBase
+public class BaseSettingsController : ControllerBase
 {
     //private const int ONE_THREAD = 1;
 

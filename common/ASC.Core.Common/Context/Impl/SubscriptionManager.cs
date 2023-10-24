@@ -212,10 +212,6 @@ public class SubscriptionManager
 
             return result;
         }
-        catch
-        {
-            throw;
-        }
         finally
         {
             _semaphore.Release();

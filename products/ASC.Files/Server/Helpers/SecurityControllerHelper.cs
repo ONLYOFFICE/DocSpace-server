@@ -62,7 +62,7 @@ public class SecurityControllerHelper : FilesHelperBase
     {
         await GetFileInfoAsync(fileId);
 
-        var tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T> { });
+        var tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
 
         if (sharedInfo == null || sharedInfo.Access != share)
@@ -86,7 +86,7 @@ public class SecurityControllerHelper : FilesHelperBase
 
             await _fileStorageService.SetAceObjectAsync(aceCollection, false);
 
-            tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T> { });
+            tmpInfo = await _fileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
             sharedInfo = tmpInfo.Find(r => r.Id == FileConstant.ShareLinkId);
         }
 
@@ -95,12 +95,12 @@ public class SecurityControllerHelper : FilesHelperBase
 
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {
-        return GetSecurityInfoAsync(new List<T> { fileId }, new List<T> { });
+        return GetSecurityInfoAsync(new List<T> { fileId }, new List<T>());
     }
 
     public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync<T>(T folderId)
     {
-        return GetSecurityInfoAsync(new List<T> { }, new List<T> { folderId });
+        return GetSecurityInfoAsync(new List<T>(), new List<T> { folderId });
     }
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)

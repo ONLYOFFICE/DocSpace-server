@@ -455,10 +455,6 @@ public class TenantManager
             await _semaphore.WaitAsync();
             await QuotaService.SetTenantQuotaRowAsync(row, exchange);
         }
-        catch
-        {
-            throw;
-    }
         finally
         {
             _semaphore.Release();

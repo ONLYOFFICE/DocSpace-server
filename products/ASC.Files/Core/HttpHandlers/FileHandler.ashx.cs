@@ -1341,7 +1341,6 @@ public class FileHandlerService
             return;
         }
         context.Response.Redirect(PathProvider.StartURL + "#error/" + HttpUtility.UrlEncode(ex.Message), true);
-        return;
     }
 
     private async Task WriteOk<T>(HttpContext context, Folder<T> folder, File<T> file)

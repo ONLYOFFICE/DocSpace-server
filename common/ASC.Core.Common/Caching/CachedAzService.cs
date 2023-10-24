@@ -99,7 +99,7 @@ class CachedAzService : IAzService
     public async Task<AzRecord> SaveAceAsync(int tenant, AzRecord r)
     {
         r = await _service.SaveAceAsync(tenant, r);
-        await _cacheNotify.PublishAsync((AzRecordCache)r, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotify.PublishAsync(r, CacheNotifyAction.InsertOrUpdate);
 
         return r;
     }
@@ -107,6 +107,6 @@ class CachedAzService : IAzService
     public async Task RemoveAceAsync(int tenant, AzRecord r)
     {
         await _service.RemoveAceAsync(tenant, r);
-        await _cacheNotify.PublishAsync((AzRecordCache)r, CacheNotifyAction.Remove);
+        await _cacheNotify.PublishAsync(r, CacheNotifyAction.Remove);
     }
 }

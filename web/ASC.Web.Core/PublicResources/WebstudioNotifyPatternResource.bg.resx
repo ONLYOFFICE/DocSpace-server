@@ -144,10 +144,10 @@ $OrangeButton
 
 За да научите повече за процедурата за архивиране, вижте ръководството за потребителя "Резервиране на данни":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block".
 
-Ако имате някакви въпроси или имате нужда от помощ, моля не се колебайте да се свържете с нас на адрес "support.onlyoffice.com":"http://support.onlyoffice.com"
+Ако имате някакви въпроси или имате нужда от помощ, моля не се колебайте да се свържете с нас на адрес "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Най-добри пожелания,
-Екип за поддръжка на ONLYOFFICE™ "www.onlyoffice.com":"http://onlyoffice.com/"</value>
+Екип за поддръжка на ONLYOFFICE™ "www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_password" xml:space="preserve">
     <value>h1.Запитване за промяна на парола за портал "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -227,7 +227,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Здравейте, $UserName!
@@ -248,7 +248,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Здравейте, $UserName!
@@ -269,7 +269,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
    <value>Здравейте, $UserName!
@@ -290,7 +290,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Съобщение от портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -355,7 +355,7 @@ $OrangeButton
 Моля, опитайте отново по-късно. Вашият портал вече е достъпен на стария адрес "$PortalUrl":"$PortalUrl"
 
 Ако имате някакви въпроси или имате нужда от помощ, моля не се колебайте да се свържете с нас на адрес "support@onlyoffice.com":mailto:support@onlyoffice.com
-С най-добри пожелания, Екип за поддръжка на ONLYOFFICE™ "www.onlyoffice.com":"http://onlyoffice.com/"
+С най-добри пожелания, Екип за поддръжка на ONLYOFFICE™ "www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^За да промените типа на известието, моля, управлявайте "настройките за абонамента":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -368,7 +368,7 @@ $OrangeButton
 Ако имате някакви въпроси или имате нужда от помощ, моля не се колебайте да се свържете с нас на адрес "support@onlyoffice.com":"mailto: support@onlyoffice.com"
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^За да промените типа на известието, моля, управлявайте "настройките за абонамента":"$RecipientSubscriptionConfigURL". ^</value>
   </data>
@@ -383,7 +383,7 @@ $OrangeButton
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Здравейте, $UserName
@@ -478,7 +478,7 @@ p=. "Reactivate Portal":"$ActivateUrl" (тази връзка няма огра�
 
 за уважение,
 екип за поддръжка на ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Забелязване на портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -503,7 +503,7 @@ $OrangeButton
 
 Поздрави,
 Екип за поддръжка на ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/ "</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ "</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Промяна на адреса на портала
@@ -603,7 +603,7 @@ h3.Пощенски адрес
 Ако имате някакви въпроси или имате нужда от помощ, моля не се колебайте да се свържете с нас на адрес "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 
 Поздрави,
-Екип за поддръжка на ONLYOFFICE™ "www.onlyoffice.com":http://onlyoffice.com/
+Екип за поддръжка на ONLYOFFICE™ "www.onlyoffice.com":https://onlyoffice.com/
 
 ^За да промените типа на известието, моля, управлявайте "настройките за абонамента":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -821,7 +821,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -836,7 +836,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -851,7 +851,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -873,7 +873,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -886,7 +886,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -905,7 +905,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -924,7 +924,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -943,7 +943,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -962,7 +962,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -983,7 +983,7 @@ _Моля, обърнете внимание: Лицето, което плащ�
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1004,7 +1004,7 @@ _Моля, обърнете внимание: Лицето, което плащ�
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1025,7 +1025,7 @@ _Моля, обърнете внимание: Лицето, което плащ�
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1046,7 +1046,7 @@ _Моля, обърнете внимание: Лицето, което плащ�
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Здравейте!
@@ -1057,7 +1057,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Здравейте!
@@ -1068,7 +1068,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Здравейте!
@@ -1079,7 +1079,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Здравейте!
@@ -1090,7 +1090,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1111,7 +1111,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1132,7 +1132,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1153,7 +1153,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1174,7 +1174,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Съобщение от портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1196,7 +1196,7 @@ $Body</value>
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1209,7 +1209,7 @@ $Body</value>
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Привет!
@@ -1240,7 +1240,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1267,7 +1267,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Не сте влизали във вашия ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" повече от половин година. 
@@ -1282,7 +1282,7 @@ $OrangeButton
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Здравейте!
@@ -1295,7 +1295,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Здравей, $UserName!
@@ -1360,7 +1360,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Добре дошли в ONLYOFFICE DocSpace!</value>
@@ -1506,11 +1506,11 @@ $OrangeButton
 
 За да научите повече за процедурата по архивиране, моля, вижте нашето ръководство за потребителя [Архивиране на данни](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Ако имате някакви въпроси или се нуждаете от помощ, моля не се колебайте да се свържете с нас на [support.onlyoffice.com](http://support.onlyoffice.com)
+Ако имате някакви въпроси или се нуждаете от помощ, моля не се колебайте да се свържете с нас на [support.onlyoffice.com](https://support.onlyoffice.com)
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-[www.onlyoffice.com]( http://onlyoffice.com/)</value>
+[www.onlyoffice.com]( https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Искате ли да промените имейла в акаунта си ${LetterLogoText}?
@@ -1609,7 +1609,7 @@ _Забележка_: този линк е валиден само 7 дни. М�
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Изтриване на портала [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1634,7 +1634,7 @@ _Забележка_: този линк е валиден само 7 дни. М�
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Потребителят "$FromUserName":"$FromUserLink" е изтрил своя/нейния профил и сега този профил е блокиран. Всички файлове на потребителя все още им принадлецат и заемат дисково пространство. 
@@ -1706,7 +1706,7 @@ $OrangeButton
 
 С уважение,
 Екипът на ONLYOFFICE
-"www.onlyoffice.com": "http://onlyoffice.com/"</value>
+"www.onlyoffice.com": "https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) известие за промяна на профил в портала

@@ -613,10 +613,6 @@ public class SettingsController : BaseSettingsController
 
                 await _settingsManager.SaveAsync(settings);
             }
-            catch
-            {
-                throw;
-            }
             finally
             {
                 _semaphore.Release();

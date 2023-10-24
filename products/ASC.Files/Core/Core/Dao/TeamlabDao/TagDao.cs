@@ -394,10 +394,6 @@ internal abstract class BaseTagDao<T> : AbstractDao
                 await tx.CommitAsync();
             });
         }
-        catch
-        {
-            throw;
-        }
         finally
         {
             _semaphore.Release();
@@ -620,10 +616,6 @@ internal abstract class BaseTagDao<T> : AbstractDao
                 await tx.CommitAsync();
             });
         }
-        catch
-        {
-            throw;
-        }
         finally
         {
             _semaphore.Release();
@@ -730,8 +722,6 @@ internal abstract class BaseTagDao<T> : AbstractDao
                 yield return await ToTagAsync(e);
             }
         }
-
-        yield break;
     }
 
     protected async IAsyncEnumerable<Tag> FromQueryAsync(IAsyncEnumerable<TagLinkData> dbFilesTags)

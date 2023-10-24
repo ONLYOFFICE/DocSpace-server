@@ -191,36 +191,8 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         return url;
     }
 
-    public async Task<string> GetUserProfileAsync(Guid user, bool absolute = true)
-    {
-        var queryParams = await GetUserParamsPairAsync(user);
-
-        var url = absolute ? ToAbsolute(VirtualAccountsPath) : AbsoluteAccountsPath;
-        url += "view/";
-        url += queryParams;
-
-        return url;
-    }
-
     #endregion
-
-    public Guid GetProductID()
-    {
-        var productID = Guid.Empty;
-
-        if (_httpContextAccessor?.HttpContext != null)
-        {
-            GetLocationByRequest(out var product, out _);
-            if (product != null)
-            {
-                productID = product.ID;
-            }
-        }
-
-        return productID;
-    }
     
-
     public void GetLocationByRequest(out IProduct currentProduct, out IModule currentModule)
     {
         var currentURL = string.Empty;
@@ -466,20 +438,6 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         return !settings.FeedbackAndSupportEnabled || string.IsNullOrEmpty(settings.FeedbackAndSupportUrl)
             ? string.Empty
             : GetRegionalUrl(settings.FeedbackAndSupportUrl, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
-    }
-
-    #endregion
-
-    #region management links
-
-    public string GetAdministration(ManagementType managementType)
-    {
-        if (managementType == ManagementType.General)
-        {
-            return ToAbsolute("~/management.aspx") + string.Empty;
-        }
-
-        return ToAbsolute("~/management.aspx") + "?" + "type=" + ((int)managementType);
     }
 
     #endregion

@@ -111,10 +111,6 @@ public class SmsKeyStorage
             _keyCache.Insert(cacheKey, phoneKeys, DateTime.UtcNow.Add(StoreInterval));
             return (true, key);
         }
-        catch
-        {
-            throw;
-        }
         finally
         {
             _semaphore.Release();
@@ -134,10 +130,6 @@ public class SmsKeyStorage
             var cacheKey = await BuildCacheKeyAsync(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey);
             return phoneKeys != null;
-        }
-        catch
-        {
-            throw;
         }
         finally
         {
@@ -186,10 +178,6 @@ public class SmsKeyStorage
 
             _checkCache.Insert(cacheCheck, (counter - 1).ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(StoreInterval));
             return Result.Ok;
-        }
-        catch
-        {
-            throw;
         }
         finally
         {

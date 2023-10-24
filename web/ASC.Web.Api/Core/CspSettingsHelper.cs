@@ -262,7 +262,7 @@ public class CspOptions
 
     public CspOptions(string domain)
     {
-        Def = new List<string>() { };
+        Def = new List<string>();
         Script = new List<string>() { domain };
         Style = new List<string>() { domain };
         Img = new List<string>() { domain };

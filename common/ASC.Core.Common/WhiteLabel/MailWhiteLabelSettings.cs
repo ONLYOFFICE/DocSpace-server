@@ -158,7 +158,7 @@ public class MailWhiteLabelSettingsHelper
         {
             var url = BaseCommonLinkUtility.GetRegionalUrl(_configuration["web:demo-order"] ?? string.Empty, null);
 
-            return !string.IsNullOrEmpty(url) ? url : "http://www.onlyoffice.com/demo-order.aspx";
+            return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com/demo-order.aspx";
         }
     }
 
@@ -168,7 +168,7 @@ public class MailWhiteLabelSettingsHelper
         {
             var url = _configuration["web:teamlab-site"];
 
-            return !string.IsNullOrEmpty(url) ? url : "http://www.onlyoffice.com";
+            return !string.IsNullOrEmpty(url) ? url : "https://www.onlyoffice.com";
         }
     }
 }

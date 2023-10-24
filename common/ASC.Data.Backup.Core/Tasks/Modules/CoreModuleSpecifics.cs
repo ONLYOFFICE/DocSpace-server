@@ -107,14 +107,11 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
     protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
     {
-        if (table.Name == "core_acl")
+        if (table.Name == "core_acl" && int.Parse((string)row["tenant"]) == -1)
         {
-            if (int.Parse((string)row["tenant"]) == -1)
-            {
-                preparedRow = null;
+            preparedRow = null;
 
-                return false;
-            }
+            return false;
         }
 
         return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
@@ -191,19 +188,6 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         }
 
         return base.TryPrepareValue(dump, connection, columnMapper, table, columnName, relationList, ref value);
-    }
-
-    private static bool ValidateSource(Guid expectedValue, DataRowInfo row)
-    {
-        var source = Convert.ToString(row["source"]);
-        try
-        {
-            return expectedValue == new Guid(source);
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     private static bool IsDocumentsStorageType(string strStorageType)

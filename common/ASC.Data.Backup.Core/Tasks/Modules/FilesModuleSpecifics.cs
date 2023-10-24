@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Linq;
-
-using ASC.Files.Core.Core.Thirdparty.ProviderDao;
-
 namespace ASC.Data.Backup.Tasks.Modules;
 
 public class FilesModuleSpecifics : ModuleSpecificsBase

@@ -52,7 +52,6 @@ public class PaymentAccountHandler
 
         var backUrl = context.Request.Query["backUrl"];
         context.Response.Redirect((await tariffService.GetAccountLinkAsync(tenant.Id, backUrl)).AbsoluteUri);
-        return;
     }
 }
 

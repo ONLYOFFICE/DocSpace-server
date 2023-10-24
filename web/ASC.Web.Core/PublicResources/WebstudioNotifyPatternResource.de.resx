@@ -154,11 +154,11 @@ eine Backup-Datei mit allen Daten von Ihrem Portal "${__VirtualRootPath}":"${__V
 Um mehr über den Backup- bzw. Wiederherstellungsvorgang zu erfahren, lesen Sie bitte unsere Anleitung "Erstellung und Wiederherstellung des Backups von einem ONLYOFFICE™-SaaS-Portal":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block".
 
 Wenn Sie Fragen haben oder Hilfe brauchen, wenden Sie sich bitte an uns unter
-"support.onlyoffice.com":"http://support.onlyoffice.com"
+"support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Mit freundlichen Grüßen
 ONLYOFFICE™-Kundendienst
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) Backup des Portals gestartet
@@ -169,11 +169,11 @@ eine Datei mit dem Backup Ihres Portals [${__VirtualRootPath}](${__VirtualRootPa
 
 Schauen Sie in unser Benutzerhandbuch [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx), um mehr über Backups zu erfahren.
 
-Sollten Sie noch Fragen haben oder Hilfe benötigen, kontaktieren Sie  uns unter [support.onlyoffice.com](http://support.onlyoffice.com)
+Sollten Sie noch Fragen haben oder Hilfe benötigen, kontaktieren Sie  uns unter [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Möchten Sie Ihre E-Mail im ${LetterLogoText}-Konto ändern?
@@ -264,7 +264,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
 
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -296,7 +296,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
 
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Nachricht von dem "${__VirtualRootPath}":"${__VirtualRootPath}" Portal
@@ -370,7 +370,7 @@ Ihr Portal ist nun unter der alten Adresse "$PortalUrl":"$PortalUrl" verfügbar
 Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte unter "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Um den Benachrichtigungstyp zu ändern, verwalten Sie Ihre "Abonnement-Einstellungen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -384,7 +384,7 @@ Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte un
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Um den Benachrichtigungstyp zu ändern, verwalten Sie Ihre "Abonnement-Einstellungen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -399,7 +399,7 @@ Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte un
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Migration eines Portals
@@ -444,7 +444,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
 
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Hallo, $UserName
@@ -542,7 +542,7 @@ Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte un
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Deaktivierung des Portals [${__VirtualRootPath}](${__VirtualRootPath})
@@ -562,7 +562,7 @@ Haben Sie Fragen oder benötigen Sie Hilfe, können Sie uns unter [support@onlyo
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Das Löschen des Portals "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -587,7 +587,7 @@ Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte un
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Löschen des Portals [${__VirtualRootPath}](${__VirtualRootPath})
@@ -612,7 +612,7 @@ Haben Sie Fragen oder benötigen Sie Hilfe, können Sie uns unter [support@onlyo
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Änderung der Portaladresse
@@ -773,7 +773,7 @@ Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte un
 
 Mit freundlichen Grüßen,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Um den Benachrichtigungstyp zu ändern, verwalten Sie Ihre "Abonnement-Einstellungen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -788,7 +788,7 @@ Sie erhalten bald mehr Tipps für Ihr Online-Büro. Sie können dies jederzeit a
 
 Beste Grüße,
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -809,7 +809,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
 
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1.Benachrichtigung über die Profiländerung des Portals "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1234,7 +1234,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1255,7 +1255,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1276,7 +1276,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1297,7 +1297,7 @@ Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1362,7 +1362,7 @@ Nachdem Sie auf den Einladungslink geklickt haben, setzen Sie bitte ein neues Pa
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -1373,7 +1373,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Möchten Sie das Passwort für Ihr ONLYOFFICE-Konto ändern? Klicken Sie zur Bestätigung auf die Schaltfläche unten.
@@ -1395,7 +1395,7 @@ Mit den kostenlosen ONLYOFFICE-Apps können Sie Dokumente von jedem Ihrer Gerät
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1414,7 +1414,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1435,7 +1435,7 @@ Bitte beachten Sie: Die Person, die das Abonnement bezahlt, wird zum Zahler. Nur
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -1446,7 +1446,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1467,7 +1467,7 @@ Bitte beachten Sie: Die Person, die das Abonnement bezahlt, wird zum Zahler. Nur
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -1478,7 +1478,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Nachricht aus dem Portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1506,7 +1506,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1527,7 +1527,7 @@ Bitte beachten Sie: Die Person, die das Abonnement bezahlt, wird zum Zahler. Nur
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -1538,7 +1538,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1557,7 +1557,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1570,7 +1570,7 @@ Erhalten Sie kostenlose ONLYOFFICE-Apps, um von jedem Ihrer Geräte aus an Dokum
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Hallo zusammen!
@@ -1592,7 +1592,7 @@ Vielen Dank und viel Glück!
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1619,7 +1619,7 @@ Lesen Sie unser "Hilfe-Center":"https://helpcenter.onlyoffice.com/", um mehr üb
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Sie haben Ihren ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" seit mehr als einem halben Jahr nicht mehr betreten. 
@@ -1633,7 +1633,7 @@ Wenn Sie dies für einen Fehler halten und ONLYOFFICE DocSpace weiterhin nutzen 
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1646,7 +1646,7 @@ Erhalten Sie kostenlose ONLYOFFICE-Apps, um von jedem Ihrer Geräte aus an Dokum
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1665,7 +1665,7 @@ $OrangeButton
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1686,7 +1686,7 @@ Bitte beachten Sie: Die Person, die das Abonnement bezahlt, wird zum Zahler. Nur
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Hallo!
@@ -1699,7 +1699,7 @@ Nachdem Sie auf den Einladungslink geklickt haben, setzen Sie bitte ein neues Pa
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1721,7 +1721,7 @@ Genießen Sie eine innovative Art der Zusammenarbeit mit Dokumenten!
  
 Beste Grüße
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="ButtonVisitPaymentsSection" xml:space="preserve">
     <value>Abschnitt Zahlungen besuchen</value>
@@ -1757,7 +1757,7 @@ Genießen Sie eine neue Art der Zusammenarbeit mit Dokumenten!
 
 Mit freundlichen Grüßen
 ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1772,7 +1772,7 @@ Genießen Sie eine neue Art der Zusammenarbeit mit Dokumenten!
 
 Mit freundlichen Grüßen
 ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1787,6 +1787,6 @@ Genießen Sie eine neue Art der Zusammenarbeit mit Dokumenten!
 
 Mit freundlichen Grüßen
 ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
 </root>

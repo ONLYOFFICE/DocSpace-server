@@ -118,7 +118,7 @@ $OrangeButton
 ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/ja/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>$UserNameさん、こんにちは!
@@ -138,7 +138,7 @@ $OrangeButton
 ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/ja/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>$UserNameさん、こんにちは!
@@ -158,7 +158,7 @@ $OrangeButton
 ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/ja/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>$UserNameさん、こんにちは!
@@ -178,7 +178,7 @@ $OrangeButton
 ヘルプが必要な場合は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/"を閲覧してください。または"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/ja/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja/"</value>
  </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpaceへようこそ!</value>
@@ -214,7 +214,7 @@ $OrangeButton
 ドキュメントコラボレーションの新時代をどうぞお楽しみください！
  
 ONLYOFFICE Team
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>$UserName 様
@@ -230,7 +230,7 @@ $OrangeButton
 ドキュメントコラボレーションの新時代をどうぞお楽しみください！
  
 ONLYOFFICE Team
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>$UserName 様
@@ -246,7 +246,7 @@ $OrangeButton
 ドキュメントコラボレーションの新時代をどうぞお楽しみください！
  
 ONLYOFFICE Team
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>$UserName 様
@@ -269,7 +269,7 @@ $OrangeButton
 ドキュメントコラボレーションの新時代をどうぞお楽しみください！
  
 ONLYOFFICE Team
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.ポータルサイトのアドレス変更
@@ -299,7 +299,7 @@ $OrangeButton
 #モバイルデバイスでドキュメントを編集するには、"iOS": "https://apps.apple.com/us/app/onlyoffice-documents/id944896972" または "Android": "https://play.google.com/store/apps/details?id=com.onlyoffice.documents "のONLYOFFICE Documentsアプリを入手してください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName 様
@@ -315,7 +315,7 @@ ONLYOFFICE チーム
 *#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>$UserName 様
@@ -331,7 +331,7 @@ ONLYOFFICE チーム
 *#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName 様
@@ -347,7 +347,7 @@ ONLYOFFICE チーム
 *#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName 様
@@ -363,7 +363,7 @@ ONLYOFFICE チーム
 *#4. サードパーティーのクラウドを接続する。*任意のクラウドストレージを接続し、アプリを切り替えることなく作業することができます。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>$UserName 様
@@ -385,7 +385,7 @@ ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照
 _ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":"http://onlyoffice.com/ja"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>$UserName 様
@@ -397,7 +397,7 @@ ONLYOFFICE DocSpaceの$PaymentDelay日数の猶予期間が有効になってい
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>$UserName 様
@@ -419,7 +419,7 @@ ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照
 _ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":"http://onlyoffice.com/ja"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>$UserName 様
@@ -441,7 +441,7 @@ ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照
 _ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":"http://onlyoffice.com/ja"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>$UserName 様
@@ -463,7 +463,7 @@ ONLYOFFICE DocSpaceの "お支払いセクション":"$PricingPage" をご参照
 _ご注意：サブスクリプションをお支払いされている方は、支払者になります。お支払い担当者のみがサブスクリプションの変更（マネージャー数の調整）を行うことができます。ユーザーはお支払いの詳細にアクセスすることはできません。ONLYOFFICE DocSpaceのアカウント所有者は、支払者をいつでも変更することができます。_
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":"http://onlyoffice.com/ja"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>こんにちは！
@@ -473,7 +473,7 @@ ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待さ�
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>こんにちは！
@@ -483,7 +483,7 @@ ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待さ�
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>こんにちは！
@@ -493,7 +493,7 @@ ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待さ�
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>こんにちは！
@@ -503,7 +503,7 @@ ONLYOFFICE DocSpaceの"${__VirtualRootPath}":"${__VirtualRootPath}"に招待さ�
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>$UserName 様
@@ -604,7 +604,7 @@ $Body</value>
 #モバイルデバイスでドキュメントを編集するには、"iOS": "https://apps.apple.com/us/app/onlyoffice-documents/id944896972" または "Android": "https://play.google.com/store/apps/details?id=com.onlyoffice.documents "のONLYOFFICE Documentsアプリを入手してください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>$UserName 様
@@ -616,7 +616,7 @@ ONLYOFFICE チーム
 #モバイルデバイスでドキュメントを編集するには、"iOS": "https://apps.apple.com/us/app/onlyoffice-documents/id944896972" または "Android": "https://play.google.com/store/apps/details?id=com.onlyoffice.documents "のONLYOFFICE Documentsアプリを入手してください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>こんにちは！
@@ -637,7 +637,7 @@ $OrangeButton
 ONLYOFFICEをご利用いただき誠にありがとうございました。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":"http://onlyoffice.com/ja"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ja"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>$UserName 様
@@ -663,7 +663,7 @@ $OrangeButton
 ONLYOFFICE DocSpaceの設定や管理については、「ヘルプセンター」: "https://helpcenter.onlyoffice.com/"をご覧ください。また、機能についての質問も受け付けております。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" に半年以上入っていないようです。
@@ -677,7 +677,7 @@ $OrangeButton
 もし、これが間違いだと思い、ONLYOFFICE DocSpaceのご利用を継続したい場合は、お手数ですが、弊社の"サポートチーム":"https://www.onlyoffice.com/support-contact-form.aspx"までご連絡ください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>こんにちは！
@@ -689,7 +689,7 @@ $OrangeButton
 招待リンクをクリックした後、アカウントに新しいパスワードを設定してください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>$UserName 様
@@ -701,7 +701,7 @@ ONLYOFFICE DocSpaceのすべての利点を使用し続けるために、今Busi
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>$UserName 様
@@ -713,7 +713,7 @@ ONLYOFFICE DocSpaceの$PaymentDelay日数の猶予期間は終了しています
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>$UserName 様
@@ -725,7 +725,7 @@ ONLYOFFICE DocSpaceの$PaymentDelay日数の猶予が明日までとなります
 $OrangeButton
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>こんにちは！
@@ -737,7 +737,7 @@ $OrangeButton
 招待リンクをクリックした後、アカウントに新しいパスワードを設定してください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":http://onlyoffice.com/ja</value>
+"www.onlyoffice.com":https://onlyoffice.com/ja</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE Personalアカウントのパスワードを変更したいですか？下のボタンをクリックして確認してください。

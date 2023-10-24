@@ -714,7 +714,7 @@ public class SharePointProviderInfoHelper
 
     public async Task InvalidateAsync()
     {
-        await _notify.PublishAsync(new SharePointProviderCacheItem { }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new SharePointProviderCacheItem(), CacheNotifyAction.Remove);
     }
 
     public async Task PublishFolderAsync(string id)

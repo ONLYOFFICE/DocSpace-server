@@ -136,7 +136,7 @@ public class EncryptionKeyPairDtoHelper
             throw new NotSupportedException();
         }
 
-        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T> { });
+        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
         fileShares = fileShares.Where(share => !share.SubjectGroup
                                         && !share.Id.Equals(FileConstant.ShareLinkId)

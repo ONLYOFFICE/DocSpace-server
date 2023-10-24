@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Data;
-
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Utils;
@@ -39,8 +37,6 @@ global using ASC.Feed.Configuration;
 global using ASC.Feed.Core;
 global using ASC.Feed.Data;
 global using ASC.Web.Core;
-
-global using Autofac;
 
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
