@@ -514,9 +514,11 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             {
                 await _factoryIndexer.DeleteAsync(f);
             }
-
+            
             filesDbContext.Folders.RemoveRange(folderToDelete);
 
+            await Queries.DeleteOrderAsync(filesDbContext, subfolders);
+            
             var subfoldersStrings = subfolders.Select(r => r.ToString()).ToList();
 
             await Queries.DeleteTagLinksAsync(filesDbContext, TenantID, subfoldersStrings);
@@ -787,7 +789,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     private async Task<int> GetFilesCountAsync(int folderId)
     {
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
         return await Queries.CountFilesAsync(filesDbContext, TenantID, folderId);
     }
 
@@ -1828,6 +1829,13 @@ static file class Queries
                     .Where(r => subfolders.Contains(r.Id)));
 
 
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> DeleteOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<int> subfolders) =>
+                ctx.Tree
+                    .Where(r => subfolders.Contains(r.FolderId))
+                    .ExecuteDelete());
+    
     public static readonly Func<FilesDbContext, int, IEnumerable<string>, Task<int>> DeleteTagLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<string> subfolders) =>
@@ -1981,6 +1989,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int parentId) =>
                 ctx.Tree
+                    .Join(ctx.Folders, tree => tree.FolderId, folder => folder.Id, (tree, folder) => tree)
                     .Count(r => r.ParentId == parentId && r.Level > 0));
 
     public static readonly Func<FilesDbContext, int, int, Task<int>> CountFilesAsync =
