@@ -797,6 +797,17 @@ public class FileSecurity : IFileSecurity
 
             if (action != FilesSecurityActions.Read)
             {
+                if (action is FilesSecurityActions.Duplicate or
+                              FilesSecurityActions.Delete or
+                              FilesSecurityActions.EditAccess or
+                              FilesSecurityActions.Edit or
+                              FilesSecurityActions.Move or
+                              FilesSecurityActions.MoveTo or
+                              FilesSecurityActions.Rename
+                    && (folder.FolderType == FolderType.ReadyFormFolder || folder.FolderType == FolderType.InProcessFormFolder))
+                {
+                    return false;
+                }
                 if ((action == FilesSecurityActions.Pin ||
                      action == FilesSecurityActions.EditAccess ||
                      action == FilesSecurityActions.Mute) &&

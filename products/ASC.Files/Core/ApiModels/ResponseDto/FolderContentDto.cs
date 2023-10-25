@@ -243,6 +243,10 @@ public class FolderContentDtoHelper
                         }
                     }
                 }
+                else if (fol1.FolderType == FolderType.InProcessFormFolder || fol1.FolderType == FolderType.ReadyFormFolder)
+                {
+                    result.Type = fol1.FolderType;
+                }
                 return result;
             }
         }
