@@ -145,7 +145,6 @@ internal class BackupFileUploadResult
 {
     public bool Success { get; set; }
     public string Message { get; set; }
-    public int ChunkSize { get; set; }
     public bool EndUpload { get; set; }
 }
 
