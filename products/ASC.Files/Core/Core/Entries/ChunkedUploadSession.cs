@@ -50,23 +50,6 @@ public class ChunkedUploadSession<T> : CommonChunkedUploadSession
 
         return clone;
     }
-
-    public override Stream Serialize()
-    {
-        var str = JsonSerializer.Serialize(this);
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(str));
-
-        return stream;
-    }
-
-    public static ChunkedUploadSession<T> Deserialize(Stream stream, FileHelper fileHelper)
-    {
-        var chunkedUploadSession = JsonSerializer.Deserialize<ChunkedUploadSession<T>>(stream);
-        chunkedUploadSession.File.FileHelper = fileHelper; //TODO
-        chunkedUploadSession.TransformItems();
-
-        return chunkedUploadSession;
-    }
 }
 
 [Scope]
@@ -115,7 +98,6 @@ public class ChunkedUploadSessionHelper
             created = session.Created,
             expired = session.Expired,
             location = session.Location,
-            bytes_uploaded = session.BytesUploaded,
             bytes_total = session.BytesTotal
         };
     }

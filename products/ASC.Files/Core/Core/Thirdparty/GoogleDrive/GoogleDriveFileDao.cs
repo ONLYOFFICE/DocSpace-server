@@ -97,7 +97,6 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -106,7 +105,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         {
             var googleDriveSession = uploadSession.GetItemOrDefault<Files.Thirdparty.GoogleDrive.ResumableUploadSession>("GoogleDriveSession");
             var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(googleDriveSession, stream, chunkLength, uploadSession.LastChunk);
+            await storage.TransferAsync(googleDriveSession, stream, chunkLength);
         }
         else
         {
@@ -115,16 +114,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
-        {
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
+        uploadSession.File = RestoreIds(uploadSession.File);
 
         return uploadSession.File;
     }

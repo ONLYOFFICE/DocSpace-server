@@ -50,22 +50,6 @@ public class CommonChunkedUploadSessionHolder
         MaxChunkUploadSize = maxChunkUploadSize;
     }
 
-    public async Task StoreAsync(CommonChunkedUploadSession s)
-    {
-        await using var stream = s.Serialize();
-        await DataStore.SavePrivateAsync(Domain, GetPathWithId(s.Id), stream, s.Expired);
-    }
-
-    public async Task RemoveAsync(CommonChunkedUploadSession s)
-    {
-        await DataStore.DeleteAsync(Domain, GetPathWithId(s.Id));
-    }
-
-    public async Task<Stream> GetStreamAsync(string sessionId)
-    {
-        return await DataStore.GetReadStreamAsync(Domain, GetPathWithId(sessionId));
-    }
-
     public async ValueTask InitAsync(CommonChunkedUploadSession chunkedUploadSession)
     {
         if (chunkedUploadSession.BytesTotal < MaxChunkUploadSize && chunkedUploadSession.BytesTotal != -1)
@@ -142,13 +126,8 @@ public class CommonChunkedUploadSessionHolder
                 await stream.CopyToAsync(bufferStream);
             }
 
-            uploadSession.BytesUploaded += chunkLength;
-
-            if (uploadSession.BytesTotal == uploadSession.BytesUploaded)
-            {
-                return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite,
-                    4096, FileOptions.DeleteOnClose);
-            }
+            return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite,
+                   4096, FileOptions.DeleteOnClose);
         }
 
         return Stream.Null;

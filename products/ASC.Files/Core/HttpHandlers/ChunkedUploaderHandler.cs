@@ -110,7 +110,7 @@ public class ChunkedUploaderHandlerService
 
             var request = new ChunkedRequestHelper<T>(context.Request);
 
-            if (!await TryAuthorizeAsync(request))
+            if (!TryAuthorize(request))
             {
                 await WriteError(context, "Not authorized or session with specified upload id already expired");
 
@@ -140,21 +140,16 @@ public class ChunkedUploaderHandlerService
 
                 case ChunkedRequestType.Upload:
                     var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize, request.ChunkNumber);
-
-                    if (resumedSession.BytesUploaded == resumedSession.BytesTotal)
-                    {
-                        await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                        _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
-
-                        await _socketManager.CreateFileAsync(resumedSession.File);
-                    }
-                    else
-                    {
-                        await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
-                    }
-
+                    await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
                     return;
+                case ChunkedRequestType.Finalize:
+                    var session = await _fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
 
+                    await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
+                    _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, session.File, session.File.Title);
+
+                    await _socketManager.CreateFileAsync(session.File);
+                    return;
                 default:
                     await WriteError(context, "Unknown request type.");
                     return;
@@ -172,12 +167,12 @@ public class ChunkedUploaderHandlerService
         }
     }
 
-    private async Task<bool> TryAuthorizeAsync<T>(ChunkedRequestHelper<T> request)
+    private bool TryAuthorize<T>(ChunkedRequestHelper<T> request)
     {
         if (!_authContext.IsAuthenticated)
         {
             return false;
-            }
+        }
 
         if (request.Type() == ChunkedRequestType.Initiate)
         {
@@ -186,7 +181,7 @@ public class ChunkedUploaderHandlerService
 
         if (!string.IsNullOrEmpty(request.UploadId))
         {
-            var uploadSession = await _chunkedUploadSessionHolder.GetSessionAsync<T>(request.UploadId);
+            var uploadSession = _chunkedUploadSessionHolder.GetSession<T>(request.UploadId);
             if (uploadSession != null && _authContext.CurrentAccount.ID == uploadSession.UserId)
             {
                 return true;
@@ -239,7 +234,8 @@ public enum ChunkedRequestType
     None,
     Initiate,
     Abort,
-    Upload
+    Upload,
+    Finalize
 }
 
 [DebuggerDisplay("{Type} ({UploadId})")]
@@ -260,6 +256,11 @@ public class ChunkedRequestHelper<T>
         if (_request.Query["abort"] == "true" && !string.IsNullOrEmpty(UploadId))
         {
             return ChunkedRequestType.Abort;
+        }
+        
+        if (_request.Query["finalize"] == "true" && !string.IsNullOrEmpty(UploadId))
+        {
+            return ChunkedRequestType.Finalize;
         }
 
         return !string.IsNullOrEmpty(UploadId)

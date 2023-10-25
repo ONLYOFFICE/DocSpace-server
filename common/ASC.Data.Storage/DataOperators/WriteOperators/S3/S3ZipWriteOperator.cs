@@ -38,6 +38,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly List<Task> _tasks = new List<Task>(TasksLimit);
     private readonly List<Stream> _streams = new List<Stream>(TasksLimit);
     private readonly TempStream _tempStream;
+    private int _chunkNumber = 1;
     private readonly object _locker = new object();
 
     public string Hash { get; private set; }
@@ -177,28 +178,19 @@ public class S3ZipWriteOperator : IDataWriteOperator
             }
         }
         _streams.Add(stream);
-        _tasks.Add(InternalUploadAsync(_chunkedUploadSession, stream, stream.Length));
+        _tasks.Add(InternalUploadAsync(_chunkedUploadSession, stream, stream.Length, _chunkNumber++));
     }
 
-    private async Task InternalUploadAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length)
+    private async Task InternalUploadAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int number)
     {
-        var number = 0;
-        lock (_locker) 
-        {
-            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out number);
-            number++;
-            uploadSession.Items["ChunksUploaded"] = number.ToString();
-
-        }
         (var path, var eTag) = await _sessionHolder.UploadChunkAsync(uploadSession, stream, length, number);
 
         lock (_locker) 
         {
-            uploadSession.BytesUploaded = _chunkedUploadSession.BytesUploaded + length;
-
             var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
             eTags.Add(number, eTag);
             uploadSession.Items["ETag"] = eTags;
+            uploadSession.BytesTotal += length;
         }
     }
 

@@ -462,7 +462,6 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }

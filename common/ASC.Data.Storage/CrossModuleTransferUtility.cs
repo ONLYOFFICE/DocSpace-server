@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace ASC.Data.Storage;
 
 public class CrossModuleTransferUtility
@@ -74,10 +76,16 @@ public class CrossModuleTransferUtility
                 Stream memstream = null;
                 try
                 {
+                    var i = 1;
                     while (GetStream(stream, out memstream))
                     {
                         memstream.Seek(0, SeekOrigin.Begin);
-                        await holder.UploadChunkAsync(session, memstream, _chunkSize, 1);
+                        (var _, var eTag) = await holder.UploadChunkAsync(session, memstream, _chunkSize, i++);
+
+                        var eTags = session.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
+                        eTags.Add(i, eTag);
+                        session.Items["ETag"] = eTags;
+
                         await memstream.DisposeAsync();
                     }
                 }

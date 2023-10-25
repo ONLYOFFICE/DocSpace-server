@@ -95,7 +95,6 @@ internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -113,16 +112,7 @@ internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
-        {
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
+        uploadSession.File = RestoreIds(uploadSession.File);
 
         return uploadSession.File;
     }

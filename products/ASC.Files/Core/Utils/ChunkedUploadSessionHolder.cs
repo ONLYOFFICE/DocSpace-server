@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Telegram.Bot.Types;
+
 namespace ASC.Web.Files.Utils;
 
 [Scope]
@@ -34,51 +36,67 @@ public class ChunkedUploadSessionHolder
     private readonly GlobalStore _globalStore;
     private readonly SetupInfo _setupInfo;
     private readonly TempPath _tempPath;
-    private readonly FileHelper _fileHelper;
     private CommonChunkedUploadSessionHolder _holder;
     private CommonChunkedUploadSessionHolder _currentHolder;
     private readonly ICache _cache;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
     public ChunkedUploadSessionHolder(
         GlobalStore globalStore,
         SetupInfo setupInfo,
         TempPath tempPath,
-        FileHelper fileHelper,
         ICache cache)
     {
         _globalStore = globalStore;
         _setupInfo = setupInfo;
         _tempPath = tempPath;
-        _fileHelper = fileHelper;
         _cache = cache;
     }
 
     public void StoreSession<T>(ChunkedUploadSession<T> s)
     {
-        _cache.Insert(s.Id, s, TimeSpan.FromHours(1));
+        _cache.Insert(s.Id, s, SlidingExpiration);
+    }
+
+    public void StoreChunk<T>(ChunkedUploadSession<T> s, int number, string eTag, long size)
+    {
+        var chunk = new Chunk
+        {
+            ETag = eTag,
+            Size = size
+        };
+
+        _cache.Insert($"{s.Id} - {number}", chunk, SlidingExpiration);
+    }
+
+    public Dictionary<int, Chunk> GetChunks<T>(ChunkedUploadSession<T> s)
+    {
+        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
+
+        var dict = new Dictionary<int, Chunk>();
+        for (var i = 1; i <= count; i++)
+        {
+            dict.Add(i, _cache.Get<Chunk>($"{s.Id} - {i}"));
+        }
+
+        return dict;
     }
 
     public void RemoveSession<T>(ChunkedUploadSession<T> s)
     {
         _cache.Remove(s.Id);
+
+        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
+        for (var i = 1; i <= count; i++)
+        {
+            _cache.Remove($"{s.Id} - {i}");
+        }
     }
 
-    public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
+    public ChunkedUploadSession<T> GetSession<T>(string sessionId)
     {
-        try
-        {
-           await _semaphore.WaitAsync();
-           return _cache.Get<ChunkedUploadSession<T>>(sessionId);
-        }
-        catch
-        {
-            throw;
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        return _cache.Get<ChunkedUploadSession<T>>(sessionId);
     }
 
     public async Task<ChunkedUploadSession<T>> CreateUploadSessionAsync<T>(File<T> file, long contentLength)
@@ -92,38 +110,23 @@ public class ChunkedUploadSessionHolder
     public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length, int chunkNumber)
     {
         (var path, var eTag) = await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
-        await UpdateUploadSessionAsync<T>(uploadSession, chunkNumber, eTag, length);
-    }
-
-    public async Task UpdateUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession, int chunkNumber, string eTag, long bytesUploaded)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-
-            var updatedUploadSession = _cache.Get<ChunkedUploadSession<T>>(uploadSession.Id);
-
-            uploadSession.BytesUploaded = updatedUploadSession.BytesUploaded + bytesUploaded;
-
-            var eTags = updatedUploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-            eTags.Add(chunkNumber, eTag);
-            uploadSession.Items["ETag"] = eTags;
-
-            StoreSession(uploadSession);
-        }
-        catch
-        {
-            throw;
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        StoreChunk(uploadSession, chunkNumber, eTag, length);
     }
 
     public async Task FinalizeUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
-        await (await CommonSessionHolderAsync()).FinalizeAsync(uploadSession);
+        var chunks = GetChunks(uploadSession);
+        var uploadSize = chunks.Sum(c => c.Value.Size);
+        if (uploadSize != uploadSession.BytesTotal)
+        {
+            throw new ArgumentException("uploadSize != bytesTotal");
+        }
+        else
+        {
+            var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
+            uploadSession.Items["ETag"] = eTags;
+            await (await CommonSessionHolderAsync()).FinalizeAsync(uploadSession);
+        }
     }
 
     public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath)
@@ -160,4 +163,10 @@ public class ChunkedUploadSessionHolder
             return _holder;
         }
     }
+}
+
+public class Chunk
+{
+    public string ETag { get; set; }
+    public long Size { get; set; }
 }

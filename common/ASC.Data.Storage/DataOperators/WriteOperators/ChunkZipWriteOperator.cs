@@ -35,6 +35,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     private readonly SHA256 _sha;
     private Stream _fileStream;
     private readonly TempStream _tempStream;
+    private int _chunkNumber = 1;
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -117,24 +118,14 @@ public class ChunkZipWriteOperator : IDataWriteOperator
                 theMemStream.Position = 0;
                 if (bytesRead == chunkUploadSize || last)
                 {
-                    if (_fileStream.Position == _fileStream.Length && last)
-                    {
-                        _chunkedUploadSession.LastChunk = true;
-                    }
-                    
                     theMemStream.Position = 0;
 
-                    int.TryParse(_chunkedUploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
-                    number++;
-                    _chunkedUploadSession.Items["ChunksUploaded"] = number.ToString();
-
-                    (StoragePath, var eTag) = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, number);
-
-                    _chunkedUploadSession.BytesUploaded = _chunkedUploadSession.BytesUploaded + theMemStream.Length;
+                    (StoragePath, var eTag) = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, _chunkNumber++);
 
                     var eTags = _chunkedUploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-                    eTags.Add(number, eTag);
+                    eTags.Add(_chunkNumber, eTag);
                     _chunkedUploadSession.Items["ETag"] = eTags;
+                    _chunkedUploadSession.BytesTotal += theMemStream.Length;
 
                     _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
                 }
@@ -151,6 +142,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         }
         if (last)
         {
+            await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
             _sha.TransformFinalBlock(buffer, 0, 0);
         }
     }

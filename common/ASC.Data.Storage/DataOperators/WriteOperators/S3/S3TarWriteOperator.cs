@@ -86,7 +86,6 @@ public class S3TarWriteOperator : IDataWriteOperator
 
         (var uploadId, var eTags, var partNumber) = await _store.InitiateConcatAsync(_domain, _key, lastInit: true);
 
-        _chunkedUploadSession.BytesUploaded = contentLength;
         _chunkedUploadSession.BytesTotal = contentLength;
         _chunkedUploadSession.UploadId = uploadId;
         _chunkedUploadSession.Items["ETag"] = eTags.ToDictionary(e => e.PartNumber, e => e.ETag);
