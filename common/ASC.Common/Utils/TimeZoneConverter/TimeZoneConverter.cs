@@ -236,7 +236,7 @@ public class TimeZoneConverter
             return _isMono ? timeZone.Id : timeZone.DisplayName;
         }
 
-        return _translations.ContainsKey(timeZone.Id) ? _translations[timeZone.Id] : timeZone.DisplayName;
+        return _translations.TryGetValue(timeZone.Id, out var translation) ? translation : timeZone.DisplayName;
     }
 
     private TimeZoneInfo GetTimeZoneDefault()

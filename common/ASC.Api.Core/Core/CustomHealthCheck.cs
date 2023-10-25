@@ -79,7 +79,7 @@ public static class CustomHealthCheck
     {
         var elasticSettings = configuration.GetSection("elastic");
 
-        if (elasticSettings != null && elasticSettings.GetChildren().Any())
+        if (elasticSettings.GetChildren().Any())
         {
             var host = elasticSettings.GetSection("Host").Value ?? "localhost";
             var scheme = elasticSettings.GetSection("Scheme").Value ?? "http";

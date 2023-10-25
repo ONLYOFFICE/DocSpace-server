@@ -231,7 +231,7 @@ public class LoginProfile
 
     internal string GetField(string name)
     {
-        return _fields.ContainsKey(name) ? _fields[name] : string.Empty;
+        return _fields.TryGetValue(name, out var field) ? field : string.Empty;
     }
 
     internal void SetField(string name, string value)

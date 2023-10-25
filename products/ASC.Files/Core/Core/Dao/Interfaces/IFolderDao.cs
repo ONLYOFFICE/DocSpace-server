@@ -378,5 +378,9 @@ public interface IFolderDao<T>
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
 
+    Task SetCustomOrder(T folderId, T parentFolderId, int order);
+
+    Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
+    
     #endregion
 }

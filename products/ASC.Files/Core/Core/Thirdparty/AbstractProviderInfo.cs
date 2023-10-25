@@ -230,9 +230,8 @@ public class ProviderInfoHelper
 
         if (items == null)
         {
-            if (folder != null && folder.HasValue && storage is IGoogleDriveItemStorage<TItem>)
+            if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
             {
-                var googleStorage = storage as IGoogleDriveItemStorage<TItem>;
                 items = await googleStorage.GetItemsAsync(folderId, folder);
             }
             else

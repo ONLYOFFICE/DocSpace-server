@@ -145,7 +145,7 @@ public class UploadControllerHelper : FilesHelperBase
         }
 
         IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext.Request.Form.Files;
-        if (files == null || !files.Any())
+        if (!files.Any())
         {
             files = uploadModel.Files;
         }

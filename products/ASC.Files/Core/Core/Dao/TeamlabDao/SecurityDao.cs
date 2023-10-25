@@ -711,17 +711,13 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
             }
 
             var parentFolders = await folderDao.GetParentFoldersAsync(selector.ConvertId(folder.Id)).ToListAsync();
-            if (parentFolders == null || parentFolders.Count == 0)
+            if (parentFolders.Count == 0)
             {
                 continue;
             }
 
             parentFolders.Reverse();
             var pureShareRecords = await GetPureShareRecordsAsync(parentFolders).ToListAsync();
-            if (pureShareRecords == null)
-            {
-                continue;
-            }
 
             foreach (var pureShareRecord in pureShareRecords)
             {

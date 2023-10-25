@@ -118,7 +118,7 @@ public class TenantCookieSettingsHelper
         var settingsTenant = await GetForTenantAsync(tenantId);
         var expires = settingsTenant.IsDefault() || !settingsTenant.Enabled ?
             DateTime.UtcNow.AddYears(1) :
-            DateTime.UtcNow.AddMinutes(settingsTenant.LifeTime);
+            settingsTenant.LifeTime == 0 ? DateTime.MaxValue : DateTime.UtcNow.AddMinutes(settingsTenant.LifeTime);
 
         return expires;
     }

@@ -127,7 +127,7 @@ public class RoomsModule : FeedModule
                 ExtraLocation = room.ParentId.ToString(),
                 Keywords = room.Title,
                 AdditionalInfo = ((int)room.FolderType).ToString(),
-                AdditionalInfo4 = room.Private ? "private" : null,
+                AdditionalInfo4 = room.SettingsPrivate ? "private" : null,
                 GroupId = GetGroupId(RoomItem, room.CreateBy, roomCreatedUtc, room.ParentId.ToString())
             };
         }
@@ -145,7 +145,7 @@ public class RoomsModule : FeedModule
             AdditionalInfo = ((int)room.FolderType).ToString(),
             AdditionalInfo2 = ((int)shareRecord.Share).ToString(),
             AdditionalInfo3 = ((int)shareRecord.SubjectType).ToString(),
-            AdditionalInfo4 = room.Private ? "private" : null,
+            AdditionalInfo4 = room.SettingsPrivate ? "private" : null,
             Target = shareRecord.Subject,
             GroupId = GetGroupId(SharedRoomItem, shareRecord.Owner, shareRecord.TimeStamp, room.ParentId.ToString()),
             ContextId = $"{RoomItem}_{room.Id}"

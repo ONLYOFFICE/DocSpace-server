@@ -81,11 +81,9 @@ public class NovellLdapHelper : LdapHelper
 
             if (capabilities.Count > 0)
             {
-                if (capabilities.ContainsKey("defaultNamingContext"))
+                if (capabilities.TryGetValue("defaultNamingContext", out var capability))
                 {
-                    var dnList = capabilities["defaultNamingContext"];
-
-                    var dn = dnList.FirstOrDefault(dc =>
+                    var dn = capability.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
                         dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
 
@@ -97,11 +95,9 @@ public class NovellLdapHelper : LdapHelper
                     }
                 }
 
-                if (capabilities.ContainsKey("rootDomainNamingContext"))
+                if (capabilities.TryGetValue("rootDomainNamingContext", out var capability1))
                 {
-                    var dnList = capabilities["rootDomainNamingContext"];
-
-                    var dn = dnList.FirstOrDefault(dc =>
+                    var dn = capability1.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
                         dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);
 
@@ -113,10 +109,8 @@ public class NovellLdapHelper : LdapHelper
                     }
                 }
 
-                if (capabilities.ContainsKey("namingContexts"))
+                if (capabilities.TryGetValue("namingContexts", out var dnList))
                 {
-                    var dnList = capabilities["namingContexts"];
-
                     var dn = dnList.FirstOrDefault(dc =>
                         !string.IsNullOrEmpty(dc) &&
                         dc.IndexOf("dc=", StringComparison.InvariantCultureIgnoreCase) != -1);

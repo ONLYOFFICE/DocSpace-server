@@ -79,7 +79,7 @@ public class BillingClient
         return payments;
     }
 
-    public IDictionary<string, Uri> GetPaymentUrls(string portalId, string[] products, string affiliateId = null, string campaign = null, string currency = null, string language = null, string customerId = null, string quantity = null)
+    public IDictionary<string, Uri> GetPaymentUrls(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerId = null, string quantity = null)
     {
         var urls = new Dictionary<string, Uri>();
 
@@ -87,6 +87,10 @@ public class BillingClient
         if (!string.IsNullOrEmpty(affiliateId))
         {
             additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            additionalParameters.Add(Tuple.Create("PartnerId", partnerId));
         }
         if (!string.IsNullOrEmpty(campaign))
         {
@@ -133,12 +137,16 @@ public class BillingClient
         return urls;
     }
 
-    public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
+    public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
         var additionalParameters = new List<Tuple<string, string>>() { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
         {
             additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            additionalParameters.Add(Tuple.Create("PartnerId", partnerId));
         }
         if (!string.IsNullOrEmpty(campaign))
         {
@@ -190,13 +198,18 @@ public class BillingClient
         return changed;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(params string[] productIds)
+    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId, params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
         var parameters = productIds.Select(pid => Tuple.Create("ProductId", pid)).ToList();
         parameters.Add(Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()));
 
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            parameters.Add(Tuple.Create("PartnerId", partnerId));
+        }
+        
         var result = Request("GetProductsPrices", null, parameters.ToArray());
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 

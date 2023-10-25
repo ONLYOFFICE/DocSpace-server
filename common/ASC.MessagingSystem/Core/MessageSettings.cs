@@ -51,7 +51,7 @@ public class MessageSettings
 
     public static string GetUAHeader(IDictionary<string, StringValues> headers)
     {
-        return headers.ContainsKey(UserAgentHeader) ? headers[UserAgentHeader].FirstOrDefault() : null;
+        return headers.TryGetValue(UserAgentHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static string GetReferer(HttpRequest request)
@@ -61,7 +61,7 @@ public class MessageSettings
 
     public static string GetReferer(IDictionary<string, StringValues> headers)
     {
-        return headers.ContainsKey(RefererHeader) ? headers[RefererHeader].FirstOrDefault() : null;
+        return headers.TryGetValue(RefererHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static string GetIP(HttpRequest request)

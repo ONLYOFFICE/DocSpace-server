@@ -16,11 +16,11 @@ if(logpath != null)
 {
     if(!path.isAbsolute(logpath))
     {
-        logpath = path.join(__dirname, "..", logpath);
+        logpath = path.join(__dirname, "..", "..", logpath);
     }
 }
 
-const fileName = logpath ? path.join(logpath, "socket-io.%DATE%.log") : path.join(__dirname, "..", "..", "..", "Logs", "socket-io.%DATE%.log");
+const fileName = logpath ? path.join(logpath, "socket-io.%DATE%.log") : path.join(__dirname, "..", "..", "..", "..", "Logs", "socket-io.%DATE%.log");
 const dirName = path.dirname(fileName);
 
 const aws = config.get("aws").cloudWatch;

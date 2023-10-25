@@ -105,6 +105,22 @@ public class BreadCrumbsManager
         _authContext = authContext;
     }
 
+    public async Task<string> GetBreadCrumbsOrderAsync<T>(T folderId)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+
+        var breadcrumbs = (await GetBreadCrumbsAsync(folderId, folderDao));
+
+        var result = breadcrumbs.Skip(2).Select(r => r.Order.ToString()).ToList();
+
+        if (result.Any())
+        {
+            return result.Aggregate((first, second) => $"{first}.{second}");
+        }
+
+        return null;
+    }
+
     public async Task<List<FileEntry>> GetBreadCrumbsAsync<T>(T folderId)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -276,7 +292,7 @@ public class EntryStatusManager
 [Scope]
 public class EntryManager
 {
-    private const string _updateList = "filesUpdateList";
+    private const string UpdateList = "filesUpdateList";
     private readonly ThirdPartySelector _thirdPartySelector;
     private readonly ThumbnailSettings _thumbnailSettings;
 
@@ -1664,14 +1680,14 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_NotSupportedFormat);
         }
 
-        var exists = _cache.Get<string>(_updateList + fileId.ToString()) != null;
+        var exists = _cache.Get<string>(UpdateList + fileId.ToString()) != null;
         if (exists)
         {
             throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
         }
         else
         {
-            _cache.Insert(_updateList + fileId.ToString(), fileId.ToString(), TimeSpan.FromMinutes(2));
+            _cache.Insert(UpdateList + fileId.ToString(), fileId.ToString(), TimeSpan.FromMinutes(2));
         }
 
         try
@@ -1728,7 +1744,7 @@ public class EntryManager
             var linkDao = _daoFactory.GetLinkDao();
             await linkDao.DeleteAllLinkAsync(newFile.Id.ToString());
 
-            await _fileMarker.MarkAsNewAsync(newFile); ;
+            await _fileMarker.MarkAsNewAsync(newFile);
 
             await _entryStatusManager.SetFileStatusAsync(newFile);
 
@@ -1755,7 +1771,7 @@ public class EntryManager
         }
         finally
         {
-            _cache.Remove(_updateList + fromFile.Id);
+            _cache.Remove(UpdateList + fromFile.Id);
         }
     }
 

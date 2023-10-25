@@ -33,6 +33,7 @@ public class InviteUsersRequestDto
     /// <summary>List of user invitations</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.People.ApiModels.RequestDto.UserInvitation}, System.Collections.Generic</type>
     public IEnumerable<UserInvitation> Invitations { get; set; }
+    public string Culture { get; set; }
 }
 
 /// <summary>

@@ -47,9 +47,9 @@ internal class TenantQuotaPriceResolver : IValueResolver<DbQuota, TenantQuota, d
             var currentRegion = _regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>>() { { source.ProductId, priceInfo } }).Result;
             destination.PriceCurrencySymbol = currentRegion.CurrencySymbol;
 
-            if (priceInfo.ContainsKey(currentRegion.ISOCurrencySymbol))
+            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
             {
-                return priceInfo[currentRegion.ISOCurrencySymbol];
+                return resolve;
             }
         }
 

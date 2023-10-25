@@ -114,11 +114,6 @@ public class ThirdpartyController : ApiControllerBase
             var token = await _wordpressToken.GetTokenAsync();
             var meInfo = _wordpressHelper.GetWordpressMeInfo(token.AccessToken);
             var parser = JObject.Parse(meInfo);
-            if (parser == null)
-            {
-                return false;
-            }
-
             var blogId = parser.Value<string>("token_site_id");
 
             if (blogId != null)

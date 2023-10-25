@@ -406,9 +406,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
             LdapMapping = new Dictionary<MappingFields, string>();
         }
 
-        if (LdapMapping.ContainsKey(field))
+        if (LdapMapping.TryGetValue(field, out var setting))
         {
-            return LdapMapping[field];
+            return setting;
         }
         else
         {

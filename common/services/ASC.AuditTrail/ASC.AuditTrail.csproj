@@ -13,6 +13,18 @@
     <Compile Remove="Attributes\**" />
     <EmbeddedResource Remove="Attributes\**" />
     <None Remove="Attributes\**" />
+    <EmbeddedResource Update="AuditReportResource.ar-SA.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.hy-AM.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ko-KR.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.pt.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="30.0.1" />

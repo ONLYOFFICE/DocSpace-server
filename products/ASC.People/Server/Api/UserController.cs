@@ -64,6 +64,7 @@ public class UserController : PeopleControllerBase
     private readonly CountUserChecker _countUserChecker;
     private readonly UsersInRoomChecker _usersInRoomChecker;
     private readonly IUrlShortener _urlShortener;
+    private readonly FileSecurityCommon _fileSecurityCommon;
 
     public UserController(
         ICache cache,
@@ -105,7 +106,8 @@ public class UserController : PeopleControllerBase
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
         IQuotaService quotaService,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener,
+        FileSecurityCommon fileSecurityCommon)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _cache = cache;
@@ -142,6 +144,7 @@ public class UserController : PeopleControllerBase
         _quotaService = quotaService;
         _usersQuotaSyncOperation = usersQuotaSyncOperation;
         _urlShortener = urlShortener;
+        _fileSecurityCommon = fileSecurityCommon;
     }
 
     /// <summary>
@@ -366,7 +369,7 @@ public class UserController : PeopleControllerBase
             var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID);
             var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
-            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
+            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
         }
 
         var result = new List<EmployeeDto>();
@@ -475,6 +478,13 @@ public class UserController : PeopleControllerBase
             throw new Exception("The user is not suspended");
         }
 
+        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+
+        if (await _fileSecurityCommon.IsDocSpaceAdministratorAsync(user.Id) && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
+        {
+            throw new SecurityException();
+        }
+        
         await CheckReassignProccessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
@@ -1786,12 +1796,12 @@ public class UserController : PeopleControllerBase
         var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
-        await foreach(var user in users)
+        await foreach (var user in users)
         {
             counter++;
 

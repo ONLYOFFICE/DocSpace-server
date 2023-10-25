@@ -553,13 +553,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Soba izbrisana</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Povezava ustvarjena. Vloga: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Povezava izbrisana</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Povezava osvežena. Vloga: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

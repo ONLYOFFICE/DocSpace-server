@@ -349,118 +349,112 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         }
 
         var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (_, _, _, fileConverter, filesMessageService, _) = scopeClass;
-        var FileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
+        var (_, _, _, fileConverter, _, _) = scopeClass;
+        var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        using (var compressTo = scope.ServiceProvider.GetService<CompressToArchive>())
+        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        compressTo.SetStream(stream);
+
+        foreach (var path in _entriesPathId.AllKeys)
         {
-            compressTo.SetStream(stream);
-
-            foreach (var path in _entriesPathId.AllKeys)
+            if (string.IsNullOrEmpty(path))
             {
-                if (string.IsNullOrEmpty(path))
+                ProgressStep();
+                continue;
+            }
+
+            var counter = 0;
+            foreach (var entryId in _entriesPathId[path])
+            {
+                if (CancellationToken.IsCancellationRequested)
                 {
-                    ProgressStep();
-                    continue;
+                    CancellationToken.ThrowIfCancellationRequested();
                 }
 
-                var counter = 0;
-                foreach (var entryId in _entriesPathId[path])
+                var newtitle = path;
+
+                File<T> file = null;
+                var convertToExt = string.Empty;
+
+                if (!Equals(entryId, default(T)))
                 {
-                    if (CancellationToken.IsCancellationRequested)
+                    await fileDao.InvalidateCacheAsync(entryId);
+                    file = await fileDao.GetFileAsync(entryId);
+
+                    if (file == null)
                     {
-                        CancellationToken.ThrowIfCancellationRequested();
+                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        continue;
                     }
 
-                    var newtitle = path;
+                    if (_files.TryGetValue(file.Id, out convertToExt))
+                    {
+                        if (!string.IsNullOrEmpty(convertToExt))
+                        {
+                            newtitle = FileUtility.ReplaceFileExtension(path, convertToExt);
+                        }
+                    }
+                }
 
-                    File<T> file = null;
-                    var convertToExt = string.Empty;
+                if (0 < counter)
+                {
+                    var suffix = " (" + counter + ")";
 
                     if (!Equals(entryId, default(T)))
                     {
-                        await FileDao.InvalidateCacheAsync(entryId);
-                        file = await FileDao.GetFileAsync(entryId);
-
-                        if (file == null)
-                        {
-                            this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
-                            continue;
-                        }
-
-                        if (_files.TryGetValue(file.Id, out convertToExt))
-                        {
-                            if (!string.IsNullOrEmpty(convertToExt))
-                            {
-                                newtitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                            }
-                        }
-                    }
-
-                    if (0 < counter)
-                    {
-                        var suffix = " (" + counter + ")";
-
-                        if (!Equals(entryId, default(T)))
-                        {
-                            newtitle = newtitle.IndexOf('.') > 0 ? newtitle.Insert(newtitle.LastIndexOf('.'), suffix) : newtitle + suffix;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    if (!Equals(entryId, default(T)) && file != null)
-                    {
-                        compressTo.CreateEntry(newtitle, file.ModifiedOn);
-                        try
-                        {
-                            if (await fileConverter.EnableConvertAsync(file, convertToExt))
-                            {
-                                //Take from converter
-                                await using (var readStream = await fileConverter.ExecAsync(file, convertToExt))
-                                {
-                                    await compressTo.PutStream(readStream);
-                                }
-                            }
-                            else
-                            {
-                                await using (var readStream = await FileDao.GetFileStreamAsync(file))
-                                {
-                                    await compressTo.PutStream(readStream);
-                                }
-                            }
-                            compressTo.CloseEntry();
-                        }
-                        catch (Exception ex)
-                        {
-                            this[Err] = ex.Message;
-
-                            Logger.ErrorWithException(ex);
-                        }
+                        newtitle = newtitle.IndexOf('.') > 0 ? newtitle.Insert(newtitle.LastIndexOf('.'), suffix) : newtitle + suffix;
                     }
                     else
                     {
-                        compressTo.CreateEntry(newtitle);
-                        compressTo.PutNextEntry();
-                        compressTo.CloseEntry();
-                    }
-
-                    counter++;
-
-                    if (!Equals(entryId, default(T)) && file != null)
-                    {
-                        ProcessedFile(entryId);
-                    }
-                    else
-                    {
-                        ProcessedFolder(default(T));
+                        break;
                     }
                 }
 
-                ProgressStep();
+                if (!Equals(entryId, default(T)))
+                {
+                    compressTo.CreateEntry(newtitle, file.ModifiedOn);
+                    try
+                    {
+                        if (await fileConverter.EnableConvertAsync(file, convertToExt))
+                        {
+                            //Take from converter
+                            await using var readStream = await fileConverter.ExecAsync(file, convertToExt);
+                            await compressTo.PutStream(readStream);
+                        }
+                        else
+                        {
+                            await using var readStream = await fileDao.GetFileStreamAsync(file);
+                            await compressTo.PutStream(readStream);
+                        }
+                        compressTo.CloseEntry();
+                    }
+                    catch (Exception ex)
+                    {
+                        this[Err] = ex.Message;
+
+                        Logger.ErrorWithException(ex);
+                    }
+                }
+                else
+                {
+                    compressTo.CreateEntry(newtitle);
+                    compressTo.PutNextEntry();
+                    compressTo.CloseEntry();
+                }
+
+                counter++;
+
+                if (!Equals(entryId, default(T)))
+                {
+                    ProcessedFile(entryId);
+                }
+                else
+                {
+                    ProcessedFolder(default);
+                }
             }
+
+            ProgressStep();
         }
     }
 

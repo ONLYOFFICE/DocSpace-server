@@ -236,13 +236,13 @@ public class TenantManager
         if (context != null)
         {
             tenant = context.Items[CurrentTenant] as Tenant;
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 tenant = await GetTenantAsync(context.Request.Url().Host);
                 context.Items[CurrentTenant] = tenant;
             }
 
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
 
@@ -278,13 +278,13 @@ public class TenantManager
         if (context != null)
         {
             tenant = context.Items[CurrentTenant] as Tenant;
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 tenant = GetTenant(context.Request.Url().Host);
                 context.Items[CurrentTenant] = tenant;
             }
 
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
 
@@ -422,8 +422,9 @@ public class TenantManager
             .Where(id => !string.IsNullOrEmpty(id))
             .Distinct()
             .ToArray();
-
-        var prices = TariffService.GetProductPriceInfo(productIds);
+        
+        var tenant = await GetCurrentTenantAsync(false);
+        var prices = TariffService.GetProductPriceInfo(tenant?.PartnerId, productIds);
         var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
         return result;
     }
@@ -435,8 +436,9 @@ public class TenantManager
             return null;
         }
 
-        var prices = TariffService.GetProductPriceInfo(new[] { productId });
-        return prices.ContainsKey(productId) ? prices[productId] : null;
+        var tenant = GetCurrentTenant(false);
+        var prices = TariffService.GetProductPriceInfo(tenant?.PartnerId, productId);
+        return prices.TryGetValue(productId, out var price) ? price : null;
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)

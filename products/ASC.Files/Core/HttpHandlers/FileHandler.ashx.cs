@@ -279,7 +279,6 @@ public class FileHandlerService
 
         try
         {
-            var flushed = false;
             await using (var readStream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path))
             {
                 long offset = 0;
@@ -290,7 +289,7 @@ public class FileHandlerService
                     readStream.Seek(offset, SeekOrigin.Begin);
                 }
 
-                await SendStreamByChunksAsync(context, length, filename, readStream, flushed);
+                await SendStreamByChunksAsync(context, length, filename, readStream, false);
             }
 
             await context.Response.Body.FlushAsync();

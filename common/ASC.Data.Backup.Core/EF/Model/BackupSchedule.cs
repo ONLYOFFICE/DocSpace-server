@@ -77,7 +77,7 @@ public static class BackupScheduleExtension
                 .HasColumnName("cron")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci"); ;
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.BackupsStored)
                 .IsRequired()
@@ -133,7 +133,7 @@ public static class BackupScheduleExtension
                 .HasColumnName("cron")
                 .HasMaxLength(255)
                 .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci"); ;
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.BackupsStored)
                 .IsRequired()

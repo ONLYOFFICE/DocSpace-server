@@ -831,9 +831,9 @@ public class FileSecurity : IFileSecurity
     {
         await foreach (var r in SetSecurity(entry, userId))
         {
-            if (r.Security != null && r.Security.ContainsKey(action))
+            if (r.Security != null && r.Security.TryGetValue(action, out var value))
             {
-                yield return new Tuple<FileEntry<T>, bool>(r, r.Security[action]);
+                yield return new Tuple<FileEntry<T>, bool>(r, value);
             }
             else
             {
@@ -1683,7 +1683,7 @@ public class FileSecurity : IFileSecurity
         foreach (var e in data)
         {
             yield return e;
-        };
+        }
     }
 
     public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)

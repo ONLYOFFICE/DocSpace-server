@@ -48,9 +48,9 @@ public class AWSSender : SmtpSender, IDisposable
     public override void Init(IDictionary<string, string> properties)
     {
         base.Init(properties);
-        var region = properties.ContainsKey("region") ? RegionEndpoint.GetBySystemName(properties["region"]) : RegionEndpoint.USEast1;
+        var region = properties.TryGetValue("region", out var property) ? RegionEndpoint.GetBySystemName(property) : RegionEndpoint.USEast1;
         _amazonEmailServiceClient = new AmazonSimpleEmailServiceClient(properties["accessKey"], properties["secretKey"], region);
-        _refreshTimeout = TimeSpan.Parse(properties.ContainsKey("refreshTimeout") ? properties["refreshTimeout"] : "0:30:0");
+        _refreshTimeout = TimeSpan.Parse(properties.TryGetValue("refreshTimeout", out var property1) ? property1 : "0:30:0");
         _lastRefresh = DateTime.UtcNow - _refreshTimeout; //set to refresh on first send
     }
 

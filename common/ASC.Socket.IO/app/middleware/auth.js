@@ -38,8 +38,6 @@ module.exports = (socket, next) => {
   if (cookie) {
     headers.Authorization = cookie;
 
-    logger.info(`API basePath='${basePath}' Authorization='${cookie}'`);
-
   const getUser = () => {
     return request({
       method: "get",

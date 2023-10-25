@@ -422,11 +422,8 @@ public static class DocumentService
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            if (responseStream != null)
-            {
-                using var reader = new StreamReader(responseStream);
-                dataResponse = await reader.ReadToEndAsync();
-            }
+            using var reader = new StreamReader(responseStream);
+            dataResponse = await reader.ReadToEndAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))

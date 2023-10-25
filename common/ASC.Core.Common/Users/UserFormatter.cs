@@ -74,15 +74,17 @@ public class UserFormatter : IComparer<UserInfo>
 
     public static int Compare(UserInfo x, UserInfo y, DisplayUserNameFormat format)
     {
-        if (x == null && y == null)
+        if (x == null)
         {
-            return 0;
-        }
-        if (x == null && y != null)
-        {
+            if (y == null)
+            {
+                return 0;
+            }
+            
             return -1;
         }
-        if (x != null && y == null)
+        
+        if (y == null)
         {
             return +1;
         }

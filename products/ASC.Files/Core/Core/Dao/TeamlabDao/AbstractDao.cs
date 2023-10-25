@@ -183,6 +183,91 @@ public class AbstractDao
 
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
 
+    internal async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
+    {
+        var indexing = await Queries.IsIndexingAsync(filesDbContext, TenantID, parentFolderId, fileEntryType);
+        
+        if(!indexing)
+        {
+            return;
+        }
+
+        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId, fileEntryType);
+
+        if (order == 0 || fileOrder?.ParentFolderId != parentFolderId)
+        {
+            var lastOrder = await Queries.GetLastFileOrderAsync(filesDbContext, TenantID, parentFolderId, fileEntryType);
+            order = ++lastOrder;
+        }
+
+        if (fileOrder != null)
+        {
+            if (fileOrder.ParentFolderId == parentFolderId)
+            {
+                var currentOrder = fileOrder.Order;
+
+                if (currentOrder == order)
+                {
+                    return;
+                }
+                
+                if (currentOrder > order)
+                {
+                    await Queries.IncreaseFileOrderAsync(filesDbContext, TenantID, parentFolderId, order, currentOrder);
+                }
+                else
+                {
+                    await Queries.DecreaseFileOrderAsync(filesDbContext, TenantID, parentFolderId, order, currentOrder);
+                }
+            }
+
+            fileOrder.ParentFolderId = parentFolderId;
+            fileOrder.Order = order;
+        }
+        else
+        {
+            await filesDbContext.FileOrder.AddAsync(new DbFileOrder
+            {
+                EntryId = fileId,
+                EntryType = fileEntryType,
+                ParentFolderId = parentFolderId,
+                TenantId = TenantID,
+                Order = order
+            });
+        }
+
+        await filesDbContext.SaveChangesAsync();
+    }
+
+    internal async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId, FileEntryType entryType)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        await Queries.ClearFileOrderAsync(filesDbContext, TenantID, parentFolderId, entryType);
+        
+        await filesDbContext.FileOrder.AddRangeAsync(fileIds.Select((r, i) => new DbFileOrder
+        {
+            TenantId = TenantID,
+            ParentFolderId = parentFolderId,
+            EntryId = r,
+            EntryType = entryType,
+            Order = i + 1
+        }));
+        
+        await filesDbContext.SaveChangesAsync();
+    }
+    
+    internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
+    {
+        var fileOrder = await Queries.GetFileOrderAsync(filesDbContext, TenantID, fileId, fileEntryType);
+        if (fileOrder != null)
+        {
+            filesDbContext.Remove(fileOrder);
+
+            await filesDbContext.SaveChangesAsync();
+        }
+    }
+
     internal enum SearhTypeEnum
     {
         Start,
@@ -218,7 +303,63 @@ static file class Queries
                 ctx.ThirdpartyIdMapping
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.HashId == hashId)
-                    
                     .Select(r => r.Id)
                     .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<bool>> IsIndexingAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
+            (from rs in ctx.RoomSettings 
+                where rs.TenantId == tenantId && rs.RoomId ==
+                    (from t in ctx.Tree
+                        where t.FolderId == parentFolderId
+                        orderby t.Level descending
+                        select t.ParentId
+                    ).Skip(1).FirstOrDefault()
+                select rs.Indexing).FirstOrDefault());
+    
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<DbFileOrder>> GetFileOrderAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
+            ctx.FileOrder
+                .AsTracking()
+                .FirstOrDefault(r =>  r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType));
+
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task> ClearFileOrderAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && r.ParentFolderId == parentFolderId)
+                .ExecuteDelete());
+
+
+    public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> GetLastFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, FileEntryType entryType) =>
+                ctx.FileOrder
+                    .AsTracking()
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.EntryType == entryType)
+                    .OrderBy(r => r.Order)
+                    .Select(r => r.Order)
+                    .LastOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.Order >= newOrder && r.Order < currentOrder)
+                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order + 1)));
+
+    public static readonly Func<FilesDbContext, int, int, int, int, Task> DecreaseFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.Order <= newOrder && r.Order > currentOrder)
+                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
 }

@@ -79,7 +79,7 @@ public abstract class BaseStorage : IDataStore
 
     public TimeSpan GetExpire(string domain)
     {
-        return DomainsExpires.ContainsKey(domain) ? DomainsExpires[domain] : DomainsExpires[string.Empty];
+        return DomainsExpires.TryGetValue(domain, out var expire) ? expire : DomainsExpires[string.Empty];
     }
 
     public async Task<Uri> GetUriAsync(string path)

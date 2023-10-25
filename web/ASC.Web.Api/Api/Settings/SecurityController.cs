@@ -287,10 +287,7 @@ public class SecurityController : BaseSettingsController
 
         foreach (var item in inDto.Items)
         {
-            if (!itemList.ContainsKey(item.Key))
-            {
-                itemList.Add(item.Key, item.Value);
-            }
+            itemList.TryAdd(item.Key, item.Value);
         }
 
         var defaultPageSettings = await _settingsManager.LoadAsync<StudioDefaultPageSettings>();

@@ -137,7 +137,7 @@ public class ColumnMapper
 
     private object GetMappingInternal(string key)
     {
-        return _newMappings.ContainsKey(key) ? _newMappings[key] : _mappings[key];
+        return _newMappings.TryGetValue(key, out var mapping) ? mapping : _mappings[key];
     }
 
     private bool HasMapping(string key)

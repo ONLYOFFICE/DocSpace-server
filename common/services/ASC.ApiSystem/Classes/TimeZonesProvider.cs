@@ -99,7 +99,7 @@ public class TimeZonesProvider
 
     public TimeZoneInfo GetCurrentTimeZoneInfo(string languageKey)
     {
-        var time = _timeZones.ContainsKey(languageKey) ? _timeZones[languageKey] : _timeZones[""];
+        var time = _timeZones.TryGetValue(languageKey, out var zone) ? zone : _timeZones[""];
         try
         {
             try
@@ -126,7 +126,7 @@ public class TimeZonesProvider
             return _commonConstants.DefaultCulture;
         }
 
-        var culture = _cultureUiMap.ContainsKey(languageKey) ? _cultureUiMap[languageKey] : null;
+        var culture = _cultureUiMap.TryGetValue(languageKey, out var value) ? value : null;
 
         return culture ?? _commonConstants.DefaultCulture;
     }

@@ -189,7 +189,7 @@ public class MessagesRepository : IDisposable
 
     private void FlushCache()
     {
-        List<EventMessage> events = null;
+        List<EventMessage> events;
 
         lock (_cache)
         {
@@ -201,7 +201,7 @@ public class MessagesRepository : IDisposable
             _lastSave = DateTime.UtcNow;
         }
 
-        if (events == null)
+        if (events.Count == 0)
         {
             return;
         }
