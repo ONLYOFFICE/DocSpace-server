@@ -80,11 +80,11 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
-    public boolean deleteClient(String id, int tenantId) {
-        log.info("deleting a client with id {} for tenant {}", id, tenantId);
-        if (mutationUsecases.deleteByClientIdAndTenant(id, tenantId) < 1)
+    public boolean deleteClient(String id, int tenant) {
+        log.info("deleting a client with id {} for tenant {}", id, tenant);
+        if (mutationUsecases.deleteByClientIdAndTenant(id, tenant) < 1)
             throw new ClientNotFoundException(String
-                    .format("could not find client with client id %s for %d", id, tenantId));
+                    .format("could not find client with client id %s for %d", id, tenant));
         return true;
     }
 
@@ -117,7 +117,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         return ids;
     }
 
-    public ClientDTO clientAsyncCreationTask(CreateClientDTO clientDTO, int tenant) {
+    public ClientDTO clientAsyncCreationTask(CreateClientDTO clientDTO, int tenant, String tenantUrl) {
         log.info("trying to create a new client creation task");
         try {
             ClientDTO client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
@@ -129,6 +129,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             client.setClientId(UUID.randomUUID().toString());
             client.setClientSecret(cipher.encrypt(secret));
             client.setTenant(tenant);
+            client.setTenantUrl(tenantUrl);
             client.setCreatedOn(now);
             client.setModifiedOn(now);
             client.setCreatedBy(me);
@@ -181,8 +182,8 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
-    public ClientDTO getClient(String clientId, int tenantId) {
-        log.info("trying to get a client with id {} for tenant {}", clientId, tenantId);
+    public ClientDTO getClient(String clientId, int tenant) {
+        log.info("trying to get a client with id {} for tenant {}", clientId, tenant);
         return retrievalUsecases
                 .findById(clientId)
                 .filter(c -> !c.isInvalidated())
@@ -197,14 +198,14 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                     }
                 })
                 .orElseThrow(() -> new ClientNotFoundException(String
-                        .format("could not find client with id %s for %d", clientId, tenantId)));
+                        .format("could not find client with id %s for %d", clientId, tenant)));
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
-    public PaginationDTO getTenantClients(int tenantId, int page, int limit) {
-        log.info("trying to get tenant {} clients with page {} and limit {}", tenantId, page, limit);
+    public PaginationDTO getTenantClients(int tenant, int page, int limit) {
+        log.info("trying to get tenant {} clients with page {} and limit {}", tenant, page, limit);
         var data = retrievalUsecases
-                .findAllByTenant(tenantId, Pageable.ofSize(limit).withPage(page));
+                .findAllByTenant(tenant, Pageable.ofSize(limit).withPage(page));
 
         var builder = PaginationDTO
                 .<ClientDTO>builder()

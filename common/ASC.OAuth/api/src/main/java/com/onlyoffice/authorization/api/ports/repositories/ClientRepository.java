@@ -28,7 +28,7 @@ public interface ClientRepository extends CrudRepository<Client, String>, Paging
     Optional<Client> findById(@Param("id") String id);
     int deleteByClientIdAndTenant(String id, int tenant);
     @EntityGraph(attributePaths = {"scopes", "tenant"})
-    Optional<Client> findClientByClientIdAndTenant(String id, int tenantId);
+    Optional<Client> findClientByClientIdAndTenant(String id, int tenant);
     Page<Client> findAllByTenant(int tenant, Pageable pageable);
     @Query("""
            UPDATE Client c SET c.clientSecret=:secret WHERE c.clientId=:clientId AND c.tenant=:tenant

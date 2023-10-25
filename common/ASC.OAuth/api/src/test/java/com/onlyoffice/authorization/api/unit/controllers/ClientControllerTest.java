@@ -87,7 +87,7 @@ public class ClientControllerTest {
         given(clientService.clientAsyncCreationTask(CreateClientDTO
                 .builder()
                         .name("mock")
-                .build(), 1)).willReturn(ClientDTO
+                .build(), 1, "http://127.0.0.1")).willReturn(ClientDTO
                 .builder()
                         .name("mock")
                 .build());

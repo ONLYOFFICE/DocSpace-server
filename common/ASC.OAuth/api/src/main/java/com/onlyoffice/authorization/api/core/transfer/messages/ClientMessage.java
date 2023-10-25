@@ -32,6 +32,7 @@ public class ClientMessage implements Serializable {
     private String logoutRedirectUri;
     private Set<String> scopes;
     private int tenant;
+    private String tenantUrl;
     private boolean enabled;
     private boolean invalidated;
     private Timestamp createdOn;

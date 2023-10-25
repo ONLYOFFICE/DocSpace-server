@@ -50,6 +50,7 @@ CREATE TABLE identity_clients (
 	redirect_uris tinytext,
 	scopes tinytext,
 	tenant_id integer,
+	tenant_url tinytext,
 	terms_url tinytext,
 	primary key (client_id)
 ) engine=InnoDB;

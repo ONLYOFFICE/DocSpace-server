@@ -44,6 +44,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(value = "/api/2.0/clients")
 @RequiredArgsConstructor
 public class ClientController {
+    private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
     private final String X_TENANT_HEADER = "X-Tenant";
     private List<String> allowedScopes = new ArrayList<>();
 
@@ -64,6 +65,7 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<PaginationDTO<ClientDTO>> getClients(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestParam(value = "page") @Min(value = 0) int page,
             @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit
     ) {
@@ -73,32 +75,33 @@ public class ClientController {
         PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant, page, limit);
         for (final ClientDTO client : pagination.getData()) {
             client.add(linkTo(methodOn(ClientController.class)
-                    .getClient(response, client.getClientId()))
+                    .getClient(response, address, client.getClientId()))
                     .withRel(HttpMethod.GET.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("get_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(response, client.getClientId(), null))
+                    .updateClient(response, address, client.getClientId(), null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("update_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(response, client.getClientId()))
+                    .deleteClient(response, address, client.getClientId()))
                     .withRel(HttpMethod.DELETE.name())
                     .withTitle("delete_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .regenerateSecret(response, client.getClientId()))
+                    .regenerateSecret(response, address, client.getClientId()))
                     .withRel(HttpMethod.PATCH.name())
                     .withTitle("regenerate_secret"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(response, client.getClientId(), null))
+                    .activateClient(response, address, client.getClientId(), null))
                     .withRel(HttpMethod.PATCH.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
         }
 
         pagination.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, null)).withRel(HttpMethod.POST.name())
+                .postClient(response, address,null))
+                .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
 
         return ResponseEntity.ok(pagination);
@@ -108,6 +111,7 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientDTO> getClient(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
@@ -115,24 +119,24 @@ public class ClientController {
 
         var client = retrieveUsecases.getClient(clientId, tenant);
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, clientId, null))
+                .updateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, clientId))
+                .deleteClient(response, address, clientId))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, client.getClientId()))
+                .regenerateSecret(response, address, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, null))
+                .postClient(response, address,null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, clientId, null))
+                .activateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -144,6 +148,7 @@ public class ClientController {
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity<ClientDTO> postClient(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestBody @Valid CreateClientDTO body
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
@@ -155,29 +160,29 @@ public class ClientController {
         }
 
         log.info("generating a new client's credentials");
-        var client = creationUsecases.clientAsyncCreationTask(body, tenant);
+        var client = creationUsecases.clientAsyncCreationTask(body, 1, address);
         log.info("successfully submitted a new client broker message");
 
         client.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, client.getClientId()))
+                .getClient(response, address, client.getClientId()))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, client.getClientId(),null))
+                .updateClient(response, address, client.getClientId(),null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, client.getClientId()))
+                .deleteClient(response, address, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, client.getClientId()))
+                .regenerateSecret(response, address, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, client.getClientId(), null))
+                .activateClient(response, address, client.getClientId(), null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -189,6 +194,7 @@ public class ClientController {
     @RateLimiter(name = "updateClientRateLimiter")
     public ResponseEntity<ClientDTO> updateClient(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid UpdateClientDTO body
     ) {
@@ -202,24 +208,24 @@ public class ClientController {
 
         var client = creationUsecases.updateClient(body, clientId, tenant);
         client.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, client.getClientId()))
+                .getClient(response, address, client.getClientId()))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, client.getClientId()))
+                .deleteClient(response, address, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, client.getClientId()))
+                .regenerateSecret(response, address, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, null))
+                .postClient(response, address,null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, clientId, null))
+                .activateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -231,6 +237,7 @@ public class ClientController {
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     public ResponseEntity<SecretDTO> regenerateSecret(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
@@ -238,24 +245,24 @@ public class ClientController {
         var regenerate = mutationUsecases.regenerateSecret(clientId, tenant);
 
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .getClient(response, clientId))
+                .getClient(response, address, clientId))
                 .withRel(HttpMethod.GET.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, clientId, null))
+                .updateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, clientId))
+                .deleteClient(response, address, clientId))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, null)).withRel(HttpMethod.POST.name())
+                .postClient(response, address,null)).withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, clientId, null))
+                .activateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -267,6 +274,7 @@ public class ClientController {
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity deleteClient(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
@@ -279,6 +287,7 @@ public class ClientController {
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     public ResponseEntity activateClient(
             HttpServletResponse response,
+            @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {

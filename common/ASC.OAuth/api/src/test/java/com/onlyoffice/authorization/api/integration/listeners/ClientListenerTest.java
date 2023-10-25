@@ -45,7 +45,7 @@ public class ClientListenerTest extends ContainerBase {
                 .scopes(Set.of("mock"))
                 .description("mock")
                 .termsUrl("mock")
-                .build(), 1);
+                .build(), 1, "http://127.0.0.1");
         Thread.sleep(1000);
         assertEquals(1, clientListener.getLastBatchSize());
     }
@@ -59,7 +59,7 @@ public class ClientListenerTest extends ContainerBase {
                 .scopes(Set.of("mock"))
                 .description("mock")
                 .termsUrl("mock")
-                .build(), 1);
+                .build(), 1, "http://127.0.0.1");
         Thread.sleep(1000);
         assertEquals(1, clientListener.getLastBatchSize());
         clientService.clientAsyncDeletionTask(c.getClientId(), 1);

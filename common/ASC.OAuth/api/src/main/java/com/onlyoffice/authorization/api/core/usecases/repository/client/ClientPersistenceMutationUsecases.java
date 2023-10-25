@@ -10,7 +10,7 @@ import com.onlyoffice.authorization.api.core.entities.Client;
  */
 public interface ClientPersistenceMutationUsecases {
     Client saveClient(Client entity);
-    void regenerateClientSecretByClientId(String clientId, int tenantId, String secret);
+    void regenerateClientSecretByClientId(String clientId, int tenant, String secret);
     void changeActivation(String clientId, boolean enabled);
-    int deleteByClientIdAndTenant(String id, int tenantId);
+    int deleteByClientIdAndTenant(String id, int tenant);
 }

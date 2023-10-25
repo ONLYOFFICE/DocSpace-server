@@ -41,6 +41,9 @@ public class Client {
     private String authenticationMethod;
     @Column(name = "tenant_id")
     private int tenant;
+    @Column(name = "tenant_url")
+    @Lob
+    private String tenantUrl;
     @Column(name = "website_url")
     @Lob
     private String websiteUrl;
