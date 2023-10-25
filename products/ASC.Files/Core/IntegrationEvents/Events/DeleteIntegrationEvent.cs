@@ -46,11 +46,4 @@ public record DeleteIntegrationEvent : IntegrationEvent
 
     [ProtoMember(4)]
     public List<string> FileIdsString { get; set; }
-    [ProtoMember(5)]
-    public List<int> FolderIds { get; set; }
-
-    [ProtoMember(6)]
-    public List<int> FileIds { get; set; }
-
-
 }

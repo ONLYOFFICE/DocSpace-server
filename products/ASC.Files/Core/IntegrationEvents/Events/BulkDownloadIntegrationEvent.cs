@@ -27,32 +27,17 @@
 namespace ASC.Files.Core.IntegrationEvents.Events;
 
 [ProtoContract]
-public record MoveOrCopyIntegrationEvent : IntegrationEvent
+public record BulkDownloadIntegrationEvent : IntegrationEvent
 {
-    private MoveOrCopyIntegrationEvent() : base() { }
-    public MoveOrCopyIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    private BulkDownloadIntegrationEvent() : base() { }
+    public BulkDownloadIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
 
     [ProtoMember(1)]
-    public bool DeleteAfter { get; set; }
+    public Dictionary<string, string> FolderIdsString { get; set; }
 
-    [ProtoMember(2)]
-    public bool Ic { get; set; }
-
-    [ProtoMember(3)]
-    public List<string> FolderIdsString { get; set; }
-
-    [ProtoMember(4)]
-    public List<string> FileIdsString { get; set; }
-
-    [ProtoMember(5)]
-    public bool Content { get; set; }
-
-    [ProtoMember(6)]
-    public FileConflictResolveType ConflictResolveType { get; set; }
-
-    [ProtoMember(7)]
-    public string DestFolderId { get; set; }
+    [ProtoMember(2)] 
+    public Dictionary<string, string> FileIdsString { get; set; }
 }

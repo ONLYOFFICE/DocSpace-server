@@ -70,6 +70,7 @@ try
     eventBus.Subscribe<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
     eventBus.Subscribe<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
     eventBus.Subscribe<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
+    eventBus.Subscribe<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

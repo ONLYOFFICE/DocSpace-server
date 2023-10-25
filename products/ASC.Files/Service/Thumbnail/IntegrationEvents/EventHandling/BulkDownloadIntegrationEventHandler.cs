@@ -27,20 +27,20 @@
 namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 
 [Scope]
-public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
+public class BulkDownloadIntegrationEventHandler : IIntegrationEventHandler<BulkDownloadIntegrationEvent>
 {
     private readonly ILogger _logger;
     private readonly FileStorageService _fileStorageService;
     private readonly SecurityContext _securityContext;
     private readonly TenantManager _tenantManager;
     private readonly AuthManager _authManager;
-    private MoveOrCopyIntegrationEventHandler() : base()
+    private BulkDownloadIntegrationEventHandler() : base()
     {
 
     }
 
-    public MoveOrCopyIntegrationEventHandler(
-        ILogger<MoveOrCopyIntegrationEventHandler> logger,
+    public BulkDownloadIntegrationEventHandler(
+        ILogger<BulkDownloadIntegrationEvent> logger,
         FileStorageService fileStorageService,
         TenantManager tenantManager,
         SecurityContext securityContext,
@@ -56,7 +56,7 @@ public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOr
     }
 
 
-    public async Task Handle(MoveOrCopyIntegrationEvent @event)
+    public async Task Handle(BulkDownloadIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
@@ -64,23 +64,12 @@ public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOr
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
-            var files = new List<JsonElement>();
-            var folders = new List<JsonElement>();
-            if (@event.FileIdsString != null)
-            {
-                foreach (var file in @event.FileIdsString)
-                {
-                    files.Add(JsonDocument.Parse(file).RootElement);
-                }
-            }
-            if(@event.FolderIdsString != null)
-            {
-                foreach (var folder in @event.FolderIdsString)
-                {
-                    folders.Add(JsonDocument.Parse(folder).RootElement);
-                }
-            }
-            await _fileStorageService.MoveOrCopyItemsAsync(folders, files, JsonDocument.Parse(@event.DestFolderId).RootElement, @event.ConflictResolveType, @event.Ic, @event.DeleteAfter, @event.Content);
+
+            var folders = @event.FolderIdsString == null ? new Dictionary<JsonElement, string>() : @event.FolderIdsString.ToDictionary(k => JsonDocument.Parse(k.Key).RootElement, k => k.Value);
+            var files = @event.FileIdsString == null ? new Dictionary<JsonElement, string>() : @event.FileIdsString.ToDictionary(k => JsonDocument.Parse(k.Key).RootElement, k => k.Value);
+
+
+            await _fileStorageService.BulkDownloadAsync(folders, files);
         }
 
     }

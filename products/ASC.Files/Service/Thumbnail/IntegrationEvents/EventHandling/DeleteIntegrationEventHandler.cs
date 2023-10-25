@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core;
-using ASC.Core.Billing;
-using ASC.Web.Files.Services.WCFService;
-
-using Google.Protobuf;
-
 namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 
 [Scope]
@@ -71,9 +65,24 @@ public class DeleteIntegrationEventHandler : IIntegrationEventHandler<DeleteInte
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await _fileStorageService.DeleteItemsAsync("delete", @event.FileIdsString, @event.FolderIdsString, @event.FileIds, @event.FolderIds, false, @event.DeleteAfter, @event.Immediately);
-            await Task.CompletedTask;
+            var files = new List<JsonElement>();
+            var folders = new List<JsonElement>();
+            if (@event.FileIdsString != null)
+            {
+                foreach (var file in @event.FileIdsString)
+                {
+                    files.Add(JsonDocument.Parse(file).RootElement);
+                }
+            }
+            if (@event.FolderIdsString != null)
+            {
+                foreach (var folder in @event.FolderIdsString)
+                {
+                    folders.Add(JsonDocument.Parse(folder).RootElement);
+                }
+            }
 
+            await _fileStorageService.DeleteItemsAsync("delete", files, folders, false, @event.DeleteAfter, @event.Immediately);
         }
 
     }

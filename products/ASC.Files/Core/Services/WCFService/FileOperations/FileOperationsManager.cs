@@ -213,9 +213,11 @@ public class FileOperationsManager
         return QueueTask(userId, op);
     }
 
-    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, List<string> folderStringIds, List<string> fileStringIds, List<int> folderIntIds, List<int> fileIntIds, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
+    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, List<JsonElement> folders, List<JsonElement> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool isEmptyTrash = false)
     {
+        var (folderIntIds, folderStringIds) = GetIds(folders);
+        var (fileIntIds, fileStringIds) = GetIds(files);
 
         var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
         var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
