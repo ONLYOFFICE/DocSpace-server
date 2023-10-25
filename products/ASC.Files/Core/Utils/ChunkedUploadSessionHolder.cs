@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Telegram.Bot.Types;
-
 namespace ASC.Web.Files.Utils;
 
 [Scope]
@@ -116,7 +114,7 @@ public class ChunkedUploadSessionHolder
     public async Task FinalizeUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
         var chunks = GetChunks(uploadSession);
-        var uploadSize = chunks.Sum(c => c.Value.Size);
+        var uploadSize = chunks.Sum(c => c.Value == null ? 0 : c.Value.Size);
         if (uploadSize != uploadSession.BytesTotal)
         {
             throw new ArgumentException("uploadSize != bytesTotal");

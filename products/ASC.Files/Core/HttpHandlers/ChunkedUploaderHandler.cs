@@ -139,9 +139,32 @@ public class ChunkedUploaderHandlerService
                     return;
 
                 case ChunkedRequestType.Upload:
-                    var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize, request.ChunkNumber);
-                    await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
-                    return;
+                    {
+                        var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize);
+
+                        var chunks = _chunkedUploadSessionHolder.GetChunks(resumedSession);
+                        var bytesUploaded = chunks.Sum(c => c.Value == null ? 0 : c.Value.Size);
+                        if (bytesUploaded == resumedSession.BytesTotal)
+                        {
+                            resumedSession = await _fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                            await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
+                            _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
+
+                            await _socketManager.CreateFileAsync(resumedSession.File);
+                        }
+                        else
+                        {
+                            await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        }
+
+                        return;
+                    }
+                case ChunkedRequestType.UploadAsync:
+                    {
+                        var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize, request.ChunkNumber);
+                        await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        return;
+                    }
                 case ChunkedRequestType.Finalize:
                     var session = await _fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
 
@@ -235,6 +258,7 @@ public enum ChunkedRequestType
     Initiate,
     Abort,
     Upload,
+    UploadAsync,
     Finalize
 }
 
@@ -261,6 +285,11 @@ public class ChunkedRequestHelper<T>
         if (_request.Query["finalize"] == "true" && !string.IsNullOrEmpty(UploadId))
         {
             return ChunkedRequestType.Finalize;
+        }
+
+        if (_request.Query["upload"] == "true" && !string.IsNullOrEmpty(UploadId))
+        {
+            return ChunkedRequestType.UploadAsync;
         }
 
         return !string.IsNullOrEmpty(UploadId)
