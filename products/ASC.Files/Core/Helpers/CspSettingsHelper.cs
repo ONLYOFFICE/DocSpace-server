@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Storage.S3;
-using ASC.Web.Files.Classes;
-
 namespace ASC.Web.Api.Core;
 
 [Scope]
