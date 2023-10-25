@@ -182,8 +182,8 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
-    public ClientDTO getClient(String clientId, int tenant) {
-        log.info("trying to get a client with id {} for tenant {}", clientId, tenant);
+    public ClientDTO getClient(String clientId) {
+        log.info("trying to get a client with id {}", clientId);
         return retrievalUsecases
                 .findById(clientId)
                 .filter(c -> !c.isInvalidated())
@@ -198,7 +198,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                     }
                 })
                 .orElseThrow(() -> new ClientNotFoundException(String
-                        .format("could not find client with id %s for %d", clientId, tenant)));
+                        .format("could not find client with id %s", clientId)));
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)

@@ -72,7 +72,7 @@ public class ClientControllerTest {
 
     @Test
     void canRetrieveByIdAndTenant() throws Exception {
-        given(clientService.getClient("mock", 1))
+        given(clientService.getClient("mock"))
                 .willReturn(ClientDTO.builder().clientId("mock").tenant(1).build());
         MockHttpServletResponse response = mvc.perform(
                         MockMvcRequestBuilders.get("/api/2.0/clients/mock")

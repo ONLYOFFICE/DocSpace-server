@@ -58,7 +58,7 @@ public class ClientServiceTest extends ContainerBase {
 
     @Test
     void shouldGetClient() {
-        var c = clientService.getClient("client", 1);
+        var c = clientService.getClient("client");
         assertEquals("secret", c.getClientSecret());
     }
 
@@ -72,13 +72,13 @@ public class ClientServiceTest extends ContainerBase {
         clientService.changeActivation(ChangeClientActivationDTO
                 .builder().enabled(false).build(), "client");
 
-        var c = clientService.getClient("client", 1);
+        var c = clientService.getClient("client");
         assertFalse(c.isEnabled());
     }
 
     @Test
     void shouldRegenerateClientSecret() {
-        var secret = clientService.getClient("client", 1).getClientSecret();
+        var secret = clientService.getClient("client").getClientSecret();
         var newSecret = clientService.regenerateSecret("client", 1);
         assertNotNull(newSecret.getClientSecret());
         assertNotEquals(newSecret.getClientSecret(), secret);

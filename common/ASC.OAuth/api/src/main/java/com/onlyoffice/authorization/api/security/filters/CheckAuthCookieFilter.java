@@ -18,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -76,5 +77,13 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
         UserContextContainer.context.set(me);
         response.setHeader(X_TENANT_HEADER, String.valueOf(tenant.getResponse().getTenantId()));
         chain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
+            throws ServletException {
+        Pattern pattern = Pattern.compile("/api/2.0/clients/.*/info");
+        String path = request.getRequestURI();
+        return pattern.matcher(path).find();
     }
 }

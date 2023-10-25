@@ -8,12 +8,14 @@ import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActiva
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.ClientDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.ClientInfoDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.PaginationDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.SecretDTO;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
+import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
@@ -107,6 +109,13 @@ public class ClientController {
         return ResponseEntity.ok(pagination);
     }
 
+    @GetMapping("/{clientId}/info")
+    @RateLimiter(name = "getClientRateLimiter")
+    public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
+        var client = retrieveUsecases.getClient(clientId);
+        return ResponseEntity.ok(ClientMapper.INSTANCE.fromClientToInfoDTO(client));
+    }
+
     @GetMapping("/{clientId}")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientDTO> getClient(
@@ -117,7 +126,7 @@ public class ClientController {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
         log.info("received a new get client {} request for tenant {}", clientId, tenant);
 
-        var client = retrieveUsecases.getClient(clientId, tenant);
+        var client = retrieveUsecases.getClient(clientId);
         client.add(linkTo(methodOn(ClientController.class)
                 .updateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())

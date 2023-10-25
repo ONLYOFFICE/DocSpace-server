@@ -10,6 +10,6 @@ import com.onlyoffice.authorization.api.core.transfer.response.PaginationDTO;
  *
  */
 public interface ClientRetrieveUsecases {
-    ClientDTO getClient(String clientId, int tenant);
+    ClientDTO getClient(String clientId);
     PaginationDTO getTenantClients(int tenant, int page, int limit);
 }

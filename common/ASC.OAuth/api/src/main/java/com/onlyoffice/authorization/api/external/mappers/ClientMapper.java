@@ -8,6 +8,7 @@ import com.onlyoffice.authorization.api.core.transfer.messages.ClientMessage;
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.UpdateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.response.ClientDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.ClientInfoDTO;
 import org.bouncycastle.util.Strings;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -55,6 +56,7 @@ public interface ClientMapper {
             )
     })
     Client fromMessageToEntity(ClientMessage message);
+    ClientInfoDTO fromClientToInfoDTO(ClientDTO client);
     @Mappings({
             @Mapping(
                     source = "authenticationMethod",
