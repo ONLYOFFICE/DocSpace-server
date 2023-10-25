@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.security.oauth.providers;
 
+import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistenceQueryUsecases;
 import com.onlyoffice.authorization.external.clients.DocspaceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -27,12 +29,23 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class DocspaceAuthenticationProvider implements AuthenticationProvider {
+    private final String CLIENT_ID_COOKIE = "client_id";
     private final DocspaceClient docspaceClient;
+    private final ClientPersistenceQueryUsecases queryUsecases;
 
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
         var request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest();
+
+
+        var clientCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase(CLIENT_ID_COOKIE))
+                .findFirst();
+
+        if (clientCookie.isEmpty())
+            throw new BadCredentialsException("Docspace client cookie is empty");
+
+        var client = queryUsecases.getClientByClientId(clientCookie.get().getValue());
 
         var authCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase("asc_auth_key"))
                 .findFirst();
@@ -47,7 +60,7 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
         var cookie = String.format("%s=%s", authCookie.get().getName(),
                 authCookie.get().getValue());
 
-        var me = docspaceClient.getMe(cookie);
+        var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie);
         if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin())
             throw new BadCredentialsException("Invalid docspace authorization");
 

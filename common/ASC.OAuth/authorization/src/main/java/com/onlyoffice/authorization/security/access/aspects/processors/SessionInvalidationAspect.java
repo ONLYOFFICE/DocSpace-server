@@ -3,7 +3,6 @@
  */
 package com.onlyoffice.authorization.security.access.aspects.processors;
 
-import com.onlyoffice.authorization.external.configuration.DocspaceConfiguration;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,9 +32,8 @@ import java.util.Arrays;
 public class SessionInvalidationAspect {
     @Value("${server.servlet.session.cookie.name:JSESSIONID}")
     private String JSESSIONID;
+    private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
     private final String ASC_AUTH_KEY = "asc_auth_key";
-
-    private final DocspaceConfiguration docspaceConfiguration;
 
     @Around("@annotation(com.onlyoffice.authorization.security.access.aspects.annotations.InvalidateSession)")
     public Object sessionInvalidationAdvice(ProceedingJoinPoint pjp)
@@ -45,7 +43,9 @@ public class SessionInvalidationAspect {
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes()).getResponse();
 
-        if (request != null && Arrays.stream(request.getCookies())
+        var address = Arrays.stream(request.getCookies()).filter(c -> c.getName()
+                .equalsIgnoreCase(X_DOCSPACE_ADDRESS)).findFirst();
+        if (request != null && address.isPresent() && Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_KEY))
                 .findFirst().isEmpty()) {
             log.info("trying to remove jsession");
@@ -66,7 +66,7 @@ public class SessionInvalidationAspect {
                 cookie.setMaxAge(0);
                 cookie.setSecure(isSecure);
                 response.addCookie(cookie);
-                response.sendRedirect(docspaceConfiguration.getUrl());
+                response.sendRedirect(address.get().getValue());
             }
         }
 
