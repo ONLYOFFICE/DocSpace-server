@@ -116,7 +116,15 @@ public class FileOperationsManager
 
         return QueueTask(userId, op);
     }
+    public List<FileOperationResult> MarkAsRead(Guid userId, Tenant tenant, List<string> folderIdsString, List<string> fileIdsString, List<int> folderIdsInt, List<int> fileIdsInt, IDictionary<string, StringValues> headers,
+        ExternalShareData externalShareData)
+    {
+        var op1 = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIdsInt, fileIdsInt, tenant, headers, externalShareData));
+        var op2 = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderIdsString, fileIdsString, tenant, headers, externalShareData));
+        var op = new FileMarkAsReadOperation(_serviceProvider, op2, op1);
 
+        return QueueTask(userId, op);
+    }
     public List<FileOperationResult> Download(Guid userId, Tenant tenant, Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData)
     {
@@ -226,7 +234,15 @@ public class FileOperationsManager
         return QueueTask(userId, op);
     }
 
+    public List<FileOperationResult> Delete(Guid userId, Tenant tenant, List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
+        ExternalShareData externalShareData, bool isEmptyTrash = false)
+    {
+        var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(foldersIdInt, filesIdInt, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
+        var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(foldersIdString, filesIdString, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
+        var op = new FileDeleteOperation(_serviceProvider, op2, op1);
 
+        return QueueTask(userId, op);
+    }
     private List<FileOperationResult> QueueTask(Guid userId, DistributedTaskProgress op)
     {
         _tasks.EnqueueTask(op);

@@ -64,23 +64,8 @@ public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOr
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
-            var files = new List<JsonElement>();
-            var folders = new List<JsonElement>();
-            if (@event.FileIdsString != null)
-            {
-                foreach (var file in @event.FileIdsString)
-                {
-                    files.Add(JsonDocument.Parse(file).RootElement);
-                }
-            }
-            if(@event.FolderIdsString != null)
-            {
-                foreach (var folder in @event.FolderIdsString)
-                {
-                    folders.Add(JsonDocument.Parse(folder).RootElement);
-                }
-            }
-            await _fileStorageService.MoveOrCopyItemsAsync(folders, files, JsonDocument.Parse(@event.DestFolderId).RootElement, @event.ConflictResolveType, @event.Ic, @event.DeleteAfter, @event.Content);
+            
+            await _fileStorageService.MoveOrCopyItemsAsync(@event.FolderIdsString, @event.FileIdsString, @event.FolderIdsInt, @event.FileIdsInt, JsonDocument.Parse(@event.DestFolderId).RootElement, @event.ConflictResolveType, @event.Ic, @event.DeleteAfter, @event.Content);
         }
 
     }

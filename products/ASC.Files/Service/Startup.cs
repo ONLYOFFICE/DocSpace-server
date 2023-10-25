@@ -79,6 +79,8 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<DeleteIntegrationEventHandler>();
         DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
         DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+        DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+        DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
         services.AddHostedService<Launcher>();
         DIHelper.TryAdd<Launcher>();

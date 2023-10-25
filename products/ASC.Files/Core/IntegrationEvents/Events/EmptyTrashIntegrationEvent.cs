@@ -27,36 +27,11 @@
 namespace ASC.Files.Core.IntegrationEvents.Events;
 
 [ProtoContract]
-public record MoveOrCopyIntegrationEvent : IntegrationEvent
+public record EmptyTrashIntegrationEvent : IntegrationEvent
 {
-    private MoveOrCopyIntegrationEvent() : base() { }
-    public MoveOrCopyIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    private EmptyTrashIntegrationEvent() : base() { }
+    public EmptyTrashIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
-
-    [ProtoMember(1)]
-    public bool DeleteAfter { get; set; }
-
-    [ProtoMember(2)]
-    public bool Ic { get; set; }
-
-    [ProtoMember(3)]
-    public List<string> FolderIdsString { get; set; }
-
-    [ProtoMember(4)]
-    public List<string> FileIdsString { get; set; }
-    [ProtoMember(5)]
-    public List<int> FolderIdsInt { get; set; }
-    [ProtoMember(6)]
-    public List<int> FileIdsInt { get; set; }
-
-    [ProtoMember(7)]
-    public bool Content { get; set; }
-
-    [ProtoMember(8)]
-    public FileConflictResolveType ConflictResolveType { get; set; }
-
-    [ProtoMember(9)]
-    public string DestFolderId { get; set; }
 }

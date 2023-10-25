@@ -24,19 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Amqp.Framing;
-using System.Text.Json.Nodes;
-
-using ASC.Core.Common;
 using ASC.EventBus.Abstractions;
 using ASC.Files.Core.IntegrationEvents.Events;
-
-using Newtonsoft.Json;
-
-using Tweetinvi.Core.Events;
-
-using static DotNetOpenAuth.OpenId.Extensions.AttributeExchange.WellKnownAttributes;
-using ASC.Core;
 
 namespace ASC.Files.Api;
 
@@ -123,16 +112,9 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        var files = new List<string>();
-        var folders = new List<string>();
-        foreach (var t in inDto.FileIds.ToList())
-        {
-            files.Add(t.ToString());
-        }
-        foreach (var t in inDto.FolderIds.ToList())
-        {
-            folders.Add(t.ToString());
-        }
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds.ToList());
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds.ToList());
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var DestFolderId = inDto.DestFolderId.ToString();
 
@@ -140,8 +122,10 @@ public class OperationController : ApiControllerBase
         {
             DeleteAfter = inDto.DeleteAfter,
             Ic = true,
-            FileIdsString = files,
-            FolderIdsString = folders,
+            FileIdsString = fileStringIds,
+            FolderIdsString = folderStringIds,
+            FileIdsInt = fileIntIds,
+            FolderIdsInt = folderIntIds,
             Content = inDto.Content,
             ConflictResolveType = inDto.ConflictResolveType,
             DestFolderId = DestFolderId
@@ -165,24 +149,18 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var files = new List<string>();
-        var folders = new List<string>();
-        foreach (var t in inDto.FileIds.ToList())
-        {
-            files.Add(t.ToString());
-        }
-        foreach (var t in inDto.FolderIds.ToList())
-        {
-            folders.Add(t.ToString());
-        }
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds.ToList());
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds.ToList());
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         _eventBus.Publish(new DeleteIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             DeleteAfter = inDto.DeleteAfter,
             Immediately = inDto.Immediately,
-            FileIdsString = files,
-            FolderIdsString = folders
+            FolderIdsString = folderStringIds,
+            FileIdsString = fileStringIds,
+            FolderIdsInt = folderIntIds,
+            FileIdsInt = fileIntIds
         });
         foreach (var e in _fileStorageService.GetTasksStatuses())
         {
@@ -202,9 +180,9 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var emptyTrash = await _fileStorageService.EmptyTrashAsync();
-
-        foreach (var e in emptyTrash)
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        _eventBus.Publish(new EmptyTrashIntegrationEvent(_authContext.CurrentAccount.ID, tenantId) { });
+        foreach (var e in _fileStorageService.GetTasksStatuses())
         {
             yield return await _fileOperationDtoHelper.GetAsync(e);
         }
@@ -242,7 +220,18 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
-        foreach (var e in await _fileStorageService.MarkAsReadAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList()))
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds.ToList());
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds.ToList());
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        _eventBus.Publish(new MarkAsReadIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            FolderIdsString = folderStringIds,
+            FileIdsString = fileStringIds,
+            FolderIdsInt = folderIntIds,
+            FileIdsInt = fileIntIds
+        });
+
+        foreach (var e in _fileStorageService.GetTasksStatuses())
         {
             yield return await _fileOperationDtoHelper.GetAsync(e);
         }
@@ -261,16 +250,9 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
-        var files = new List<string>();
-        var folders = new List<string>();
-        foreach (var t in inDto.FileIds.ToList())
-        {
-            files.Add(t.ToString());
-        }
-        foreach (var t in inDto.FolderIds.ToList())
-        {
-            folders.Add(t.ToString());
-        }
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds.ToList());
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds.ToList());
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var DestFolderId = inDto.DestFolderId.ToString();
 
@@ -278,8 +260,10 @@ public class OperationController : ApiControllerBase
         {
             DeleteAfter = inDto.DeleteAfter,
             Ic = true,
-            FileIdsString = files,
-            FolderIdsString = folders,
+            FileIdsString = fileStringIds,
+            FolderIdsString = folderStringIds,
+            FileIdsInt = fileIntIds, 
+            FolderIdsInt = folderIntIds,
             Content = inDto.Content,
             ConflictResolveType = inDto.ConflictResolveType,
             DestFolderId = DestFolderId

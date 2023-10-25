@@ -27,20 +27,20 @@
 namespace ASC.Thumbnail.IntegrationEvents.EventHandling;
 
 [Scope]
-public class DeleteIntegrationEventHandler : IIntegrationEventHandler<DeleteIntegrationEvent>
+public class EmptyTrashIntegrationEventHandler : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
 {
     private readonly ILogger _logger;
     private readonly FileStorageService _fileStorageService;
     private readonly SecurityContext _securityContext;
     private readonly TenantManager _tenantManager;
     private readonly AuthManager _authManager;
-    private DeleteIntegrationEventHandler() : base()
+    private EmptyTrashIntegrationEventHandler() : base()
     {
 
     }
 
-    public DeleteIntegrationEventHandler(
-        ILogger<DeleteIntegrationEventHandler> logger,
+    public EmptyTrashIntegrationEventHandler(
+        ILogger<EmptyTrashIntegrationEventHandler> logger,
         FileStorageService fileStorageService,
         TenantManager tenantManager,
         SecurityContext securityContext,
@@ -56,7 +56,7 @@ public class DeleteIntegrationEventHandler : IIntegrationEventHandler<DeleteInte
     }
 
 
-    public async Task Handle(DeleteIntegrationEvent @event)
+    public async Task Handle(EmptyTrashIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
@@ -65,7 +65,7 @@ public class DeleteIntegrationEventHandler : IIntegrationEventHandler<DeleteInte
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await _fileStorageService.DeleteItemsAsync("delete", @event.FolderIdsString, @event.FileIdsString, @event.FolderIdsInt, @event.FileIdsInt, false, @event.DeleteAfter, @event.Immediately);
+            await _fileStorageService.EmptyTrashAsync();
         }
 
     }
