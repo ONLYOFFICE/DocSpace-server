@@ -1797,4 +1797,16 @@ $OrangeButton
   <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>确认房间邀请</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>ONLYOFFICE 支持团队</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>观看完整播放列表</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>观看视频指南，玩转 ONLYOFFICE 协作空间</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>ONLYOFFICE 团队</value>
+  </data>
 </root>

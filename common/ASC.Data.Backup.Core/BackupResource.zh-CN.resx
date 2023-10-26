@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>设置密码</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>备份超过门户空间总限制</value>
+  </data>
 </root>

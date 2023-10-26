@@ -121,9 +121,7 @@
 &lt;/body&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>您好！这是系统自动生成的电子邮件，您无需回复。&lt;br /&gt;您收到此电子邮件是因为您是&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;协作空间&lt;/a&gt; 的注册用户。
-&lt;br /&gt;点击此处即可退订来自协作空间的电子邮件通知：&lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;退订&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>如在购买时遇到任何问题，请给我们发送电子邮件，地址为 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; 如遇到技术问题，请联系我们的 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;支持团队&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;点击此处取消订阅&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="FooterOpensourceV10" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
