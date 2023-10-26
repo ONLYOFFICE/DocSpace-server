@@ -1,0 +1,1071 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>Adresă de email {!User} este înregistrată deja</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} spaţiu de stocare</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>ID echipă contului de dezvoltator de 10 caractere</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Identificator cheie de 10 caractere generat pentru conectarea cu cheia privată Apple</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>Linkul de confirmare a operaţiei a fost trimis către: e-mail (adresa de e-mail a proprietarului portalului).</value>
+  </data>
+  <data name="DnsChangeMsg" xml:space="preserve">
+    <value>Linkul de confirmare a operaţiei a fost trimis către {0} (adresa de email a proprietarului portalului).</value>
+  </data>
+  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
+    <value>Este necesară o metodă de autentificare mai securizată. Trebuie să utilizaţi o conexiune criptată sau să activați autentificarea simplă pe server-ul.</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>SID cont</value>
+  </data>
+  <data name="LdapSettingsStatusAddingGroupUser" xml:space="preserve">
+    <value>adăugare utilizator</value>
+  </data>
+  <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
+    <value>Notificări administrator</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>Cheie API</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>Cheie secretă API</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>Cheie API</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>Cheie API</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>Cheie aplicație</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>Token aplicație</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>ID Apple</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID de Client Aplicației</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID de Client Aplicației</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>ID de Aplicație</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>ID de Aplicație</value>
+  </data>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>Asia Pacific (Singapore)</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Token de autorizare</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Utilizator cu autentificare</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Copiere de rezervă și recuperare automată</value>
+  </data>
+  <data name="ErrorBadKeys" xml:space="preserve">
+    <value>Chei nepotrivite</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Token Robot</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Numele de utilizator Robot</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>ID Box</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Cheie Box</value>
+  </data>
+  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+    <value>Branding și particularizare</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="ButtonTfaAppEnable" xml:space="preserve">
+    <value>Prin aplicația de autentificare</value>
+  </data>
+  <data name="ButtonSmsEnable" xml:space="preserve">
+    <value>Prin SMS</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>octeți, KO, MO, GO, TO</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>majuscule</value>
+  </data>
+  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
+    <value>Verificare Certificat</value>
+  </data>
+  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
+    <value>Verificare setări de acceptare LDAP</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>ID de Client</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID de Client</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Cheie Secretă Client</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Cheie Secretă Client</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Cheie Secretă Client</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Cheie Secretă Client</value>
+  </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Stocare în cloud pentru documentele de birou</value>
+  </data>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>Cod: {0}</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Conectați Amazon AWS S3 pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Conectați Amazon AWS S3 pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Accesați Consola de Gestionare AWS și generaţi cheile de acces pentru ONLYOFFICE. Mai jos, lipiți datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Conectați serviciu de stocare în cloud Google pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Conectați serviciu de stocare în cloud Google pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Accesaţi consola Google Cloud Platform și creați un nou cont de serviciu pentru ONLYOFFICE. Mai jos, lipiți datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Conectați serviciu de stocare în cloud Rackspace pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Conectați serviciu de stocare în cloud Rackspace pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}În secțiunea Setări de Securitate din Panou de control Rackspace Cloud, faceți clic pe Show link (Afișare link) pe lângă Rackspace API Key (Cheie Rackspace API). Mai jos, lipiți datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Conectați serviciu de stocare în cloud Selectel pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Conectați serviciu de stocare în cloud Selectel pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Obțineți datele de acces pentru utilizatorul cu permisiuni de scriere/citire asupra containerelor unde intenționați să stocați copiile de rezervă și lipiţi-le mai jos:</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Conectați contul Telegram pentru a primi notificări de portal prin Telegram.</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Conectați proiectul pentru a vă conecta la portalul prin contul Google și pentru a gestiona fișiere și foldere din Google Drive.</value>
+  </data>
+  <data name="LdapSettingsConnectError" xml:space="preserve">
+    <value>Eroare de conectare</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupAttribute" xml:space="preserve">
+    <value>Imposibil de obținut Atributul de grup pentru unul sau mai multe grupuri.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
+    <value>Imposibil de obținut Atributul de conectare pentru unul sau mai multe utilizatori.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
+    <value>Imposibil de obținut Atributul de utilizator pentru unul sau mai multe utilizatori.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
+    <value>Imposibil de obținut Atributul nume de grup pentru unul sau mai multe grupuri.</value>
+  </data>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>Imposibil de salvat setările</value>
+  </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>Particularizat</value>
+  </data>
+  <data name="ReassignDataRemoveUserError" xml:space="preserve">
+    <value>Procesul de reatribuire a datelor pentru {0} nu s-a terminat.</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>cifre</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
+    <value>Dezactivarea profilelor vechi de utilizator care au fost încărcate anterior prin LDAP</value>
+  </data>
+  <data name="PersonalFreeSpaceException" xml:space="preserve">
+    <value>Cota spaţiului de stocare a fost depășită</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>Punct final de autentificare DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>Cheie DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>Cheie secretă DocuSign</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>ID Dropbox</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>Cheie Dropbox</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>Câmpul Adresă de e-mail este gol</value>
+  </data>
+  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
+    <value>Înregistrarea adreselor de e-mail care fac parte din acest domeniu nu este acceptată</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Permiteți aplicației autentificarea cu doi factori prin Clickatell.</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Permiteți aplicației autentificarea cu doi factori prin Centru de SMS.</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Permiteți aplicației semnarea digitală a documentelor dvs utilizând DocuSign.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Permiteţi aplicaţiei publicarea ușoară a documentelor pe site-ul WordPress.&lt;/value&gt; {0}Pe pagina de dezvoltatori Wordpress, și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, lipiți datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Permiteți aplicației importarea utilizatorilor din serviciu Yahoo.</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Permiteți aplicației gestionarea fișierelor și folderelor din Box.</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Permiteți aplicației gestionarea fișierelor și folderelor din Dropbox.</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Permiteți aplicației gestionarea fișierelor și folderelor din OneDrive.</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Permiteţi aplicaţiei publicarea documentelor direct pe site-ul WordPress.</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul Facebook.</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul LinkedIn.</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul Mail.ru.</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul Microsoft.</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul Twitter și căutarea contactelor.</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul VK.</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul Yandex.</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul Zoom.</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind ID-ul Apple.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Permiteți aplicației adăugarea utilizatorilor noi la portal din lista de contacte Yahoo. {0}Accesați pagina Creare aplicație pe rețeaua de dezvoltatori și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite utilizatorilor să își apeleze contactele din modulul CRM folosind Twilio. {0}Accesați consola Twilio și lipiți mai jos datele următoare:</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite notificările la primirea mesajelor chiar și offline. {0}Accesați consola Firebase și adăugați un proiect nou pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând ID-ul Apple. {0}Accesați Portalul pentru dezvoltatori Apple și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând Facebook și să conecteze conturile de Facebook ale clienților la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Facebook și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând Microsoft. {0}Accesați Microsoft Azure și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând contul LinkedIn. {0}Accesați site-ul pentru dezvoltatori LinkedIn și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând Twitter și să conecteze conturile de Twitter ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Twitter și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând contul Zoom. {0}Accesați site-ul pentru dezvoltatori Zoom și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Permiteți aplicației conectarea contului dvs Box la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Box cu utilizatorii ONLYOFFICE. {0}Vă conectați la contul dvs. pe pagina de dezvoltatori Box și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Permiteți aplicației conectarea contului dvs Dropbox la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Dropbox cu utilizatorii ONLYOFFICE. {0}Vă conectați la contul dvs. pe site-ul de dezvoltatori Dropbox și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Permiteţi aplicației conectarea contului dvs Google Drive la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Google Drive cu utilizatorii ONLYOFFICE. {0}Accesați consola Google APIs și creați un proiect nou pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Permiteți aplicației conectarea contului dvs OneDrive la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul OneDrive cu utilizatorii ONLYOFFICE. {0}Vă conectați la contul dvs. Microsoft Azure și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Permiteţi aplicaţiei crearea listelor bibliografice în editorul ONLYOFFICE. {0}Accesaţi pagina de conectare EasyBib și completați formularul pentru adăugarea soluției de integrare cu ONLYOFFICE. După ce obțineți o cheie de aplicație, lipiți-o mai jos:</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Permiteţi aplicaţiei semnarea digitală a documentelor utilizând DocuSign. {0}Accesați consola de administrator DocuSign și adăugați aplicația de integrare cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Permiteţi aplicaţiei prescurtarea link-urilor de invitație și linkurilor către documente. {0}Inserați mai jos numele de utilizator Bitly și cheia API:</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Permiteţi aplicaţiei apelarea contactelor CRM folosind Twilio.</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Permiteţi aplicaţiei crearea listelor bibliografice în documente folosind EasyBib.</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Permiteţi notificările la primirea mesajelor trimise prin mesagerie cloud Firebase.</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Activați prescurtarea link-urilor de invitație la portalul și link-urilor de partajare din modulul Documente folosind serviciu Bitly.</value>
+  </data>
+  <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
+    <value>Introduceți număr de telefon mobil</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Indicaţi regiunea AWS unde se află găleata dvs Amazon.</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Introduceţi numele de găleată Google Cloud pentru stocarea copiilor de rezervă.</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Introduceți numele de container privat Selectel pentru stocarea copiilor de rezervă.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Introduceți numele de container public Selectel pentru stocarea copiilor de rezervă.</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Introduceți regiunea unde se află containere dvs Rackspace.</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Introduceți numele unic al găleții Amazon pentru stocarea copiilor de rezervă.</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Introduceți adresa URL a containerului privat Rackspace pentru stocarea copiilor de rezervă.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Introduceți adresa URL a containerului public Rackspace pentru stocarea copiilor de rezervă.</value>
+  </data>
+  <data name="EuServerRegion" xml:space="preserve">
+    <value>Regiunea UE (Frankfurt)</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>ID Facebook</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Cheie Facebook</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prenume</value>
+  </data>
+  <data name="ErrorPasswordLength" xml:space="preserve">
+    <value>de la {0} până la {1} caractere</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Serviciu de stocare în cloud Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>ID Google</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Cheie Google</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Dacă utilizatorul cu adresa e-mail {0} există, instrucțiuni de schimbare a parolei au fost trimise către această adresa de e-mail.</value>
+  </data>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>Dimensiunea imaginii este prea mare</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Limită dimensiune imagine este depășită</value>
+  </data>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Cod incorect</value>
+  </data>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Cod incorect</value>
+  </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>Adresa de e-mail incorectă</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>Adresa de e-mail incorectă</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Numele şi prenumele sunt incorecte</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupFilter" xml:space="preserve">
+    <value>Filtru Grup incorect.</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>ID-ul instanței eronat.</value>
+  </data>
+  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
+    <value>Numele de utilizator şi parola sunt incorecte.</value>
+  </data>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Instrucțiuni de ștergere a profilului au fost trimise către adresa de e-mail {0}</value>
+  </data>
+  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
+    <value>Legătură nevalidă: {0}</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>Nume de domeniu nevalid</value>
+  </data>
+  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
+    <value>ID entitate nevalid</value>
+  </data>
+  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
+    <value>Mapare câmpuri nevalidă</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Recaptcha incorectă</value>
+  </data>
+  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
+    <value>Valoarea filtru utilizator nevalidă.</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nume</value>
+  </data>
+  <data name="LdapSettingsStatusDisconnecting" xml:space="preserve">
+    <value>Deconecrtare LDAP</value>
+  </data>
+  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
+    <value>Imposibil de găsit domeniu LDAP.</value>
+  </data>
+  <data name="LicenseError" xml:space="preserve">
+    <value>Licența este nevalabilă</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>ID Linkedin</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Cheie Linkedin</value>
+  </data>
+  <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
+    <value>Încărcare bază de date cu informații LDAP</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>nume de utilizator</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Nume de utilizator</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Dimensiunea maximă a fișierelului</value>
+  </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Textul mesajului lipsește</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="LdapSettingsModifyLdapUsers" xml:space="preserve">
+    <value>Trecerea utilizatorilor LDAP în utilizatori de portal obișnuiți</value>
+  </data>
+  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
+    <value>Nu s-a găsit nici-un grup.</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Nu aveți permisiunea de a efectua această acțiune</value>
+  </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>fără spații</value>
+  </data>
+  <data name="LdapSettingsErrorUsersNotFound" xml:space="preserve">
+    <value>Nu s-a găsit nici-un utilizator.</value>
+  </data>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>Mențiune: dimensiunea fișierului nu poate depăși {1}{0}{2}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>Numărul de administratori</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Numărul de administratori/utilizatori avansați:</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>numai litere latine</value>
+  </data>
+  <data name="OrgServerRegion" xml:space="preserve">
+    <value>Regiunea ORG</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Proprietar</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Parolă</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>Parola trebuie să aibă</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Parolă sau parolă MD5 hash cu minuscule</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>Operațiunea de recuperare a parolei este interzisă pentru un utilizator LDAP</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>Operațiunea de recuperare a parolei este interzisă pentru un utilizator al sistemului de autentificare unică</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Parola contului de acces la serviciu de stocare</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Număr de telefon Twilio (necesar pentru autentificarea prin SMS)</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>Vă rugăm să completați toate câmpurile</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>Acces la portal</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Container privat</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Container privat</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Cheia privată încărcată de pe Portalul pentru dezvoltatori Apple</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID Proiect</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Container public</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Container public</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Cheie API Rackspace</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Serviciu de stocare în cloud Rackspace</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Numele de utilizator Rackspace</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Regiunea</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Regiunea</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Eliminarea permisiunilor de acces vechi care au fost încărcate anterior prin LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
+    <value>Eliminarea grupurilor vechi care au fost încărcate anterior prin LDAP&lt;</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingGroupUser" xml:space="preserve">
+    <value>eliminare utilizator</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Limită de solicitare depășită</value>
+  </data>
+  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
+    <value>Reluiarea listei de grupuri de la serverul LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
+    <value>Reluiarea listei de utilizatori de la serverul LDAP</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Săli:</value>
+  </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>Cheie de acces S3</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>Cheie secretă S3</value>
+  </data>
+  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
+    <value>Salvare grupuri</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
+    <value>Salvare fotografie</value>
+  </data>
+  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
+    <value>Salvare setări</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
+    <value>Salvare utilizatori</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Cheie secretă</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Cheie securizată</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Parola (authPwd) Selectel</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Nume de utilizator (authUser) Selectel</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Serviciu de stocare în cloud Selectel</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID Expeditor</value>
+  </data>
+  <data name="LdapSettingsInternalServerError" xml:space="preserve">
+    <value>Eroare internă de server.</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Cheie server</value>
+  </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Desemnare utilizator {0} ca {1} administrator</value>
+  </data>
+  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
+    <value>Setări nu pot fi nule</value>
+  </data>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>Setările au fost actualizate cu succes</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>Centru de SMS</value>
+  </data>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>Setări mesaje SMS nu sunt disponibile</value>
+  </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>caractere speciale</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>Conectare unică</value>
+  </data>
+  <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
+    <value>StartTLS nu este acceptat pentru serverul LDAP curent.</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Spaţiu de stocare</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Spaţiul de stocare utilizat:</value>
+  </data>
+  <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
+    <value>Sincronizare utilizatori</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>Setări de autentificare cu doi factori pentru aplicația nu sunt disponibile</value>
+  </data>
+  <data name="ErrorIpSecurity" xml:space="preserve">
+    <value>Accesul la portal este restricționat</value>
+  </data>
+  <data name="ErrorAccessRestricted" xml:space="preserve">
+    <value>Accesul la portal este restricționat.</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>Adresa de e-mail curentă și adresa de e-mail nouă sunt aceleași</value>
+  </data>
+  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
+    <value>S-a atins limita maximă de utilizatori conform planului tarifar al abonamentului</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>Denumirea domeniului trebuie să conțină de la {0} până la {1}de caractere.</value>
+  </data>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>Instrucțiuni de schimbare a adresei de e-mail au fost trimise cu succes</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>Dimensiunea fișierului nu trebuie să depășească {0}</value>
+  </data>
+  <data name="LicenseErrorExpired" xml:space="preserve">
+    <value>Această licență nu este valabilă pentru această versiune de portal.</value>
+  </data>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>Linkul de confirmare a contului a fost trimis către adresa de email pe care ați indicat-o</value>
+  </data>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>Dimensiunea maximă a fișierului este depășită</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>Numărul de administratori nu trebuie să depășească {0}</value>
+  </data>
+  <data name="LicenseErrorPortal" xml:space="preserve">
+    <value>Numărul de portaluri a depășit numărul maxim permis conform licenței</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>Numărul de săli nu trebuie să depășească {0}</value>
+  </data>
+  <data name="LicenseErrorQuota" xml:space="preserve">
+    <value>Numărul de utilizatori a depășit numărul maxim permis conform licenței</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>Numărul de utilizatori în sală nu trebuie să depășească {0}</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Numărul de utilizatori nu trebuie să depășească {0}</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>Câmpul pentru parolă necompletat.</value>
+  </data>
+  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
+    <value>Serverul nu poate obține setări.</value>
+  </data>
+  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
+    <value>Serverul nu poate salva setările.</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Câmpul de domeniu găzduit nu poate rămâne necompletat.</value>
+  </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Imposibil de găsit fișierul încărcat</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>Spațiul de stocare utilizat nu trebuie să depășească {0}</value>
+  </data>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>Imposibil de găsit utilizatorul</value>
+  </data>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>Imposibil de găsit utilizatorul cu adresa de e-mail "{0}"</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Soluții de integrare</value>
+  </data>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>Valabilitatea codului a expirat. Solicitați un mesaj text cu un cod nou.</value>
+  </data>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>Pentru a schimba numărul, trebuie să ștergeți numărul de telefon actual</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Pentru a primi notificări de portal prin Telegram, activați robotul Telegram. Puteți crea un nou robot folosind BotFather în aplicația Telegram Desktop. Pentru a utiliza acest robot, utilizatorii portalului trebuie să activeze notificările prin Telegram pe pagina lor de profil. {0}Lipiți numele de utilizator și token-ul al robotului în câmpurile de mai jos.</value>
+  </data>
+  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
+    <value>Prea multe operații LDAP.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Prea multe încercări de conectare. Încercați din nou mai târziu</value>
+  </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Urmărire conectări și acțiuni efectuate de utilizatori</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
+    <value>Imposibil de conectat la serverul LDAP. Verificaţi dacă adresa serverului și numărul de port sunt corecte.</value>
+  </data>
+  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
+    <value>Imposibil de obține ID-ul unic pentru obiecte de utilizator/grup. În mod implicit, sistemul va încerca să potrivească unul dintre următorii identificatori: entryUUID, nsuniqueid, GUID, objectSid. Dacă niciunul din atribute nu corespunde serverului LDAP, indicaţi atributul necesar ca parametrul ldap.unique.id în fișierul web.appsettings.config.</value>
+  </data>
+  <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
+    <value>Eroare necunoscută.</value>
+  </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Tip de format de imagine necunoscut</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Un număr nelimitat de săli active</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Un număr nelimitat de utilizatori</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
+    <value>Actualizare fotografii ale utilizatorilor</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
+    <value>Actualizare permisiuni de acces ale utilizatorilor</value>
+  </data>
+  <data name="LicenseUploaded" xml:space="preserve">
+    <value>Încărcat cu succes</value>
+  </data>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Încărcat cu succes. {0}Asistenţă și actualizări nu sunt disponibile pentru această licenţă din {2}.{1}</value>
+  </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Încărcat cu succes. {0}Asistenţă nu este disponibilă pentru această licenţă din {2}.{1}&lt;</value>
+  </data>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Regiunea US West (Oregon)</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Utilizați această aplicație pentru activarea autentificării cu doi factori cu serviciu Clickatell. {0}Vă conectați la contul dvs. SMS Platform și creați o soluție de integrare nouă cu ONLYOFFICE. Copiați și inserași cheia API mai jos:</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Utilizați această aplicație pentru activarea autentificării cu doi factori cu serviciu Centru de SMS. {0}Inserați numele de utilizator și parola contului dvs smsc (sau parola MD5 hash) cu minuscule:</value>
+  </data>
+  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
+    <value>Imposibil de creat utilizatorii, datele primite sunt eronate.</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Utilizatorii în sala</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Utilizatorii în sala:</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Câmp Cod de validare nu poate fi lăsat necompletat</value>
+  </data>
+  <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
+    <value>Câmp Cod de validare nu poate fi lăsat necompletat</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Cheie API Web</value>
+  </data>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Setările paginii de întâmpinare au fost salvate cu succes</value>
+  </data>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Ce este nou</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Odată ce ați adăugat aplicația  Mail.ru, pe pagina de profil puteți activa conectarea la portalul folosind contul Mail.ru.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Odată ce ați adăugat aplicația VK, pe pagina de profil puteți activa conectarea la portalul folosind contul VK.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Odată ce ați adăugat aplicația Yandex, pe pagina de profil puteți activa conectarea la portalul folosind contul Yandex.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>Cheie WordPress</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>Cheie Secretă WordPress</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID de Client Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Secret client Zoom</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>Ați încercat să vă retrageți drepturile de administrator. Drepturile dvs de administrator nu au fost afectate.</value>
+  </data>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Ați trimis prea multe mesaje text. Încercaţi din nou mai târziu.</value>
+  </data>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>Ați trimis prea multe mesaje text. Încercaţi din nou mai târziu.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Contul dvs. nu este conectat la directorul LDAP și parola dvs LDAP nu mai este activă. Vă rugăm să modificați sau să setați parola pentru contul dvs. pe pagina de configurare a profilului.</value>
+  </data>
+  <data name="AdminMessageSent" xml:space="preserve">
+    <value>Mesajul a fost trimis cu succes. Veţi fi contactat de administratorul portalului.</value>
+  </data>
+  <data name="ErrorNotAllowedOption" xml:space="preserve">
+    <value>Planul tarifar al dvs nu include această opțiune</value>
+  </data>
+  <data name="ErrorDisabledProfile" xml:space="preserve">
+    <value>Profilul dvs. a fost suspendat</value>
+  </data>
+</root>

@@ -115,7 +115,7 @@ public static class UserPhotoThumbnailManager
         }
     }
 
-    public static byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize, out IImageFormat imgFormat, out int width, out int height)
+    public static byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize)
     {
         if (data == null || data.Length <= 0)
         {
@@ -132,9 +132,8 @@ public static class UserPhotoThumbnailManager
         try
         {
             using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
-            width = img.Width;
-            height = img.Height;
+            var width = img.Width;
+            var height = img.Height;
             var maxWidth = maxsize.Width;
             var maxHeight = maxsize.Height;
 

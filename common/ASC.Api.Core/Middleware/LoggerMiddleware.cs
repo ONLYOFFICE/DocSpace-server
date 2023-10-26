@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Diagnostics;
+
 using Amazon.Runtime.Internal.Transform;
 
 namespace ASC.Api.Core.Middleware;
@@ -64,7 +66,10 @@ public class LoggerMiddleware
 
         using (logger.BeginScope(state))
         {
+            var sw = Stopwatch.StartNew();
             await _next.Invoke(context);
+            sw.Stop();
+            logger.Debug($"{context.Request.Url().AbsoluteUri} - {sw.ElapsedMilliseconds}ms");
         }
     }
 }

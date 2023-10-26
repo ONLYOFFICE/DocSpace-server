@@ -199,11 +199,8 @@ public abstract class PortalTaskBase
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
-        if (Progress != value)
-        {
-            Progress = value;
-            OnProgressChanged(new ProgressChangedEventArgs(value));
-        }
+        Progress = value;
+        OnProgressChanged(new ProgressChangedEventArgs(value));
     }
 
     protected virtual void OnProgressChanged(ProgressChangedEventArgs eventArgs)

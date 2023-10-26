@@ -148,6 +148,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
 
+        _chunkedUploadSession.BytesTotal = _chunkedUploadSession.BytesUploaded;
         await UploadAsync(true);
         await _fileStream.DisposeAsync();
 

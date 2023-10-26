@@ -38,7 +38,7 @@ public class DiscDataStore : BaseStorage
     private readonly EncryptionSettingsHelper _encryptionSettingsHelper;
     private readonly EncryptionFactory _encryptionFactory;
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
         Tenant = tenant;
         //Fill map path
@@ -61,7 +61,7 @@ public class DiscDataStore : BaseStorage
         DomainsExpires.Add(string.Empty, moduleConfig.Expires);
         var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : _encryptionSettingsHelper.Load();
         _crypt = _encryptionFactory.GetCrypt(moduleConfig.Name, settings);
-
+        DataStoreValidator = validator;
         return this;
     }
 

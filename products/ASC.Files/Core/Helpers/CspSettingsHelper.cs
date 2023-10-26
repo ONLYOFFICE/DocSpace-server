@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Storage.S3;
-using ASC.Web.Files.Classes;
-
 namespace ASC.Web.Api.Core;
 
 [Scope]
@@ -174,7 +171,7 @@ public class CspSettingsHelper
 
         if (Uri.IsWellFormedUriString(_filesLinkUtility.DocServiceUrl, UriKind.Absolute))
         {
-            options.Add(new CspOptions()
+            options.Add(new CspOptions
             {
                 Def = new List<string> { _filesLinkUtility.DocServiceUrl },
                 Script = new List<string> { _filesLinkUtility.DocServiceUrl },
@@ -237,6 +234,11 @@ public class CspSettingsHelper
             csp.AllowFraming.From(domain);
         }
 
+        foreach (var domain in options.SelectMany(r => r.Fonts).Distinct())
+        {
+            csp.AllowFonts.From(domain);
+        }
+
         var (_, headerValue) = csp.BuildCspOptions().ToString(null);
         return headerValue;
     }
@@ -253,6 +255,7 @@ public class CspOptions
     public List<string> Style { get; set; } = new();
     public List<string> Img { get; set; } = new();
     public List<string> Frame { get; set; } = new();
+    public List<string> Fonts { get; set; } = new();
     public List<string> Def { get; set; } = new();
 
     public CspOptions()
@@ -263,9 +266,10 @@ public class CspOptions
     public CspOptions(string domain)
     {
         Def = new List<string>();
-        Script = new List<string>() { domain };
-        Style = new List<string>() { domain };
-        Img = new List<string>() { domain };
-        Frame = new List<string>() { domain };
+        Script = new List<string> { domain };
+        Style = new List<string> { domain };
+        Img = new List<string> { domain };
+        Frame = new List<string> { domain };
+        Fonts = new List<string> { domain };
     }
 }

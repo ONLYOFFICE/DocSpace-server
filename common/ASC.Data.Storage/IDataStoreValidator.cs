@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,52 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Builder;
+namespace ASC.Data.Storage;
 
-namespace ASC.Core;
-
-public class CustomSynchronizationContext
+public interface IDataStoreValidator
 {
-    public IPrincipal CurrentPrincipal { get; set; }
-
-    private readonly static AsyncLocal<CustomSynchronizationContext> _context = new();
-    public static CustomSynchronizationContext CurrentContext => _context.Value;
-
-    public static void CreateContext()
-    {
-        if (CurrentContext == null)
-        {
-            var context = new CustomSynchronizationContext();
-            _context.Value = context;
-        }
-    }
-}
-
-
-public class SynchronizationContextMiddleware
-{
-    private readonly RequestDelegate _next;
-
-    public SynchronizationContextMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
-    public async Task Invoke(HttpContext context, ILogger<SynchronizationContextMiddleware> logger)
-    {
-        CustomSynchronizationContext.CreateContext();
-
-        var sw = Stopwatch.StartNew();
-        await _next.Invoke(context);
-        sw.Stop();
-        logger.Debug($"{context.Request.Url().AbsoluteUri} - {sw.ElapsedMilliseconds}ms");
-    }
-}
-
-public static class SynchronizationContextMiddlewareExtensions
-{
-    public static IApplicationBuilder UseSynchronizationContextMiddleware(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<SynchronizationContextMiddleware>();
-    }
+    Task<bool> Validate(string path);
 }
