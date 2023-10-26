@@ -303,7 +303,7 @@ public class BackupAjaxHandler
             if (restoreRequest.StorageType == BackupStorageType.Local)
             {
                 var path = await GetTmpFilePathAsync(tenantId);
-                path = File.Exists(path + "tar.gz") ? path + "tar.gz" : path + "tar";
+                path = File.Exists(path + ".tar.gz") ? path + ".tar.gz" : path + ".tar";
                 restoreRequest.FilePathOrId = path;
             }
         }
