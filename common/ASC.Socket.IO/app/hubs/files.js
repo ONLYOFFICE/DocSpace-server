@@ -78,8 +78,9 @@
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
 
-      logger.info(`WS: restore backup in room ${room} session=[tenantId=${tenant}|${tenantId} userId='${user}'|'${userId}']`);
+      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId} userId='${user}'|'${userId}']`);
       socket.to(room).emit("restore-backup");
     });
 

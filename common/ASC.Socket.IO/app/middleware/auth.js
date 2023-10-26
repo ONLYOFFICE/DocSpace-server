@@ -60,7 +60,7 @@ module.exports = (socket, next) => {
 
     return Promise.all([getUser(), getPortal()])
       .then(([user, portal]) => {
-        logger.info("WS: get account info", { user, portal });
+        logger.info(`WS: save account info in sessionId='sess:${session.id}'`, { user, portal });
         session.user = user;
         session.portal = portal;
         session.save();
@@ -95,11 +95,11 @@ module.exports = (socket, next) => {
       .then((validation) => {
         if (validation.status !== 0) {
           const err = new Error("Invalid share key");
-          logger.error("Share key validation failure:", err);
+          logger.error("WS: share key validation failure:", err);
           return next(err);
         }
 
-        logger.info(`Share key validation successful: key=${share}`);
+        logger.info(`WS: share key validation successful: key='${share}' sessionId='sess:${session.id}'`);
         session.anonymous = true;
         session.portal = { tenantId: validation.tenantId };
         session.save();
