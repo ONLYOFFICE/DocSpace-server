@@ -30,6 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DocspaceAuthenticationProvider implements AuthenticationProvider {
     private final String CLIENT_ID_COOKIE = "client_id";
+    private final String ASC_AUTH_COOKIE = "asc_auth_key";
     private final DocspaceClient docspaceClient;
     private final ClientPersistenceQueryUsecases queryUsecases;
 
@@ -37,7 +38,6 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
             throws AuthenticationException {
         var request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest();
-
 
         var clientCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase(CLIENT_ID_COOKIE))
                 .findFirst();
@@ -47,7 +47,8 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
 
         var client = queryUsecases.getClientByClientId(clientCookie.get().getValue());
 
-        var authCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase("asc_auth_key"))
+        var authCookie = Arrays.stream(request.getCookies())
+                .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_COOKIE))
                 .findFirst();
 
         if (authCookie.isEmpty())
