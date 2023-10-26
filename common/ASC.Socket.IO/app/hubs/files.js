@@ -75,7 +75,11 @@
 
     socket.on("restore-backup", () => {
       const room = getRoom("backup-restore");
-      logger.info(`restore backup in room ${room}`);
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+
+      logger.info(`WS: restore backup in room ${room} session=[tenantId=${tenant}|${tenantId} userId='${user}'|'${userId}']`);
       socket.to(room).emit("restore-backup");
     });
 
