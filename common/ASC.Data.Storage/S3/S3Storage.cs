@@ -30,7 +30,7 @@ namespace ASC.Data.Storage.S3;
 public class S3Storage : BaseStorage
 {
     public override bool IsSupportCdnUri => true;
-    public static long ChunkSize { get; } = 50 * 1024 * 1024;
+    public static long ChunkSize { get; } = 1000 * 1024 * 1024;
     public override bool IsSupportChunking => true;
 
     private readonly List<string> _domains = new List<string>();
