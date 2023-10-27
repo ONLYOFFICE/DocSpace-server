@@ -715,7 +715,7 @@ public class TenantWhiteLabelSettingsHelper
             return null;
         }
 
-        var partnerStorage = await _storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await _storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         if (partnerStorage == null)
         {
@@ -767,7 +767,7 @@ public class TenantWhiteLabelSettingsHelper
             return null;
         }
 
-        var partnerStorage = await _storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await _storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         if (partnerStorage == null)
         {
