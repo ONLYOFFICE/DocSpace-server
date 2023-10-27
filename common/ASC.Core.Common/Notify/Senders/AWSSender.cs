@@ -48,9 +48,14 @@ public class AWSSender : SmtpSender, IDisposable
     public override void Init(IDictionary<string, string> properties)
     {
         base.Init(properties);
-        var region = properties.TryGetValue("region", out var propertyRegion) ? RegionEndpoint.GetBySystemName(propertyRegion) : RegionEndpoint.USEast1;
-        _amazonEmailServiceClient = new AmazonSimpleEmailServiceClient(properties["accessKey"], properties["secretKey"], region);
-        _refreshTimeout = TimeSpan.Parse(properties.TryGetValue("refreshTimeout", out var propertyRefreshTimeout) ? propertyRefreshTimeout : "0:30:0");
+        var region = properties.TryGetValue("region", out var propertyRegion)
+            ? RegionEndpoint.GetBySystemName(propertyRegion)
+            : RegionEndpoint.USEast1;
+        _amazonEmailServiceClient =
+            new AmazonSimpleEmailServiceClient(properties["accessKey"], properties["secretKey"], region);
+        _refreshTimeout = TimeSpan.Parse(properties.TryGetValue("refreshTimeout", out var propertyRefreshTimeout)
+            ? propertyRefreshTimeout
+            : "0:30:0");
         _lastRefresh = DateTime.UtcNow - _refreshTimeout; //set to refresh on first send
     }
 
@@ -94,7 +99,9 @@ public class AWSSender : SmtpSender, IDisposable
         }
         catch (AmazonSimpleEmailServiceException e)
         {
-            result = e.ErrorType == ErrorType.Sender ? NoticeSendResult.MessageIncorrect : NoticeSendResult.TryOnceAgain;
+            result = e.ErrorType == ErrorType.Sender
+                ? NoticeSendResult.MessageIncorrect
+                : NoticeSendResult.TryOnceAgain;
         }
         catch (Exception)
         {
@@ -125,6 +132,7 @@ public class AWSSender : SmtpSender, IDisposable
 
                 return NoticeSendResult.SendingImpossible;
             }
+
             _semaphore.Release();
         }
 
@@ -165,7 +173,7 @@ public class AWSSender : SmtpSender, IDisposable
         }
 
         await _semaphore.WaitAsync();
-        if (IsRefreshNeeded())//Double check
+        if (IsRefreshNeeded()) //Double check
         {
             _logger.DebugRefreshingQuota(_refreshTimeout, _lastRefresh);
 
@@ -183,6 +191,7 @@ public class AWSSender : SmtpSender, IDisposable
                 _logger.ErrorRefreshingQuota(e);
             }
         }
+
         _semaphore.Release();
     }
 

@@ -135,8 +135,8 @@ public class Global
 
     #region Property
 
-    public DocThumbnailExtension DocThumbnailExtension;
-    public ThumbnailExtension ThumbnailExtension;
+    public readonly DocThumbnailExtension DocThumbnailExtension;
+    public readonly ThumbnailExtension ThumbnailExtension;
 
     public const int MaxTitle = 170;
 

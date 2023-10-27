@@ -152,11 +152,11 @@ public class WhitelabelController : BaseSettingsController
         return true;
     }
 
-    private void GetParts(string fileName, out WhiteLabelLogoTypeEnum logoType, out string fileExt)
+    private void GetParts(string fileName, out WhiteLabelLogoType logoType, out string fileExt)
     {
         var parts = fileName.Split('.');
-        logoType = (WhiteLabelLogoTypeEnum)Convert.ToInt32(parts[0]);
-        fileExt = parts.Last();
+        logoType = (WhiteLabelLogoType)Convert.ToInt32(parts[0]);
+        fileExt = parts[^1];
     }
 
     /// <summary>
@@ -179,9 +179,9 @@ public class WhitelabelController : BaseSettingsController
     {
         var _tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        foreach (var logoType in (WhiteLabelLogoTypeEnum[])Enum.GetValues(typeof(WhiteLabelLogoTypeEnum)))
+        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
         {
-            if (logoType == WhiteLabelLogoTypeEnum.Notification)
+            if (logoType == WhiteLabelLogoType.Notification)
             {
                 continue;
             }
@@ -253,7 +253,7 @@ public class WhitelabelController : BaseSettingsController
             Name = "logotext",
             Default = _tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || _tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
         };
-        foreach (var logoType in (WhiteLabelLogoTypeEnum[])Enum.GetValues(typeof(WhiteLabelLogoTypeEnum)))
+        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
         {
             var result = new IsDefaultWhiteLabelLogosDto
             {

@@ -100,7 +100,7 @@ public class DocuSignHandlerService
         _log.InformationDocuSignRedirectQuery(context.Request.QueryString);
 
         var eventRedirect = context.Request.Query["event"].FirstOrDefault();
-        switch (eventRedirect.ToLower())
+        switch (eventRedirect?.ToLower())
         {
             case "send":
                 context.Response.Redirect(PathProvider.StartURL + "#message/" + HttpUtility.UrlEncode(FilesCommonResource.DocuSignStatusSended), true);
@@ -124,14 +124,14 @@ public class DocuSignHandlerService
         _log.InformationDocuSignWebhook(context.Request.QueryString);
         try
         {
-            var xmldoc = new XmlDocument();
-            xmldoc.Load(context.Request.Body);
-            _log.InformationDocuSignWebhookOuterXml(xmldoc.OuterXml);
+            var xmlDocument = new XmlDocument();
+            xmlDocument.Load(context.Request.Body);
+            _log.InformationDocuSignWebhookOuterXml(xmlDocument.OuterXml);
 
-            var mgr = new XmlNamespaceManager(xmldoc.NameTable);
+            var mgr = new XmlNamespaceManager(xmlDocument.NameTable);
             mgr.AddNamespace(XmlPrefix, "http://www.docusign.net/API/3.0");
 
-            var envelopeStatusNode = GetSingleNode(xmldoc, "DocuSignEnvelopeInformation/" + XmlPrefix + ":EnvelopeStatus", mgr);
+            var envelopeStatusNode = GetSingleNode(xmlDocument, "DocuSignEnvelopeInformation/" + XmlPrefix + ":EnvelopeStatus", mgr);
             var envelopeId = GetSingleNode(envelopeStatusNode, "EnvelopeID", mgr).InnerText;
             var subject = GetSingleNode(envelopeStatusNode, "Subject", mgr).InnerText;
 

@@ -32,7 +32,7 @@ public class SmtpSender : INotifySender
     protected ILogger _logger;
     private IDictionary<string, string> _initProperties;
     protected readonly IConfiguration _configuration;
-    protected IServiceProvider _serviceProvider;
+    protected readonly IServiceProvider _serviceProvider;
 
     private string _host;
     private int _port;

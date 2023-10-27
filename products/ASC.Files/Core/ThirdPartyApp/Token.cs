@@ -74,7 +74,7 @@ public class Token : OAuth20Token
 public class TokenHelper
 {
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    public ILogger<TokenHelper> Logger;
+    public readonly ILogger<TokenHelper> Logger;
     private readonly InstanceCrypto _instanceCrypto;
     private readonly AuthContext _authContext;
     private readonly TenantManager _tenantManager;

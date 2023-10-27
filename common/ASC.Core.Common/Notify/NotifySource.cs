@@ -32,7 +32,7 @@ public abstract class NotifySource : INotifySource
     private readonly IDictionary<CultureInfo, IPatternProvider> _patterns = new Dictionary<CultureInfo, IPatternProvider>();
 
     protected ISubscriptionProvider _subscriprionProvider;
-    protected IRecipientProvider _recipientsProvider;
+    protected readonly IRecipientProvider _recipientsProvider;
     public string Id { get; private set; }
 
     private readonly UserManager _userManager;

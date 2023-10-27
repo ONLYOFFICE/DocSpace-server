@@ -30,7 +30,7 @@ namespace ASC.Webhooks.Service.Services;
 public class WorkerService : BackgroundService
 {
     private readonly ILogger<WorkerService> _logger;
-    private readonly int? _threadCount = 10;
+    private readonly int? _threadCount;
     private readonly WebhookSender _webhookSender;
     private readonly TimeSpan _waitingPeriod;
     private readonly ConcurrentQueue<WebhookRequestIntegrationEvent> _queue;

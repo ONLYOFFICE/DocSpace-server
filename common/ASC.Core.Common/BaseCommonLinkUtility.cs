@@ -35,7 +35,7 @@ public class BaseCommonLinkUtility
     private UriBuilder _serverRoot;
     private string _vpath;
 
-    protected IHttpContextAccessor _httpContextAccessor;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
     public string ServerUri
     {
         set
@@ -101,9 +101,9 @@ public class BaseCommonLinkUtility
 
     public string VirtualRoot => ToAbsolute("~");
 
-    protected CoreBaseSettings _coreBaseSettings;
+    protected readonly CoreBaseSettings _coreBaseSettings;
     private readonly CoreSettings _coreSettings;
-    protected TenantManager _tenantManager;
+    protected readonly TenantManager _tenantManager;
 
     public string ServerRootPath
     {

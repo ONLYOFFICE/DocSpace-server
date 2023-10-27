@@ -50,7 +50,7 @@ public class ProviderManager
             ProviderConstants.AppleId
         };
 
-    public static List<string> InviteExceptProviders = new()
+    public static readonly List<string> InviteExceptProviders = new()
     {
                 ProviderConstants.Twitter,
                 ProviderConstants.AppleId,

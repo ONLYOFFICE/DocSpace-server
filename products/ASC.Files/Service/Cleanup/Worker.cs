@@ -87,7 +87,7 @@ public class Worker
 
                 var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
 
-                if (userAccount == ASC.Core.Configuration.Constants.Guest)
+                if (Equals(userAccount, ASC.Core.Configuration.Constants.Guest))
                 {
                     return;
                 }
@@ -98,18 +98,17 @@ public class Worker
                 var folderDao = daoFactory.GetFolderDao<int>();
                 var now = DateTime.UtcNow;
 
-                var filesList = new List<int>();
-                var foldersList = new List<int>();
-
                 var trashId = await folderDao.GetFolderIDTrashAsync(false, tenantUser.UserId);
 
-                foldersList.AddRange((await folderDao.GetFoldersAsync(trashId).ToListAsync(cancellationToken: cancellationToken))
+                var foldersList = await folderDao.GetFoldersAsync(trashId)
                     .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
-                    .Select(f => f.Id));
+                    .Select(f => f.Id)
+                    .ToListAsync(cancellationToken);
 
-                filesList.AddRange((await fileDao.GetFilesAsync(trashId, null, default(FilterType), false, Guid.Empty, string.Empty, false).ToListAsync(cancellationToken: cancellationToken))
+                var filesList = await fileDao.GetFilesAsync(trashId, null, default, false, Guid.Empty, string.Empty, false)
                     .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
-                    .Select(y => y.Id));
+                    .Select(y => y.Id)
+                    .ToListAsync(cancellationToken);
 
                 if (foldersList.Count == 0 && filesList.Count == 0)
                 {
@@ -162,7 +161,7 @@ static file class Queries
                     .Where(x => x.tenants.Status == TenantStatus.Active &&
                                 x.settings.Id == filesSettingsId &&
                                 Convert.ToBoolean(DbFunctionsExtension.JsonValue(nameof(x.settings.Data).ToLower(),
-                                    "AutomaticallyCleanUp.IsAutoCleanUp")) == true)
+                                    "AutomaticallyCleanUp.IsAutoCleanUp")))
                     .Select(r => new TenantUserSettings()
                     {
                         TenantId = r.tenants.Id,

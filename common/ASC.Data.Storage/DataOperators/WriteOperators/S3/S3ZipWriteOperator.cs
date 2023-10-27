@@ -69,11 +69,8 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        Stream fileStream = null;
-        await ActionInvoker.TryAsync(async () =>
-        {
-            fileStream = await store.GetReadStreamAsync(domain, path);
-        }, 5, error => throw error);
+        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);

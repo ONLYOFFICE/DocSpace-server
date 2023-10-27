@@ -28,7 +28,7 @@ namespace ASC.Web.Files.HttpHandlers;
 
 public class ThirdPartyAppHandler
 {
-    public static string HandlerPath = "~/ThirdPartyApp";
+    public static readonly string HandlerPath = "~/ThirdPartyApp";
 
     public ThirdPartyAppHandler(RequestDelegate next)
     {

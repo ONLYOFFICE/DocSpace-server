@@ -99,7 +99,7 @@ public class SettingsManager
     public async Task ClearCacheAsync<T>(int tenantId) where T : class, ISettings<T>
     {
         var settings = await LoadAsync<T>(tenantId, Guid.Empty);
-        var key = settings.ID.ToString() + tenantId + Guid.Empty;
+        var key = $"{settings.ID}{tenantId}{Guid.Empty}";
 
         _dbSettingsManagerCache.Remove(key);
     }
@@ -238,17 +238,10 @@ public class SettingsManager
                 return settings;
             }
 
-            await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
-            var result = await Queries.DataAsync(webstudioDbContext, tenantId, def.ID, userId);
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
 
-            if (result != null)
-            {
-                settings = Deserialize<T>(result);
-            }
-            else
-            {
-                settings = def;
-            }
+            settings = result != null ? Deserialize<T>(result) : def;
 
             _cache.Insert(key, settings, _expirationTimeout);
 
@@ -275,17 +268,10 @@ public class SettingsManager
                 return settings;
             }
 
-            using var webstudioDbContext = _dbContextFactory.CreateDbContext();
-            var result = Queries.Data(webstudioDbContext, tenantId, def.ID, userId);
+            using var context = _dbContextFactory.CreateDbContext();
+            var result = Queries.Data(context, tenantId, def.ID, userId);
 
-            if (result != null)
-            {
-                settings = Deserialize<T>(result);
-            }
-            else
-            {
-                settings = def;
-            }
+            settings = result != null ? Deserialize<T>(result) : def;
 
             _cache.Insert(key, settings, _expirationTimeout);
 
@@ -303,7 +289,7 @@ public class SettingsManager
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         try
         {
@@ -315,14 +301,14 @@ public class SettingsManager
 
             if (data.SequenceEqual(defaultData))
             {
-                var s = await Queries.WebStudioSettingsAsync(webstudioDbContext, tenantId, settings.ID, userId);
+                var s = await Queries.WebStudioSettingsAsync(context, tenantId, settings.ID, userId);
 
                 if (s != null)
                 {
-                    webstudioDbContext.WebstudioSettings.Remove(s);
+                    context.WebstudioSettings.Remove(s);
                 }
 
-                await webstudioDbContext.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             else
             {
@@ -334,9 +320,9 @@ public class SettingsManager
                     Data = data
                 };
 
-                await webstudioDbContext.AddOrUpdateAsync(q => q.WebstudioSettings, s);
+                await context.AddOrUpdateAsync(q => q.WebstudioSettings, s);
 
-                await webstudioDbContext.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
 
             _dbSettingsManagerCache.Remove(key);
@@ -357,7 +343,7 @@ public class SettingsManager
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        using var context = _dbContextFactory.CreateDbContext();
 
         try
         {
@@ -369,14 +355,14 @@ public class SettingsManager
 
             if (data.SequenceEqual(defaultData))
             {
-                var s = Queries.WebStudioSettings(webstudioDbContext, tenantId, settings.ID, userId);
+                var s = Queries.WebStudioSettings(context, tenantId, settings.ID, userId);
 
                 if (s != null)
                 {
-                    webstudioDbContext.WebstudioSettings.Remove(s);
+                    context.WebstudioSettings.Remove(s);
                 }
 
-                webstudioDbContext.SaveChanges();
+                context.SaveChanges();
             }
             else
             {
@@ -388,9 +374,9 @@ public class SettingsManager
                     Data = data
                 };
 
-                webstudioDbContext.AddOrUpdate(webstudioDbContext.WebstudioSettings, s);
+                context.AddOrUpdate(context.WebstudioSettings, s);
 
-                webstudioDbContext.SaveChanges();
+                context.SaveChanges();
             }
 
             _dbSettingsManagerCache.Remove(key);
@@ -449,17 +435,11 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
                 ctx.WebstudioSettings
-                    .Where(r => r.Id == id)
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.UserId == userId)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
 
     public static readonly Func<WebstudioDbContext, int, Guid, Guid, DbWebstudioSettings> WebStudioSettings =
         Microsoft.EntityFrameworkCore.EF.CompileQuery(
             (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
                 ctx.WebstudioSettings
-                    .Where(r => r.Id == id)
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.UserId == userId)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
 }

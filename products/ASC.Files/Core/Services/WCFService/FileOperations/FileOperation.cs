@@ -218,7 +218,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected internal List<TId> Files { get; private set; }
     protected ExternalShareData CurrentShareData { get; private set; }
 
-    protected IServiceProvider _serviceProvider;
+    protected readonly IServiceProvider _serviceProvider;
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
     {

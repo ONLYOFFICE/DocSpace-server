@@ -32,7 +32,7 @@ namespace ASC.Files.Thirdparty.Dropbox;
 internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, IDisposable
 {
     public bool IsOpened { get; private set; }
-    public long MaxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
+    public readonly long MaxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
 
     private DropboxClient _dropboxClient;
     private readonly TempStream _tempStream;
