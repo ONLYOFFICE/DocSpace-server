@@ -133,7 +133,7 @@ public class NovellLdapEntryExtension
     {
         if (ldapEntry == null)
         {
-            throw new ArgumentNullException("ldapEntry");
+            throw new ArgumentNullException(nameof(ldapEntry));
         }
 
         var novellLdapObject = new NovellLdapObject(_logger, this);

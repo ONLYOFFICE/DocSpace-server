@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Data;
 public class AbstractDao
 {
 
-    protected internal int TenantID
+    protected int TenantID
     {
         get
         {
@@ -83,7 +83,7 @@ public class AbstractDao
         return set.Where(r => r.TenantId == tenantId);
     }
 
-    protected internal IQueryable<DbFile> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
+    protected IQueryable<DbFile> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
     {
         return Query(filesDbContext.Files)
             .Where(where);

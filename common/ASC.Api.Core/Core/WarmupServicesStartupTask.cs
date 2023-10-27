@@ -39,7 +39,7 @@ public class WarmupServicesStartupTask : IStartupTask
         _provider = provider;
     }
 
-    public async Task ExecuteAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {      
         var processedFailed = 0;
         var processedSuccessed = 0;
@@ -84,7 +84,7 @@ public class WarmupServicesStartupTask : IStartupTask
     {
         return services
             .Where(descriptor => descriptor.ImplementationType != typeof(WarmupServicesStartupTask))
-            .Where(descriptor => descriptor.ServiceType.ContainsGenericParameters == false)
+            .Where(descriptor => !descriptor.ServiceType.ContainsGenericParameters)
             .Select(descriptor => descriptor.ServiceType)
             .Distinct();
     }

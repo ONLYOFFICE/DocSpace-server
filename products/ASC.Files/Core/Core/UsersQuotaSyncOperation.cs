@@ -126,16 +126,16 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         {
            await using var scope = _serviceScopeFactory.CreateAsyncScope();
 
-            var _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            var _userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var _authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
-            var _securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            var _webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            var webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            var users = await _userManager.GetUsersAsync();
-            var webItems = _webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
+            var users = await userManager.GetUsersAsync();
+            var webItems = webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
 
             foreach (var user in users)
             {
@@ -148,16 +148,14 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
                 Percentage += 1.0 * 100 / users.Length;
                 PublishChanges();
 
-                var account = await _authentication.GetAccountByIDAsync(TenantId, user.Id);
-                await _securityContext.AuthenticateMeAsync(account);
+                var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
+                await securityContext.AuthenticateMeAsync(account);
 
                 foreach (var item in webItems)
                 {
-                    IUserSpaceUsage manager;
-
                     if (item.ID == WebItemManager.DocumentsProductID)
                     {
-                        manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
+                        var manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
                         if (manager == null)
                         {
                             continue;

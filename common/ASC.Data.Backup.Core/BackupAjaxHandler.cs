@@ -266,7 +266,7 @@ public class BackupAjaxHandler
 
     private async Task DemandPermissionsBackupAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!_coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
         {
@@ -321,7 +321,7 @@ public class BackupAjaxHandler
 
     public async Task DemandPermissionsRestoreAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var quota = await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync());
         if (!SetupInfo.IsVisibleSettings("Restore") ||
@@ -341,7 +341,7 @@ public class BackupAjaxHandler
 
     public async Task DemandPermissionsAutoBackupAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup") ||
             (!_coreBaseSettings.Standalone && !(await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync())).AutoBackupRestore))
@@ -376,7 +376,7 @@ public class BackupAjaxHandler
 
     private async Task DemandPermissionsTransferAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.Migration))

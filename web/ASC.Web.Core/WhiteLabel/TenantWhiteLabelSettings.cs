@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using UnknownImageFormatException = SixLabors.ImageSharp.UnknownImageFormatException;
-
 namespace ASC.Web.Core.WhiteLabel;
 
 public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
@@ -344,43 +342,6 @@ public class TenantWhiteLabelSettingsHelper
 
     #region Restore default
 
-    public bool IsDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings)
-    {
-        var defaultSettings = _settingsManager.GetDefault<TenantWhiteLabelSettings>();
-
-        return tenantWhiteLabelSettings.LogoLightSmallExt == defaultSettings.LogoLightSmallExt &&
-                tenantWhiteLabelSettings.DarkLogoLightSmallExt == defaultSettings.DarkLogoLightSmallExt &&
-
-                tenantWhiteLabelSettings.LogoDarkExt == defaultSettings.LogoDarkExt &&
-                tenantWhiteLabelSettings.DarkLogoDarkExt == defaultSettings.DarkLogoDarkExt &&
-
-                tenantWhiteLabelSettings.LogoFaviconExt == defaultSettings.LogoFaviconExt &&
-                tenantWhiteLabelSettings.DarkLogoFaviconExt == defaultSettings.DarkLogoFaviconExt &&
-
-                tenantWhiteLabelSettings.LogoDocsEditorExt == defaultSettings.LogoDocsEditorExt &&
-                tenantWhiteLabelSettings.DarkLogoDocsEditorExt == defaultSettings.DarkLogoDocsEditorExt &&
-
-                tenantWhiteLabelSettings.LogoDocsEditorEmbedExt == defaultSettings.LogoDocsEditorEmbedExt &&
-                tenantWhiteLabelSettings.DarkLogoDocsEditorEmbedExt == defaultSettings.DarkLogoDocsEditorEmbedExt &&
-
-                tenantWhiteLabelSettings.LogoLeftMenuExt == defaultSettings.LogoLeftMenuExt &&
-                tenantWhiteLabelSettings.DarkLogoLeftMenuExt == defaultSettings.DarkLogoLeftMenuExt &&
-
-                tenantWhiteLabelSettings.LogoAboutPageExt == defaultSettings.LogoAboutPageExt &&
-                tenantWhiteLabelSettings.DarkLogoAboutPageExt == defaultSettings.DarkLogoAboutPageExt &&
-
-
-                tenantWhiteLabelSettings.IsDefaultLogoLightSmall == defaultSettings.IsDefaultLogoLightSmall &&
-                tenantWhiteLabelSettings.IsDefaultLogoDark == defaultSettings.IsDefaultLogoDark &&
-                tenantWhiteLabelSettings.IsDefaultLogoFavicon == defaultSettings.IsDefaultLogoFavicon &&
-                tenantWhiteLabelSettings.IsDefaultLogoDocsEditor == defaultSettings.IsDefaultLogoDocsEditor &&
-                tenantWhiteLabelSettings.IsDefaultLogoDocsEditorEmbed == defaultSettings.IsDefaultLogoDocsEditorEmbed &&
-                tenantWhiteLabelSettings.IsDefaultLogoLeftMenu == defaultSettings.IsDefaultLogoLeftMenu &&
-                tenantWhiteLabelSettings.IsDefaultLogoAboutPage == defaultSettings.IsDefaultLogoAboutPage &&
-
-                tenantWhiteLabelSettings.LogoText == defaultSettings.LogoText;
-    }
-
     public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
     {
         tenantWhiteLabelSettings.LogoLightSmallExt = null;
@@ -428,29 +389,11 @@ public class TenantWhiteLabelSettingsHelper
         await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
     }
 
-    public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type)
-    {
-        if (!tenantWhiteLabelSettings.GetIsDefault(type))
-        {
-            try
-            {
-                tenantWhiteLabelSettings.SetIsDefault(type, true);
-                var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
-                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type, false);
-                await DeleteLogoFromStore(tenantWhiteLabelSettings, store, type, true);
-            }
-            catch (Exception e)
-            {
-                _log.ErrorRestoreDefault(e);
-            }
-        }
-    }
-
     #endregion
 
     #region Set logo
 
-    public async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
+    private async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
     {
         var store = storage ?? await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
 
@@ -647,13 +590,11 @@ public class TenantWhiteLabelSettingsHelper
     {
         if (stream != null)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                return memoryStream.ToArray();
-            }
+            using var memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            return memoryStream.ToArray();
         }
-        return null;
+        return Array.Empty<byte>();
     }
 
     #endregion
@@ -781,7 +722,7 @@ public class TenantWhiteLabelSettingsHelper
 
     #endregion
 
-    public static string BuildLogoFileName(WhiteLabelLogoType type, string fileExt, bool dark)
+    private static string BuildLogoFileName(WhiteLabelLogoType type, string fileExt, bool dark)
     {
         if (CanBeDark(type))
         {
@@ -791,7 +732,7 @@ public class TenantWhiteLabelSettingsHelper
         return $"{type.ToString().ToLowerInvariant()}.{fileExt}";
     }
 
-    public static Size GetSize(WhiteLabelLogoType type)
+    private static Size GetSize(WhiteLabelLogoType type)
     {
         return type switch
         {
@@ -805,45 +746,6 @@ public class TenantWhiteLabelSettingsHelper
             WhiteLabelLogoType.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
             _ => new Size(0, 0),
         };
-    }
-
-    private static async Task ResizeLogo(string fileName, byte[] data, long maxFileSize, Size size, IDataStore store)
-    {
-        //Resize synchronously
-        if (data == null || data.Length <= 0)
-        {
-            throw new UnknownImageFormatException("data null");
-        }
-
-        if (maxFileSize != -1 && data.Length > maxFileSize)
-        {
-            throw new ImageWeightLimitException();
-        }
-
-        try
-        {
-            using var stream = new MemoryStream(data);
-            using var img = await Image.LoadAsync(stream);
-
-            if (size != img.Size)
-            {
-                using var img2 = CommonPhotoManager.DoThumbnail(img, size, false, true, false);
-                data = CommonPhotoManager.SaveToBytes(img2);
-            }
-            else
-            {
-                data = CommonPhotoManager.SaveToBytes(img);
-            }
-
-            //fileExt = CommonPhotoManager.GetImgFormatName(imgFormat);
-
-            using var stream2 = new MemoryStream(data);
-            await store.SaveAsync(fileName, stream2);
-        }
-        catch (ArgumentException error)
-        {
-            throw new UnknownImageFormatException(error.Message);
-        }
     }
 
     #region Save for Resource replacement

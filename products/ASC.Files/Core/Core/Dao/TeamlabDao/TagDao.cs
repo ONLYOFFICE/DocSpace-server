@@ -31,7 +31,7 @@ internal abstract class BaseTagDao<T> : AbstractDao
     private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly IMapper _mapper;
 
-    public BaseTagDao(
+    protected BaseTagDao(
         UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -125,38 +125,6 @@ internal abstract class BaseTagDao<T> : AbstractDao
         return new Dictionary<object, IEnumerable<Tag>>();
     }
 
-    public async Task<IDictionary<object, IEnumerable<Tag>>> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IAsyncEnumerable<FileEntry<T>> fileEntries)
-    {
-        var filesId = new HashSet<string>();
-        var foldersId = new HashSet<string>();
-
-        await foreach (var f in fileEntries)
-        {
-            var idObj = f.Id is int fid ? MappingIDAsync(fid) : await MappingIDAsync(f.Id);
-            var id = idObj.ToString();
-            if (f.FileEntryType == FileEntryType.File)
-            {
-                filesId.Add(id);
-            }
-            else if (f.FileEntryType == FileEntryType.Folder)
-            {
-                foldersId.Add(id);
-            }
-        }
-
-        if (filesId.Any() || foldersId.Any())
-        {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            var fromQuery = await FromQueryAsync(Queries.TagsBySubjectAsync(filesDbContext, TenantID, subject, tagType, filesId, foldersId)).ToListAsync();
-
-            return fromQuery
-                .GroupBy(r => r.EntryId)
-                .ToDictionary(r => r.Key, r => r.AsEnumerable());
-        }
-
-        return new Dictionary<object, IEnumerable<Tag>>();
-    }
-
     public IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries)
     {
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
@@ -182,17 +150,6 @@ internal abstract class BaseTagDao<T> : AbstractDao
         return InternalGetTagsAsync(names, tagType);
     }
 
-    private async IAsyncEnumerable<Tag> InternalGetTagsAsync(string[] names, TagType tagType)
-    {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = Queries.TagsByNamesAsync(filesDbContext, TenantID, tagType, names);
-
-        await foreach (var e in q)
-        {
-            yield return await ToTagAsync(e);
-        }
-    }
-
     public IAsyncEnumerable<Tag> GetTagsAsync(string name, TagType tagType)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
@@ -210,8 +167,18 @@ internal abstract class BaseTagDao<T> : AbstractDao
             yield return await ToTagAsync(e);
         }
     }
+    
+    private async IAsyncEnumerable<Tag> InternalGetTagsAsync(string[] names, TagType tagType)
+    {
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var q = Queries.TagsByNamesAsync(filesDbContext, TenantID, tagType, names);
 
-
+        await foreach (var e in q)
+        {
+            yield return await ToTagAsync(e);
+        }
+    }
+    
     public async IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0)
     {
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -419,7 +386,7 @@ internal abstract class BaseTagDao<T> : AbstractDao
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var cacheTagIdKey = string.Join("/", new[] { TenantID.ToString(), t.Owner.ToString(), t.Name, ((int)t.Type).ToString(CultureInfo.InvariantCulture) });
+        var cacheTagIdKey = string.Join("/", TenantID.ToString(), t.Owner.ToString(), t.Name, ((int)t.Type).ToString(CultureInfo.InvariantCulture));
 
         if (!cacheTagId.TryGetValue(cacheTagIdKey, out var id))
         {
@@ -452,7 +419,7 @@ internal abstract class BaseTagDao<T> : AbstractDao
             TagId = id,
             EntryId = (await MappingIDAsync(t.EntryId, true)).ToString(),
             EntryType = t.EntryType,
-            CreateBy = createdBy != default ? createdBy : _authContext.CurrentAccount.ID,
+            CreateBy = createdBy != Guid.Empty ? createdBy : _authContext.CurrentAccount.ID,
             CreateOn = createOn,
             Count = t.Count
         };
@@ -561,7 +528,7 @@ internal abstract class BaseTagDao<T> : AbstractDao
         var tagEntryType = tag.EntryType;
 
         await Queries.UpdateTagLinkAsync(filesDbContext, TenantID, tagId, tagEntryType, mappedId,
-            createdBy != default ? createdBy : _authContext.CurrentAccount.ID,
+            createdBy != Guid.Empty ? createdBy : _authContext.CurrentAccount.ID,
             createOn, tag.Count);
         }
 

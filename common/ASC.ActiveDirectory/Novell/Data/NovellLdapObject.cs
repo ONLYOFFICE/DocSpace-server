@@ -49,12 +49,7 @@ public class NovellLdapObject : LdapObject
 
     public void Init(LdapEntry ldapEntry, string ldapUniqueIdAttribute = null)
     {
-        if (ldapEntry == null)
-        {
-            throw new ArgumentNullException("ldapEntry");
-        }
-
-        _ldapEntry = ldapEntry;
+        _ldapEntry = ldapEntry ?? throw new ArgumentNullException(nameof(ldapEntry));
 
         if (string.IsNullOrEmpty(ldapUniqueIdAttribute))
         {

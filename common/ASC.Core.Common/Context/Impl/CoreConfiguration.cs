@@ -389,7 +389,7 @@ public class CoreConfiguration
         var serializedSection = await GetSettingAsync(sectionName, tenantId);
         if (serializedSection == null && tenantId != Tenant.DefaultTenant)
         {
-            serializedSection = await GetSettingAsync(sectionName, Tenant.DefaultTenant);
+            serializedSection = await GetSettingAsync(sectionName);
         }
 
         return serializedSection != null ? JsonConvert.DeserializeObject<T>(serializedSection) : null;

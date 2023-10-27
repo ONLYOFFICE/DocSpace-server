@@ -233,7 +233,10 @@ public class TariffService : ITariffService
                         updatedQuota += tenantQuota;
                     }
 
-                    await updatedQuota.CheckAsync(_serviceProvider);
+                    if (updatedQuota != null)
+                    {
+                        await updatedQuota.CheckAsync(_serviceProvider);
+                    }
 
                     if (!string.IsNullOrEmpty(email))
                     {
@@ -330,7 +333,7 @@ public class TariffService : ITariffService
         }
 
         var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId));
-        var newQuotas = quantity.Keys.Select(name => allQuotas.FirstOrDefault(q => q.Name == name));
+        var newQuotas = quantity.Keys.Select(name => allQuotas.FirstOrDefault(q => q.Name == name)).ToList();
 
         var tariff = await GetTariffAsync(tenantId);
 
@@ -354,7 +357,7 @@ public class TariffService : ITariffService
         }
 
         // add new quotas
-        var addedQuotas = newQuotas.Where(q => !tariff.Quotas.Any(t => t.Id == q.TenantId));
+        var addedQuotas = newQuotas.Where(q => !tariff.Quotas.Exists(t => t.Id == q.TenantId));
         foreach (var addedQuota in addedQuotas)
         {
             var qty = quantity[addedQuota.Name];
@@ -365,7 +368,10 @@ public class TariffService : ITariffService
             updatedQuota += quota;
         }
 
-        await updatedQuota.CheckAsync(_serviceProvider);
+        if (updatedQuota != null)
+        {
+            await updatedQuota.CheckAsync(_serviceProvider);
+        }
 
         var productIds = newQuotas.Select(q => q.ProductId);
 
@@ -401,17 +407,14 @@ public class TariffService : ITariffService
 
         await SaveBillingInfoAsync(tenantId, tariff);
 
-        if (quotas.Any(q => q.Trial))
+        if (quotas.Exists(q => q.Trial) && tenantId != Tenant.DefaultTenant)
         {
             // reset trial date
-            if (tenantId != Tenant.DefaultTenant)
+            var tenant = await _tenantService.GetTenantAsync(tenantId);
+            if (tenant != null)
             {
-                var tenant = await _tenantService.GetTenantAsync(tenantId);
-                if (tenant != null)
-                {
-                    tenant.VersionChanged = DateTime.UtcNow;
-                    await _tenantService.SaveTenantAsync(_coreSettings, tenant);
-                }
+                tenant.VersionChanged = DateTime.UtcNow;
+                await _tenantService.SaveTenantAsync(_coreSettings, tenant);
             }
         }
     }
@@ -483,7 +486,7 @@ public class TariffService : ITariffService
         if (_billingClient.Configured)
         {
             var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible).ToList();
-            newQuotas = quantity.Select(item => allQuotas.FirstOrDefault(q => q.Name == item.Key)).ToList();
+            newQuotas = quantity.Select(item => allQuotas.Find(q => q.Name == item.Key)).ToList();
 
             TenantQuota updatedQuota = null;
             foreach (var addedQuota in newQuotas)
@@ -496,7 +499,10 @@ public class TariffService : ITariffService
                 updatedQuota += quota;
             }
 
-            await updatedQuota.CheckAsync(_serviceProvider);
+            if (updatedQuota != null)
+            {
+                await updatedQuota.CheckAsync(_serviceProvider);
+            }
         }
 
         var hasQuantity = quantity != null && quantity.Any();
@@ -585,30 +591,22 @@ public class TariffService : ITariffService
     {
         var key = "accountlink_" + tenant;
         var url = _cache.Get<string>(key);
-        if (url == null)
+        if (url == null && _billingClient.Configured)
         {
-            if (_billingClient.Configured)
+            try
             {
-                try
-                {
-                    url = _billingClient.GetAccountLink(await _coreSettings.GetKeyAsync(tenant), backUrl);
-                    _cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
-                }
-                catch (Exception error)
-                {
-                    LogError(error);
-                }
+                url = _billingClient.GetAccountLink(await _coreSettings.GetKeyAsync(tenant), backUrl);
+                _cache.Insert(key, url, DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)));
+            }
+            catch (Exception error)
+            {
+                LogError(error);
             }
         }
-        if (!string.IsNullOrEmpty(url))
-        {
-            return new Uri(url);
-        }
-
-        return null;
+        
+        return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
-
-
+    
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
         await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -795,7 +793,7 @@ public class TariffService : ITariffService
 
                 var defaultQuota = await _quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
                 defaultQuota.Name = "overdue";
-                defaultQuota.Features = updatedQuota.Features;
+                defaultQuota.Features = updatedQuota?.Features;
 
                 await _quotaService.SaveTenantQuotaAsync(defaultQuota);
 

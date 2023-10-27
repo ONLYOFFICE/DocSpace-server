@@ -219,7 +219,7 @@ public class SmtpSettingsController : ControllerBase
 
     private async Task CheckSmtpPermissionsAsync()
     {            
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");

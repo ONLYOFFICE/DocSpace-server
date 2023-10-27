@@ -119,12 +119,9 @@ public partial class TextileFormatter
 
     internal void ChangeState(FormatterState formatterState)
     {
-        if (CurrentState != null && CurrentState.GetType() == formatterState.GetType())
+        if (CurrentState != null && CurrentState.GetType() == formatterState.GetType() && !CurrentState.ShouldNestState(formatterState))
         {
-            if (!CurrentState.ShouldNestState(formatterState))
-            {
-                return;
-            }
+            return;
         }
         PushState(formatterState);
     }

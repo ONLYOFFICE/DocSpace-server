@@ -105,7 +105,7 @@ public class CustomNavigationController : BaseSettingsController
     [HttpPost("customnavigation/create")]
     public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await _settingsManager.LoadAsync<CustomNavigationSettings>();
 
@@ -167,7 +167,7 @@ public class CustomNavigationController : BaseSettingsController
     [HttpDelete("customnavigation/delete/{id}")]
     public async Task DeleteCustomNavigationItem(Guid id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await _settingsManager.LoadAsync<CustomNavigationSettings>();
 

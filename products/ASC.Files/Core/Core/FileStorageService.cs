@@ -2802,7 +2802,7 @@ public class FileStorageService //: IFileStorageService
                 };
             }
 
-            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, false, false);
+            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, false);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
         }
 

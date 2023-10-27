@@ -58,7 +58,6 @@ public class TransferProgressItem : BaseBackupProgressItem
     private TenantManager _tenantManager;
     private readonly ILogger<TransferProgressItem> _logger;
     private readonly NotifyHelper _notifyHelper;
-    private TransferPortalTask _transferPortalTask;
     private readonly IConfiguration _configuration;
 
     public TransferProgressItem(
@@ -104,11 +103,10 @@ public class TransferProgressItem : BaseBackupProgressItem
         {
             await using var scope = _serviceScopeProvider.CreateAsyncScope();
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-            _transferPortalTask = scope.ServiceProvider.GetService<TransferPortalTask>();
+            var transferProgressItem = scope.ServiceProvider.GetService<TransferPortalTask>();
 
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
-            var transferProgressItem = _transferPortalTask;
             transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
             transferProgressItem.ProgressChanged += (sender, args) =>
             {

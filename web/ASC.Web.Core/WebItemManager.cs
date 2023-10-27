@@ -101,7 +101,6 @@ public class WebItemManager
     }
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _configuration;
 
 
     public IWebItem this[Guid id]
@@ -116,9 +115,8 @@ public class WebItemManager
     public WebItemManager(IServiceProvider serviceProvider, IConfiguration configuration, ILoggerProvider options)
     {
         _serviceProvider = serviceProvider;
-        _configuration = configuration;
         _log = options.CreateLogger("ASC.Web");
-        _disableItem = (_configuration["web:disabled-items"] ?? "").Split(",").ToList();
+        _disableItem = (configuration["web:disabled-items"] ?? "").Split(",").ToList();
         _lazyItems = new Lazy<ConcurrentDictionary<Guid, IWebItem>>(LoadItems, LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
@@ -160,13 +158,10 @@ public class WebItemManager
                 product.Init();
             }
 
-            if (webitem is IModule module)
+            if (webitem is IModule { Context.SearchHandler: not null })
             {
-                if (module.Context != null && module.Context.SearchHandler != null)
-                {
-                    //TODO
-                    //SearchHandlerManager.Registry(module.Context.SearchHandler);
-                }
+                //TODO
+                //SearchHandlerManager.Registry(module.Context.SearchHandler);
             }
 
             result.TryAdd(webitem.ID, webitem);

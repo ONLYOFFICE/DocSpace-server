@@ -195,7 +195,7 @@ public class SecurityController : BaseSettingsController
     [HttpPut("security/password")]
     public async Task<PasswordSettings> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var userPasswordSettings = await _settingsManager.LoadAsync<PasswordSettings>();
 
@@ -226,7 +226,7 @@ public class SecurityController : BaseSettingsController
     [HttpPut("security")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await _webItemSecurity.SetSecurityAsync(inDto.Id, inDto.Enabled, inDto.Subjects?.ToArray());
         var securityInfo = await GetWebItemSecurityInfo(new List<string> { inDto.Id }).ToListAsync();
@@ -278,7 +278,7 @@ public class SecurityController : BaseSettingsController
     [HttpPut("security/access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemSecurityRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var itemList = new ItemDictionary<string, bool>();
 
@@ -377,7 +377,7 @@ public class SecurityController : BaseSettingsController
     [HttpPut("security/administrator")]
     public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var isStartup = !_coreBaseSettings.CustomMode && _tenantExtra.Saas &&
                         (await _tenantManager.GetCurrentTenantQuotaAsync()).Free;
@@ -424,7 +424,7 @@ public class SecurityController : BaseSettingsController
     [HttpPut("security/loginSettings")]
     public async Task<LoginSettingsDto> UpdateLoginSettingsAsync(LoginSettingsRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var attemptsCount = inDto.AttemptCount;
         var checkPeriod = inDto.CheckPeriod;
@@ -468,7 +468,7 @@ public class SecurityController : BaseSettingsController
     [HttpGet("security/loginSettings")]
     public async Task<LoginSettingsDto> GetLoginSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await _settingsManager.LoadAsync<LoginSettings>();
 

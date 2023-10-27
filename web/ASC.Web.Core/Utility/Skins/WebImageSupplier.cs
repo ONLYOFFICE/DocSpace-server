@@ -32,18 +32,12 @@ public class WebImageSupplier
     private readonly string _folderName;
     private readonly WebItemManager _webItemManager;
     private readonly WebPath _webPath;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public WebImageSupplier(WebItemManager webItemManager, WebPath webPath, IConfiguration configuration)
     {
         _webItemManager = webItemManager;
         _webPath = webPath;
         _folderName = configuration["web:images"];
-    }
-    public WebImageSupplier(WebItemManager webItemManager, WebPath webPath, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
-        : this(webItemManager, webPath, configuration)
-    {
-        _httpContextAccessor = httpContextAccessor;
     }
 
     public string GetAbsoluteWebPath(string imgFileName)

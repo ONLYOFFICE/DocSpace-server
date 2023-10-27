@@ -70,7 +70,7 @@ public class WebhooksController : BaseSettingsController
     [HttpGet("webhook")]
     public async IAsyncEnumerable<WebhooksConfigWithStatusDto> GetTenantWebhooks()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await foreach (var webhook in _webhookDbWorker.GetTenantWebhooksWithStatus())
         {
@@ -92,7 +92,7 @@ public class WebhooksController : BaseSettingsController
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.SecretKey);
@@ -117,7 +117,7 @@ public class WebhooksController : BaseSettingsController
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         ArgumentNullException.ThrowIfNull(inDto.Uri);
         ArgumentNullException.ThrowIfNull(inDto.Name);
@@ -141,7 +141,7 @@ public class WebhooksController : BaseSettingsController
     [HttpDelete("webhook/{id}")]
     public async Task<WebhooksConfigDto> RemoveWebhook(int id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var webhook = await _webhookDbWorker.RemoveWebhookConfigAsync(id);
 
@@ -169,7 +169,7 @@ public class WebhooksController : BaseSettingsController
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetJournal(DateTime? deliveryFrom, DateTime? deliveryTo, string hookUri, int? webhookId, int? configId, int? eventId, WebhookGroupStatus? groupStatus)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         _context.SetTotalCount(await _webhookDbWorker.GetTotalByQuery(deliveryFrom, deliveryTo, hookUri, webhookId, configId, eventId, groupStatus));
 
@@ -197,7 +197,7 @@ public class WebhooksController : BaseSettingsController
     [HttpPut("webhook/{id}/retry")]
     public async Task<WebhooksLogDto> RetryWebhook(int id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (id == 0)
         {
@@ -231,7 +231,7 @@ public class WebhooksController : BaseSettingsController
     [HttpPut("webhook/retry")]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         foreach (var id in inDto.Ids)
         {

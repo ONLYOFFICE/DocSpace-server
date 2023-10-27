@@ -70,7 +70,7 @@ public class DnsSettings
                 throw new Exception(Resource.ErrorNotAllowedOption);
             }
 
-            await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+            await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
             var tenant = await _tenantManager.GetCurrentTenantAsync();
 

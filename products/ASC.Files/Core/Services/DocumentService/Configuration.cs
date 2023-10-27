@@ -780,7 +780,7 @@ public class CustomizationConfig<T>
                 return null;
             }
 
-            var link = _commonLinkUtility.GetFeedbackAndSupportLink(_settingsManager, true);
+            var link = _commonLinkUtility.GetFeedbackAndSupportLink(_settingsManager);
 
             if (string.IsNullOrEmpty(link))
             {

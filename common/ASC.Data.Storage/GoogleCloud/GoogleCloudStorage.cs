@@ -627,7 +627,7 @@ public class GoogleCloudStorage : BaseStorage
 
         await foreach (var obj in objects)
         {
-            var objInfo = await storage.GetObjectAsync(_bucket, MakePath(domain, path), null);
+            var objInfo = await storage.GetObjectAsync(_bucket, MakePath(domain, path));
 
             var privateExpireKey = objInfo.Metadata["private-expire"];
 

@@ -51,7 +51,7 @@ public class TenantsModuleSpecifics : ModuleSpecificsBase
                 UserIDColumns = new[] { "id" }
             },
             new TableInfo("core_group", "tenant", "id", IdType.Guid),
-            new TableInfo("tenants_iprestrictions", "tenant", "id", IdType.Autoincrement)
+            new TableInfo("tenants_iprestrictions", "tenant", "id")
         };
 
     private readonly RelationInfo[] _tableRelations = new[]

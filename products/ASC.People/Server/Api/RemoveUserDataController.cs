@@ -28,8 +28,6 @@ namespace ASC.People.Api;
 
 public class RemoveUserDataController : ApiControllerBase
 {
-    private Tenant Tenant => _apiContext.Tenant;
-
     private readonly PermissionContext _permissionContext;
     private readonly UserManager _userManager;
     private readonly QueueWorkerRemove _queueWorkerRemove;
@@ -37,7 +35,7 @@ public class RemoveUserDataController : ApiControllerBase
     private readonly StudioNotifyService _studioNotifyService;
     private readonly MessageService _messageService;
     private readonly AuthContext _authContext;
-    private readonly ApiContext _apiContext;
+    private readonly TenantManager _tenantManager;
 
     public RemoveUserDataController(
         PermissionContext permissionContext,
@@ -47,7 +45,7 @@ public class RemoveUserDataController : ApiControllerBase
         StudioNotifyService studioNotifyService,
         MessageService messageService,
         AuthContext authContext,
-        ApiContext apiContext)
+        TenantManager tenantManager)
     {
         _permissionContext = permissionContext;
         _userManager = userManager;
@@ -56,7 +54,7 @@ public class RemoveUserDataController : ApiControllerBase
         _studioNotifyService = studioNotifyService;
         _messageService = messageService;
         _authContext = authContext;
-        _apiContext = apiContext;
+        _tenantManager = tenantManager;
     }
 
     /// <summary>
@@ -73,7 +71,8 @@ public class RemoveUserDataController : ApiControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var progressItem = _queueWorkerRemove.GetProgressItemStatus(Tenant.Id, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var progressItem = _queueWorkerRemove.GetProgressItemStatus(tenant.Id, userId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -92,8 +91,9 @@ public class RemoveUserDataController : ApiControllerBase
     public async Task<object> SendInstructionsToDeleteAsync()
     {
         var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-
-        if (user.IsLDAP() || user.IsOwner(Tenant))
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        if (user.IsLDAP() || user.IsOwner(tenant))
         {
             throw new SecurityException();
         }
@@ -125,12 +125,13 @@ public class RemoveUserDataController : ApiControllerBase
             throw new ArgumentException("User with id = " + inDto.UserId + " not found");
         }
 
-        if (user.IsOwner(Tenant) || user.IsMe(_authContext) || user.Status != EmployeeStatus.Terminated)
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) || user.IsMe(_authContext) || user.Status != EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
         }
 
-        var progressItem = _queueWorkerRemove.Start(Tenant.Id, user, _securityContext.CurrentAccount.ID, true, true);
+        var progressItem = _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, true, true);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -149,6 +150,7 @@ public class RemoveUserDataController : ApiControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        _queueWorkerRemove.Terminate(Tenant.Id, inDto.UserId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        _queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
     }
 }

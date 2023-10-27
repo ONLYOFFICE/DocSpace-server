@@ -93,7 +93,8 @@ public class SettingsManager
 
     public async Task ClearCacheAsync<T>() where T : class, ISettings<T>
     {
-        await ClearCacheAsync<T>(TenantID);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await ClearCacheAsync<T>(tenantId);
     }
 
     public async Task ClearCacheAsync<T>(int tenantId) where T : class, ISettings<T>
@@ -127,17 +128,20 @@ public class SettingsManager
     
     public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(TenantID, Guid.Empty);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return await LoadAsync<T>(tenantId, Guid.Empty);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(TenantID, userId);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return await LoadAsync<T>(tenantId, userId);
     }
 
     public async Task<T> LoadAsync<T>(UserInfo user) where T : class, ISettings<T>
     {
-        return await LoadAsync<T>(TenantID, user.Id);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return await LoadAsync<T>(tenantId, user.Id);
     }
 
     public async Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
@@ -167,18 +171,21 @@ public class SettingsManager
 
     public async Task<bool> SaveAsync<T>(T data) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, TenantID, Guid.Empty);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return await SaveAsync(data, tenantId, Guid.Empty);
     }
     
 
     public async Task<bool> SaveAsync<T>(T data, Guid userId) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, TenantID, userId);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return await SaveAsync(data, tenantId, userId);
     }
 
     public async Task<bool> SaveAsync<T>(T data, UserInfo user) where T : class, ISettings<T>
     {
-        return await SaveAsync(data, TenantID, user.Id);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        return await SaveAsync(data, tenantId, user.Id);
     }
 
     public async Task<bool> SaveAsync<T>(T data, int tenantId) where T : class, ISettings<T>

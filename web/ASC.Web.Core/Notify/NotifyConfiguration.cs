@@ -345,7 +345,7 @@ public class NotifyTransferRequest : INotifyEngineAction
 
         try
         {
-            var attachment = await _tenantLogoManager.GetMailLogoAsAttacmentAsync();
+            var attachment = await _tenantLogoManager.GetMailLogoAsAttachmentAsync();
 
             if (attachment != null)
             {

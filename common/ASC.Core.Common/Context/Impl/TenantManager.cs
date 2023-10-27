@@ -107,11 +107,6 @@ public class TenantManager
         return await TenantService.GetTenantAsync(tenantId);
     }
 
-    public Tenant GetTenant(int tenantId)
-    {
-        return TenantService.GetTenant(tenantId);
-    }
-
     public async Task<Tenant> GetTenantAsync(string domain)
     {
         if (string.IsNullOrEmpty(domain))
@@ -214,16 +209,6 @@ public class TenantManager
         await TenantService.RemoveTenantAsync(tenantId, auto);
     }
 
-    public async Task<Tenant> GetCurrentTenantAsync(HttpContext context)
-    {
-        return await GetCurrentTenantAsync(true, context);
-    }
-
-    public Tenant GetCurrentTenant(HttpContext context)
-    {
-        return GetCurrentTenant(true, context);
-    }
-
     public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
     {
         if (_currentTenant != null)
@@ -236,13 +221,13 @@ public class TenantManager
         if (context != null)
         {
             tenant = context.Items[CurrentTenant] as Tenant;
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 tenant = await GetTenantAsync(context.Request.Url().Host);
                 context.Items[CurrentTenant] = tenant;
             }
 
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
 
@@ -266,7 +251,7 @@ public class TenantManager
         return tenant;
     }
 
-    public Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
+    private Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
     {
         if (_currentTenant != null)
         {
@@ -318,17 +303,12 @@ public class TenantManager
         return (await GetCurrentTenantAsync(true)).Id;
     }
 
-    public Tenant GetCurrentTenant()
-    {
-        return GetCurrentTenant(true);
-    }
-
     public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
     {
         return await GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
-
-    public Tenant GetCurrentTenant(bool throwIfNotFound)
+    
+    public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         return GetCurrentTenant(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }

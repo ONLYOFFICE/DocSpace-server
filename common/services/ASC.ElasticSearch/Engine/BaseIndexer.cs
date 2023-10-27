@@ -607,7 +607,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 }
                 break;
             default:
-                throw new ArgumentOutOfRangeException("action", action, null);
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
     }
 

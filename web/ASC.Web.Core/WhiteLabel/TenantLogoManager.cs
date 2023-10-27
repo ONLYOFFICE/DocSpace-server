@@ -52,8 +52,7 @@ public class TenantLogoManager
         _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
         _tenantManager = tenantManager;
         _authContext = authContext;
-        _configuration = configuration;
-        var hideSettings = (_configuration["web:hide-settings"] ?? "").Split(new[] { ',', ';', ' ' });
+        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(new[] { ',', ';', ' ' });
         WhiteLabelEnabled = !hideSettings.Contains("WhiteLabel", StringComparer.CurrentCultureIgnoreCase);
         _distributedCache = distributedCache;
     }
@@ -142,12 +141,9 @@ public class TenantLogoManager
         if (request != null)
         {
             var cookie = request.Cookies["is_retina"];
-            if (cookie != null && !string.IsNullOrEmpty(cookie))
+            if (cookie != null && !string.IsNullOrEmpty(cookie) && bool.TryParse(cookie, out var result))
             {
-                if (bool.TryParse(cookie, out var result))
-                {
-                    return result;
-                }
+                return result;
             }
         }
         return !_authContext.IsAuthenticated;
@@ -163,12 +159,11 @@ public class TenantLogoManager
     private readonly TenantInfoSettingsHelper _tenantInfoSettingsHelper;
     private readonly TenantManager _tenantManager;
     private readonly AuthContext _authContext;
-    private readonly IConfiguration _configuration;
 
     /// <summary>
     /// Get logo stream or null in case of default logo
     /// </summary>
-    public async Task<Stream> GetWhitelabelMailLogoAsync()
+    private async Task<Stream> GetWhitelabelMailLogoAsync()
     {
         if (WhiteLabelEnabled)
         {
@@ -181,7 +176,7 @@ public class TenantLogoManager
         /***/
     }
 
-    public async Task<NotifyMessageAttachment> GetMailLogoAsAttacmentAsync()
+    public async Task<NotifyMessageAttachment> GetMailLogoAsAttachmentAsync()
     {
         var logoData = await GetMailLogoDataFromCacheAsync();
 
@@ -249,8 +244,13 @@ public class TenantLogoManager
     {
         var myAssembly = Assembly.GetExecutingAssembly();
         await using var stream = myAssembly.GetManifestResourceStream("ASC.Web.Core.PublicResources.logo.png");
-        using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        return memoryStream.ToArray();
+        if (stream != null)
+        {
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
+
+        return null;
     }
 }

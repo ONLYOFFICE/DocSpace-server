@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,33 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Api.Core.Extensions;
+using Action = ASC.Common.Security.Authorizing.Action;
 
-public static class WebHostExtensions
+namespace ASC.Web.Studio.Core;
+
+public static class SecurityConstants
 {
-    public static IWebHostBuilder ConfigureDefaultKestrel(this IWebHostBuilder webHostBuilder, Action<WebHostBuilderContext, KestrelServerOptions> configureDelegate = null)
-    {
-        webHostBuilder.ConfigureKestrel((hostingContext, serverOptions) =>
-        {
-            var kestrelConfig = hostingContext.Configuration.GetSection("Kestrel");
-
-            if (!kestrelConfig.Exists())
-            {
-                return;
-            }
-
-            var unixSocket = kestrelConfig.GetValue<string>("ListenUnixSocket");
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !string.IsNullOrWhiteSpace(unixSocket))
-            {
-                unixSocket = string.Format(unixSocket, hostingContext.HostingEnvironment.ApplicationName.Replace("ASC.", "").Replace(".", ""));
-
-                serverOptions.ListenUnixSocket(unixSocket);
-            }
-
-            configureDelegate?.Invoke(hostingContext, serverOptions);
-        });
-
-        return webHostBuilder;
-    }
+    public static readonly Action EditPortalSettings = new(new Guid("{60DB830E-80A8-4997-8B83-3D6EA525749B}"), "Edit Portal Settings");
 }

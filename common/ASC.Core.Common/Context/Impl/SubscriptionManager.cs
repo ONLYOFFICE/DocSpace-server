@@ -45,7 +45,7 @@ public class SubscriptionManager
 
     public SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
     {
-        _service = service ?? throw new ArgumentNullException("subscriptionManager");
+        _service = service ?? throw new ArgumentNullException(nameof(service));
         _tenantManager = tenantManager;
         _cache = cache;
     }
@@ -126,7 +126,7 @@ public class SubscriptionManager
     {
         IEnumerable<SubscriptionMethod> methods;
 
-        if (Groups.Any(r => r.ToString() == recipientID))
+        if (Groups.Exists(r => r.ToString() == recipientID))
         {
             methods = await GetDefaultSubscriptionMethodsFromCacheAsync(sourceID, actionID, recipientID);
         }

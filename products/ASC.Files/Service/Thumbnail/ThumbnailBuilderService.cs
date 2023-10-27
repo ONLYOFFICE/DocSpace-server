@@ -52,8 +52,6 @@ public class ThumbnailBuilderService : BackgroundService
 
         stoppingToken.Register(() => _logger.InformationThumbnailWorkerStopping());
 
-        new List<FileData<int>>();
-
         _logger.TraceProcedureStart();
 
         var readers = new List<ChannelReader<FileData<int>>>() {

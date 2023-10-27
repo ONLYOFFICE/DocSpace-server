@@ -106,7 +106,7 @@ internal class ThirdPartyTagDao<TFile, TFolder, TItem> : IThirdPartyTagDao
     }
 }
 
-file class TagLinkTagPair
+sealed file class TagLinkTagPair
 {
     public DbFilesTag Tag { get; set; }
     public DbFilesTagLink TagLink { get; set; }

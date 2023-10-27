@@ -499,7 +499,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     internal string GetFeature(string name)
     {
-        return _featuresList.FirstOrDefault(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
+        return _featuresList.Find(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
     }
 
     internal void ReplaceFeature<T>(string name, T value, T defaultValue)

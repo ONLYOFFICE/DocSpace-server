@@ -42,7 +42,7 @@ public class LogoUploader
         var result = new FileUploadResult();
         try
         {
-            await permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
             var width = Convert.ToInt32(context.Request.Form["width"]);
             var height = Convert.ToInt32(context.Request.Form["height"]);

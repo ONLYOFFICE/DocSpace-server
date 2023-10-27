@@ -181,7 +181,31 @@ public class UserManager
 
         return await users.ToArrayAsync();
     }
+    
+    public async Task<UserInfo> GetUsersAsync(Guid id)
+    {
+        if (IsSystemUser(id))
+        {
+            return SystemUsers[id];
+        }
 
+        var u = await _userService.GetUserAsync(Tenant.Id, id);
+
+        return u != null && !u.Removed ? u : Constants.LostUser;
+    }
+    
+    public async Task<UserInfo> GetUserAsync(Guid id, Expression<Func<User, UserInfo>> exp)
+    {
+        if (IsSystemUser(id))
+        {
+            return SystemUsers[id];
+        }
+
+        var u = await _userService.GetUserAsync(Tenant.Id, id, exp);
+
+        return u != null && !u.Removed ? u : Constants.LostUser;
+    }
+    
     public Task<int> GetUsersCountAsync(
         bool isDocSpaceAdmin,
         EmployeeStatus? employeeStatus,
@@ -212,6 +236,18 @@ public class UserManager
         return _userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, sortBy, sortOrderAsc, limit, offset);
     }
 
+    public UserInfo GetUsers(Guid id)
+    {
+        if (IsSystemUser(id))
+        {
+            return SystemUsers[id];
+        }
+
+        var u = _userService.GetUser(Tenant.Id, id);
+
+        return u != null && !u.Removed ? u : Constants.LostUser;
+    }
+    
     public async Task<string[]> GetUserNamesAsync(EmployeeStatus status)
     {
         return (await GetUsersAsync(status))
@@ -237,47 +273,6 @@ public class UserManager
     {
         return (await GetUsersInternalAsync())
             .FirstOrDefault(u => !string.IsNullOrEmpty(u.SsoNameId) && string.Equals(u.SsoNameId, nameId, StringComparison.CurrentCultureIgnoreCase)) ?? Constants.LostUser;
-    }
-    public async Task<bool> IsUserNameExistsAsync(string username)
-    {
-        return (await GetUserNamesAsync(EmployeeStatus.All))
-            .Contains(username, StringComparer.CurrentCultureIgnoreCase);
-    }
-
-    public async Task<UserInfo> GetUsersAsync(Guid id)
-    {
-        if (IsSystemUser(id))
-        {
-            return SystemUsers[id];
-        }
-
-        var u = await _userService.GetUserAsync(Tenant.Id, id);
-
-        return u != null && !u.Removed ? u : Constants.LostUser;
-    }
-
-    public UserInfo GetUsers(Guid id)
-    {
-        if (IsSystemUser(id))
-        {
-            return SystemUsers[id];
-        }
-
-        var u = _userService.GetUser(Tenant.Id, id);
-
-        return u != null && !u.Removed ? u : Constants.LostUser;
-    }
-
-    public async Task<UserInfo> GetUserAsync(Guid id, Expression<Func<User, UserInfo>> exp)
-    {
-        if (IsSystemUser(id))
-        {
-            return SystemUsers[id];
-        }
-
-        var u = await _userService.GetUserAsync(Tenant.Id, id, exp);
-
-        return u != null && !u.Removed ? u : Constants.LostUser;
     }
 
     public async Task<UserInfo> GetUsersByPasswordHashAsync(int tenant, string login, string passwordHash)
@@ -460,12 +455,9 @@ public class UserManager
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id, type), Constants.Action_AddRemoveUser);
 
-        if (!_coreBaseSettings.Personal)
+        if (!_coreBaseSettings.Personal && _constants.MaxEveryoneCount <= (await GetUsersByGroupAsync(Constants.GroupEveryone.ID)).Length)
         {
-            if (_constants.MaxEveryoneCount <= (await GetUsersByGroupAsync(Constants.GroupEveryone.ID)).Length)
-            {
-                throw new TenantQuotaException("Maximum number of users exceeded");
-            }
+            throw new TenantQuotaException("Maximum number of users exceeded");
         }
 
         var oldUserData = await _userService.GetUserByUserName(await _tenantManager.GetCurrentTenantIdAsync(), u.UserName);

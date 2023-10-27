@@ -210,7 +210,7 @@ public class NotifyHelper
             args.Add(new TagValue(CommonTags.VirtualRootPath, url));
             args.Add(new TagValue(CommonTags.ProfileUrl, url + _commonLinkUtility.GetMyStaff()));
 
-            var attachment = await _tenantLogoManager.GetMailLogoAsAttacmentAsync();
+            var attachment = await _tenantLogoManager.GetMailLogoAsAttachmentAsync();
 
             if (attachment != null)
             {

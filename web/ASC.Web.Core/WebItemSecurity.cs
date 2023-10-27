@@ -243,19 +243,20 @@ public class WebItemSecurity
     {
         var info = (await GetSecurityAsync(id)).ToList();
         var module = _webItemManager.GetParentItemID(new Guid(id)) != Guid.Empty;
-
-        var infoAsync = info.ToAsyncEnumerable();
+        
         return new WebItemSecurityInfo
         {
             WebItemId = id,
 
-            Enabled = info.Count == 0 || (!module && info.Any(i => i.Item2)) || (module && info.All(i => i.Item2)),
+            Enabled = info.Count == 0 || (!module && info.Exists(i => i.Item2)) || (module && info.TrueForAll(i => i.Item2)),
 
-            Users = await infoAsync
+            Users = await info
+                           .ToAsyncEnumerable()
                            .SelectAwait(async i => await _userManager.GetUsersAsync(i.Item1))
                            .Where(u => u.Id != Constants.LostUser.Id).ToListAsync(),
 
-            Groups = await infoAsync
+            Groups = await info
+                           .ToAsyncEnumerable()
                            .SelectAwait(async i => await _userManager.GetGroupInfoAsync(i.Item1))
                            .Where(g => g.ID != Constants.LostGroupInfo.ID && g.CategoryID != Constants.SysGroupCategoryId).ToListAsync()
         };
@@ -375,7 +376,7 @@ public class WebItemSecurity
                 }.Select(action => new AzRecord(userid, action, AceType.Allow));
     }
 
-    private class WebItemSecurityObject : ISecurityObject
+    private sealed class WebItemSecurityObject : ISecurityObject
     {
         public Guid WebItemId { get; private set; }
         private readonly WebItemManager _webItemManager;
@@ -415,7 +416,7 @@ public class WebItemSecurity
             {
                 var w = webItemManager
                     .GetItemsAll()
-                    .FirstOrDefault(i => id.Equals(i.GetSysName(), StringComparison.InvariantCultureIgnoreCase));
+                    .Find(i => id.Equals(i.GetSysName(), StringComparison.InvariantCultureIgnoreCase));
                 if (w != null)
                 {
                     itemId = w.ID;

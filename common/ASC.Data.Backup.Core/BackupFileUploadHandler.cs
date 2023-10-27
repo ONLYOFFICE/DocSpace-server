@@ -43,7 +43,7 @@ public class BackupFileUploadHandler
         BackupFileUploadResult result = null;
         try
         {
-            if (!await permissionContext.CheckPermissionsAsync(SecutiryConstants.EditPortalSettings))
+            if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
             {
                 throw new ArgumentException("Access denied.");
             }

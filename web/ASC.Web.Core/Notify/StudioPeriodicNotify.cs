@@ -722,21 +722,4 @@ public class StudioPeriodicNotify
 
         return !isSubscribe;
     }
-
-    private CultureInfo GetCulture(UserInfo user)
-    {
-        CultureInfo culture = null;
-
-        if (!string.IsNullOrEmpty(user.CultureName))
-        {
-            culture = user.GetCulture();
-        }
-
-        if (culture == null)
-        {
-            culture = _tenantManager.GetCurrentTenant(false)?.GetCulture();
-        }
-
-        return culture;
-    }
 }

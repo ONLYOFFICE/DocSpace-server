@@ -195,7 +195,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, searchInContent, false);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, searchInContent);
 
             (var succ, var searchIds) = await _factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
             if (succ)
@@ -1109,7 +1109,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, searchInContent, false);
+            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, searchInContent);
 
             (var succ, var searchIds) = await _factoryIndexer.TrySelectIdsAsync(s => func(s));
             if (succ)

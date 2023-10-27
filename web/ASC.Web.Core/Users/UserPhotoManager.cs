@@ -101,31 +101,27 @@ public sealed class ResizeWorkerItem : DistributedTask
 [Singleton]
 public class UserPhotoManagerCache
 {
-    private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<CacheSize, string>> _photofiles;
+    private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<CacheSize, string>> _photoFiles;
     private readonly ICacheNotify<UserPhotoManagerCacheItem> _cacheNotify;
     private readonly HashSet<int> _tenantDiskCache;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public UserPhotoManagerCache(ICacheNotify<UserPhotoManagerCacheItem> notify, IServiceScopeFactory serviceScopeFactory)
+    public UserPhotoManagerCache(ICacheNotify<UserPhotoManagerCacheItem> notify)
     {
         try
         {
-            _photofiles = new ConcurrentDictionary<Guid, ConcurrentDictionary<CacheSize, string>>();
+            _photoFiles = new ConcurrentDictionary<Guid, ConcurrentDictionary<CacheSize, string>>();
             _tenantDiskCache = new HashSet<int>();
             _cacheNotify = notify;
 
-            _cacheNotify.Subscribe((data) =>
+            _cacheNotify.Subscribe(data =>
             {
-                _photofiles.GetOrAdd(new Guid(data.UserId), (r) => new ConcurrentDictionary<CacheSize, string>())
-                              .AddOrUpdate(data.Size, data.FileName, (key, oldValue) => data.FileName);
+                _photoFiles.GetOrAdd(new Guid(data.UserId), (_) => new ConcurrentDictionary<CacheSize, string>())
+                              .AddOrUpdate(data.Size, data.FileName, (_, _) => data.FileName);
             }, CacheNotifyAction.InsertOrUpdate);
 
-            _cacheNotify.Subscribe((data) =>
+            _cacheNotify.Subscribe(data =>
             {
-                if (_photofiles.TryRemove(new Guid(data.UserId), out _))
-                {
-
-                }
+                _ = _photoFiles.TryRemove(new Guid(data.UserId), out _);
 
             }, CacheNotifyAction.Remove);
         }
@@ -133,7 +129,6 @@ public class UserPhotoManagerCache
         {
 
         }
-        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public bool IsCacheLoadedForTenant(int tenantId)
@@ -164,7 +159,7 @@ public class UserPhotoManagerCache
 
     public string SearchInCache(Guid userId, Size size)
     {
-        if (!_photofiles.TryGetValue(userId, out var val))
+        if (!_photoFiles.TryGetValue(userId, out var val))
         {
             return null;
         }

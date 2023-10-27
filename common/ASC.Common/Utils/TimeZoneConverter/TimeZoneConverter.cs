@@ -329,7 +329,7 @@ public class TimeZoneConverter
         }
     }
 
-    private class MapZone
+    private sealed class MapZone
     {
         public string OlsonTimeZoneId { get; set; }
         public string WindowsTimeZoneId { get; set; }

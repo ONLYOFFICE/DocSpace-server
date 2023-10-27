@@ -87,7 +87,7 @@ public class LdapUserManager
     {
         if (string.IsNullOrEmpty(userInfo.Email))
         {
-            throw new ArgumentException(_resource.ErrorEmailEmpty, "userInfo");
+            throw new ArgumentException(_resource.ErrorEmailEmpty, nameof(userInfo));
         }
 
         var uniqueName = new MailAddress(userInfo.Email).User;
@@ -114,7 +114,7 @@ public class LdapUserManager
         {
             if (ldapUserInfo == null)
             {
-                throw new ArgumentNullException("ldapUserInfo");
+                throw new ArgumentNullException(nameof(ldapUserInfo));
             }
 
             _logger.DebugTryAddLdapUser(ldapUserInfo.Sid, ldapUserInfo.Email, ldapUserInfo.UserName);
