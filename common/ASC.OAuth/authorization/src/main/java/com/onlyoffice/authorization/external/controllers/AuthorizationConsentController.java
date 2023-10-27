@@ -10,11 +10,9 @@ import com.onlyoffice.authorization.security.access.aspects.annotations.Invalida
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -32,29 +30,34 @@ public class AuthorizationConsentController {
     private final ClientPersistenceQueryUsecases queryUsecases;
 
     @GetMapping(value = "/oauth2/consent")
-    @ResponseBody
     @InvalidateSession
-    public ResponseEntity<String> consent(
+    public String consent(
             HttpServletRequest request,
             @CookieValue(name = "asc_auth_key") String authCookie,
             @CookieValue(name = CLIENT_ID_COOKIE) String clientId
     ) {
         log.info("got a new consent request");
+        var client = queryUsecases.getClientByClientId(clientId);
         try {
             var cookie = String.format("%s=%s", "asc_auth_key", authCookie);
-            var client = queryUsecases.getClientByClientId(clientId);
             var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie)
                     .getResponse();
             var auth = authorizationRepository.getByPrincipalNameAndRegisteredClientId(me.getEmail(), clientId);
-            return ResponseEntity.ok(String.format("redirect:%s", UriComponentsBuilder
+            return String.format("redirect:%s", UriComponentsBuilder
                     .fromUriString(client.getTenantUrl())
                     .path("login/consent")
                     .queryParam("type", "oauth2")
                     .queryParam("client_id", clientId)
                     .queryParam("state", auth.getState())
-                    .build()));
+                    .build());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            log.error("could not redirect to consent page", e);
+            return String.format("redirect:%s", UriComponentsBuilder
+                    .fromUriString(client.getTenantUrl())
+                    .path("login")
+                    .queryParam("type", "oauth2")
+                    .queryParam("client_id", clientId)
+                    .build());
         }
     }
 }
