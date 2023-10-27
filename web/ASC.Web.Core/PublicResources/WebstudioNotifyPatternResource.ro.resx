@@ -208,61 +208,70 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -299,23 +308,26 @@ Pentru a proceda astfel, consultaţi secţiunea "Plăți":"$PricingPage" a spaț
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 sfaturi&lt;/span&gt; pentru a lucra eficient la documentele dvs
+
+
+Stimate, $UserName!
+
 Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. Iată câteva sfaturi care vă ajută să eficientizeze lucrul cu documente.
- 
-*#1. Alegeți-vă modul de lucru.* Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.
- 
-*#2. Lucrați în orice conținut pe care îl aveți.* Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-*#3. Elaborați în comun în mod eficient.* Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.
- 
-*#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Alegeți-vă modul de lucru.&lt;/b&gt; &lt;br/&gt;Organizați-vă fluxul de lucru așa cum doriți  prin intermediul sălilor de colaborare pentru elaborare prin colaborare în timp real sau sălilor personalizate cu setări flexibile pentru orice scop.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Lucrați în orice conținut pe care îl aveți.&lt;/b&gt;Stocați și lucrați în sălile dvs cu diferite formate de fișier: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Elaborați în comun în mod eficient.&lt;/b&gt; &lt;br/&gt;Colaborați la documente în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colaborare securizată.&lt;/b&gt; &lt;br/&gt;Optimizați setările pentru accesul la întregul spațiu sau la săli separate folosind permisiuni flexibile și roluri de utilizator. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilizați plugin-ul asistent bazat pe inteligență artificială.&lt;/b&gt;&lt;br/&gt;Rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>h1. Descoperiți abonamentul &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace business
@@ -435,88 +447,92 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-* Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-* *Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-* *Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-* *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-* Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-* *Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-* *Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-* *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-* Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-* *Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-* *Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-* *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>Stimate, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
 Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
- 
-* Colaborați cu alți utilizatori din sala în care sunteți invitat*: săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop*.
- 
-* *Lucrați cu diferite formate de fișier*: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.
- 
-* *Colaborați la documente* în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video. 
- 
-* *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
- 
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 $OrangeButton
- 
-Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Cu deosebită considerație, 
-Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Mesajul de la "${__VirtualRootPath}": portalul "${__VirtualRootPath}"
@@ -1533,5 +1549,93 @@ Urmăriți linkul de mai jos pentru a accepta invitația și folosiți numele de
 $OrangeButton
 
 Linkul este valabil numai timp de 7 zile.</value>
+  </data>
+  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Stimate, $UserName!
+
+Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost adăugat cu succes la "${__VirtualRootPath}":"${__VirtualRootPath}". Acum puteți să:
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Colaborați cu alți utilizatori din sala în care sunteți invitat: &lt;b&gt;săli de colaborare pentru elaborare prin colaborare în timp real sau săli personalizate cu setări flexibile pentru orice scop&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Lucrați cu diferite formate de fișier&lt;/b&gt;: documente text, foi de calcul, prezentări, formulare digitale, PDF-uri, e-book-uri, multimedia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colaborați la documente&lt;/b&gt; în două moduri de co-editare: în timp real sau prin blocare de paragrafe. Urmăriți modificări, comunicați în timp real cu ajutorul chat-ului încorporat sau prin apeluri audio și video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilizați plugin-ul asistent bazat pe inteligență artificială:&lt;/b&gt; rezumați și traduceți texte, generați imagini și cuvinte cheie, analizați cuvinte etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați "echipa noastră de asistență":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
 </root>

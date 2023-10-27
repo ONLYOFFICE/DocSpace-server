@@ -1186,12 +1186,12 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h1. &lt;span style=&quot;color:#FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs
         ///
-        ///	
+        ///
         ///Hello, $UserName!
         ///
         ///We hope you enjoy using your ONLYOFFICE DocSpace. Here are some tips on how to make work on documents more effective.
         ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;d [rest of string was truncated]&quot;;.
+        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;&quot;&gt;&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td style=&quot;di [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_opensource_user_docs_tips_v1 {
             get {
