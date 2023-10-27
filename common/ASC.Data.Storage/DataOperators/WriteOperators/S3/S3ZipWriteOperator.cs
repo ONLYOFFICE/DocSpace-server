@@ -130,7 +130,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
             {
                 if (last)
                 {
-                    ComputeHash(tempStream, last);
+                    ComputeHash(tempStream, true);
                     Upload(tempStream);
                 }
                 else

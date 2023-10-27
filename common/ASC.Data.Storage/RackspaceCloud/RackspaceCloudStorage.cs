@@ -64,7 +64,7 @@ public class RackspaceCloudStorage : BaseStorage
         TempPath = tempPath;
     }
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -120,6 +120,8 @@ public class RackspaceCloudStorage : BaseStorage
                              ? new Uri(props["cnamessl"], UriKind.Absolute)
                              : new Uri(cdnHeaders.CDNSslUri);
 
+        DataStoreValidator = dataStoreValidator;
+        
         return this;
     }
 

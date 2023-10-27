@@ -38,7 +38,6 @@ public class QuotaSyncOperation
 
     public QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
     {
-;
         _serviceProvider = serviceProvider;
 
         _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);

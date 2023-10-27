@@ -88,9 +88,8 @@ public class LdapNotifyService : BackgroundService
 
     public void UnregisterAutoSync(Tenant tenant)
     {
-        if (_clients.ContainsKey(tenant.Id))
+        if (_clients.TryGetValue(tenant.Id, out var client))
         {
-            var client = _clients[tenant.Id];
             _workContext.UnregisterSendMethod(client.Item2.AutoSyncAsync);
             _clients.TryRemove(tenant.Id, out _);
         }

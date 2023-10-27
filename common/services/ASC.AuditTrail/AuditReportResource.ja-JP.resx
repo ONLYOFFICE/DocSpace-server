@@ -658,13 +658,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>ルームが削除されました</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>リンクが作成されました。役割: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>リンクが削除されました</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>リンクがアップデートされました。役割: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

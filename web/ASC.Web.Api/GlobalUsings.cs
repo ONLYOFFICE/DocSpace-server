@@ -164,6 +164,7 @@ global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Primitives;
+global using Microsoft.IdentityModel.Tokens;
 
 global using MimeKit;
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Api.Core;
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -46,9 +48,8 @@ public class PortalController : ControllerBase
     private readonly TimeZonesProvider _timeZonesProvider;
     private readonly TimeZoneConverter _timeZoneConverter;
     private readonly PasswordHasher _passwordHasher;
+    private readonly CspSettingsHelper _cspSettingsHelper;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly AuthContext _authContext;
-    private readonly UserManager _userManager;
     private readonly ILogger<PortalController> _log;
     private readonly QuotaUsageManager _quotaUsageManager;
 
@@ -69,9 +70,8 @@ public class PortalController : ControllerBase
         TimeZonesProvider timeZonesProvider,
         TimeZoneConverter timeZoneConverter,
         PasswordHasher passwordHasher,
+        CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
-        AuthContext authContext,
-        UserManager userManager,
         QuotaUsageManager quotaUsageManager)
     {
         _configuration = configuration;
@@ -89,9 +89,8 @@ public class PortalController : ControllerBase
         _timeZonesProvider = timeZonesProvider;
         _timeZoneConverter = timeZoneConverter;
         _passwordHasher = passwordHasher;
+        _cspSettingsHelper = cspSettingsHelper;
         _coreBaseSettings = coreBaseSettings;
-        _authContext = authContext;
-        _userManager = userManager;
         _log = option;
         _quotaUsageManager = quotaUsageManager;
     }
@@ -256,7 +255,8 @@ public class PortalController : ControllerBase
             }
 
             t = await _hostedSolution.RegisterTenantAsync(info);
-
+            _tenantManager.SetCurrentTenant(t);
+            await _cspSettingsHelper.Save(null, true);
             /*********/
 
             _log.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);

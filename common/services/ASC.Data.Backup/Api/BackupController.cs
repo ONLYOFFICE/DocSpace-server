@@ -100,6 +100,19 @@ public class BackupController : ControllerBase
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day),
         };
+
+        if (storageType == BackupStorageType.Documents)
+        {
+
+            if (int.TryParse(storageParams["folderId"], out var fId))
+            {
+                await _backupHandler.CheckAccessToFolderAsync(fId);
+            }
+            else
+            {
+                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+            }
+        }
         await _backupHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
         return true;
     }
@@ -147,6 +160,19 @@ public class BackupController : ControllerBase
         if (!_coreBaseSettings.Standalone && inDto.Dump)
         {
             throw new ArgumentException("backup can not start as dump");
+        }
+
+        if (storageType == BackupStorageType.Documents)
+        {
+
+            if (int.TryParse(storageParams["folderId"], out var fId))
+            {
+                await _backupHandler.CheckAccessToFolderAsync(fId);
+            }
+            else
+            {
+                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+            }
         }
 
         _eventBus.Publish(new BackupRequestIntegrationEvent(

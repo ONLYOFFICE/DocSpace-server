@@ -69,7 +69,7 @@ public class EmailValidationKeyModelHelper
     {
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
-        var type = request.ContainsKey("type") ? request["type"].FirstOrDefault() : null;
+        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : null;
 
         ConfirmType? cType = null;
         if (ConfirmTypeExtensions.TryParse(type, out var confirmType))
