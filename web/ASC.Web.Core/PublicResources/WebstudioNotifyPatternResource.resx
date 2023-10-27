@@ -1204,7 +1204,7 @@ Don’t want to change your password? Just ignore this message</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Want to change the password on your ONLYOFFICE Personal account? Click the button below to confirm.
 
-$OrangeButton 
+$OrangeButton
 
 The link is valid for 7 days.
 
@@ -1900,7 +1900,7 @@ $TrulyYours</comment>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>h1. Your ONLYOFFICE DocSpace will be &lt;span style="color:#FF6F3D;"&gt;deleted&lt;/span&gt;
 
-		
+
 You haven't entered your ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" for more than half a year. 
 
 Since you have decided not to use it anymore, your ONLYOFFICE DocSpace and all the data will be deleted in accordance with our "Privacy Policy":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 

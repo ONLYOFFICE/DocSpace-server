@@ -117,13 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir senha</value>
+  <data name="POST|api/2.0/files/file/{fileId}/startedit" xml:space="preserve">
+    <value>Iniciar edição</value>
   </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O arquivo de backup é inválido. Por favor, use um arquivo criado no ONLYOFFICE v11.5 ou posterior.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="POST|api/2.0/files/file/{fileId}/startedit_Description" xml:space="preserve">
+    <value>Iniciar Editar Descrição</value>
   </data>
 </root>

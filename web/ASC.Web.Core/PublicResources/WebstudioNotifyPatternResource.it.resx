@@ -630,34 +630,34 @@ Messaggio di eccezione: $Message</value>
   <data name="pattern_request_license" xml:space="preserve">
     <value>h1.Richiesta licenza Enterprise
 
-h3.NOME
+h3.Nome
 $UserName
 
-h3.COGNOME
+h3.Cognome
 $UserLastName
 
-h3.POSIZIONE
+h3.Posizione
 $Position
 
-h3.EMAIL
+h3.Email
 "$UserEmail":"mailto:$UserEmail"
 
-h3.TELEFONO
+h3.Telefono
 $Phone
 
-h3.SITO WEB AZIENDALE
+h3.Sito web aziendale
 $Website
 
-h3.NOME AZIENDA
+h3.Nome azienda
 $CompanyTitle
 
-h3.DIMENSIONE AZIENDA
+h3.Dimensione azienda
 $CompanySize
 
-h3.RICHIESTA CONTENUTO
+h3.Richiesta contenuto
 $Body
 
-h3.INDIRIZZO PORTALE
+h3.Indirizzo portale
 "${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
   <data name="pattern_restore_started" xml:space="preserve">

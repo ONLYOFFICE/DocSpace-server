@@ -1307,7 +1307,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Want to change the password on your ONLYOFFICE Personal account? Click the button below to confirm.
         ///
-        ///$OrangeButton 
+        ///$OrangeButton
         ///
         ///The link is valid for 7 days.
         ///
@@ -1718,12 +1718,12 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h1. Your ONLYOFFICE DocSpace will be &lt;span style=&quot;color:#FF6F3D;&quot;&gt;deleted&lt;/span&gt;
         ///
-        ///		
+        ///
         ///You haven&apos;t entered your ONLYOFFICE DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; for more than half a year. 
         ///
         ///Since you have decided not to use it anymore, your ONLYOFFICE DocSpace and all the data will be deleted in accordance with our &quot;Privacy Policy&quot;:&quot;https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0&quot;. 
         ///
-        /// [rest of string was truncated]&quot;;.
+        ///&lt;t [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_trial_warning_after_half_year_v1 {
             get {
