@@ -29,6 +29,7 @@ namespace ASC.Data.Storage;
 public abstract class BaseStorage : IDataStore
 {
     public IQuotaController QuotaController { get; set; }
+    public IDataStoreValidator DataStoreValidator { get; set; }
     public virtual bool IsSupportInternalUri => true;
     public virtual bool IsSupportCdnUri => false;
     public virtual bool IsSupportedPreSignedUri => true;
@@ -329,7 +330,7 @@ public abstract class BaseStorage : IDataStore
         await CopyDirectoryAsync(string.Empty, dir, newdomain, newdir);
     }
 
-    public virtual IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public virtual IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
         return this;
     }

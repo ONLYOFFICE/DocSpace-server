@@ -30,6 +30,8 @@ namespace ASC.Web.Files.Utils;
 [Scope]
 public class FileSharingAceHelper
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
+    
     private readonly FileSecurity _fileSecurity;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly FileUtility _fileUtility;
@@ -183,6 +185,7 @@ public class FileSharingAceHelper
 
                 try
                 {
+                    await _semaphore.WaitAsync();
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
                         await _countPaidUserChecker.CheckAppend();
@@ -211,12 +214,16 @@ public class FileSharingAceHelper
                     warning ??= e.Message;
                     continue;
                 }
-
+                finally
+                {
+                    _semaphore.Release();
+                }
+                
                 if (emailInvite)
                 {
                     try
                     {
-                        var user = await _userManagerWrapper.AddInvitedUserAsync(w.Email, userType);
+                        var user = await _userManagerWrapper.AddInvitedUserAsync(w.Email, userType, culture);
                         w.Id = user.Id;
                     }
                     catch (Exception e)
@@ -259,7 +266,7 @@ public class FileSharingAceHelper
 
             if (emailInvite)
             {
-                var link = await _invitationLinkService.GetInvitationLinkAsync(w.Email, share, _authContext.CurrentAccount.ID, entry.Id.ToString());
+                var link = await _invitationLinkService.GetInvitationLinkAsync(w.Email, share, _authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
                 await _studioNotifyService.SendEmailRoomInviteAsync(w.Email, entry.Title, shortenLink, culture);
@@ -379,7 +386,7 @@ public class FileSharingAceHelper
 
 [Scope]
 public class FileSharingHelper
-{
+{    
     public FileSharingHelper(
         Global global,
         GlobalFolderHelper globalFolderHelper,

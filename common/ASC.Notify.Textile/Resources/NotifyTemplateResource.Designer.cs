@@ -123,9 +123,9 @@ namespace ASC.Notify.Textile.Resources {
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///          &lt;td colspan=&quot;3&quot; style=&quot;margin: 0; padding: 0; background-color: #fff; &quot;&gt;
         ///            &lt;div style=&quot;text-align: left; width: 600px; margin: 0; padding: 0;&quot;&gt;
-        ///                &lt;a href=&quot;%SITEURL%&quot; style=&quot;text-decoration: none; display: inline-block; width: 386px; height: 44px; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
+        ///                &lt;a href=&quot;%SITEURL%&quot; style=&quot;text-decoration: none; display: inline-block; width: 600px; height: 360px; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
         ///                    &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0px none; width: 600px; margin: 0; padding: 0;&quot; alt=&quot;ONLYOFFICE&quot; /&gt;
-        ///                 [rest of string was truncated]&quot;;.
+        ///                [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TopGif {
             get {

@@ -202,9 +202,18 @@ public class StorageFactory
             props = handler.Property.ToDictionary(r => r.Name, r => r.Value);
         }
 
+        IDataStoreValidator validator = null;
+        if (!string.IsNullOrEmpty(moduleElement.ValidatorType))
+        {
+            var validatorType = Type.GetType(moduleElement.ValidatorType, false);
+            if (validatorType != null)
+            {
+                validator = (IDataStoreValidator)ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, validatorType);
+            }
+        }
 
         return ((IDataStore)ActivatorUtilities.CreateInstance(_serviceProvider, instanceType))
-            .Configure(tenantPath, handler, moduleElement, props)
+            .Configure(tenantPath, handler, moduleElement, props, validator)
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);
     }

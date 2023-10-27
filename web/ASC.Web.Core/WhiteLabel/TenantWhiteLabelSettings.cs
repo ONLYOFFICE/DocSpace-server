@@ -171,7 +171,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     #region Get/Set IsDefault and Extension
 
-    internal bool GetIsDefault(WhiteLabelLogoTypeEnum type)
+    public bool GetIsDefault(WhiteLabelLogoTypeEnum type)
     {
         return type switch
         {

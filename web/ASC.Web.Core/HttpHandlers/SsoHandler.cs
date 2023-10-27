@@ -43,7 +43,8 @@ public class SsoHandler
 
 [Scope]
 public class SsoHandlerService
-{
+{    
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly ILogger<SsoHandlerService> _log;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly UserManager _userManager;
@@ -283,15 +284,22 @@ public class SsoHandlerService
 
                 try
                 {
-                    await _countPaidUserChecker.CheckAppend();
-                }
-                catch (Exception)
-                {
-                    type = EmployeeType.User;
-                }
+                    await _semaphore.WaitAsync();
+                    try
+                    {
+                        await _countPaidUserChecker.CheckAppend();
+                    }
+                    catch (Exception)
+                    {
+                        type = EmployeeType.User;
+                    }
 
-                newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true,
-                  false, type);
+                    newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
             }
             else
             {

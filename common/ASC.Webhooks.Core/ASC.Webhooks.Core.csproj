@@ -97,6 +97,9 @@
     <EmbeddedResource Update="Resources\WebHookResource.pt.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.ro.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\WebHookResource.ru.resx">
       <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>

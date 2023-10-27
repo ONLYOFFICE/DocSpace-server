@@ -30,7 +30,7 @@ namespace ASC.Core.Tenants;
 
 /// <summary>
 /// </summary>
-[DebuggerDisplay("{Tenant} {Name}")]
+[DebuggerDisplay("{TenantId} {Name}")]
 public class TenantQuota : IMapFrom<DbQuota>
 {
     public static readonly TenantQuota Default = new TenantQuota(Tenant.DefaultTenant)

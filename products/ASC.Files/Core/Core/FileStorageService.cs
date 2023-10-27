@@ -31,6 +31,7 @@ namespace ASC.Web.Files.Services.WCFService;
 [Scope]
 public class FileStorageService //: IFileStorageService
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly CompressToArchive _compressToArchive;
     private readonly OFormRequestManager _oFormRequestManager;
     private readonly ThirdPartySelector _thirdPartySelector;
@@ -407,12 +408,12 @@ public class FileStorageService //: IFileStorageService
                 {
                     if (f is Folder<string> f1)
                     {
-                        return (object)f1.Id;
+                        return (object)new { f1.Id, f1.Title, RoomType = DocSpaceHelper.GetRoomType(f1.FolderType) };
                     }
 
                     if (f is Folder<int> f2)
                     {
-                        return f2.Id;
+                        return new { f2.Id, f2.Title, RoomType = DocSpaceHelper.GetRoomType(f2.FolderType) };
                     }
                 }
 
@@ -495,6 +496,9 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
+        try
+        {
+            await _semaphore.WaitAsync();
         ArgumentNullException.ThrowIfNull(title, nameof(title));
 
         await _countRoomChecker.CheckAppend();
@@ -528,6 +532,11 @@ public class FileStorageService //: IFileStorageService
         }
 
         return room;
+    }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)

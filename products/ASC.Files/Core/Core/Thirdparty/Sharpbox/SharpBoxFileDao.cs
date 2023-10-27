@@ -636,6 +636,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
+            uploadSession.BytesTotal += uploadSession.BytesUploaded;
             uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
         }
         else

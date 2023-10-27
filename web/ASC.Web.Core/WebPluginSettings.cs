@@ -72,12 +72,12 @@ public class WebPluginSettings
 
 public class SystemWebPluginSettings : ISettings<SystemWebPluginSettings>
 {
-    public List<string> DisabledPlugins { get; set; }
+    public List<string> EnabledPlugins { get; set; }
 
     [JsonIgnore]
     public Guid ID
     {
-        get { return new Guid("{33039FD8-CF74-46B5-9AF2-2B3D4B651F31}"); }
+        get { return new Guid("{056113AD-E08D-4407-BAAD-7C9BE4EE73E9}"); }
     }
 
     public SystemWebPluginSettings GetDefault()
