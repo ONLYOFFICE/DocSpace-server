@@ -50,7 +50,6 @@ public class CookieSuccessAuthenticationHandler implements AuthenticationSuccess
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 }
