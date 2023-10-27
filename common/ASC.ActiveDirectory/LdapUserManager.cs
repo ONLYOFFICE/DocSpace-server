@@ -293,13 +293,13 @@ public class LdapUserManager
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
                         null,
-                        new[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
+                        new IRecipient[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
                         new[] { Core.Configuration.Constants.NotifyEMailSenderSysName },
                         null,
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(_displayUserSettingsHelper)),
                         new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
                         new TagValue(NotifyConstants.TagMyStaffLink, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagGreenButton(_resource.NotifyButtonJoin, confirmLink),
+                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, confirmLink),
                         new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
                 }
 

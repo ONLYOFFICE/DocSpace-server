@@ -31,13 +31,15 @@ public class MessageSettings
 {
     private const string UserAgentHeader = "User-Agent";
     private const string RefererHeader = "Referer";
+    private const string EditorsUAHeader = "AscDesktopEditor";
+    private const string EditorsName = "Desktop Editors";
 
     static MessageSettings()
     {
         Parser = Parser.GetDefault();
     }
 
-    private static Parser Parser { get; set; }
+    private static Parser Parser { get; }
 
     public static ClientInfo GetClientInfo(string uaHeader)
     {
@@ -46,31 +48,27 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
-        return request != null ? request.Headers[UserAgentHeader].FirstOrDefault() : null;
+        return request?.Headers[UserAgentHeader].FirstOrDefault();
     }
 
     public static string GetUAHeader(IDictionary<string, StringValues> headers)
     {
-        return headers.ContainsKey(UserAgentHeader) ? headers[UserAgentHeader].FirstOrDefault() : null;
+        return headers.TryGetValue(UserAgentHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static string GetReferer(HttpRequest request)
     {
-        return request != null ? request.Headers[RefererHeader].FirstOrDefault() : null;
+        return request?.Headers[RefererHeader].FirstOrDefault();
     }
 
     public static string GetReferer(IDictionary<string, StringValues> headers)
     {
-        return headers.ContainsKey(RefererHeader) ? headers[RefererHeader].FirstOrDefault() : null;
+        return headers.TryGetValue(RefererHeader, out var header) ? header.FirstOrDefault() : null;
     }
 
     public static string GetIP(HttpRequest request)
     {
-        if (request != null)
-        {
-            return request.HttpContext.Connection.RemoteIpAddress.ToString();          
-        }
-        return null;
+        return request.HttpContext.Connection.RemoteIpAddress?.ToString();
     }
 
     public static void AddInfoMessage(EventMessage message, Dictionary<string, ClientInfo> dict = null)
@@ -97,20 +95,31 @@ public class MessageSettings
 
     public static string GetBrowser(ClientInfo clientInfo)
     {
-        return clientInfo == null
-                   ? null
-                   : string.Format("{0} {1}", clientInfo.UA.Family, clientInfo.UA.Major).Trim();
+        if (clientInfo == null)
+        {
+            return null;
+        }
+
+        if (clientInfo.String.Contains(EditorsUAHeader))
+        {
+            var data = clientInfo.String.Split(" ").FirstOrDefault(r=> r.StartsWith(EditorsUAHeader));
+            if (data != null)
+            {
+                var parts = data.Split("/");
+                return $"{EditorsName} {parts[1]}";
+            }
+        }
+        
+        return $"{clientInfo.UA.Family} {clientInfo.UA.Major}".Trim();
     }
 
     public static string GetPlatformAndDevice(ClientInfo clientInfo)
     {
-        return clientInfo == null
-                   ? null
-                   : string.Format("{0} {1} {2} {3}",
-                   clientInfo.OS.Family,
-                   clientInfo.OS.Major,
-                   clientInfo.Device.Brand,
-                   clientInfo.Device.Model)
-                   .Trim();
+        if (clientInfo == null)
+        {
+            return null;
+        }
+        
+        return $"{clientInfo.OS.Family} {clientInfo.OS.Major} {clientInfo.Device.Brand} {clientInfo.Device.Model}".Trim();
     }
 }

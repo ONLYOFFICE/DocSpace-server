@@ -583,8 +583,8 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
             result.FilesCount = 0;
             result.FoldersCount = 0;
             result.Error = errorFolder.Error;
-            result.Private = Private;
-            result.HasLogo = HasLogo;
+            result.SettingsPrivate = Private;
+            result.SettingsHasLogo = HasLogo;
 
             return result;
         }
@@ -607,8 +607,8 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
         result.Title = isRoot ? CustomerTitle : MakeTitle(folder.Name);
         result.FilesCount = 0;
         result.FoldersCount = 0;
-        result.Private = Private;
-        result.HasLogo = HasLogo;
+        result.SettingsPrivate = Private;
+        result.SettingsHasLogo = HasLogo;
 
         SetFolderType(result, isRoot);
 
@@ -683,31 +683,31 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
 public class SharePointProviderInfoHelper
 {
     private readonly TimeSpan _cacheExpiration;
-    private readonly ICache _fileCache;
-    private readonly ICache _folderCache;
+    private readonly ICache _cache;
     private readonly ICacheNotify<SharePointProviderCacheItem> _notify;
+    private readonly ConcurrentDictionary<string, object> _cacheKeys;
 
     public SharePointProviderInfoHelper(ICacheNotify<SharePointProviderCacheItem> notify, ICache cache)
     {
         _cacheExpiration = TimeSpan.FromMinutes(1);
-        _fileCache = cache;
-        _folderCache = cache;
+        _cache = cache;
+        _cacheKeys = new ConcurrentDictionary<string, object>();
         _notify = notify;
 
         _notify.Subscribe((i) =>
         {
             if (!string.IsNullOrEmpty(i.FileKey))
             {
-                _fileCache.Remove($"{Selectors.SharePoint.Id}f-" + i.FileKey);
+                _cache.Remove($"{Selectors.SharePoint.Id}f-" + i.FileKey);
             }
             if (!string.IsNullOrEmpty(i.FolderKey))
             {
-                _folderCache.Remove($"{Selectors.SharePoint.Id}d-" + i.FolderKey);
+                _cache.Remove($"{Selectors.SharePoint.Id}d-" + i.FolderKey);
             }
             if (string.IsNullOrEmpty(i.FileKey) && string.IsNullOrEmpty(i.FolderKey))
             {
-                _fileCache.Remove(new Regex($"^{Selectors.SharePoint.Id}f-.*"));
-                _folderCache.Remove(new Regex($"^{Selectors.SharePoint.Id}d-.*"));
+                _cache.Remove(_cacheKeys, new Regex($"^{Selectors.SharePoint.Id}f-.*"));
+                _cache.Remove(_cacheKeys, new Regex($"^{Selectors.SharePoint.Id}d-.*"));
             }
         }, CacheNotifyAction.Remove);
     }
@@ -742,26 +742,35 @@ public class SharePointProviderInfoHelper
     public async Task CreateFolderAsync(string id, string parentFolderId, Folder folder)
     {
         await PublishFolderAsync(parentFolderId);
-        _folderCache.Insert($"{Selectors.SharePoint.Id}d-" + id, folder, DateTime.UtcNow.Add(_cacheExpiration));
+        var key = $"{Selectors.SharePoint.Id}d-" + id;
+        _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
     }
 
     public Folder GetFolder(string key)
     {
-        return _folderCache.Get<Folder>(key);
+        return _cache.Get<Folder>(key);
     }
 
     public void AddFolder(string key, Folder folder)
     {
-        _folderCache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration));
+        _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
     }
 
     public File GetFile(string key)
     {
-        return _fileCache.Get<File>(key);
+        return _cache.Get<File>(key);
     }
 
     public void AddFile(string key, File file)
     {
-        _fileCache.Insert(key, file, DateTime.UtcNow.Add(_cacheExpiration));
+        _cache.Insert(key, file, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
+    }
+
+    private void EvictionCallback(object key, object value, EvictionReason reason, object state)
+    {
+        _cacheKeys.TryRemove(key.ToString(), out _);
     }
 }

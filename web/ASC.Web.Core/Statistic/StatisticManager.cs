@@ -46,8 +46,8 @@ public class StatisticManager
 
         lock (_cache)
         {
-            var visit = _cache.ContainsKey(key) ?
-                            _cache[key] :
+            var visit = _cache.TryGetValue(key, out var value) ?
+                            value :
                             new UserVisit
                             {
                                 TenantID = tenantId,

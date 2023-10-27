@@ -64,6 +64,7 @@ public class SettingsController : BaseSettingsController
     private readonly ExternalShare _externalShare;
     private readonly ConfigurationExtension _configurationExtension;
     private readonly IMapper _mapper;
+    private readonly UserFormatter _userFormatter;
 
     public SettingsController(
         ILoggerProvider option,
@@ -102,8 +103,8 @@ public class SettingsController : BaseSettingsController
         TenantDomainValidator tenantDomainValidator,
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
-        IMapper mapper
-        ) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        IMapper mapper,
+        UserFormatter userFormatter) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _log = option.CreateLogger("ASC.Api");
         _consumerFactory = consumerFactory;
@@ -138,6 +139,7 @@ public class SettingsController : BaseSettingsController
         _externalShare = externalShare;
         _configurationExtension = configurationExtension;
         _mapper = mapper;
+        _userFormatter = userFormatter;
     }
 
     /// <summary>
@@ -172,7 +174,8 @@ public class SettingsController : BaseSettingsController
             TenantAlias = Tenant.Alias,
             EnableAdmMess = studioAdminMessageSettings.Enable || await _tenantExtra.IsNotPaidAsync(),
             LegalTerms = _setupInfo.LegalTerms,
-            CookieSettingsEnabled = tenantCookieSettings.Enabled
+            CookieSettingsEnabled = tenantCookieSettings.Enabled,
+            UserNameRegex = _userFormatter.UserNameRegex.ToString(),
         };
 
         if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() != default)

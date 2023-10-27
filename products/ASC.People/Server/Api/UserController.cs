@@ -28,6 +28,7 @@ namespace ASC.People.Api;
 
 public class UserController : PeopleControllerBase
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private Tenant Tenant => _apiContext.Tenant;
 
     private readonly ICache _cache;
@@ -64,6 +65,7 @@ public class UserController : PeopleControllerBase
     private readonly CountUserChecker _countUserChecker;
     private readonly UsersInRoomChecker _usersInRoomChecker;
     private readonly IUrlShortener _urlShortener;
+    private readonly FileSecurityCommon _fileSecurityCommon;
 
     public UserController(
         ICache cache,
@@ -105,7 +107,8 @@ public class UserController : PeopleControllerBase
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
         IQuotaService quotaService,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener,
+        FileSecurityCommon fileSecurityCommon)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _cache = cache;
@@ -142,6 +145,7 @@ public class UserController : PeopleControllerBase
         _quotaService = quotaService;
         _usersQuotaSyncOperation = usersQuotaSyncOperation;
         _urlShortener = urlShortener;
+        _fileSecurityCommon = fileSecurityCommon;
     }
 
     /// <summary>
@@ -313,15 +317,23 @@ public class UserController : PeopleControllerBase
         {
             var success = int.TryParse(linkData.RoomId, out var id);
 
-            if (success)
+            try
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                await _semaphore.WaitAsync();
+                if (success)
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                }
+                else
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
-            else
+            finally
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                _semaphore.Release();
             }
         }
 
@@ -362,11 +374,11 @@ public class UserController : PeopleControllerBase
                 continue;
             }
 
-            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type);
-            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID);
+            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
+            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID, inDto.Culture);
             var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
-            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
+            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
         }
 
         var result = new List<EmployeeDto>();
@@ -442,8 +454,7 @@ public class UserController : PeopleControllerBase
             await _cookiesManager.ResetUserCookieAsync(userid);
             await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-
-        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(Tenant.Id, userid);
+        
         return await _employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
@@ -475,6 +486,13 @@ public class UserController : PeopleControllerBase
             throw new Exception("The user is not suspended");
         }
 
+        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+
+        if (await _fileSecurityCommon.IsDocSpaceAdministratorAsync(user.Id) && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
+        {
+            throw new SecurityException();
+        }
+        
         await CheckReassignProccessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
@@ -1055,7 +1073,7 @@ public class UserController : PeopleControllerBase
                     continue;
                 }
 
-                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID);
+                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID, user.GetCulture()?.Name);
                 var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
                 await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
@@ -1445,18 +1463,26 @@ public class UserController : PeopleControllerBase
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            if (isUser && !await _userManager.IsUserAsync(user) && canBeGuestFlag)
+            try
             {
-                await _countUserChecker.CheckAppend();
-                await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-                _webItemSecurityCache.ClearCache(Tenant.Id);
-            }
+                await _semaphore.WaitAsync();
+                if (isUser && !await _userManager.IsUserAsync(user) && canBeGuestFlag)
+                {
+                    await _countUserChecker.CheckAppend();
+                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                }
 
-            if (!self && !isUser && await _userManager.IsUserAsync(user))
+                if (!self && !isUser && await _userManager.IsUserAsync(user))
+                {
+                    await _countPaidUserChecker.CheckAppend();
+                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                }
+            }
+            finally
             {
-                await _countPaidUserChecker.CheckAppend();
-                await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                _webItemSecurityCache.ClearCache(Tenant.Id);
+                _semaphore.Release();
             }
         }
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
@@ -1505,18 +1531,26 @@ public class UserController : PeopleControllerBase
                 case EmployeeStatus.Active:
                     if (user.Status == EmployeeStatus.Terminated)
                     {
-                        if (!await _userManager.IsUserAsync(user))
+                        try
                         {
-                            await _countPaidUserChecker.CheckAppend();
+                            await _semaphore.WaitAsync();
+                            if (!await _userManager.IsUserAsync(user))
+                            {
+                                await _countPaidUserChecker.CheckAppend();
+                            }
+                            else
+                            {
+                                await _countUserChecker.CheckAppend();
+                            }
+
+                            user.Status = EmployeeStatus.Active;
+
+                            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                         }
-                        else
+                        finally
                         {
-                            await _countUserChecker.CheckAppend();
+                            _semaphore.Release();
                         }
-
-                        user.Status = EmployeeStatus.Active;
-
-                        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                     }
                     break;
                 case EmployeeStatus.Terminated:
@@ -1572,7 +1606,7 @@ public class UserController : PeopleControllerBase
             }
         }
 
-        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.CreateFromGroupValues(users.Select(x => x.Id.ToString())),
+        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.Create(users.Select(x => x.Id)),
         users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
 
         foreach (var user in users)
@@ -1786,12 +1820,12 @@ public class UserController : PeopleControllerBase
         var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue);
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, 
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
             _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
         var counter = 0;
 
-        await foreach(var user in users)
+        await foreach (var user in users)
         {
             counter++;
 

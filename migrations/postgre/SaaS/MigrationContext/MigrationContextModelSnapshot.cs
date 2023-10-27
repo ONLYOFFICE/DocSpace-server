@@ -4597,7 +4597,7 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint(19)")
+                        .HasColumnType("int(10)")
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
@@ -6417,12 +6417,6 @@ namespace ASC.Migrations.PostgreSql.SaaS.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("name");
-
-                    b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasColumnName("ssl")
-                        .HasDefaultValueSql("true");
 
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()

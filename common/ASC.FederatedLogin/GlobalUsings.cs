@@ -54,11 +54,9 @@ global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
 global using ASC.Security.Cryptography;
+global using ASC.Web.Core.Files;
 
 global using Autofac;
-
-global using JWT.Algorithms;
-global using JWT.Builder;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;

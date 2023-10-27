@@ -118,6 +118,12 @@ public class StorageHandler
 
         //context.Response.Headers.ETag = etag;
 
+        if (securityContext.IsAuthenticated && storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            return;
+        }
+        
         string encoding = null;
 
         if (storage is DiscDataStore && await storage.IsFileAsync(_domain, path + ".gz"))

@@ -125,7 +125,7 @@ Merhaba!
 
 "${__VirtualRootPath}":"$InviteLink" portalına katılmak için e-posta adresinizi aktifleştirmeniz gerekmektedir. Bu işlem güvenlik için yapılmaktadır.
 
-$GreenButton
+$OrangeButton
 
 Bu link 7 gün boyunca geçerli olacaktır. Lütfen bu dönem içerisinde e-posta aktivasyonunuzu tamamlayın.</value>
   </data>
@@ -151,7 +151,7 @@ ONLYOFFICE™ Destek Ekibi
 
 Lütfen aşağıdaki linki takip ederek şifrenizi değiştirin:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerlidir. Lütfen bu süre zarfında şifre değiştirme işlemini tamamlayın.
 
@@ -164,7 +164,7 @@ ${LetterLogoText} portalındaki cep telefonu numaranızı değiştirme talebinde
 
 Lütfen aşağıdaki linke tıklayarak cep telefonu numaranızı değiştirin:
 
-$GreenButton
+$OrangeButton
 
 Cep telefonu numaranızı değiştirmek istemiyorsanız veya bu e-postanın hatalı olduğunu düşünüyorsanız lütfen dikkate almayın veya portal yöneticiniz ile görüşün.</value>
   </data>
@@ -177,7 +177,7 @@ Değerli $OwnerName,
 
 Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal sahibi değişikliğini bu sürede tamamlayın.</value>
   </data>
@@ -190,7 +190,7 @@ Değerli $OwnerName,
 
 Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal adresi değişikliğini bu sürede tamamlayın.</value>
   </data>
@@ -207,7 +207,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
 
@@ -228,7 +228,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
 
@@ -249,7 +249,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
 
@@ -270,7 +270,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
 
@@ -294,7 +294,7 @@ ${LetterLogoText} bünyesindeki "${__VirtualRootPath}":"$InviteLink" portalına 
 
 Daveti kabul etmek için adınızı ve şifrenizi aşağıdaki linke tıklayarak girin:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 48 saat boyunca geçerli olacaktır. Lütfen işlemi bu sürede tamamlayın.</value>
   </data>
@@ -346,7 +346,7 @@ Değerli $OwnerName,
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portalını geçici olarak deaktive etme talebinde bulundunuz. Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal sahibi değişikliğini bu sürede tamamlayın.
 
@@ -374,7 +374,7 @@ Portalınızı silmeden önce otomatik faturalandırmanın kapalı olduğundan e
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portalınızı kesinlikle silmek istiyorsanız lütfen aşağıdaki linke tıklayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal silinmesi işlemini bu sürede tamamlayın.
 
@@ -400,7 +400,7 @@ Profilinizi kalıcı olarak "${__VirtualRootPath}":"${__VirtualRootPath}" portal
 
 Profilinizi silmek istiyorsanız aşağıdaki linki takip edin:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen bu süre zarfında profil silme işlemini tamamlayın.</value>
   </data>
@@ -630,7 +630,7 @@ ONLYOFFICE Ekibi</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE hesabınızın şifresini değiştirmek mi istiyorsunuz? Onaylamak için aşağıdaki düğmeyi tıklayın.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -643,7 +643,7 @@ Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliği
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
 Yeni bir belge iş birliği yönteminin keyfini çıkarın!
 
@@ -658,7 +658,7 @@ Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliği
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
 Yeni bir belge iş birliği yönteminin keyfini çıkarın!
 
@@ -673,7 +673,7 @@ Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliği
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
 Mevcut tarife planınız STARTUP. Tamamen ücretsizdir ve şunları içerir:
 
@@ -695,7 +695,7 @@ Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliği
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
 Yeni bir belge iş birliği yönteminin keyfini çıkarın!
 
@@ -729,7 +729,7 @@ ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler ü
 
 *#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -748,7 +748,7 @@ ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler ü
 
 *#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -767,7 +767,7 @@ ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler ü
 
 *#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -786,7 +786,7 @@ ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler ü
 
 *#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -883,7 +883,7 @@ ONLYOFFICE Ekibi
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -894,7 +894,7 @@ ONLYOFFICE Ekibi
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -905,7 +905,7 @@ ONLYOFFICE Ekibi
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -916,7 +916,7 @@ ONLYOFFICE Ekibi
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -935,7 +935,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
 
@@ -956,7 +956,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
 
@@ -977,7 +977,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
 
@@ -998,7 +998,7 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
 
-$GreenButton
+$OrangeButton
 
 Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
 
@@ -1053,7 +1053,7 @@ ONLYOFFICE ekibi</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE Kişisel hesabınızın şifresini değiştirmek mi istiyorsunuz? Onaylamak için aşağıdaki düğmeyi tıklayın.
 
-$GreenButton 
+$OrangeButton 
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -1064,7 +1064,7 @@ Bağlantı 7 gün boyunca geçerlidir.
 
 Neden ayrılmaya karar verdiniz? Deneyiminizi bizimle paylaşın.
  
-$GreenButton
+$OrangeButton
 
 Teşekkürler ve iyi şanslar!
 
@@ -1091,7 +1091,7 @@ ONLYOFFICE DocSpace'inizi daha güvenli hale getirmek için güvenlik ayarların
 
 * Veri yedeklemeleri yapın.
 
-$GreenButton
+$OrangeButton
 
 ONLYOFFICE DocSpace'inizi yapılandırma ve yönetme hakkında daha fazla bilgi edinmek için "Yardım Merkezimizi":"https://helpcenter.onlyoffice.com/" ziyaret edin. İşlevsellik hakkında sorularınız olduğunda da buraya başvurabilirsiniz.
 
@@ -1106,7 +1106,7 @@ Artık kullanmamaya karar verdiğiniz için ONLYOFFICE DocSpace'iniz ve tüm ver
 
 Geri bildirim almaktan memnun oluruz. Niçin ONLYOFFICE DocSpace'i kullanmayı bırakmaya karar verdiniz?
 
-$GreenButton
+$OrangeButton
 
 Bunun bir hata olduğunu düşünüyorsanız ve ONLYOFFICE DocSpace'i kullanmaya devam etmek istiyorsanız, lütfen "destek ekibimiz":"https://www.onlyoffice.com/support-contact-form.aspx" ile iletişime geçin.
 
@@ -1119,7 +1119,7 @@ ONLYOFFICE Ekibi
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Davet linkine tıkladıktan sonra hesabınız için lütfen yeni bir şifre belirleyiniz.
 
@@ -1134,7 +1134,7 @@ Lütfen ONLYOFFICE DocSpace'iniz için $PaymentDelay‎ günlük ek sürenin etk
 
 Business aboneliğinizin ödemesini, ödemesiz dönem sona ermeden önce yaptığınızdan emin olun. Bu sayede ONLYOFFICE DocSpace'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -1147,7 +1147,7 @@ Lütfen ONLYOFFICE DocSpace aboneliğinizin üç gün içinde sona ereceğini di
 
 Business aboneliğinizi şimdi ödemenizi ve ONLYOFFICE DocSpace'inizin tüm avantajlarını kullanmaya devam etmenizi tavsiye ederiz.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -1160,7 +1160,7 @@ ONLYOFFICE DocSpace'iniz için $PaymentDelay günlük ödemesiz sürenin sona er
 
 Business aboneliğinizin ödemesini mümkün olan en kısa sürede yaptığınızdan emin olun. Böylece ONLYOFFICE DocSpace'inizin tüm avantajlarını eskisi gibi kullanabileceksiniz.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -1173,7 +1173,7 @@ ONLYOFFICE DocSpace'iniz için $PaymentDelay günlük ek sürenin yarın sona er
 
 Business aboneliğinizin ödemesini bugün yaptığınızdan emin olun. Böylece ONLYOFFICE DocSpace'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
 
-$GreenButton
+$OrangeButton
 
 Saygılarımızla,
 ONLYOFFICE Ekibi
@@ -1184,7 +1184,7 @@ ONLYOFFICE Ekibi
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumundaki $Message odasına katılmaya davet edildiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Davet bağlantısına tıkladıktan sonra lütfen hesabınız için yeni bir şifre belirleyiniz.
 
@@ -1251,7 +1251,7 @@ ONLYOFFICE™ Destek Ekibi
 
 Aşağıdaki butona tıklayın ve bulutunuzda giriş yapın*.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -1266,14 +1266,14 @@ ${LetterLogoText} portalına girmek için kullandığınız kimlik doğrulama uy
 
 Portal oturum açma sayfasına gitmek ve kimlik doğrulayıcı uygulamasını yapılandırmak için lütfen aşağıdaki butona tıklayın:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Merhaba $UserName!
 
 Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Bağlantı yalnızca 7 gün boyunca geçerlidir.
 
@@ -1284,7 +1284,7 @@ Web ofisinizi nasıl kullanacağınıza dair daha fazla ipucu göndereceğiz. Pr
 
 $__AuthorName size konuk kullanıcı olarak davet ediyor: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Bağlantı yalnızca 7 gün boyunca geçerlidir.
 
@@ -1340,7 +1340,7 @@ h1."$PortalUrl":"$PortalUrl"
 Portalınız yeni bir alana taşındı. Lütfen oturum açmak için kullanılacak şifreyi belirleyerek portala erişiminizi yeniden etkin hale getirin.
 
 Hesap şifrenizi belirlemek üzere lütfen aşağıdaki bağlantıyı takip edin:
-$GreenButton
+$OrangeButton
 
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen erişimi yeniden etkin hale getirme işlemini bu süre zarfında tamamlayın.
 
@@ -1401,7 +1401,7 @@ ONLYOFFICE ekibi</value>
 
 Aşağıdaki butona tıklayın ve bulutunuzda giriş yapın*.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -1422,7 +1422,7 @@ ONLYOFFICE ekibi</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com adresindeki hesabınızın sonlandırılmasını talep ettiniz. İsteği tamamlamak için bağlantıya tıklayın (bağlantı 7 günlük bir süre boyunca etkindir):
 
-$GreenButton
+$OrangeButton
 
 *Not*: Silme sonrasında, hesabınız ve tüm ilişkili veriler "Gizlilik Politikası":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca kalıcı olarak silinecektir.
 
@@ -1442,7 +1442,7 @@ Sayın $OwnerName,
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalınızın geçici olarak devre dışı bırakılmasını talep ettiniz. Lütfen işlemi onaylamak için aşağıdaki bağlantıya tıklayın:
 
-$GreenButton
+$OrangeButton
 
 _Not_: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen portal devre dışı bırakma işlemini bu süre zarfında tamamlayın.
 
@@ -1470,7 +1470,7 @@ Portalı silmeden önce, lütfen otomatik faturalamanın kapalı olduğundan emi
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalınızı silmeye devam etmek istiyorsanız, lütfen işlemi onaylamak için aşağıdaki bağlantıya tıklayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen portal silme işlemini bu süre zarfında tamamlayın.
 
@@ -1559,7 +1559,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Portalınız geri yüklendi. Erişmek için yeni bir şifre belirlemeniz gerekmektedir.
 
-$GreenButton
+$OrangeButton
 
 s
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir.
@@ -1571,7 +1571,7 @@ Bu e-postayı yanlışlıkla aldıysanız, lütfen dikkate almayın veya daha fa
 
 Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Aralıklarla size kullanışlı ipuçları ve güncel ONLYOFFICE haberlerini de göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsiniz.
 
@@ -1637,7 +1637,7 @@ Portalınız yeniden kullanılabilir.</value>
 
 Aşağıdaki bağlantıya tıklayarak daveti kabul edin ve oturum açmak için kurumsal hesap kullanıcı adınızı ve şifrenizi kullanın.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
   </data>

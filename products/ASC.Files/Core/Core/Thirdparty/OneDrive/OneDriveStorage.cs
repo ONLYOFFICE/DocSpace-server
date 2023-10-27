@@ -269,13 +269,10 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                var responseString = await readStream.ReadToEndAsync();
-                var responseJson = JObject.Parse(responseString);
-                uploadSession.Location = responseJson.Value<string>("uploadUrl");
-            }
+            using var readStream = new StreamReader(responseStream);
+            var responseString = await readStream.ReadToEndAsync();
+            var responseJson = JObject.Parse(responseString);
+            uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
 
         uploadSession.Status = ResumableUploadSessionStatus.Started;

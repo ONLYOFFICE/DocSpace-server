@@ -607,13 +607,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Kamer verwijderd</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Link aangemaakt. Rol: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Link verwijderd</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Link bijgewerkt. Rol: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

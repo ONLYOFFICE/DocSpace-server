@@ -69,7 +69,6 @@ const httpServer = http.createServer(app);
 httpServer.listen(config.app.port, function () {
   winston.info(
     `Start SSO Service Provider listening on port ${config.app.port} ` +
-      `machineKey='${machineKey}' ` +
       `appsettings path='${config.app.appsettings}'`
   );
 });

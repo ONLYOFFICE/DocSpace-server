@@ -4650,7 +4650,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint(19)")
+                        .HasColumnType("int(10)")
                         .HasColumnName("id");
 
                     b.Property<string>("Link")
@@ -6563,12 +6563,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("name");
-
-                    b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("ssl")
-                        .HasDefaultValueSql("'1'");
 
                     b.Property<string>("SecretKey")
                         .ValueGeneratedOnAdd()

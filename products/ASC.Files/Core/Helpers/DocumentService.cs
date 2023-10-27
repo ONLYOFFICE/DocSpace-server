@@ -300,17 +300,12 @@ public static class DocumentService
                     { "payload", body }
                 };
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                                              new JsonNetSerializer(),
-                                                              new JwtBase64UrlEncoder());
-#pragma warning restore CS0618 // Type or member is obsolete
+            var token = JsonWebToken.Encode(payload, signatureSecret);
 
-            var token = encoder.Encode(payload, signatureSecret);
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
-            token = encoder.Encode(body, signatureSecret);
+            token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
         }
 
@@ -427,11 +422,8 @@ public static class DocumentService
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            if (responseStream != null)
-            {
-                using var reader = new StreamReader(responseStream);
-                dataResponse = await reader.ReadToEndAsync();
-            }
+            using var reader = new StreamReader(responseStream);
+            dataResponse = await reader.ReadToEndAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))

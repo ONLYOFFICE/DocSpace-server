@@ -221,7 +221,7 @@ public class CookiesManager
         if (lifeTime > 0)
         {
             settings.Index += 1;
-            settings.LifeTime = lifeTime;
+            settings.LifeTime = lifeTime > 9999 ? 9999 : lifeTime;
         }
         else
         {
@@ -295,7 +295,6 @@ public class CookiesManager
             if (isSuccess)
             {
                 await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
-                _dbLoginEventsManager.ResetCache(tenantId, userId);
             }
         }
 
@@ -322,7 +321,6 @@ public class CookiesManager
             if (isSuccess)
             {
                 await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
-                await _dbLoginEventsManager.ResetCacheAsync();
             }
         }
     }

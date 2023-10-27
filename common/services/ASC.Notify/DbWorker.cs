@@ -53,11 +53,11 @@ public class DbWorker : IDisposable
         await strategy.ExecuteAsync(async () =>
         {
             await using var tx = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-
             var notifyQueue = _mapper.Map<NotifyMessage, NotifyQueue>(m);
             notifyQueue.Attachments = JsonConvert.SerializeObject(m.Attachments);
 
             notifyQueue = (await dbContext.NotifyQueue.AddAsync(notifyQueue)).Entity;
+            await dbContext.SaveChangesAsync();
 
             var id = notifyQueue.NotifyId;
 
@@ -119,10 +119,6 @@ public class DbWorker : IDisposable
             await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(q=> q.SetProperty(p => p.State, (int)MailSendingState.Sending));
 
             return messages;
-        }
-        catch
-        {
-            throw;
         }
         finally
         {
