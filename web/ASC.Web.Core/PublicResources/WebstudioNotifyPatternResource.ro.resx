@@ -1638,4 +1638,253 @@ Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" s
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_rename" xml:space="preserve">
+    <value>h1.Schimbarea adresei de portal
+
+Stimată/Stimate $UserDisplayName,
+
+Adresa de portal $PortalUrl a fost schimbată cu una nouă "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+*Mențiune*: Setările DNS și opțiuni de autentificare unică nu vor funcționa până nu le schimbați.</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1.Ștergerea profilului pe portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+licitat ștergerea definitivă profilului dvs din portalul "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Dacă doriți totuși să ștergeți portalul, urmăriți linkul de mai jos pentru a confirma acțiunea:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile. Finalizați procedura de ștergere a profilului în perioada dată.</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>Utilizatorul "$FromUserName":"$FromUserLink" și-a șters profilul, așadar acest profil este acum blocat. Toate fișierele sunt încă atribuite acestui utilizator și ocupă spațiu de stocare.
+
+Puteți reatribui documentele partajate de acest utilizator unui alt utilizator activ sau le puteți elimina pentru a elibera spațiul de stocare pe portalul.
+
+Accesați pagina de profil a utilizatorului utilizând acest link.:"$FromUserLink" pentru a reatribui documentele unui alt utilizator sau pentru a elimina totate datele.</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1.Profilul dvs pe "$__VirtualRootPath":"$__VirtualRootPath" a fost schimbat
+
+Stimată/Stimate $UserName,
+
+Detaliile profilului dvs de utilizator pe "$__VirtualRootPath":"$__VirtualRootPath" au fost schimbate de către "$__AuthorName":"$__AuthorUrl".
+ 
+Pentru a vizualiza profilul dvs, urmăriți link-ul de mai jos:
+"$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>Profilul dvs pe [${__VirtualRootPath}](${__VirtualRootPath}) a fost schimbat
+
+Stimată/Stimate $UserName,
+
+Detaliile profilului dvs de utilizator pe [${__VirtualRootPath}](${__VirtualRootPath}) au fost schimbate de către [$__AuthorName]($__AuthorUrl).
+
+Pentru a vizualiza profilul dvs, urmăriți link-ul de mai jos:
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Procesul de reatribuire de date de la utilizatorul "$FromUserName":"$FromUserLink" la utilizatorul "$ToUserName":"$ToUserLink" s-a terminat cu succes.</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Procesul de reatribuire de date de la utilizatorul "$FromUserName":"$FromUserLink" la utilizatorul "$ToUserName":"$ToUserLink" nu a reușit.
+
+Mesaj de excepție: $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Datele utilizatorului "$FromUserName":"$FromUserLink" nu au fost eliminate.
+
+Mesaj de excepție: $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.Solicitare licență Enterprise
+
+h3.Prenume
+$UserName
+
+h3.Nume
+$UserLastName
+
+h3.Funcția
+$Position
+
+h3.E-mail
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Telefon
+$Phone
+
+h3.Pagina web a societăției
+$Website
+
+h3.Denumirea societății
+$CompanyTitle
+
+h3.Mărimea socuetății
+$CompanySize
+
+h3.Conținutul solicitării
+$Body
+
+h3.Adresă de portal
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.Solicitarea tarifului SaaS pent "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.Prenume
+$UserName
+
+h3.Nume
+$UserLastName
+
+h3.Funcția
+$Position
+
+h3.E-mail
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Telefon
+$Phone
+
+h3.Pagina web a societăției
+$Website
+
+h3.Denumirea societății
+$CompanyTitle
+
+h3.Mărimea socuetății
+$CompanySize
+
+h3.Conținutul solicitării
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.Restaurare portal
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Portalul dvs a fost restaurat. Pentru a accesa portalul, trebuie să setați o nouă parolă:
+
+$OrangeButton
+
+*Menţiune*: Acest link este valabil doar timp de 7 zile.
+
+Dacă acest mesaj v-a fost trimis din greșeală, ignorați-l sau contactați administratorul dvs de portal "${__VirtualRootPath}":"${__VirtualRootPath}" pentru a afla detalii.</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.Demararea operaţiunii de restaurare portal
+
+Restaurarea portalului s-a demarat. Procesul va dura ceva timp în funcție de volumul și tipul de date.
+
+*Mențiune*: în timpul procesului de restaurare portalul nu va fi disponibil.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Pentru a modifica tipul de notificare, gestionați setările pentru abonament:":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Salut!
+
+Sunteţi invitat să vă asociaţi la "${__VirtualRootPath}":"${__VirtualRootPath}" ca un utilizator invitat. Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+De asemenea, vă vom trimite din când în când sfaturi utile și ultimele noutăți ONLYOFFICE. Puteți anula abonamentele pe pagina de Profil în orice moment, precum și să le reactivați.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1.Notificarea privind modificarea profilului de portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl" a schimbat detaliile profilului său pe portalul ["${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^Dacă nu doriți să primiți notificări despre actualizări de profil, gestionați setările de abonament:"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_send_whats_new" xml:space="preserve">
+    <value>h1.Ce este nou în spațiul dvs DocSpace în data de $Date
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>Mesaj test SMTP
+
+Acest mesaj a fost generat automat pentru a testa setările SMTP. Dacă mesajul se afișează înseamnă că toate setările sunt setate corect și le puteți folosi pe portalul dvs.
+
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de decriptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" eșuată.
+
+Unele fișiere nu au putut fi decriptate. Aflați mai multe detalii în Panou de control:"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de decriptare a fișierului s-a demarat pe portalul "${PortalUrl}":"${PortalUrl}".
+
+Decriptarea va dura ceva timp, deci portalul va fi temporar indisponibil. De îndată ce decriptarea se încheie, veți putea să lucrați din nou cu datele dvs.</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de decriptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" s-a terminat cu succes.
+
+Portalul dvs este din nou disponibil.</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de criptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" eșuată.
+
+Unele fișiere nu au putut fi criptate. Aflați mai multe detalii în Panou de control:"${ControlPanelUrl}/storage".</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de criptare a fișierului s-a demarat pe portalul "${PortalUrl}":"${PortalUrl}".
+
+Criptarea va dura ceva timp, deci portalul va fi temporar indisponibil. De îndată ce criptarea se încheie, veți putea să lucrați din nou cu datele dvs.</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>Salut, $UserName!
+
+Procedura de criptare a fișierului pe portalul "${PortalUrl}":"${PortalUrl}" s-a terminat cu succes.
+
+Portalul dvs este din nou disponibil.</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1.Un utilizator nou a fost adăugat la portalul "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl" s-a alăturat portalului dvs "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^Dacă nu doriți să primiți notificări despre utilizatorii noi, gestionați setările de abonament:"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>Stimată/Stimate $UserName,
+
+Datele utilizatorului "$FromUserName":"$FromUserLink" au fost eliminate cu succes.
+
+Ștergerea datelor cu caracter personal a permis eliberarea $DocsSpace</value>
+  </data>
 </root>
