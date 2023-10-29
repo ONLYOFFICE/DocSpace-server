@@ -206,7 +206,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     internal async Task IndexAsync(T data, bool immediately = true)
     {
-        if (!(await BeforeIndex(data)))
+        if (!(await BeforeIndexAsync(data)))
         {
             return;
         }
@@ -237,7 +237,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 var t = data[i];
                 var runBulk = i == data.Count - 1;
 
-                await BeforeIndex(t);
+                await BeforeIndexAsync(t);
 
                 if (t is not ISearchItemDocument wwd || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
                 {
@@ -313,7 +313,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
         {
             foreach (var item in data)
             {
-                await BeforeIndex(item);
+                await BeforeIndexAsync(item);
             }
 
             await _client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
@@ -420,11 +420,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
         var total = result.Total;
 
         return (result.Documents, total);
-    }
-
-    protected virtual Task<bool> BeforeIndex(T data)
-    {
-        return Task.FromResult(CheckExist(data));
     }
 
     protected virtual Task<bool> BeforeIndexAsync(T data)
@@ -614,12 +609,9 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private string TryGetName(Expression expr, out MemberExpression member)
     {
         member = expr as MemberExpression;
-        if (member == null)
+        if (member == null && expr is UnaryExpression unary)
         {
-            if (expr is UnaryExpression unary)
-            {
-                member = unary.Operand as MemberExpression;
-            }
+            member = unary.Operand as MemberExpression;
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();

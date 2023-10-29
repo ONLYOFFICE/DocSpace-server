@@ -73,14 +73,14 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Delete;
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
-        var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
-        var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
+        var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
+        var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
         tenantManager.SetCurrentTenant(CurrentTenant);
 
-        var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
+        var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.SetCurrentShareData(CurrentShareData);
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
@@ -100,16 +100,16 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         if (_isEmptyTrash)
         {
-            await DeleteFilesAsync(Files, scope);
-            await DeleteFoldersAsync(Folders, scope);
+            await DeleteFilesAsync(Files, serviceScope);
+            await DeleteFoldersAsync(Folders, serviceScope);
 
             var trash = await folderDao.GetFolderAsync(_trashId);
             _ = filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
         }
         else
         {
-            await DeleteFilesAsync(Files, scope, true);
-            await DeleteFoldersAsync(Folders, scope, true);
+            await DeleteFilesAsync(Files, serviceScope, true);
+            await DeleteFoldersAsync(Folders, serviceScope, true);
         }
     }
 
@@ -388,7 +388,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
         }
 
-        return (false, error);
+        return (false, null);
     }
 }
 

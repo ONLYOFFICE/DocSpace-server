@@ -875,13 +875,11 @@ public class S3Storage : BaseStorage
 
     public override async Task<bool> IsDirectoryAsync(string domain, string path)
     {
-        using (var client = GetClient())
-        {
-            var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
-            var response = await client.ListObjectsAsync(request);
+        using var client = GetClient();
+        var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
+        var response = await client.ListObjectsAsync(request);
 
-            return response.S3Objects.Count > 0;
-        }
+        return response.S3Objects.Count > 0;
     }
 
     public override async Task DeleteDirectoryAsync(string domain, string path)

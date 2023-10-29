@@ -173,14 +173,12 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
 
         using var response = await _dropboxClient.Files.DownloadAsync(filePath);
         var tempBuffer = _tempStream.Create();
-        await using (var str = await response.GetContentAsStreamAsync())
+        await using var str = await response.GetContentAsStreamAsync();
+        if (str != null)
         {
-            if (str != null)
-            {
-                await str.CopyToAsync(tempBuffer);
-                await tempBuffer.FlushAsync();
-                tempBuffer.Seek(offset, SeekOrigin.Begin);
-            }
+            await str.CopyToAsync(tempBuffer);
+            await tempBuffer.FlushAsync();
+            tempBuffer.Seek(offset, SeekOrigin.Begin);
         }
 
         return tempBuffer;

@@ -862,11 +862,9 @@ public class FileStorageService //: IFileStorageService
 
         if (fileWrapper.FormId != 0)
         {
-            await using (var stream = await _oFormRequestManager.Get(fileWrapper.FormId))
-            {
-                file.ContentLength = stream.Length;
-                file = await fileDao.SaveFileAsync(file, stream);
-            }
+            await using var stream = await _oFormRequestManager.Get(fileWrapper.FormId);
+            file.ContentLength = stream.Length;
+            file = await fileDao.SaveFileAsync(file, stream);
         }
         else if (EqualityComparer<TTemplate>.Default.Equals(fileWrapper.TemplateId, default(TTemplate)))
         {
@@ -887,11 +885,9 @@ public class FileStorageService //: IFileStorageService
                 if (!enableExternalExt)
                 {
                     var pathNew = path + "new" + fileExt;
-                    await using (var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0))
-                    {
-                        file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
-                        file = await fileDao.SaveFileAsync(file, stream);
-                    }
+                    await using var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0);
+                    file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
+                    file = await fileDao.SaveFileAsync(file, stream);
                 }
                 else
                 {
@@ -3640,8 +3636,8 @@ public class FileStorageService //: IFileStorageService
 
 public class FileModel<T, TTempate>
 {
-    public T ParentId { get; set; }
+    public T ParentId { get; init; }
     public string Title { get; set; }
-    public TTempate TemplateId { get; set; }
-    public int FormId { get; set; }
+    public TTempate TemplateId { get; init; }
+    public int FormId { get; init; }
 }

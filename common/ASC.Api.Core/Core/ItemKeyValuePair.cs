@@ -28,6 +28,6 @@ namespace ASC.Api.Collections;
 
 public class ItemKeyValuePair<TKey, TValue>
 {
-    public TKey Key { get; set; }
-    public TValue Value { get; set; }
+    public TKey Key { get; init; }
+    public TValue Value { get; init; }
 }

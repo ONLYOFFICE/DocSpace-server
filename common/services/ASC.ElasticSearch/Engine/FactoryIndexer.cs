@@ -278,7 +278,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         }
     }
 
-    public async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
+    protected async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
     {
         var t = _serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || data.Count == 0)

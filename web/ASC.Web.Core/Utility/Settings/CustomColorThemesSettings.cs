@@ -181,9 +181,9 @@ public class CustomColorThemesSettingsColorItem
 {
     /// <summary>Accent color</summary>
     /// <type>System.String, System</type>
-    public string Accent { get; set; }
+    public string Accent { get; init; }
 
     /// <summary>Button color</summary>
     /// <type>System.String, System</type>
-    public string Buttons { get; set; }
+    public string Buttons { get; init; }
 }

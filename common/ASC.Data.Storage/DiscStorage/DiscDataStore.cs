@@ -47,11 +47,11 @@ public class DiscDataStore : BaseStorage
 
         foreach (var domain in moduleConfig.Domain)
         {
-            _mappedPaths.Add(domain.Name, new MappedPath(_tpathUtils, tenant, moduleConfig.AppendTenantId, domain.Path, handlerConfig.GetProperties()));
+            _mappedPaths.Add(domain.Name, new MappedPath(_pathUtils, tenant, moduleConfig.AppendTenantId, domain.Path, handlerConfig.GetProperties()));
         }
 
         //Add default
-        _mappedPaths.Add(string.Empty, new MappedPath(_tpathUtils, tenant, moduleConfig.AppendTenantId, PathUtils.Normalize(moduleConfig.Path), handlerConfig.GetProperties()));
+        _mappedPaths.Add(string.Empty, new MappedPath(_pathUtils, tenant, moduleConfig.AppendTenantId, PathUtils.Normalize(moduleConfig.Path), handlerConfig.GetProperties()));
 
         //Make expires
         DomainsExpires =

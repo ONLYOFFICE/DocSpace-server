@@ -42,5 +42,5 @@ public record WebhookRequestIntegrationEvent : IntegrationEvent
     }
 
     [ProtoMember(1)]
-    public int WebhookId { get; set; }
+    public int WebhookId { get; init; }
 }

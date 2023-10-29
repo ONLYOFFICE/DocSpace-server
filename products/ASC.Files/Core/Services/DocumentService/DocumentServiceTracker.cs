@@ -108,7 +108,7 @@ public class DocumentServiceTracker
             }
         }
 
-        public string Message { get; set; }
+        public string Message { get; init; }
 
         public static string Serialize(TrackResponse response)
         {
@@ -555,10 +555,8 @@ public class DocumentServiceTrackerHelper
                     {
                         if (stream != null)
                         {
-                            using (var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName)))
-                            {
-                                message = await reader.ReadToEndAsync();
-                            }
+                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                            message = await reader.ReadToEndAsync();
                         }
                     }
 

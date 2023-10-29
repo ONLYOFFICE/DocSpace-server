@@ -41,12 +41,10 @@ internal sealed class BackupListenerService : IHostedService
 
     public async Task DeleteScheldureAsync(DeleteSchedule deleteSchedule)
     {
-        using (var scope = _scopeFactory.CreateScope())
-        {
-            var backupService = scope.ServiceProvider.GetService<BackupService>();
+        using var scope = _scopeFactory.CreateScope();
+        var backupService = scope.ServiceProvider.GetService<BackupService>();
 
-            await backupService.DeleteScheduleAsync(deleteSchedule.TenantId);
-        }
+        await backupService.DeleteScheduleAsync(deleteSchedule.TenantId);
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

@@ -39,27 +39,27 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool FooterSocialEnabled { get; set; }
+    public bool FooterSocialEnabled { get; init; }
 
     /// <summary>Support URL</summary>
     /// <type>System.String, System</type>
-    public string SupportUrl { get; set; }
+    public string SupportUrl { get; init; }
 
     /// <summary>Support email</summary>
     /// <type>System.String, System</type>
-    public string SupportEmail { get; set; }
+    public string SupportEmail { get; init; }
 
     /// <summary>Sales email</summary>
     /// <type>System.String, System</type>
-    public string SalesEmail { get; set; }
+    public string SalesEmail { get; init; }
 
     /// <summary>Demo URL</summary>
     /// <type>System.String, System</type>
-    public string DemoUrl { get; set; }
+    public string DemoUrl { get; init; }
 
     /// <summary>Site URL</summary>
     /// <type>System.String, System</type>
-    public string SiteUrl { get; set; }
+    public string SiteUrl { get; init; }
 
     [JsonIgnore]
     public Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");

@@ -790,14 +790,14 @@ public class EFUserService : IUserService
 
 public class DbUserSecurity
 {
-    public User User { get; set; }
-    public UserSecurity UserSecurity { get; set; }
+    public User User { get; init; }
+    public UserSecurity UserSecurity { get; init; }
 }
 
 public class UserWithGroup
 {
-    public User User { get; set; }
-    public UserGroup Group { get; set; }
+    public User User { get; init; }
+    public UserGroup Group { get; init; }
 }
 
 static file class Queries

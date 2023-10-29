@@ -538,7 +538,7 @@ public class NovellLdapSearcher : IDisposable
 
                 var attributeSet = nextEntry.GetAttributeSet();
 
-                var ienum = attributeSet.GetEnumerator();
+                using var ienum = attributeSet.GetEnumerator();
 
                 while (ienum.MoveNext())
                 {

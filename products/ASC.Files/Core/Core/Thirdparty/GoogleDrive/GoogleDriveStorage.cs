@@ -240,14 +240,12 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         }
 
         var tempBuffer = _tempStream.Create();
-        await using (var str = await response.Content.ReadAsStreamAsync())
+        await using var str = await response.Content.ReadAsStreamAsync();
+        if (str != null)
         {
-            if (str != null)
-            {
-                await str.CopyToAsync(tempBuffer);
-                await tempBuffer.FlushAsync();
-                tempBuffer.Seek(offset, SeekOrigin.Begin);
-            }
+            await str.CopyToAsync(tempBuffer);
+            await tempBuffer.FlushAsync();
+            tempBuffer.Seek(offset, SeekOrigin.Begin);
         }
 
         return tempBuffer;

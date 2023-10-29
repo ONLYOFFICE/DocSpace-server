@@ -96,11 +96,9 @@ public static class CommonPhotoManager
     public static byte[] SaveToBytes(Image img, IImageFormat imageFormat)
     {
         byte[] data;
-        using (var memoryStream = new MemoryStream())
-        {
-            img.Save(memoryStream, imageFormat);
-            data = memoryStream.ToArray();
-        }
+        using var memoryStream = new MemoryStream();
+        img.Save(memoryStream, imageFormat);
+        data = memoryStream.ToArray();
         return data;
     }
 

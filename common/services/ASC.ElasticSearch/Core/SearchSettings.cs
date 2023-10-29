@@ -188,7 +188,7 @@ public class SearchSettingsHelper
 
 public class SearchSettingsItem
 {
-    public string ID { get; set; }
-    public bool Enabled { get; set; }
+    public string ID { get; init; }
+    public bool Enabled { get; init; }
     public string Title { get; set; }
 }

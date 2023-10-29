@@ -41,5 +41,5 @@ public record NotifySendMessageRequestedIntegrationEvent : IntegrationEvent
     }
 
     [ProtoMember(1)]
-    public NotifyMessage NotifyMessage { get; set; }
+    public NotifyMessage NotifyMessage { get; init; }
 }

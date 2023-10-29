@@ -107,26 +107,22 @@ public class EventBusActiveMQ : IEventBus, IDisposable
                 _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
             });
 
-        using (var session = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge))
-        {
-            var destination = session.GetQueue(_queueName);
+        using var session = _persistentConnection.CreateSession(AcknowledgementMode.ClientAcknowledge);
+        var destination = session.GetQueue(_queueName);
 
-            using (var producer = session.CreateProducer(destination))
-            {
-                producer.DeliveryMode = MsgDeliveryMode.Persistent;
+        using var producer = session.CreateProducer(destination);
+        producer.DeliveryMode = MsgDeliveryMode.Persistent;
 
-                var body = _serializer.Serialize(@event);
+        var body = _serializer.Serialize(@event);
 
-                var request = session.CreateStreamMessage();
-                var eventName = @event.GetType().Name;
+        var request = session.CreateStreamMessage();
+        var eventName = @event.GetType().Name;
                         
-                request.Properties["eventName"] = eventName;
+        request.Properties["eventName"] = eventName;
 
-                request.WriteBytes(body);
+        request.WriteBytes(body);
 
-                producer.Send(request);
-            }
-        }
+        producer.Send(request);
     }
 
     public void Subscribe<T, TH>()
@@ -305,38 +301,36 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
         if (_subsManager.HasSubscriptionsForEvent(eventName))
         {
-            await using (var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME))
+            await using var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME);
+            var subscriptions = _subsManager.GetHandlersForEvent(eventName);
+
+            foreach (var subscription in subscriptions)
             {
-                var subscriptions = _subsManager.GetHandlersForEvent(eventName);
-
-                foreach (var subscription in subscriptions)
+                if (subscription.IsDynamic)
                 {
-                    if (subscription.IsDynamic)
+                    var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
+                    if (handler == null)
                     {
-                        var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
-                        if (handler == null)
-                        {
-                            continue;
-                        }
-
-                        using dynamic eventData = @event;
-                        await Task.Yield();
-                        await handler.Handle(eventData);
+                        continue;
                     }
-                    else
+
+                    using dynamic eventData = @event;
+                    await Task.Yield();
+                    await handler.Handle(eventData);
+                }
+                else
+                {
+                    var handler = scope.ResolveOptional(subscription.HandlerType);
+                    if (handler == null)
                     {
-                        var handler = scope.ResolveOptional(subscription.HandlerType);
-                        if (handler == null)
-                        {
-                            continue;
-                        }
-
-                        var eventType = _subsManager.GetEventTypeByName(eventName);
-                        var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-
-                        await Task.Yield();
-                        await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+                        continue;
                     }
+
+                    var eventType = _subsManager.GetEventTypeByName(eventName);
+                    var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
+
+                    await Task.Yield();
+                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
                 }
             }
         }

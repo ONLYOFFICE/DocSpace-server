@@ -356,8 +356,8 @@ public class DbWorker
 }
 public class DbWebhooks
 {
-    public WebhooksLog Log { get; set; }
-    public WebhooksConfig Config { get; set; }
+    public WebhooksLog Log { get; init; }
+    public WebhooksConfig Config { get; init; }
 }
 
 [Flags]

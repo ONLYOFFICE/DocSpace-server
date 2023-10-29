@@ -58,7 +58,7 @@ public class File<T> : FileEntry<T>, IFileEntry
         Global global,
         GlobalFolderHelper globalFolderHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global, globalFolderHelper, filesSettingsHelper, fileDateTime)
+        FileDateTime fileDateTime) : base(fileHelper, global)
     {
         Version = 1;
         VersionGroup = 1;

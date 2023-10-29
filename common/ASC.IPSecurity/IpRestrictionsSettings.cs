@@ -34,7 +34,7 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
 {
     /// <summary>Specifies if the IP restrictions are enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool Enable { get; set; }
+    public bool Enable { get; init; }
 
     [JsonIgnore]
     public Guid ID => new("{2EDDDF64-F792-4498-A638-2E3E6EBB13C9}");

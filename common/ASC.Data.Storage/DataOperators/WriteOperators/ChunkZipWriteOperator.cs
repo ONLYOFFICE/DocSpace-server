@@ -108,30 +108,28 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _fileStream.Position = 0;
         while ((bytesRead = await _fileStream.ReadAsync(buffer, 0, (int)chunkUploadSize)) > 0)
         {
-            using (var theMemStream = new MemoryStream())
+            using var theMemStream = new MemoryStream();
+            await theMemStream.WriteAsync(buffer, 0, bytesRead);
+            theMemStream.Position = 0;
+            if (bytesRead == chunkUploadSize || last)
             {
-                await theMemStream.WriteAsync(buffer, 0, bytesRead);
-                theMemStream.Position = 0;
-                if (bytesRead == chunkUploadSize || last)
+                if (_fileStream.Position == _fileStream.Length && last)
                 {
-                    if (_fileStream.Position == _fileStream.Length && last)
-                    {
-                        _chunkedUploadSession.LastChunk = true;
-                    }
+                    _chunkedUploadSession.LastChunk = true;
+                }
                     
-                    theMemStream.Position = 0;
-                    StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
-                    _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
-                }
-                else
-                {
-                    await _fileStream.DisposeAsync();
-                    _fileStream = _tempStream.Create();
-                    _gZipOutputStream.baseOutputStream_ = _fileStream;
+                theMemStream.Position = 0;
+                StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
+                _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
+            }
+            else
+            {
+                await _fileStream.DisposeAsync();
+                _fileStream = _tempStream.Create();
+                _gZipOutputStream.baseOutputStream_ = _fileStream;
 
-                    await theMemStream.CopyToAsync(_fileStream);
-                    await _fileStream.FlushAsync();
-                }
+                await theMemStream.CopyToAsync(_fileStream);
+                await _fileStream.FlushAsync();
             }
         }
         if (last)

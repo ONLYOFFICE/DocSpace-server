@@ -108,14 +108,12 @@ public class BackupPortalTask : PortalTaskBase
     public List<object[]> ExecuteList(DbCommand command)
     {
         var list = new List<object[]>();
-        using (var result = command.ExecuteReader())
+        using var result = command.ExecuteReader();
+        while (result.Read())
         {
-            while (result.Read())
-            {
-                var objects = new object[result.FieldCount];
-                result.GetValues(objects);
-                list.Add(objects);
-            }
+            var objects = new object[result.FieldCount];
+            result.GetValues(objects);
+            list.Add(objects);
         }
 
         return list;
@@ -127,20 +125,18 @@ public class BackupPortalTask : PortalTaskBase
 
         try
         {
-            await using (var connection = DbFactory.OpenConnection())
+            await using var connection = DbFactory.OpenConnection();
+            var command = connection.CreateCommand();
+            command.CommandText = "select id, connection_string from mail_server_server";
+            ExecuteList(command).ForEach(r =>
             {
-                var command = connection.CreateCommand();
-                command.CommandText = "select id, connection_string from mail_server_server";
-                ExecuteList(command).ForEach(r =>
-                {
-                    var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
+                var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
 
-                    var command = connection.CreateCommand();
-                    command.CommandText = "show tables";
-                    var tables = ExecuteList(command).Select(r => Convert.ToString(r[0])).ToList();
-                    databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
-                });
-            }
+                var command = connection.CreateCommand();
+                command.CommandText = "show tables";
+                var tables = ExecuteList(command).Select(r => Convert.ToString(r[0])).ToList();
+                databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
+            });
         }
         catch (Exception e)
         {

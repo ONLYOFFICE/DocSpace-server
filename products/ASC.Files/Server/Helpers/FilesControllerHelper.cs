@@ -280,10 +280,8 @@ public class FilesControllerHelper : FilesHelperBase
             return await _fileDtoHelper.GetAsync(newFile);
         }
 
-        await using (var fileStream = await _fileConverter.ExecAsync(file, destExt, password))
-        {
-            var controller = _serviceProvider.GetService<FilesControllerHelper>();
-            return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
-        }
+        await using var fileStream = await _fileConverter.ExecAsync(file, destExt, password);
+        var controller = _serviceProvider.GetService<FilesControllerHelper>();
+        return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
     }
 }

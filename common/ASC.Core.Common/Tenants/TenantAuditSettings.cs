@@ -34,11 +34,11 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
 
     /// <summary>Login history lifetime</summary>
     /// <type>System.Int32, System</type>
-    public int LoginHistoryLifeTime { get; set; }
+    public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>Audit trail lifetime</summary>
     /// <type>System.Int32, System</type>
-    public int AuditTrailLifeTime { get; set; }
+    public int AuditTrailLifeTime { get; init; }
 
     public static readonly Guid Guid = new("{8337D0FB-AD67-4552-8297-802312E7F503}");
 

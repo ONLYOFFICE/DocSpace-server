@@ -64,7 +64,7 @@ public class ActionLinkConfig
 public class CoEditingConfig
 {
     public bool Change { get; set; }
-    public bool Fast { get; set; }
+    public bool Fast { get; init; }
 
     public string Mode
     {
@@ -118,7 +118,7 @@ public class Configuration<T>
     public string EditorUrl { get; }
 
     [JsonPropertyName("Error")]
-    public string ErrorMessage { get; set; }
+    public string ErrorMessage { get; init; }
 
     /// <summary>Token</summary>
     /// <type>System.String, System</type>

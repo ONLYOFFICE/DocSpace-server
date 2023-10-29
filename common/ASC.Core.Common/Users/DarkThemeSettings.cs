@@ -40,7 +40,7 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
 
     /// <summary>Theme</summary>
     /// <type>ASC.Web.Core.Users.DarkThemeSettingsEnum, ASC.Core.Common</type>
-    public DarkThemeSettingsType Theme { get; set; }
+    public DarkThemeSettingsType Theme { get; init; }
 
     public DarkThemeSettings GetDefault()
     {

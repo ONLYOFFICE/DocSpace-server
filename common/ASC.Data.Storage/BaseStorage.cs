@@ -42,9 +42,9 @@ public abstract class BaseStorage : IDataStore
     protected ILogger Logger { get; set; }
 
     protected readonly TempStream _tempStream;
-    protected readonly TenantManager _tenantManager;
-    protected readonly PathUtils _tpathUtils;
-    protected readonly EmailValidationKeyProvider _temailValidationKeyProvider;
+    private readonly TenantManager _tenantManager;
+    protected readonly PathUtils _pathUtils;
+    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
     protected readonly IHttpContextAccessor _httpContextAccessor;
     protected readonly ILoggerProvider _options;
     protected readonly IHttpClientFactory _clientFactory;
@@ -52,7 +52,7 @@ public abstract class BaseStorage : IDataStore
     private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
     private readonly QuotaSocketManager _quotaSocketManager;
 
-    public BaseStorage(
+    protected BaseStorage(
         TempStream tempStream,
         TenantManager tenantManager,
         PathUtils pathUtils,
@@ -67,8 +67,8 @@ public abstract class BaseStorage : IDataStore
 
         _tempStream = tempStream;
         _tenantManager = tenantManager;
-        _tpathUtils = pathUtils;
-        _temailValidationKeyProvider = emailValidationKeyProvider;
+        _pathUtils = pathUtils;
+        _emailValidationKeyProvider = emailValidationKeyProvider;
         _options = options;
         _clientFactory = clientFactory;
         Logger = logger;
@@ -128,7 +128,7 @@ public abstract class BaseStorage : IDataStore
                 currentTenantId = 0;
             }
 
-            var auth = _temailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
+            var auth = _emailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
             query = $"{(path.IndexOf('?') >= 0 ? "&" : "?")}{Constants.QueryExpire}={expireString}&{Constants.QueryAuth}={auth}";
         }
 
@@ -138,8 +138,8 @@ public abstract class BaseStorage : IDataStore
         }
 
         var tenant = Tenant.Trim('/');
-        var vpath = _tpathUtils.ResolveVirtualPath(Modulename, domain);
-        vpath = _tpathUtils.ResolveVirtualPath(vpath, false);
+        var vpath = _pathUtils.ResolveVirtualPath(Modulename, domain);
+        vpath = _pathUtils.ResolveVirtualPath(vpath, false);
         vpath = string.Format(vpath, tenant);
         var virtualPath = new Uri(vpath + "/", UriKind.RelativeOrAbsolute);
 
@@ -378,7 +378,7 @@ public abstract class BaseStorage : IDataStore
 
     public abstract Task<string> GetFileEtagAsync(string domain, string path);
 
-    private class MonoUri : Uri
+    private sealed class MonoUri : Uri
     {
         public MonoUri(Uri baseUri, string relativeUri)
             : base(baseUri, relativeUri) { }

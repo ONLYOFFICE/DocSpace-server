@@ -177,12 +177,19 @@ public class StorageHandler
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null) throw new ArgumentNullException();
-        if (context.Request.Headers["Range"] == StringValues.Empty) return fullLength;
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
+
+        if (context.Request.Headers["Range"] == StringValues.Empty)
+        {
+            return fullLength;
+        }
 
         long endOffset = -1;
 
-        var range = context.Request.Headers["Range"][0].Split(new[] { '=', '-' });
+        var range = context.Request.Headers["Range"][0].Split('=', '-');
         offset = Convert.ToInt64(range[1]);
         if (range.Count() > 2 && !string.IsNullOrEmpty(range[2]))
         {

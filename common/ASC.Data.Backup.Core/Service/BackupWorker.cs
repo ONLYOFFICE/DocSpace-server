@@ -227,42 +227,39 @@ public class BackupWorker
 
     internal static string GetBackupHashSHA(string path)
     {
-        using (var sha256 = SHA256.Create())
-        using (var fileStream = File.OpenRead(path))
-        {
-            fileStream.Position = 0;
-            var hash = sha256.ComputeHash(fileStream);
-            return BitConverter.ToString(hash).Replace("-", string.Empty);
-        }
+        using var sha256 = SHA256.Create();
+        using var fileStream = File.OpenRead(path);
+        fileStream.Position = 0;
+        var hash = sha256.ComputeHash(fileStream);
+        return BitConverter.ToString(hash).Replace("-", string.Empty);
     }
 
     internal static string GetBackupHashMD5(string path, long chunkSize)
     {
-        using (var md5 = MD5.Create())
-        using (var fileStream = File.OpenRead(path))
-        {var multipartSplitCount = 0;
-                var splitCount = fileStream.Length / chunkSize;
-                var mod = (int)(fileStream.Length - chunkSize * splitCount);
-                IEnumerable<byte> concatHash = new byte[] { };
+        using var md5 = MD5.Create();
+        using var fileStream = File.OpenRead(path);
+        var multipartSplitCount = 0;
+        var splitCount = fileStream.Length / chunkSize;
+        var mod = (int)(fileStream.Length - chunkSize * splitCount);
+        IEnumerable<byte> concatHash = new byte[] { };
 
-                for (var i = 0; i < splitCount; i++)
-                {
-                    var offset = i == 0 ? 0 : chunkSize * i;
-                    var chunk = GetChunk(fileStream, offset, (int)chunkSize);
-                    var hash = md5.ComputeHash(chunk);
-                    concatHash = concatHash.Concat(hash);
-                    multipartSplitCount++;
-                }
-                if (mod != 0)
-                {
-                    var chunk = GetChunk(fileStream, chunkSize * splitCount, mod);
-                    var hash = md5.ComputeHash(chunk);
-                    concatHash = concatHash.Concat(hash);
-                    multipartSplitCount++;
-                }
-                var multipartHash = BitConverter.ToString(md5.ComputeHash(concatHash.ToArray())).Replace("-", string.Empty);
-                return multipartHash + "-" + multipartSplitCount;
+        for (var i = 0; i < splitCount; i++)
+        {
+            var offset = i == 0 ? 0 : chunkSize * i;
+            var chunk = GetChunk(fileStream, offset, (int)chunkSize);
+            var hash = md5.ComputeHash(chunk);
+            concatHash = concatHash.Concat(hash);
+            multipartSplitCount++;
         }
+        if (mod != 0)
+        {
+            var chunk = GetChunk(fileStream, chunkSize * splitCount, mod);
+            var hash = md5.ComputeHash(chunk);
+            concatHash = concatHash.Concat(hash);
+            multipartSplitCount++;
+        }
+        var multipartHash = BitConverter.ToString(md5.ComputeHash(concatHash.ToArray())).Replace("-", string.Empty);
+        return multipartHash + "-" + multipartSplitCount;
     }
 
     private static byte[] GetChunk(Stream sourceStream, long offset, int count)

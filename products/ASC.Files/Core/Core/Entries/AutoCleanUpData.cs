@@ -38,9 +38,9 @@ public enum DateToAutoCleanUp
 
 public class AutoCleanUpData
 {
-    public bool IsAutoCleanUp { get; set; }
+    public bool IsAutoCleanUp { get; init; }
 
-    public DateToAutoCleanUp Gap { get; set; }
+    public DateToAutoCleanUp Gap { get; init; }
 }
 
 [Scope]

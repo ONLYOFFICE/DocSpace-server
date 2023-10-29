@@ -194,7 +194,7 @@ public static class UserPhotoThumbnailManager
 
 public class ThumbnailItem
 {
-    public Size Size { get; set; }
+    public Size Size { get; init; }
     public string ImgUrl { get; set; }
     public Image Image { get; set; }
 }

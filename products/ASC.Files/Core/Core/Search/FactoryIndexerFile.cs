@@ -45,30 +45,18 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
         _daoFactory = daoFactory;
     }
 
-    protected override async Task<bool> BeforeIndex(DbFile data)
-    {
-        if (!(await base.BeforeIndex(data)))
-        {
-            return false;
-        }
-
-        var fileDao = _daoFactory.GetFileDao<int>() as FileDao;
-        await _tenantManager.SetCurrentTenantAsync(data.TenantId);
-        await fileDao.InitDocumentAsync(data);
-
-        return true;
-    }
-
     protected override async Task<bool> BeforeIndexAsync(DbFile data)
     {
-        if (!(await base.BeforeIndex(data)))
+        if (!(await base.BeforeIndexAsync(data)))
         {
             return false;
         }
 
-        var fileDao = _daoFactory.GetFileDao<int>() as FileDao;
-        await _tenantManager.SetCurrentTenantAsync(data.TenantId);
-        await fileDao.InitDocumentAsync(data);
+        if (_daoFactory.GetFileDao<int>() is FileDao fileDao)
+        {
+            await _tenantManager.SetCurrentTenantAsync(data.TenantId);
+            await fileDao.InitDocumentAsync(data);
+        }
 
         return true;
     }
@@ -99,63 +87,12 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
     public override async Task IndexAllAsync()
     {
-        (int, int, int) getCount(DateTime lastIndexed)
-        {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-
-            var minid = Queries.FileMinId(filesDbContext, lastIndexed);
-
-            var maxid = Queries.FileMaxId(filesDbContext, lastIndexed);
-
-            var count = Queries.FilesCount(filesDbContext, lastIndexed);
-
-            return new(count, maxid, minid);
-        }
-
-        List<DbFile> getData(long start, long stop, DateTime lastIndexed)
-        {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-            return Queries.FilesFoldersPair(filesDbContext, lastIndexed, start, stop)
-                .Select(r =>
-                {
-                    var result = r.File;
-                    result.Folders = r.Folders;
-                    return result;
-                })
-                .ToList();
-
-        }
-
-        List<int> getIds(DateTime lastIndexed)
-        {
-            var start = 0;
-            var result = new List<int>();
-
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-
-            while (true)
-            {
-                var id = Queries.FileId(filesDbContext, lastIndexed, start);
-                if (id != 0)
-                {
-                    start = id;
-                    result.Add(id);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return result;
-        }
-
         try
         {
             var j = 0;
             var tasks = new List<Task>();
 
-            foreach (var data in await _indexer.IndexAllAsync(getCount, getIds, getData))
+            foreach (var data in await _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
                 if (_settings.Threads == 1)
                 {
@@ -184,6 +121,57 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             Logger.ErrorFactoryIndexerFile(e);
             throw;
         }
+
+        List<int> GetIds(DateTime lastIndexed)
+        {
+            var start = 0;
+            var result = new List<int>();
+
+            using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+            while (true)
+            {
+                var id = Queries.FileId(filesDbContext, lastIndexed, start);
+                if (id != 0)
+                {
+                    start = id;
+                    result.Add(id);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        List<DbFile> GetData(long start, long stop, DateTime lastIndexed)
+        {
+            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            return Queries.FilesFoldersPair(filesDbContext, lastIndexed, start, stop)
+                .Select(r =>
+                {
+                    var result = r.File;
+                    result.Folders = r.Folders;
+                    return result;
+                })
+                .ToList();
+
+        }
+
+        (int, int, int) GetCount(DateTime lastIndexed)
+        {
+            using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+            var minId = Queries.FileMinId(filesDbContext, lastIndexed);
+
+            var maxId = Queries.FileMaxId(filesDbContext, lastIndexed);
+
+            var count = Queries.FilesCount(filesDbContext, lastIndexed);
+
+            return new(count, maxId, minId);
+        }
     }
 
     public override string SettingsTitle => FilesCommonResource.IndexTitle;
@@ -191,8 +179,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
 public class FileTenant
 {
-    public DbTenant DbTenant { get; set; }
-    public DbFile DbFile { get; set; }
+    public DbTenant DbTenant { get; init; }
+    public DbFile DbFile { get; init; }
 }
 
 public static class FactoryIndexerFileExtension
@@ -203,10 +191,10 @@ public static class FactoryIndexerFileExtension
     }
 }
 
-file class FilesFoldersPair
+sealed file class FilesFoldersPair
 {
-    public DbFile File { get; set; }
-    public List<DbFolderTree> Folders { get; set; }
+    public DbFile File { get; init; }
+    public List<DbFolderTree> Folders { get; init; }
 }
 
 static file class Queries
@@ -242,8 +230,7 @@ static file class Queries
                 .Join(ctx.Tenants, r => r.TenantId, r => r.Id, (f, t) => new FileTenant { DbFile = f, DbTenant = t })
                 .Where(r => r.DbTenant.Status == TenantStatus.Active)
                 .Select(r => r.DbFile)
-                .Where(r => r.Version == 1)
-                .Count());
+                .Count(r => r.Version == 1));
 
     public static readonly Func<FilesDbContext, DateTime, long, long, IEnumerable<FilesFoldersPair>> FilesFoldersPair =
         EF.CompileQuery(

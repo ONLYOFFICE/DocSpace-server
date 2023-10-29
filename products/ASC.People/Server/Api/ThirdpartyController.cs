@@ -363,29 +363,25 @@ public class ThirdpartyController : ApiControllerBase
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        using (var memstream = new MemoryStream())
+        using var memstream = new MemoryStream();
+        var request = new HttpRequestMessage
         {
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url)
-            };
+            RequestUri = new Uri(url)
+        };
 
-            var httpClient = _httpClientFactory.CreateClient();
-            using (var response = await httpClient.SendAsync(request))
-            await using (var stream = await response.Content.ReadAsStreamAsync())
-            {
-                var buffer = new byte[512];
-                int bytesRead;
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
-                    memstream.Write(buffer, 0, bytesRead);
-                }
-
-                var bytes = memstream.ToArray();
-
-                await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-            }
+        var httpClient = _httpClientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var buffer = new byte[512];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            memstream.Write(buffer, 0, bytesRead);
         }
+
+        var bytes = memstream.ToArray();
+
+        await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
     }
 
     private string GetEmailAddress(SignupAccountRequestDto inDto)

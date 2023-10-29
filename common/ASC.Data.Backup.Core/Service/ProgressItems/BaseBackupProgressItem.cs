@@ -86,7 +86,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
         {
             return _backupProgressItemEnum ?? (BackupProgressItemType)this[nameof(_backupProgressItemEnum)];
         }
-        protected set
+        protected init
         {
             _backupProgressItemEnum = value;
 

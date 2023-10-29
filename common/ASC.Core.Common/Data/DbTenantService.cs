@@ -468,9 +468,9 @@ public class DbTenantService : ITenantService
 
 public class TenantUserSecurity
 {
-    public DbTenant DbTenant { get; set; }
-    public User User { get; set; }
-    public UserSecurity UserSecurity { get; set; }
+    public DbTenant DbTenant { get; init; }
+    public User User { get; init; }
+    public UserSecurity UserSecurity { get; init; }
 }
 
 static file class Queries

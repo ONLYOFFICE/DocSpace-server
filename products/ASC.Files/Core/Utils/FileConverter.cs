@@ -649,10 +649,7 @@ public class FileConverter
 
             if (e.StatusCode != HttpStatusCode.NotFound)
             {
-                if (e.Message != null)
-                {
-                    errorString += $" Error {e.Message}";
-                }
+                errorString += $" Error {e.Message}";
             }
 
             throw new Exception(errorString);

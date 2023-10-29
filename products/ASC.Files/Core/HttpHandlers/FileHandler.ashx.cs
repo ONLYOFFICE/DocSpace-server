@@ -1125,19 +1125,17 @@ public class FileHandlerService
                 context.Response.ContentType = MimeMapping.GetMimeMapping(".jpeg");
                 context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".jpeg", true));
 
-                await using (var stream = await fileDao.GetFileStreamAsync(file))
+                await using var stream = await fileDao.GetFileStreamAsync(file);
+                var processedImage = await Image.LoadAsync(stream);
+
+                processedImage.Mutate(x => x.Resize(new ResizeOptions
                 {
-                    var processedImage = await Image.LoadAsync(stream);
+                    Size = new Size(width, height),
+                    Mode = ResizeMode.Crop
+                }));
 
-                    processedImage.Mutate(x => x.Resize(new ResizeOptions
-                    {
-                        Size = new Size(width, height),
-                        Mode = ResizeMode.Crop
-                    }));
-
-                    // save as jpeg more fast, then webp
-                    await processedImage.SaveAsJpegAsync(context.Response.Body);
-                }
+                // save as jpeg more fast, then webp
+                await processedImage.SaveAsJpegAsync(context.Response.Body);
             }
             else
             {
@@ -1146,11 +1144,9 @@ public class FileHandlerService
 
                 var thumbnailFilePath = fileDao.GetUniqThumbnailPath(file, width, height);
 
-                await using (var stream = await (await _globalStore.GetStoreAsync()).GetReadStreamAsync(thumbnailFilePath))
-                {
-                    context.Response.Headers.Add("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
-                    await stream.CopyToAsync(context.Response.Body);
-                }
+                await using var stream = await (await _globalStore.GetStoreAsync()).GetReadStreamAsync(thumbnailFilePath);
+                context.Response.Headers.Add("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
+                await stream.CopyToAsync(context.Response.Body);
             }
 
         }
@@ -1208,10 +1204,8 @@ public class FileHandlerService
 
             var fileDao = _daoFactory.GetFileDao<string>();
 
-            await using (var stream = await fileDao.GetThumbnailAsync(id, width, height))
-            {
-                await stream.CopyToAsync(context.Response.Body);
-            }
+            await using var stream = await fileDao.GetThumbnailAsync(id, width, height);
+            await stream.CopyToAsync(context.Response.Body);
         }
         catch (FileNotFoundException ex)
         {

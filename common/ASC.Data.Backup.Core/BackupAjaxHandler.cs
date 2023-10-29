@@ -431,11 +431,11 @@ public class BackupAjaxHandler
 
         /// <summary>Cron parameters</summary>
         /// <type>ASC.Data.Backup.BackupAjaxHandler.CronParams, ASC.Data.Backup.Core</type>
-        public CronParams CronParams { get; set; }
+        public CronParams CronParams { get; init; }
 
         /// <summary>Maximum number of the stored backup copies</summary>
         /// <type>System.Nullable{System.Int32}, System</type>
-        public int? BackupsStored { get; set; }
+        public int? BackupsStored { get; init; }
 
         /// <summary>Last backup creation time</summary>
         /// <type>System.DateTime, System</type>
@@ -444,9 +444,9 @@ public class BackupAjaxHandler
 
     public class CronParams
     {
-        public BackupPeriod Period { get; set; }
-        public int Hour { get; set; }
-        public int Day { get; set; }
+        public BackupPeriod Period { get; init; }
+        public int Hour { get; init; }
+        public int Day { get; init; }
 
         public CronParams() { }
 

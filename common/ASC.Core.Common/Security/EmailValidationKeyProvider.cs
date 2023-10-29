@@ -174,23 +174,23 @@ public class EmailValidationKeyModel
 {
     /// <summary>Key</summary>
     /// <type>System.String, System</type>
-    public string Key { get; set; }
+    public string Key { get; init; }
 
     /// <summary>Employee type</summary>
     /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
-    public EmployeeType? EmplType { get; set; }
+    public EmployeeType? EmplType { get; init; }
 
     /// <summary>Email</summary>
     /// <type>System.String, System</type>
-    public string Email { get; set; }
+    public string Email { get; init; }
 
     /// <summary>User ID</summary>
     /// <type>System.Nullabel{System.Guid}, System</type>
-    public Guid? UiD { get; set; }
+    public Guid? UiD { get; init; }
 
     /// <summary>Confirmation email type</summary>
     /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
-    public ConfirmType? Type { get; set; }
+    public ConfirmType? Type { get; init; }
     
     /// <summary>Room ID</summary>
     /// <type>System.String, System</type>

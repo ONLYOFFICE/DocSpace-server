@@ -160,8 +160,8 @@ internal class BackupFileUploadResult
 
 internal class UploadInfo
 {
-    public long Size { get; set; }
-    public string Ext { get; set; }
+    public long Size { get; init; }
+    public string Ext { get; init; }
 }
 
 public static class BackupFileUploadHandlerExtensions

@@ -295,7 +295,7 @@ internal abstract class ThirdPartyProviderDao
     {
         if (withoutTags)
         {
-            return rooms.Join(Queries.AllThirdpartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
+            return rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
                 .WhereAwait(async r => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
                 .Select(r => r.folder);
         }
@@ -305,7 +305,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var filtered = rooms.Join(Queries.AllThirdpartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
+        var filtered = rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
             .Join(Queries.AllTagLinksAsync(filesDbContext), r => r.HashId, t => t.EntryId, (result, tag) => new { result.folder, tag.TagId })
             .Join(Queries.AllTagsAsync(filesDbContext), r => r.TagId, t => t.Id, (result, tagInfo) => new { result.folder, tagInfo.Name })
             .Where(r => tags.Contains(r.Name))
@@ -513,7 +513,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         return file;
     }
 
-    protected void InitFileEntry(FileEntry<string> fileEntry)
+    private void InitFileEntry(FileEntry<string> fileEntry)
     {
         fileEntry.CreateBy = ProviderInfo.Owner;
         fileEntry.ModifiedBy = ProviderInfo.Owner;
@@ -524,7 +524,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         fileEntry.RootId = MakeId();
     }
 
-    protected void InitFileEntryError(FileEntry<string> fileEntry, ErrorEntry entry)
+    private void InitFileEntryError(FileEntry<string> fileEntry, ErrorEntry entry)
     {
         fileEntry.Id = MakeId(entry.ErrorId);
         fileEntry.CreateOn = _tenantUtil.DateTimeNow();
@@ -586,29 +586,10 @@ internal class ErrorEntry
     }
 }
 
-public class TagLink
-{
-    public int TenantId { get; set; }
-    public int Id { get; set; }
-}
-
-public class TagLinkComparer : IEqualityComparer<TagLink>
-{
-    public bool Equals([AllowNull] TagLink x, [AllowNull] TagLink y)
-    {
-        return x.Id == y.Id && x.TenantId == y.TenantId;
-    }
-
-    public int GetHashCode([DisallowNull] TagLink obj)
-    {
-        return obj.Id.GetHashCode() + obj.TenantId.GetHashCode();
-    }
-}
-
 static file class Queries
 {
     public static readonly Func<FilesDbContext, IAsyncEnumerable<DbFilesThirdpartyIdMapping>>
-        AllThirdpartyIdMappingsAsync = EF.CompileAsyncQuery(
+        AllThirdPartyIdMappingsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 ctx.ThirdpartyIdMapping.AsQueryable());
 

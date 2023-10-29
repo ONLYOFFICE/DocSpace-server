@@ -28,14 +28,14 @@ namespace ASC.Web.Files.Services.WCFService;
 
 public class DataWrapper<T>
 {
-    public List<FileEntry> Entries { get; set; }
-    public int Total { get; set; }
+    public List<FileEntry> Entries { get; init; }
+    public int Total { get; init; }
 
     [JsonPropertyName("path_parts")]
-    public List<object> FolderPathParts { get; set; }
+    public List<object> FolderPathParts { get; init; }
 
     [JsonPropertyName("folder_info")]
-    public Folder<T> FolderInfo { get; set; }
+    public Folder<T> FolderInfo { get; init; }
 
-    public int New { get; set; }
+    public int New { get; init; }
 }

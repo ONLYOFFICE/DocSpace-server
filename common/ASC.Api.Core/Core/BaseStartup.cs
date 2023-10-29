@@ -44,7 +44,7 @@ public abstract class BaseStartup
     protected DIHelper DIHelper { get; }
     protected bool LoadProducts { get; set; } = true;
     protected bool LoadConsumers { get; } = true;
-    protected bool WebhooksEnabled { get; set; }
+    protected bool WebhooksEnabled { get; init; }
 
     protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
@@ -138,7 +138,7 @@ public abstract class BaseStartup
                         userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
                     }
 
-                    if (String.Compare(httpContext.Request.Method, "GET", true) == 0)
+                    if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         permitLimit = 50;
                         partitionKey = $"cr_read_{userId}";
@@ -169,8 +169,8 @@ public abstract class BaseStartup
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
 
-                       if (!(String.Compare(httpContext.Request.Method, "POST", true) == 0 ||
-                            String.Compare(httpContext.Request.Method, "PUT", true) == 0))
+                       if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
+                             String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
                        {
                            return RateLimitPartition.GetNoLimiter("no_limiter");
                        }

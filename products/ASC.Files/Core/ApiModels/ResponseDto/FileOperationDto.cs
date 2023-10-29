@@ -37,7 +37,7 @@ public class FileOperationDto
     /// <summary>Operation type</summary>
     /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; set; }
+    public FileOperationType OperationType { get; init; }
 
     /// <summary>Operation progress</summary>
     /// <type>System.Int32, System</type>

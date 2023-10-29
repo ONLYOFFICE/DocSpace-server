@@ -24,22 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Contracts;
+namespace ASC.Feed;
 
-[ServiceContract]
-public interface IBackupService
+[Flags]
+public enum FeedActions
 {
-    BackupProgress GetBackupProgress(int tenantId);
-    BackupProgress GetRestoreProgress(int tenantId);
-    BackupProgress GetTransferProgress(int tenantId);
-    Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(int tenantId);
-    Task<ScheduleResponse> GetScheduleAsync(int tenantId);
-    string GetTmpFolder();
-    Task CreateScheduleAsync(CreateScheduleRequest request);
-    Task DeleteAllBackupsAsync(int tenantId);
-    Task DeleteBackupAsync(Guid backupId);
-    Task DeleteScheduleAsync(int tenantId);
-    void StartBackup(StartBackupRequest request);
-    Task StartRestoreAsync(StartRestoreRequest request);
-    void StartTransfer(StartTransferRequest request);
+    Created = 0,
+    Updated = 1,
+    Commented = 2,
+    AllDayEventCreated = 3
 }

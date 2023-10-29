@@ -215,10 +215,10 @@ public class BaseCommonLinkUtility
         }
         else
         {
-            foreach (Match match in matches)
+            foreach (var match in matches.Select(r=> r.Value))
             {
-                var values = match.Value.TrimStart('{').TrimEnd('}').Split('|');
-                url = url.Replace(match.Value, values.Contains(lang) ? lang : string.Empty);
+                var values = match.TrimStart('{').TrimEnd('}').Split('|');
+                url = url.Replace(match, values.Contains(lang) ? lang : string.Empty);
             }
         }
         //-

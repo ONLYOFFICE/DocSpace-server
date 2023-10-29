@@ -267,10 +267,8 @@ public class Metadata
     {
         byte[] key;
 
-        using (var deriveBytes = new Rfc2898DeriveBytes(Password, Salt, Iterations, HashAlgorithmName.SHA256))
-        {
-            key = deriveBytes.GetBytes(keyLength);
-        }
+        using var deriveBytes = new Rfc2898DeriveBytes(Password, Salt, Iterations, HashAlgorithmName.SHA256);
+        key = deriveBytes.GetBytes(keyLength);
 
         return key;
     }
@@ -279,10 +277,8 @@ public class Metadata
     {
         byte[] hmacKey;
 
-        using (var sha512 = SHA512.Create())
-        {
-            hmacKey = sha512.ComputeHash(Key);
-        }
+        using var sha512 = SHA512.Create();
+        hmacKey = sha512.ComputeHash(Key);
 
         return hmacKey;
     }
@@ -293,10 +289,8 @@ public class Metadata
 
         stream.Seek(metadataLength - ivLength, SeekOrigin.Begin); // Move position to (IV + encrypted data)
 
-        using (var hmac = new HMACSHA256(HmacKey))
-        {
-            hmacHash = hmac.ComputeHash(stream); // IV needs to be part of the MAC calculation
-        }
+        using var hmac = new HMACSHA256(HmacKey);
+        hmacHash = hmac.ComputeHash(stream); // IV needs to be part of the MAC calculation
 
         return hmacHash;
     }

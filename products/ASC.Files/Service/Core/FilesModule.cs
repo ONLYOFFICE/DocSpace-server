@@ -192,7 +192,7 @@ public class FilesModule : FeedModule
             ItemId = $"{file.Id}_{(file.Version > 1 ? file.Version : 0)}",
             Product = Product,
             Module = Name,
-            Action = updated ? FeedAction.Updated : FeedAction.Created,
+            Actions = updated ? FeedActions.Updated : FeedActions.Created,
             Title = file.Title,
             ExtraLocationTitle = parentFolder.Title,
             ExtraLocation = parentFolder.Id.ToString(),

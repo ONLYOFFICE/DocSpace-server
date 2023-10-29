@@ -99,7 +99,9 @@ internal sealed class StreamWrapper : Stream
         set
         {
             if (value < 0 || value > fileSize)
-                throw new ArgumentOutOfRangeException();
+            {
+                throw new ArgumentOutOfRangeException(nameof(Position));
+            }
 
             stream.Position = value + metadataLength;
         }

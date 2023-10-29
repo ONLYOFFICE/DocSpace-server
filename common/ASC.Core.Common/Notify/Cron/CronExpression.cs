@@ -97,7 +97,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
     public virtual TimeZoneInfo TimeZone
     {
-        set { _timeZone = value; }
+        init { _timeZone = value; }
         get
         {
             if (_timeZone == null)

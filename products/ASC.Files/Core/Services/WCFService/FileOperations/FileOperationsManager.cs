@@ -295,7 +295,6 @@ public static class FileOperationsManagerHelperExtention
         services.TryAdd<FileMarkAsReadOperationScope>();
         services.TryAdd<FileMoveCopyOperationScope>();
         services.TryAdd<FileOperationScope>();
-        services.TryAdd<FileDownloadOperationScope>();
         services.TryAdd<CompressToArchive>();
     }
 }

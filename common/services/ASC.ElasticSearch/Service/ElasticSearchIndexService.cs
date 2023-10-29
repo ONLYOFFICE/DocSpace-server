@@ -145,10 +145,8 @@ public class ElasticSearchIndexService : BackgroundService
 
             await Parallel.ForEachAsync(wrappers, async (wrapper, token) =>
             {
-                await using (var scope = _serviceScopeFactory.CreateAsyncScope())
-                {
-                    await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
-                }
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
             });
 
 

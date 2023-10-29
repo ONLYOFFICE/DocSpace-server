@@ -241,29 +241,27 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         await strategy.ExecuteAsync(async () =>
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
-            {
-                var link = await Queries.TagLinksAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            var link = await Queries.TagLinksAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-                filesDbContext.TagLink.RemoveRange(link);
-                await filesDbContext.SaveChangesAsync();
+            filesDbContext.TagLink.RemoveRange(link);
+            await filesDbContext.SaveChangesAsync();
 
-                var tagsToRemove = await Queries.TagsAsync(filesDbContext).ToListAsync();
+            var tagsToRemove = await Queries.TagsAsync(filesDbContext).ToListAsync();
 
-                filesDbContext.Tag.RemoveRange(tagsToRemove);
+            filesDbContext.Tag.RemoveRange(tagsToRemove);
 
-                var securityToDelete = await Queries.SecuritiesAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            var securityToDelete = await Queries.SecuritiesAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-                filesDbContext.Security.RemoveRange(securityToDelete);
-                await filesDbContext.SaveChangesAsync();
+            filesDbContext.Security.RemoveRange(securityToDelete);
+            await filesDbContext.SaveChangesAsync();
 
-                var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-                filesDbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
-                await filesDbContext.SaveChangesAsync();
+            filesDbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
+            await filesDbContext.SaveChangesAsync();
 
-                await tx.CommitAsync();
-            }
+            await tx.CommitAsync();
         });
 
 

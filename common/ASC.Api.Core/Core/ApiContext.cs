@@ -63,7 +63,7 @@ public class ApiContext : ICloneable
     /// <remarks>
     /// Don't forget to call _context.SetDataPaginated() to prevent SmartList from filtering response if you fetch data from DB with TOP &amp; COUNT
     /// </remarks>
-    public long Count { get; set; }
+    public long Count { get; init; }
 
     /// <summary>
     /// Gets start index to get item from collection. Request parameter "startIndex"

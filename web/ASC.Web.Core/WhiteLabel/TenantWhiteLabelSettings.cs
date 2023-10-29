@@ -414,13 +414,11 @@ public class TenantWhiteLabelSettingsHelper
         }
         #endregion
 
-        using (var memory = new MemoryStream(data))
-        {
-            var logoFileName = BuildLogoFileName(type, logoFileExt, dark);
+        using var memory = new MemoryStream(data);
+        var logoFileName = BuildLogoFileName(type, logoFileExt, dark);
 
-            memory.Seek(0, SeekOrigin.Begin);
-            await store.SaveAsync(logoFileName, memory);
-        }
+        memory.Seek(0, SeekOrigin.Begin);
+        await store.SaveAsync(logoFileName, memory);
     }
 
     public async Task SetLogo(TenantWhiteLabelSettings tenantWhiteLabelSettings, Dictionary<int, KeyValuePair<string, string>> logo, IDataStore storage = null)
@@ -560,11 +558,9 @@ public class TenantWhiteLabelSettingsHelper
 
         byte[] GetLogoDataFromJpg()
         {
-            using (var image = SKImage.FromEncodedData(logoData))
-            using (var pngData = image.Encode(SKEncodedImageFormat.Png, 100))
-            {
-                return pngData.ToArray();
-            }
+            using var image = SKImage.FromEncodedData(logoData);
+            using var pngData = image.Encode(SKEncodedImageFormat.Png, 100);
+            return pngData.ToArray();
         }
     }
 

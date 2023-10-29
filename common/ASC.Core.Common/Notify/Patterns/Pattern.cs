@@ -37,7 +37,7 @@ public class Pattern : IPattern
     public string Subject { get; private set; }
     public string Body { get; private set; }
     public string ContentType { get; internal set; }
-    public string Styler { get; internal set; }
+    public string Styler { get; internal init; }
 
 
     public Pattern(string id, string subject, string body, string contentType)

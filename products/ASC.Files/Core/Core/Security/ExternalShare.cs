@@ -302,8 +302,8 @@ public class ExternalShareData
 
 public class DownloadSession
 {
-    public Guid Id { get; set; }
-    public Guid LinkId { get; set; }
+    public Guid Id { get; init; }
+    public Guid LinkId { get; init; }
 }
 
 public enum Status

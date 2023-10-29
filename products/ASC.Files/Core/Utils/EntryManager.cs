@@ -1680,21 +1680,19 @@ public class EntryManager
             {
                 var CopyThumbnailsAsync = async () =>
                 {
-                    await using (var scope = _serviceProvider.CreateAsyncScope())
+                    await using var scope = _serviceProvider.CreateAsyncScope();
+                    var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
+                    var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
+
+                    foreach (var size in _thumbnailSettings.Sizes)
                     {
-                        var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
-                        var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
-
-                        foreach (var size in _thumbnailSettings.Sizes)
-                        {
-                            await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
-                                                                    String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
-                        }
-
-                        await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
+                        await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
+                            _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
+                            String.Empty,
+                            _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
                     }
+
+                    await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
                 };
 
                 _ = Task.Run(() => CopyThumbnailsAsync().GetAwaiter().GetResult());

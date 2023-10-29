@@ -28,15 +28,6 @@ namespace ASC.Files.Core.Data;
 
 public class AbstractDao
 {
-
-    protected int TenantID
-    {
-        get
-        {
-            return _tenantManager.GetCurrentTenant().Id;
-        }
-    }
-
     protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     protected readonly UserManager _userManager;
     protected readonly TenantManager _tenantManager;
@@ -76,23 +67,26 @@ public class AbstractDao
     }
 
 
-    protected IQueryable<T> Query<T>(DbSet<T> set) where T : class, IDbFile
+    protected async Task<IQueryable<T>> Query<T>(DbSet<T> set) where T : class, IDbFile
     {
-        var tenantId = TenantID;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return set.Where(r => r.TenantId == tenantId);
     }
 
-    protected IQueryable<DbFile> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
+    protected async Task<IQueryable<DbFile>> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
     {
-        return Query(filesDbContext.Files)
+        return (await Query(filesDbContext.Files))
             .Where(where);
     }
 
     protected async Task GetRecalculateFilesCountUpdateAsync(int folderId)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var folders = await Queries.FoldersAsync(filesDbContext, TenantID, folderId).ToListAsync();
+        
+        var folders = await Queries.FoldersAsync(filesDbContext, tenantId, folderId).ToListAsync();
 
         foreach (var f in folders)
         {
@@ -101,6 +95,11 @@ public class AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
 
+    protected int MappingIDAsync(int id)
+    {
+        return id;
+    }
+    
     protected ValueTask<object> MappingIDAsync(object id, bool saveIfNotExist = false)
     {
         if (id == null)
@@ -118,11 +117,6 @@ public class AbstractDao
         return InternalMappingIDAsync(id, saveIfNotExist);
     }
 
-    protected int MappingIDAsync(int id)
-    {
-        return id;
-    }
-
     private async ValueTask<object> InternalMappingIDAsync(object id, bool saveIfNotExist = false)
     {
         object result;
@@ -135,16 +129,19 @@ public class AbstractDao
         else
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            result = await Queries.IdAsync(filesDbContext, TenantID, id.ToString());
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            result = await Queries.IdAsync(filesDbContext, tenantId, id.ToString());
         }
 
         if (saveIfNotExist)
         {
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            
             var newItem = new DbFilesThirdpartyIdMapping
             {
                 Id = id.ToString(),
                 HashId = result.ToString(),
-                TenantId = TenantID
+                TenantId = tenantId
             };
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -205,7 +202,7 @@ static file class Queries
                 ctx.ThirdpartyIdMapping
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.HashId == hashId)
-                    
+
                     .Select(r => r.Id)
                     .FirstOrDefault());
 }

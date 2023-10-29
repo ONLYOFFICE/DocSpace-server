@@ -212,7 +212,7 @@ public class FeedController : ControllerBase
             if (entry == null)
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
-    }
+            }
 
             if (!await _fileSecurity.CanReadAsync(entry))
             {

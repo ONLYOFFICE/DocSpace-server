@@ -40,6 +40,6 @@ public record NotifyInvokeSendMethodRequestedIntegrationEvent : IntegrationEvent
     }
 
     [ProtoMember(1)]
-    public NotifyInvoke NotifyInvoke { get; set; }
+    public NotifyInvoke NotifyInvoke { get; init; }
 }
 

@@ -27,7 +27,7 @@
 namespace ASC.Data.Backup.Services;
 
 [Scope]
-public class BackupService : IBackupService
+public class BackupService
 {
     private readonly ILogger<BackupService> _logger;
     private readonly BackupStorageFactory _backupStorageFactory;
@@ -55,9 +55,9 @@ public class BackupService : IBackupService
         }
     }
 
-    public async Task DeleteBackupAsync(Guid id)
+    public async Task DeleteBackupAsync(Guid backupId)
     {
-        var backupRecord = await _backupRepository.GetBackupRecordAsync(id);
+        var backupRecord = await _backupRepository.GetBackupRecordAsync(backupId);
         await _backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
 
         var storage = await _backupStorageFactory.GetBackupStorageAsync(backupRecord);

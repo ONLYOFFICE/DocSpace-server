@@ -181,14 +181,12 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
         _clientContext.ExecuteQuery();
 
         var tempBuffer = _tempStream.Create();
-        await using (var str = fileInfo.Stream)
+        await using var str = fileInfo.Stream;
+        if (str != null)
         {
-            if (str != null)
-            {
-                await str.CopyToAsync(tempBuffer);
-                await tempBuffer.FlushAsync();
-                tempBuffer.Seek(offset, SeekOrigin.Begin);
-            }
+            await str.CopyToAsync(tempBuffer);
+            await tempBuffer.FlushAsync();
+            tempBuffer.Seek(offset, SeekOrigin.Begin);
         }
 
         return tempBuffer;

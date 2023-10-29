@@ -379,15 +379,13 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         await strategy.ExecuteAsync(async () =>
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
-            {
-                await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteTagsAsync(filesDbContext);
-                await Queries.DeleteFilesSecuritiesAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteTagsAsync(filesDbContext);
+            await Queries.DeleteFilesSecuritiesAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
 
-                await tx.CommitAsync();
-            }
+            await tx.CommitAsync();
         });
 
         if (file is not IErrorItem)

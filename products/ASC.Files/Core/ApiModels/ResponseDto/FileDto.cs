@@ -162,8 +162,10 @@ public class FileDtoHelper : FileEntryDtoHelper
         FilesLinkUtility filesLinkUtility,
         FileUtility fileUtility,
         FileSharingHelper fileSharingHelper,
-        BadgesSettingsHelper badgesSettingsHelper)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity)
+        BadgesSettingsHelper badgesSettingsHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;

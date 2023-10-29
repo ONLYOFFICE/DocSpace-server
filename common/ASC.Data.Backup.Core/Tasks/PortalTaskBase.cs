@@ -48,7 +48,7 @@ public abstract class PortalTaskBase
     public bool ProcessStorage { get; set; }
     protected IDataWriteOperator WriteOperator { get; set; }
     protected ModuleProvider ModuleProvider { get; set; }
-    protected DbFactory DbFactory { get; set; }
+    protected DbFactory DbFactory { get; init; }
 
     protected readonly List<ModuleName> _ignoredModules = new();
     protected readonly List<string> _ignoredTables = new(); //todo: add using to backup and transfer tasks
