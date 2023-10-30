@@ -124,7 +124,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             var secret = UUID.randomUUID().toString();
             var now = Timestamp.from(Instant.now());
             var me = UserContextContainer.context.get()
-                    .getResponse().getUserName();
+                    .getResponse();
 
             client.setClientId(UUID.randomUUID().toString());
             client.setClientSecret(cipher.encrypt(secret));
@@ -132,8 +132,8 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             client.setTenantUrl(tenantUrl);
             client.setCreatedOn(now);
             client.setModifiedOn(now);
-            client.setCreatedBy(me);
-            client.setModifiedBy(me);
+            client.setCreatedBy(me.getEmail());
+            client.setModifiedBy(me.getEmail());
 
             this.amqpTemplate.convertAndSend(configuration.getClient().getExchange(),
                     configuration.getClient().getRouting(),
