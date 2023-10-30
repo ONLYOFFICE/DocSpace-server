@@ -124,7 +124,7 @@ public class RoomLogoManager
 
         if (EnableAudit)
         {
-            _ = _filesMessageService.SendAsync(MessageAction.RoomLogoCreated, room, room.Title);
+            await _filesMessageService.SendAsync(MessageAction.RoomLogoCreated, room, room.Title);
         }
 
         return room;
@@ -159,7 +159,7 @@ public class RoomLogoManager
 
             if (EnableAudit)
             {
-                _ = _filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
+                await _filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
             }
         }
         catch (Exception e)
