@@ -157,10 +157,10 @@ public interface IFolderDao<T>
     /// <returns>
     /// Returns pair of file ID, file name, in which the same name.
     /// </returns>
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync(T[] folderIds, T to);
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync<TTo>(T[] folderIds, TTo to);
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync(T[] folderIds, string to);
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync(T[] folderIds, int to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync(IEnumerable<T> folderIds, T to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<T> folderIds, TTo to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync(IEnumerable<T> folderIds, string to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync(IEnumerable<T> folderIds, int to);
 
     /// <summary>
     ///     Rename folder

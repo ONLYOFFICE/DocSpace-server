@@ -2061,7 +2061,7 @@ public class FileStorageService //: IFileStorageService
 
         try
         {
-            foreach (var pair in await folderDao.CanMoveOrCopyAsync(foldersId.ToArray(), toFolder.Id))
+            foreach (var pair in await folderDao.CanMoveOrCopyAsync(foldersId, toFolder.Id))
             {
                 checkedFolders.Add(pair.Key);
             }

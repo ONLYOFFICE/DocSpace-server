@@ -700,27 +700,22 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return moved;
     }
 
-    public Task<IDictionary<int, string>> CanMoveOrCopyAsync<TTo>(int[] folderIds, TTo to)
+    public Task<IDictionary<int, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<int> folderIds, TTo to)
     {
-        if (to is int tId)
+        return to switch
         {
-            return CanMoveOrCopyAsync(folderIds, tId);
-        }
-
-        if (to is string tsId)
-        {
-            return CanMoveOrCopyAsync(folderIds, tsId);
-        }
-
-        throw new NotImplementedException();
+            int tId => CanMoveOrCopyAsync(folderIds, tId),
+            string tsId => CanMoveOrCopyAsync(folderIds, tsId),
+            _ => throw new NotImplementedException()
+        };
     }
 
-    public Task<IDictionary<int, string>> CanMoveOrCopyAsync(int[] folderIds, string to)
+    public Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, string to)
     {
         return Task.FromResult((IDictionary<int, string>)new Dictionary<int, string>());
     }
 
-    public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(int[] folderIds, int to)
+    public async Task<IDictionary<int, string>> CanMoveOrCopyAsync(IEnumerable<int> folderIds, int to)
     {
         var result = new Dictionary<int, string>();
 
@@ -745,9 +740,9 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                     result[file.Id] = file.Title;
                 }
 
-                var childs = await Queries.ArrayAsync(filesDbContext, TenantID, folderId);
+                var children = await Queries.ArrayAsync(filesDbContext, TenantID, folderId).ToListAsync();
 
-                foreach (var pair in await CanMoveOrCopyAsync(childs, conflict))
+                foreach (var pair in await CanMoveOrCopyAsync(children, conflict))
                 {
                     result.Add(pair.Key, pair.Value);
                 }
@@ -1967,15 +1962,13 @@ static file class Queries
                     .Where(r => r.f2.TenantId == tenantId && r.f2.CurrentVersion && r.f2.ParentId == conflict)
                     .Select(r => r.f1));
 
-    public static readonly Func<FilesDbContext, int, int, Task<int[]>> ArrayAsync =
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> ArrayAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId) =>
                 ctx.Folders
-                    
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == folderId)
-                    .Select(r => r.Id)
-                    .ToArray());
+                    .Select(r => r.Id));
 
     public static readonly Func<FilesDbContext, int, int, Task<DbFolder>> FolderAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
