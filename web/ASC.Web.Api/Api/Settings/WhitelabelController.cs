@@ -91,8 +91,6 @@ public class WhitelabelController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
 
-        await DemandWhiteLabelPermissionAsync();
-
         if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
         {
             await DemandRebrandingPermissionAsync();
@@ -101,6 +99,8 @@ public class WhitelabelController : BaseSettingsController
         }
         else
         {
+            await DemandWhiteLabelPermissionAsync();
+
             await SaveWhiteLabelSettingsForCurrentTenantAsync(inDto);
         }
 
@@ -161,8 +161,6 @@ public class WhitelabelController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
 
-        await DemandWhiteLabelPermissionAsync();
-
         if (HttpContext.Request.Form?.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
             throw new InvalidOperationException("No input files");
@@ -176,6 +174,8 @@ public class WhitelabelController : BaseSettingsController
         }
         else
         {
+            await DemandWhiteLabelPermissionAsync();
+
             await SaveWhiteLabelSettingsFromFilesForCurrentTenantAsync();
         }
 
@@ -384,8 +384,6 @@ public class WhitelabelController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
 
-        await DemandWhiteLabelPermissionAsync();
-
         if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
         {
             await DemandRebrandingPermissionAsync();
@@ -394,6 +392,8 @@ public class WhitelabelController : BaseSettingsController
         }
         else
         {
+            await DemandWhiteLabelPermissionAsync();
+
             await RestoreWhiteLabelOptionsForCurrentTenantAsync();
         }
 
