@@ -140,7 +140,7 @@ Olá!
 
 Para começar a participar na vida do portal "${__VirtualRootPath}":"$InviteLink", você precisa ativar o seu endereço de e-mail. Isso é feito por razões de segurança.
 
-$GreenButton
+$OrangeButton
 
 Este link é válido apenas por 7 dias. Por favor, complete a ativação de seu e-mail dentro deste período.</value>
   </data>
@@ -180,7 +180,7 @@ ONLYOFFICE™ Equipe de suporte
 
 Clique no botão abaixo e faça o login* em sua nuvem.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -195,7 +195,7 @@ Houve uma solicitação de alteração da senha usada para entrar no portal "${_
 
 Por favor, clique no link abaixo para alterar a senha:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de alteração de senha dentro do período.
 
@@ -208,7 +208,7 @@ Você solicitou a alteração do celular usado para entrar no portal ${LetterLog
 
 Por favor, clique no link abaixo para alterar o seu celular:
 
-$GreenButton
+$OrangeButton
 
 Se você não quiser alterar o seu celular ou recebeu este e-mail por engano, por favor, ignore-o ou entre em contato com o administrador do seu portal para descobrir mais informações.</value>
   </data>
@@ -219,7 +219,7 @@ A configuração do aplicativo autenticador que você usa para entrar no portal 
 
 Clique no botão abaixo para ir para a página de login do portal e configurar o aplicativo autenticador:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Alteração do proprietário do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -230,7 +230,7 @@ Houve uma solicitação para alterar o proprietário do portal "${__VirtualRootP
 
 Por favor, clique no link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de alteração do proprietário do portal dentro do período.</value>
   </data>
@@ -243,7 +243,7 @@ Houve uma solicitação para alterar o endereço do portal "${__VirtualRootPath}
 
 Por favor, clique no link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de alteração do endereço do portal dentro do período.</value>
   </data>
@@ -252,7 +252,7 @@ $GreenButton
 
 $__AuthorName o convidou como usuário convidado para "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
 
-$GreenButton
+$OrangeButton
 
 O link só é válido por 7 dias.
 
@@ -263,7 +263,7 @@ Você receberá mais dicas sobre como usar seu web-office. Você pode cancelar a
 
 $__AuthorName o convidou como usuário convidado para "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
 
-$GreenButton
+$OrangeButton
 
 O link só é válido por 7 dias.
 
@@ -282,7 +282,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
 
-$GreenButton
+$OrangeButton
 
 Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
 
@@ -303,7 +303,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
 
-$GreenButton
+$OrangeButton
 
 Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
 
@@ -324,7 +324,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
 
-$GreenButton
+$OrangeButton
 
 Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
 
@@ -345,7 +345,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos.
 
-$GreenButton
+$OrangeButton
 
 Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
 
@@ -376,7 +376,7 @@ Você solicitou se juntar ao portal "${__VirtualRootPath}":"$InviteLink" em ${Le
 
 Para aceitar o convite, por favor, insira o seu nome e senha clicando neste link:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 48 horas. Por favor, complete a operação dentro deste período.</value>
   </data>
@@ -465,7 +465,7 @@ h1. "$PortalUrl": "$PortalUrl":
 Seu portal foi migrado para um novo domínio. Por favor, restabeleça seu acesso ao portal especificando a senha que será usada para fazer o login.
 
 Por favor, siga o link abaixo para definir sua senha para a conta:
-$GreenButton
+$OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias. Favor completar o processo de restauração de acesso dentro desse período.
 
@@ -526,7 +526,7 @@ Equipe ONLYOFFICE</value>
 
 Clique no botão abaixo e faça o login* em sua nuvem.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -539,7 +539,7 @@ Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
 
 Por favor, siga o link abaixo para alterar sua senha:
 
-$GreenButton
+$OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
 
@@ -561,7 +561,7 @@ Equipe ONLYOFFICE</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Você solicitou o encerramento de sua conta em personal.onlyoffice.com. Siga o link para completar a solicitação (o link está ativo por um período de 7 dias): 
 
-$GreenButton
+$OrangeButton
 
 *Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente, de acordo com nossa "Declaração de privacidade": "https://help.onlyoffice.com/Products/Files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
@@ -579,7 +579,7 @@ Caro(a) $OwnerName,
 
 Você solicitou uma desativação temporária de seu portal "${__VirtualRootPath}":"${__VirtualRootPath}". Por favor, clique no link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de desativação do portal dentro do período.
 
@@ -599,7 +599,7 @@ Prezado $OwnerName,
 
 Você solicitou uma desativação temporária de seu portal [${__VirtualRootPath}](${__VirtualRootPath}). Por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 _Nota_: este link é válido por apenas 7 dias. Favor completar o processo de desativação do portal dentro desse período.
 
@@ -627,7 +627,7 @@ Antes de excluir o seu portal, por favor, certifique-se de que o faturamento aut
 
 Se você ainda assim quiser excluir o seu portal "${__VirtualRootPath}":"${__VirtualRootPath}", por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de exclusão do portal dentro do período.
 
@@ -652,7 +652,7 @@ Antes de excluir o portal, certifique-se de que o faturamento automático esteja
 
 Se você ainda quiser excluir seu portal [${__VirtualRootPath}](${__VirtualRootPath}), por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 _Nota_: este link é válido por apenas 7 dias. Favor completar o processo de exclusão do portal dentro desse período.
 
@@ -678,7 +678,7 @@ Você solicitou a exclusão permanente do seu perfil no portal "${__VirtualRootP
 
 Se você ainda assim quiser excluir o seu perfil, por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de exclusão do perfil dentro do período.</value>
   </data>
@@ -804,7 +804,7 @@ h1. "${__VirtualRootPath}": "${__VirtualRootPath}"
 
 Seu portal foi restaurado. Para acessá-lo, você precisa definir uma nova senha:
 
-$GreenButton
+$OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias.
 
@@ -830,7 +830,7 @@ Equipe de suporte do ONLYOFFICE™
 
 Você está convidado a participar de "${__VirtualRootPath}":"${__VirtualRootPath}" como um usuário convidado. Aceite o convite clicando no link:
 
-$GreenButton
+$OrangeButton
 
 Também lhe enviaremos dicas úteis e as últimas notícias da ONLYOFFICE de vez em quando. Você pode cancelar as assinaturas em sua página de Perfil a qualquer momento, assim como reativá-las.
 
@@ -929,7 +929,7 @@ Você foi convidado a juntar-se ao escritório seguro e protegido de sua empresa
 
 Aceite o convite seguindo o link abaixo e use seu login e senha da conta corporativa para fazer o login. 
 
-$GreenButton
+$OrangeButton
 
 O link só é válido por 7 dias.</value>
   </data>
@@ -1138,7 +1138,7 @@ Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pod
  
 Confirme seu e-mail (o link é válido por 7 dias):
  
-$GreenButton
+$OrangeButton
  
 Desfrute de uma nova forma de colaboração de documentos!
  
@@ -1154,7 +1154,7 @@ Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pod
  
 Confirme seu e-mail (o link é válido por 7 dias):
  
-$GreenButton
+$OrangeButton
  
 Desfrute de uma nova forma de colaboração de documentos!
  
@@ -1170,7 +1170,7 @@ Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pod
  
 Confirme seu e-mail (o link é válido por 7 dias):
  
-$GreenButton
+$OrangeButton
  
 Desfrute de uma nova forma de colaboração de documentos!
  
@@ -1186,7 +1186,7 @@ Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pod
  
 Confirme seu e-mail (o link é válido por 7 dias):
  
-$GreenButton
+$OrangeButton
  
 O seu tarifário atual é STARTUP. É totalmente gratuito e inclui:
  
@@ -1205,7 +1205,7 @@ Equipe ONLYOFFICE
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Quer mudar a senha em sua conta pessoal ONLYOFFICE? Clique no botão abaixo para confirmar.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -1226,7 +1226,7 @@ Não deseja alterar sua senha? Simplesmente ignore esta mensagem.</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Deseja alterar a senha da sua conta do ONLYOFFICE? Clique no botão abaixo para confirmar.
  
-$GreenButton
+$OrangeButton
  
 O link é válido por 7 dias.
 
@@ -1258,7 +1258,7 @@ Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas d
  
 *#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente, 
 Equipe ONLYOFFICE 
@@ -1277,7 +1277,7 @@ Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas d
  
 *#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente, 
 Equipe ONLYOFFICE 
@@ -1296,7 +1296,7 @@ Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas d
  
 *#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente, 
 Equipe ONLYOFFICE 
@@ -1315,7 +1315,7 @@ Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas d
  
 *#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente, 
 Equipe ONLYOFFICE 
@@ -1410,7 +1410,7 @@ Equipe ONLYOFFICE
  
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1421,7 +1421,7 @@ Equipe ONLYOFFICE
  
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1432,7 +1432,7 @@ Equipe ONLYOFFICE
  
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1443,7 +1443,7 @@ Equipe ONLYOFFICE
  
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1462,7 +1462,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
  
-$GreenButton
+$OrangeButton
  
 Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
  
@@ -1483,7 +1483,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
  
-$GreenButton
+$OrangeButton
  
 Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
  
@@ -1504,7 +1504,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
  
-$GreenButton
+$OrangeButton
  
 Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
  
@@ -1525,7 +1525,7 @@ Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
 
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
  
-$GreenButton
+$OrangeButton
  
 Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
  
@@ -1582,7 +1582,7 @@ Equipe ONLYOFFICE</value>
  
 Por que você decidiu sair? Compartilhe sua experiência conosco.
 
-$GreenButton
+$OrangeButton
 
 Obrigado e boa sorte!
  
@@ -1609,7 +1609,7 @@ Ajuste as configurações de segurança do seu ONLYOFFICE DocSpace para torná-l
 
 * Faça backups de dados.
  
-$GreenButton
+$OrangeButton
  
 Visite nosso "Centro de Ajuda":"https://helpcenter.onlyoffice.com/" para saber mais sobre como configurar e gerenciar seu ONLYOFFICE DocSpace. Você também pode consultá-lo quando tiver dúvidas sobre a funcionalidade.
  
@@ -1624,7 +1624,7 @@ Como você decidiu não usá-lo mais, seu ONLYOFFICE DocSpace e todos os dados s
  
 Agradecemos o seu feedback. Por que você decidiu parar de usar o ONLYOFFICE DocSpace?
  
-$GreenButton
+$OrangeButton
  
 Se você acha que isso é um erro e deseja continuar usando o ONLYOFFICE DocSpace, entre em contato com nossa "Equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx". 
  
@@ -1637,7 +1637,7 @@ Equipe ONLYOFFICE
  
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
  
-$GreenButton
+$OrangeButton
  
 Depois de clicar no link de convite, defina uma nova senha para sua conta.
  
@@ -1652,7 +1652,7 @@ Leve em consideração que o período de carência de $PaymentDelay‎ dias para
 
 Certifique-se de pagar sua assinatura Business antes do vencimento do período de carência. Assim, você poderá aproveitar ainda mais todos os benefícios do seu ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1665,7 +1665,7 @@ Leve em consideração que sua assinatura do ONLYOFFICE DocSpace expira em três
 
 Recomendamos pagar sua assinatura Business agora e continuar a usar todos os benefícios de seu ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1678,7 +1678,7 @@ Leve em consideração que o período de carência de $PaymentDelay dias para o 
 
 Certifique-se de pagar sua assinatura Business o mais rápido possível. Assim, você poderá usar todos os benefícios do seu ONLYOFFICE DocSpace como antes.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1691,7 +1691,7 @@ Leve em consideração que o período de tolerância de $PaymentDelay dias para 
 
 Certifique-se de pagar sua assinatura Business hoje. Assim, você poderá aproveitar ainda mais todos os benefícios do seu ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Atenciosamente,
 Equipe ONLYOFFICE
@@ -1702,7 +1702,7 @@ Equipe ONLYOFFICE
  
 Você está convidado a entrar na sala $Message em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
  
-$GreenButton
+$OrangeButton
  
 Depois de clicar no link de convite, defina uma nova senha para sua conta.
  

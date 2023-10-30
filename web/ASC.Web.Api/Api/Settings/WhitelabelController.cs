@@ -233,6 +233,39 @@ public class WhitelabelController : BaseSettingsController
     }
 
     /// <summary>
+    /// Returns the is default white label logos.
+    /// </summary>
+    /// <short>
+    /// Get the is default white label logos
+    /// </short>
+    /// <category>Rebranding</category>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.IsDefaultWhiteLabelLogosDto, ASC.Web.Api">Is default white label logos</returns>
+    /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    /// <visible>false</visible>
+    [HttpGet("whitelabel/logos/isdefault")]
+    public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos()
+    {
+        var _tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        yield return new IsDefaultWhiteLabelLogosDto
+        {
+            Name = "logotext",
+            Default = _tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || _tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
+        };
+        foreach (var logoType in (WhiteLabelLogoTypeEnum[])Enum.GetValues(typeof(WhiteLabelLogoTypeEnum)))
+        {
+            var result = new IsDefaultWhiteLabelLogosDto
+            {
+                Name = logoType.ToString(),
+                Default = _tenantWhiteLabelSettings.GetIsDefault(logoType)
+            };
+
+            yield return result;
+        }
+    }
+
+    /// <summary>
     /// Returns the white label logo text.
     /// </summary>
     /// <short>

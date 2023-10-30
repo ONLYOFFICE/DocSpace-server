@@ -105,7 +105,7 @@ public class LoginEventsRepository
                     query = query.Where(q => q.Event.Date >= fromDate.Value);
                 }
             }
-            else if (hasToFilter)
+            else
             {
                 query = query.Where(q => q.Event.Date <= to.Value);
             }

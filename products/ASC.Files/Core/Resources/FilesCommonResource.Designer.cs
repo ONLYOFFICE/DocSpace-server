@@ -331,11 +331,20 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to External link.
+        ///   Looks up a localized string similar to Shared link.
         /// </summary>
         public static string DefaultExternalLinkTitle {
             get {
                 return ResourceManager.GetString("DefaultExternalLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invitation link.
+        /// </summary>
+        public static string DefaultInvitationLinkTitle {
+            get {
+                return ResourceManager.GetString("DefaultInvitationLinkTitle", resourceCulture);
             }
         }
         
