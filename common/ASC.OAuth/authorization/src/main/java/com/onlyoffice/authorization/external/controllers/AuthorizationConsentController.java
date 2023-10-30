@@ -24,6 +24,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthorizationConsentController {
+    private final String ASC_AUTH_COOKIE = "asc_auth_key";
     private final String CLIENT_ID_COOKIE = "client_id";
     private final DocspaceClient docspaceClient;
     private final AuthorizationPersistenceQueryUsecases authorizationRepository;
@@ -33,7 +34,7 @@ public class AuthorizationConsentController {
     @InvalidateSession
     public String consent(
             HttpServletRequest request,
-            @CookieValue(name = "asc_auth_key") String authCookie,
+            @CookieValue(name = ASC_AUTH_COOKIE) String authCookie,
             @CookieValue(name = CLIENT_ID_COOKIE) String clientId
     ) {
         log.info("got a new consent request");

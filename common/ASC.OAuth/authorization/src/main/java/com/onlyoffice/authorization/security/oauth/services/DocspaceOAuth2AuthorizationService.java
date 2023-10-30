@@ -17,6 +17,7 @@ import com.onlyoffice.authorization.external.caching.hazelcast.AuthorizationCach
 import com.onlyoffice.authorization.external.messaging.configuration.RabbitMQConfiguration;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -39,6 +40,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Date;
 import java.util.List;
@@ -54,6 +57,8 @@ import java.util.function.Consumer;
 @Transactional(readOnly = true, timeout = 2000)
 public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationService, AuthorizationRetrieveUsecases,
         AuthorizationCreationUsecases, AuthorizationCleanupUsecases {
+    private final String CLIENT_STATE_COOKIE = "client_state";
+
     private final RabbitMQConfiguration configuration;
 
     private final AuthorizationPersistenceQueryUsecases queryUsecases;
@@ -112,11 +117,21 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             cache.put(refreshToken.getToken().getTokenValue(), authorization);
         }
 
+        var msg = toMessage(authorization);
         this.amqpTemplate.convertAndSend(
                 configuration.getAuthorization().getExchange(),
                 configuration.getAuthorization().getRouting(),
-                toMessage(authorization)
-        );
+                msg);
+
+        if (msg.getState() != null && !msg.getState().isBlank()) {
+            Cookie cookie = new Cookie(CLIENT_STATE_COOKIE, msg.getState());
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
+            cookie.setHttpOnly(true);
+            ((ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes()).getResponse()
+                    .addCookie(cookie);
+        }
     }
 
     @RateLimiter(name = "mutateRateLimiter")

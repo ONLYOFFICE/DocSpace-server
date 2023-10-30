@@ -3,7 +3,6 @@
  */
 package com.onlyoffice.authorization.security.configuration;
 
-import com.onlyoffice.authorization.security.access.handlers.CookieSuccessAuthenticationHandler;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -27,8 +26,6 @@ public class ApplicationConfiguration {
     private String cipherSecret = "secret";
     private String issuer;
 
-    private final CookieSuccessAuthenticationHandler cookieSuccessAuthenticationHandler;
-
     @Bean
     @SneakyThrows
     SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) {
@@ -36,7 +33,6 @@ public class ApplicationConfiguration {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
                 .formLogin(form -> form
                                 .loginPage(login)
-                                .successHandler(cookieSuccessAuthenticationHandler)
                                 .loginProcessingUrl(login)
                                 .permitAll())
                 .logout(l -> l.disable())
