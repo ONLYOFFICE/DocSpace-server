@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.api.core.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -10,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Set;
 
 /**
  *
@@ -79,6 +81,10 @@ public class Client {
     private Timestamp modifiedOn;
     @Column(name = "modified_by")
     private String modifiedBy;
+    @OneToMany
+    @JoinColumn(name="registered_client_id", referencedColumnName="client_id")
+    @JsonBackReference
+    private Set<Consent> consents;
     @PrePersist
     private void prePersist() {
         this.enabled = true;

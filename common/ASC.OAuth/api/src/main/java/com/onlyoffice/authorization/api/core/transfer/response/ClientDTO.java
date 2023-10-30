@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.api.core.transfer.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
@@ -24,6 +25,7 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     @JsonProperty("client_id")
     private String clientId;
     @JsonProperty("client_secret")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String clientSecret;
     private String description;
     @JsonProperty("website_url")

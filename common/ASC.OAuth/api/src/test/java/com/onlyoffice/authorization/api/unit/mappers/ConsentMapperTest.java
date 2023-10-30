@@ -29,7 +29,7 @@ public class ConsentMapperTest {
                 .modifiedAt(Timestamp.from(Instant.now()))
                 .scopes("mock")
                 .build();
-        var m = ConsentMapper.INSTANCE.toDTO(c);
+        var m = ConsentMapper.INSTANCE.toMessage(c);
         assertNotNull(m);
         var nc = ConsentMapper.INSTANCE.toEntity(m);
         assertEquals(c, nc);
@@ -46,7 +46,7 @@ public class ConsentMapperTest {
                 .build();
         var c = ConsentMapper.INSTANCE.toEntity(m);
         assertNotNull(c);
-        var nm = ConsentMapper.INSTANCE.toDTO(c);
+        var nm = ConsentMapper.INSTANCE.toMessage(c);
         assertEquals(m, nm);
     }
 }

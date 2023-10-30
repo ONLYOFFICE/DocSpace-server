@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.api.core.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,9 @@ public class Consent {
     private Timestamp modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private Client client;
     @PrePersist
     private void prePersist() {
         this.invalidated = false;

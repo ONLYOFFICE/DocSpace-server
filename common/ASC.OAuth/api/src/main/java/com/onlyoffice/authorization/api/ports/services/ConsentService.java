@@ -4,6 +4,9 @@
 package com.onlyoffice.authorization.api.ports.services;
 
 import com.onlyoffice.authorization.api.core.entities.Consent;
+import com.onlyoffice.authorization.api.core.transfer.response.ConsentDTO;
+import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceRetrieveUsecases;
+import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
 import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceMutationUsecases;
@@ -14,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -23,8 +28,17 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ConsentService implements ConsentCleanupUsecases, ConsentCreationUsecases {
+public class ConsentService implements ConsentRetrieveUsecases,
+        ConsentCleanupUsecases, ConsentCreationUsecases {
+    private final ConsentPersistenceRetrieveUsecases retrieveUsecases;
     private final ConsentPersistenceMutationUsecases mutationUsecases;
+
+    public Set<ConsentDTO> getAllByPrincipalName(String principalName) throws RuntimeException {
+        var response = new HashSet<ConsentDTO>();
+        var results = retrieveUsecases.findAllByPrincipalName(principalName);
+        results.forEach(r -> response.add(ConsentMapper.INSTANCE.toDTO(r)));
+        return response;
+    }
 
     @Transactional
     public void saveConsent(ConsentMessage consentMessage) {

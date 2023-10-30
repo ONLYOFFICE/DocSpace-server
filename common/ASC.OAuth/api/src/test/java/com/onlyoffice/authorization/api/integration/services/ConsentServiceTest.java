@@ -62,7 +62,7 @@ public class ConsentServiceTest extends ContainerBase {
     void shouldDeleteConsent() {
         var c = consentRepository
                 .findById(new Consent.ConsentId("mock", "mock"));
-        consentService.deleteConsent(ConsentMapper.INSTANCE.toDTO(c.get()));
+        consentService.deleteConsent(ConsentMapper.INSTANCE.toMessage(c.get()));
         c = consentRepository.findById(new Consent.ConsentId("mock", "mock"));
         assertTrue(c.isEmpty());
     }

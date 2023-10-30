@@ -4,18 +4,22 @@
 package com.onlyoffice.authorization.api.external.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
+import com.onlyoffice.authorization.api.core.entities.Client;
+import com.onlyoffice.authorization.api.core.entities.Consent;
 import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.UpdateClientDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.ClientDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.ClientInfoDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.PaginationDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.SecretDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.*;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
+import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
+import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
+import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
+import com.onlyoffice.authorization.api.ports.repositories.ConsentRepository;
+import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,7 +36,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -55,6 +61,8 @@ public class ClientController {
     private final ClientCreationUsecases creationUsecases;
     private final ClientMutationUsecases mutationUsecases;
     private final ClientCleanupUsecases cleanupUsecases;
+    private final ConsentRetrieveUsecases consentRetrieveUsecases;
+
 
     @PostConstruct
     public void init() {
@@ -114,6 +122,15 @@ public class ClientController {
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
         var client = retrieveUsecases.getClient(clientId);
         return ResponseEntity.ok(ClientMapper.INSTANCE.fromClientToInfoDTO(client));
+    }
+
+    @GetMapping("/consents")
+    @RateLimiter(name = "getClientRateLimiter")
+    public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
+        var user = UserContextContainer.context.get();
+        var result = consentRetrieveUsecases
+                .getAllByPrincipalName(user.getResponse().getEmail());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{clientId}")

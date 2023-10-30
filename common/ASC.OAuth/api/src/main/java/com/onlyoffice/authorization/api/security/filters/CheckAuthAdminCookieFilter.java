@@ -1,3 +1,6 @@
+/**
+ *
+ */
 package com.onlyoffice.authorization.api.security.filters;
 
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
@@ -17,11 +20,15 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+/**
+ *
+ */
 @Component
 @RequiredArgsConstructor
-public class CheckAuthCookieFilter extends OncePerRequestFilter {
+public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";
     private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
+    private final String X_TENANT_HEADER = "X-Tenant";
 
     private final DocspaceClient docspaceClient;
 
@@ -56,20 +63,28 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
 
         var address = URI.create(addressCookie.get().getValue());
         var me = docspaceClient.getMe(address, cookie);
-        if (me.getStatusCode() != HttpStatus.OK.value()) {
+        if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin()) {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            return;
+        }
+
+        var tenant = docspaceClient.getTenant(address, cookie);
+        if (tenant.getStatusCode() != HttpStatus.OK.value()) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
         }
 
         UserContextContainer.context.set(me);
+        response.setHeader(X_TENANT_HEADER, String.valueOf(tenant.getResponse().getTenantId()));
         chain.doFilter(request, response);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
-        Pattern pattern = Pattern.compile("/api/2.0/clients/consents");
         String path = request.getRequestURI();
-        return !pattern.matcher(path).find();
+        Pattern first = Pattern.compile("/api/2.0/clients/.*/info");
+        Pattern second = Pattern.compile("/api/2.0/clients/consents");
+        return first.matcher(path).find() || second.matcher(path).find();
     }
 }
