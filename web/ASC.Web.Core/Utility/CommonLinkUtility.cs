@@ -106,12 +106,12 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     public string GetMyStaff()
     {
-        return _coreBaseSettings.Personal ? ToAbsolute("~/my") : ToAbsolute("~/accounts/view/@self");
+        return _coreBaseSettings.Personal ? ToAbsolute("~/my") : ToAbsolute("~/profile");
     }
 
     public string GetUnsubscribe()
     {
-        return _coreBaseSettings.Personal ? ToAbsolute("~/my?unsubscribe=tips") : ToAbsolute("~/products/people/view/@self");
+        return _coreBaseSettings.Personal ? ToAbsolute("~/my?unsubscribe=tips") : ToAbsolute("~/profile/notifications");
     }
 
     public string GetEmployees()
