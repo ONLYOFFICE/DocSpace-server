@@ -73,7 +73,7 @@ public class QueueWorker<T> where T : DistributedTaskProgress
         {
             var task = GetProgressItemStatus(tenantId, userId);
 
-            if (task != null && task.IsCompleted)
+            if (task is { IsCompleted: true })
             {
                 _queue.DequeueTask(task.Id);
                 task = null;

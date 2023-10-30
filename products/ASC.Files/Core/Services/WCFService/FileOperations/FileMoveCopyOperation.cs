@@ -847,16 +847,21 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.Private && DocSpaceHelper.IsRoom(f.FolderType));
 
-        if (entryParentRoom == null && toFolderParentRoom == null)
+        if (entryParentRoom == null)
         {
-            return true;
+            if(toFolderParentRoom == null)
+            {
+                return true;
+            }
+
+            return false;
         }
 
-        if (entryParentRoom != null && toFolderParentRoom == null
-            || entryParentRoom == null && toFolderParentRoom != null)
+        if(toFolderParentRoom == null)
         {
             return false;
         }
+
 
         return entryParentRoom.Id.Equals(toFolderParentRoom.Id) && !_copy;
     }

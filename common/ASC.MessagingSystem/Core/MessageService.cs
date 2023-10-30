@@ -280,7 +280,7 @@ public class MessageService
                 UserRole = (int)userType
             });
         }
-        else if (action == MessageAction.UserCreated || action == MessageAction.UserUpdated)
+        else if (action is MessageAction.UserCreated or MessageAction.UserUpdated)
         {
             parametr = JsonSerializer.Serialize(new AdditionalNotificationInfo
             {

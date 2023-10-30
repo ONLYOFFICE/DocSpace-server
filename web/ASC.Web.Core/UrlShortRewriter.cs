@@ -43,7 +43,7 @@ public class UrlShortRewriter
 
         ShortLink link;
 
-        using (var context = await dbContextFactory.CreateDbContextAsync())
+        await using (var context = await dbContextFactory.CreateDbContextAsync())
         {
             link = await context.ShortLinks.FindAsync(id);
         }

@@ -162,7 +162,7 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
 
     public bool IsRoot(FolderMetadata dropboxFolder)
     {
-        return dropboxFolder != null && dropboxFolder.Id == "/";
+        return dropboxFolder is { Id: "/" };
     }
 
     private File<string> ToErrorFile(ErrorFile dropboxFile)

@@ -176,7 +176,7 @@ public class WebItemManager
 
     public int GetSortOrder(IWebItem item)
     {
-        return item != null && item.Context != null ? item.Context.DefaultSortOrder : 0;
+        return item is { Context: not null } ? item.Context.DefaultSortOrder : 0;
     }
 
     public List<IWebItem> GetItemsAll()

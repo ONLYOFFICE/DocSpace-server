@@ -454,7 +454,7 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         var folderDao = selector.GetFolderDao(folderId);
         var storageMaxUploadSize = await folderDao.GetMaxUploadSizeAsync(selector.ConvertId(folderId), chunkedUpload);
 
-        if (storageMaxUploadSize == -1 || storageMaxUploadSize == long.MaxValue)
+        if (storageMaxUploadSize is -1 or long.MaxValue)
         {
             storageMaxUploadSize = _setupInfo.ProviderMaxUploadSize;
         }

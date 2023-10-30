@@ -78,7 +78,7 @@ public abstract class BaseStartup
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
             var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
 
-            if (knownProxies != null && knownProxies.Count > 0)
+            if (knownProxies is { Count: > 0 })
             {
                 foreach (var knownProxy in knownProxies)
                 {
@@ -87,7 +87,7 @@ public abstract class BaseStartup
             }
 
 
-            if (knownNetworks != null && knownNetworks.Count > 0)
+            if (knownNetworks is { Count: > 0 })
             {
                 foreach (var knownNetwork in knownNetworks)
                 {

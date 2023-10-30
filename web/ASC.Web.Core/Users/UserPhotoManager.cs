@@ -542,7 +542,7 @@ public class UserPhotoManager
         var store = await GetDataStoreAsync();
 
         var photoUrl = GetDefaultPhotoAbsoluteWebPath();
-        if (data != null && data.Length > 0)
+        if (data is { Length: > 0 })
         {
             using (var stream = new MemoryStream(data))
             {

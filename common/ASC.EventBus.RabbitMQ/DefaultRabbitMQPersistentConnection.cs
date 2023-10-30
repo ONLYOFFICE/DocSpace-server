@@ -47,7 +47,7 @@ public class DefaultRabbitMQPersistentConnection
     {
         get
         {
-            return _connection != null && _connection.IsOpen && !_disposed;
+            return _connection is { IsOpen: true } && !_disposed;
         }
     }
 

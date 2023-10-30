@@ -496,7 +496,7 @@ public class FilesLinkUtility
 
     private string GetUrlWithShare(string url)
     {
-        if (_externalShare.GetLinkId() == default)
+        if (_externalShare.GetLinkId() == Guid.Empty)
         {
             return url;
         }

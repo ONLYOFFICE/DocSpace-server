@@ -50,7 +50,7 @@ public class EncryptionWorker
         {
             var item = _queue.GetAllTasks<EncryptionOperation>().SingleOrDefault();
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _queue.DequeueTask(item.Id);
                 item = null;

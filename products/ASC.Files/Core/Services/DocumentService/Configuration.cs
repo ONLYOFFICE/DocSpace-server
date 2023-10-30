@@ -904,9 +904,7 @@ public class CustomizationConfig<T>
                         properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
                     }
 
-                    return properties != null
-                        && properties.FormFilling != null
-                        && properties.FormFilling.CollectFillForm;
+                    return properties is { FormFilling.CollectFillForm: true };
                 }
             }
             return false;

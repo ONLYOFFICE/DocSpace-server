@@ -283,7 +283,7 @@ public class DIHelper
                             var a1 = a.GetGenericTypeDefinition();
                             var b = a.GetGenericArguments().FirstOrDefault();
 
-                            if (b != null && b.IsGenericType)
+                            if (b is { IsGenericType: true })
                             {
                                 var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
 
@@ -359,7 +359,7 @@ public class DIHelper
                             var a1 = a.GetGenericTypeDefinition();
                             var b = a.GetGenericArguments().FirstOrDefault();
 
-                            if (b != null && b.IsGenericType)
+                            if (b is { IsGenericType: true })
                             {
                                 var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
 

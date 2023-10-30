@@ -713,7 +713,7 @@ public class GoogleCloudStorage : BaseStorage
             {
                 var status = (int)ex.StatusCode;
 
-                if (status == 408 || status == 500 || status == 502 || status == 503 || status == 504)
+                if (status is 408 or 500 or 502 or 503 or 504)
                 {
                     Thread.Sleep(millisecondsTimeout);
                     continue;

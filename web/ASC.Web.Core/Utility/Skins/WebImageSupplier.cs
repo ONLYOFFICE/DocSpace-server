@@ -68,7 +68,7 @@ public class WebImageSupplier
         if (!Guid.Empty.Equals(partID))
         {
             var product = _webItemManager[partID];
-            if (product != null && product.Context != null)
+            if (product is { Context: not null })
             {
                 itemFolder = GetAppThemeVirtualPath(product) + "/default/images";
             }

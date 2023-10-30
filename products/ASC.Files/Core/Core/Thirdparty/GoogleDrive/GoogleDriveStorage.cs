@@ -234,7 +234,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         var httpClient = _clientFactory.CreateClient();
         var response = await httpClient.SendAsync(request);
 
-        if (offset == 0 && file.Size.HasValue && file.Size > 0)
+        if (offset == 0 && file.Size is > 0)
         {
             return new ResponseStream(await response.Content.ReadAsStreamAsync(), file.Size.Value);
         }

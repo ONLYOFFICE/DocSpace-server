@@ -65,7 +65,7 @@ public class TopSubscriptionProvider : ISubscriptionProvider
             }
         }
 
-        return senders != null && 0 < senders.Length ? senders : _defaultSenderMethods;
+        return senders is { Length: > 0 } ? senders : _defaultSenderMethods;
     }
 
     public virtual async Task<IRecipient[]> GetRecipientsAsync(INotifyAction action, string objectID)

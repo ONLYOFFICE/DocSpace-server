@@ -377,12 +377,12 @@ public class SecurityController : ControllerBase
 
         await DemandAuditPermissionAsync();
 
-        if (inDto.Settings.LoginHistoryLifeTime <= 0 || inDto.Settings.LoginHistoryLifeTime > TenantAuditSettings.MaxLifeTime)
+        if (inDto.Settings.LoginHistoryLifeTime is <= 0 or > TenantAuditSettings.MaxLifeTime)
         {
             throw new ArgumentException("LoginHistoryLifeTime");
         }
 
-        if (inDto.Settings.AuditTrailLifeTime <= 0 || inDto.Settings.AuditTrailLifeTime > TenantAuditSettings.MaxLifeTime)
+        if (inDto.Settings.AuditTrailLifeTime is <= 0 or > TenantAuditSettings.MaxLifeTime)
         {
             throw new ArgumentException("AuditTrailLifeTime");
         }

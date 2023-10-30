@@ -248,7 +248,7 @@ public class TimeZoneConverter
                 var tz = TimeZoneInfo.Local;
                 if (Path.DirectorySeparatorChar == '/')
                 {
-                    if (tz.StandardName == "UTC" || tz.StandardName == "UCT")
+                    if (tz.StandardName is "UTC" or "UCT")
                     {
                         tz = TimeZoneInfo.Utc;
                     }

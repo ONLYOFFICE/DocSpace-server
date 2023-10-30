@@ -833,7 +833,7 @@ internal class TagDao : BaseTagDao<int>, ITagDao<int>
 
         result = result.Concat(Queries.NewTagsForFilesAsync(filesDbContext, tenantId, subject, where));
 
-        if (parentFolder.FolderType == FolderType.USER || parentFolder.FolderType == FolderType.COMMON)
+        if (parentFolder.FolderType is FolderType.USER or FolderType.COMMON)
         {
             var folderIds = await Queries.ThirdpartyAccountAsync(filesDbContext, tenantId, parentFolder.FolderType, subject).ToListAsync();
 

@@ -165,7 +165,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
                 files = files.Where(x =>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -245,7 +245,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:

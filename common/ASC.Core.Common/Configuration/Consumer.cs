@@ -124,7 +124,7 @@ public class Consumer : IDictionary<string, string>
         _props = props ?? new Dictionary<string, string>();
         _additional = additional ?? new Dictionary<string, string>();
 
-        if (props != null && props.Count > 0)
+        if (props is { Count: > 0 })
         {
             CanSet = props.All(r => string.IsNullOrEmpty(r.Value));
         }

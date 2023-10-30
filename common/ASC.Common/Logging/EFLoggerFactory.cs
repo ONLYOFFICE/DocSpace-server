@@ -70,9 +70,6 @@ public class EFLogger : ILogger
     {
         switch (eventId.Id)
         {
-            //case 20000:
-            //    CustomLogger.Debug(formatter(state, exception));
-            //    break;
             case 20101:
                 var keyValuePairs = state as IEnumerable<KeyValuePair<string, object>>;
                 var ev = new EFLogEvent("");

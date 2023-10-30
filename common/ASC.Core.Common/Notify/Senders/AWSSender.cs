@@ -108,7 +108,7 @@ public class AWSSender : SmtpSender, IDisposable
             result = NoticeSendResult.SendingImpossible;
         }
 
-        if (result == NoticeSendResult.MessageIncorrect || result == NoticeSendResult.SendingImpossible)
+        if (result is NoticeSendResult.MessageIncorrect or NoticeSendResult.SendingImpossible)
         {
             _logger.DebugAmazonSendingFailed(result);
             result = await base.SendAsync(m);

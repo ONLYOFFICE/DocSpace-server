@@ -50,7 +50,7 @@ public class TenantStatusFilter : IAsyncResourceFilter
             return;
         }
 
-        if (tenant.Status == TenantStatus.RemovePending || tenant.Status == TenantStatus.Suspended)
+        if (tenant.Status is TenantStatus.RemovePending or TenantStatus.Suspended)
         {
             if (tenant.Status == TenantStatus.Suspended &&
                 context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor &&
@@ -65,7 +65,7 @@ public class TenantStatusFilter : IAsyncResourceFilter
             return;
         }
 
-        if (tenant.Status == TenantStatus.Transfering || tenant.Status == TenantStatus.Restoring)
+        if (tenant.Status is TenantStatus.Transfering or TenantStatus.Restoring)
         {
             if (_passthroughtRequestEndings.Any(path => context.HttpContext.Request.Path.ToString().EndsWith(path, StringComparison.InvariantCultureIgnoreCase)))
             {

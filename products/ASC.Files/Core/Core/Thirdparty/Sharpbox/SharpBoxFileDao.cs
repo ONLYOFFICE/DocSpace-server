@@ -143,7 +143,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -222,7 +222,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -347,7 +347,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 var response = (HttpWebResponse)webException.Response;
                 if (response != null)
                 {
-                    if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
+                    if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                     {
                         throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
                     }

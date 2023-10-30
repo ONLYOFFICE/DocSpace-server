@@ -121,7 +121,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
         catch (Exception ex)
         {
             var serviceException = (ServiceException)ex.InnerException;
-            if (serviceException != null && serviceException.StatusCode == HttpStatusCode.NotFound)
+            if (serviceException is { StatusCode: HttpStatusCode.NotFound })
             {
                 return null;
             }

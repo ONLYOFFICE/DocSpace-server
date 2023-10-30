@@ -790,8 +790,7 @@ public class SettingsController : BaseSettingsController
                                    .FirstOrDefault(item =>
                                                    item != null &&
                                                    item.ID == id &&
-                                                   item.Context != null &&
-                                                   item.Context.SpaceUsageStatManager != null);
+                                                   item.Context is { SpaceUsageStatManager: not null });
 
         if (webitem == null)
         {

@@ -155,7 +155,7 @@ public class ColumnMapper
         return string.Format("{0};v:{1}", GetMappingKey(tableName, columnName), oldValue).ToLowerInvariant();
     }
 
-    private class MappingWithCondition
+    private sealed class MappingWithCondition
     {
         public object NewValue { get; set; }
         public object OldValue { get; set; }

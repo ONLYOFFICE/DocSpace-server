@@ -412,7 +412,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
             await filesDbContext.SaveChangesAsync();
 
-            if (folder.FolderType == FolderType.DEFAULT || folder.FolderType == FolderType.BUNCH)
+            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH)
             {
                 _ = _factoryIndexer.IndexAsync(toUpdate);
             }
@@ -439,7 +439,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             newFolder = entityEntry.Entity;
             await filesDbContext.SaveChangesAsync();
 
-            if (folder.FolderType == FolderType.DEFAULT || folder.FolderType == FolderType.BUNCH)
+            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH)
             {
                 _ = _factoryIndexer.IndexAsync(newFolder);
             }
@@ -886,7 +886,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         await foreach (var f in folders)
         {
             if (bunch ? f.RootFolderType == FolderType.BUNCH
-            : (f.RootFolderType == FolderType.USER || f.RootFolderType == FolderType.COMMON))
+            : f.RootFolderType is FolderType.USER or FolderType.COMMON)
             {
                 yield return f;
             }

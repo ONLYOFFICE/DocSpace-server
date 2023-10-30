@@ -110,7 +110,7 @@ public class FoldersModule : FeedModule
         var parentFolders = await _folderDao.GetFoldersAsync(parentFolderIDs, checkShare: false).ToListAsync();
         var roomsIds = await _folderDao.GetParentRoomsAsync(parentFolderIDs).ToDictionaryAsync(k => k.FolderId, v => v.ParentRoomId);
 
-        return folders.Select(f => new Tuple<Feed.Aggregator.Feed, object>(ToFeed(f, parentFolders.FirstOrDefault(r => r.Id.Equals(f.Folder.ParentId)),
+        return folders.Select(f => new Tuple<Feed.Aggregator.Feed, object>(ToFeed(f, parentFolders.Find(r => r.Id.Equals(f.Folder.ParentId)),
             roomsIds.GetValueOrDefault(f.Folder.ParentId)), f));
     }
 

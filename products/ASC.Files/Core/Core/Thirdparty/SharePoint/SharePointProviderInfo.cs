@@ -660,8 +660,7 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
 
     private void SetFolderType(Folder<string> folder, bool isRoot)
     {
-        if (isRoot && (RootFolderType == FolderType.VirtualRooms ||
-            RootFolderType == FolderType.Archive))
+        if (isRoot && RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             folder.FolderType = RootFolderType;
         }

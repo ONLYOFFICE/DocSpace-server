@@ -235,7 +235,7 @@ public class SmtpSender : INotifySender
                 ContentTransferEncoding = ContentEncoding.QuotedPrintable
             };
 
-            if (m.Attachments != null && m.Attachments.Length > 0)
+            if (m.Attachments is { Length: > 0 })
             {
                 var multipartRelated = new MultipartRelated
                 {

@@ -217,7 +217,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.Error(e.Response.HttpStatusCode.ToString());
 
-                if (e.Response.HttpStatusCode == 413 || e.Response.HttpStatusCode == 403 || e.Response.HttpStatusCode == 408)
+                if (e.Response.HttpStatusCode is 413 or 403 or 408)
                 {
                     foreach (var r in data.Where(r => r != null))
                     {
@@ -251,7 +251,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.ErrorInner(inner);
 
-                if (inner.Response.HttpStatusCode == 413 || inner.Response.HttpStatusCode == 403)
+                if (inner.Response.HttpStatusCode is 413 or 403)
                 {
                     Logger.Error(inner.Response.HttpStatusCode.ToString());
                     foreach (var r in data.Where(r => r != null))
@@ -298,7 +298,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.Error(e.Response.HttpStatusCode.ToString());
 
-                if (e.Response.HttpStatusCode == 413 || e.Response.HttpStatusCode == 403 || e.Response.HttpStatusCode == 408)
+                if (e.Response.HttpStatusCode is 413 or 403 or 408)
                 {
                     foreach (var r in data.Where(r => r != null))
                     {
@@ -332,7 +332,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.ErrorIndexAsync(inner);
 
-                if (inner.Response.HttpStatusCode == 413 || inner.Response.HttpStatusCode == 403)
+                if (inner.Response.HttpStatusCode is 413 or 403)
                 {
                     Logger.Error(inner.Response.HttpStatusCode.ToString());
                     foreach (var r in data.Where(r => r != null))

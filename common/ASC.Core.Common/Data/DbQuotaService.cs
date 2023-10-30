@@ -46,7 +46,7 @@ class DbQuotaService : IQuotaService
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)
     {
-        using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return _mapper.Map<DbQuota, TenantQuota>(await coreDbContext.Quotas.SingleOrDefaultAsync(r => r.TenantId == id));
     }

@@ -257,7 +257,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
     {
-        if (table.Name == "files_thirdparty_account" && (columnName == "password" || columnName == "token") && value != null)
+        if (table.Name == "files_thirdparty_account" && columnName is "password" or "token" && value != null)
         {
             try
             {
@@ -270,7 +270,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
             }
             return true;
         }
-        if (table.Name == "files_folder" && (columnName == "create_by" || columnName == "modified_by"))
+        if (table.Name == "files_folder" && columnName is "create_by" or "modified_by")
         {
             base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
 

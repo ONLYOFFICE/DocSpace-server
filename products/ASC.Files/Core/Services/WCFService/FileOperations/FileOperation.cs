@@ -243,7 +243,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         this[Src] = string.Join(SplitChar, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray());
     }
 
-    public override async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
+    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         try
         {
@@ -279,7 +279,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         }
         catch (AggregateException ae)
         {
-            ae.Flatten().Handle(e => e is TaskCanceledException || e is OperationCanceledException);
+            ae.Flatten().Handle(e => e is TaskCanceledException or OperationCanceledException);
         }
         catch (Exception error)
         {

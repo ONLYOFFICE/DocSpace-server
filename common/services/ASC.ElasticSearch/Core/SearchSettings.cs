@@ -62,7 +62,7 @@ public class SearchSettings : ISettings<SearchSettings>
     {
         var wrapper = Items.FirstOrDefault(r => r.ID == name);
 
-        return wrapper != null && wrapper.Enabled;
+        return wrapper is { Enabled: true };
     }
 }
 

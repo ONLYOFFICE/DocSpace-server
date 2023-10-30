@@ -39,7 +39,7 @@ public class UsersQuotaSyncOperation
     public void RecalculateQuota(Tenant tenant)
     {
         var item = _progressQueue.GetAllTasks<UsersQuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             item = null;

@@ -108,7 +108,7 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
                 {
                     item.Name = user.DisplayUserName(false, _displayUserSettingsHelper);
                     item.ImgUrl = await user.GetSmallPhotoURL(_userPhotoManager);
-                    item.Url = user.GetUserProfilePageURL(_commonLinkUtility);
+                    item.Url =await user.GetUserProfilePageUrl(_commonLinkUtility);
                     item.Disabled = user.Status == EmployeeStatus.Terminated;
                 }
                 return item;
@@ -129,13 +129,13 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
         return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
     }
 
-    public async Task RecalculateUserQuota(int TenantId, Guid userId)
+    public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
-        await _tenantManager.SetCurrentTenantAsync(TenantId);
+        await _tenantManager.SetCurrentTenantAsync(tenantId);
         var size = await GetUserSpaceUsageAsync(userId);
 
         await _tenantManager.SetTenantQuotaRowAsync(
-           new TenantQuotaRow { TenantId = TenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = userId, LastModified = DateTime.UtcNow },
+           new TenantQuotaRow { TenantId = tenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = userId, LastModified = DateTime.UtcNow },
            false);
     }
 }

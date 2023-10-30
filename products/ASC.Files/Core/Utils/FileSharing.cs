@@ -99,7 +99,7 @@ public class FileSharingAceHelper
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
 
-        if (!aceWrappers.All(r => r.Id == _authContext.CurrentAccount.ID && r.Access == FileShare.None) && 
+        if (!aceWrappers.TrueForAll(r => r.Id == _authContext.CurrentAccount.ID && r.Access == FileShare.None) && 
             !await _fileSharingHelper.CanSetAccessAsync(entry) && advancedSettings is not { InvitationLink: true })
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
@@ -684,7 +684,7 @@ public class FileSharing
             result.Add(w);
         }
 
-        if (entry.FileEntryType == FileEntryType.File && result.All(w => w.Id != FileConstant.ShareLinkId)
+        if (entry.FileEntryType == FileEntryType.File && result.TrueForAll(w => w.Id != FileConstant.ShareLinkId)
             && entry.FileEntryType == FileEntryType.File
             && !((File<T>)entry).Encrypted)
         {
@@ -716,14 +716,14 @@ public class FileSharing
             result.Add(w);
         }
 
-        if (result.Any(w => w.Id == _authContext.CurrentAccount.ID))
+        if (result.Exists(w => w.Id == _authContext.CurrentAccount.ID))
         {
             result.Single(w => w.Id == _authContext.CurrentAccount.ID).LockedRights = true;
         }
 
         if (entry.RootFolderType == FolderType.COMMON)
         {
-            if (result.All(w => w.Id != Constants.GroupAdmin.ID))
+            if (result.TrueForAll(w => w.Id != Constants.GroupAdmin.ID))
             {
                 var w = new AceWrapper
                 {

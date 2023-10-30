@@ -283,7 +283,7 @@ public static class DocumentService
             body.Callback = callbackUrl;
         }
 
-        if (users != null && users.Length > 0)
+        if (users is { Length: > 0 })
         {
             body.Users = users;
         }
@@ -735,7 +735,7 @@ public static class DocumentService
     }
 
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
-    private class ConvertionBody
+    private sealed class ConvertionBody
     {
         [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]
@@ -783,7 +783,7 @@ public static class DocumentService
     }
 
     [DebuggerDisplay("{Key}")]
-    private class BuilderBody
+    private sealed class BuilderBody
     {
         [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]

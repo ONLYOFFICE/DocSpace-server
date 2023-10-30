@@ -295,7 +295,7 @@ public class UploadModelBinder : IModelBinder
         var defaultBindingContext = bindingContext as DefaultModelBindingContext;
         var composite = bindingContext.ValueProvider as CompositeValueProvider;
 
-        if (defaultBindingContext != null && composite != null && composite.Count == 0)
+        if (defaultBindingContext != null && composite is { Count: 0 })
         {
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
         }

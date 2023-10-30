@@ -216,7 +216,7 @@ public class NotifyEngine
             _logger.ErrorPrepare(ex);
         }
 
-        if (request._senderNames != null && request._senderNames.Length > 0)
+        if (request._senderNames is { Length: > 0 })
         {
             foreach (var sendertag in request._senderNames)
             {
@@ -324,7 +324,7 @@ public class NotifyEngine
                                        {
                                                new TagValue(Context.SysRecipientId, request.Recipient.ID),
                                                new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                                               new TagValue(Context.SysRecipientAddress, addresses != null && addresses.Length > 0 ? addresses[0] : null)
+                                               new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
                                        }
                 );
             //Do styling here

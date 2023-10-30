@@ -78,31 +78,28 @@ public static class StorageFactoryExtenstion
 
         var section = builder.ServiceProvider.GetService<Configuration.Storage>();
         builder.ServiceProvider.GetService<PathUtils>();
-        if (section != null)
+        if (section is { Module: not null })
         {
-            if (section.Module != null)
+            foreach (var m in section.Module.Where(r => string.IsNullOrEmpty(module) || r.Name == module))
             {
-                foreach (var m in section.Module.Where(r => string.IsNullOrEmpty(module) || r.Name == module))
+                //todo: add path criterion
+                if (m.Type == "disc" || !m.Public || m.Path.Contains(Constants.StorageRootParam))
                 {
-                    //todo: add path criterion
-                    if (m.Type == "disc" || !m.Public || m.Path.Contains(Constants.StorageRootParam))
+                    builder.RegisterStorageHandler(
+                        m.Name,
+                        string.Empty,
+                        m.Public);
+                }
+
+                //todo: add path criterion
+                if (m.Domain != null)
+                {
+                    foreach (var d in m.Domain.Where(d => d.Path.Contains(Constants.StorageRootParam)))
                     {
                         builder.RegisterStorageHandler(
                             m.Name,
-                            string.Empty,
-                            m.Public);
-                    }
-
-                    //todo: add path criterion
-                    if (m.Domain != null)
-                    {
-                        foreach (var d in m.Domain.Where(d => d.Path.Contains(Constants.StorageRootParam)))
-                        {
-                            builder.RegisterStorageHandler(
-                                m.Name,
-                                d.Name,
-                                d.Public);
-                        }
+                            d.Name,
+                            d.Public);
                     }
                 }
             }

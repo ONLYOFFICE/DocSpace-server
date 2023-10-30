@@ -92,7 +92,7 @@ public class DbWorker
 
     public async IAsyncEnumerable<WebhooksConfigWithStatus> GetTenantWebhooksWithStatus()
     {
-        using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.WebhooksConfigWithStatusAsync(webhooksDbContext, Tenant);
 
@@ -203,7 +203,7 @@ public class DbWorker
             fromDb.Log.Config = fromDb.Config;
         }
 
-        return fromDb.Log;
+        return fromDb?.Log;
     }
 
     public async Task<WebhooksLog> WriteToJournal(WebhooksLog webhook)

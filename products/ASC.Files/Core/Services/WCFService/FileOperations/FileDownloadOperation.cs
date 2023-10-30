@@ -80,20 +80,15 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             }
 
             stream.Position = 0;
-            var fileName = FileConstant.DownloadTitle + archiveExtension;
+            string fileName;
 
             var thirdPartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
             if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
-                if (thirdPartyFolderOnly)
-                {
-                    fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title, archiveExtension);
-                }
-                else
-                {
-                    fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
-                }
+                fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
+                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
+                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
             }
             else
             {

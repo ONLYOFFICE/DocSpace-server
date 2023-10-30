@@ -283,7 +283,7 @@ internal class SubsciptionsStore
     public void SetSubscriptionMethod(SubscriptionMethod m)
     {
         _methods.RemoveAll(r => r.Tenant == m.Tenant && r.Source == m.Source && r.Action == m.Action && r.Recipient == m.Recipient);
-        if (m.Methods != null && 0 < m.Methods.Length)
+        if (m.Methods is { Length: > 0 })
         {
             _methods.Add(m);
         }

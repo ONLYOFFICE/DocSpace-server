@@ -51,7 +51,7 @@ public class NovellLdapSearcher : IDisposable
 
     public bool IsConnected
     {
-        get { return _ldapConnection != null && _ldapConnection.Connected; }
+        get { return _ldapConnection is { Connected: true }; }
     }
 
     public NovellLdapSearcher(
@@ -490,7 +490,7 @@ public class NovellLdapSearcher : IDisposable
                 }
             }
             // if cookie is empty, we are done.
-        } while (cookie != null && cookie.Length > 0);
+        } while (cookie is { Length: > 0 });
 
         var result = _novellLdapEntryExtension.ToLdapObjects(entries, LdapUniqueIdAttribute);
 

@@ -83,12 +83,12 @@ public class FilesControllerThirdparty : FilesController<string>
 
 public abstract class FilesController<T> : ApiControllerBase
 {
-    protected readonly FilesControllerHelper _filesControllerHelper;
+    private readonly FilesControllerHelper _filesControllerHelper;
     private readonly FileStorageService _fileStorageService;
     private readonly IMapper _mapper;
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
 
-    public FilesController(
+    protected FilesController(
         FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
         IMapper mapper,
@@ -605,7 +605,7 @@ public class FilesControllerCommon : ApiControllerBase
             {
                 await AddProps(fileId.GetString());
             }
-            else if (fileId.ValueKind == JsonValueKind.String)
+            else if (fileId.ValueKind == JsonValueKind.Number)
             {
                 await AddProps(fileId.GetInt32());
             }

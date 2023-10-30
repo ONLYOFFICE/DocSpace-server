@@ -47,7 +47,7 @@ public class DefaultActiveMQPersistentConnection
     {
         get
         {
-            return _connection != null && _connection.IsStarted && !_disposed;
+            return _connection is { IsStarted: true } && !_disposed;
         }
     }
 

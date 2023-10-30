@@ -384,8 +384,8 @@ public class EFUserService : IUserService
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await userDbContext.Database.BeginTransactionAsync();
 
             await Queries.DeleteAclsAsync(userDbContext, tenant, id);
             await Queries.DeleteSubscriptionsAsync(userDbContext, tenant, id.ToString());
@@ -419,8 +419,8 @@ public class EFUserService : IUserService
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await userDbContext.Database.BeginTransactionAsync();
             if (immediate)
             {
                 await Queries.DeleteUserGroupsByGroupIdAsync(userDbContext, tenant, userId, groupId, refType);
@@ -629,9 +629,9 @@ public class EFUserService : IUserService
     {
         q = q.Where(r => !r.Removed);
 
-        if (includeGroups != null && includeGroups.Count > 0 || excludeGroups != null && excludeGroups.Count > 0)
+        if (includeGroups is { Count: > 0 } || excludeGroups is { Count: > 0 })
         {
-            if (includeGroups != null && includeGroups.Count > 0)
+            if (includeGroups is { Count: > 0 })
             {
                 foreach (var ig in includeGroups)
                 {
@@ -639,7 +639,7 @@ public class EFUserService : IUserService
                 }
             }
 
-            if (excludeGroups != null && excludeGroups.Count > 0)
+            if (excludeGroups is { Count: > 0 })
             {
                 foreach (var eg in excludeGroups)
                 {
@@ -657,7 +657,7 @@ public class EFUserService : IUserService
 
                 var cgIncludeGroups = cg.Item1;
                 var cgExcludeGroups = cg.Item2;
-                if (cgIncludeGroups != null && cgIncludeGroups.Count > 0)
+                if (cgIncludeGroups is { Count: > 0 })
                 {
                     foreach (var ig in cgIncludeGroups)
                     {
@@ -665,7 +665,7 @@ public class EFUserService : IUserService
                     }
                 }
 
-                if (cgExcludeGroups != null && cgExcludeGroups.Count > 0)
+                if (cgExcludeGroups is { Count: > 0 })
                 {
                     foreach (var eg in cgExcludeGroups)
                     {

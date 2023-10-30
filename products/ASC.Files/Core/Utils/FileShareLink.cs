@@ -90,11 +90,7 @@ public class FileShareLink
         var fileShare = check.FileShare;
 
         return ((!checkRead
-                && (fileShare == FileShare.ReadWrite
-                    || fileShare == FileShare.CustomFilter
-                    || fileShare == FileShare.Review
-                    || fileShare == FileShare.FillForms
-                    || fileShare == FileShare.Comment))
+                && fileShare is FileShare.ReadWrite or FileShare.CustomFilter or FileShare.Review or FileShare.FillForms or FileShare.Comment)
             || (checkRead && fileShare != FileShare.Restrict), check.File, fileShare);
     }
 

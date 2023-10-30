@@ -150,18 +150,6 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
     }
 
-    public async IAsyncEnumerable<FileShareRecord> GetShareForEntryIdsAsync(Guid subject, IEnumerable<string> roomIds)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = Queries.ShareForEntryIdsAsync(filesDbContext, tenantId, subject, roomIds);
-
-        await foreach (var e in q)
-        {
-            yield return await ToFileShareRecordAsync(e);
-        }
-    }
-
     public async IAsyncEnumerable<FileShareRecord> GetSharesAsync(IEnumerable<Guid> subjects)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -820,14 +808,6 @@ static file class Queries
                 ctx.Security.Any(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == type
                                       && !(new[] { FileConstant.DenyDownloadId, FileConstant.DenySharingId }).Contains(
                                           r.Subject)));
-
-    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<DbFilesSecurity>>
-        ShareForEntryIdsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> roomIds) =>
-                ctx.Security
-                    .Where(r => r.TenantId == tenantId
-                                && (r.Subject == subject || r.Owner == subject)
-                                && roomIds.Contains(r.EntryId)));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

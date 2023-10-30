@@ -127,7 +127,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
     }
 
 
-    public bool IsConnected => _connection != null && _connection.IsOpen && !_disposed;
+    public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
     private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
     {

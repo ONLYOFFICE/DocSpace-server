@@ -248,32 +248,6 @@ public class FileStorageService //: IFileStorageService
         return entries;
     }
 
-    public async Task<List<object>> GetPathAsync<T>(T folderId)
-    {
-        var folderDao = GetFolderDao<T>();
-        var folder = await folderDao.GetFolderAsync(folderId);
-
-        ErrorIf(folder == null, FilesCommonResource.ErrorMassage_FolderNotFound);
-        ErrorIf(!await _fileSecurity.CanReadAsync(folder), FilesCommonResource.ErrorMassage_SecurityException_ViewFolder);
-
-        var breadCrumbs = await _entryManager.GetBreadCrumbsAsync(folderId, folderDao);
-
-        return new List<object>(breadCrumbs.Select(f =>
-        {
-            if (f is Folder<string> f1)
-            {
-                return (object)f1.Id;
-            }
-
-            if (f is Folder<int> f2)
-            {
-                return f2.Id;
-            }
-
-            return 0;
-        }));
-    }
-
     public async Task<DataWrapper<T>> GetFolderItemsAsync<T>(
         T parentId,
         int from,
@@ -309,7 +283,7 @@ public class FileStorageService //: IFileStorageService
         }
         catch (Exception e)
         {
-            if (parent != null && parent.ProviderEntry)
+            if (parent is { ProviderEntry: true })
             {
                 throw GenerateException(new Exception(FilesCommonResource.ErrorMassage_SharpBoxException, e));
             }
@@ -481,10 +455,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<T>> CreateNewFolderAsync<T>(T parentId, string title)
     {
-        if (string.IsNullOrEmpty(title) || parentId == null)
-        {
-            throw new ArgumentException();
-        }
+        ArgumentException.ThrowIfNullOrEmpty(title);
+        ArgumentNullException.ThrowIfNull(parentId);
 
         return await InternalCreateNewFolderAsync(parentId, title);
     }
@@ -1390,7 +1362,6 @@ public class FileStorageService //: IFileStorageService
         {
             string previouseKey;
             string sourceFileUrl;
-            string previousFileExt;
             string sourceExt;
 
             if (file.Version > 1)
@@ -1402,7 +1373,6 @@ public class FileStorageService //: IFileStorageService
                 sourceExt = previousFileStable.ConvertedExtension;
 
                 previouseKey = await _documentServiceHelper.GetDocKeyAsync(previousFileStable);
-                previousFileExt = FileUtility.GetFileExtension(previousFileStable.Title);
             }
             else
             {
@@ -1425,7 +1395,6 @@ public class FileStorageService //: IFileStorageService
                 sourceExt = fileExt.Trim('.');
 
                 previouseKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
-                previousFileExt = fileExt;
             }
 
             result.Previous = new EditHistoryUrl
@@ -1445,7 +1414,6 @@ public class FileStorageService //: IFileStorageService
 
     public async IAsyncEnumerable<EditHistory> RestoreVersionAsync<T>(T fileId, int version, string url = null, string doc = null)
     {
-        IFileDao<T> fileDao;
         File<T> file;
         if (string.IsNullOrEmpty(url))
         {
@@ -1453,10 +1421,9 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            string modifiedOnString;
-            fileDao = GetFileDao<T>();
+            var fileDao = GetFileDao<T>();
             var fromFile = await fileDao.GetFileAsync(fileId, version);
-            modifiedOnString = fromFile.ModifiedOnString;
+            var modifiedOnString = fromFile.ModifiedOnString;
             file = await _entryManager.SaveEditingAsync(fileId, null, url, null, doc, string.Format(FilesCommonResource.CommentRevertChanges, modifiedOnString));
         }
 
@@ -1627,9 +1594,8 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            Folder<T> folder;
             var folderDao = GetFolderDao<T>();
-            folder = await folderDao.GetFolderAsync(folderId);
+            var folder = await folderDao.GetFolderAsync(folderId);
 
             var result = await _fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
 
@@ -2023,8 +1989,7 @@ public class FileStorageService //: IFileStorageService
         foreach (var id in filesId)
         {
             var file = await fileDao.GetFileAsync(id);
-            if (file != null
-                && !file.Encrypted
+            if (file is { Encrypted: false }
                 && await destFileDao.IsExistAsync(file.Title, toFolder.Id))
             {
                 checkedFiles.Add(id);
@@ -2147,7 +2112,7 @@ public class FileStorageService //: IFileStorageService
                 continue;
             }
 
-            ErrorIf(!await _fileSecurity.CanConvert(file), FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+            ErrorIf(!await _fileSecurity.CanConvertAsync(file), FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
 
             if (fileInfo.StartConvert && _fileConverter.MustConvert(file))
             {
@@ -2184,15 +2149,15 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<string> CheckFillFormDraftAsync<T>(T fileId, int version, string doc, bool editPossible, bool view)
     {
-        var (file, _configuration, _) = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, editPossible, !view, true);
-        var _valideShareLink = !string.IsNullOrEmpty(await _fileShareLink.ParseAsync(doc));
+        var (file, configuration, _) = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, editPossible, !view, true);
+        var validShareLink = !string.IsNullOrEmpty(await _fileShareLink.ParseAsync(doc));
 
-        if (_valideShareLink)
+        if (validShareLink)
         {
-            _configuration.Document.SharedLinkKey += doc;
+            configuration.Document.SharedLinkKey += doc;
         }
 
-        if (_configuration.EditorConfig.ModeWrite
+        if (configuration.EditorConfig.ModeWrite
             && _fileUtility.CanWebRestrictedEditing(file.Title)
             && await _fileSecurity.CanFillFormsAsync(file)
             && !await _fileSecurity.CanEditAsync(file))
@@ -2316,7 +2281,7 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task ReassignProvidersAsync<T>(Guid userFromId, Guid userToId, bool checkPermission = false)
+    public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
     {
         if (checkPermission)
         {
@@ -3408,11 +3373,6 @@ public class FileStorageService //: IFileStorageService
         return new List<MentionWrapper>(users);
     }
 
-    public string GetHelpCenter()
-    {
-        return string.Empty; //TODO: Studio.UserControls.Common.HelpCenter.HelpCenter.RenderControlToString();
-    }
-
     private IFolderDao<T> GetFolderDao<T>()
     {
         return _daoFactory.GetFolderDao<T>();
@@ -3566,12 +3526,12 @@ public class FileStorageService //: IFileStorageService
 
         var userInfos = admins.Union(onlyFilesAdmins).ToList();
 
-        foreach (var userInfo in userInfos)
+        foreach (var userInfo in userInfos.Select(r=> r.Id))
         {
-            dict[userInfo.Id] = new AceWrapper
+            dict[userInfo] = new AceWrapper
             {
                 Access = FileShare.ReadWrite,
-                Id = userInfo.Id
+                Id = userInfo
             };
         }
 

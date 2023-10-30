@@ -179,7 +179,7 @@ public abstract class PortalTaskBase
 
     protected void SetCurrentStepProgress(int value)
     {
-        if (value < 0 || value > 100)
+        if (value is < 0 or > 100)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
@@ -195,7 +195,7 @@ public abstract class PortalTaskBase
 
     protected void SetProgress(int value)
     {
-        if (value < 0 || value > 100)
+        if (value is < 0 or > 100)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }

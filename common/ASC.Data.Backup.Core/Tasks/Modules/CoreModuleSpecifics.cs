@@ -93,18 +93,6 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
-    protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
-    {
-        if (table.Name == "core_usergroup" && columnName == "last_modified")
-        {
-            value = DateTime.UtcNow;
-
-            return true;
-        }
-
-        return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
-    }
-
     protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
     {
         if (table.Name == "core_acl" && int.Parse((string)row["tenant"]) == -1)
@@ -117,6 +105,18 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
     }
 
+    protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
+    {
+        if (table.Name == "core_usergroup" && columnName == "last_modified")
+        {
+            value = DateTime.UtcNow;
+
+            return true;
+        }
+
+        return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
+    }
+    
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
         if (relation.ChildTable == "core_acl" && relation.ChildColumn == "object")
@@ -194,6 +194,6 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
     {
         var storageType = int.Parse(strStorageType);
 
-        return storageType == 0 || storageType == 1;
+        return storageType is 0 or 1;
     }
 }

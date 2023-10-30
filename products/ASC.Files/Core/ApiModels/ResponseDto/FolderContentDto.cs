@@ -239,7 +239,7 @@ public class FolderContentDtoHelper
                         }
                         if (currentUsersRecords != null)
                         {
-                            result.InRoom = currentUsersRecords.Any(c => c.EntryId.Equals(fol1.Id));
+                            result.InRoom = currentUsersRecords.Exists(c => c.EntryId.Equals(fol1.Id));
                         }
                     }
                 }

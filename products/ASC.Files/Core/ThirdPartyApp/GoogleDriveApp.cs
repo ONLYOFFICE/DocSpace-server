@@ -321,7 +321,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         catch (HttpRequestException e)
         {
             _logger.ErrorGoogleDriveAppSaveFileStream(e);
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
             }
@@ -789,7 +789,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             _logger.ErrorGoogleDriveAppCreateFile(e);
 
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
             }
@@ -863,7 +863,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 _logger.ErrorGoogleDriveAppDownLoadExportLink(e);
 
-                if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+                if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
                 }

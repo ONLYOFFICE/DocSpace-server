@@ -223,7 +223,7 @@ public class WebItemSecurity
         // set new aces
         if (subjects == null || subjects.Length == 0 || subjects.Contains(Constants.GroupEveryone.ID))
         {
-            if (!enabled && subjects != null && subjects.Length == 0)
+            if (!enabled && subjects is { Length: 0 })
             {
                 // users from list with no users equals allow to all users
                 enabled = true;

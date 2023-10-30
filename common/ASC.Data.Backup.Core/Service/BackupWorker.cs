@@ -90,7 +90,7 @@ public class BackupWorker
         {
             var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _progressQueue.DequeueTask(item.Id);
                 item = null;
@@ -186,7 +186,7 @@ public class BackupWorker
         lock (_syncRoot)
         {
             var item = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId);
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _progressQueue.DequeueTask(item.Id);
                 item = null;
@@ -285,7 +285,7 @@ public class BackupWorker
             BackupProgressEnum = progressItem.BackupProgressItemType.Convert()
         };
 
-        if ((progressItem.BackupProgressItemType == BackupProgressItemType.Backup || progressItem.BackupProgressItemType == BackupProgressItemType.Transfer) && progressItem.Link != null)
+        if (progressItem.BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && progressItem.Link != null)
         {
             progress.Link = progressItem.Link;
         }

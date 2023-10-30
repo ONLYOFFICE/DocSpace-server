@@ -294,8 +294,6 @@ public class FileHandlerService
 
             await context.Response.Body.FlushAsync();
             await context.Response.CompleteAsync();
-            //context.Response.SuppressContent = true;
-            //context.ApplicationInstance.CompleteRequest();
         }
         catch (Exception e)
         {
@@ -356,7 +354,7 @@ public class FileHandlerService
                 }
             }
 
-            if (readLink && (linkShare == FileShare.Comment || linkShare == FileShare.Read) && file.DenyDownload)
+            if (readLink && linkShare is FileShare.Comment or FileShare.Read && file.DenyDownload)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
@@ -382,7 +380,7 @@ public class FileHandlerService
             //TODO
             //context.Response.Headers.Charset = "utf-8";
 
-            var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split(new[] { '=', '-' });
+            var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split('=', '-');
             var isNeedSendAction = range.Count() < 2 || Convert.ToInt64(range[1]) == 0;
 
             if (isNeedSendAction)
@@ -535,7 +533,6 @@ public class FileHandlerService
                 try
                 {
                     await context.Response.Body.FlushAsync();
-                    //context.Response.SuppressContent = true;
                     await context.Response.CompleteAsync();
                     flushed = true;
                 }
@@ -569,19 +566,17 @@ public class FileHandlerService
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException();
-        }
-
-        if (context.Request.Headers["Range"].FirstOrDefault() == null)
+        ArgumentNullException.ThrowIfNull(context);
+        
+        var rangeHeader = context.Request.Headers["Range"].FirstOrDefault();
+        if (rangeHeader == null)
         {
             return fullLength;
         }
 
         long endOffset = -1;
 
-        var range = context.Request.Headers["Range"].FirstOrDefault().Split('=', '-');
+        var range = rangeHeader.Split('=', '-');
         offset = Convert.ToInt64(range[1]);
         if (range.Length > 2 && !string.IsNullOrEmpty(range[2]))
         {
@@ -612,7 +607,6 @@ public class FileHandlerService
 
     private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream, bool flushed)
     {
-        //context.Response.Buffer = false;
         context.Response.Headers.Add("Connection", "Keep-Alive");
         context.Response.ContentLength = toRead;
         context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(title));
@@ -707,11 +701,11 @@ public class FileHandlerService
                         var header = context.Request.Headers[_fileUtility.SignatureHeader].FirstOrDefault();
                         if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                         {
-                            var requestHeaderTrace = String.Empty;
+                            var requestHeaderTrace = new StringBuilder();
 
                             foreach (var requestHeader in context.Request.Headers)
                             {
-                                requestHeaderTrace += $"{requestHeader.Key}={requestHeader.Value}" + Environment.NewLine;
+                                requestHeaderTrace.Append($"{requestHeader.Key}={requestHeader.Value}" + Environment.NewLine);
                             }
 
                             var exceptionMessage = $"Invalid signature header {_fileUtility.SignatureHeader} with value {header}." +
@@ -804,8 +798,6 @@ public class FileHandlerService
         {
             await context.Response.Body.FlushAsync();
             await context.Response.CompleteAsync();
-            //context.Response.SuppressContent = true;
-            //context.ApplicationInstance.CompleteRequest();
         }
         catch (HttpException he)
         {
@@ -897,8 +889,6 @@ public class FileHandlerService
         try
         {
             await context.Response.Body.FlushAsync();
-            //context.Response.SuppressContent = true;
-            //context.ApplicationInstance.CompleteRequest();
         }
         catch (HttpException he)
         {
@@ -949,8 +939,6 @@ public class FileHandlerService
         try
         {
             await context.Response.Body.FlushAsync();
-            //context.Response.SuppressContent = true;
-            //context.ApplicationInstance.CompleteRequest();
         }
         catch (HttpException he)
         {
@@ -1044,8 +1032,6 @@ public class FileHandlerService
         try
         {
             await context.Response.Body.FlushAsync();
-            //context.Response.SuppressContent = true;
-            //context.ApplicationInstance.CompleteRequest();
         }
         catch (HttpException he)
         {
@@ -1063,7 +1049,7 @@ public class FileHandlerService
         }
         else
         {
-            await ThumbnailFileFromThirdparty(context, q.FirstOrDefault() ?? "", force);
+            await ThumbnailFileFromThirdParty(context, q.FirstOrDefault() ?? "");
         }
     }
 
@@ -1176,7 +1162,7 @@ public class FileHandlerService
         }
     }
 
-    private async Task ThumbnailFileFromThirdparty(HttpContext context, string id, bool _)
+    private async Task ThumbnailFileFromThirdParty(HttpContext context, string id)
     {
         try
         {
@@ -1439,7 +1425,7 @@ public class FileHandlerService
 
         if (int.TryParse(q, out var fileId) && int.TryParse(q1, out var folderId))
         {
-            await RedirectAsync(context, fileId, folderId);
+            await RedirectAsync(context, folderId, fileId);
         }
         else
         {

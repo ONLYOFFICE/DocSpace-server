@@ -223,7 +223,7 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
                 var response = (HttpWebResponse)webException.Response;
                 if (response != null)
                 {
-                    if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
+                    if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                     {
                         throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
                     }

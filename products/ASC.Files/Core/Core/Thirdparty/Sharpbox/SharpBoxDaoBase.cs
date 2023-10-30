@@ -352,7 +352,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
 
     private static bool IsRoot(ICloudDirectoryEntry entry)
     {
-        if (entry != null && entry.Name != null)
+        if (entry is { Name: not null })
         {
             return string.IsNullOrEmpty(entry.Name.Trim('/'));
         }

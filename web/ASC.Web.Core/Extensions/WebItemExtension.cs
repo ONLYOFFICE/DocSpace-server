@@ -76,6 +76,6 @@ public static class WebItemExtension
 
     public static bool IsSubItem(this IWebItem item)
     {
-        return item is IModule && item is not IProduct;
+        return item is IModule and not IProduct;
     }
 }

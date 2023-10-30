@@ -534,8 +534,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
 
     protected void SetFolderType(Folder<string> folder, bool isRoot)
     {
-        if (isRoot && (ProviderInfo.RootFolderType == FolderType.VirtualRooms ||
-            ProviderInfo.RootFolderType == FolderType.Archive))
+        if (isRoot && ProviderInfo.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             folder.FolderType = ProviderInfo.RootFolderType;
         }

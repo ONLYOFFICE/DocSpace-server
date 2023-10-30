@@ -241,12 +241,9 @@ public class EntryStatusManager
 
         var tagsFavorite = await tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Favorite, folders).ToListAsync();
 
-        foreach (var folder in folders)
+        foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
-            if (tagsFavorite.Exists(r => r.EntryId.Equals(folder.Id)))
-            {
-                folder.IsFavorite = true;
-            }
+            folder.IsFavorite = true;
         }
     }
 }
@@ -439,7 +436,7 @@ public class EntryManager
 
             CalculateTotal();
         }
-        else if ((parent.FolderType == FolderType.VirtualRooms || parent.FolderType == FolderType.Archive) && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
             entries = await _fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter);
 
@@ -484,7 +481,7 @@ public class EntryManager
             var task1 = _fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = _fileSecurity.FilterReadAsync(files).ToListAsync();
 
-            if (filterType == FilterType.None || filterType == FilterType.FoldersOnly)
+            if (filterType is FilterType.None or FilterType.FoldersOnly)
             {
                 var folderList = GetThirpartyFoldersAsync(parent, searchText);
                 var thirdPartyFolder = FilterEntries(folderList, filterType, subjectGroup, subjectId, searchText, searchInContent);
@@ -784,7 +781,7 @@ public class EntryManager
             List<FileEntry<T>> files = new();
             List<FileEntry<T>> folders = new();
 
-            if (filter == FilterType.None || filter == FilterType.FoldersOnly)
+            if (filter is FilterType.None or FilterType.FoldersOnly)
             {
                 var tmpFolders = asyncFolders.Where(folder => folder.RootFolderType != FolderType.TRASH);
 
@@ -1373,7 +1370,7 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
         }
 
-        if (checkRight && (!forcesave.HasValue || forcesave.Value == ForcesaveType.None) && _fileTracker.IsEditing(file.Id))
+        if (checkRight && forcesave is null or ForcesaveType.None && _fileTracker.IsEditing(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMassage_SecurityException_UpdateEditingFile);
         }

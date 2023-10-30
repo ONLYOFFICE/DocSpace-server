@@ -131,58 +131,15 @@ public class CommonLinkUtility : BaseCommonLinkUtility
     }
 
     #region user profile link
-    
-    public string GetUserProfile(UserInfo user)
+
+    public async Task<string> GetUserProfileAsync(Guid userId, bool absolute = true)
     {
-        if (!_userManager.UserExists(user))
+        if (!await _userManager.UserExistsAsync(userId))
         {
             return GetEmployees();
         }
-
-        return GetUserProfile(user, true);
-    }
-    
-    public string GetUserProfile(UserInfo user, bool absolute = true)
-    {
-        var queryParams = user.Id != Guid.Empty ? GetUserParamsPair(user) : HttpUtility.UrlEncode(user.UserName.ToLowerInvariant());
-
-        var url = absolute ? ToAbsolute(VirtualAccountsPath) : AbsoluteAccountsPath;
-        url += "view/";
-        url += queryParams;
-
-        return url;
-    }
-    
-    public async Task<string> GetUserProfileAsync(Guid userID)
-    {
-        if (!await _userManager.UserExistsAsync(userID))
-        {
-            return GetEmployees();
-        }
-
-        return await GetUserProfileAsync(userID.ToString());
-    }
-    
-    public async Task<string> GetUserProfileAsync(string user, bool absolute = true)
-    {
-        var queryParams = "";
-
-        if (!string.IsNullOrEmpty(user))
-        {
-            var guid = Guid.Empty;
-            if (!string.IsNullOrEmpty(user) && 32 <= user.Length && user[8] == '-')
-            {
-                try
-                {
-                    guid = new Guid(user);
-                }
-                catch
-                {
-                }
-            }
-
-            queryParams = guid != Guid.Empty ? await GetUserParamsPairAsync(guid) : HttpUtility.UrlEncode(user.ToLowerInvariant());
-        }
+        
+        var queryParams = userId != Guid.Empty ? await GetUserParamsPairAsync(userId) : HttpUtility.UrlEncode(userId.ToString().ToLowerInvariant());
 
         var url = absolute ? ToAbsolute(VirtualAccountsPath) : AbsoluteAccountsPath;
         url += "view/";

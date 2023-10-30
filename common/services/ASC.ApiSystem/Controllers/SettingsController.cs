@@ -149,7 +149,7 @@ public class SettingsController : ControllerBase
             return (false, tenantId, error);
         }
 
-        if (model.TenantId.HasValue && model.TenantId.Value == -1)
+        if (model.TenantId is -1)
         {
             tenantId = model.TenantId.Value;
             return (true, tenantId, error);

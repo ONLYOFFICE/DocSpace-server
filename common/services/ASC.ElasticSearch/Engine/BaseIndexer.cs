@@ -294,7 +294,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                     await _client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
                     for (var j = portionStart; j < i; j++)
                     {
-                        if (data[j] is ISearchItemDocument doc && doc.Document != null)
+                        if (data[j] is ISearchItemDocument { Document: not null } doc)
                         {
                             doc.Document.Data = null;
                             doc.Document = null;
@@ -464,7 +464,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     {
         var result = desc.Index(IndexName).Id(data.Id);
 
-        if (data is ISearchItemDocument doc && doc.Document != null)
+        if (data is ISearchItemDocument { Document: not null })
         {
             result.Pipeline("attachments");
         }

@@ -171,7 +171,7 @@ public class IPSecurity
 
             var localIPs = new List<IPAddress> { IPAddress.IPv6Loopback, IPAddress.Loopback };
 
-            localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
+            localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6));
 
             foreach (var ipAddress in localIPs)
             {

@@ -109,7 +109,7 @@ public class CookiesManager
             {
                 options.Secure = true;
 
-                if (_sameSiteMode.HasValue && _sameSiteMode.Value == SameSiteMode.None)
+                if (_sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = _sameSiteMode.Value;
                 }

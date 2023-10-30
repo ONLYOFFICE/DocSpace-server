@@ -62,7 +62,7 @@ public abstract class FoldersController<T> : ApiControllerBase
     private readonly FileStorageService _fileStorageService;
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
 
-    public FoldersController(
+    protected FoldersController(
         EntryManager entryManager,
         FoldersControllerHelper foldersControllerHelper,
         FileStorageService fileStorageService,

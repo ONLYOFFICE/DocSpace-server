@@ -163,12 +163,9 @@ public class FilesControllerHelper : FilesHelperBase
 
         //Try detect content
         var extension = ".txt";
-        if (!string.IsNullOrEmpty(content))
+        if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
-            if (Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
-            {
-                extension = ".html";
-            }
+            extension = ".html";
         }
 
         return await CreateFileAsync(folderId, title, content, extension);

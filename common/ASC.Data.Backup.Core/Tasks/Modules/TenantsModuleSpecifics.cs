@@ -107,7 +107,7 @@ public class TenantsModuleSpecifics : ModuleSpecificsBase
             return true;
         }
 
-        if ((table.Name == "core_user" || table.Name == "core_group") && columnName == "last_modified")
+        if (table.Name is "core_user" or "core_group" && columnName == "last_modified")
         {
             value = DateTime.UtcNow.AddMinutes(2);
 

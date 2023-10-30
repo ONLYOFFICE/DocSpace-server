@@ -266,7 +266,7 @@ public class JabberServiceClient
         {
             throw error;
         }
-        if (error is CommunicationException || error is TimeoutException)
+        if (error is CommunicationException or TimeoutException)
         {
             _lastErrorTime = DateTime.Now;
         }

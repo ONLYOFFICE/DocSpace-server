@@ -138,7 +138,7 @@ public class ThirdpartyController : ApiControllerBase
                 continue;
             }
             var loginProvider = _providerManager.GetLoginProvider(provider);
-            if (loginProvider != null && loginProvider.IsEnabled)
+            if (loginProvider is { IsEnabled: true })
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";

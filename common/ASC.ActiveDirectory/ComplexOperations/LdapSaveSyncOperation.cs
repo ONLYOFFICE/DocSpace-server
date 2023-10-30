@@ -45,7 +45,7 @@ public class LdapSaveSyncOperation
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
         var item = _progressQueue.GetAllTasks<LdapOperationJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             item = null;

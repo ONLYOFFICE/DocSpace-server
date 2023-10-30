@@ -1186,7 +1186,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                     f =>
                     bunch
                         ? f.RootFolderType == FolderType.BUNCH
-                        : f.RootFolderType == FolderType.USER || f.RootFolderType == FolderType.COMMON);
+                        : f.RootFolderType is FolderType.USER or FolderType.COMMON);
             await foreach (var file in files)
             {
                 yield return file;
@@ -1199,7 +1199,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 .Where(f =>
                        bunch
                             ? f.RootFolderType == FolderType.BUNCH
-                            : f.RootFolderType == FolderType.USER || f.RootFolderType == FolderType.COMMON);
+                            : f.RootFolderType is FolderType.USER or FolderType.COMMON);
             await foreach (var file in files)
             {
                 yield return file;

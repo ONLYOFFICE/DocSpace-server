@@ -145,7 +145,7 @@ public class FeedAggregateDataProvider
     public async Task<List<FeedResultItem>> GetFeedsAsync(FeedApiFilter filter)
     {
         var filterOffset = filter.Offset;
-        var filterLimit = filter.Max > 0 && filter.Max < 1000 ? filter.Max : 1000;
+        var filterLimit = filter.Max is > 0 and < 1000 ? filter.Max : 1000;
 
         var feeds = new Dictionary<string, List<FeedResultItem>>();
 
@@ -261,7 +261,7 @@ public class FeedAggregateDataProvider
             q1 = q1.Where(r => r.aggregates.ModifiedBy == filter.Author);
         }
 
-        if (filter.SearchKeys != null && filter.SearchKeys.Length > 0)
+        if (filter.SearchKeys is { Length: > 0 })
         {
             var keys = filter.SearchKeys
                 .Where(s => !string.IsNullOrEmpty(s))

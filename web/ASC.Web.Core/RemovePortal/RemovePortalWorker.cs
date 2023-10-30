@@ -49,7 +49,7 @@ public class RemovePortalWorker
         {
             var item = _queue.GetAllTasks<RemovePortalOperation>().FirstOrDefault(t => t.TenantId == tenantId);
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _queue.DequeueTask(item.Id);
                 item = null;

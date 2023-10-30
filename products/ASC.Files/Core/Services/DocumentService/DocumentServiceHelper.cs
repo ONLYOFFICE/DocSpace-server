@@ -375,7 +375,7 @@ public class DocumentServiceHelper
         var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode()}_{await _global.GetDocDbKeyAsync()}";
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
-                             .ToList()
+                             .AsEnumerable()
                              .Concat(_machinePseudoKeys.GetMachineConstant())
                              .ToArray();
 

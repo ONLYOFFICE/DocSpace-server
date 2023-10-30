@@ -54,8 +54,8 @@ public class IPRestrictionsRepository
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var filesDbContext = await _dbContextManager.CreateDbContextAsync();
-            using var tr = await tenantDbContext.Database.BeginTransactionAsync();
+            await using var filesDbContext = await _dbContextManager.CreateDbContextAsync();
+            await using var tr = await tenantDbContext.Database.BeginTransactionAsync();
 
             await Queries.DeleteTenantIpRestrictionsAsync(tenantDbContext, tenant);
 

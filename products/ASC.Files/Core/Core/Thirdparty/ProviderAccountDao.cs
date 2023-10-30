@@ -407,8 +407,8 @@ internal class ProviderAccountDao : IProviderDao
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
-            using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            using var tr = await filesDbContext.Database.BeginTransactionAsync();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await filesDbContext.Database.BeginTransactionAsync();
 
             var folderId = (await GetProviderInfoAsync(linkId)).RootFolderId;
             var entryIDs = await Queries.HashIdsAsync(filesDbContext, TenantID, folderId).ToListAsync();

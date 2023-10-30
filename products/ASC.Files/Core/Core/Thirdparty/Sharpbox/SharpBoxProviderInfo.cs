@@ -139,7 +139,7 @@ internal class SharpBoxStorageDisposableWrapper : IDisposable
     {
         foreach (var (key, storage) in _storages)
         {
-            if (storage != null && storage.IsOpened)
+            if (storage is { IsOpened: true })
             {
                 storage.Close();
                 _storages.Remove(key, out _);

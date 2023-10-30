@@ -35,7 +35,7 @@ public class ProviderManager
         {
             return AuthProviders
                 .Select(GetLoginProvider)
-                .Any(loginProvider => loginProvider != null && loginProvider.IsEnabled);
+                .Any(loginProvider => loginProvider is { IsEnabled: true });
         }
     }
 

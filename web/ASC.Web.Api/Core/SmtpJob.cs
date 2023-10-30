@@ -159,7 +159,7 @@ public class SmtpJob : DistributedTaskProgress
         }
         catch (AggregateException ae)
         {
-            ae.Flatten().Handle(e => e is TaskCanceledException || e is OperationCanceledException);
+            ae.Flatten().Handle(e => e is TaskCanceledException or OperationCanceledException);
         }
         catch (SocketException ex)
         {

@@ -364,7 +364,7 @@ public class Selector<T> where T : class, ISearchItem
             return null;
         }
 
-        if (lambdaExpression.Body is MethodCallExpression methodCallExpression && methodCallExpression.Arguments.Count > 1)
+        if (lambdaExpression.Body is MethodCallExpression { Arguments.Count: > 1 } methodCallExpression)
         {
             return methodCallExpression.Arguments[0] is not MemberExpression pathMember
                 ? null

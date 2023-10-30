@@ -102,13 +102,13 @@ public class CapabilitiesController : ControllerBase
             {
                 result.Providers = ProviderManager.AuthProviders.Where(loginProvider =>
                 {
-                    if ((loginProvider == ProviderConstants.Facebook || loginProvider == ProviderConstants.AppleId)
+                    if (loginProvider is ProviderConstants.Facebook or ProviderConstants.AppleId
                                                                     && _coreBaseSettings.Standalone && HttpContext.Request.MobileApp())
                     {
                         return false;
                     }
                     var provider = _providerManager.GetLoginProvider(loginProvider);
-                    return provider != null && provider.IsEnabled;
+                    return provider is { IsEnabled: true };
                 })
                 .ToList();
             }

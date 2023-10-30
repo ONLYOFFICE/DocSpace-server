@@ -102,7 +102,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         var rootIds = new List<int>
             {
                 await globalFolder.GetFolderMyAsync(fileMarker, daoFactory),
-                await globalFolder.GetFolderCommonAsync(fileMarker, daoFactory),
+                await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
                 await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),

@@ -191,7 +191,7 @@ public class UserManager
 
         var u = await _userService.GetUserAsync(Tenant.Id, id);
 
-        return u != null && !u.Removed ? u : Constants.LostUser;
+        return u is { Removed: false } ? u : Constants.LostUser;
     }
     
     public async Task<UserInfo> GetUserAsync(Guid id, Expression<Func<User, UserInfo>> exp)
@@ -203,7 +203,7 @@ public class UserManager
 
         var u = await _userService.GetUserAsync(Tenant.Id, id, exp);
 
-        return u != null && !u.Removed ? u : Constants.LostUser;
+        return u is { Removed: false } ? u : Constants.LostUser;
     }
     
     public Task<int> GetUsersCountAsync(
@@ -245,7 +245,7 @@ public class UserManager
 
         var u = _userService.GetUser(Tenant.Id, id);
 
-        return u != null && !u.Removed ? u : Constants.LostUser;
+        return u is { Removed: false } ? u : Constants.LostUser;
     }
     
     public async Task<string[]> GetUserNamesAsync(EmployeeStatus status)
@@ -279,7 +279,7 @@ public class UserManager
     {
         var u = await _userService.GetUserByPasswordHashAsync(tenant, login, passwordHash);
 
-        return u != null && !u.Removed ? u : Constants.LostUser;
+        return u is { Removed: false } ? u : Constants.LostUser;
     }
 
     public async Task<bool> UserExistsAsync(Guid id)
@@ -311,7 +311,7 @@ public class UserManager
 
         var u = await _userService.GetUserAsync(Tenant.Id, email);
 
-        return u != null && !u.Removed ? u : Constants.LostUser;
+        return u is { Removed: false } ? u : Constants.LostUser;
     }
 
     public async Task<UserInfo> SearchUserAsync(string id)
@@ -677,7 +677,7 @@ public class UserManager
 
         var httpRequestDictionary = new HttpRequestDictionary<List<GroupInfo>>(_accessor?.HttpContext, "GroupInfo");
         var result = httpRequestDictionary.Get(userID.ToString());
-        if (result != null && result.Count > 0)
+        if (result is { Count: > 0 })
         {
             if (categoryId.HasValue)
             {

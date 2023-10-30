@@ -71,7 +71,7 @@ public class DbWebPluginService
 
     public async Task UpdateAsync(int tenantId, int id, bool enabled)
     {
-        using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.UpdateWebPluginStatusAsync(dbContext, tenantId, id, enabled);
     }

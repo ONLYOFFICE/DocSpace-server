@@ -99,7 +99,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             SetPercentageAndCheckCancellation(30, true);
 
-            await fileStorageService.ReassignProvidersAsync<string>(FromUser, ToUser);
+            await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
             SetPercentageAndCheckCancellation(50, true);
 
