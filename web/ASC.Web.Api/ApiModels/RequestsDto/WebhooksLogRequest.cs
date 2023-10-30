@@ -30,11 +30,11 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </summary>
 public class WebhooksLogRequest
 {
-    /// <summary></summary>
+    /// <summary>Delivey start time</summary>
     /// <type>System.Nullable{System.DateTime}, System</type>
     public DateTime? DeliveryFrom { get; set; }
 
-    /// <summary></summary>
+    /// <summary>Delivey end time</summary>
     /// <type>System.Nullable{System.DateTime}, System</type>
     public DateTime? DeliveryTo { get; set; }
 
@@ -43,18 +43,18 @@ public class WebhooksLogRequest
     public string HookUri { get; set; }
 
     /// <summary>Webhook ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <type>System.Nullable{System.Int32}, System</type>
     public int? WebhookId { get; set; }
 
-    /// <summary></summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>Config ID</summary>
+    /// <type>System.Nullable{System.Int32}, System</type>
     public int? ConfigId { get; set; }
 
-    /// <summary></summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>Event ID</summary>
+    /// <type>System.Nullable{System.Int32}, System</type>
     public int? EventId { get; set; }
 
-    /// <summary></summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>Webhook group status</summary>
+    /// <type>System.Nullable{ASC.Webhooks.Core.WebhookGroupStatus}, System</type>
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

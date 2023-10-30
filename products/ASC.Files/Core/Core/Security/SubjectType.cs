@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// </summary>
 [Flags]
 public enum ShareFilterType
 {

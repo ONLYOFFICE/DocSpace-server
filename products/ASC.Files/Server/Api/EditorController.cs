@@ -304,14 +304,15 @@ public abstract class EditorController<T> : ApiControllerBase
     }
 
     /// <summary>
-    /// 
+    /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
-    /// <short>Get protect users</short>
+    /// <short>Get users with the access to the protected file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId"></param>
-    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users</returns>
+    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the protected file</returns>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("file/{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> ProtectUsers(T fileId)
     {

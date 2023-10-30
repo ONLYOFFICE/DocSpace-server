@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// </summary>
 public enum FolderType
 {
     DEFAULT = 0,

@@ -77,6 +77,8 @@ public class FileShareLink
     public bool Primary { get; set; }
 }
 
+/// <summary>
+/// </summary>
 public enum LinkType
 {
     Invitation,

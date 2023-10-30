@@ -30,7 +30,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class ExternalShareRequestDto
 {
-    /// <summary></summary>
+    /// <summary>Password</summary>
     /// <type>System.String, System</type>
     public string Password { get; set; }
 }

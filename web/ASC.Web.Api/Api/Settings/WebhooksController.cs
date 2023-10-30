@@ -155,13 +155,13 @@ public class WebhooksController : BaseSettingsController
     /// Get webhook logs
     /// </short>
     /// <category>Webhooks</category>
-    /// <param type="System.DateTime, System" name="deliveryFrom"></param>
-    /// <param type="System.DateTime, System" name="deliveryTo"></param>
-    /// <param type="System.String, System" name="hookUri"></param>
-    /// <param type="System.Int32, System" name="webhookId"></param>
-    /// <param type="System.Int32, System" name="configId"></param>
-    /// <param type="System.Int32, System" name="eventId"></param>
-    /// <param type="ASC.Webhooks.Core.WebhookGroupStatus, ASC.Webhooks.Core" name="groupStatus"></param>
+    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryFrom">Delivey start time</param>
+    /// <param type="System.Nullable{System.DateTime}, System" name="deliveryTo">Delivey end time</param>
+    /// <param type="System.String, System" name="hookUri">Hook URI</param>
+    /// <param type="System.Nullable{System.Int32}, System" name="webhookId">Webhook ID</param>
+    /// <param type="System.Nullable{System.Int32}, System" name="configId">Config ID</param>
+    /// <param type="System.Nullable{System.Int32}, System" name="eventId">Event ID</param>
+    /// <param type="System.Nullable{ASC.Webhooks.Core.WebhookGroupStatus}, System" name="groupStatus">Webhook group status</param>
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <httpMethod>GET</httpMethod>
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WebhooksLogDto, ASC.Web.Api">Logs of the webhook activities</returns>

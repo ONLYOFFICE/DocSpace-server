@@ -346,12 +346,12 @@ public class SecurityControllerCommon : ApiControllerBase
     }
 
     /// <summary>
-    /// 
+    /// Returns the external data by the key specified in the request.
     /// </summary>
-    /// <short>Get external share data</short>
+    /// <short>Get the external data</short>
     /// <category>Sharing</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="key"></param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core"></returns>
+    /// <param type="System.String, System" name="key" method="url">The unique document identifier</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}</path>
     /// <httpMethod>GET</httpMethod>
     [AllowAnonymous]
@@ -364,13 +364,13 @@ public class SecurityControllerCommon : ApiControllerBase
     }
 
     /// <summary>
-    /// 
+    /// Applies a password specified in the request to get the external data.
     /// </summary>
-    /// <short>Apply external share password</short>
+    /// <short>Apply external data password</short>
     /// <category>Sharing</category>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BaseBatchRequestDto, ASC.Files.Core" name="key"></param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ExternalShareRequestDto, ASC.Files.Core" name="inDto"></param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core"></returns>
+    /// <param type="System.String, System" name="key" method="url">The unique document identifier</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.ExternalShareRequestDto, ASC.Files.Core" name="inDto">External data request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.ExternalShareDto, ASC.Files.Core">External data</returns>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <httpMethod>POST</httpMethod>
     [AllowAnonymous]

@@ -106,7 +106,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.Boolean, System</type>
     public bool IsAdmin { get; set; }
 
-    /// <summary>Is room admin or not</summary>
+    /// <summary>Specifies if the user is a room administrator or not</summary>
     /// <type>System.Boolean, System</type>
     public bool IsRoomAdmin { get; set; }
 
