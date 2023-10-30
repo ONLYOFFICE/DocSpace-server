@@ -425,7 +425,7 @@
     <value>Yhdistä Twilio ja voit soittaa Asiakkuudenhallinnan kontakteja suoraan selaimessa.</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä Twitter tiliä ja etsiä kontakteja.</value>
+    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä Twitter tiliä.</value>
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>Tuntematon kuvatiedoston tyyppi</value>

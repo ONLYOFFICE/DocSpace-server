@@ -524,7 +524,7 @@
     <value>Số điện thoại từ Twilio (được yêu cầu để cho phép gửi SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Twitter và tìm kiếm địa chỉ liên hệ.</value>
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Bật ứng dụng cho phép nhập liên hệ từ Yahoo.</value>

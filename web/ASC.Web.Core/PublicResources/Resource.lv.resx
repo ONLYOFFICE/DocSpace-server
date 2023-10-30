@@ -527,7 +527,7 @@
     <value>Tālruņa numurs no Twilio (nepieciešams SMS autorizācijai)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar Twitter kontu un meklētu lietotājus.</value>
+    <value>Pievienojiet lietotni, lai ieietu portālā ar Twitter kontu.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Iespējot lietotni Yahoo kontaktu importēšanai.</value>

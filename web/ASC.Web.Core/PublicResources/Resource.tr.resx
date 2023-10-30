@@ -536,7 +536,7 @@
     <value>Twilio telefon numarası (SMS yetkilendirme için gereklidir)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabı kullanarak uygulamaya bağlan ve kişileri ara.</value>
+    <value>Twitter hesabı kullanarak uygulamaya bağlan.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Yahoo kişi aktarımı uygulamasını etkinleştir.</value>

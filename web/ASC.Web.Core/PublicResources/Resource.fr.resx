@@ -401,7 +401,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte Twitter et rechercher des contacts.</value>
+    <value>Se connecter à l'application pour accéder au portail en utilisant le compte Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à ONLYOFFICE via leur Twitter et reliez les comptes Twitter de vos clients à votre module CRM. {0}Passez au portail des développeurs Twitter et créez une nouvelle application d'intégration ONLYOFFICE. Collez ci-dessous les données que vous venez de recevoir :</value>

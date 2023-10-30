@@ -406,7 +406,7 @@
     <value>Permiteți aplicației conectarea la portalul folosind contul Microsoft.</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul Twitter și căutarea contactelor.</value>
+    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul Twitter.</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>Permiteți aplicației conectarea la portalul folosind contul VK.</value>

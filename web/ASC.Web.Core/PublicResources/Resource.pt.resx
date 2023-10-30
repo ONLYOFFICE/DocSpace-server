@@ -647,7 +647,7 @@
     <value>Segredo do Cliente</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Ative esta aplicação para iniciar sessão no portal através de uma conta Twitter e procure por contactos.</value>
+    <value>Ative esta aplicação para iniciar sessão no portal através de uma conta Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na ONLYOFFICE utilizando o seu Twitter, e para que liguem as contas Twitter dos seus clientes ao módulo CRM. {0}Aceda ao Portal de Programadores do Twitter e crie uma nova aplicação de integração para a ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>

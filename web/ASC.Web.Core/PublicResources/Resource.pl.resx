@@ -527,7 +527,7 @@
     <value>Numer telefonu z Twilio (wymagany do autoryzacji SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Twitter i wyszukaj kontakty.</value>
+    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Włącz aplikację dla importu kontaktów Yahoo.</value>

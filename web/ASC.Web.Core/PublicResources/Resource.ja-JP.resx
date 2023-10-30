@@ -590,7 +590,7 @@
     <value>Twilioの電話番号(SMS承認のために必要です)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>アプリをONLYOFFICEに接続すると、Twitterでポータルにサインインし、コンタクトを検索できます。</value>
+    <value>Twitterアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>このアプリを接続すると、Twitterを使用してONLYOFFICEにサインイン、またはCRMモジュールでお客様のTwitterアカウントをリンクできます。{0} Twitter開発者ポータルでONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>

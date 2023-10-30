@@ -422,7 +422,7 @@
     <value>Номер телефону від Twilio (необхідний для авторизації SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Twitter та пошуку контактів.</value>
+    <value>Підключіть програму для входу на портал за допомогою облікового запису Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Увімкніть додаток для імпорту контактів Yahoo.</value>

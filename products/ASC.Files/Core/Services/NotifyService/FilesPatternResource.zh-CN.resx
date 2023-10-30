@@ -122,8 +122,8 @@ $Message</value>
   </data>
   <data name="pattern_RoomRemoved" xml:space="preserve">
     <value>h1. $__AuthorName 删除了一个房间
- 
-$__AuthorName 删除了房间：$RoomTitle</value>
+
+$__AuthorName 删除了房间： $RoomTitle</value>
   </data>
   <data name="subject_DocuSignComplete_push" xml:space="preserve">
     <value>所有签署者均已签署 $DocumentTitle</value>

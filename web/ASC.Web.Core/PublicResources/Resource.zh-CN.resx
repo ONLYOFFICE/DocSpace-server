@@ -626,7 +626,7 @@
     <value>来自Twilio的电话号码（需短信授权）</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>连接应用程序，以使用Twitter账户登录门户并搜索联系人。</value>
+    <value>启动应用程序，以使用推特（Twitter）账户登录门户网站。</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>启用雅虎联系人导入的应用程序。</value>

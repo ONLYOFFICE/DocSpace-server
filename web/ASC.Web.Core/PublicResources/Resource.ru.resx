@@ -401,7 +401,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Twitter и поиска контактов.</value>
+    <value>Подключите приложение для входа на портал по учетной записи Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в ONLYOFFICE, используя Twitter, и привязывать Twitter-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков Twitter и создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>

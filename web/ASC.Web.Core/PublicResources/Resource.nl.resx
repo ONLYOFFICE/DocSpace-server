@@ -536,7 +536,7 @@
     <value>Telefoonnummer van Twilio (vereist voor SMS autorisatie)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een Twitter-account en zoek naar contacten.</value>
+    <value>Verbind de applicatie om in te loggen op het portaal met een Twitter-account.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Schakel de applicatie in voor importeren van Yahoo-contacten.</value>

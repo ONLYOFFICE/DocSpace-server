@@ -368,7 +368,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account Twitter e cercare contatti.</value>
+    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account Twitter.</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>

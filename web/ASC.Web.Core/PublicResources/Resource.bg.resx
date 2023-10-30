@@ -632,7 +632,7 @@
     <value>Телефонен номер от Twilio (изисква се за SMS разрешение)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Свържете приложението, за да влезете в портала, като използвате профил в Twitter и потърсете контакти.</value>
+    <value>Свържете приложението, за да влезете в портала, като използвате профил в Twitter.</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Свържете приложението за публикуване на документи в WordPress.</value>

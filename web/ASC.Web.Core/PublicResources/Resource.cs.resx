@@ -551,7 +551,7 @@
     <value>Telefonní číslo od společnosti Twilio (vyžadováno pro autorizaci SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí Twitteru a vyhledejte kontakty.</value>
+    <value>Připojte aplikaci k přihlášení do portálu pomocí Twitteru.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Povolte aplikaci importovat uživatele ze služby Yahoo.</value>

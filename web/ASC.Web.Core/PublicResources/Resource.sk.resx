@@ -533,7 +533,7 @@
     <value>Telefónne číslo od spoločnosti Twilio (vyžadované pre autorizáciu prostredníctvom SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Twitter a vyhľadajte kontakty.</value>
+    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Povoliť aplikáciu pre import kontaktov Yahoo.</value>
