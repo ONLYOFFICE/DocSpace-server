@@ -15,6 +15,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreat
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
+import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
 import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
@@ -35,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,10 +54,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(value = "/api/2.0/clients")
 @RequiredArgsConstructor
 public class ClientController {
+    private final String AUTH_COOKIE_NAME = "asc_auth_key";
     private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
     private final String X_TENANT_HEADER = "X-Tenant";
     private List<String> allowedScopes = new ArrayList<>();
 
+    private final DocspaceClient docspaceClient;
     private final ApplicationConfiguration applicationConfiguration;
     private final ClientRetrieveUsecases retrieveUsecases;
     private final ClientCreationUsecases creationUsecases;
@@ -75,14 +79,26 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<PaginationDTO<ClientDTO>> getClients(
             HttpServletResponse response,
+            @CookieValue(name = AUTH_COOKIE_NAME) String ascAuth,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestParam(value = "page") @Min(value = 0) int page,
             @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit
     ) {
+        var cookie = String.format("%s=%s", AUTH_COOKIE_NAME, ascAuth);
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
         log.info("received a new get clients request for tenant {} with page {} and limit", tenant, page, limit);
 
         PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant, page, limit);
+        pagination.getData().forEach(c -> {
+            var profile = docspaceClient.getProfile(URI.create(address), cookie, c.getModifiedBy());
+            if (profile != null && profile.getResponse() != null) {
+                var r = profile.getResponse();
+                c.setCreatorAvatar(r.getAvatar());
+                c.setCreatorDisplayName(String
+                        .format("%s %s", r.getFirstName(), r.getLastName()).trim());
+            }
+        });
+
         for (final ClientDTO client : pagination.getData()) {
             client.add(linkTo(methodOn(ClientController.class)
                     .getClient(response, address, client.getClientId()))

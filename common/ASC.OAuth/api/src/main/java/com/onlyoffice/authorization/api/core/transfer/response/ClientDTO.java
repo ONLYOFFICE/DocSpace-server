@@ -58,4 +58,10 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     private Timestamp modifiedOn;
     @JsonProperty("modified_by")
     private String modifiedBy;
+    @JsonProperty("creator_avatar")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String creatorAvatar;
+    @JsonProperty("creator_display_name")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String creatorDisplayName;
 }
