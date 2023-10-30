@@ -53,11 +53,15 @@ public class ExternalShare
         _commonLinkUtility = commonLinkUtility;
     }
     
-    public async Task<string> GetLinkAsync(Guid linkId)
+    public async Task<LinkData> GetLinkDataAsync(Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
-
-        return _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}");
+        
+        return new LinkData
+        {
+            Url = _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}"),
+            Token = key
+        };
     }
     
     public async Task<Status> ValidateAsync(Guid linkId)
@@ -272,6 +276,12 @@ public class ExternalShare
     {
         return _dbKey ??= await _global.GetDocDbKeyAsync();
     }
+}
+
+public class LinkData
+{
+    public string Url { get; init; }
+    public string Token { get; init; }
 }
 
 /// <summary>

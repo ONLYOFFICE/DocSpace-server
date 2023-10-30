@@ -168,7 +168,7 @@ public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
 
     public override bool Equals(object obj)
     {
-        return obj is FileEntry<T> f && Equals(f.Id, Id);
+        return obj is FileEntry<T> f && f.FileEntryType == FileEntryType && Equals(f.Id, Id);
     }
 
     public virtual bool Equals(FileEntry<T> obj)

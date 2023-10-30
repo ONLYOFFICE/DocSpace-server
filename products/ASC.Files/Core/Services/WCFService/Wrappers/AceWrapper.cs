@@ -61,6 +61,7 @@ public class AceWrapper : IMapFrom<RoomInvitation>
 
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
+    public string RequestToken { get; set; }
 
     [JsonIgnore] 
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);

@@ -75,6 +75,7 @@ public class FileShareLink
     public bool? DenyDownload { get; set; }
     public bool? IsExpired { get; set; }
     public bool Primary { get; set; }
+    public string RequestToken { get; set; }
 }
 
 /// <summary>
@@ -134,7 +135,8 @@ public class FileShareDtoHelper
                         _ => LinkType.Invitation
                     },
                     IsExpired = expired,
-                    Primary = aceWrapper.SubjectType == SubjectType.PrimaryExternalLink
+                    Primary = aceWrapper.SubjectType == SubjectType.PrimaryExternalLink,
+                    RequestToken = aceWrapper.RequestToken
                 };
             }
             else
