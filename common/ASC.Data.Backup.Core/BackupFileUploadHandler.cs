@@ -100,7 +100,7 @@ public class BackupFileUploadHandler
                 var file = context.Request.Form.Files[0];
                 await using var stream = file.OpenReadStream();
 
-                if (stream.Length >= setupInfo.ChunkUploadSize)
+                if (stream.Length > setupInfo.ChunkUploadSize)
                 {
                     throw new ArgumentException("chunkSize more then maxChunkUploadSize");
                 }

@@ -435,7 +435,7 @@ public class FileMarker
 
             entries.ForEach(entry =>
             {
-                if (entry != null && exist.TrueForAll(tag => tag != null && !tag.EntryId.Equals(entry.Id)))
+                if (entry != null && exist.TrueForAll(tag => tag != null && !(tag.EntryType == entry.FileEntryType && tag.EntryId.Equals(entry.Id))))
                 {
                     newTags.Add(Tag.New(userId, entry));
                 }
@@ -518,7 +518,7 @@ public class FileMarker
             folderId = fileEntry.Id;
 
             var listTags = await tagDao.GetNewTagsAsync(userID, (Folder<T>)fileEntry, true).ToListAsync();
-            var fileTag  = listTags.Find(tag => tag.EntryId.Equals(fileEntry.Id));
+            var fileTag  = listTags.Find(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(fileEntry.Id));
             if (fileTag != null)
             {
                 valueNew = fileTag.Count;
@@ -679,7 +679,7 @@ public class FileMarker
             var tagDao = _daoFactory.GetTagDao<T>();
             var folderDao = _daoFactory.GetFolderDao<T>();
             var requestTags = tagDao.GetNewTagsAsync(_authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(rootId));
-            var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryId.Equals(rootId));
+            var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(rootId));
             var count = requestTag == null ? 0 : requestTag.Count;
             InsertToCahce(rootId, count);
 
@@ -752,7 +752,7 @@ public class FileMarker
         }
 
         tags = tags
-            .Where(r => !Equals(r.EntryId, folder.Id))
+            .Where(r => r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id))
                 .Distinct()
                 .ToList();
 
@@ -763,7 +763,7 @@ public class FileMarker
         foreach (var entryTag in entryTagsInternal)
         {
             var parentEntry = entryTagsInternal.Keys
-                .FirstOrDefault(entryCountTag => Equals(entryCountTag.Id, entryTag.Key.ParentId));
+                .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
 
             if (parentEntry != null)
             {
@@ -776,7 +776,7 @@ public class FileMarker
             if (int.TryParse(entryTag.Key.ParentId, out var fId))
             {
                 var parentEntryInt = entryTagsInternal.Keys
-                        .FirstOrDefault(entryCountTag => Equals(entryCountTag.Id, fId));
+                        .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, fId));
 
                 if (parentEntryInt != null)
                 {
@@ -787,7 +787,7 @@ public class FileMarker
             }
 
             var parentEntry = entryTagsProvider.Keys
-                .FirstOrDefault(entryCountTag => Equals(entryCountTag.Id, entryTag.Key.ParentId));
+                .FirstOrDefault(entryCountTag => entryCountTag.FileEntryType == FileEntryType.Folder && Equals(entryCountTag.Id, entryTag.Key.ParentId));
 
             if (parentEntry != null)
             {

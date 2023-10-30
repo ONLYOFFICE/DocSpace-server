@@ -144,7 +144,7 @@ public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry
 
     public override bool Equals(object obj)
     {
-        return obj is FileEntry<T> f && Equals(f.Id, Id);
+        return obj is FileEntry<T> f && f.FileEntryType == FileEntryType && Equals(f.Id, Id);
     }
 
     public bool Equals(FileEntry<T> obj)

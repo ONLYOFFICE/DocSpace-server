@@ -664,7 +664,7 @@ public class FileSharing
 
                 var link = r.SubjectType == SubjectType.InvitationLink
                     ? _invitationLinkService.GetInvitationLink(r.Subject, _authContext.CurrentAccount.ID)
-                    : await _externalShare.GetLinkAsync(r.Subject);
+                    : (await _externalShare.GetLinkDataAsync(r.Subject)).Url;
 
                 w.Link = await _urlShortener.GetShortenLinkAsync(link);
                 w.SubjectGroup = true;
@@ -930,19 +930,7 @@ public class FileSharing
 
         w.CanEditAccess = _authContext.CurrentAccount.ID != w.Id && (w.SubjectType is SubjectType.User or SubjectType.Group) && canEditAccess;
 
-        if (record.IsLink)
-        {
-            var link = record.SubjectType == SubjectType.InvitationLink ? 
-                _invitationLinkService.GetInvitationLink(record.Subject, _authContext.CurrentAccount.ID) : 
-                await _externalShare.GetLinkAsync(record.Subject);
-            
-            w.Link = await _urlShortener.GetShortenLinkAsync(link);
-            w.SubjectGroup = true;
-            w.CanEditAccess = false;
-            w.FileShareOptions.Password = await _externalShare.GetPasswordAsync(w.FileShareOptions.Password);
-            w.SubjectType = record.SubjectType;
-        }
-        else
+        if (!record.IsLink)
         {
             var user = await _userManager.GetUsersAsync(record.Subject);
 
@@ -951,7 +939,28 @@ public class FileSharing
                 ? entry.RootCreateBy == record.Subject
                 : entry.CreateBy == record.Subject;
             w.LockedRights = record.Subject == _authContext.CurrentAccount.ID;
+
+            return w;
         }
+        
+        string link;
+
+        if (record.SubjectType == SubjectType.InvitationLink)
+        {
+            link = _invitationLinkService.GetInvitationLink(record.Subject, _authContext.CurrentAccount.ID);
+        }
+        else
+        {
+            var linkData = await _externalShare.GetLinkDataAsync(record.Subject);
+            link = linkData.Url;
+            w.RequestToken = linkData.Token;
+        }
+            
+        w.Link = await _urlShortener.GetShortenLinkAsync(link);
+        w.SubjectGroup = true;
+        w.CanEditAccess = false;
+        w.FileShareOptions.Password = await _externalShare.GetPasswordAsync(w.FileShareOptions.Password);
+        w.SubjectType = record.SubjectType;
 
         return w;
     }
