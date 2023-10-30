@@ -234,7 +234,7 @@ public class DocumentServiceConnector
 
         if (!string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
         {
-            string convertedFileUri = null;
+            string convertedFileUri;
             try
             {
                 const string fileExtension = ".docx";

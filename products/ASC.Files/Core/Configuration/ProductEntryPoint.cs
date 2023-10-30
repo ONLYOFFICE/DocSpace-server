@@ -203,10 +203,8 @@ public class ProductEntryPoint : Product
                 activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
             }
 
-            AdditionalNotificationInfo additionalInfo = null;
-
             var obj = e.Description.LastOrDefault();
-            additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
+            var additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 

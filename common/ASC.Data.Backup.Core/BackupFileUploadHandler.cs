@@ -40,7 +40,7 @@ public class BackupFileUploadHandler
         TenantManager tenantManager,
         SetupInfo setupInfo)
     {
-        BackupFileUploadResult result = null;
+        BackupFileUploadResult result;
         try
         {
             if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))

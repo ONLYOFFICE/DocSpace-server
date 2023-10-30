@@ -81,7 +81,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         var contentLength = await _store.GetFileSizeAsync(_domain, _key);
         Hash = (await _store.GetFileEtagAsync(_domain, _key)).Trim('\"');
 
-        (var uploadId, var eTags, var partNumber) = await _store.InitiateConcatAsync(_domain, _key, lastInit: true);
+        var (uploadId, eTags, partNumber) = await _store.InitiateConcatAsync(_domain, _key, lastInit: true);
 
         _chunkedUploadSession.BytesUploaded = contentLength;
         _chunkedUploadSession.BytesTotal = contentLength;

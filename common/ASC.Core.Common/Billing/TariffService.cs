@@ -842,15 +842,9 @@ public class TariffService : ITariffService
     private async Task AddDefaultQuotaAsync(Tariff tariff)
     {
         var allQuotas = await _quotaService.GetTenantQuotasAsync();
-        TenantQuota toAdd = null;
-        if (_trialEnabled)
-        {
-            toAdd = allQuotas.FirstOrDefault(r => r.Trial && !r.Custom);
-        }
-        else
-        {
-            toAdd = allQuotas.FirstOrDefault(r => _coreBaseSettings.Standalone || r.Free && !r.Custom);
-        }
+        var toAdd = _trialEnabled ? 
+            allQuotas.FirstOrDefault(r => r.Trial && !r.Custom) : 
+            allQuotas.FirstOrDefault(r => _coreBaseSettings.Standalone || r.Free && !r.Custom);
 
         if (toAdd != null)
         {

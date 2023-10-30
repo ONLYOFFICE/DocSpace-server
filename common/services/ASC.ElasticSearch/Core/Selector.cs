@@ -246,9 +246,9 @@ public class Selector<T> where T : class, ISearchItem
         return s =>
         {
             var result = s
-            .Query(q => _queryContainer)
+            .Query(_ => _queryContainer)
             .Index(indexer.IndexName)
-            .Sort(r => _sortContainerDescriptor)
+            .Sort(_ => _sortContainerDescriptor)
             .From(_offset)
             .Size(_limit);
 
@@ -266,7 +266,7 @@ public class Selector<T> where T : class, ISearchItem
         return s =>
         {
             var result = s
-                .Query(q => _queryContainer)
+                .Query(_ => _queryContainer)
                 .Index(indexer.IndexName);
             if (immediately)
             {
@@ -282,7 +282,7 @@ public class Selector<T> where T : class, ISearchItem
         return s =>
         {
             var result = s
-                .Query(q => _queryContainer)
+                .Query(_ => _queryContainer)
                 .Index(indexer.IndexName)
                 .Script(script);
 

@@ -152,8 +152,6 @@ global using AutoMapper;
 
 global using Google.Authenticator;
 
-global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
-
 global using MailKit.Security;
 
 global using Microsoft.AspNetCore.Authorization;

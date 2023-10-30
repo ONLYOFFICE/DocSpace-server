@@ -235,7 +235,7 @@ public class DbTenantService : ITenantService
     public async Task<Tenant> SaveTenantAsync(CoreSettings coreSettings, Tenant tenant)
     {
         ArgumentNullException.ThrowIfNull(tenant);
-            DbTenant dbTenant = null;
+            DbTenant dbTenant;
 
         await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -423,15 +423,11 @@ public class DbTenantService : ITenantService
 
         await using var tenantDbContext = await _dbContextFactory.CreateDbContextAsync();
         // forbidden or exists
-        var exists = false;
 
         domain = domain.ToLowerInvariant();
-        if (_forbiddenDomains == null)
-        {
-            _forbiddenDomains = await Queries.AddressAsync(tenantDbContext).ToListAsync();
-        }
+        _forbiddenDomains ??= await Queries.AddressAsync(tenantDbContext).ToListAsync();
 
-        exists = tenantId != 0 && _forbiddenDomains.Contains(domain);
+        var exists = tenantId != 0 && _forbiddenDomains.Contains(domain);
 
         if (!exists)
         {

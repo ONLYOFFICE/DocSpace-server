@@ -48,7 +48,7 @@ public class BaseIndexerHelper
         _notify = cacheNotify;
         _notify.Subscribe((a) =>
         {
-            IsExist.AddOrUpdate(a.Id, false, (string q, bool w) => false);
+            IsExist.AddOrUpdate(a.Id, false, (_, _) => false);
         }, CacheNotifyAction.Any);
     }
 
@@ -269,7 +269,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
                         {
                             wwd.Document.Data = null;
                             wwd.Document = null;
-                            wwd = null;
                             GC.Collect();
                         }
 

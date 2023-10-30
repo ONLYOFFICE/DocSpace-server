@@ -132,9 +132,6 @@ internal class SharpBoxStorageDisposableWrapper : IDisposable
 {
     private readonly ConcurrentDictionary<int, CloudStorage> _storages = new();
 
-    public SharpBoxStorageDisposableWrapper()
-    { }
-
     public void Dispose()
     {
         foreach (var (key, storage) in _storages)

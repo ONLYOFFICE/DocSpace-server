@@ -66,8 +66,6 @@ public class Consumer : IDictionary<string, string>
 
     public bool IsSet => _props.Count > 0 && !_props.All(r => string.IsNullOrEmpty(this[r.Key]));
 
-    static Consumer() { }
-
     public Consumer()
     {
         _props = new Dictionary<string, string>();
@@ -256,10 +254,11 @@ public class DataStoreConsumer : Consumer, ICloneable
     public Type HandlerType { get; private set; }
     public DataStoreConsumer Cdn { get; private set; }
 
-    public const string HandlerTypeKey = "handlerType";
-    public const string CdnKey = "cdn";
+    private const string HandlerTypeKey = "handlerType";
+    private const string CdnKey = "cdn";
 
-    public DataStoreConsumer() : base() { }
+    public DataStoreConsumer()
+    { }
 
     public DataStoreConsumer(
         TenantManager tenantManager,

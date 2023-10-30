@@ -55,7 +55,7 @@ public class ElasticSearchIndexService : BackgroundService
 
         try
         {
-            _notify.Subscribe(async (item) =>
+            _notify.Subscribe(async (_) =>
             {
                 while (_isStarted)
                 {
@@ -143,7 +143,7 @@ public class ElasticSearchIndexService : BackgroundService
                 wrappers = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().Select(r => r.GetType()).ToList();
             }
 
-            await Parallel.ForEachAsync(wrappers, async (wrapper, token) =>
+            await Parallel.ForEachAsync(wrappers, async (wrapper, _) =>
             {
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);

@@ -44,7 +44,7 @@ public static class UserPhotoThumbnailManager
 
         var resultBitmaps = new List<ThumbnailItem>();
 
-        (var mainImg, _) = await thumbnailsData.MainImgBitmapAsync();
+        var (mainImg, _) = await thumbnailsData.MainImgBitmapAsync();
 
         using var img = mainImg;
 
@@ -212,7 +212,7 @@ public class ThumbnailsData
 
     public async Task<(Image, IImageFormat)> MainImgBitmapAsync()
     {
-        (var img, var imageFormat) = await _userPhotoManager.GetPhotoImageAsync(_userId);
+        var (img, imageFormat) = await _userPhotoManager.GetPhotoImageAsync(_userId);
         return (img, imageFormat);
     }
 
@@ -252,7 +252,7 @@ public class ThumbnailsData
     {
         foreach (var item in bitmaps)
         {
-            (var mainImgBitmap, var format) = await MainImgBitmapAsync();
+            var (mainImgBitmap, format) = await MainImgBitmapAsync();
             using var mainImg = mainImgBitmap;
             await _userPhotoManager.SaveThumbnail(_userId, item.Image, format);
         }

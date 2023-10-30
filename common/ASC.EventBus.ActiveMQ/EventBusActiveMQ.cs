@@ -237,7 +237,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
             if (_rejectedEvents.TryPeek(out var result) && result.Equals(ex.EventId))
             {
-                _rejectedEvents.TryDequeue(out var _);
+                _rejectedEvents.TryDequeue(out _);
                 streamMessage.Acknowledge();
             }
             else

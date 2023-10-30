@@ -90,7 +90,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<(bool, IReadOnlyCollection<T>)> TrySelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
-        IReadOnlyCollection<T> result = null;
+        IReadOnlyCollection<T> result;
         var t = _serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
@@ -116,7 +116,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<(bool, List<int>)> TrySelectIdsAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
-        List<int> result = null;
+        List<int> result;
         var t = _serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
@@ -142,7 +142,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<(bool, List<int>, long)> TrySelectIdsWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
-        List<int> result = null;
+        List<int> result;
         long total;
         var t = _serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))

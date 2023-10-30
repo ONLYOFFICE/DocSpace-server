@@ -31,7 +31,7 @@ public class QueueWorker<T> where T : DistributedTaskProgress
     private readonly object _synchRoot = new();
 
     protected readonly IServiceProvider _serviceProvider;
-    protected readonly DistributedTaskQueue _queue;
+    private readonly DistributedTaskQueue _queue;
     protected readonly IDictionary<string, StringValues> _httpHeaders;
 
     public QueueWorker(
@@ -42,7 +42,7 @@ public class QueueWorker<T> where T : DistributedTaskProgress
     {
         _serviceProvider = serviceProvider;
         _queue = queueFactory.CreateQueue(queueName);
-        _httpHeaders = httpContextAccessor.HttpContext?.Request?.Headers;
+        _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
     }
 
     public static string GetProgressItemId(int tenantId, Guid userId)

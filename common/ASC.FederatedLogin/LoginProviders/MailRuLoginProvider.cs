@@ -163,6 +163,6 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
 
         var parser = JObject.Parse(token.OriginJson);
 
-        return parser?.Value<string>("x_mailru_vid");
+        return parser.Value<string>("x_mailru_vid");
     }
 }

@@ -365,9 +365,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var entryManager = scope.ServiceProvider.GetService<EntryManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
 
-        string error = null;
         foreach (var file in files)
         {
+            string error;
             if (checkPermissions && !await FilesSecurity.CanDeleteAsync(file))
             {
                 error = FilesCommonResource.ErrorMassage_SecurityException_DeleteFile;

@@ -70,15 +70,15 @@ public class GeolocationHelper
             var location = await GetIPGeolocationAsync(IPAddress.Parse(ip));
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
             {
-                return new string[] { string.Empty, string.Empty };
+                return new[] { string.Empty, string.Empty };
             }
             var regionInfo = new RegionInfo(location.Key).EnglishName;
-            return new string[] { regionInfo, location.City };
+            return new[] { regionInfo, location.City };
         }
         catch (Exception ex)
         {
             _logger.ErrorWithException(ex);
-            return new string[] { string.Empty, string.Empty };
+            return new[] { string.Empty, string.Empty };
         }
     }
 

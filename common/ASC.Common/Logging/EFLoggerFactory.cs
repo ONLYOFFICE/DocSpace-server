@@ -111,7 +111,7 @@ public class EFLogger : ILogger
             _properties.Add(new KeyValuePair<string, object>(name, value));
         }
 
-        public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, e) => l.Message;
+        public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, _) => l.Message;
     }
 
 }

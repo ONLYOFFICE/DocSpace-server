@@ -107,7 +107,7 @@ public class BackupProgressItem : BaseBackupProgressItem
 
             backupPortalTask.Init(TenantId, tempFile, _limit, writer);
 
-            backupPortalTask.ProgressChanged += (sender, args) =>
+            backupPortalTask.ProgressChanged += (_, args) =>
             {
                 Percentage = 0.9 * args.Progress;
                 PublishChanges();

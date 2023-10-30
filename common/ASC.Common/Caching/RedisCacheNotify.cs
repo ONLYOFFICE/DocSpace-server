@@ -84,7 +84,7 @@ public class RedisCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
 
     public void Unsubscribe(CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), (i) =>
+        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), (_) =>
         {
             return Task.FromResult(true);
         })).GetAwaiter()
@@ -129,7 +129,7 @@ public class RedisCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
         {
             _invoctionList.AddOrUpdate(action,
                 new ConcurrentBag<Action<T>> { onChange },
-                (type, bag) =>
+                (_, bag) =>
                 {
                     bag.Add(onChange);
                     return bag;

@@ -1068,7 +1068,7 @@ public class FileHandlerService
             var width = defaultSize.Width;
             var height = defaultSize.Height;
 
-            var size = context.Request.Query["size"].ToString() ?? "";
+            var size = context.Request.Query["size"].ToString();
             var sizes = size.Split('x');
             if (sizes.Length == 2)
             {
@@ -1177,7 +1177,7 @@ public class FileHandlerService
             var width = defaultSize.Width;
             var height = defaultSize.Height;
 
-            var size = context.Request.Query["size"].ToString() ?? "";
+            var size = context.Request.Query["size"].ToString();
             var sizes = size.Split('x');
             if (sizes.Length == 2)
             {
@@ -1258,10 +1258,8 @@ public class FileHandlerService
     {
         var responseMessage = context.Request.Query["response"] == "message";
 
-        Folder<T> folder;
-
         var folderDao = _daoFactory.GetFolderDao<T>();
-        folder = await folderDao.GetFolderAsync(folderId);
+        var folder = await folderDao.GetFolderAsync(folderId);
 
         if (folder == null)
         {
@@ -1504,10 +1502,9 @@ public class FileHandlerService
         TrackerData fileData;
         try
         {
-            string body;
             var receiveStream = context.Request.Body;
             using var readStream = new StreamReader(receiveStream);
-            body = await readStream.ReadToEndAsync();
+            var body = await readStream.ReadToEndAsync();
 
             _logger.DebugDocServiceTrackBody(body);
             if (string.IsNullOrEmpty(body))

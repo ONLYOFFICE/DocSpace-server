@@ -424,10 +424,9 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
     public bool UseRecursiveOperation(string folderId, string toRootFolderId)
     {
         var selector = _selectorFactory.GetSelector(folderId);
-        bool useRecursive;
 
         var folderDao = selector.GetFolderDao(folderId);
-        useRecursive = folderDao.UseRecursiveOperation(folderId, null);
+        var useRecursive = folderDao.UseRecursiveOperation(folderId, null);
 
         if (toRootFolderId != null)
         {

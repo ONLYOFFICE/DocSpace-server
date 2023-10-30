@@ -169,6 +169,6 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
 
         var parser = JObject.Parse(token.OriginJson);
 
-        return parser?.Value<string>("email");
+        return parser.Value<string>("email");
     }
 }

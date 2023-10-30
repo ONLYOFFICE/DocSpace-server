@@ -217,7 +217,7 @@ public class FileTrackerHelper
 
     private Action<object, object, EvictionReason, object> EvictionCallback<T>(T fileId, FileTracker fileTracker)
     {
-        return async (key, value, reason, state) =>
+        return async (_, _, reason, _) =>
         {
             if (reason != EvictionReason.Expired)
             {

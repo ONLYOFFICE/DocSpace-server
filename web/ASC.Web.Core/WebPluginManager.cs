@@ -176,7 +176,7 @@ public class WebPluginManager
 
     private async Task<DbWebPlugin> SaveWebPluginToStorageAsync(int tenantId, IFormFile file)
     {
-        if (Path.GetExtension(file.FileName)?.ToLowerInvariant() != _webPluginSettings.Extension)
+        if (Path.GetExtension(file.FileName).ToLowerInvariant() != _webPluginSettings.Extension)
         {
             throw new ArgumentException("Wrong file extension");
         }

@@ -72,7 +72,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
         if (stream != null)
         {
-            var archiveExtension = "";
+            string archiveExtension;
 
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {

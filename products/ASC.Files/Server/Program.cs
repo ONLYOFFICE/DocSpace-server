@@ -44,7 +44,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (logevent) => AppName);
+                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -55,7 +55,7 @@ try
 
     builder.Host.ConfigureDefault();
 
-    builder.WebHost.ConfigureDefaultKestrel((hostingContext, serverOptions) =>
+    builder.WebHost.ConfigureDefaultKestrel((_, serverOptions) =>
     {
         serverOptions.Limits.MaxRequestBodySize = 100 * 1024 * 1024;
         serverOptions.Limits.MaxRequestBufferSize = 100 * 1024 * 1024;

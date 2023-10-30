@@ -123,7 +123,7 @@ public class StudioPeriodicNotify
                 var toowner = false;
                 var topayer = false;
 
-                Func<CultureInfo, string> orangeButtonText = (c) => string.Empty;
+                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
                 var orangeButtonUrl = string.Empty;
 
                 var img1 = string.Empty;
@@ -440,7 +440,7 @@ public class StudioPeriodicNotify
                 var toadmins = false;
                 var tousers = false;
 
-                Func<CultureInfo, string> orangeButtonText = (c) => string.Empty;
+                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
                 var orangeButtonUrl = string.Empty;
 
                 Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);

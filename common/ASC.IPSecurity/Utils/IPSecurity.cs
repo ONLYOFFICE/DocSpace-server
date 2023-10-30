@@ -119,7 +119,7 @@ public class IPSecurity
             return false;
         }
 
-        _logger.InformationRestricted(requestIps ?? "", tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
+        _logger.InformationRestricted(requestIps, tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
 
         return false;
     }

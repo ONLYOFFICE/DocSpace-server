@@ -90,7 +90,7 @@ public class PhotoController : PeopleControllerBase
             var fileName = Path.GetFileName(inDto.TmpFile);
             var data = await _userPhotoManager.GetTempPhotoData(fileName);
 
-            UserPhotoThumbnailSettings settings = null;
+            UserPhotoThumbnailSettings settings;
 
             if (inDto.Width == 0 && inDto.Height == 0)
             {

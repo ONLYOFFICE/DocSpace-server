@@ -113,8 +113,6 @@ public class FileDto<T> : FileEntryDto<T>
 
     protected internal override FileEntryType EntryType { get => FileEntryType.File; }
 
-    public FileDto() { }
-
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>

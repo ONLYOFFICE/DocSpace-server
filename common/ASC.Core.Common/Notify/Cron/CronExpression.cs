@@ -1127,11 +1127,9 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
         while (!gotOne)
         {
-            ISortedSet st;
-            int t;
             var sec = d.Second;
 
-            st = _seconds.TailSet(sec);
+            var st = _seconds.TailSet(sec);
             if (st != null && st.Count != 0)
             {
                 sec = (int)st.First();
@@ -1144,7 +1142,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             d = new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond);
             var min = d.Minute;
             var hr = d.Hour;
-            t = -1;
+            var t = -1;
 
             st = _minutes.TailSet(min);
             if (st != null && st.Count != 0)

@@ -135,7 +135,7 @@ public class BruteForceLoginManager
 
     public async Task<UserInfo> AttemptAsync(string login, string passwordHash, string requestIp, string recaptchaResponse)
     {
-        UserInfo user = null;
+        UserInfo user;
 
         var secretEmail = SetupInfo.IsSecretEmail(login);
 

@@ -43,28 +43,6 @@ public static class NotifyConstants
 
         return new TagValue("OrangeButton", action);
     }
-
-    private class TagActionValue : ITagValue
-    {
-        private readonly Func<string> action;
-
-        public string Tag
-        {
-            get;
-            private set;
-        }
-
-        public object Value
-        {
-            get { return action(); }
-        }
-
-        public TagActionValue(string name, Func<string> action)
-        {
-            Tag = name;
-            this.action = action;
-        }
-    }
 }
 
 public static class NotifyCommonTags

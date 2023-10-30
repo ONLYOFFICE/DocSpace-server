@@ -44,7 +44,7 @@ public class WhiteLabelHelper
     {
         try
         {
-            _whiteLabelDictionary.AddOrUpdate(tenantId, r => newText, (i, s) => newText);
+            _whiteLabelDictionary.AddOrUpdate(tenantId, _ => newText, (_, _) => newText);
         }
         catch (Exception e)
         {

@@ -80,7 +80,7 @@ public class MessagesRepository : IDisposable
     {
         if (ForseSave(message))
         {
-            var id = 0;
+            int id;
             if (!string.IsNullOrEmpty(message.UAHeader))
             {
                 try
@@ -188,7 +188,7 @@ public class MessagesRepository : IDisposable
 
     private void FlushCache()
     {
-        List<EventMessage> events = null;
+        List<EventMessage> events;
 
         lock (_cache)
         {
@@ -198,11 +198,6 @@ public class MessagesRepository : IDisposable
             events = new List<EventMessage>(_cache.Values);
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
-        }
-
-        if (events == null)
-        {
-            return;
         }
 
         using var scope = _serviceScopeFactory.CreateScope();

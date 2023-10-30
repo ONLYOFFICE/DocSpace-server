@@ -39,7 +39,7 @@ public partial class TextileFormatter
             throw new ArgumentException("The formatter state must be a sub-public class of FormatterStateBase.");
         }
 
-        if (formatterStateType.GetConstructor(new Type[] { typeof(TextileFormatter) }) == null)
+        if (formatterStateType.GetConstructor(new[] { typeof(TextileFormatter) }) == null)
         {
             throw new ArgumentException("The formatter state must have a constructor that takes a TextileFormatter reference.");
         }

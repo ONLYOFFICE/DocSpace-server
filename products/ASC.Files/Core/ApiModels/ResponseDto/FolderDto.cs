@@ -82,8 +82,6 @@ public class FolderDto<T> : FileEntryDto<T>
 
     protected internal override FileEntryType EntryType { get => FileEntryType.Folder; }
 
-    public FolderDto() { }
-
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>

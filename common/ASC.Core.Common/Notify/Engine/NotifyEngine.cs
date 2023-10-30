@@ -100,7 +100,7 @@ public class NotifyEngine
         }
         else
         {
-            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (s, r) => r.Result), sendResponces);
+            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
         }
         _logger.Debug(result.ToString());
 
@@ -259,7 +259,7 @@ public class NotifyEngine
 
         request.CurrentSender = channel.SenderName;
 
-        (var oops, var noticeMessage) = await CreateNoticeMessageFromNotifyRequestAsync(request, channel.SenderName, serviceScope);
+        var (oops, noticeMessage) = await CreateNoticeMessageFromNotifyRequestAsync(request, channel.SenderName, serviceScope);
         if (oops != null)
         {
             return oops;
@@ -280,7 +280,6 @@ public class NotifyEngine
     private async Task<(SendResponse, NoticeMessage)> CreateNoticeMessageFromNotifyRequestAsync(NotifyRequest request, string sender, IServiceScope serviceScope)
     {
         ArgumentNullException.ThrowIfNull(request);
-        NoticeMessage noticeMessage = null;
         var recipientProvider = request.GetRecipientsProvider(serviceScope);
         var recipient = request.Recipient as IDirectRecipient;
 
@@ -292,7 +291,7 @@ public class NotifyEngine
         }
 
         recipient = await recipientProvider.FilterRecipientAddressesAsync(recipient);
-        noticeMessage = request.CreateMessage(recipient);
+        var noticeMessage = request.CreateMessage(recipient);
 
         addresses = recipient.Addresses;
         if (addresses == null || !addresses.Any(a => !string.IsNullOrEmpty(a)))

@@ -74,7 +74,7 @@ public class ElasticSearchService
             return;
         }
 
-        Task.WhenAll(tasks).ContinueWith(async r =>
+        Task.WhenAll(tasks).ContinueWith(async _ =>
         {
             using var scope = _serviceProvider.CreateScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();

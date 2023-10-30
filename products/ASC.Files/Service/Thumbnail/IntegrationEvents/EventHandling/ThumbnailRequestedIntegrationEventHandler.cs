@@ -34,7 +34,7 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
     private readonly ITariffService _tariffService;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
 
-    private ThumbnailRequestedIntegrationEventHandler() : base()
+    private ThumbnailRequestedIntegrationEventHandler()
     {
 
     }

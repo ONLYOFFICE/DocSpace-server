@@ -261,7 +261,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
             if (_rejectedEvents.TryPeek(out var result) && result.Equals(ex.EventId))
             {
-                _rejectedEvents.TryDequeue(out var _);
+                _rejectedEvents.TryDequeue(out _);
                 _consumerChannel.BasicReject(eventArgs.DeliveryTag, requeue: false);
             }
             else
@@ -313,7 +313,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
                                 autoDelete: false,
                                 arguments: arguments);
 
-        channel.CallbackException += (sender, ea) =>
+        channel.CallbackException += (_, ea) =>
         {
             _logger.WarningRecreatingConsumerChannel(ea.Exception);
 

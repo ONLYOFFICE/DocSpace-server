@@ -108,13 +108,11 @@ public abstract class NotifySource : INotifySource
     {
         var subscriptionProvider = new DirectSubscriptionProvider(Id, _subscriptionManager, _recipientsProvider);
 
-        return new TopSubscriptionProvider(_recipientsProvider, subscriptionProvider, WorkContext.DefaultClientSenders)
-            ?? throw new NotifyException("Provider ISubscriprionProvider not instanced.");
+        return new TopSubscriptionProvider(_recipientsProvider, subscriptionProvider, WorkContext.DefaultClientSenders);
     }
 
     protected virtual IRecipientProvider CreateRecipientsProvider()
     {
-        return new RecipientProviderImpl(_userManager)
-            ?? throw new NotifyException("Provider IRecipientsProvider not instanced.");
+        return new RecipientProviderImpl(_userManager);
     }
 }

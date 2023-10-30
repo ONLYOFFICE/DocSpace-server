@@ -66,7 +66,7 @@ public class NotifyConfiguration
             "Web.UrlAbsoluter",
             InterceptorPlace.MessageSend,
             InterceptorLifetime.Global,
-            (r, p, scope) =>
+            (r, _, scope) =>
             {
                 if (r is { CurrentMessage.ContentType: Pattern.HtmlContentType })
                 {
@@ -121,7 +121,7 @@ public class NotifyConfiguration
             "WhiteLabelInterceptor",
              InterceptorPlace.MessageSend,
              InterceptorLifetime.Global,
-             (r, p, scope) =>
+             (r, _, scope) =>
              {
                  try
                  {

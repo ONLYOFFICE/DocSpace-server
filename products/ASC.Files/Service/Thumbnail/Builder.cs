@@ -386,7 +386,7 @@ public class Builder<T>
         }
         else
         {
-            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, t) =>
+            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, _) =>
             {
                 await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
             });

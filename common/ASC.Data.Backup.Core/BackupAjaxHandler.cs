@@ -311,10 +311,8 @@ public class BackupAjaxHandler
 
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        BackupProgress result;
-
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        result = _backupService.GetRestoreProgress(tenant.Id);
+        var result = _backupService.GetRestoreProgress(tenant.Id);
 
         return result;
     }

@@ -202,8 +202,8 @@ public class BackupPortalTask : PortalTaskBase
 
         var dir = Path.GetDirectoryName(BackupFilePath);
         var subDir = CrossPlatform.PathCombine(dir, Path.GetFileNameWithoutExtension(BackupFilePath));
-        var schemeDir = "";
-        var dataDir = "";
+        string schemeDir;
+        string dataDir;
         if (dbName == "default")
         {
             schemeDir = Path.Combine(subDir, KeyHelper.GetDatabaseSchema());

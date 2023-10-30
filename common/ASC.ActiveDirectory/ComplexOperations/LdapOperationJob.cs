@@ -697,7 +697,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         SetProgress(20, Resource.LdapSettingsStatusGettingUsersFromLdap);
 
-        (var ldapGroupsUsers, var uniqueLdapGroupUsers) = await GetGroupsUsersAsync(ldapGroups);
+        var (ldapGroupsUsers, uniqueLdapGroupUsers) = await GetGroupsUsersAsync(ldapGroups);
 
         if (!uniqueLdapGroupUsers.Any())
         {

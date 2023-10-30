@@ -29,7 +29,7 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 [ProtoContract]
 public record ThumbnailRequestedIntegrationEvent : IntegrationEvent
 {
-    private ThumbnailRequestedIntegrationEvent() : base()
+    private ThumbnailRequestedIntegrationEvent()
     {
 
     }

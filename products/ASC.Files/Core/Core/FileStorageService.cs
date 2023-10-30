@@ -1108,7 +1108,7 @@ public class FileStorageService //: IFileStorageService
             }
             else
             {
-                (var file, var editable) = await app.GetFileAsync(fileId.ToString());
+                var (file, editable) = await app.GetFileAsync(fileId.ToString());
                 fileOptions = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
             }
 
@@ -2635,9 +2635,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<string> GetShortenLinkAsync<T>(T fileId)
     {
-        File<T> file;
         var fileDao = GetFileDao<T>();
-        file = await fileDao.GetFileAsync(fileId);
+        var file = await fileDao.GetFileAsync(fileId);
         ErrorIf(!await _fileSharing.CanSetAccessAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
         var shareLink = await _fileShareLink.GetLinkAsync(file);
 
@@ -2683,9 +2682,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<bool> SetAceLinkAsync<T>(T fileId, FileShare share)
     {
-        FileEntry<T> file;
         var fileDao = GetFileDao<T>();
-        file = await fileDao.GetFileAsync(fileId);
+        FileEntry<T> file = await fileDao.GetFileAsync(fileId);
         var aces = new List<AceWrapper>
             {
                 new()
@@ -2800,10 +2798,9 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)
     {
-        FileEntry<T> file;
         var fileDao = GetFileDao<T>();
 
-        file = await fileDao.GetFileAsync(fileId);
+        FileEntry<T> file = await fileDao.GetFileAsync(fileId);
 
         ErrorIf(file == null, FilesCommonResource.ErrorMassage_FileNotFound);
 

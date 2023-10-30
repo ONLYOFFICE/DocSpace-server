@@ -67,8 +67,6 @@ public class FileOperationDto
     /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
     public List<FileEntryDto> Folders { get; set; }
 
-    public FileOperationDto() { }
-
     public static FileOperationDto GetSample()
     {
         return new FileOperationDto

@@ -169,7 +169,7 @@ public class CommonMethods
             return (true, tenant);
         }
 
-        return (false, tenant);
+        return (false, null);
     }
 
     public bool IsTestEmail(string email)

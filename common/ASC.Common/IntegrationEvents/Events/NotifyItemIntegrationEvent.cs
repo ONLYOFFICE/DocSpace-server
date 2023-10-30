@@ -52,7 +52,7 @@ public record NotifyItemIntegrationEvent : IntegrationEvent
     [ProtoMember(7)]
     public string BaseUrl { get; init; }
 
-    private NotifyItemIntegrationEvent() : base()
+    private NotifyItemIntegrationEvent()
     {
 
     }

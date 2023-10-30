@@ -152,7 +152,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
             ValidateLifetime = true
 
-        }, out var _);
+        }, out _);
 
         return claims;
     }

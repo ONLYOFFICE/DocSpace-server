@@ -87,10 +87,6 @@ public static class AutofacExtension
         var root = config.Build();
 
         var sectionSettings = root.GetSection("components");
-        if (sectionSettings == null)
-        {
-            return new List<string>();
-        }
 
         var folder = configuration["core:products:folder"];
         var subfolder = configuration["core:products:subfolder"];

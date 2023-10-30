@@ -200,7 +200,7 @@ public class MessageService
 
         if (httpHeaders == null && _request != null)
         {
-            httpHeaders = _request.Headers?.ToDictionary(k => k.Key, v => v.Value);
+            httpHeaders = _request.Headers.ToDictionary(k => k.Key, v => v.Value);
         }
 
         var message = await _messageFactory.CreateAsync(httpHeaders, action, target, description);

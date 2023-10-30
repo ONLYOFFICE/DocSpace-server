@@ -80,7 +80,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                     state =>
                         RestoreTable(connection.Fix(), (TableInfo)state, ref transactionsCommited,
                             ref rowsInserted), table, 5,
-                    onAttemptFailure: error => _columnMapper.Rollback(),
+                    onAttemptFailure: _ => _columnMapper.Rollback(),
                     onFailure: error => { throw ThrowHelper.CantRestoreTable(table.Name, error); });
 
                 SetStepCompleted();
@@ -139,7 +139,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                 }
 
                 object oldIdValue = null;
-                object newIdValue = null;
+                object newIdValue;
 
                 if (tableInfo.HasIdColumn())
                 {

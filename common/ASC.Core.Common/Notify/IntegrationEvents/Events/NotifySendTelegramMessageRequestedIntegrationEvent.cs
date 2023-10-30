@@ -29,7 +29,7 @@ namespace ASC.Core.Common.Notify.IntegrationEvents.Events;
 [ProtoContract]
 public record NotifySendTelegramMessageRequestedIntegrationEvent : IntegrationEvent
 {
-    private NotifySendTelegramMessageRequestedIntegrationEvent() : base()
+    private NotifySendTelegramMessageRequestedIntegrationEvent()
     {
 
     }

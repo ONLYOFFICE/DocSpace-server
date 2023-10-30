@@ -46,7 +46,7 @@ public class GlobalNotify
     {
         try
         {
-            _notify.Subscribe((item) =>
+            _notify.Subscribe((_) =>
             {
                 try
                 {
@@ -421,7 +421,7 @@ public class GlobalFolder
 
         var cacheKey = $"my/{await _tenantManager.GetCurrentTenantIdAsync()}/{_authContext.CurrentAccount.ID}";
 
-        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, (a) => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, (_) => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
 
         return myFolderId.Value;
     }

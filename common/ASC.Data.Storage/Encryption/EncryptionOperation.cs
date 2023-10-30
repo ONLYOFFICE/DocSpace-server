@@ -94,7 +94,7 @@ public class EncryptionOperation : DistributedTaskProgress
                     dictionary.Add(module, (DiscDataStore)await storageFactory.GetStorageAsync(tenant.Id, module));
                 }
 
-                await Parallel.ForEachAsync(dictionary, async (elem, token) =>
+                await Parallel.ForEachAsync(dictionary, async (elem, _) =>
                 {
                     await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, log);
                 });

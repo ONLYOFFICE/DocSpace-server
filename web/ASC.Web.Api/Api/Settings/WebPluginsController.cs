@@ -57,7 +57,7 @@ public class WebPluginsController : BaseSettingsController
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (HttpContext.Request.Form?.Files == null || HttpContext.Request.Form.Files.Count == 0)
+        if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
             throw new ArgumentException("No input file");
         }
@@ -84,7 +84,7 @@ public class WebPluginsController : BaseSettingsController
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        
+
         var plugins = new List<DbWebPlugin>();
 
         plugins.AddRange(await _webPluginManager.GetSystemWebPluginsAsync());
@@ -157,7 +157,6 @@ public class WebPluginsController : BaseSettingsController
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         await _webPluginManager.DeleteWebPluginAsync(tenant.Id, id);
     }
-
 
 
     [HttpGet("webplugins/system/{name}")]

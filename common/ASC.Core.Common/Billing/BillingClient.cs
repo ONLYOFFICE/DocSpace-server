@@ -345,7 +345,7 @@ public static class BillingHttplClientExtension
     {
         services.AddHttpClient(BillingClient.HttpClientOption)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((s, request) =>
+            .AddPolicyHandler((_, request) =>
             {
                 if (!request.RequestUri.AbsolutePath.EndsWith(BillingClient.GetCurrentPaymentsUri))
                 {

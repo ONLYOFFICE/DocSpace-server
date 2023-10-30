@@ -1387,7 +1387,7 @@ public class FileSecurity : IFileSecurity
         var roomsIds = new Dictionary<int, FileShare>();
         var thirdPartyRoomsIds = new Dictionary<string, FileShare>();
 
-        var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (key, group) => new
+        var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer(currentUserSubjects))
             .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
@@ -1518,7 +1518,7 @@ public class FileSecurity : IFileSecurity
         var fileIds = new Dictionary<T, FileShare>();
         var folderIds = new Dictionary<T, FileShare>();
 
-        var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (key, group) => new
+        var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer(subjects))
                .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
@@ -1654,7 +1654,7 @@ public class FileSecurity : IFileSecurity
         var fileIds = new Dictionary<T, FileShare>();
         var folderIds = new Dictionary<T, FileShare>();
 
-        var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (key, group) => new
+        var recordGroup = records.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
             firstRecord = group.OrderBy(r => r, new SubjectComparer(subjects))
                 .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())

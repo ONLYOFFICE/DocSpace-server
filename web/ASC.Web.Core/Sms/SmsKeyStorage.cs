@@ -91,7 +91,6 @@ public class SmsKeyStorage
 
     public async Task<(bool, string)> GenerateKeyAsync(string phone)
     {
-        string key = null;
         ArgumentException.ThrowIfNullOrEmpty(phone);
 
         try
@@ -99,6 +98,7 @@ public class SmsKeyStorage
             await _semaphore.WaitAsync();
             var cacheKey = await BuildCacheKeyAsync(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey) ?? new Dictionary<string, DateTime>();
+            string key;
             if (phoneKeys.Count > _attemptCount)
             {
                 key = null;

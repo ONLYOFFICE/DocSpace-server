@@ -37,7 +37,7 @@ public class AscCacheNotify
         _cacheNotify = cacheNotify;
         _cache = cache;
 
-        _cacheNotify.Subscribe((item) => { OnClearCache(); }, CacheNotifyAction.Any);
+        _cacheNotify.Subscribe((_) => { OnClearCache(); }, CacheNotifyAction.Any);
     }
 
     public void ClearCache() => _cacheNotify.Publish(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);
@@ -126,7 +126,7 @@ public sealed class AscCache : ICache, IDisposable
 
         if (value != null)
         {
-            dic.AddOrUpdate(field, value, (k, v) => value);
+            dic.AddOrUpdate(field, value, (_, _) => value);
 
             _memoryCache.Set(key, dic, options);
         }

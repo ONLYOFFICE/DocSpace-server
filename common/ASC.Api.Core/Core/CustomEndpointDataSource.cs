@@ -103,10 +103,7 @@ public static class EndpointExtension
 
                 if (disabled == null && httpMethodMetadata != null)
                 {
-                    foreach (var httpMethod in httpMethodMetadata.HttpMethods)
-                    {
-                        result.Add(new Webhook { Method = httpMethod, Route = r.RoutePattern.RawText.ToLower() });
-                    }
+                    result.AddRange(httpMethodMetadata.HttpMethods.Select(httpMethod => new Webhook { Method = httpMethod, Route = r.RoutePattern.RawText.ToLower() }));
                 }
                 return result;
             })

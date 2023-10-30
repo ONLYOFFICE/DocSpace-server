@@ -114,7 +114,7 @@ public class NotifySenderService : BackgroundService
             }
             else
             {
-                await Task.WhenAny(tasks.ToArray()).ContinueWith(r => tasks.RemoveAll(a => a.IsCompleted));
+                await Task.WhenAny(tasks.ToArray()).ContinueWith(_ => tasks.RemoveAll(a => a.IsCompleted));
             }
         }
         catch (ThreadAbortException)

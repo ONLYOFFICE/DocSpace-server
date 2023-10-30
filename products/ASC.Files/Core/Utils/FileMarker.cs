@@ -81,7 +81,7 @@ public class FileMarkerHelper
 
     internal void Add<T>(AsyncTaskData<T> taskData)
     {
-        Tasks.EnqueueTask(async (d, c) => await ExecMarkFileAsNewAsync(taskData), taskData);
+        Tasks.EnqueueTask(async (_, _) => await ExecMarkFileAsNewAsync(taskData), taskData);
     }
 
     private async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj)
@@ -658,11 +658,9 @@ public class FileMarker
 
     public async Task RemoveMarkAsNewForAllAsync<T>(FileEntry<T> fileEntry)
     {
-        IAsyncEnumerable<Guid> userIDs;
-
         var tagDao = _daoFactory.GetTagDao<T>();
         var tags = tagDao.GetTagsAsync(fileEntry.Id, fileEntry.FileEntryType == FileEntryType.File ? FileEntryType.File : FileEntryType.Folder, TagType.New);
-        userIDs = tags.Select(tag => tag.Owner).Distinct();
+        var userIDs = tags.Select(tag => tag.Owner).Distinct();
 
         await foreach (var userID in userIDs)
         {
@@ -1057,7 +1055,7 @@ public class FileMarker
 [Transient]
 public class AsyncTaskData<T> : DistributedTask
 {
-    public AsyncTaskData(TenantManager tenantManager, AuthContext authContext) : base()
+    public AsyncTaskData(TenantManager tenantManager, AuthContext authContext)
     {
         TenantID = tenantManager.GetCurrentTenant().Id;
         CurrentAccountId = authContext.CurrentAccount.ID;

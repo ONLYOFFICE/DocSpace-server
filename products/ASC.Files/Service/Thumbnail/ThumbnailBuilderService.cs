@@ -60,7 +60,7 @@ public class ThumbnailBuilderService : BackgroundService
 
         if (((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.3)) > 0)
         {
-            var splitter = _channelReader.Split(2, (n, i, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
+            var splitter = _channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
             var premiumChannels = splitter[0].Split((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.7), null, stoppingToken);
             var freeChannel = splitter[1].Split((int)(_thumbnailSettings.MaxDegreeOfParallelism * 0.3), null, stoppingToken);
             readers = premiumChannels.Union(freeChannel).ToList();

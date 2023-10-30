@@ -105,7 +105,7 @@ public class EmployeeDtoHelper
         {
             employee = await InitAsync(new EmployeeDto(), userInfo);
 
-            _dictionary.AddOrUpdate(userInfo.Id, i => employee, (i, v) => employee);
+            _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
 
         }
         

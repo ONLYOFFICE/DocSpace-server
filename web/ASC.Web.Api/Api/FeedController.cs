@@ -179,7 +179,7 @@ public class FeedController : ControllerBase
             .GetFeedsAsync(filter))
             .GroupBy(n => n.GroupId,
                      n => _mapper.Map<FeedResultItem, FeedDto>(n),
-                     (n, group) =>
+                     (_, group) =>
                      {
                          var firstFeed = group.First();
                          firstFeed.GroupedFeeds = group.Skip(1);

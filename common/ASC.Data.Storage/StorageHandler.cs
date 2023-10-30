@@ -69,7 +69,7 @@ public class StorageHandler
                 expire = storageExpire.TotalMinutes.ToString(CultureInfo.InvariantCulture);
             }
 
-            var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(path + "." + header + "." + expire, auth ?? "", TimeSpan.FromMinutes(Convert.ToDouble(expire)));
+            var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(path + "." + header + "." + expire, auth, TimeSpan.FromMinutes(Convert.ToDouble(expire)));
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

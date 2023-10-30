@@ -29,7 +29,7 @@ namespace ASC.Web.Core.RemovePortal;
 [ProtoContract]
 public record RemovePortalIntegrationEvent : IntegrationEvent
 {
-    private RemovePortalIntegrationEvent() : base()
+    private RemovePortalIntegrationEvent()
     {
 
     }

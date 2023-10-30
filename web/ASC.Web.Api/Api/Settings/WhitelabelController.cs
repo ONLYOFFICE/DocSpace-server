@@ -127,7 +127,7 @@ public class WhitelabelController : BaseSettingsController
 
         await DemandWhiteLabelPermissionAsync();
 
-        if (HttpContext.Request.Form?.Files == null || HttpContext.Request.Form.Files.Count == 0)
+        if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
             throw new InvalidOperationException("No input files");
         }

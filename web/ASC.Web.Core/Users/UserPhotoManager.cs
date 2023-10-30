@@ -34,7 +34,7 @@ public sealed class ResizeWorkerItem : DistributedTask
 
     }
 
-    public ResizeWorkerItem(int tenantId, Guid userId, byte[] data, long maxFileSize, Size size, IDataStore dataStore, UserPhotoThumbnailSettings settings) : base()
+    public ResizeWorkerItem(int tenantId, Guid userId, byte[] data, long maxFileSize, Size size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
     {
         TenantId = tenantId;
         UserId = userId;
@@ -662,9 +662,9 @@ public class UserPhotoManager
         }
     }
 
-    private async Task<string> SizePhoto(Guid userID, byte[] data, long maxFileSize, Size size)
+    private async Task SizePhoto(Guid userID, byte[] data, long maxFileSize, Size size)
     {
-        return await SizePhoto(userID, data, maxFileSize, size, false);
+        await SizePhoto(userID, data, maxFileSize, size, false);
     }
 
     private async Task<string> SizePhoto(Guid userID, byte[] data, long maxFileSize, Size size, bool now)
@@ -694,7 +694,7 @@ public class UserPhotoManager
             if (!_resizeQueue.GetAllTasks<ResizeWorkerItem>().Any(r => r["key"] == key))
             {
                 //Add
-                _resizeQueue.EnqueueTask(async (a, b) => await ResizeImage(resizeTask), resizeTask);
+                _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);
             }
             return GetDefaultPhotoAbsoluteWebPath(size);
             //NOTE: return default photo here. Since task will update cache

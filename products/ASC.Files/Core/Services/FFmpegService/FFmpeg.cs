@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 
 using File = System.IO.File;
@@ -51,7 +52,7 @@ public class FFmpegService
     private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
-    private readonly List<string> _fFmpegFormats;
+    private readonly ImmutableList<string> _fFmpegFormats;
 
     private readonly ILogger<FFmpegService> _logger;
 
@@ -94,7 +95,7 @@ public class FFmpegService
         _fFmpegPath = configuration["files:ffmpeg:value"];
         _fFmpegArgs = configuration["files:ffmpeg:args"] ?? "-i - -preset ultrafast -movflags frag_keyframe+empty_moov -f {0} -";
         _fFmpegThumbnailsArgs = configuration["files:ffmpeg:thumbnails:args"] ?? "-i \"{0}\" -frames:v 1 \"{1}\" -y";
-        _fFmpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>() ?? FileUtility.ExtsVideo;
+        _fFmpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>().ToImmutableList() ?? FileUtility.ExtsVideo;
 
         _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? Array.Empty<string>()).ToList();
 

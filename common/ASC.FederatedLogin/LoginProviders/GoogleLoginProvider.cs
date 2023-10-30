@@ -82,7 +82,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
     public OAuth20Token Auth(HttpContext context)
     {
-        return Auth(context, GoogleScopeContacts, out var _, (context.Request.Query["access_type"].ToString() ?? "") == "offline"
+        return Auth(context, GoogleScopeContacts, out _, (context.Request.Query["access_type"].ToString()) == "offline"
             ? new Dictionary<string, string>
             {
                     { "access_type", "offline" },

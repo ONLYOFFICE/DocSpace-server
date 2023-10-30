@@ -62,8 +62,6 @@ public class FolderContentDto<T>
     /// <type>System.Int32, System</type>
     public int New { get; set; }
 
-    public FolderContentDto() { }
-
     public static FolderContentDto<int> GetSample()
     {
         return new FolderContentDto<int>
