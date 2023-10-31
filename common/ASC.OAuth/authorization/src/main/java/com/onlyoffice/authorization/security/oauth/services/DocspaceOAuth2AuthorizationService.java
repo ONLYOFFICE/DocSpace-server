@@ -15,10 +15,12 @@ import com.onlyoffice.authorization.core.usecases.service.authorization.Authoriz
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationRetrieveUsecases;
 import com.onlyoffice.authorization.external.caching.hazelcast.AuthorizationCache;
 import com.onlyoffice.authorization.external.messaging.configuration.RabbitMQConfiguration;
+import com.onlyoffice.authorization.security.crypto.aes.Cipher;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -66,6 +68,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private final AmqpTemplate amqpTemplate;
     private final AuthorizationCache cache;
+    private final Cipher cipher;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -79,6 +82,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     @RateLimiter(name = "mutateRateLimiter")
+    @SneakyThrows
     public void save(OAuth2Authorization authorization) {
         Assert.notNull(authorization, "authorization cannot be null");
         MDC.put("id", authorization.getId());
@@ -118,11 +122,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         }
 
         var msg = toMessage(authorization);
-        this.amqpTemplate.convertAndSend(
-                configuration.getAuthorization().getExchange(),
-                configuration.getAuthorization().getRouting(),
-                msg);
-
         if (msg.getState() != null && !msg.getState().isBlank()) {
             Cookie cookie = new Cookie(CLIENT_STATE_COOKIE, msg.getState());
             cookie.setPath("/");
@@ -132,6 +131,20 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                     .getRequestAttributes()).getResponse()
                     .addCookie(cookie);
         }
+
+        if (msg.getAuthorizationCodeValue() != null && !msg.getAuthorizationCodeValue().isBlank())
+            msg.setAuthorizationCodeValue(cipher.encrypt(msg.getAuthorizationCodeValue()));
+
+        if (msg.getAccessTokenValue() != null && !msg.getAccessTokenValue().isBlank())
+            msg.setAccessTokenValue(cipher.encrypt(msg.getAccessTokenValue()));
+
+        if (msg.getRefreshTokenValue() != null && !msg.getRefreshTokenValue().isBlank())
+            msg.setRefreshTokenValue(cipher.encrypt(msg.getRefreshTokenValue()));
+
+        this.amqpTemplate.convertAndSend(
+                configuration.getAuthorization().getExchange(),
+                configuration.getAuthorization().getRouting(),
+                msg);
     }
 
     @RateLimiter(name = "mutateRateLimiter")
@@ -186,6 +199,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationFallback")
+    @SneakyThrows
     public OAuth2Authorization findById(String id) {
         Assert.hasText(id, "id cannot be empty");
         MDC.put("id", id);
@@ -200,6 +214,16 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             return authorization;
         }
 
+        var msg = this.queryUsecases.getById(id);
+        if (msg.getAuthorizationCodeValue() != null && !msg.getAuthorizationCodeValue().isBlank())
+            msg.setAuthorizationCodeValue(cipher.decrypt(msg.getAuthorizationCodeValue()));
+
+        if (msg.getAccessTokenValue() != null && !msg.getAccessTokenValue().isBlank())
+            msg.setAccessTokenValue(cipher.decrypt(msg.getAccessTokenValue()));
+
+        if (msg.getRefreshTokenValue() != null && !msg.getRefreshTokenValue().isBlank())
+            msg.setRefreshTokenValue(cipher.decrypt(msg.getRefreshTokenValue()));
+
         MDC.clear();
         return toObject(this.queryUsecases.getById(id));
     }
@@ -213,6 +237,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationByTokenFallback")
+    @SneakyThrows
     public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
         Assert.hasText(token, "token cannot be empty");
         MDC.put("token", token);
@@ -255,6 +280,15 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             log.info("empty authorization");
             return null;
         }
+
+        if (result.getAuthorizationCodeValue() != null && !result.getAuthorizationCodeValue().isBlank())
+            result.setAuthorizationCodeValue(cipher.decrypt(result.getAuthorizationCodeValue()));
+
+        if (result.getAccessTokenValue() != null && !result.getAccessTokenValue().isBlank())
+            result.setAccessTokenValue(cipher.decrypt(result.getAccessTokenValue()));
+
+        if (result.getRefreshTokenValue() != null && !result.getRefreshTokenValue().isBlank())
+            result.setRefreshTokenValue(cipher.decrypt(result.getRefreshTokenValue()));
 
         return toObject(result);
     }
