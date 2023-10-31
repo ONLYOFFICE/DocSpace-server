@@ -54,5 +54,71 @@
     <EmbeddedResource Update="BackupResource.az.resx">
       <DependentUpon>BackupResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.ar-SA.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.bg.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.cs.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.de.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.es.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.fi.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.hy-AM.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.it.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.ja-JP.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.ko-KR.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.lv.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.nl.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.pl.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.pt.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.pt-BR.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.ro.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.ru.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.sk.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.sl.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.uk-UA.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.vi.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.zh-CN.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

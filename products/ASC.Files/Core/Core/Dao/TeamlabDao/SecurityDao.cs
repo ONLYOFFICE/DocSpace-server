@@ -488,10 +488,16 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
                 q = q.Where(s => s.SubjectType == SubjectType.InvitationLink);
                 break;
             case ShareFilterType.ExternalLink:
+                q = q.Where(s => s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
+                break;
+            case ShareFilterType.AdditionalExternalLink:
                 q = q.Where(s => s.SubjectType == SubjectType.ExternalLink);
                 break;
+            case ShareFilterType.PrimaryExternalLink:
+                q = q.Where(s => s.SubjectType == SubjectType.PrimaryExternalLink);
+                break;
             case ShareFilterType.Link:
-                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink);
+                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
                 break;
         }
 
@@ -705,17 +711,13 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
             }
 
             var parentFolders = await folderDao.GetParentFoldersAsync(selector.ConvertId(folder.Id)).ToListAsync();
-            if (parentFolders == null || parentFolders.Count == 0)
+            if (parentFolders.Count == 0)
             {
                 continue;
             }
 
             parentFolders.Reverse();
             var pureShareRecords = await GetPureShareRecordsAsync(parentFolders).ToListAsync();
-            if (pureShareRecords == null)
-            {
-                continue;
-            }
 
             foreach (var pureShareRecord in pureShareRecords)
             {

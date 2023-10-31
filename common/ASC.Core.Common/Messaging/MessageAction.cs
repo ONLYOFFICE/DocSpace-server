@@ -217,9 +217,9 @@ public enum MessageAction
     RoomLogoCreated = 5080,
     RoomLogoDeleted = 5081,
     
-    ExternalLinkCreated = 5088,
-    ExternalLinkUpdated = 5089,
-    ExternalLinkDeleted = 5090,
+    RoomExternalLinkCreated = 5088,
+    RoomExternalLinkUpdated = 5089,
+    RoomExternalLinkDeleted = 5090,
 
     #endregion
 

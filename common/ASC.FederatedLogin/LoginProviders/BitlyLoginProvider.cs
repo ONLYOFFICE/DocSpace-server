@@ -72,7 +72,7 @@ public class BitlyLoginProvider : Consumer, IValidateKeysProvider
 
     public string GetShortenLink(string shareLink)
     {
-        var data = string.Format("{{\"long_url\":\"{0}\"}}", shareLink);
+        var data = $"{{\"long_url\":\"{shareLink}\"}}";
         var headers = new Dictionary<string, string>
             {
                 {"Authorization" ,"Bearer " + BitlyToken}
@@ -81,8 +81,6 @@ public class BitlyLoginProvider : Consumer, IValidateKeysProvider
         var response = _requestHelper.PerformRequest(_bitlyUrl, "application/json", "POST", data, headers);
 
         var parser = JObject.Parse(response);
-        if (parser == null) return null;
-
         var link = parser.Value<string>("link");
 
         return link;

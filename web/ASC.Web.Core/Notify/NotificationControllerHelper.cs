@@ -65,7 +65,7 @@ public class NotificationControllerHelper
                 return isEnabled;
             default:
                 throw new Exception("Incorrect parameters");
-        };
+        }
     }
 
     public async Task SetNotificationStatusAsync(NotificationType notificationType, bool isEnabled)

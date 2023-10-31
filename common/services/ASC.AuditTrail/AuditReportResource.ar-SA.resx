@@ -558,13 +558,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>تم حذف الغرفة</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>تم انشاء الرابط. المسمى: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>تم حذف الرابط</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>تم تحديث الرابط. المسمى: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

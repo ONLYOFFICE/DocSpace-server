@@ -93,7 +93,7 @@ public class EditorControllerThirdparty : EditorController<string>
         configuration.Document.Url = app.GetFileStreamUrl(file);
         configuration.Document.Info.Favorite = null;
         configuration.EditorConfig.Customization.GobackUrl = string.Empty;
-        configuration.EditorType = EditorType.External;
+        configuration.EditorType = EditorType.Desktop;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -229,7 +229,7 @@ public abstract class EditorController<T> : ApiControllerBase
         var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
         var configuration = docParams.Configuration;
         var file = docParams.File;
-        configuration.EditorType = EditorType.External;
+        configuration.EditorType = EditorType.Desktop;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {

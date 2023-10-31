@@ -119,15 +119,8 @@ internal class CrossDao //Additional SharpBox
                 fromFileTags.Add(fromFileLockTag);
             }
 
-            if (fromFileFavoriteTag != null)
-            {
-                fromFileTags.AddRange(fromFileFavoriteTag);
-            }
-
-            if (fromFileTemplateTag != null)
-            {
-                fromFileTags.AddRange(fromFileTemplateTag);
-            }
+            fromFileTags.AddRange(fromFileFavoriteTag);
+            fromFileTags.AddRange(fromFileTemplateTag);
 
             if (fromFileTags.Count > 0)
             {
