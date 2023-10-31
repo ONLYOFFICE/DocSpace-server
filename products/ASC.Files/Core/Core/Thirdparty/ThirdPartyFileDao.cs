@@ -441,8 +441,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
             throw new Exception(errorFolder.Error);
         }
 
-        Dao.GetParentFolderId(file);
-
         var newTitle = await Dao.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
         var storage = await ProviderInfo.StorageAsync;
         file = await storage.MoveFileAsync(Dao.GetId(file), newTitle, Dao.GetId(toFolder));

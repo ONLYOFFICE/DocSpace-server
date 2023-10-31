@@ -72,7 +72,7 @@ public class ReassignProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, _, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, messageTarget, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, messageTarget, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -215,7 +215,6 @@ public class ReassignProgressItem : DistributedTaskProgress
 public class ReassignProgressItemScope
 {
     private readonly TenantManager _tenantManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly MessageService _messageService;
     private readonly FileStorageService _fileStorageService;
     private readonly StudioNotifyService _studioNotifyService;
@@ -226,8 +225,8 @@ public class ReassignProgressItemScope
     private readonly MessageTarget _messageTarget;
     private readonly ILoggerProvider _options;
 
-    public ReassignProgressItemScope(TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
+    public ReassignProgressItemScope(
+        TenantManager tenantManager,
         MessageService messageService,
         FileStorageService fileStorageService,
         StudioNotifyService studioNotifyService,
@@ -239,7 +238,6 @@ public class ReassignProgressItemScope
         ILoggerProvider options)
     {
         _tenantManager = tenantManager;
-        _coreBaseSettings = coreBaseSettings;
         _messageService = messageService;
         _fileStorageService = fileStorageService;
         _studioNotifyService = studioNotifyService;
@@ -252,7 +250,6 @@ public class ReassignProgressItemScope
     }
 
     public void Deconstruct(out TenantManager tenantManager,
-        out CoreBaseSettings coreBaseSettings,
         out MessageService messageService,
         out FileStorageService fileStorageService,
         out StudioNotifyService studioNotifyService,
@@ -264,7 +261,6 @@ public class ReassignProgressItemScope
         out ILoggerProvider optionsMonitor)
     {
         tenantManager = _tenantManager;
-        coreBaseSettings = _coreBaseSettings;
         messageService = _messageService;
         fileStorageService = _fileStorageService;
         studioNotifyService = _studioNotifyService;

@@ -332,8 +332,8 @@ public class TariffService : ITariffService
             return false;
         }
 
-        var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId));
-        var newQuotas = quantity.Keys.Select(name => allQuotas.FirstOrDefault(q => q.Name == name)).ToList();
+        var allQuotas = (await _quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId)).ToList();
+        var newQuotas = quantity.Keys.Select(name => allQuotas.Find(q => q.Name == name)).ToList();
 
         var tariff = await GetTariffAsync(tenantId);
 

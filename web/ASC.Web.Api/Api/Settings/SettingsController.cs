@@ -102,7 +102,6 @@ public class SettingsController : BaseSettingsController
         IMapper mapper,
         UserFormatter userFormatter) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
-        option.CreateLogger("ASC.Api");
         _consumerFactory = consumerFactory;
         _timeZoneConverter = timeZoneConverter;
         _customNamingPeople = customNamingPeople;
@@ -570,7 +569,7 @@ public class SettingsController : BaseSettingsController
                 await _semaphore.WaitAsync();
                 var theme = inDto.Theme;
 
-                if (CustomColorThemesSettingsItem.Default.Any(r => r.Id == theme.Id))
+                if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
                 {
                     theme.Id = 0;
                 }
@@ -618,7 +617,7 @@ public class SettingsController : BaseSettingsController
             }
         }
 
-        if (inDto.Selected.HasValue && settings.Themes.Any(r => r.Id == inDto.Selected.Value))
+        if (inDto.Selected.HasValue && settings.Themes.Exists(r => r.Id == inDto.Selected.Value))
         {
             settings.Selected = inDto.Selected.Value;
             await _settingsManager.SaveAsync(settings);

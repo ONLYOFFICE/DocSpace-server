@@ -147,7 +147,7 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsSSO { get; set; }
 
     /// <summary>Theme</summary>
-    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsEnum}, System</type>
+    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsType}, System</type>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>Quota limit</summary>

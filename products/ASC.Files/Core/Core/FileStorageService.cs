@@ -3523,12 +3523,12 @@ public class FileStorageService //: IFileStorageService
 
         var userInfos = admins.Union(onlyFilesAdmins).ToList();
 
-        foreach (var userInfo in userInfos.Select(r=> r.Id))
+        foreach (var userId in userInfos.Select(r=> r.Id))
         {
-            dict[userInfo] = new AceWrapper
+            dict[userId] = new AceWrapper
             {
                 Access = FileShare.ReadWrite,
-                Id = userInfo
+                Id = userId
             };
         }
 

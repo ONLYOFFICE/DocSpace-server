@@ -46,7 +46,7 @@ public class ThirdPartyController : ControllerBase
     /// Returns a request to get the confirmation code from URL.
     /// </summary>
     /// <short>Get the code request</short>
-    /// <param type="ASC.FederatedLogin.LoginProviders.LoginProviderEnum, ASC.FederatedLogin.LoginProviders" method="url" name="provider">Provider</param>
+    /// <param type="ASC.FederatedLogin.LoginProviders.LoginProvider, ASC.FederatedLogin.LoginProviders" method="url" name="provider">Provider</param>
     /// <returns type="System.Object, System">Code request</returns>
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>

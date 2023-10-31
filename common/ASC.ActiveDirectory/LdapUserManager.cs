@@ -95,7 +95,7 @@ public class LdapUserManager
         var i = 0;
         while (!await TestUniqueUserNameAsync(uniqueName))
         {
-            uniqueName = string.Format("{0}{1}", startUniqueName, (++i).ToString(CultureInfo.InvariantCulture));
+            uniqueName = $"{startUniqueName}{(++i).ToString(CultureInfo.InvariantCulture)}";
         }
         return uniqueName;
     }
@@ -164,7 +164,7 @@ public class LdapUserManager
         catch (TenantQuotaException ex)
         {
             // rethrow if quota
-            throw ex;
+            throw;
         }
         catch (Exception ex)
         {
@@ -262,7 +262,7 @@ public class LdapUserManager
                     return wrapper;
                 }
                 wrapper.UserInfo = await TryAddLDAPUser(ldapUserInfo, onlyGetChanges);
-                if (wrapper.UserInfo == Constants.LostUser)
+                if (wrapper.UserInfo.Equals(Constants.LostUser))
                 {
                     if (onlyGetChanges)
                     {
@@ -282,7 +282,6 @@ public class LdapUserManager
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                    scope.ServiceProvider.GetRequiredService<LdapNotifyService>();
                     var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
                     source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();

@@ -296,7 +296,7 @@ public class LoginProfile
 
     internal string ToSerializedString()
     {
-        return string.Join(new string(PairSeparator, 1), _fields.Select(x => string.Join(new string(KeyValueSeparator, 1), new[] { x.Key, x.Value })).ToArray());
+        return string.Join(new string(PairSeparator, 1), _fields.Select(x => string.Join(new string(KeyValueSeparator, 1), x.Key, x.Value)).ToArray());
     }
 
     internal static LoginProfile CreateFromSerializedString(Signature signature, InstanceCrypto instanceCrypto, string serialized)

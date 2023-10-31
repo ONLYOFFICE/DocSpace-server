@@ -52,7 +52,7 @@ public class TenantLogoManager
         _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
         _tenantManager = tenantManager;
         _authContext = authContext;
-        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(new[] { ',', ';', ' ' });
+        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
         WhiteLabelEnabled = !hideSettings.Contains("WhiteLabel", StringComparer.CurrentCultureIgnoreCase);
         _distributedCache = distributedCache;
     }
