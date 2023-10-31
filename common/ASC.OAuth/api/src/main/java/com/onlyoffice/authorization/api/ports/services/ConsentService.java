@@ -3,15 +3,16 @@
  */
 package com.onlyoffice.authorization.api.ports.services;
 
+import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.entities.Consent;
-import com.onlyoffice.authorization.api.core.transfer.response.ConsentDTO;
-import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceRetrieveUsecases;
-import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
-import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.core.transfer.response.ConsentDTO;
 import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceMutationUsecases;
+import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceRetrieveUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCreationUsecases;
+import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
+import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,9 @@ public class ConsentService implements ConsentRetrieveUsecases,
     public void saveConsent(ConsentMessage consentMessage) {
         log.info("trying to save a new consent for {} and {}",
                 consentMessage.getPrincipalName(), consentMessage.getRegisteredClientId());
-        mutationUsecases.saveConsent(ConsentMapper.INSTANCE.toEntity(consentMessage));
+        var entity = ConsentMapper.INSTANCE.toEntity(consentMessage);
+        entity.setClient(Client.builder().clientId(consentMessage.getRegisteredClientId()).build());
+        mutationUsecases.saveConsent(entity);
     }
 
     @Transactional
@@ -52,9 +55,11 @@ public class ConsentService implements ConsentRetrieveUsecases,
         log.info("trying to save consents");
         for (ConsentMessage consent : consents) {
             try {
+                var entity = ConsentMapper.INSTANCE.toEntity(consent);
+                entity.setClient(Client.builder().clientId(consent.getRegisteredClientId()).build());
                 log.info("saving a new consent for {} and {}",
                         consent.getPrincipalName(), consent.getRegisteredClientId());
-                mutationUsecases.saveConsent(ConsentMapper.INSTANCE.toEntity(consent));
+                mutationUsecases.saveConsent(entity);
             } catch (Exception e) {
                 log.error(e.getMessage());
             }

@@ -52,10 +52,10 @@ public class Client {
     private String policyUrl;
     @Column(name = "redirect_uris")
     private String redirectUris;
-    @Column(name = "logout_redirect_uri")
-    private String logoutRedirectUri;
     @Column(name = "allowed_origins")
     private String allowedOrigins;
+    @Column(name = "logout_redirect_uri")
+    private String logoutRedirectUri;
     @Column(name = "enabled")
     private boolean enabled;
     @Column(name = "invalidated")
