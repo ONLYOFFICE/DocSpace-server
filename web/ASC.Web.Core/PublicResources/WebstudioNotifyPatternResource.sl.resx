@@ -1854,4 +1854,16 @@ $OrangeButton
 
 Povezava velja le 7 dni.</value>
   </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Lep pozdrav, ekipa ONLYOFFICE</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Osvojite ONLYOFFICE DocSpace z video navodili</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>OGLEJTE SI CELOTEN SEZNAM PREDVAJANJA</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Lep pozdrav, ONLYOFFICE podporna ekipa</value>
+  </data>
 </root>

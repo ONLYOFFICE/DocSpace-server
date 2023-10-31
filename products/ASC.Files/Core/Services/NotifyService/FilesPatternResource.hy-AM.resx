@@ -130,7 +130,7 @@
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName նշել է ձեզ փաստաթղթի մեկնաբանության մեջ
 
-$__AuthorName նշել է ձեզ "$DocumentTitle":"$DocumentURL" փաստաթղթի մեկնաբանության մեջ սենյակում $RoomTitle":"$RoomURL":
+$__AuthorName նշել է ձեզ "$DocumentTitle":"$DocumentURL" փաստաթղթի մեկնաբանության մեջ սենյակում "$RoomTitle":"$RoomURL":
 
 $Message</value>
   </data>

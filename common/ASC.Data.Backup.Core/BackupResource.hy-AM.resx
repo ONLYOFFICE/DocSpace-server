@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Սահմանել գաղտնաբառ</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Պահուստավորումն ավելի մեծ է, քան պորտալի ընդհանուր չափը</value>
+  </data>
 </root>
