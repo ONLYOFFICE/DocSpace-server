@@ -324,7 +324,7 @@ public class DocumentServiceTrackerHelper
 
         if (file != null && fileData.Actions is { Count: > 0 })
         {
-            _ = _filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            await _filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
         }
     }
 
@@ -454,7 +454,7 @@ public class DocumentServiceTrackerHelper
         {
             if (user != null)
             {
-                _ = _filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, _displayUserSettingsHelper), file.Title);
+                await _filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, _displayUserSettingsHelper), file.Title);
             }
 
             if (!forceSave)

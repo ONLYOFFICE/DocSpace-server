@@ -185,7 +185,7 @@ public class DocuSignHelper
 
         var url = await CreateEnvelopeAsync(account.AccountId, document, docuSignData, apiClient);
 
-        _ = _filesMessageService.SendAsync(MessageAction.DocumentSendToSign, sourceFile, "DocuSign", sourceFile.Title);
+        await _filesMessageService.SendAsync(MessageAction.DocumentSendToSign, sourceFile, "DocuSign", sourceFile.Title);
 
         return url;
     }
@@ -406,7 +406,7 @@ public class DocuSignHelper
             file = await fileDao.SaveFileAsync(file, stream);
         }
 
-        _ = _filesMessageService.SendAsync(MessageAction.DocumentSignComplete, file, MessageInitiator.ThirdPartyProvider, "DocuSign", file.Title);
+        await _filesMessageService.SendAsync(MessageAction.DocumentSignComplete, file, MessageInitiator.ThirdPartyProvider, "DocuSign", file.Title);
 
         await _fileMarker.MarkAsNewAsync(file);
 

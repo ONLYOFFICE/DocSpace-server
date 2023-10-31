@@ -387,13 +387,13 @@ public class FileHandlerService
             {
                 if (forView)
                 {
-                    _ = _filesMessageService.SendAsync(MessageAction.FileReaded, file, file.Title);
+                    await _filesMessageService.SendAsync(MessageAction.FileReaded, file, file.Title);
                 }
                 else
                 {
                     if (version == 0)
                     {
-                        _ = _filesMessageService.SendAsync(MessageAction.FileDownloaded, file, file.Title);
+                        await _filesMessageService.SendAsync(MessageAction.FileDownloaded, file, file.Title);
                     }
                     else
                     {
