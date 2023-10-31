@@ -167,7 +167,7 @@ public class MessageService
             return;
         }
 
-        await _sender.SendAsync(message);
+        _ = _sender.SendAsync(message);
     }
 
     #region HttpHeaders
@@ -209,7 +209,7 @@ public class MessageService
             return;
         }
 
-        await _sender.SendAsync(message);
+        _ = _sender.SendAsync(message);
     }
 
     #endregion
@@ -245,7 +245,7 @@ public class MessageService
             return;
         }
 
-        await _sender.SendAsync(message);
+        _ = _sender.SendAsync(message);
     }
     public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
     {

@@ -38,6 +38,7 @@ public class MessagesRepository : IDisposable
     private readonly ILogger<MessagesRepository> _logger;
     private readonly Timer _timer;
     private readonly int _cacheLimit;
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
     private readonly HashSet<MessageAction> _forceSaveAuditActions = new HashSet<MessageAction>
         { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
 
@@ -111,7 +112,9 @@ public class MessagesRepository : IDisposable
         var now = DateTime.UtcNow;
         var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, message.Id, now.Ticks);
 
-        lock (_cache)
+        await _semaphore.WaitAsync();
+
+        try
         {
             _cache[key] = message;
 
@@ -120,6 +123,10 @@ public class MessagesRepository : IDisposable
                 _timer.Change(0, 100);
                 _timerStarted = true;
             }
+        }
+        finally
+        {
+            _semaphore.Release();
         }
         return 0;
     }
