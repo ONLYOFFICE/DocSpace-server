@@ -45,13 +45,13 @@ CREATE TABLE identity_clients (
 	modified_by varchar(255),
 	modified_on datetime(6),
 	client_name varchar(255),
-	website_url tinytext,
 	policy_url tinytext,
 	redirect_uris tinytext,
 	scopes tinytext,
 	tenant_id integer,
 	tenant_url tinytext,
 	terms_url tinytext,
+	website_url tinytext,
 	primary key (client_id)
 ) engine=InnoDB;
 
@@ -61,6 +61,7 @@ CREATE TABLE identity_consents (
 	invalidated tinyint(1),
 	modified_at datetime(6),
 	scopes tinytext,
+	client_client_id varchar(36),
 	primary key (principal_name, registered_client_id)
 ) engine=InnoDB;
 
@@ -71,6 +72,11 @@ ALTER TABLE identity_clients
 ALTER TABLE identity_clients
 	ADD CONSTRAINT UK_client_secret
 	UNIQUE (client_secret);
+
+ALTER TABLE identity_consents
+	ADD CONSTRAINT FK_client_id
+	FOREIGN KEY (registered_client_id)
+	REFERENCES identity_clients (client_id);
 
 CREATE EVENT IF NOT EXISTS delete_invalidated_clients
 ON SCHEDULE EVERY 1 hour
