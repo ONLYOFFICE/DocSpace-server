@@ -126,7 +126,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             Cookie cookie = new Cookie(CLIENT_STATE_COOKIE, msg.getState());
             cookie.setPath("/");
             cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
-            cookie.setHttpOnly(true);
             ((ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes()).getResponse()
                     .addCookie(cookie);
