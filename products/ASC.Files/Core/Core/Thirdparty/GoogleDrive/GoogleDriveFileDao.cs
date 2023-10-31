@@ -119,7 +119,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
 
         if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
-            uploadSession.BytesTotal += uploadSession.BytesUploaded;
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
         }
         else

@@ -331,29 +331,24 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
                 : await folderDao.CopyFolderAsync(selector.ConvertId(folderId), selector.ConvertId(toFolderId), null);
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(string[] folderIds, TTo to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<string> folderIds, TTo to)
     {
-        if (to is int tId)
+        return to switch
         {
-            return CanMoveOrCopyAsync(folderIds, tId);
-        }
-
-        if (to is string tsId)
-        {
-            return CanMoveOrCopyAsync(folderIds, tsId);
-        }
-
-        throw new NotImplementedException();
+            int tId => CanMoveOrCopyAsync(folderIds, tId),
+            string tsId => CanMoveOrCopyAsync(folderIds, tsId),
+            _ => throw new NotImplementedException()
+        };
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, int to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, string to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
     {
-        if (folderIds.Length == 0)
+        if (!folderIds.Any())
         {
             return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
         }

@@ -305,7 +305,7 @@ public class SettingsController : BaseSettingsController
 
         tenant.TrustedDomainsType = inDto.Type;
 
-        await _settingsManager.SaveAsync(new StudioTrustedDomainSettings { InviteAsUsers = inDto.InviteAsUsers });
+        await _settingsManager.SaveAsync(new StudioTrustedDomainSettings { InviteAsUsers = inDto.InviteUsersAsVisitors });
 
         await _tenantManager.SaveTenantAsync(tenant);
 
