@@ -163,8 +163,12 @@ public class FolderDtoHelper : FileEntryDtoHelper
             {
                 result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
 
-                var isMuted = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
-                result.Mute = isMuted;
+
+            }
+
+            if (DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             }
         }
 
