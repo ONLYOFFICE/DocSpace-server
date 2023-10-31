@@ -84,6 +84,7 @@ global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Storage;
+global using ASC.Data.Storage.ChunkedUploader;
 global using ASC.Data.Storage.DataOperators;
 global using ASC.ElasticSearch;
 global using ASC.ElasticSearch.Core;
@@ -126,7 +127,6 @@ global using ASC.Files.Thirdparty.Sharpbox;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
-global using ASC.Notify.Engine;
 global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
@@ -187,10 +187,7 @@ global using ICSharpCode.SharpZipLib.Tar;
 global using ICSharpCode.SharpZipLib.Zip;
 
 global using JWT;
-global using JWT.Algorithms;
-global using JWT.Builder;
 global using JWT.Exceptions;
-global using JWT.Serializers;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;

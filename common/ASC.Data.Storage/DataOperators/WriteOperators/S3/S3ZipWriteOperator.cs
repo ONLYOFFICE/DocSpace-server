@@ -183,13 +183,10 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     private async Task InternalUploadAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int number)
     {
-        (var path, var eTag) = await _sessionHolder.UploadChunkAsync(uploadSession, stream, length, number);
+        await _sessionHolder.UploadChunkAsync(uploadSession, stream, length, number);
 
         lock (_locker) 
         {
-            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-            eTags.Add(number, eTag);
-            uploadSession.Items["ETag"] = eTags;
             uploadSession.BytesTotal += length;
         }
     }
@@ -203,6 +200,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
         Task.WaitAll(_tasks.ToArray());
 
+        _chunkedUploadSession.BytesTotal++;
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
 
         Hash = BitConverter.ToString(_sha.Hash).Replace("-", string.Empty);

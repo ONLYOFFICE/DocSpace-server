@@ -162,9 +162,3 @@ public class ChunkedUploadSessionHolder
         }
     }
 }
-
-public class Chunk
-{
-    public string ETag { get; set; }
-    public long Size { get; set; }
-}

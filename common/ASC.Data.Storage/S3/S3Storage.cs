@@ -58,6 +58,7 @@ public class S3Storage : BaseStorage
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
     private readonly CoreBaseSettings _coreBaseSettings;
+    private readonly ICache _cache;
 
     public S3Storage(
         TempStream tempStream,
@@ -70,10 +71,12 @@ public class S3Storage : BaseStorage
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
-        CoreBaseSettings coreBaseSettings)
+        CoreBaseSettings coreBaseSettings,
+        ICache cache)
         : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
     {
         _coreBaseSettings = coreBaseSettings;
+        _cache = cache;
     }
 
     public Uri GetUriInternal(string path)
@@ -466,7 +469,7 @@ public class S3Storage : BaseStorage
         }
         else
         {
-            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder);
+            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _cache);
         }
     }
 
