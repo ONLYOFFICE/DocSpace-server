@@ -72,17 +72,17 @@ public class OperationController : ApiControllerBase
 
         foreach (var fileId in inDto.FileConvertIds.Where(fileId => !files.ContainsKey(fileId.Key.ToString())))
         {
-            files.Add(fileId.Key.ToString(), fileId.Value);
+            files.Add(JsonSerializer.Serialize(fileId.Key), fileId.Value);
         }
 
         foreach (var fileId in inDto.FileIds.Where(fileId => !files.ContainsKey(fileId.ToString())))
         {
-            files.Add(fileId.ToString(), string.Empty);
+            files.Add(JsonSerializer.Serialize(fileId), string.Empty);
         }
 
         foreach (var folderId in inDto.FolderIds.Where(folderId => !folders.ContainsKey(folderId.ToString())))
         {
-            folders.Add(folderId.ToString(), string.Empty);
+            folders.Add(JsonSerializer.Serialize(folderId), string.Empty);
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -116,7 +116,7 @@ public class OperationController : ApiControllerBase
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds.ToList());
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var DestFolderId = inDto.DestFolderId.ToString();
+        var DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId);
 
         _eventBus.Publish(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
@@ -254,7 +254,7 @@ public class OperationController : ApiControllerBase
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds.ToList());
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var DestFolderId = inDto.DestFolderId.ToString();
+        var DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId);
 
         _eventBus.Publish(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {

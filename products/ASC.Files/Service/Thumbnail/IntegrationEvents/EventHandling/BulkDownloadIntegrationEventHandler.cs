@@ -65,8 +65,14 @@ public class BulkDownloadIntegrationEventHandler : IIntegrationEventHandler<Bulk
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            var folders = @event.FolderIdsString == null ? new Dictionary<JsonElement, string>() : @event.FolderIdsString.ToDictionary(k => JsonDocument.Parse(k.Key).RootElement, k => k.Value);
-            var files = @event.FileIdsString == null ? new Dictionary<JsonElement, string>() : @event.FileIdsString.ToDictionary(k => JsonDocument.Parse(k.Key).RootElement, k => k.Value);
+            static JsonElement ToJsonElement(string value)
+            {
+                using var doc = JsonDocument.Parse(value);
+                return doc.RootElement.Clone();
+            }
+
+            var folders = @event.FolderIdsString == null ? new Dictionary<JsonElement, string>() : @event.FolderIdsString.ToDictionary(k => ToJsonElement(k.Key), k => k.Value);
+            var files = @event.FileIdsString == null ? new Dictionary<JsonElement, string>() : @event.FileIdsString.ToDictionary(k => ToJsonElement(k.Key), k => k.Value);
 
             await _fileStorageService.BulkDownloadAsync(folders, files);
         }
