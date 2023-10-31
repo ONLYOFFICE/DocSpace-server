@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Extensions;
+
 public static class ServiceCollectionExtension
 {
     public static void AddCacheNotify(this IServiceCollection services, IConfiguration configuration)
@@ -80,6 +81,28 @@ public static class ServiceCollectionExtension
         {
             services.AddDistributedMemoryCache();
         }
+    }
+
+    public static void AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+
+        if (redisConfiguration == null)
+        {
+            throw new NotSupportedException("DistributedLock: Provider not found");
+        }
+
+        var user = configuration.GetSection("Redis").GetValue<string>("User");
+        
+        //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
+        if (user != null)
+        {
+            redisConfiguration.ConfigurationOptions.User = user;
+        }
+        
+        var options = configuration.GetSection("distributed-lock").Get<RedisLockOptions>();
+            
+        services.AddRedisDistributedLock(options);
     }
 
     public static void AddEventBus(this IServiceCollection services, IConfiguration configuration)

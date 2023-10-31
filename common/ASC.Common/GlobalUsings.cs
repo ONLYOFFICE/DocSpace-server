@@ -56,6 +56,7 @@ global using ASC.Common.Mapping.PrimitiveTypeConverters;
 global using ASC.Common.Security;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Security.Cryptography;
 
@@ -71,7 +72,9 @@ global using Google.Protobuf;
 
 global using JWT;
 global using JWT.Algorithms;
-global using JWT.Serializers;
+
+global using Medallion.Threading;
+global using Medallion.Threading.Redis;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.AspNetCore.Http;

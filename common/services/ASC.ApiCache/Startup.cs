@@ -100,6 +100,7 @@ public class Startup
         services.AddEventBus(_configuration);
         services.AddDistributedTaskQueue();
         services.AddCacheNotify(_configuration);
+        services.AddDistributedLock(_configuration);
 
         if (!_hostEnvironment.IsDevelopment())
         {

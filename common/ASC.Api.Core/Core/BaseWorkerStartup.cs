@@ -79,6 +79,7 @@ public class BaseWorkerStartup
         services.AddDistributedTaskQueue();
         services.AddCacheNotify(Configuration);
         services.AddHttpClient();
+        services.AddDistributedLock(Configuration);
 
         DIHelper.Configure(services);
 
