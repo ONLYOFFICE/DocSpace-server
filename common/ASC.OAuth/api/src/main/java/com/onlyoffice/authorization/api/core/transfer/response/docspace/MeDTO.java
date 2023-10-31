@@ -19,5 +19,6 @@ public class MeDTO {
     private String userName;
     private String email;
     private String avatar;
+    private String avatarSmall;
     private Boolean isAdmin;
 }

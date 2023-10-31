@@ -93,7 +93,7 @@ public class ClientController {
             var profile = docspaceClient.getProfile(URI.create(address), cookie, c.getModifiedBy());
             if (profile != null && profile.getResponse() != null) {
                 var r = profile.getResponse();
-                c.setCreatorAvatar(r.getAvatar());
+                c.setCreatorAvatar(r.getAvatarSmall());
                 c.setCreatorDisplayName(String
                         .format("%s %s", r.getFirstName(), r.getLastName()).trim());
             }
