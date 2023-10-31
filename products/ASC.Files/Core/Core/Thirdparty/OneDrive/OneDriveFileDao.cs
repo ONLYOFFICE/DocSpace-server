@@ -117,7 +117,7 @@ internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
 
         if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
-            uploadSession.BytesTotal += uploadSession.BytesUploaded;
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
         }
         else

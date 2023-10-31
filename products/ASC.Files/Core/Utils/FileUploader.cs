@@ -336,7 +336,7 @@ public class FileUploader
 
         if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
-            uploadSession.BytesTotal += uploadSession.BytesUploaded;
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             var linkDao = _daoFactory.GetLinkDao();
             await linkDao.DeleteAllLinkAsync(uploadSession.File.Id.ToString());
 
