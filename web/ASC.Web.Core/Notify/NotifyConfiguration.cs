@@ -187,18 +187,13 @@ public class ProductSecurityInterceptor
                 if (!Constants.LostUser.Equals(u))
                 {
                     // security
-                    var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
+                    var tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
                     var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                    if (productId == Guid.Empty)
-                    {
-                        tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
-                        productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                    }
                     if (productId == Guid.Empty)
                     {
                         productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
                     }
-                    if (productId != Guid.Empty && productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
+                    if (productId != Guid.Empty && productId != WebItemManager.PeopleProductID /* ignore people product */)
                     {
                         return !await _webItemSecurity.IsAvailableForUserAsync(productId, u.Id);
                     }
@@ -297,7 +292,7 @@ public class NotifyTransferRequest : INotifyEngineAction
             }
         }
 
-        _commonLinkUtility.GetLocationByRequest(out var product, out var module);
+        _commonLinkUtility.GetLocationByRequest(out var product, out _);
         if (product == null && CallContext.GetData("asc.web.product_id") != null)
         {
             product = _webItemManager[(Guid)CallContext.GetData("asc.web.product_id")] as IProduct;
@@ -314,7 +309,6 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, _commonLinkUtility.GetFullAbsolutePath(await _commonLinkUtility.GetUserProfileAsync(aid))));
         request.Arguments.Add(new TagValue(CommonTags.VirtualRootPath, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
         request.Arguments.Add(new TagValue(CommonTags.ProductID, product != null ? product.ID : Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.ModuleID, module != null ? module.ID : Guid.Empty));
         request.Arguments.Add(new TagValue(CommonTags.ProductUrl, _commonLinkUtility.GetFullAbsolutePath(product != null ? product.StartURL : "~")));
         request.Arguments.Add(new TagValue(CommonTags.DateTime, _tenantUtil.DateTimeNow()));
         request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
