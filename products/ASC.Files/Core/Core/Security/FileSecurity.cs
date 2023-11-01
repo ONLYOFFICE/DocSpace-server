@@ -901,9 +901,9 @@ public class FileSecurity : IFileSecurity
                         return folder.CreateBy == userId && action is FilesSecurityActions.Create or FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.FillForms;
                     }
 
-                    if (folder.FolderType == FolderType.Archive)
+                    if (folder.FolderType == FolderType.Archive && action == FilesSecurityActions.MoveTo)
                     {
-                        return action == FilesSecurityActions.MoveTo;
+                        return true;
                     }
 
                     if (folder.FolderType == FolderType.VirtualRooms && !isCollaborator)
@@ -979,7 +979,8 @@ public class FileSecurity : IFileSecurity
                     action != FilesSecurityActions.Delete &&
                     action != FilesSecurityActions.ReadHistory &&
                     action != FilesSecurityActions.Copy &&
-                    action != FilesSecurityActions.Move
+                    action != FilesSecurityActions.Move &&
+                    action != FilesSecurityActions.Download
                     )
                 {
                     return false;
