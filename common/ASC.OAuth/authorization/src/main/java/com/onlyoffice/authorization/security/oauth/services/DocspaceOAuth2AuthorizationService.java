@@ -45,9 +45,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
@@ -71,6 +75,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     private final Cipher cipher;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     @PostConstruct
     public void init() {
@@ -82,7 +87,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     @RateLimiter(name = "mutateRateLimiter")
-    @SneakyThrows
     public void save(OAuth2Authorization authorization) {
         Assert.notNull(authorization, "authorization cannot be null");
         MDC.put("id", authorization.getId());
@@ -129,16 +133,48 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             ((ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes()).getResponse()
                     .addCookie(cookie);
+            System.out.println(msg.getState());
         }
 
+        var tasks = new ArrayList<Callable<Boolean>>();
         if (msg.getAuthorizationCodeValue() != null && !msg.getAuthorizationCodeValue().isBlank())
-            msg.setAuthorizationCodeValue(cipher.encrypt(msg.getAuthorizationCodeValue()));
+            tasks.add(() -> {
+                try {
+                    msg.setAuthorizationCodeValue(cipher.encrypt(msg.getAuthorizationCodeValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
 
         if (msg.getAccessTokenValue() != null && !msg.getAccessTokenValue().isBlank())
-            msg.setAccessTokenValue(cipher.encrypt(msg.getAccessTokenValue()));
+            tasks.add(() -> {
+                try {
+                    msg.setAccessTokenValue(cipher.encrypt(msg.getAccessTokenValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
 
         if (msg.getRefreshTokenValue() != null && !msg.getRefreshTokenValue().isBlank())
-            msg.setRefreshTokenValue(cipher.encrypt(msg.getRefreshTokenValue()));
+            tasks.add(() -> {
+                try {
+                    msg.setRefreshTokenValue(cipher.encrypt(msg.getRefreshTokenValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
+
+        try {
+            pool.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage());
+        }
 
         this.amqpTemplate.convertAndSend(
                 configuration.getAuthorization().getExchange(),
@@ -198,7 +234,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationFallback")
-    @SneakyThrows
     public OAuth2Authorization findById(String id) {
         Assert.hasText(id, "id cannot be empty");
         MDC.put("id", id);
@@ -213,15 +248,46 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             return authorization;
         }
 
+        var tasks = new ArrayList<Callable<Boolean>>();
         var msg = this.queryUsecases.getById(id);
         if (msg.getAuthorizationCodeValue() != null && !msg.getAuthorizationCodeValue().isBlank())
-            msg.setAuthorizationCodeValue(cipher.decrypt(msg.getAuthorizationCodeValue()));
+            tasks.add(() -> {
+                try {
+                    msg.setAuthorizationCodeValue(cipher.decrypt(msg.getAuthorizationCodeValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
 
         if (msg.getAccessTokenValue() != null && !msg.getAccessTokenValue().isBlank())
-            msg.setAccessTokenValue(cipher.decrypt(msg.getAccessTokenValue()));
+            tasks.add(() -> {
+                try {
+                    msg.setAccessTokenValue(cipher.decrypt(msg.getAccessTokenValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
 
         if (msg.getRefreshTokenValue() != null && !msg.getRefreshTokenValue().isBlank())
-            msg.setRefreshTokenValue(cipher.decrypt(msg.getRefreshTokenValue()));
+            tasks.add(() -> {
+                try {
+                    msg.setRefreshTokenValue(cipher.decrypt(msg.getRefreshTokenValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
+
+        try {
+            pool.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage());
+        }
 
         MDC.clear();
         return toObject(this.queryUsecases.getById(id));
@@ -280,14 +346,45 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             return null;
         }
 
+        var tasks = new ArrayList<Callable<Boolean>>();
         if (result.getAuthorizationCodeValue() != null && !result.getAuthorizationCodeValue().isBlank())
-            result.setAuthorizationCodeValue(cipher.decrypt(result.getAuthorizationCodeValue()));
+            tasks.add(() -> {
+                try {
+                    result.setAuthorizationCodeValue(cipher.decrypt(result.getAuthorizationCodeValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
 
         if (result.getAccessTokenValue() != null && !result.getAccessTokenValue().isBlank())
-            result.setAccessTokenValue(cipher.decrypt(result.getAccessTokenValue()));
+            tasks.add(() -> {
+                try {
+                    result.setAccessTokenValue(cipher.decrypt(result.getAccessTokenValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
 
         if (result.getRefreshTokenValue() != null && !result.getRefreshTokenValue().isBlank())
-            result.setRefreshTokenValue(cipher.decrypt(result.getRefreshTokenValue()));
+            tasks.add(() -> {
+                try {
+                    result.setRefreshTokenValue(cipher.decrypt(result.getRefreshTokenValue()));
+                    return true;
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return false;
+                }
+            });
+
+        try {
+            pool.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage());
+        }
 
         return toObject(result);
     }
