@@ -250,7 +250,7 @@ public class PortalController : ControllerBase
 
             t = await _hostedSolution.RegisterTenantAsync(info);
             _tenantManager.SetCurrentTenant(t);
-            await _cspSettingsHelper.Save(null, true);
+            await _cspSettingsHelper.SaveAsync(null, true);
             /*********/
 
             _log.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
