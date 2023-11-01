@@ -619,7 +619,7 @@ $OrangeButton
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի հասցեի փոփոխման գործընթացը այդ ժամանակահատվածում.</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>h1. դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName:
@@ -708,7 +708,7 @@ $OrangeButton
 Դուք կստանաք ավելի շատ խորհուրդներ, թե ինչպես օգտագործել ձեր վեբ-գրասենյակը: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -742,7 +742,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -764,7 +764,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -817,7 +817,7 @@ $OrangeButton
 Դուք կստանաք ավելի շատ խորհուրդներ, թե ինչպես օգտագործել ձեր վեբ-գրասենյակը: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -851,8 +851,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
-
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 Բարև, $UserName!
 
@@ -993,7 +992,7 @@ $OrangeButton
 Եթե սխալմամբ եք ստացել այս նամակը, խնդրում ենք անտեսել այն կամ կապվել ձեր "$PortalUrl":"$PortalUrl" պորտալի ադմինիստրատորի հետ՝ մանրամասները պարզելու համար.</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -1068,7 +1067,7 @@ $TrulyYours</value>
 Դուք կստանաք ավելի շատ խորհուրդներ, թե ինչպես օգտագործել ձեր վեբ-գրասենյակը: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք.</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -1124,7 +1123,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -1436,7 +1435,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -1737,7 +1736,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
@@ -1826,7 +1825,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. Դեպի &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace:
 
 
 Բարև, $UserName!
