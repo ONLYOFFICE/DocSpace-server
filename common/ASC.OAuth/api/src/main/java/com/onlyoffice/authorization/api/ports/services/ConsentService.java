@@ -34,6 +34,7 @@ public class ConsentService implements ConsentRetrieveUsecases,
     private final ConsentPersistenceRetrieveUsecases retrieveUsecases;
     private final ConsentPersistenceMutationUsecases mutationUsecases;
 
+    @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public Set<ConsentDTO> getAllByPrincipalName(String principalName) throws RuntimeException {
         var response = new HashSet<ConsentDTO>();
         var results = retrieveUsecases.findAllByPrincipalName(principalName);
