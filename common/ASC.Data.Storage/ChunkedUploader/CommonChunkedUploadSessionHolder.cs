@@ -33,7 +33,7 @@ public class CommonChunkedUploadSessionHolder
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
     private readonly TempPath _tempPath;
     private readonly string _domain;
-    public readonly long MaxChunkUploadSize;
+    public long MaxChunkUploadSize;
     public string TempDomain;
 
     public const string StoragePath = "sessions";
