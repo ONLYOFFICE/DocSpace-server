@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Kennwort festlegen</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Backup ist größer als die Gesamtgröße des Portals</value>
+  </data>
 </root>

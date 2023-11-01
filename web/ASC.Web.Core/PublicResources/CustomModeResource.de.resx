@@ -65,24 +65,23 @@ Sie haben gerade Ihr Cloud-Office für persönliche Verwendung erstellt.
 
 h3.Das ist ein virtueller Arbeitsbereich, in dem Sie Dokumente bearbeiten und speichern und sie mit Ihren Freunden oder Kollegen teilen. Also können Sie mit Dateien von überall aus arbeiten.
 
-ONLYOFFICE ist mit Microsoft Office™-Formaten kompatibel und garantiert keinen Verlust an Formatierung oder Qualität der erstellten Objekte. Sie müssen sich keine Sorgen um Formatierung machen und zur Hand haben Sie umfassende professionelle Bearbeitungstools.
-
 h3.Hier ist eine schnelle Übersicht, was Sie in ONLYOFFICE machen können:
 
-- Dateien von Ihrem Computer hochladen und neue Dokumente erstellen;
+- Erstellen, öffnen und bearbeiten Sie Textdokumente, Tabellenkalkulationen und Präsentationen.
 
-- Mit allen gängigen Dateiformaten arbeiten;
-
-- Formen, Diagramme, Tabellen, Gleichungen und andere Objekte bearbeiten;
+- Arbeiten Sie mit allen gängigen Formaten. Höchste Kompatibilität mit MS-Office-Dateien.
+ 
+- Erstellen und bearbeiten Sie "ausfüllbare Formulare":"https://www.onlyoffice.com/form-creator.aspx".
+ 
+- Geben Sie Dokumente online frei und arbeiten Sie gemeinsam daran.
 
 - Verschiedene Plugins für erweiterte Bearbeitungsfunktionen verwenden;
 
-- Über die "Chrome-Erweiterung":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=de" auf Ihre ONLYOFFICE Personal-Cloud zugreifen.
+- Über die "Chrome-Erweiterung":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" auf Ihre ONLYOFFICE Personal-Cloud zugreifen.
 
-Sie können Dokumente auch offline mit unseren kostenlosen "Desktop Editoren":"https://www.onlyoffice.com/de/download-desktop.aspx" bearbeiten oder eine "mobile App":"https://www.onlyoffice.com/de/mobile.aspx" für Ihr iOS- oder Android-Gerät herunterladen.
+Sie können Dokumente auch offline mit unseren kostenlosen "Desktop-Editoren":"https://www.onlyoffice.com/download-desktop.aspx" bearbeiten oder eine mobile Bearbeitungssuite für Ihr "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" oder "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" Gerät erhalten.
 
-Mit freundlichen Grüßen,
-ONLYOFFICE Team</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Möchten Sie Ihre E-Mail im Cloud-Konto ändern?
@@ -104,22 +103,23 @@ Sie haben gerade ein ONLYOFFICE-Konto für persönliche Verwendung registriert. 
 
 Wenn Sie den Link nicht anklicken können, kopieren Sie ihn "$InviteLink":"$InviteLink" einfach in die Adressleiste Ihres Browsers.
 
-Mit freundlichen Grüßen,
-ONLYOFFICE Team</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Sie haben Löschen Ihres Kontos bei personal.onlyoffice.com beantragt. Folgen Sie dem Link, um das Löschen des Kontos abzuschließen (der Link ist 7 Tage lang gültig):
 
-$OrangeButton
+Bestätigung der Kontokündigung
 
 *Bitte beachten*: Nach dem Löschen werden Ihr Konto und alle damit verbundenen Daten gemäß unserer "Datenschutzerklärung":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" dauerhaft gelöscht.
 
+
+"Mehr über die Kontokündigung erfahren":"${__HelpLink}/administration/configuration.aspx"
+
 Ignorieren Sie diese E-Mail, wenn Sie nicht fortfahren möchten.
+ 
+Bei Fragen wenden Sie sich bitte an "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Bei Fragen wenden Sie sich bitte an "support@onlyoffice.com":"mailto:support@onlyoffice.com"
-
-Mit freundlichen Grüßen,
-ONLYOFFICE Team</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Hallo $UserName,
@@ -170,23 +170,21 @@ Möchten Sie das Passwort nicht ändern? Ignorieren Sie diese Nachricht.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Hallo, $UserName!
- 
+
 Willkommen bei ONLYOFFICE DocSpace! Ihr Benutzerprofil wurde erfolgreich zu "${__VirtualRootPath}":"${__VirtualRootPath}" hinzugefügt. Jetzt können Sie:
- 
+
 * Mit anderen Benutzern in dem Raum arbeiten, zu dem Sie eingeladen sind: *Kollaborationsräume für die Zusammenarbeit in Echtzeit oder benutzerdefinierte Räume mit flexiblen Einstellungen für jeden Zweck*.
- 
+
 * * Mit Dateien unterschiedlicher Formate arbeiten: Textdokumente, Tabellenkalkulationen, Präsentationen, digitale Formulare, PDFs, E-Books, Multimedia.
- 
+
 * *Zusammenarbeit an Dokumenten* mit zwei Co-Editing-Modi: in Echtzeit oder im privaten Modus. Verfolgen Sie Änderungen, kommunizieren Sie in Echtzeit über den integrierten Chat oder führen Sie Audio- und Videoanrufe. 
- 
+
 * *Verbinden Sie einen beliebigen Cloud-Speicher* und arbeiten Sie, ohne zwischen Anwendungen zu wechseln.
- 
+
 $OrangeButton
- 
-Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter.onlyoffice.com/" oder fragen Sie unser "Support-Team":"https://www.onlyoffice.com/support-contact-form.aspx".
- 
-Mit freundlichen Grüßen
-ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+
+Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"${__HelpLink}" oder fragen Sie unser "Support-Team":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
 </root>

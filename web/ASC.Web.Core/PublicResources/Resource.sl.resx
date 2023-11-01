@@ -1006,4 +1006,7 @@
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v ONLYOFFICE s svojimi računi Zoom. {0}Pojdite na spletno mesto Zoom Developers in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Preveč poskusov prijave. Prosimo, poskusite kasneje</value>
+  </data>
 </root>

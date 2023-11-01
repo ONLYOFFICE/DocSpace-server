@@ -991,4 +991,22 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integrationen von Drittanbietern</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom Kundennummer</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom Client Geheimnis</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Aktivieren Sie die Anwendung, um sich mit einem Zoom-Konto am Portal anzumelden.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Aktivieren Sie diese Anwendung, damit sich Ihre Benutzer mit ihren Zoom-Konten bei ONLYOFFICE anmelden können. {0}Gehen Sie auf die Zoom Developers Website und erstellen Sie eine neue App ONLYOFFICE Integration. Geben Sie die Daten ein, die Sie unten erhalten haben:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Zu viele Anmeldeversuche. Bitte versuchen Sie es später noch einmal</value>
+  </data>
 </root>

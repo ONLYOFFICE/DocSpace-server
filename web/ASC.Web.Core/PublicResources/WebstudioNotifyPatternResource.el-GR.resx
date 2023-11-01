@@ -1795,4 +1795,16 @@ $OrangeButton
 Η ομάδα υποστήριξης του ONLYOFFICE™ 
 "www.onlyoffice.com":"http://onlyoffice.com/"</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Με εκτίμηση, Η Ομάδα υποστήριξης του ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ΠΑΡΑΚΟΛΟΥΘΗΣΤΕ ΟΛΟΚΛΗΡΗ ΤΗ ΛΙΣΤΑ ΑΝΑΠΑΡΑΓΩΓΗΣ</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Κατακτήστε το DocSpace του ONLYOFFICE με οδηγούς βίντεο</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Με εκτίμηση, Η Ομάδα του ONLYOFFICE</value>
+  </data>
 </root>

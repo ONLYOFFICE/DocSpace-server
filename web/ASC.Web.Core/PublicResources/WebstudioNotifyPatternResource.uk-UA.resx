@@ -1807,4 +1807,16 @@ $OrangeButton
 
 Посилання дійсне лише протягом 7 днів.</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>З найкращими побажаннями, команда підтримки ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ПОДИВИТИСЯ ПОВНИЙ ПЛЕЙЛИСТ</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Опануйте ONLYOFFICE DocSpace за допомогою відеопосібників</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Щиро ваша, команда ONLYOFFICE</value>
+  </data>
 </root>

@@ -1797,4 +1797,16 @@ $TrulyYours</value>
   <data name="subject_change_password" xml:space="preserve">
     <value>Aide au mot de passe ${LetterLogoText}</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Bien à vous, l'équipe de support ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>VOIR LA LISTE DE LECTURE COMPLÈTE</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Maîtrisez ONLYOFFICE DocSpace avec des guides vidéo</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Bien à vous, l'équipe ONLYOFFICE</value>
+  </data>
 </root>

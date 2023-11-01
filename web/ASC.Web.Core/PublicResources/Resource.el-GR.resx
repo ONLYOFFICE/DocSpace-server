@@ -991,4 +991,22 @@
   <data name="UsServerRegion" xml:space="preserve">
     <value>Περιφέρεια Δυτικής Αμερικής (Όρεγκον)</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Ζουμ</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Αναγνωριστικό πελάτη Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Μυστικό κλειδί πελάτη Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Ενεργοποιήστε την εφαρμογή για να συνδεθείτε στην πύλη χρησιμοποιώντας έναν λογαριασμό Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ενεργοποιήστε αυτήν την εφαρμογή για να επιτρέψετε στους χρήστες σας να συνδεθούν στο ONLYOFFICE χρησιμοποιώντας τους λογαριασμούς τους στο Zoom. {0}Μπείτε στον ιστότοπο Zoom Developers και δημιουργήστε μια νέα εφαρμογή ολοκλήρωσης ONLYOFFICE. Εισάγετε τα δεδομένα που λάβατε παρακάτω:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Πάρα πολλές προσπάθειες σύνδεσης. Προσπαθήστε ξανά αργότερα</value>
+  </data>
 </root>

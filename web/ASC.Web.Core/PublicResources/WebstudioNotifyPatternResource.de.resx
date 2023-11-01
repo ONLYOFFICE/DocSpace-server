@@ -1789,4 +1789,16 @@ Mit freundlichen Grüßen
 ONLYOFFICE
 "www.onlyoffice.com":"http://onlyoffice.com/"</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Mit freundlichen Grüßen ONLYOFFICE Support Team</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ALLE VIDEOS ANSEHEN</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Beherrschen Sie ONLYOFFICE DocSpace mit Videoanleitungen</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Mit freundlichen Grüßen ONLYOFFICE Team</value>
+  </data>
 </root>

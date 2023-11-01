@@ -1809,4 +1809,16 @@ $OrangeButton
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Поканени сте да се присъедините към ${__VirtualRootPath}</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Поздрави, Екипът за Поддръжка на ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ИЗГЛЕДАЙ ЦЕЛИЯ ПЛЕЙЛИСТ</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Овладей ONLYOFFICE DocSpace чрез видеоръководства</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Искрено Ваш, Екипът на ONLYOFFICE</value>
+  </data>
 </root>

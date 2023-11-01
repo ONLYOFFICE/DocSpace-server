@@ -1801,4 +1801,16 @@ $Body</value>
   <data name="subject_remove_user_data_failed" xml:space="preserve">
     <value>${LetterLogoText}. Odstranění uživatelských dat se nezdařilo</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>S pozdravem, Tým podpory ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>SLEDOVAT CELÝ SEZNAM SKLADEB</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Zvládněte ONLYOFFICE DocSpace s videoprůvodci</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>S pozdravem, tým ONLYOFFICE</value>
+  </data>
 </root>

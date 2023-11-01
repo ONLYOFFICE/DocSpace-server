@@ -128,15 +128,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Sodelujete pri dokumentih* z dvema načinoma sourejanja: v realnem času ali z zaklepanjem odstavkov. Sledite spremembam, komunicirate v realnem času z uporabo vgrajenega klepeta ali z zvočnimi in video klici. 
 
-* *Povežete katero koli shrambo v oblaku* in delate brez preklapljanja med aplikacijami. 
+* *Povežete katero koli shrambo v oblaku* in delate brez preklapljanja med aplikacijami.
 
 $OrangeButton
 
-Če potrebujete pomoč, pobrskajte v našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
+Če potrebujete pomoč, pobrskajte v našem "Centru za pomoč":"${__HelpLink}" ali vprašajte našo "ekipo za podporo":"${__SupportLink}".
 
-S spoštovanjem, 
-ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Ali želite spremeniti geslo v svojem računu za pisarno v oblaku? Kliknite spodnji gumb za potrditev.
@@ -170,8 +168,7 @@ h3.Za hiter začetek si oglejte, kaj lahko delate v ONLYOFFICE:
 
 Dokumente lahko urejate tudi brez povezave z našimi brezplačnimi "namiznimi urejevalniki":"https://www.onlyoffice.com/download-desktop.aspx" ali pridobite program za mobilno urejanje za vašo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ali "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" napravo.
 
-S spoštovanjem,
-ekipa ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Želite spremeniti email naslov v svojem računu za pisarno v oblaku?
@@ -186,16 +183,6 @@ Povezava je veljavna 7 dni.
 
 Ne želite spremeniti vašega emaila? Prezrite to sporočilo.</value>
   </data>
-  <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
-    <value>Pozdravljeni,
-
-pravkar ste registrirali račun v okolju ONLYOFFICE za osebno uporabo. Kliknite "tukaj":"$InviteLink", da potrdite registracijo in ustvarite geslo.
-
-Če ne morete odpreti povezave, kopirajte naslednjo povezavo "$InviteLink":"$InviteLink" in jo prilepite v naslovno vrstico brskalnika.
-
-S spoštovanjem,
-ekipa ONLYOFFICE</value>
-  </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Zahtevali ste ukinitev vašega računa na personal.onlyoffice.com. Sledite povezavi za dokončanje zahteve (povezava je aktivna 7 dni): 
 
@@ -203,25 +190,20 @@ Potrdite ukinitev računa
 
 *Opomba*: Po izbrisu bodo vaš račun in vsi z njim povezani podatki trajno izbrisani v skladu z našo "Politiko zasebnosti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Preberite več o ukinitvi računa":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Preberite več o ukinitvi računa":"${__HelpLink}/administration/configuration.aspx"
 
 Prezrite ta email, če ne želite nadaljevati. 
 
-Če imate kakršna koli vprašanja, nas kontaktirajte na "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Če imate kakršna koli vprašanja, nas kontaktirajte na "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-S spoštovanjem,
-ekipa ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Dragi $UserName,
 
 Postopek odstranjevanja podatkov uporabnika "$FromUserName":"$FromUserLink" je bil uspešno zaključen.
 
-Izbris osebnih podatkov je dovoljen za sprostitev:
-
-# Dokumentov - $DocsSpace
-# Emailov- $MailSpace
-# Pogovorov - $TalkSpace</value>
+Izbris osebnih podatkov je dovoljen za sprostitev $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Nov portal je bil registriran
@@ -253,5 +235,14 @@ Izbris osebnih podatkov je dovoljen za sprostitev:
   </data>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>Nov portal je registriran</value>
+  </data>
+  <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
+    <value>Pozdravljeni,
+
+pravkar ste registrirali račun v okolju ONLYOFFICE za osebno uporabo. Kliknite "tukaj":"$InviteLink", da potrdite registracijo in ustvarite geslo.
+
+Če ne morete odpreti povezave, kopirajte naslednjo povezavo "$InviteLink":"$InviteLink" in jo prilepite v naslovno vrstico brskalnika.
+
+$TrulyYours</value>
   </data>
 </root>

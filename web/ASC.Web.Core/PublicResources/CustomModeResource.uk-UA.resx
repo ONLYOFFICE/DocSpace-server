@@ -132,11 +132,9 @@
 
 $OrangeButton
 
-Якщо вам потрібна допомога, перейдіть до нашого "Довідкового центру":"https://helpcenter.onlyoffice.com/" або зверніться до "служби підтримки":"https://www.onlyoffice.com/support-contact-form.aspx".
+Якщо вам потрібна допомога, перейдіть до нашого "Довідкового центру":"${__HelpLink}" або зверніться до "служби підтримки":"${__SupportLink}".
 
-З повагою 
-команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Хочете змінити пароль свого облікового запису хмарного офісу? Натисніть кнопку нижче, щоб підтвердити.
@@ -168,10 +166,9 @@ h3.Спочатку про те, що можна робити в ONLYOFFICE:
 
 - Легко отримувати доступ до своєї персональної хмари через "розширення для Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
-Крім того, ви можете редагувати документи в автономному режимі за допомогою наших  "настільних редакторів":"https://www.onlyoffice.com/download-desktop.aspx" і отримати набір застосунків для редагування на мобільному пристрої "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" або "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+Крім того, ви можете редагувати документи в автономному режимі за допомогою наших "настільних редакторів":"https://www.onlyoffice.com/download-desktop.aspx" і отримати набір застосунків для редагування на мобільному пристрої "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" або "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-З повагою
-команда ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Хочете змінити адресу електронної пошти у своєму обліковому записі хмарного офісу?
@@ -203,25 +200,20 @@ $OrangeButton
 
 *Примітка*. Після видалення ваш обліковий запис і всі пов’язані з ним дані буде знищено назавжди відповідно до нашого "Положення про конфіденційність":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Ознайомитися з додатковою інформацією про закриття облікового запису":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Ознайомитися з додатковою інформацією про закриття облікового запису":"${__HelpLink}/administration/configuration.aspx"
 
 Якщо ви не хочете продовжувати, проігноруйте цей лист. 
 
-Якщо у вас виникли запитання, напишіть нам на адресу "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Якщо у вас виникли запитання, напишіть нам на адресу "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-З повагою
-команда ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес видалення даних користувача "$FromUserName":"$FromUserLink" успішно завершено.
 
-Видалення персональних даних дозволило вивільнити:
-
-# Документи: $DocsSpace
-# Пошта: $MailSpace
-# Розмови: $TalkSpace</value>
+Видалення персональних даних дозволило вивільнити $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Зареєстровано новий портал
