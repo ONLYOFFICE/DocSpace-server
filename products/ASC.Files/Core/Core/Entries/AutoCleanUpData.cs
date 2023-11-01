@@ -44,11 +44,11 @@ public class AutoCleanUpData
 {
     /// <summary>Specifies if the auto-clearing setting is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool IsAutoCleanUp { get; set; }
+    public bool IsAutoCleanUp { get; init; }
 
     /// <summary>The period when the trash bin will be cleared</summary>
     /// <type>ASC.Files.Core.DateToAutoCleanUp, ASC.Files.Core</type>
-    public DateToAutoCleanUp Gap { get; set; }
+    public DateToAutoCleanUp Gap { get; init; }
 }
 
 [Scope]

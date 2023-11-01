@@ -26,10 +26,10 @@
 
 namespace ASC.Feed.Aggregator.Service;
 
-[Singletone]
+[Singleton]
 public class FeedAggregatorService : FeedBaseService
 {
-    protected override string LoggerName { get; set; } = "ASC.Feed.Aggregator";
+    protected override string LoggerName { get; } = "ASC.Feed.Aggregator";
 
     public FeedAggregatorService(
         FeedSettings feedSettings,
@@ -130,7 +130,6 @@ public class FeedAggregatorService : FeedBaseService
                     // clearing the cache to get the correct acl
                     cache.Remove("acl" + tenant);
                     cache.Remove("/webitemsecurity/" + tenant);
-                    //cache.Remove(string.Format("sub/{0}/{1}/{2}", tenant, "6045b68c-2c2e-42db-9e53-c272e814c4ad", NotifyConstants.Event_NewCommentForMessage.ID));
 
                     try
                     {
@@ -155,14 +154,12 @@ public class FeedAggregatorService : FeedBaseService
                             }, tuple.Item2))
                             .ToList();
 
-                        foreach (var u in users)
+                        foreach (var uId in users.Select(r=> r.Id))
                         {
-                            if (!await TryAuthenticateAsync(securityContext, authManager, tenant1, u.Id))
+                            if (await TryAuthenticateAsync(securityContext, authManager, tenant1, uId))
                             {
-                                continue;
+                                await module.VisibleForAsync(feedsRow, uId);
                             }
-
-                            await module.VisibleForAsync(feedsRow, u.Id);
                         }
 
                         result.AddRange(feedsRow.Select(r => r.Item1));

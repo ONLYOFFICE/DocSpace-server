@@ -118,7 +118,7 @@ public class ExternalShare
     
     public async Task<string> CreatePasswordKeyAsync(string password)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(password);
+        ArgumentException.ThrowIfNullOrEmpty(password);
 
         return Signature.Create(password, await GetDbKeyAsync());
     }
@@ -154,7 +154,7 @@ public class ExternalShare
 
     public async Task<Guid> GetLinkIdAsync()
     {
-        if (_linkId != default)
+        if (_linkId != Guid.Empty)
         {
             return _linkId;
         }
@@ -163,14 +163,14 @@ public class ExternalShare
         
         if (string.IsNullOrEmpty(key))
         {
-            return default;
+            return Guid.Empty;
         }
         
         var linkId = await ParseShareKeyAsync(key);
         
-        if (linkId == default)
+        if (linkId == Guid.Empty)
         {
-            return default;
+            return Guid.Empty;
         }
         
         _linkId = linkId;
@@ -185,7 +185,7 @@ public class ExternalShare
 
     public async Task<Guid> GetSessionIdAsync()
     {
-        if (_sessionId != default)
+        if (_sessionId != Guid.Empty)
         {
             return _sessionId;
         }
@@ -194,14 +194,14 @@ public class ExternalShare
         
         if (string.IsNullOrEmpty(sessionKey))
         {
-            return default;
+            return Guid.Empty;
         }
         
         var id = Signature.Read<Guid>(sessionKey, await GetDbKeyAsync());
         
-        if (id == default)
+        if (id == Guid.Empty)
         {
-            return default;
+            return Guid.Empty;
         }
 
         _sessionId = id;
@@ -222,12 +222,12 @@ public class ExternalShare
     {
         ArgumentNullException.ThrowIfNull(data);
         
-        if (_linkId == default)
+        if (_linkId == Guid.Empty)
         {
             _linkId = data.LinkId;
         }
 
-        if (_sessionId == default)
+        if (_sessionId == Guid.Empty)
         {
             _sessionId = data.SessionId;
         }
@@ -337,8 +337,8 @@ public class ExternalShareData
 
 public class DownloadSession
 {
-    public Guid Id { get; set; }
-    public Guid LinkId { get; set; }
+    public Guid Id { get; init; }
+    public Guid LinkId { get; init; }
 }
 
 /// <summary>

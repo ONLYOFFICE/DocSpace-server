@@ -40,7 +40,7 @@ public class IPRestrictionsRepository
 
     public async Task<List<IPRestriction>> GetAsync(int tenant)
     {
-        await using var tenantDbContext = _dbContextManager.CreateDbContext();
+        await using var tenantDbContext = await _dbContextManager.CreateDbContextAsync();
         return await tenantDbContext.TenantIpRestrictions
             .Where(r => r.TenantId == tenant)
             .ProjectTo<IPRestriction>(_mapper.ConfigurationProvider)
@@ -49,13 +49,13 @@ public class IPRestrictionsRepository
 
     public async Task<List<IpRestrictionBase>> SaveAsync(IEnumerable<IpRestrictionBase> ips, int tenant)
     {
-        await using var tenantDbContext = _dbContextManager.CreateDbContext();
+        await using var tenantDbContext = await _dbContextManager.CreateDbContextAsync();
         var strategy = tenantDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var filesDbContext = _dbContextManager.CreateDbContext();
-            using var tr = await tenantDbContext.Database.BeginTransactionAsync();
+            await using var filesDbContext = await _dbContextManager.CreateDbContextAsync();
+            await using var tr = await tenantDbContext.Database.BeginTransactionAsync();
 
             await Queries.DeleteTenantIpRestrictionsAsync(tenantDbContext, tenant);
 

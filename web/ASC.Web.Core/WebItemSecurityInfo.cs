@@ -28,11 +28,11 @@ namespace ASC.Web.Core;
 
 public class WebItemSecurityInfo
 {
-    public string WebItemId { get; set; }
+    public string WebItemId { get; init; }
 
-    public IEnumerable<UserInfo> Users { get; set; }
+    public IEnumerable<UserInfo> Users { get; init; }
 
-    public IEnumerable<GroupInfo> Groups { get; set; }
+    public IEnumerable<GroupInfo> Groups { get; init; }
 
-    public bool Enabled { get; set; }
+    public bool Enabled { get; init; }
 }

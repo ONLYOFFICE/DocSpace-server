@@ -34,7 +34,7 @@ public class TagValue : ITagValue
 
     public TagValue(string tag, object value)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(tag);
+        ArgumentException.ThrowIfNullOrEmpty(tag);
 
         Tag = tag;
         Value = value;

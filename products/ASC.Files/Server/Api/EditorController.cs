@@ -86,8 +86,8 @@ public class EditorControllerThirdparty : EditorController<string>
     public async Task<Configuration<string>> OpenEditThirdPartyAsync(string fileId)
     {
         fileId = "app-" + fileId;
-        var app = _thirdPartySelector.GetAppByFileId(fileId?.ToString());
-        (var file, var editable) = await app.GetFileAsync(fileId?.ToString());
+        var app = _thirdPartySelector.GetAppByFileId(fileId);
+        var (file, editable) = await app.GetFileAsync(fileId);
         var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
         var configuration = docParams.Configuration;
         configuration.Document.Url = app.GetFileStreamUrl(file);
@@ -121,17 +121,17 @@ public class EditorControllerThirdparty : EditorController<string>
 
 public abstract class EditorController<T> : ApiControllerBase
 {
-    protected readonly FileStorageService _fileStorageService;
+    private readonly FileStorageService _fileStorageService;
     protected readonly DocumentServiceHelper _documentServiceHelper;
     protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper;
     protected readonly SettingsManager _settingsManager;
     protected readonly EntryManager _entryManager;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMapper _mapper;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
 
-    public EditorController(
+    protected EditorController(
         FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,

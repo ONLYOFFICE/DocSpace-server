@@ -171,7 +171,7 @@ public class SsoHandlerService
                     throw new SSOException("Current user is terminated", MessageKey.SsoSettingsUserTerminated);
                 }
 
-                if (context.User != null && context.User.Identity != null && context.User.Identity.IsAuthenticated)
+                if (context.User is { Identity.IsAuthenticated: true })
                 {
                     var authenticatedUserInfo = await _userManager.GetUsersAsync(((IUserAccount)context.User.Identity).ID);
 

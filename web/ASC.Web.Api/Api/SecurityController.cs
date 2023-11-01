@@ -90,7 +90,7 @@ public class SecurityController : ControllerBase
     [HttpGet("audit/login/last")]
     public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         DemandBaseAuditPermission();
 
@@ -111,7 +111,7 @@ public class SecurityController : ControllerBase
     [HttpGet("audit/events/last")]
     public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         DemandBaseAuditPermission();
 
@@ -139,7 +139,7 @@ public class SecurityController : ControllerBase
     ApiDateTime from,
     ApiDateTime to)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var startIndex = (int)_apiContext.StartIndex;
         var limit = (int)_apiContext.Count;
@@ -190,7 +190,7 @@ public class SecurityController : ControllerBase
             ApiDateTime from,
             ApiDateTime to)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var startIndex = (int)_apiContext.StartIndex;
         var limit = (int)_apiContext.Count;
@@ -285,7 +285,7 @@ public class SecurityController : ControllerBase
     [HttpPost("audit/login/report")]
     public async Task<object> CreateLoginHistoryReport()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandAuditPermissionAsync();
 
@@ -317,7 +317,7 @@ public class SecurityController : ControllerBase
     [HttpPost("audit/events/report")]
     public async Task<object> CreateAuditTrailReport()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandAuditPermissionAsync();
 
@@ -352,7 +352,7 @@ public class SecurityController : ControllerBase
     [HttpGet("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> GetAuditSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         DemandBaseAuditPermission();
 
@@ -373,16 +373,16 @@ public class SecurityController : ControllerBase
     [HttpPost("audit/settings/lifetime")]
     public async Task<TenantAuditSettings> SetAuditSettings(TenantAuditSettingsWrapper inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandAuditPermissionAsync();
 
-        if (inDto.Settings.LoginHistoryLifeTime <= 0 || inDto.Settings.LoginHistoryLifeTime > TenantAuditSettings.MaxLifeTime)
+        if (inDto.Settings.LoginHistoryLifeTime is <= 0 or > TenantAuditSettings.MaxLifeTime)
         {
             throw new ArgumentException("LoginHistoryLifeTime");
         }
 
-        if (inDto.Settings.AuditTrailLifeTime <= 0 || inDto.Settings.AuditTrailLifeTime > TenantAuditSettings.MaxLifeTime)
+        if (inDto.Settings.AuditTrailLifeTime is <= 0 or > TenantAuditSettings.MaxLifeTime)
         {
             throw new ArgumentException("AuditTrailLifeTime");
         }
@@ -396,7 +396,7 @@ public class SecurityController : ControllerBase
     [HttpPost("csp")]
     public async Task<CspDto> Csp(CspRequestsDto request)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         ArgumentNullException.ThrowIfNull(request);
 
@@ -408,7 +408,7 @@ public class SecurityController : ControllerBase
     [HttpGet("csp")]
     public async Task<CspDto> Csp()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = _cspSettingsHelper.Load();
         return new CspDto
         {

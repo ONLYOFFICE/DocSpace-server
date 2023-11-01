@@ -149,7 +149,7 @@ public class FoldersControllerHelper : FilesHelperBase
 
         if (!withoutTrash && !IsUser)
         {
-            yield return (int)await _globalFolderHelper.FolderTrashAsync;
+            yield return await _globalFolderHelper.FolderTrashAsync;
         }
 
         if (!_coreBaseSettings.DisableDocSpace)

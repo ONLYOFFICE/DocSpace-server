@@ -30,8 +30,6 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class FileShareDto
 {
-    public FileShareDto() { }
-
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }

@@ -102,10 +102,8 @@ public class Login
 
             return;
         }
-        else
-        {
-            _params = JsonSerializer.Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(context.Request.Query["p"])));
-        }
+
+        _params = JsonSerializer.Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(context.Request.Query["p"])));
 
         if (!string.IsNullOrEmpty(Auth))
         {

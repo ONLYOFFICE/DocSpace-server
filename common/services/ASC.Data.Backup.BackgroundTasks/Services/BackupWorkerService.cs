@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.BackgroundTasks;
 
-[Singletone]
+[Singleton]
 internal sealed class BackupWorkerService : IHostedService
 {
     private readonly BackupWorker _backupWorker;

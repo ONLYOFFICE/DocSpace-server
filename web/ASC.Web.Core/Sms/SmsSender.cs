@@ -48,8 +48,8 @@ public class SmsSender
 
     public async Task<bool> SendSMSAsync(string number, string message)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(number);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(message);
+        ArgumentException.ThrowIfNullOrEmpty(number);
+        ArgumentException.ThrowIfNullOrEmpty(message);
 
         if (!_smsProviderManager.Enabled())
         {

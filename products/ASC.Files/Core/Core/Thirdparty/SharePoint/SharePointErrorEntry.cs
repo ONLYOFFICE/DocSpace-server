@@ -36,8 +36,8 @@ public class SharePointFileErrorEntry : File
     {
     }
 
-    public string Error { get; set; }
-    public object ID { get; set; }
+    public string Error { get; init; }
+    public object ID { get; init; }
 }
 
 public class SharePointFolderErrorEntry : Folder
@@ -47,6 +47,6 @@ public class SharePointFolderErrorEntry : Folder
     {
     }
 
-    public string Error { get; set; }
-    public object ID { get; set; }
+    public string Error { get; init; }
+    public object ID { get; init; }
 }

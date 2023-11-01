@@ -59,12 +59,9 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered)
+            if (!@event.Redelivered && _backupWorker.IsInstanceTooBusy())
             {
-                if (_backupWorker.IsInstanceTooBusy())
-                {
-                    throw new IntegrationEventRejectExeption(@event.Id);
-                }
+                throw new IntegrationEventRejectExeption(@event.Id);
             }
 
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);

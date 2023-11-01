@@ -65,12 +65,10 @@ public class SocketServiceClient
             var httpClient = _clientFactory.CreateClient();
 
             //async
-            using (var response = await httpClient.SendAsync(request))
-            await using (var stream = await response.Content.ReadAsStreamAsync())
-            using (var streamReader = new StreamReader(stream))
-            {
-                return await streamReader.ReadToEndAsync();
-            }
+            using var response = await httpClient.SendAsync(request);
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            using var streamReader = new StreamReader(stream);
+            return await streamReader.ReadToEndAsync();
         }
         catch (Exception e)
         {

@@ -38,7 +38,7 @@ public class CspStartupTask : IStartupTask
         _distributedCache = distributedCache;
     }
 
-    public async Task ExecuteAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         await using var scope = _provider.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;

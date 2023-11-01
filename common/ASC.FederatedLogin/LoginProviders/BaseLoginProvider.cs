@@ -28,7 +28,7 @@ namespace ASC.FederatedLogin.LoginProviders;
 
 /// <summary>
 /// </summary>
-public enum LoginProviderEnum
+public enum LoginProvider
 {
     Facebook,
     Google,
@@ -90,7 +90,7 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
         InstanceCrypto = instanceCrypto;
     }
 
-    public virtual LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public virtual LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {

@@ -158,6 +158,5 @@ public class LicenseConverter : System.Text.Json.Serialization.JsonConverter<obj
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
     {
-        return;
     }
 }

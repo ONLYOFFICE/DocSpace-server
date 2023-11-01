@@ -143,7 +143,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -222,7 +222,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -347,7 +347,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 var response = (HttpWebResponse)webException.Response;
                 if (response != null)
                 {
-                    if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
+                    if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                     {
                         throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
                     }
@@ -380,20 +380,18 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         var id = MakeId(file);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
-            await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
-            {
-                await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteTagsAsync(filesDbContext);
-                await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
-                await tx.CommitAsync();
-            }
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteTagsAsync(filesDbContext);
+            await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await tx.CommitAsync();
         });
 
         if (file is not ErrorEntry)
@@ -636,7 +634,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
-            uploadSession.BytesTotal += uploadSession.BytesUploaded;
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
         }
         else
@@ -722,9 +720,9 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                join ftl in ctx.TagLink.DefaultIfEmpty() on new { TenantId = ft.TenantId, Id = ft.Id } equals new
+                join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
                 {
-                    TenantId = ftl.TenantId,
+                    ftl.TenantId,
                     Id = ftl.TagId
                 }
                 where ftl == null
