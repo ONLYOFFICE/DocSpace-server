@@ -126,6 +126,20 @@ spring:
           multiplier: 3.0
 
 resilience4j:
+  retry:
+    instances:
+      getClientRetryRateLimiter:
+        maxRetryAttempts: 2
+        waitDuration: 1s
+      batchClientRetryRateLimiter:
+        maxRetryAttempts: 2
+        waitDuration: 1s
+      regenerateClientSecretRetryRateLimiter:
+        maxRetryAttempts: 2
+        waitDuration: 1s
+      updateClientRetryRateLimiter:
+        maxRetryAttempts: 4
+        waitDuration: 1s
   ratelimiter:
     configs:
       default:

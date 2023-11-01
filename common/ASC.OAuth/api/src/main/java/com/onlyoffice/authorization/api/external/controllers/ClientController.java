@@ -4,8 +4,6 @@
 package com.onlyoffice.authorization.api.external.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.core.entities.Client;
-import com.onlyoffice.authorization.api.core.entities.Consent;
 import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.UpdateClientDTO;
@@ -17,11 +15,9 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetri
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
-import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
-import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
-import com.onlyoffice.authorization.api.ports.repositories.ConsentRepository;
 import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -38,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,6 +71,7 @@ public class ClientController {
     }
 
     @GetMapping
+    @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<PaginationDTO<ClientDTO>> getClients(
             HttpServletResponse response,
@@ -134,6 +130,7 @@ public class ClientController {
     }
 
     @GetMapping("/{clientId}/info")
+    @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
         var client = retrieveUsecases.getClient(clientId);
@@ -141,6 +138,7 @@ public class ClientController {
     }
 
     @GetMapping("/consents")
+    @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
         var user = UserContextContainer.context.get();
@@ -150,6 +148,7 @@ public class ClientController {
     }
 
     @GetMapping("/{clientId}")
+    @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientDTO> getClient(
             HttpServletResponse response,
@@ -187,6 +186,7 @@ public class ClientController {
     }
 
     @PostMapping
+    @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity<ClientDTO> postClient(
             HttpServletResponse response,
@@ -233,6 +233,7 @@ public class ClientController {
     }
 
     @PutMapping("/{clientId}")
+    @Retry(name = "updateClientRetryRateLimiter")
     @RateLimiter(name = "updateClientRateLimiter")
     public ResponseEntity<ClientDTO> updateClient(
             HttpServletResponse response,
@@ -276,6 +277,7 @@ public class ClientController {
     }
 
     @PatchMapping("/{clientId}/regenerate")
+    @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     public ResponseEntity<SecretDTO> regenerateSecret(
             HttpServletResponse response,
@@ -313,6 +315,7 @@ public class ClientController {
     }
 
     @DeleteMapping("/{clientId}")
+    @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity deleteClient(
             HttpServletResponse response,
@@ -326,6 +329,7 @@ public class ClientController {
     }
 
     @PatchMapping("/{clientId}/activation")
+    @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     public ResponseEntity activateClient(
             HttpServletResponse response,
