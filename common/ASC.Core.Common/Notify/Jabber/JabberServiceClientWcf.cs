@@ -28,8 +28,6 @@ namespace ASC.Core.Notify.Jabber;
 
 public class JabberServiceClientWcf : BaseWcfClient<IJabberService>, IJabberService
 {
-    public JabberServiceClientWcf() { }
-
     public string GetVersion()
     {
         return Channel.GetVersion();

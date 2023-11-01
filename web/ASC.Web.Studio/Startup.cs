@@ -88,7 +88,7 @@ public class Startup : BaseStartup
 
         var lifeTime = TimeSpan.FromMinutes(5);
 
-        Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, request) =>
+        Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, _) =>
         {
             var settings = s.GetRequiredService<Settings>();
 
@@ -105,11 +105,11 @@ public class Startup : BaseStartup
         services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
         .SetHandlerLifetime(lifeTime)
         .AddPolicyHandler(policyHandler)
-        .ConfigurePrimaryHttpMessageHandler((s) =>
+        .ConfigurePrimaryHttpMessageHandler((_) =>
         {
             return new HttpClientHandler()
             {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };
         });
     }

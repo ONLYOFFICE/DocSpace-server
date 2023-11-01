@@ -205,7 +205,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα του ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Γεια σας, $UserName!
@@ -226,7 +226,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα του ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Γεια σας, $UserName!
@@ -247,7 +247,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα του ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Γεια σας, $UserName!
@@ -268,7 +268,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα του ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Θέλετε να αλλάξετε τον κωδικό πρόσβασης στον λογαριασμό σας στο ONLYOFFICE; Κάντε κλικ στο παρακάτω κουμπί για επιβεβαίωση.
@@ -292,7 +292,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -307,7 +307,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -329,7 +329,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -344,7 +344,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -357,7 +357,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -376,7 +376,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com": "http://onlyoffice.com/"</value>
+"www.onlyoffice.com": "https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -395,7 +395,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -414,7 +414,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -433,7 +433,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -454,7 +454,7 @@ _Σημείωση: Το άτομο που πληρώνει τη συνδρομή
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -475,7 +475,7 @@ _Σημείωση: Το άτομο που πληρώνει τη συνδρομή
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -496,7 +496,7 @@ _Σημείωση: Το άτομο που πληρώνει τη συνδρομή
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -517,7 +517,7 @@ _Σημείωση: Το άτομο που πληρώνει τη συνδρομή
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Γεια σας!
@@ -528,7 +528,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Γεια σας!
@@ -539,7 +539,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Γεια σας!
@@ -550,7 +550,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Γεια σας!
@@ -561,7 +561,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -582,7 +582,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -603,7 +603,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -624,7 +624,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -645,7 +645,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Μήνυμα από την πύλη "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -667,7 +667,7 @@ $Body</value>
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -680,7 +680,7 @@ $Body</value>
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Γεια σας!
@@ -711,7 +711,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -738,7 +738,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Δεν έχετε εισέλθει στο DocSpace του ONLYOFFICE "${__VirtualRootPath}":"${__VirtualRootPath}" για περισσότερο από μισό χρόνο.
@@ -753,7 +753,7 @@ $OrangeButton
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Γεια σας!
@@ -766,7 +766,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
@@ -831,7 +831,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_change_password_v115" xml:space="preserve">
     <value>Επιβεβαιώστε την αλλαγή συνθηματικού</value>
@@ -1127,11 +1127,11 @@ $OrangeButton
 Για να μάθετε περισσότερα σχετικά με τη διαδικασία δημιουργίας αντιγράφων ασφαλείας, ανατρέξτε στον οδηγό χρήσης "Δημιουργία αντιγράφων ασφαλείας δεδομένων":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block".
 
 
-Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο "support.onlyoffice.com":"http://support.onlyoffice.com"
+Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) δημιουργήθηκε αντίγραφο ασφαλείας της πύλης
@@ -1142,11 +1142,11 @@ $OrangeButton
 
 Για να μάθετε περισσότερα σχετικά με τη διαδικασία δημιουργίας αντιγράφων ασφαλείας, ανατρέξτε στον οδηγό χρήσης [Δημιουργία αντιγράφων ασφαλείας δεδομένων](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [support.onlyoffice.com](http://support.onlyoffice.com)
+Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Θέλετε να αλλάξετε το email στον λογαριασμό σας ${LetterLogoText};
@@ -1301,7 +1301,7 @@ $OrangeButton
 Εάν έχετε οποιεσδήποτε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας στο "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Για να αλλάξετε τον τύπο ειδοποίησης, διαχειριστείτε τις "ρυθμίσεις συνδρομής":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1315,7 +1315,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Για να αλλάξετε τον τύπο ειδοποίησης, διαχειριστείτε τις "ρυθμίσεις συνδρομής":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1439,7 +1439,7 @@ p=. "Επανενεργοποίηση πύλης":"$ActivateUrl" (αυτός ο 
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Απενεργοποίηση πύλης [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1459,7 +1459,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Διαγραφή του χώρου "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1484,7 +1484,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Διαγραφή της πύλης [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1509,7 +1509,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Αλλαγή διεύθυνσης πύλης
@@ -1675,7 +1675,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Για να αλλάξετε τον τύπο ειδοποίησης, διαχειριστείτε τις "ρυθμίσεις συνδρομής":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1690,7 +1690,7 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα του ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1.Ειδοποίηση αλλαγής προφίλ πύλης "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1793,6 +1793,6 @@ $OrangeButton
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™ 
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
 </root>

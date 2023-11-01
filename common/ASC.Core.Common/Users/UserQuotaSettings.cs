@@ -28,7 +28,7 @@ namespace ASC.Core.Users;
 
 public class UserQuotaSettings : ISettings<UserQuotaSettings>
 {
-    public long UserQuota { get; set; }
+    public long UserQuota { get; init; }
 
     public UserQuotaSettings GetDefault()
     {

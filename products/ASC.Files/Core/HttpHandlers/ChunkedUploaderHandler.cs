@@ -44,10 +44,6 @@ public class ChunkedUploaderHandlerService
     private readonly TenantManager _tenantManager;
     private readonly FileUploader _fileUploader;
     private readonly FilesMessageService _filesMessageService;
-    private readonly AuthManager _authManager;
-    private readonly SecurityContext _securityContext;
-    private readonly SetupInfo _setupInfo;
-    private readonly InstanceCrypto _instanceCrypto;
     private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
     private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
     private readonly SocketManager _socketManager;
@@ -60,10 +56,6 @@ public class ChunkedUploaderHandlerService
         TenantManager tenantManager,
         FileUploader fileUploader,
         FilesMessageService filesMessageService,
-        AuthManager authManager,
-        SecurityContext securityContext,
-        SetupInfo setupInfo,
-        InstanceCrypto instanceCrypto,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         ChunkedUploadSessionHelper chunkedUploadSessionHelper,
         SocketManager socketManager,
@@ -73,10 +65,6 @@ public class ChunkedUploaderHandlerService
         _tenantManager = tenantManager;
         _fileUploader = fileUploader;
         _filesMessageService = filesMessageService;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _setupInfo = setupInfo;
-        _instanceCrypto = instanceCrypto;
         _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
         _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
         _socketManager = socketManager;
@@ -97,7 +85,7 @@ public class ChunkedUploaderHandlerService
         }
     }
 
-    public async Task Invoke<T>(HttpContext context)
+    private async Task Invoke<T>(HttpContext context)
     {
         try
         {
@@ -119,12 +107,12 @@ public class ChunkedUploaderHandlerService
 
             if ((await _tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
             {
-                await WriteError(context, "Can't perform upload for deleted or transfering portals");
+                await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
                 return;
             }
 
-            switch (request.Type(_instanceCrypto))
+            switch (request.Type())
             {
                 case ChunkedRequestType.Abort:
                     await _fileUploader.AbortUploadAsync<T>(request.UploadId);
@@ -144,7 +132,7 @@ public class ChunkedUploaderHandlerService
                     if (resumedSession.BytesUploaded == resumedSession.BytesTotal)
                     {
                         await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                        _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
+                        await _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
                         await _socketManager.CreateFileAsync(resumedSession.File);
                     }
@@ -177,9 +165,9 @@ public class ChunkedUploaderHandlerService
         if (!_authContext.IsAuthenticated)
         {
             return false;
-            }
+        }
 
-        if (request.Type(_instanceCrypto) == ChunkedRequestType.Initiate)
+        if (request.Type() == ChunkedRequestType.Initiate)
         {
             return true;
         }
@@ -250,7 +238,7 @@ public class ChunkedRequestHelper<T>
     private int? _tenantId;
     private long? _fileContentLength;
 
-    public ChunkedRequestType Type(InstanceCrypto instanceCrypto)
+    public ChunkedRequestType Type()
     {
         if (_request.Query["initiate"] == "true" && IsFileDataSet())
         {

@@ -229,7 +229,7 @@ public class FilesMessageService
             info.RoomOldTitle = oldTitle;
         }
 
-        if ((action == MessageAction.RoomCreateUser || action == MessageAction.RoomRemoveUser)
+        if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
             && userid != Guid.Empty)
         {
             info.UserIds = new List<Guid> { userid };

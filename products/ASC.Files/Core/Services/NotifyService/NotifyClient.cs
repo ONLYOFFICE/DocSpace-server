@@ -244,7 +244,7 @@ public class NotifyClient
                 continue;
             }
 
-            var u = _userManager.GetUsers(recipientId);
+            var u = await _userManager.GetUsersAsync(recipientId);
 
             if (!await _studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.RoomsActivity))
             {

@@ -71,6 +71,6 @@ public class CountRoomCheckerStatistic : ITenantQuotaFeatureStat<CountRoomFeatur
             return 0;
         }
         
-        return await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, default, string.Empty);
+        return await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
     }
 }

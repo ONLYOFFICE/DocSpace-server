@@ -35,8 +35,8 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly SHA256 _sha;
     private Stream _fileStream;
     protected const int TasksLimit = 10;
-    private readonly List<Task> _tasks = new List<Task>(TasksLimit);
-    private readonly List<Stream> _streams = new List<Stream>(TasksLimit);
+    private readonly List<Task> _tasks = new(TasksLimit);
+    private readonly List<Stream> _streams = new(TasksLimit);
     private readonly TempStream _tempStream;
 
     public string Hash { get; private set; }
@@ -69,15 +69,12 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        Stream fileStream = null;
-        await ActionInvoker.TryAsync(async () =>
-        {
-            fileStream = await store.GetReadStreamAsync(domain, path);
-        }, 5, error => throw error);
+        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);
-            fileStream.Dispose();
+            await fileStream.DisposeAsync();
         }
     }
 
@@ -182,7 +179,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     public async ValueTask DisposeAsync()
     {
         _tarOutputStream.Close();
-        _tarOutputStream.Dispose();
+        await _tarOutputStream.DisposeAsync();
 
         SplitAndUpload(_fileStream, true);
 

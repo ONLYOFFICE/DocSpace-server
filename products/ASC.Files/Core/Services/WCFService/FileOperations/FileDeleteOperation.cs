@@ -61,28 +61,26 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _immediately;
     private readonly bool _isEmptyTrash;
     private readonly IDictionary<string, StringValues> _headers;
-    private readonly ThumbnailSettings _thumbnailSettings;
 
     public FileDeleteOperation(
-        IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData, ThumbnailSettings thumbnailSettings)
+        IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
         _ignoreException = fileOperationData.IgnoreException;
         _immediately = fileOperationData.Immediately;
         _headers = fileOperationData.Headers;
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
-        _thumbnailSettings = thumbnailSettings;
         this[OpType] = (int)FileOperationType.Delete;
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
-        var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
-        var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
+        var filesMessageService = serviceScope.ServiceProvider.GetService<FilesMessageService>();
+        var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
         tenantManager.SetCurrentTenant(CurrentTenant);
 
-        var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
+        var externalShare = serviceScope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.SetCurrentShareData(CurrentShareData);
 
         _trashId = await folderDao.GetFolderIDTrashAsync(true);
@@ -102,16 +100,16 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         if (_isEmptyTrash)
         {
-            await DeleteFilesAsync(Files, scope);
-            await DeleteFoldersAsync(Folders, scope);
+            await DeleteFilesAsync(Files, serviceScope);
+            await DeleteFoldersAsync(Folders, serviceScope);
 
             var trash = await folderDao.GetFolderAsync(_trashId);
             _ = filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
         }
         else
         {
-            await DeleteFilesAsync(Files, scope, true);
-            await DeleteFoldersAsync(Folders, scope, true);
+            await DeleteFilesAsync(Files, serviceScope, true);
+            await DeleteFoldersAsync(Folders, serviceScope, true);
         }
     }
 
@@ -160,7 +158,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 {
                     if (ProviderDao != null)
                     {
-                        if (folder.RootFolderType == FolderType.VirtualRooms || folder.RootFolderType == FolderType.Archive)
+                        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
                         {
                             var providerInfo = await ProviderDao.GetProviderInfoAsync(folder.ProviderId);
 
@@ -367,9 +365,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var entryManager = scope.ServiceProvider.GetService<EntryManager>();
         var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
 
-        string error = null;
         foreach (var file in files)
         {
+            string error;
             if (checkPermissions && !await FilesSecurity.CanDeleteAsync(file))
             {
                 error = FilesCommonResource.ErrorMassage_SecurityException_DeleteFile;
@@ -390,7 +388,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
         }
 
-        return (false, error);
+        return (false, null);
     }
 }
 

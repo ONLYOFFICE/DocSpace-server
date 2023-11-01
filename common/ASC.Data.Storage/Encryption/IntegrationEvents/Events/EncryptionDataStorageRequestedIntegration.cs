@@ -29,7 +29,7 @@ namespace ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 [ProtoContract]
 public record EncryptionDataStorageRequestedIntegrationEvent : IntegrationEvent
 {
-    protected EncryptionDataStorageRequestedIntegrationEvent() : base()
+    protected EncryptionDataStorageRequestedIntegrationEvent()
     {
 
     }

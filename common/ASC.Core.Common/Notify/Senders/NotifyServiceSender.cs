@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class NotifyServiceSender : INotifySender
 {
     private readonly NotifyServiceClient _notifyServiceClient;

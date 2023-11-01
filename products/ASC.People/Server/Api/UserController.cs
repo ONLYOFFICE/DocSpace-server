@@ -29,8 +29,6 @@ namespace ASC.People.Api;
 public class UserController : PeopleControllerBase
 {
     private static readonly SemaphoreSlim _semaphore = new(1);
-    private Tenant Tenant => _apiContext.Tenant;
-
     private readonly ICache _cache;
     private readonly TenantManager _tenantManager;
     private readonly CookiesManager _cookiesManager;
@@ -193,10 +191,16 @@ public class UserController : PeopleControllerBase
         user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
-        user.Sex = "male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
-                       ? true
-                       : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : null);
 
+        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex = true;
+        }
+        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex =  false;
+        }
+        
         user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -292,10 +296,16 @@ public class UserController : PeopleControllerBase
         user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
-        user.Sex = "male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
-                       ? true
-                       : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : null);
 
+        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex = true;
+        }
+        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex =  false;
+        }
+        
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -493,12 +503,13 @@ public class UserController : PeopleControllerBase
             throw new SecurityException();
         }
         
-        await CheckReassignProccessAsync(new[] { user.Id });
+        await CheckReassignProcessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
-        _queueWorkerRemove.Start(Tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
 
         await _messageService.SendAsync(MessageAction.UserDeleted, _messageTarget.Create(user.Id), userName);
 
@@ -532,8 +543,9 @@ public class UserController : PeopleControllerBase
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
-
-        if (user.IsLDAP() || user.IsOwner(Tenant))
+        
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsLDAP() || user.IsOwner(tenant))
         {
             throw new SecurityException();
         }
@@ -595,7 +607,7 @@ public class UserController : PeopleControllerBase
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.IndexOf(query, StringComparison.OrdinalIgnoreCase) > -1 || (x.LastName != null && x.LastName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) ||
-                                (x.UserName != null && x.UserName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.Email != null && x.Email.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.ContactsList != null && x.ContactsList.Any(y => y.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1)));
+                                (x.UserName != null && x.UserName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.Email != null && x.Email.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.ContactsList != null && x.ContactsList.Exists(y => y.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1)));
 
         await foreach (var item in list)
         {
@@ -635,7 +647,8 @@ public class UserController : PeopleControllerBase
     [HttpGet("email")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
     {
-        if (_coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).IsOwner(Tenant))
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (_coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).IsOwner(tenant))
         {
             throw new MethodAccessException("Method not available");
         }
@@ -892,11 +905,11 @@ public class UserController : PeopleControllerBase
                 CultureInfo.CurrentUICulture = cultureInfo;
             }
 
-            inDto.Email.ThrowIfNull(new ArgumentException(Resource.ErrorEmailEmpty, "email"));
+            inDto.Email.ThrowIfNull(new ArgumentException(Resource.ErrorEmailEmpty, inDto.Email));
 
             if (!inDto.Email.TestEmailRegex())
             {
-                throw new ArgumentException(Resource.ErrorNotCorrectEmail, "email");
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail, inDto.Email);
             }
 
             if (!SetupInfo.IsSecretEmail(inDto.Email)
@@ -979,13 +992,14 @@ public class UserController : PeopleControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
-        await CheckReassignProccessAsync(inDto.UserIds);
+        await CheckReassignProcessAsync(inDto.UserIds);
 
         var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
 
         var userNames = users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)).ToList();
-
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         foreach (var user in users)
         {
             if (user.Status != EmployeeStatus.Terminated)
@@ -995,7 +1009,7 @@ public class UserController : PeopleControllerBase
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            _queueWorkerRemove.Start(Tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
+            _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
         }
 
         await _messageService.SendAsync(MessageAction.UsersDeleted, _messageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -1022,18 +1036,21 @@ public class UserController : PeopleControllerBase
     [HttpPut("invite")]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
     {
-        IEnumerable<UserInfo> users = null;
+        List<UserInfo> users;
 
         if (inDto.ResendAll)
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, EmployeeType.User), Constants.Action_AddRemoveUser);
-            users = (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
+            users = (await _userManager.GetUsersAsync())
+                .Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending)
+                .ToList();
         }
         else
         {
             users = await inDto.UserIds.ToAsyncEnumerable()
                 .Where(userId => !_userManager.IsSystemUser(userId))
-                .SelectAwait(async userId => await _userManager.GetUsersAsync(userId)).ToListAsync();
+                .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+                .ToListAsync();
         }
 
         foreach (var user in users)
@@ -1174,7 +1191,7 @@ public class UserController : PeopleControllerBase
 
         if (userid == Guid.Empty)
         {
-            throw new ArgumentNullException("userid");
+            throw new ArgumentNullException(inDto.UserId);
         }
 
         var email = (inDto.Email ?? "").Trim();
@@ -1203,7 +1220,8 @@ public class UserController : PeopleControllerBase
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        if (user.IsOwner(Tenant) && viewer.Id != user.Id)
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
@@ -1306,7 +1324,7 @@ public class UserController : PeopleControllerBase
             await _userManager.UpdateUserInfoAsync(u);
 
             if (activationstatus == EmployeeActivationStatus.Activated
-                && u.IsOwner(_tenantManager.GetCurrentTenant()))
+                && u.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
             {
                 var settings = _settingsManager.Load<FirstEmailConfirmSettings>();
 
@@ -1315,7 +1333,7 @@ public class UserController : PeopleControllerBase
                     await _studioNotifyService.SendAdminWelcomeAsync(u);
 
                     settings.IsFirst = false;
-                    _settingsManager.Save(settings);
+                    await _settingsManager.SaveAsync(settings);
                 }
             }
 
@@ -1349,25 +1367,22 @@ public class UserController : PeopleControllerBase
 
         var curLng = user.CultureName;
 
-        if (_setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
+        if (_setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
         {
-            if (curLng != inDto.CultureName)
+            user.CultureName = inDto.CultureName;
+
+            try
             {
-                user.CultureName = inDto.CultureName;
-
-                try
-                {
-                    await _userManager.UpdateUserInfoAsync(user);
-                }
-                catch
-                {
-                    user.CultureName = curLng;
-                    throw;
-                }
-
-                await _messageService.SendAsync(MessageAction.UserUpdatedLanguage, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
-
+                await _userManager.UpdateUserInfoAsync(user);
             }
+            catch
+            {
+                user.CultureName = curLng;
+                throw;
+            }
+
+            await _messageService.SendAsync(MessageAction.UserUpdatedLanguage, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+
         }
 
         return await _employeeFullDtoHelper.GetFullAsync(user);
@@ -1427,7 +1442,7 @@ public class UserController : PeopleControllerBase
         user.Notes = inDto.Comment ?? user.Notes;
         user.Sex = ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
             ? true
-            : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? (bool?)false : null)) ?? user.Sex;
+            : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : (bool?)null)) ?? user.Sex;
 
         user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
 
@@ -1457,8 +1472,9 @@ public class UserController : PeopleControllerBase
             user.TerminatedDate = inDto.Disable.Value ? DateTime.UtcNow : null;
         }
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
         // change user type
-        var canBeGuestFlag = !user.IsOwner(Tenant) && !await _userManager.IsDocSpaceAdminAsync(user) && (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && !user.IsMe(_authContext);
+        var canBeGuestFlag = !user.IsOwner(tenant) && !await _userManager.IsDocSpaceAdminAsync(user) && (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && !user.IsMe(_authContext);
 
         if (inDto.IsUser.HasValue)
         {
@@ -1470,14 +1486,14 @@ public class UserController : PeopleControllerBase
                 {
                     await _countUserChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    _webItemSecurityCache.ClearCache(tenant.Id);
                 }
 
                 if (!self && !isUser && await _userManager.IsUserAsync(user))
                 {
                     await _countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    _webItemSecurityCache.ClearCache(tenant.Id);
                 }
             }
             finally
@@ -1516,12 +1532,13 @@ public class UserController : PeopleControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
         var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
 
         foreach (var user in users)
         {
-            if (user.IsOwner(Tenant) || user.IsMe(_authContext))
+            if (user.IsOwner(tenant) || user.IsMe(_authContext))
             {
                 continue;
             }
@@ -1596,14 +1613,9 @@ public class UserController : PeopleControllerBase
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .ToListAsync();
 
-        var updatedUsers = new List<UserInfo>(users.Count());
-
         foreach (var user in users)
         {
-            if (await _userManagerWrapper.UpdateUserTypeAsync(user, type))
-            {
-                updatedUsers.Add(user);
-            }
+            await _userManagerWrapper.UpdateUserTypeAsync(user, type);
         }
 
         await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.Create(users.Select(x => x.Id)),
@@ -1628,7 +1640,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         _usersQuotaSyncOperation.RecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
     }
 
@@ -1645,7 +1657,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return _usersQuotaSyncOperation.CheckRecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
     }
 
@@ -1668,26 +1680,26 @@ public class UserController : PeopleControllerBase
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId));
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         await foreach (var user in users)
         {
             if (inDto.Quota != -1)
             {
                 var usedSpace = Math.Max(0,
-                    (await _quotaService.FindUserQuotaRowsAsync(
-                            await _tenantManager.GetCurrentTenantIdAsync(),
-                            user.Id
-                        ))
-                .Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+                    (await _quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id))
+                    .Where(r => !string.IsNullOrEmpty(r.Tag))
+                    .Sum(r => r.Counter));
 
-                var tenanSpaceQuota = (await _quotaService.GetTenantQuotaAsync(Tenant.Id)).MaxTotalSize;
+                var tenantSpaceQuota = (await _quotaService.GetTenantQuotaAsync(tenant.Id)).MaxTotalSize;
 
-                if (tenanSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
+                if (tenantSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
                 {
                     continue;
                 }
             }
 
-            var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
             await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
@@ -1710,20 +1722,20 @@ public class UserController : PeopleControllerBase
 
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
         var managerGroups = new List<Guid>();
-        foreach (var groupInfo in groups)
+        foreach (var groupInfoId in groups.Select(r=> r.ID))
         {
-            await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfo.ID);
-            var managerId = await _userManager.GetDepartmentManagerAsync(groupInfo.ID);
+            await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfoId);
+            var managerId = await _userManager.GetDepartmentManagerAsync(groupInfoId);
             if (managerId == user.Id)
             {
-                managerGroups.Add(groupInfo.ID);
-                await _userManager.SetDepartmentManagerAsync(groupInfo.ID, Guid.Empty);
+                managerGroups.Add(groupInfoId);
+                await _userManager.SetDepartmentManagerAsync(groupInfoId, Guid.Empty);
             }
         }
         foreach (var guid in department)
         {
             var userDepartment = await _userManager.GetGroupInfoAsync(guid);
-            if (userDepartment != Constants.LostGroupInfo)
+            if (!Equals(userDepartment, Constants.LostGroupInfo))
             {
                 await _userManager.AddUserIntoGroupAsync(user.Id, guid);
                 if (managerGroups.Contains(guid))
@@ -1734,11 +1746,13 @@ public class UserController : PeopleControllerBase
         }
     }
 
-    private async Task CheckReassignProccessAsync(IEnumerable<Guid> userIds)
+    private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         foreach (var userId in userIds)
         {
-            var reassignStatus = _queueWorkerReassign.GetProgressItemStatus(Tenant.Id, userId);
+            var reassignStatus = _queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
             if (reassignStatus == null || reassignStatus.IsCompleted)
             {
                 continue;

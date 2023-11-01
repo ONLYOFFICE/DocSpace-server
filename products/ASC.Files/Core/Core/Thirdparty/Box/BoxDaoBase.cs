@@ -39,7 +39,7 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
         FileUtility fileUtility,
         TempPath tempPath, 
         AuthContext authContext,
-        RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
+        RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
     {
     }
 

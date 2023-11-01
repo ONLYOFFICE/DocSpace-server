@@ -82,7 +82,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
     public OAuth20Token Auth(HttpContext context)
     {
-        return Auth(context, GoogleScopeContacts, out var _, (context.Request.Query["access_type"].ToString() ?? "") == "offline"
+        return Auth(context, GoogleScopeContacts, out _, (context.Request.Query["access_type"].ToString()) == "offline"
             ? new Dictionary<string, string>
             {
                     { "access_type", "offline" },
@@ -154,19 +154,19 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
 
     private class GoogleEmailAddress
     {
-        public GoogleMetadata Metadata { get; set; } = new GoogleMetadata();
+        public GoogleMetadata Metadata { get; set; } = new();
         public string Value { get; set; }
     }
 
     private class GoogleGender
     {
-        public GoogleMetadata Metadata { get; set; } = new GoogleMetadata();
+        public GoogleMetadata Metadata { get; set; } = new();
         public string Value { get; set; }
     }
 
     private class GoogleName
     {
-        public GoogleMetadata Metadata { get; set; } = new GoogleMetadata();
+        public GoogleMetadata Metadata { get; set; } = new();
         public string DisplayName { get; set; }
         public string FamilyName { get; set; }
         public string GivenName { get; set; }

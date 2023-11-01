@@ -287,7 +287,7 @@ public class SsoController : BaseSettingsController
     {
         if (!allowAnonymous)
         {
-            await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+            await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         }
 
         if (!_coreBaseSettings.Standalone

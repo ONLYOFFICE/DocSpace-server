@@ -39,7 +39,7 @@ public class IntegrationEventLogEntry
         {
             WriteIndented = true
         });
-        State = EventStateEnum.NotPublished;
+        State = EventState.NotPublished;
         TimesSent = 0;
         TransactionId = transactionId.ToString();
     }
@@ -52,7 +52,7 @@ public class IntegrationEventLogEntry
 
     [NotMapped]
     public IntegrationEvent IntegrationEvent { get; private set; }
-    public EventStateEnum State { get; set; }
+    public EventState State { get; set; }
     public int TimesSent { get; set; }
     public DateTime CreateOn { get; private set; }
     public Guid CreateBy { get; private set; }

@@ -28,7 +28,7 @@ namespace ASC.Web.Core.Utility.Settings;
 
 public class TenantAccessSettings : ISettings<TenantAccessSettings>
 {
-    public bool Anyone { get; set; }
+    public bool Anyone { get; init; }
 
     public bool RegisterUsersImmediately { get; set; }
 

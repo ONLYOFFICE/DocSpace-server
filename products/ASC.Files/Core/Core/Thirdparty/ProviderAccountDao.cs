@@ -185,7 +185,7 @@ internal class ProviderAccountDao : IProviderDao
             Url = authData.Url ?? ""
         };
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdpartyAccount);
         await filesDbContext.SaveChangesAsync();
 
@@ -199,7 +199,7 @@ internal class ProviderAccountDao : IProviderDao
 
     public async Task<bool> UpdateProviderInfoAsync(int linkId, FolderType rootFolderType)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
 
@@ -218,7 +218,7 @@ internal class ProviderAccountDao : IProviderDao
 
     public async Task<bool> UpdateProviderInfoAsync(int linkId, bool hasLogo)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
 
         if (forUpdate == null)
@@ -236,7 +236,7 @@ internal class ProviderAccountDao : IProviderDao
 
     public async Task<bool> UpdateProviderInfoAsync(int linkId, string title, string folderId, FolderType roomType, bool @private)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
 
         if (forUpdate == null)
@@ -258,7 +258,7 @@ internal class ProviderAccountDao : IProviderDao
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, AuthData authData)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = TenantID;
         var login = authData.Login ?? "";
         var password = EncryptPassword(authData.Password);
@@ -272,7 +272,7 @@ internal class ProviderAccountDao : IProviderDao
 
     public virtual async Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData newAuthData, FolderType folderType, Guid? userId = null)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var authData = new AuthData();
         if (newAuthData != null && !newAuthData.IsEmpty())
@@ -348,7 +348,7 @@ internal class ProviderAccountDao : IProviderDao
 
     public virtual async Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData newAuthData)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         DbFilesThirdpartyAccount thirdparty;
         try
@@ -403,12 +403,12 @@ internal class ProviderAccountDao : IProviderDao
 
     public virtual async Task RemoveProviderInfoAsync(int linkId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await filesDbContext.Database.BeginTransactionAsync();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await filesDbContext.Database.BeginTransactionAsync();
 
             var folderId = (await GetProviderInfoAsync(linkId)).RootFolderId;
             var entryIDs = await Queries.HashIdsAsync(filesDbContext, TenantID, folderId).ToListAsync();

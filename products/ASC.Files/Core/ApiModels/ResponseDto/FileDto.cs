@@ -113,8 +113,6 @@ public class FileDto<T> : FileEntryDto<T>
 
     protected internal override FileEntryType EntryType { get => FileEntryType.File; }
 
-    public FileDto() { }
-
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -135,7 +133,7 @@ public class FileDto<T> : FileEntryDto<T>
             FolderId = 12334,
             Version = 3,
             VersionGroup = 1,
-            ViewUrl = "http://www.onlyoffice.com/viewfile?fileid=2221"
+            ViewUrl = "https://www.onlyoffice.com/viewfile?fileid=2221"
         };
     }
 }
@@ -162,8 +160,10 @@ public class FileDtoHelper : FileEntryDtoHelper
         FilesLinkUtility filesLinkUtility,
         FileUtility fileUtility,
         FileSharingHelper fileSharingHelper,
-        BadgesSettingsHelper badgesSettingsHelper)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity)
+        BadgesSettingsHelper badgesSettingsHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;
@@ -184,11 +184,10 @@ public class FileDtoHelper : FileEntryDtoHelper
         {
             result.RootFolderType = FolderType.SHARE;
             var folderDao = _daoFactory.GetFolderDao<T>();
-            FileEntry<T> parentFolder;
 
             if (folders != null)
             {
-                var folderWithRight = folders.FirstOrDefault(f => f.Item1.Id.Equals(file.ParentId));
+                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(file.ParentId));
                 if (folderWithRight == null || !folderWithRight.Item2)
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
@@ -196,7 +195,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
             else
             {
-                parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(file.ParentId);
                 if (!await _fileSecurity.CanReadAsync(parentFolder))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();

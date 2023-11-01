@@ -28,7 +28,7 @@ namespace ASC.Web.Studio.Core;
 
 public class StudioAdminMessageSettings : ISettings<StudioAdminMessageSettings>
 {
-    public bool Enable { get; set; }
+    public bool Enable { get; init; }
 
     [JsonIgnore]
     public Guid ID

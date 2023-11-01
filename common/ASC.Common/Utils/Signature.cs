@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Utils;
 
-[Singletone]
+[Singleton]
 public class Signature
 {
     private readonly MachinePseudoKeys _machinePseudoKeys;
