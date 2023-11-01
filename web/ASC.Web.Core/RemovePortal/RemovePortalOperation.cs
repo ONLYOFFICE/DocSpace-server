@@ -82,7 +82,6 @@ public class RemovePortalOperation : DistributedTaskProgress
                 }
                 await storage.DeleteDirectoryAsync("");
             }
-            await _userManager.GetUsersAsync(tenant.OwnerId);
 
             _logger.DebugRemoveTenantFromDb();
             await _tenantService.PermanentlyRemoveTenantAsync(TenantId);
