@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone]
+[Singleton]
 public class PathUtils
 {
     public IHostEnvironment HostEnvironment { get; }
@@ -100,7 +100,7 @@ public class PathUtils
 
     public string ResolvePhysicalPath(string physPath, IDictionary<string, string> storageConfig)
     {
-        physPath = Normalize(physPath, false).TrimStart('~');
+        physPath = Normalize(physPath).TrimStart('~');
 
         if (physPath.Contains(Constants.StorageRootParam))
         {

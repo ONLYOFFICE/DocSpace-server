@@ -32,12 +32,10 @@ public class FakeCrypt : ICrypt
 
     public void EncryptFile(string filePath)
     {
-        return;
     }
 
     public void DecryptFile(string filePath)
     {
-        return;
     }
 
     public Stream GetReadStream(string filePath)

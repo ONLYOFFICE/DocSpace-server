@@ -70,15 +70,15 @@ public class GeolocationHelper
             var location = await GetIPGeolocationAsync(IPAddress.Parse(ip));
             if (string.IsNullOrEmpty(location.Key) || (location.Key == "ZZ"))
             {
-                return new string[] { string.Empty, string.Empty };
+                return new[] { string.Empty, string.Empty };
             }
             var regionInfo = new RegionInfo(location.Key).EnglishName;
-            return new string[] { regionInfo, location.City };
+            return new[] { regionInfo, location.City };
         }
         catch (Exception ex)
         {
             _logger.ErrorWithException(ex);
-            return new string[] { string.Empty, string.Empty };
+            return new[] { string.Empty, string.Empty };
         }
     }
 
@@ -91,7 +91,7 @@ public class GeolocationHelper
 
             if (fromCache != null) return fromCache;
 
-            await using var dbContext = _dbContextFactory.CreateDbContext();
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
             var addrType = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "ipv4" : "ipv6";
 

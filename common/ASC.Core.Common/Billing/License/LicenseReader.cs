@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Billing;
 
-[Singletone]
+[Singleton]
 public class LicenseReaderConfig
 {
     public readonly string LicensePath;
@@ -117,7 +117,7 @@ public class LicenseReader
             await using (var licenseStream = GetLicenseStream(temp))
             using (var reader = new StreamReader(licenseStream))
             {
-                var licenseJsonString = reader.ReadToEnd();
+                var licenseJsonString = await reader.ReadToEndAsync();
                 var license = License.Parse(licenseJsonString);
 
                 await LicenseToDBAsync(license);
@@ -217,7 +217,7 @@ public class LicenseReader
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new Quota(quota.TenantId, 1) },
+            Quotas = new List<Quota> { new(quota.TenantId, 1) },
             DueDate = license.DueDate,
         };
 

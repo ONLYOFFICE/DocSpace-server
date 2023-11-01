@@ -63,10 +63,10 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         return Files.Count + Folders.Count;
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
-        var scopeClass = scope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
-        var filesMessageService = scope.ServiceProvider.GetRequiredService<FilesMessageService>();
+        var scopeClass = serviceScope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
+        var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         var (fileMarker, globalFolder, daoFactory, settingsManager) = scopeClass;
         var entries = Enumerable.Empty<FileEntry<T>>();
         if (Folders.Count > 0)
@@ -102,7 +102,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         var rootIds = new List<int>
             {
                 await globalFolder.GetFolderMyAsync(fileMarker, daoFactory),
-                await globalFolder.GetFolderCommonAsync(fileMarker, daoFactory),
+                await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
                 await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),

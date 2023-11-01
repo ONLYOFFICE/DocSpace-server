@@ -150,6 +150,6 @@ public static class WebhooksConfigExtension
 
 public class WebhooksConfigWithStatus
 {
-    public WebhooksConfig WebhooksConfig { get; set; }
+    public WebhooksConfig WebhooksConfig { get; init; }
     public int? Status { get; set; }
 }

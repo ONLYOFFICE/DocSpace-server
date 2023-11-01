@@ -39,52 +39,49 @@ public class WarmupServicesStartupTask : IStartupTask
         _provider = provider;
     }
 
-    public async Task ExecuteAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {      
         var processedFailed = 0;
         var processedSuccessed = 0;
         var startTime = DateTime.UtcNow;
 
-        using (var scope = _provider.CreateScope())
-        {
-            var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-            var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
+        using var scope = _provider.CreateScope();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var logger = scope.ServiceProvider.GetService<ILogger<WarmupServicesStartupTask>>();
 
-            logger.TraceWarmupStarted();
+        logger.TraceWarmupStarted();
 
-            await tenantManager.SetCurrentTenantAsync("localhost");
+        await tenantManager.SetCurrentTenantAsync("localhost");
             
-            foreach (var service in GetServices(_services))
+        foreach (var service in GetServices(_services))
+        {
+            try
             {
-                try
-                {
-                    scope.ServiceProvider.GetService(service);
+                scope.ServiceProvider.GetService(service);
 
-                    processedSuccessed++;
-                }
-                catch (Exception ex)
-                {
-                    processedFailed++;
-
-                    logger.DebugWarmupFailed(processedFailed, service.FullName, ex.Message);
-                }
+                processedSuccessed++;
             }
+            catch (Exception ex)
+            {
+                processedFailed++;
 
-            var processed = processedSuccessed + processedFailed;
-
-            logger.TraceWarmupFinished(processed,
-                                       processedSuccessed,
-                                       processedFailed,
-                                       (DateTime.UtcNow - startTime).TotalMilliseconds);
+                logger.DebugWarmupFailed(processedFailed, service.FullName, ex.Message);
+            }
         }
 
+        var processed = processedSuccessed + processedFailed;
+
+        logger.TraceWarmupFinished(processed,
+            processedSuccessed,
+            processedFailed,
+            (DateTime.UtcNow - startTime).TotalMilliseconds);
     }
 
     static IEnumerable<Type> GetServices(IServiceCollection services)
     {
         return services
             .Where(descriptor => descriptor.ImplementationType != typeof(WarmupServicesStartupTask))
-            .Where(descriptor => descriptor.ServiceType.ContainsGenericParameters == false)
+            .Where(descriptor => !descriptor.ServiceType.ContainsGenericParameters)
             .Select(descriptor => descriptor.ServiceType)
             .Distinct();
     }

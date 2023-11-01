@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.Core.Sender;
 
-[Singletone]
+[Singleton]
 public class DbMessageSender : IMessageSender
 {
     private readonly ILogger _logger;

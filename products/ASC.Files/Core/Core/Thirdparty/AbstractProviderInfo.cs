@@ -39,7 +39,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
     private readonly DisposableWrapper _wrapper;
     internal readonly ProviderInfoHelper ProviderInfoHelper;
 
-    public AbstractProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
+    protected AbstractProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     {
         _wrapper = wrapper;
         ProviderInfoHelper = providerInfoHelper;
@@ -129,7 +129,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
     }
 }
 
-[Singletone]
+[Singleton]
 public class ProviderInfoHelper
 {
     private readonly ICache _cache;
@@ -230,9 +230,8 @@ public class ProviderInfoHelper
 
         if (items == null)
         {
-            if (folder != null && folder.HasValue && storage is IGoogleDriveItemStorage<TItem>)
+            if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
             {
-                var googleStorage = storage as IGoogleDriveItemStorage<TItem>;
                 items = await googleStorage.GetItemsAsync(folderId, folder);
             }
             else
@@ -259,8 +258,7 @@ public class DisposableWrapper : IDisposable
     private readonly ConsumerFactory _consumerFactory;
     private readonly OAuth20TokenHelper _oAuth20TokenHelper;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages =
-        new ConcurrentDictionary<int, IThirdPartyStorage>();
+    private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages = new();
 
     public DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
     {

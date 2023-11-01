@@ -28,5 +28,5 @@ namespace ASC.ActiveDirectory.Novell.Exceptions;
 
 public class NovellLdapTlsCertificateRequestedException : Exception
 {
-    public LdapCertificateConfirmRequest CertificateConfirmRequest { get; set; }
+    public LdapCertificateConfirmRequest CertificateConfirmRequest { get; init; }
 }

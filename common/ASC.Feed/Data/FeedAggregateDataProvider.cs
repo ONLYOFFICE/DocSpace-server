@@ -56,7 +56,7 @@ public class FeedAggregateDataProvider
 
     public async Task<DateTime> GetLastTimeAggregateAsync(string key)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         var value = await Queries.LastTimeAsync(feedDbContext, key);
 
         return value != default ? value.AddSeconds(1) : value;
@@ -70,7 +70,7 @@ public class FeedAggregateDataProvider
             LastDate = value
         };
 
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         await feedDbContext.AddOrUpdateAsync(q => q.FeedLast, feedLast);
         await feedDbContext.SaveChangesAsync();
 
@@ -97,7 +97,7 @@ public class FeedAggregateDataProvider
 
     private async Task SaveFeedsPortionAsync(IEnumerable<FeedRow> feeds, DateTime aggregatedDate)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (var f in feeds)
         {
@@ -137,7 +137,7 @@ public class FeedAggregateDataProvider
 
     public async Task RemoveFeedAggregateAsync(DateTime fromTime)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteFeedAggregatesByFromTimeAsync(feedDbContext, fromTime);
     }
@@ -145,7 +145,7 @@ public class FeedAggregateDataProvider
     public async Task<List<FeedResultItem>> GetFeedsAsync(FeedApiFilter filter)
     {
         var filterOffset = filter.Offset;
-        var filterLimit = filter.Max > 0 && filter.Max < 1000 ? filter.Max : 1000;
+        var filterLimit = filter.Max is > 0 and < 1000 ? filter.Max : 1000;
 
         var feeds = new Dictionary<string, List<FeedResultItem>>();
 
@@ -177,7 +177,7 @@ public class FeedAggregateDataProvider
 
     private async Task<List<FeedResultItem>> GetFeedsInternalAsync(FeedApiFilter filter)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var q = feedDbContext.FeedAggregates
             .Where(r => r.TenantId == tenant.Id);
@@ -191,8 +191,8 @@ public class FeedAggregateDataProvider
     {
         Expression<Func<FeedAggregate, bool>> exp = null;
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(filter.Id);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(filter.Module);
+        ArgumentException.ThrowIfNullOrEmpty(filter.Id);
+        ArgumentException.ThrowIfNullOrEmpty(filter.Module);
 
         switch (filter.Module)
         {
@@ -261,7 +261,7 @@ public class FeedAggregateDataProvider
             q1 = q1.Where(r => r.aggregates.ModifiedBy == filter.Author);
         }
 
-        if (filter.SearchKeys != null && filter.SearchKeys.Length > 0)
+        if (filter.SearchKeys is { Length: > 0 })
         {
             var keys = filter.SearchKeys
                 .Where(s => !string.IsNullOrEmpty(s))
@@ -276,7 +276,7 @@ public class FeedAggregateDataProvider
 
     public async Task<int> GetNewFeedsCountAsync(DateTime lastReadedTime)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
         return await Queries.CountFeedAggregatesAsync(feedDbContext, tenant.Id, _authContext.CurrentAccount.ID, lastReadedTime);
@@ -284,13 +284,13 @@ public class FeedAggregateDataProvider
 
     public async Task<IEnumerable<int>> GetTenantsAsync(TimeInterval interval)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.KeysAsync(feedDbContext, interval.From, interval.To).ToListAsync();
     }
 
     public async Task<FeedResultItem> GetFeedItemAsync(string id)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         var news = await Queries.FeedAggregateAsync(feedDbContext, id);
 
         return _mapper.Map<FeedAggregate, FeedResultItem>(news);
@@ -298,7 +298,7 @@ public class FeedAggregateDataProvider
 
     public async Task RemoveFeedItemAsync(string id)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
         await Queries.DeleteFeedAggregatesAsync(feedDbContext, id);
     }
 }

@@ -57,7 +57,7 @@ public class IPSecurity
         _userManager = userManager;
         _currentIpForTest = configuration["ipsecurity:test"];
         _myNetworks = configuration["ipsecurity:mynetworks"];
-        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(new[] { ',', ';', ' ' });
+        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
         IpSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
     }
 
@@ -94,7 +94,7 @@ public class IPSecurity
 
             if (string.IsNullOrWhiteSpace(requestIps))
             {
-                requestIps = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+                requestIps = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString();
             }
 
             var ips = string.IsNullOrWhiteSpace(requestIps)
@@ -103,7 +103,7 @@ public class IPSecurity
 
             var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
 
-            if (ips.Any(requestIp => restrictions.Any(restriction => (restriction.ForAdmin ? isDocSpaceAdmin : true) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
+            if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
             {
                 return true;
             }
@@ -119,7 +119,7 @@ public class IPSecurity
             return false;
         }
 
-        _logger.InformationRestricted(requestIps ?? "", tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
+        _logger.InformationRestricted(requestIps, tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
 
         return false;
     }
@@ -166,12 +166,11 @@ public class IPSecurity
                 }
             }
 
-            var hostName = Dns.GetHostName();
             var hostAddresses = Dns.GetHostAddresses(Dns.GetHostName());
 
             var localIPs = new List<IPAddress> { IPAddress.IPv6Loopback, IPAddress.Loopback };
 
-            localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
+            localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6));
 
             foreach (var ipAddress in localIPs)
             {

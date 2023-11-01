@@ -282,7 +282,7 @@ public class PortalController : ControllerBase
 
                 var tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new Quota(trialQuotaId, 1) },
+                    Quotas = new List<Quota> { new(trialQuotaId, 1) },
                     DueDate = dueDate
                 };
                 await _hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -333,7 +333,7 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
-        (var succ, var tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             _log.LogError("Model without tenant");
@@ -369,7 +369,7 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
-        (var succ, var tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             _log.LogError("Model without tenant");
@@ -564,7 +564,7 @@ public class PortalController : ControllerBase
             return (false, error);
         }
 
-        return (true, error);
+        return (true, null);
     }
 
     private bool CheckValidName(string name, out object error)

@@ -65,15 +65,12 @@ public class ChunkZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        Stream fileStream = null;
-        await ActionInvoker.TryAsync(async () =>
-        {
-            fileStream = await store.GetReadStreamAsync(domain, path);
-        }, 5, error => throw error);
+        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);
-            fileStream.Dispose();
+            await fileStream.DisposeAsync();
         }
     }
 
@@ -109,32 +106,30 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         var buffer = new byte[chunkUploadSize];
         int bytesRead;
         _fileStream.Position = 0;
-        while ((bytesRead = _fileStream.Read(buffer, 0, (int)chunkUploadSize)) > 0)
+        while ((bytesRead = await _fileStream.ReadAsync(buffer, 0, (int)chunkUploadSize)) > 0)
         {
-            using (var theMemStream = new MemoryStream())
+            using var theMemStream = new MemoryStream();
+            await theMemStream.WriteAsync(buffer, 0, bytesRead);
+            theMemStream.Position = 0;
+            if (bytesRead == chunkUploadSize || last)
             {
-                await theMemStream.WriteAsync(buffer, 0, bytesRead);
-                theMemStream.Position = 0;
-                if (bytesRead == chunkUploadSize || last)
+                if (_fileStream.Position == _fileStream.Length && last)
                 {
-                    if (_fileStream.Position == _fileStream.Length && last)
-                    {
-                        _chunkedUploadSession.LastChunk = true;
-                    }
+                    _chunkedUploadSession.LastChunk = true;
+                }
                     
-                    theMemStream.Position = 0;
-                    StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
-                    _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
-                }
-                else
-                {
-                    await _fileStream.DisposeAsync();
-                    _fileStream = _tempStream.Create();
-                    _gZipOutputStream.baseOutputStream_ = _fileStream;
+                theMemStream.Position = 0;
+                StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
+                _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
+            }
+            else
+            {
+                await _fileStream.DisposeAsync();
+                _fileStream = _tempStream.Create();
+                _gZipOutputStream.baseOutputStream_ = _fileStream;
 
-                    await theMemStream.CopyToAsync(_fileStream);
-                    _fileStream.Flush();
-                }
+                await theMemStream.CopyToAsync(_fileStream);
+                await _fileStream.FlushAsync();
             }
         }
         if (last)
@@ -146,11 +141,11 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     public async ValueTask DisposeAsync()
     {
         _tarOutputStream.Close();
-        _tarOutputStream.Dispose();
+        await _tarOutputStream.DisposeAsync();
 
         _chunkedUploadSession.BytesTotal = _chunkedUploadSession.BytesUploaded;
         await UploadAsync(true);
-        _fileStream.Dispose();
+        await _fileStream.DisposeAsync();
 
         Hash = BitConverter.ToString(_sha.Hash).Replace("-", string.Empty);
         _sha.Dispose();

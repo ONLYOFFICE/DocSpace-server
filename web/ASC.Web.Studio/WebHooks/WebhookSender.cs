@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks;
 
-[Singletone]
+[Singleton]
 public class WebhookSender
 {
     private readonly IHttpClientFactory _clientFactory;
@@ -63,7 +63,6 @@ public class WebhookSender
         string responsePayload = null;
         string responseHeaders = null;
         string requestHeaders = null;
-        var delivery = DateTime.MinValue;
 
         try
         {
@@ -83,7 +82,7 @@ public class WebhookSender
 
             status = (int)response.StatusCode;
             responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
-            responsePayload = await response.Content.ReadAsStringAsync();
+            responsePayload = await response.Content.ReadAsStringAsync(cancellationToken);
 
             _log.DebugResponse(response);
         }
@@ -109,7 +108,7 @@ public class WebhookSender
             _log.ErrorWithException(e);
         }
 
-        delivery = DateTime.UtcNow;
+        var delivery = DateTime.UtcNow;
 
         await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestHeaders, responsePayload, responseHeaders);
     }

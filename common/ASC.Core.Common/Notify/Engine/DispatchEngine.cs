@@ -26,7 +26,7 @@
 
 namespace ASC.Notify.Engine;
 
-[Singletone]
+[Singleton]
 public class DispatchEngine
 {
     private readonly ILogger _logger;

@@ -26,7 +26,7 @@
 
 namespace ASC.IPSecurity;
 
-[Singletone]
+[Singleton]
 public class IPRestrictionsServiceCache
 {
     public ICache Cache { get; set; }
@@ -81,7 +81,7 @@ public class IPRestrictionsService
     public async Task<IEnumerable<IpRestrictionBase>> SaveAsync(IEnumerable<IpRestrictionBase> ips, int tenant)
     {
         var restrictions = await _ipRestrictionsRepository.SaveAsync(ips, tenant);
-        _notify.Publish(new IPRestrictionItem { TenantId = tenant }, CacheNotifyAction.InsertOrUpdate);
+        await _notify.PublishAsync(new IPRestrictionItem { TenantId = tenant }, CacheNotifyAction.InsertOrUpdate);
 
         return restrictions;
     }

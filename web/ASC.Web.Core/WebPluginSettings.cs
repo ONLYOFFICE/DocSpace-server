@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core;
 
-[Singletone]
+[Singleton]
 public class WebPluginSettings
 {
     public WebPluginSettings(ConfigurationExtension configuration)
@@ -34,17 +34,13 @@ public class WebPluginSettings
         configuration.GetSetting("plugins", this);
     }
 
-    private bool _enabled;
     private long _maxSize;
     private string _extension;
     private string[] _allow;
     private string[] _assetExtensions;
 
-    public bool Enabled
-    {
-        get => _enabled;
-        set => _enabled = value;
-    }
+    public bool Enabled { get; set; }
+
     public long MaxSize
     {
         get => _maxSize > 0 ? _maxSize : 5L * 1024L * 1024L;

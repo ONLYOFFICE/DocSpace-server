@@ -30,7 +30,7 @@ public static class GenericTypeExtensions
 {
     public static string GetGenericTypeName(this Type type)
     {
-        var typeName = string.Empty;
+        string typeName;
 
         if (type.IsGenericType)
         {

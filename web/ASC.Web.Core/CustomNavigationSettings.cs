@@ -28,7 +28,7 @@ namespace ASC.Web.Studio.Core;
 
 public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
 {
-    public List<CustomNavigationItem> Items { get; set; }
+    public List<CustomNavigationItem> Items { get; init; }
 
     [JsonIgnore]
     public Guid ID

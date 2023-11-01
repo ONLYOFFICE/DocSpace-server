@@ -32,12 +32,12 @@ public sealed class HttpRequestDictionary<T> : CachedDictionaryBase<T>
 
     public HttpRequestDictionary(HttpContext httpContext, string baseKey)
     {
-        Condition = (T) => true;
+        Condition = (_) => true;
         BaseKey = baseKey;
         _httpContext = httpContext;
     }
 
-    public override void Reset(string rootKey, string key)
+    protected override void Reset(string rootKey, string key)
     {
         if (_httpContext != null)
         {
@@ -46,11 +46,11 @@ public sealed class HttpRequestDictionary<T> : CachedDictionaryBase<T>
         }
     }
 
-    public override void Add(string rootkey, string key, T newValue)
+    protected override void Add(string rootKey, string key, T newValue)
     {
         if (_httpContext != null)
         {
-            var builtkey = BuildKey(key, rootkey);
+            var builtkey = BuildKey(key, rootKey);
             _httpContext.Items[builtkey] = new CachedItem(newValue);
         }
     }
@@ -73,11 +73,6 @@ public sealed class HttpRequestDictionary<T> : CachedDictionaryBase<T>
     protected override void OnHit(string fullKey) { }
 
     protected override void OnMiss(string fullKey) { }
-
-    protected override void InsertRootKey(string rootKey)
-    {
-        //We can't expire in HtppContext in such way
-    }
 
     private sealed class CachedItem
     {

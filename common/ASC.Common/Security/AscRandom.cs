@@ -28,10 +28,6 @@ namespace ASC.Common.Security;
 
 public class AscRandom : Random
 {
-    private const int Mbig = int.MaxValue;
-    private const int Mseed = 161803398;
-    private const int Mz = 0;
-
     private int _inext;
     private int _inextp;
     private readonly int[] _seeds;

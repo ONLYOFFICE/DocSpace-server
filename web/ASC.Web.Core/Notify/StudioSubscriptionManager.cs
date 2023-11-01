@@ -46,7 +46,7 @@ internal class StudioSubscriptionManager : ISubscriptionManager
     {
         var types = new List<SubscriptionType>
             {
-                new SubscriptionType()
+                new()
                 {
                     ID = new Guid("{148B5E30-C81A-4ff8-B749-C46BAE340093}"),
                     Name = Resource.WhatsNewSubscriptionName,

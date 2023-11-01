@@ -65,7 +65,7 @@ public class TopSubscriptionProvider : ISubscriptionProvider
             }
         }
 
-        return senders != null && 0 < senders.Length ? senders : _defaultSenderMethods;
+        return senders is { Length: > 0 } ? senders : _defaultSenderMethods;
     }
 
     public virtual async Task<IRecipient[]> GetRecipientsAsync(INotifyAction action, string objectID)
@@ -163,18 +163,18 @@ public class TopSubscriptionProvider : ISubscriptionProvider
         return subscriptionRecord;
     }
 
-    public virtual async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscription = true)
+    public virtual async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscribe = true)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
 
         var objects = new List<string>();
-        var direct = await _subscriptionProvider.GetSubscriptionsAsync(action, recipient, checkSubscription) ?? Array.Empty<string>();
+        var direct = await _subscriptionProvider.GetSubscriptionsAsync(action, recipient, checkSubscribe) ?? Array.Empty<string>();
         MergeObjects(objects, direct);
         var parents = await WalkUpAsync(recipient);
         foreach (var parent in parents)
         {
-            direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscription) ?? Array.Empty<string>();
+            direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscribe) ?? Array.Empty<string>();
             if (recipient is IDirectRecipient)
             {
                 foreach (var groupsubscr in direct)
@@ -206,17 +206,6 @@ public class TopSubscriptionProvider : ISubscriptionProvider
         }
 
         return parents;
-    }
-
-    private void MergeActions(List<INotifyAction> result, IEnumerable<INotifyAction> additions)
-    {
-        foreach (var addition in additions)
-        {
-            if (!result.Contains(addition))
-            {
-                result.Add(addition);
-            }
-        }
     }
 
     private void MergeObjects(List<string> result, IEnumerable<string> additions)

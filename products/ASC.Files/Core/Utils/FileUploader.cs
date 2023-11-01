@@ -201,7 +201,7 @@ public class FileUploader
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
         }
 
-        if (relativePath != null && relativePath.Count > 0)
+        if (relativePath is { Count: > 0 })
         {
             var subFolderTitle = Global.ReplaceInvalidCharsAndTruncate(relativePath.FirstOrDefault());
 

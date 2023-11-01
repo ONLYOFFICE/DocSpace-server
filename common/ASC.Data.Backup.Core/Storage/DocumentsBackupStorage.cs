@@ -64,7 +64,7 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
         _sessionHolder = new FilesChunkedUploadSessionHolder(_daoFactory, _tempPath, store, "", _setupInfo.ChunkUploadSize);
     }
 
-    public async Task<string> UploadAsync(string folderId, string localPath, Guid userId)
+    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)
     {
         await _tenantManager.SetCurrentTenantAsync(_tenantId);
         if (!userId.Equals(Guid.Empty))
@@ -77,52 +77,52 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
             await _securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
         }
 
-        if (int.TryParse(folderId, out var fId))
+        if (int.TryParse(storageBasePath, out var fId))
         {
             return (await Upload(fId, localPath)).ToString();
         }
 
-        return await Upload(folderId, localPath);
+        return await Upload(storageBasePath, localPath);
     }
 
-    public async Task<string> DownloadAsync(string fileId, string targetLocalPath)
+    public async Task<string> DownloadAsync(string storagePath, string targetLocalPath)
     {
         await _tenantManager.SetCurrentTenantAsync(_tenantId);
 
-        if (int.TryParse(fileId, out var fId))
+        if (int.TryParse(storagePath, out var fId))
         {
             return await DownloadDaoAsync(fId, targetLocalPath);
         }
 
-        return await DownloadDaoAsync(fileId, targetLocalPath);
+        return await DownloadDaoAsync(storagePath, targetLocalPath);
     }
 
-    public async Task DeleteAsync(string fileId)
+    public async Task DeleteAsync(string storagePath)
     {
         await _tenantManager.SetCurrentTenantAsync(_tenantId);
 
-        if (int.TryParse(fileId, out var fId))
+        if (int.TryParse(storagePath, out var fId))
         {
             await DeleteDaoAsync(fId);
 
             return;
         }
 
-        await DeleteDaoAsync(fileId);
+        await DeleteDaoAsync(storagePath);
     }
 
-    public async Task<bool> IsExistsAsync(string fileId)
+    public async Task<bool> IsExistsAsync(string storagePath)
     {
         await _tenantManager.SetCurrentTenantAsync(_tenantId);
-        if (int.TryParse(fileId, out var fId))
+        if (int.TryParse(storagePath, out var fId))
         {
             return await IsExistsDaoAsync(fId);
         }
 
-        return await IsExistsDaoAsync(fileId);
+        return await IsExistsDaoAsync(storagePath);
     }
 
-    public Task<string> GetPublicLinkAsync(string fileId)
+    public Task<string> GetPublicLinkAsync(string storagePath)
     {
         return Task.FromResult(String.Empty);
     }
@@ -153,12 +153,10 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
 
         while ((bytesRead = await source.ReadAsync(buffer, 0, (int)_setupInfo.ChunkUploadSize)) > 0)
         {
-            using (var theMemStream = new MemoryStream())
-            {
-                await theMemStream.WriteAsync(buffer, 0, bytesRead);
-                theMemStream.Position = 0;
-                file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
-            }
+            using var theMemStream = new MemoryStream();
+            await theMemStream.WriteAsync(buffer, 0, bytesRead);
+            theMemStream.Position = 0;
+            file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
         }
 
         return file.Id;

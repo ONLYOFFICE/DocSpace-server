@@ -54,7 +54,7 @@ namespace ASC.Data.Backup.Services;
 public abstract class BaseBackupProgressItem : DistributedTaskProgress
 {
     private int? _tenantId;
-    private BackupProgressItemEnum? _backupProgressItemEnum;
+    private BackupProgressItemType? _backupProgressItemEnum;
     private string _link;
 
     public int TenantId
@@ -80,13 +80,13 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
         }
     }
 
-    public BackupProgressItemEnum BackupProgressItemEnum
+    public BackupProgressItemType BackupProgressItemType
     {
         get
         {
-            return _backupProgressItemEnum ?? (BackupProgressItemEnum)this[nameof(_backupProgressItemEnum)];
+            return _backupProgressItemEnum ?? (BackupProgressItemType)this[nameof(_backupProgressItemEnum)];
         }
-        protected set
+        protected init
         {
             _backupProgressItemEnum = value;
 
@@ -95,7 +95,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
     }
 
     protected ILogger Logger { get; set; }
-    protected IServiceScopeFactory _serviceScopeProvider;
+    protected readonly IServiceScopeFactory _serviceScopeProvider;
 
     protected BaseBackupProgressItem(ILogger logger, IServiceScopeFactory serviceScopeFactory)
     {

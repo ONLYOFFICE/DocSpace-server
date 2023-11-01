@@ -30,12 +30,12 @@ public class MailMergeTask : IDisposable
 {
     internal const string _messageBodyFormat = "id={0}&from={1}&subject={2}&to%5B%5D={3}&body={4}&mimeReplyToId=";
 
-    public string From { get; set; }
+    public string From { get; init; }
     public string Subject { get; set; }
-    public string To { get; set; }
+    public string To { get; init; }
     public string Message { get; set; }
     public string AttachTitle { get; set; }
-    public Stream Attach { get; set; }
+    public Stream Attach { get; init; }
     public int MessageId { get; set; }
     public string StreamId { get; set; }
 

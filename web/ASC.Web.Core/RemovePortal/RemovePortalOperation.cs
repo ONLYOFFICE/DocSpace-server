@@ -66,7 +66,7 @@ public class RemovePortalOperation : DistributedTaskProgress
 
             _logger.DebugStartRemoveTenant(TenantId);
 
-            var tenant = _tenantManager.GetTenant(TenantId);
+            var tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
 
             var modules = _storageFactoryConfig.GetModuleList();
@@ -82,7 +82,6 @@ public class RemovePortalOperation : DistributedTaskProgress
                 }
                 await storage.DeleteDirectoryAsync("");
             }
-            var owner = _userManager.GetUsers(tenant.OwnerId);
 
             _logger.DebugRemoveTenantFromDb();
             await _tenantService.PermanentlyRemoveTenantAsync(TenantId);

@@ -97,7 +97,7 @@ public class OnlyoShortener : IUrlShortener
     {
         if (Uri.IsWellFormedUriString(shareLink, UriKind.Absolute))
         {
-            var context = _contextFactory.CreateDbContext();
+            var context = await _contextFactory.CreateDbContextAsync();
             var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.Link == shareLink);
             if (link != null)
             {
@@ -142,13 +142,13 @@ public static class ShortUrl
     {
         var rand = new Random();
         var length = 15;
-        var result = "";
+        var result = new StringBuilder();
         for (var i = 0; i < length; i++)
         {
             var x = rand.Next(0, 51);
-            result += Alphabet.ElementAt(x);
+            result.Append(Alphabet.ElementAt(x));
         }
-        return result;
+        return result.ToString();
     }
 
     public static ulong Decode(string str)

@@ -28,13 +28,13 @@ namespace ASC.ActiveDirectory.ComplexOperations.Data;
 
 public static class LdapTaskProperty
 {
-    public static string OWNER = "LDAPOwner";
-    public static string OPERATION_TYPE = "LDAPOperationType";
-    public static string SOURCE = "LDAPSource";
-    public static string PROGRESS = "LDAPProgress";
-    public static string RESULT = "LDAPResult";
-    public static string ERROR = "LDAPError";
-    public static string WARNING = "LDAPWarning";
-    public static string CERT_REQUEST = "LDAPCertRequest";
-    public static string FINISHED = "LDAPFinished";
+    public static readonly string OWNER = "LDAPOwner";
+    public static readonly string OPERATION_TYPE = "LDAPOperationType";
+    public static readonly string SOURCE = "LDAPSource";
+    public static readonly string PROGRESS = "LDAPProgress";
+    public static readonly string RESULT = "LDAPResult";
+    public static readonly string ERROR = "LDAPError";
+    public static readonly string WARNING = "LDAPWarning";
+    public static readonly string CERT_REQUEST = "LDAPCertRequest";
+    public static readonly string FINISHED = "LDAPFinished";
 }

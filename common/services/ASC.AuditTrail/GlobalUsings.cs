@@ -42,8 +42,6 @@ global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
 
-global using Autofac;
-
 global using AutoMapper;
 
 global using Microsoft.EntityFrameworkCore;

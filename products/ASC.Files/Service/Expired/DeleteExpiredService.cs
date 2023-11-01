@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Expired;
 
-[Singletone]
+[Singleton]
 public class DeleteExpiredService : BackgroundService
 {
     private readonly TimeSpan _launchFrequency;

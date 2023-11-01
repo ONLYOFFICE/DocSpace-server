@@ -51,11 +51,11 @@ public class ElasticSearchIndexService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("ElasticSearch Index Service running.");
+        _logger.LogInformation("ElasticSearch Index Service running");
 
         try
         {
-            _notify.Subscribe(async (item) =>
+            _notify.Subscribe(async (_) =>
             {
                 while (_isStarted)
                 {
@@ -72,7 +72,7 @@ public class ElasticSearchIndexService : BackgroundService
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var factoryIndexer = scope.ServiceProvider.GetService<FactoryIndexer>();
 
-        while (!factoryIndexer.CheckState(false))
+        while (!await factoryIndexer.CheckStateAsync(false))
         {
             if (stoppingToken.IsCancellationRequested)
             {
@@ -121,7 +121,7 @@ public class ElasticSearchIndexService : BackgroundService
             }
 
             _logger.DebugProduct(product.IndexName);
-            _indexNotify.Publish(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
+            await _indexNotify.PublishAsync(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
             await product.IndexAllAsync();
         }
         catch (Exception e)
@@ -143,16 +143,14 @@ public class ElasticSearchIndexService : BackgroundService
                 wrappers = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().Select(r => r.GetType()).ToList();
             }
 
-            await Parallel.ForEachAsync(wrappers, async (wrapper, token) =>
+            await Parallel.ForEachAsync(wrappers, async (wrapper, _) =>
             {
-                await using (var scope = _serviceScopeFactory.CreateAsyncScope())
-                {
-                    await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
-                }
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
             });
 
 
-            _indexNotify.Publish(new IndexAction() { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
+            await _indexNotify.PublishAsync(new IndexAction() { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
             _isStarted = false;
         }
         catch (Exception e)

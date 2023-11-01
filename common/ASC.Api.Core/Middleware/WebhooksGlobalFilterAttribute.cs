@@ -66,7 +66,7 @@ public class WebhooksGlobalFilterAttribute : ResultFilterAttribute, IDisposable
             return;
         }
 
-        if (_stream != null && _stream.CanRead)
+        if (_stream is { CanRead: true })
         {
             _stream.Position = 0;
             await _stream.CopyToAsync(_bodyStream);

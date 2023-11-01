@@ -28,7 +28,7 @@ namespace ASC.Core.ChunkedUploader;
 
 public class CommonChunkedUploadSession : ICloneable
 {
-    public string Id { get; set; }
+    public string Id { get; init; }
     public DateTime Created { get; set; }
     public DateTime Expired { get; set; }
     public string Location { get; set; }
@@ -39,7 +39,7 @@ public class CommonChunkedUploadSession : ICloneable
     public Guid UserId { get; set; }
     public bool UseChunks { get; set; }
     public string CultureName { get; set; }
-    public Dictionary<string, object> Items { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object> Items { get; set; } = new();
 
     [JsonIgnore]
     public string TempPath

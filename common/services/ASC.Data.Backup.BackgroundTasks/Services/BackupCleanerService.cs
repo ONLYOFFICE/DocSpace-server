@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Singletone]
+[Singleton]
 internal sealed class BackupCleanerService : BackgroundService
 {
     private readonly ILogger<BackupCleanerService> _logger;

@@ -89,23 +89,20 @@ public class FirebaseHelper
             fireBaseUser = await _firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
         }
 
-        foreach (var fb in fireBaseUser)
+        foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
         {
-            if (fb.IsSubscribed.HasValue && fb.IsSubscribed.Value == true)
+            var m = new FirebaseAdminMessaging.Message()
             {
-                var m = new FirebaseAdminMessaging.Message()
+                Data = new Dictionary<string, string>{
+                        { "data", msg.Data }
+                    },
+                Token = fb.FirebaseDeviceToken,
+                Notification = new FirebaseAdminMessaging.Notification()
                 {
-                    Data = new Dictionary<string, string>{
-                            { "data", msg.Data }
-                        },
-                    Token = fb.FirebaseDeviceToken,
-                    Notification = new FirebaseAdminMessaging.Notification()
-                    {
-                        Body = msg.Content
-                    }
-                };
-                await FirebaseAdminMessaging.FirebaseMessaging.DefaultInstance.SendAsync(m);
-            }
+                    Body = msg.Content
+                }
+            };
+            await FirebaseAdminMessaging.FirebaseMessaging.DefaultInstance.SendAsync(m);
         }
     }
 

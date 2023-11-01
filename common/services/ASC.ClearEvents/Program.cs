@@ -45,7 +45,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (logevent) => AppName);
+                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger("ASC.ClearEvents");
@@ -99,6 +99,6 @@ finally
 
 public partial class Program
 {
-    public static string Namespace = "ASC.ClearEvents";
-    public static string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string Namespace = "ASC.ClearEvents";
+    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
 }

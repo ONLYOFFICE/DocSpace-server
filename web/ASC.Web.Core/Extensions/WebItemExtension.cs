@@ -28,39 +28,39 @@ namespace ASC.Web.Core;
 
 public static class WebItemExtension
 {
-    public static string GetSysName(this IWebItem webitem)
+    public static string GetSysName(this IWebItem webItem)
     {
-        if (string.IsNullOrEmpty(webitem.StartURL))
+        if (string.IsNullOrEmpty(webItem.StartURL))
         {
             return string.Empty;
         }
 
-        var sysname = string.Empty;
-        var parts = webitem.StartURL.ToLower().Split('/', '\\').ToList();
+        var sysName = string.Empty;
+        var parts = webItem.StartURL.ToLower().Split('/', '\\').ToList();
 
         var index = parts.FindIndex(s => "products".Equals(s));
         if (0 <= index && index < parts.Count - 1)
         {
-            sysname = parts[index + 1];
+            sysName = parts[index + 1];
             index = parts.FindIndex(s => "modules".Equals(s));
             if (0 <= index && index < parts.Count - 1)
             {
-                sysname += "-" + parts[index + 1];
+                sysName += "-" + parts[index + 1];
             }
             else if (index == parts.Count - 1)
             {
-                sysname = parts[index].Split('.')[0];
+                sysName = parts[index].Split('.')[0];
             }
-            return sysname;
+            return sysName;
         }
 
         index = parts.FindIndex(s => "addons".Equals(s));
         if (0 <= index && index < parts.Count - 1)
         {
-            sysname = parts[index + 1];
+            sysName = parts[index + 1];
         }
 
-        return sysname;
+        return sysName;
     }
 
 
@@ -76,6 +76,6 @@ public static class WebItemExtension
 
     public static bool IsSubItem(this IWebItem item)
     {
-        return item is IModule && item is not IProduct;
+        return item is IModule and not IProduct;
     }
 }

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 class AzServiceCache
 {
     internal readonly ICache Cache;
@@ -62,7 +62,7 @@ class AzServiceCache
 
     public static string GetKey(int tenant)
     {
-        return "acl" + tenant.ToString();
+        return "acl" + tenant;
     }
 }
 
@@ -99,7 +99,7 @@ class CachedAzService : IAzService
     public async Task<AzRecord> SaveAceAsync(int tenant, AzRecord r)
     {
         r = await _service.SaveAceAsync(tenant, r);
-        _cacheNotify.Publish((AzRecordCache)r, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotify.PublishAsync(r, CacheNotifyAction.InsertOrUpdate);
 
         return r;
     }
@@ -107,6 +107,6 @@ class CachedAzService : IAzService
     public async Task RemoveAceAsync(int tenant, AzRecord r)
     {
         await _service.RemoveAceAsync(tenant, r);
-        _cacheNotify.Publish((AzRecordCache)r, CacheNotifyAction.Remove);
+        await _cacheNotify.PublishAsync(r, CacheNotifyAction.Remove);
     }
 }

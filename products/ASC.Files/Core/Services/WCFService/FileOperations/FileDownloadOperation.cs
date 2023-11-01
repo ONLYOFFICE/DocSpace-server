@@ -61,8 +61,8 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
         var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-        var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (globalStore, filesLinkUtility, _, _, _, log) = scopeClass;
+        var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
+        var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
@@ -72,7 +72,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
         if (stream != null)
         {
-            var archiveExtension = "";
+            string archiveExtension;
 
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
@@ -80,20 +80,15 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             }
 
             stream.Position = 0;
-            var fileName = FileConstant.DownloadTitle + archiveExtension;
+            string fileName;
 
-            var thidpartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
+            var thirdPartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thidpartyFolderOnly || daoFolderOnly) && (thidpartyFolderOnly != daoFolderOnly))
+            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
-                if (thidpartyFolderOnly)
-                {
-                    fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title, archiveExtension);
-                }
-                else
-                {
-                    fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
-                }
+                fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
+                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
+                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
             }
             else
             {
@@ -115,12 +110,12 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 var sessionId = await externalShare.GetSessionIdAsync();
                 var linkId = await externalShare.GetLinkIdAsync();
 
-                if (sessionId == default || linkId == default)
+                if (sessionId == Guid.Empty || linkId == Guid.Empty)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
                 }
 
-                path = string.Format(@"{0}\{1}\{2}", linkId, sessionId, fileName);
+                path = $@"{linkId}\{sessionId}\{fileName}";
                 sessionKey = await externalShare.CreateDownloadSessionKeyAsync();
             }
 
@@ -190,14 +185,14 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Download;
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
         if (Files.Count == 0 && Folders.Count == 0)
         {
             return;
         }
 
-        (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(scope);
+        (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(serviceScope);
 
         if (_entriesPathId == null || _entriesPathId.Count == 0)
         {
@@ -217,7 +212,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         PublishChanges();
 
-        var filesMessageService = scope.ServiceProvider.GetRequiredService<FilesMessageService>();
+        var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         foreach (var file in filesForSend)
         {
             var key = file.Id;
@@ -244,12 +239,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         var title = file.Title;
 
-        if (_files.TryGetValue(file.Id, out var convertToExt))
+        if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
-            if (!string.IsNullOrEmpty(convertToExt))
-            {
-                title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+            title = FileUtility.ReplaceFileExtension(title, convertToExt);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -347,120 +339,110 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             return;
         }
+        
+        var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
+        var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (_, _, _, fileConverter, filesMessageService, _) = scopeClass;
-        var FileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
+        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        compressTo.SetStream(stream);
 
-        using (var compressTo = scope.ServiceProvider.GetService<CompressToArchive>())
+        foreach (var path in _entriesPathId.AllKeys)
         {
-            compressTo.SetStream(stream);
-
-            foreach (var path in _entriesPathId.AllKeys)
+            if (string.IsNullOrEmpty(path))
             {
-                if (string.IsNullOrEmpty(path))
+                ProgressStep();
+                continue;
+            }
+
+            var counter = 0;
+            foreach (var entryId in _entriesPathId[path])
+            {
+                if (CancellationToken.IsCancellationRequested)
                 {
-                    ProgressStep();
-                    continue;
+                    CancellationToken.ThrowIfCancellationRequested();
                 }
 
-                var counter = 0;
-                foreach (var entryId in _entriesPathId[path])
+                var newTitle = path;
+
+                File<T> file = null;
+                var convertToExt = string.Empty;
+
+                if (!Equals(entryId, default(T)))
                 {
-                    if (CancellationToken.IsCancellationRequested)
+                    await fileDao.InvalidateCacheAsync(entryId);
+                    file = await fileDao.GetFileAsync(entryId);
+
+                    if (file == null)
                     {
-                        CancellationToken.ThrowIfCancellationRequested();
+                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        continue;
                     }
 
-                    var newtitle = path;
+                    if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
+                    {
+                        newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
+                    }
+                }
 
-                    File<T> file = null;
-                    var convertToExt = string.Empty;
+                if (0 < counter)
+                {
+                    var suffix = " (" + counter + ")";
 
                     if (!Equals(entryId, default(T)))
                     {
-                        await FileDao.InvalidateCacheAsync(entryId);
-                        file = await FileDao.GetFileAsync(entryId);
-
-                        if (file == null)
-                        {
-                            this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
-                            continue;
-                        }
-
-                        if (_files.TryGetValue(file.Id, out convertToExt))
-                        {
-                            if (!string.IsNullOrEmpty(convertToExt))
-                            {
-                                newtitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                            }
-                        }
-                    }
-
-                    if (0 < counter)
-                    {
-                        var suffix = " (" + counter + ")";
-
-                        if (!Equals(entryId, default(T)))
-                        {
-                            newtitle = newtitle.IndexOf('.') > 0 ? newtitle.Insert(newtitle.LastIndexOf('.'), suffix) : newtitle + suffix;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    if (!Equals(entryId, default(T)) && file != null)
-                    {
-                        compressTo.CreateEntry(newtitle, file.ModifiedOn);
-                        try
-                        {
-                            if (await fileConverter.EnableConvertAsync(file, convertToExt))
-                            {
-                                //Take from converter
-                                await using (var readStream = await fileConverter.ExecAsync(file, convertToExt))
-                                {
-                                    await compressTo.PutStream(readStream);
-                                }
-                            }
-                            else
-                            {
-                                await using (var readStream = await FileDao.GetFileStreamAsync(file))
-                                {
-                                    await compressTo.PutStream(readStream);
-                                }
-                            }
-                            compressTo.CloseEntry();
-                        }
-                        catch (Exception ex)
-                        {
-                            this[Err] = ex.Message;
-
-                            Logger.ErrorWithException(ex);
-                        }
+                        newTitle = newTitle.IndexOf('.') > 0 ? newTitle.Insert(newTitle.LastIndexOf('.'), suffix) : newTitle + suffix;
                     }
                     else
                     {
-                        compressTo.CreateEntry(newtitle);
-                        compressTo.PutNextEntry();
-                        compressTo.CloseEntry();
-                    }
-
-                    counter++;
-
-                    if (!Equals(entryId, default(T)) && file != null)
-                    {
-                        ProcessedFile(entryId);
-                    }
-                    else
-                    {
-                        ProcessedFolder(default(T));
+                        break;
                     }
                 }
 
-                ProgressStep();
+                if (!Equals(entryId, default(T)) && file != null)
+                {
+                    compressTo.CreateEntry(newTitle, file.ModifiedOn);
+                    try
+                    {
+                        if (await fileConverter.EnableConvertAsync(file, convertToExt))
+                        {
+                            //Take from converter
+                            await using var readStream = await fileConverter.ExecAsync(file, convertToExt);
+                            await compressTo.PutStream(readStream);
+                        }
+                        else
+                        {
+                            await using var readStream = await fileDao.GetFileStreamAsync(file);
+                            await compressTo.PutStream(readStream);
+                        }
+                        compressTo.CloseEntry();
+                    }
+                    catch (Exception ex)
+                    {
+                        this[Err] = ex.Message;
+
+                        Logger.ErrorWithException(ex);
+                    }
+                }
+                else
+                {
+                    compressTo.CreateEntry(newTitle);
+                    compressTo.PutNextEntry();
+                    compressTo.CloseEntry();
+                }
+
+                counter++;
+
+                if (!Equals(entryId, default(T)) && file != null)
+                {
+                    ProcessedFile(entryId);
+                }
+                else
+                {
+                    ProcessedFolder(default(T));
+                }
             }
+
+            ProgressStep();
         }
     }
 
@@ -486,7 +468,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
 internal class ItemNameValueCollection<T>
 {
-    private readonly Dictionary<string, List<T>> _dic = new Dictionary<string, List<T>>();
+    private readonly Dictionary<string, List<T>> _dic = new();
 
 
     public IEnumerable<string> AllKeys => _dic.Keys;
@@ -529,42 +511,5 @@ internal class ItemNameValueCollection<T>
     public void Remove(string name)
     {
         _dic.Remove(name);
-    }
-}
-
-[Scope]
-class FileDownloadOperationScope
-{
-    private readonly GlobalStore _globalStore;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly SetupInfo _setupInfo;
-    private readonly FileConverter _fileConverter;
-    private readonly FilesMessageService _filesMessageService;
-    private readonly ILogger _log;
-
-    public FileDownloadOperationScope(
-        GlobalStore globalStore,
-        FilesLinkUtility filesLinkUtility,
-        SetupInfo setupInfo,
-        FileConverter fileConverter,
-        FilesMessageService filesMessageService,
-        ILogger<FileDownloadOperation> log)
-    {
-        _globalStore = globalStore;
-        _filesLinkUtility = filesLinkUtility;
-        _setupInfo = setupInfo;
-        _fileConverter = fileConverter;
-        _filesMessageService = filesMessageService;
-        _log = log;
-    }
-
-    public void Deconstruct(out GlobalStore globalStore, out FilesLinkUtility filesLinkUtility, out SetupInfo setupInfo, out FileConverter fileConverter, out FilesMessageService filesMessageService, out ILogger log)
-    {
-        globalStore = _globalStore;
-        filesLinkUtility = _filesLinkUtility;
-        setupInfo = _setupInfo;
-        fileConverter = _fileConverter;
-        filesMessageService = _filesMessageService;
-        log = _log;
     }
 }

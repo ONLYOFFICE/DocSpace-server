@@ -32,7 +32,7 @@ public abstract class NotifySource : INotifySource
     private readonly IDictionary<CultureInfo, IPatternProvider> _patterns = new Dictionary<CultureInfo, IPatternProvider>();
 
     protected ISubscriptionProvider _subscriprionProvider;
-    protected IRecipientProvider _recipientsProvider;
+    protected readonly IRecipientProvider _recipientsProvider;
     public string Id { get; private set; }
 
     private readonly UserManager _userManager;
@@ -41,7 +41,7 @@ public abstract class NotifySource : INotifySource
 
     protected NotifySource(string id, UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager, TenantManager tenantManager)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(id);
+        ArgumentException.ThrowIfNullOrEmpty(id);
 
         Id = id;
         _userManager = userManager;
@@ -108,13 +108,11 @@ public abstract class NotifySource : INotifySource
     {
         var subscriptionProvider = new DirectSubscriptionProvider(Id, _subscriptionManager, _recipientsProvider);
 
-        return new TopSubscriptionProvider(_recipientsProvider, subscriptionProvider, WorkContext.DefaultClientSenders)
-            ?? throw new NotifyException("Provider ISubscriprionProvider not instanced.");
+        return new TopSubscriptionProvider(_recipientsProvider, subscriptionProvider, WorkContext.DefaultClientSenders);
     }
 
     protected virtual IRecipientProvider CreateRecipientsProvider()
     {
-        return new RecipientProviderImpl(_userManager)
-            ?? throw new NotifyException("Provider IRecipientsProvider not instanced.");
+        return new RecipientProviderImpl(_userManager);
     }
 }

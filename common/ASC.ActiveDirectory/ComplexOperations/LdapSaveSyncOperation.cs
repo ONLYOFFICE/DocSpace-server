@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.ComplexOperations;
 
-[Singletone(Additional = typeof(LdapOperationExtension))]
+[Singleton(Additional = typeof(LdapOperationExtension))]
 public class LdapSaveSyncOperation
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
@@ -45,7 +45,7 @@ public class LdapSaveSyncOperation
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
         var item = _progressQueue.GetAllTasks<LdapOperationJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             item = null;

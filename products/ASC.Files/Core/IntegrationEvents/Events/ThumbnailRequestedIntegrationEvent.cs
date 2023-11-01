@@ -29,7 +29,7 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 [ProtoContract]
 public record ThumbnailRequestedIntegrationEvent : IntegrationEvent
 {
-    private ThumbnailRequestedIntegrationEvent() : base()
+    private ThumbnailRequestedIntegrationEvent()
     {
 
     }
@@ -41,8 +41,8 @@ public record ThumbnailRequestedIntegrationEvent : IntegrationEvent
     }
 
     [ProtoMember(1)]
-    public string BaseUrl { get; set; }
+    public string BaseUrl { get; init; }
 
     [ProtoMember(2)]
-    public IEnumerable<int> FileIds { get; set; }
+    public IEnumerable<int> FileIds { get; init; }
 }

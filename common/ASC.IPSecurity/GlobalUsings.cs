@@ -26,7 +26,6 @@
 
 global using System.Net;
 global using System.Net.Sockets;
-global using System.Web;
 
 global using ASC.Common;
 global using ASC.Common.Caching;

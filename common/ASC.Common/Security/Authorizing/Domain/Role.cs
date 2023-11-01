@@ -48,7 +48,7 @@ public sealed class Role : IRole
             throw new ArgumentException(nameof(id));
         }
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(name);
+        ArgumentException.ThrowIfNullOrEmpty(name);
 
         ID = id;
         Name = name;

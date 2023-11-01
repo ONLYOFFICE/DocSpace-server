@@ -49,7 +49,7 @@ public class DefaultMappingProfile : Profile
 
         var types = assembly.GetExportedTypes().Where(t => t.GetInterfaces().Any(HasInterface)).ToList();
 
-        var argumentTypes = new Type[] { typeof(Profile) };
+        var argumentTypes = new[] { typeof(Profile) };
 
         foreach (var type in types)
         {

@@ -69,7 +69,7 @@ public class XmlPatternProvider2 : IPatternProvider
 
                 var xbody = GetElementByTagName(xpattern, "body");
                 var body = GetResource(xbody);
-                if (string.IsNullOrEmpty(body) && xbody != null && xbody.FirstChild is XmlText)
+                if (string.IsNullOrEmpty(body) && xbody is { FirstChild: XmlText })
                 {
                     body = xbody.FirstChild.Value ?? string.Empty;
                 }

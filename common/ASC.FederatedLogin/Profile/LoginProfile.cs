@@ -36,7 +36,7 @@ public class LoginProfile
     public string Id
     {
         get => GetField(WellKnownFields.Id);
-        internal set => SetField(WellKnownFields.Id, value);
+        internal init => SetField(WellKnownFields.Id, value);
     }
 
     public string Link
@@ -48,7 +48,7 @@ public class LoginProfile
     public string Name
     {
         get => GetField(WellKnownFields.Name);
-        internal set => SetField(WellKnownFields.Name, value);
+        internal init => SetField(WellKnownFields.Name, value);
     }
 
     public string DisplayName
@@ -66,7 +66,7 @@ public class LoginProfile
     public string Avatar
     {
         get => GetField(WellKnownFields.Avatar);
-        internal set => SetField(WellKnownFields.Avatar, value);
+        internal init => SetField(WellKnownFields.Avatar, value);
     }
 
     public string Gender
@@ -108,7 +108,7 @@ public class LoginProfile
     public string Locale
     {
         get => GetField(WellKnownFields.Locale);
-        internal set => SetField(WellKnownFields.Locale, value);
+        internal init => SetField(WellKnownFields.Locale, value);
     }
 
     public string TimeZone
@@ -126,13 +126,13 @@ public class LoginProfile
     public string AuthorizationError
     {
         get => GetField(WellKnownFields.AuthError);
-        internal set => SetField(WellKnownFields.AuthError, value);
+        internal init => SetField(WellKnownFields.AuthError, value);
     }
 
     public string Provider
     {
         get => GetField(WellKnownFields.Provider);
-        internal set => SetField(WellKnownFields.Provider, value);
+        internal init => SetField(WellKnownFields.Provider, value);
     }
 
     public string RealmUrl
@@ -231,7 +231,7 @@ public class LoginProfile
 
     internal string GetField(string name)
     {
-        return _fields.ContainsKey(name) ? _fields[name] : string.Empty;
+        return _fields.TryGetValue(name, out var field) ? field : string.Empty;
     }
 
     internal void SetField(string name, string value)
@@ -296,7 +296,7 @@ public class LoginProfile
 
     internal string ToSerializedString()
     {
-        return string.Join(new string(PairSeparator, 1), _fields.Select(x => string.Join(new string(KeyValueSeparator, 1), new[] { x.Key, x.Value })).ToArray());
+        return string.Join(new string(PairSeparator, 1), _fields.Select(x => string.Join(new string(KeyValueSeparator, 1), x.Key, x.Value)).ToArray());
     }
 
     internal static LoginProfile CreateFromSerializedString(Signature signature, InstanceCrypto instanceCrypto, string serialized)

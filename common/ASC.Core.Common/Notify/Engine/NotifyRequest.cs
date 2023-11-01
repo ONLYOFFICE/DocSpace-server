@@ -32,7 +32,7 @@ public class NotifyRequest
     public INotifyAction NotifyAction { get; internal set; }
     public string ObjectID { get; internal set; }
     public IRecipient Recipient { get; internal set; }
-    public List<ITagValue> Arguments { get; internal set; }
+    public List<ITagValue> Arguments { get; internal init; }
     public string CurrentSender { get; internal set; }
     public INoticeMessage CurrentMessage { get; internal set; }
     public Hashtable Properties { get; private set; }

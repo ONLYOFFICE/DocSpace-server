@@ -53,13 +53,13 @@ namespace ASC.Data.Backup.Services;
 
 public static class BackupProgressItemEnumConverter
 {
-    public static BackupProgressEnum Convert(this BackupProgressItemEnum backupProgressItemEnum)
+    public static BackupProgressEnum Convert(this BackupProgressItemType backupProgressItemType)
     {
-        return backupProgressItemEnum switch
+        return backupProgressItemType switch
         {
-            BackupProgressItemEnum.Backup => BackupProgressEnum.Backup,
-            BackupProgressItemEnum.Restore => BackupProgressEnum.Restore,
-            BackupProgressItemEnum.Transfer => BackupProgressEnum.Transfer,
+            BackupProgressItemType.Backup => BackupProgressEnum.Backup,
+            BackupProgressItemType.Restore => BackupProgressEnum.Restore,
+            BackupProgressItemType.Transfer => BackupProgressEnum.Transfer,
             _ => BackupProgressEnum.Backup
         };
     }

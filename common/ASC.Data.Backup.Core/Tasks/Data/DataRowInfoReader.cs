@@ -54,19 +54,16 @@ internal static class DataRowInfoReader
 
         while (xmlReader.Read())
         {
-            if (xmlReader.NodeType == XmlNodeType.Element)
+            if (xmlReader.NodeType == XmlNodeType.Element && XNode.ReadFrom(xmlReader) is XElement el)
             {
-                if (XNode.ReadFrom(xmlReader) is XElement el)
+                var dataRowInfo = new DataRowInfo(el.Name.LocalName);
+                foreach (var column in schema)
                 {
-                    var dataRowInfo = new DataRowInfo(el.Name.LocalName);
-                    foreach (var column in schema)
-                    {
-                        var value = ConvertToType(el.Element(column.Key).ValueOrDefault(), column.Value);
-                        dataRowInfo.SetValue(column.Key, value);
-                    }
-
-                    yield return dataRowInfo;
+                    var value = ConvertToType(el.Element(column.Key).ValueOrDefault(), column.Value);
+                    dataRowInfo.SetValue(column.Key, value);
                 }
+
+                yield return dataRowInfo;
             }
         }
     }

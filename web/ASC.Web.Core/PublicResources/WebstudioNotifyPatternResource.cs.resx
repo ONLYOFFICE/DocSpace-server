@@ -99,11 +99,11 @@ Byl vytvořen zálohový soubor obsahující data z Vašeho "${__VirtualRootPath
 
 Další informace o postupu zálohování naleznete v naší uživatelské příručce "Zálohování dat":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block.
 
-Pokud máte nějaké dotazy nebo potřebujete pomoc, prosím neváhejte nás kontaktovat na "support.onlyoffice.com":"http://support.onlyoffice.com"
+Pokud máte nějaké dotazy nebo potřebujete pomoc, prosím neváhejte nás kontaktovat na "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_password" xml:space="preserve">
     <value>h1.Žádost o změnu hesla pro "${__VirtualRootPath}":"${__VirtualRootPath}" portál
@@ -194,7 +194,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -215,7 +215,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -236,7 +236,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -257,7 +257,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_migration_error" xml:space="preserve">
     <value>h1.Chyba při migraci portálu dalšího regionu
@@ -267,7 +267,7 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Chcete-li změnit typ oznámení, prosím upravte své "nastavení odběru":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -280,7 +280,7 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Chcete-li změnit typ oznámení, prosím upravte své "nastavení odběru":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -295,7 +295,7 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivace  "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
@@ -315,7 +315,7 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Vymazání "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
@@ -336,7 +336,7 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Změna dresy portálu
@@ -417,7 +417,7 @@ Pokud máte nějaké dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat
 
 S pozdravem,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Chcete-li změnit typ oznámení, spravujte své "nastavení odběru":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -602,7 +602,7 @@ Užijte si nový způsob spolupráce na dokumentech!
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -617,7 +617,7 @@ Užijte si nový způsob spolupráce na dokumentech!
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -632,7 +632,7 @@ Užijte si nový způsob spolupráce na dokumentech!
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -654,7 +654,7 @@ Užijte si nový způsob spolupráce na dokumentech!
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -667,7 +667,7 @@ Získejte bezplatné aplikace ONLYOFFICE a pracujte na dokumentech z libovolnéh
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -686,7 +686,7 @@ $OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -705,7 +705,7 @@ $OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -724,7 +724,7 @@ $OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -743,7 +743,7 @@ $OrangeButton
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -764,7 +764,7 @@ _Upozornění: plátcem se stává ten, kdo hradí předplatné. Pouze plátce m
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -785,7 +785,7 @@ _Upozornění: plátcem se stává ten, kdo hradí předplatné. Pouze plátce m
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -806,7 +806,7 @@ _Upozornění: plátcem se stává ten, kdo hradí předplatné. Pouze plátce m
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -827,7 +827,7 @@ _Upozornění: plátcem se stává ten, kdo hradí předplatné. Pouze plátce m
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Dobrý den!
@@ -838,7 +838,7 @@ $OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Dobrý den!
@@ -849,7 +849,7 @@ $OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Dobrý den!
@@ -860,7 +860,7 @@ $OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Dobrý den!
@@ -871,7 +871,7 @@ $OrangeButton
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -892,7 +892,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -913,7 +913,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -934,7 +934,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -955,7 +955,7 @@ Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpc
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Zpráva z portálu "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -977,7 +977,7 @@ Získejte bezplatné aplikace ONLYOFFICE a pracujte na dokumentech z libovolnéh
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-www.onlyoffice.com:"http://onlyoffice.com/"</value>
+www.onlyoffice.com:"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -990,7 +990,7 @@ Získejte bezplatné aplikace ONLYOFFICE a pracujte na dokumentech z libovolnéh
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-www.onlyoffice.com:"http://onlyoffice.com/"</value>
+www.onlyoffice.com:"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Dobrý den!
@@ -1021,7 +1021,7 @@ Děkujeme a přejeme hodně štěstí!
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -1048,7 +1048,7 @@ Navštivte naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/", kde 
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Již více než půl roku jste nevstoupili do svého ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". 
@@ -1063,7 +1063,7 @@ Pokud si myslíte, že se jedná o chybu, a chcete nadále používat službu ON
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Dobrý den!
@@ -1076,7 +1076,7 @@ Po kliknutí na odkaz s pozvánkou nastavte nové heslo k účtu.
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Dobrý den, $UserName!
@@ -1141,7 +1141,7 @@ Po kliknutí na odkaz s pozvánkou nastavte nové heslo k účtu.
 
 S přátelským pozdravem,
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Přijmout</value>
@@ -1224,11 +1224,11 @@ byl vytvořen záložní soubor obsahující data z vašeho portálu [${__Virtua
 
 Další informace o postupu zálohování naleznete v naší uživatelské příručce [Zálohování dat](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat na adrese [support.onlyoffice.com](http://support.onlyoffice.com).
+Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte nás kontaktovat na adrese [support.onlyoffice.com](https://support.onlyoffice.com).
 
 S pozdravem,
 tým podpory ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Chcete změnit e-mail na svém účtu ${LetterLogoText}?
@@ -1437,7 +1437,7 @@ V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktova
 
 S pozdravem,
 tým podpory ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Odstranění portálu [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1462,7 +1462,7 @@ V případě jakýchkoli dotazů nebo potřeby pomoci nás neváhejte kontaktova
 
 S pozdravem,
 tým podpory ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Uživatel "$FromUserName":"$FromUserLink" smazal svůj profil a tento profil je nyní zablokován. Všechny soubory uživatele jsou mu stále přiřazeny a zabírají místo na disku. 
@@ -1530,7 +1530,7 @@ Jednou za čas vám také zašleme užitečné tipy a novinky z ONLYOFFICE. Odb�
 
 S pozdravem,
 tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) oznámení o změně profilu portálu

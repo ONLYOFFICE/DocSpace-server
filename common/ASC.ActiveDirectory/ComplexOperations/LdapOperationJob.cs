@@ -215,7 +215,7 @@ public class LdapOperationJob : DistributedTaskProgress
         }
         catch (AggregateException ae)
         {
-            ae.Flatten().Handle(e => e is TaskCanceledException || e is OperationCanceledException);
+            ae.Flatten().Handle(e => e is TaskCanceledException or OperationCanceledException);
         }
         catch (TenantQuotaException e)
         {
@@ -343,8 +343,7 @@ public class LdapOperationJob : DistributedTaskProgress
             SetProgress(99, Resource.LdapSettingsStatusDisconnecting, "");
         }
 
-        SetProgress(100, OperationType == LdapOperationType.SaveTest ||
-                         OperationType == LdapOperationType.SyncTest
+        SetProgress(100, OperationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest
             ? JsonSerializer.Serialize(_ldapChanges)
             : "", "");
     }
@@ -518,7 +517,7 @@ public class LdapOperationJob : DistributedTaskProgress
         var currentUserRights = new List<LdapSettings.AccessRight>();
         await TakeUsersRightsAsync(_currentUser != null ? currentUserRights : null);
 
-        if (LDAPSettings.GroupMembership && LDAPSettings.AccessRights != null && LDAPSettings.AccessRights.Count > 0)
+        if (LDAPSettings.GroupMembership && LDAPSettings.AccessRights is { Count: > 0 })
         {
             await GiveUsersRights(LDAPSettings.AccessRights, _currentUser != null ? currentUserRights : null);
         }
@@ -670,7 +669,7 @@ public class LdapOperationJob : DistributedTaskProgress
         ldapUsers = await RemoveOldDbUsersAsync(ldapUsers);
 
         SetProgress(30,
-            OperationType == LdapOperationType.Save || OperationType == LdapOperationType.SaveTest
+            OperationType is LdapOperationType.Save or LdapOperationType.SaveTest
                 ? Resource.LdapSettingsStatusSavingUsers
                 : Resource.LdapSettingsStatusSyncingUsers,
             "");
@@ -698,7 +697,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         SetProgress(20, Resource.LdapSettingsStatusGettingUsersFromLdap);
 
-        (var ldapGroupsUsers, var uniqueLdapGroupUsers) = await GetGroupsUsersAsync(ldapGroups);
+        var (ldapGroupsUsers, uniqueLdapGroupUsers) = await GetGroupsUsersAsync(ldapGroups);
 
         if (!uniqueLdapGroupUsers.Any())
         {
@@ -709,7 +708,7 @@ public class LdapOperationJob : DistributedTaskProgress
         _logger.DebugGetGroupsUsers(_ldapUserImporter.AllDomainUsers.Count);
 
         SetProgress(30,
-            OperationType == LdapOperationType.Save || OperationType == LdapOperationType.SaveTest
+            OperationType is LdapOperationType.Save or LdapOperationType.SaveTest
                 ? Resource.LdapSettingsStatusSavingUsers
                 : Resource.LdapSettingsStatusSyncingUsers,
             "");
@@ -777,8 +776,7 @@ public class LdapOperationJob : DistributedTaskProgress
     {
         if (!ldapGroupUsers.Any()) // Skip empty groups
         {
-            if (OperationType == LdapOperationType.SaveTest ||
-                OperationType == LdapOperationType.SyncTest)
+            if (OperationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
                 _ldapChanges.SetSkipGroupChange(ldapGroup);
             }
@@ -825,8 +823,7 @@ public class LdapOperationJob : DistributedTaskProgress
         }
         else
         {
-            if (OperationType == LdapOperationType.SaveTest ||
-                OperationType == LdapOperationType.SyncTest)
+            if (OperationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
                 _ldapChanges.SetSkipGroupChange(ldapGroup);
             }

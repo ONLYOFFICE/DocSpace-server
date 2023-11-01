@@ -51,7 +51,7 @@ public class LdapChangeCollection : List<LdapChange>
     {
         var fieldChanges = new List<LdapItemChange>
             {
-                new LdapItemChange(LdapItemChangeKey.Sid, user.Sid, null)
+                new(LdapItemChangeKey.Sid, user.Sid, null)
             };
 
         var change = new LdapChange(user.Sid,
@@ -114,8 +114,8 @@ public class LdapChangeCollection : List<LdapChange>
     {
         var fieldChanges = new List<LdapItemChange>
                                     {
-                                        new LdapItemChange(LdapItemChangeKey.Name, null, group.Name),
-                                        new LdapItemChange(LdapItemChangeKey.Sid, null, group.Sid)
+                                        new(LdapItemChangeKey.Name, null, group.Name),
+                                        new(LdapItemChangeKey.Sid, null, group.Sid)
                                     };
 
         var change = new LdapChange(group.Sid, group.Name,
@@ -151,7 +151,7 @@ public class LdapChangeCollection : List<LdapChange>
     {
         var fieldChanges = new List<LdapItemChange>
                                 {
-                                    new LdapItemChange(LdapItemChangeKey.Name, group.Name, group.Name)
+                                    new(LdapItemChangeKey.Name, group.Name, group.Name)
                                 };
 
         var change = new LdapChange(group.Sid, group.Name,

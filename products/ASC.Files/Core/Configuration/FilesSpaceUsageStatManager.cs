@@ -70,7 +70,7 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
     public override async ValueTask<List<UsageSpaceStatItem>> GetStatDataAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var myFiles = filesDbContext.Files
             .Join(filesDbContext.Tree, a => a.ParentId, b => b.FolderId, (file, tree) => new { file, tree })
             .Join(filesDbContext.BunchObjects, a => a.tree.ParentId.ToString(), b => b.LeftNode, (fileTree, bunch) => new { fileTree.file, fileTree.tree, bunch })
@@ -108,7 +108,7 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
                 {
                     item.Name = user.DisplayUserName(false, _displayUserSettingsHelper);
                     item.ImgUrl = await user.GetSmallPhotoURL(_userPhotoManager);
-                    item.Url = user.GetUserProfilePageURL(_commonLinkUtility);
+                    item.Url =await user.GetUserProfilePageUrl(_commonLinkUtility);
                     item.Disabled = user.Status == EmployeeStatus.Terminated;
                 }
                 return item;
@@ -125,17 +125,17 @@ public class FilesSpaceUsageStatManager : SpaceUsageStatManager, IUserSpaceUsage
         var my = await _globalFolder.GetFolderMyAsync(_fileMarker, _daoFactory);
         var trash = await _globalFolder.GetFolderTrashAsync(_daoFactory);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.SumContentLengthAsync(filesDbContext, tenantId, userId, my, trash);
     }
 
-    public async Task RecalculateUserQuota(int TenantId, Guid userId)
+    public async Task RecalculateUserQuota(int tenantId, Guid userId)
     {
-        await _tenantManager.SetCurrentTenantAsync(TenantId);
+        await _tenantManager.SetCurrentTenantAsync(tenantId);
         var size = await GetUserSpaceUsageAsync(userId);
 
         await _tenantManager.SetTenantQuotaRowAsync(
-           new TenantQuotaRow { TenantId = TenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = userId, LastModified = DateTime.UtcNow },
+           new TenantQuotaRow { TenantId = tenantId, Path = $"/{FileConstant.ModuleId}/", Counter = size, Tag = WebItemManager.DocumentsProductID.ToString(), UserId = userId, LastModified = DateTime.UtcNow },
            false);
     }
 }

@@ -57,16 +57,14 @@ public class Consumer : IDictionary<string, string>
 
     private readonly bool _onlyDefault;
 
-    protected internal TenantManager TenantManager;
-    protected internal CoreBaseSettings CoreBaseSettings;
-    protected internal CoreSettings CoreSettings;
-    protected internal ConsumerFactory ConsumerFactory;
+    protected internal readonly TenantManager TenantManager;
+    protected internal readonly CoreBaseSettings CoreBaseSettings;
+    protected internal readonly CoreSettings CoreSettings;
+    protected internal readonly ConsumerFactory ConsumerFactory;
     protected internal readonly IConfiguration Configuration;
     protected internal readonly ICacheNotify<ConsumerCacheItem> Cache;
 
     public bool IsSet => _props.Count > 0 && !_props.All(r => string.IsNullOrEmpty(this[r.Key]));
-
-    static Consumer() { }
 
     public Consumer()
     {
@@ -124,7 +122,7 @@ public class Consumer : IDictionary<string, string>
         _props = props ?? new Dictionary<string, string>();
         _additional = additional ?? new Dictionary<string, string>();
 
-        if (props != null && props.Count > 0)
+        if (props is { Count: > 0 })
         {
             CanSet = props.All(r => string.IsNullOrEmpty(r.Value));
         }
@@ -256,10 +254,11 @@ public class DataStoreConsumer : Consumer, ICloneable
     public Type HandlerType { get; private set; }
     public DataStoreConsumer Cdn { get; private set; }
 
-    public const string HandlerTypeKey = "handlerType";
-    public const string CdnKey = "cdn";
+    private const string HandlerTypeKey = "handlerType";
+    private const string CdnKey = "cdn";
 
-    public DataStoreConsumer() : base() { }
+    public DataStoreConsumer()
+    { }
 
     public DataStoreConsumer(
         TenantManager tenantManager,

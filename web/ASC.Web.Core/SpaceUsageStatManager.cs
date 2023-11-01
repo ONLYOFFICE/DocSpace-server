@@ -34,7 +34,7 @@ public abstract class SpaceUsageStatManager
         public string Url { get; set; }
         public string ImgUrl { get; set; }
         public bool Disabled { get; set; }
-        public long SpaceUsage { get; set; }
+        public long SpaceUsage { get; init; }
     }
 
     public abstract ValueTask<List<UsageSpaceStatItem>> GetStatDataAsync();

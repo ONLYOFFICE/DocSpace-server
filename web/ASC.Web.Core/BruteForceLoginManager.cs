@@ -35,7 +35,7 @@ public class BruteForceLoginManager
     private readonly IDistributedCache _distributedCache;
     private readonly SetupInfo _setupInfo;
     private readonly Recaptcha _recaptcha;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     public BruteForceLoginManager(SettingsManager settingsManager,
         UserManager userManager,
@@ -135,7 +135,7 @@ public class BruteForceLoginManager
 
     public async Task<UserInfo> AttemptAsync(string login, string passwordHash, string requestIp, string recaptchaResponse)
     {
-        UserInfo user = null;
+        UserInfo user;
 
         var secretEmail = SetupInfo.IsSecretEmail(login);
 
@@ -175,7 +175,7 @@ public class BruteForceLoginManager
                 if (history.Count > settings.AttemptCount)
                 {
                     SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
-                    _distributedCache.Remove(historyCacheKey);
+                    await _distributedCache.RemoveAsync(historyCacheKey);
                     throw new BruteForceCredentialException();
                 }
 
@@ -198,10 +198,6 @@ public class BruteForceLoginManager
 
                 SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
-        }
-        catch
-        {
-            throw;
         }
         finally
         {

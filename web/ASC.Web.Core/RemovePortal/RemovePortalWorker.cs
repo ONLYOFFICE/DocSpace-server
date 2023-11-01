@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.RemovePortal;
 
-[Singletone(Additional = typeof(RemovePortalWorkerExtension))]
+[Singleton(Additional = typeof(RemovePortalWorkerExtension))]
 public class RemovePortalWorker
 {
     private readonly object _locker;
@@ -49,7 +49,7 @@ public class RemovePortalWorker
         {
             var item = _queue.GetAllTasks<RemovePortalOperation>().FirstOrDefault(t => t.TenantId == tenantId);
 
-            if (item != null && item.IsCompleted)
+            if (item is { IsCompleted: true })
             {
                 _queue.DequeueTask(item.Id);
                 item = null;

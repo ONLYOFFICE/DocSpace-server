@@ -46,8 +46,8 @@ public class StatisticManager
 
         lock (_cache)
         {
-            var visit = _cache.ContainsKey(key) ?
-                            _cache[key] :
+            var visit = _cache.TryGetValue(key, out var value) ?
+                            value :
                             new UserVisit
                             {
                                 TenantID = tenantId,
@@ -69,13 +69,13 @@ public class StatisticManager
 
     public async Task<List<UserVisit>> GetHitsByPeriodAsync(int tenantID, DateTime startPeriod, DateTime endPeriod)
     {
-        await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.UserVisitsAsync(webstudioDbContext, tenantID, startPeriod, endPeriod).ToListAsync();
     }
 
     public async Task<List<UserVisit>> GetHostsByPeriodAsync(int tenantID, DateTime startPeriod, DateTime endPeriod)
     {
-        await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.UserVisitsGroupByUserIdAsync(webstudioDbContext, tenantID, startPeriod, endPeriod).ToListAsync();
     }
 
@@ -94,7 +94,7 @@ public class StatisticManager
             _lastSave = DateTime.UtcNow;
         }
 
-        await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (var v in visits)
         {

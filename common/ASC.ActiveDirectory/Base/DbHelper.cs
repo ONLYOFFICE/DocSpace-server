@@ -45,7 +45,7 @@ public class DbHelper
         var id = _ldapSettings.ID;
         var enableLdapAuthentication = _ldapSettings.EnableLdapAuthentication;
 
-        await using var activeDirectoryDbContext = _activeDirectoryDbContextFactory.CreateDbContext();
+        await using var activeDirectoryDbContext = await _activeDirectoryDbContextFactory.CreateDbContextAsync();
         var data = await activeDirectoryDbContext.WebstudioSettings
             .Where(r => r.Id == id)
             .Join(activeDirectoryDbContext.Tenants, r => r.TenantId, r => r.Id, (settings, tenant) => new { settings, tenant })

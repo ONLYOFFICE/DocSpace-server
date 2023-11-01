@@ -113,14 +113,13 @@ public class FilesSettings : ISettings<FilesSettings>
     }
 
     [JsonIgnore]
-    public Guid ID => new Guid("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");
+    public Guid ID => new("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");
 }
 
 [Scope]
 public class FilesSettingsHelper
 {
     private readonly SettingsManager _settingsManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly SetupInfo _setupInfo;
     private readonly FileUtility _fileUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
@@ -130,7 +129,6 @@ public class FilesSettingsHelper
 
     public FilesSettingsHelper(
         SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
         SetupInfo setupInfo,
         FileUtility fileUtility,
         FilesLinkUtility filesLinkUtility,
@@ -138,7 +136,6 @@ public class FilesSettingsHelper
         AuthContext authContext)
     {
         _settingsManager = settingsManager;
-        _coreBaseSettings = coreBaseSettings;
         _setupInfo = setupInfo;
         _fileUtility = fileUtility;
         _filesLinkUtility = filesLinkUtility;
@@ -160,13 +157,13 @@ public class FilesSettingsHelper
     public List<string> ExtsMustConvert => _fileUtility.ExtsMustConvert;
     public Dictionary<string, List<string>> ExtsConvertible => _fileUtility.GetExtsConvertible();
     public List<string> ExtsUploadable => _fileUtility.ExtsUploadable;
-    public List<string> ExtsArchive => FileUtility.ExtsArchive;
-    public List<string> ExtsVideo => FileUtility.ExtsVideo;
-    public List<string> ExtsAudio => FileUtility.ExtsAudio;
-    public List<string> ExtsImage => FileUtility.ExtsImage;
-    public List<string> ExtsSpreadsheet => FileUtility.ExtsSpreadsheet;
-    public List<string> ExtsPresentation => FileUtility.ExtsPresentation;
-    public List<string> ExtsDocument => FileUtility.ExtsDocument;
+    public ImmutableList<string> ExtsArchive => FileUtility.ExtsArchive;
+    public ImmutableList<string> ExtsVideo => FileUtility.ExtsVideo;
+    public ImmutableList<string> ExtsAudio => FileUtility.ExtsAudio;
+    public ImmutableList<string> ExtsImage => FileUtility.ExtsImage;
+    public ImmutableList<string> ExtsSpreadsheet => FileUtility.ExtsSpreadsheet;
+    public ImmutableList<string> ExtsPresentation => FileUtility.ExtsPresentation;
+    public ImmutableList<string> ExtsDocument => FileUtility.ExtsDocument;
     public Dictionary<FileType, string> InternalFormats => _fileUtility.InternalExtension;
     public string MasterFormExtension => _fileUtility.MasterFormExtension;
     public string ParamVersion => FilesLinkUtility.Version;

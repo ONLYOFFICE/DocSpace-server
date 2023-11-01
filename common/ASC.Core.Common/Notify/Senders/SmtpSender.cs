@@ -26,13 +26,13 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class SmtpSender : INotifySender
 {
     protected ILogger _logger;
     private IDictionary<string, string> _initProperties;
     protected readonly IConfiguration _configuration;
-    protected IServiceProvider _serviceProvider;
+    protected readonly IServiceProvider _serviceProvider;
 
     private string _host;
     private int _port;
@@ -78,19 +78,19 @@ public class SmtpSender : INotifySender
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 
-                smtpClient.Connect(_host, _port,
+                await smtpClient.ConnectAsync(_host, _port,
                     _ssl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
                 if (_credentials != null)
                 {
-                    smtpClient.Authenticate(_credentials);
+                    await smtpClient.AuthenticateAsync(_credentials);
                 }
                 else if (_saslMechanism != null)
                 {
-                    smtpClient.Authenticate(_saslMechanism);
+                    await smtpClient.AuthenticateAsync(_saslMechanism);
                 }
 
-                smtpClient.Send(mail);
+                await smtpClient.SendAsync(mail);
                 result = NoticeSendResult.OK;
             }
             catch (Exception e)
@@ -148,7 +148,7 @@ public class SmtpSender : INotifySender
         {
             if (smtpClient.IsConnected)
             {
-                smtpClient.Disconnect(true);
+                await smtpClient.DisconnectAsync(true);
             }
 
             smtpClient.Dispose();
@@ -235,7 +235,7 @@ public class SmtpSender : INotifySender
                 ContentTransferEncoding = ContentEncoding.QuotedPrintable
             };
 
-            if (m.Attachments != null && m.Attachments.Length > 0)
+            if (m.Attachments is { Length: > 0 })
             {
                 var multipartRelated = new MultipartRelated
                 {

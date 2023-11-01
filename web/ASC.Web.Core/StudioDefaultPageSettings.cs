@@ -28,7 +28,7 @@ namespace ASC.Web.Studio.Core;
 
 public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
 {
-    public Guid DefaultProductID { get; set; }
+    public Guid DefaultProductID { get; init; }
 
     [JsonIgnore]
     public Guid ID

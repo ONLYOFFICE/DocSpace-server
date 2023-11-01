@@ -150,7 +150,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -230,7 +230,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -346,7 +346,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public async Task<bool> IsExistAsync(string title, Microsoft.SharePoint.Client.Folder folder)
+    public async Task<bool> IsExistAsync(string title, Folder folder)
     {
         var files = await SharePointProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
 

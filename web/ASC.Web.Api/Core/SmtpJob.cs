@@ -98,7 +98,7 @@ public class SmtpJob : DistributedTaskProgress
 
             SetProgress(15, "Find user data");
 
-            var currentUser = _userManager.GetUsers(_securityContext.CurrentAccount.ID);
+            var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
 
             SetProgress(20, "Create mime message");
 
@@ -127,7 +127,7 @@ public class SmtpJob : DistributedTaskProgress
             using var client = GetSmtpClient();
             SetProgress(40, "Connect to host");
 
-            client.Connect(_smtpSettings.Host, _smtpSettings.Port.GetValueOrDefault(25),
+            await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port.GetValueOrDefault(25),
                 _smtpSettings.EnableSSL ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
             if (_smtpSettings.EnableAuth)
@@ -137,18 +137,18 @@ public class SmtpJob : DistributedTaskProgress
                 if (_smtpSettings.UseNtlm)
                 {
                     var saslMechanism = new SaslMechanismNtlm(_smtpSettings.CredentialsUserName, _smtpSettings.CredentialsUserPassword);
-                    client.Authenticate(saslMechanism);
+                    await client.AuthenticateAsync(saslMechanism);
                 }
                 else
                 {
-                    client.Authenticate(_smtpSettings.CredentialsUserName,
+                    await client.AuthenticateAsync(_smtpSettings.CredentialsUserName,
                         _smtpSettings.CredentialsUserPassword);
                 }
             }
 
             SetProgress(80, "Send test message");
 
-            client.Send(FormatOptions.Default, mimeMessage);
+            await client.SendAsync(FormatOptions.Default, mimeMessage);
 
             Percentage = 100;
         }
@@ -159,7 +159,7 @@ public class SmtpJob : DistributedTaskProgress
         }
         catch (AggregateException ae)
         {
-            ae.Flatten().Handle(e => e is TaskCanceledException || e is OperationCanceledException);
+            ae.Flatten().Handle(e => e is TaskCanceledException or OperationCanceledException);
         }
         catch (SocketException ex)
         {

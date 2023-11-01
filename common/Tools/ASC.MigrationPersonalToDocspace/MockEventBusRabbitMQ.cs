@@ -26,7 +26,7 @@
 
 namespace ASC.Migration.PersonalToDocspace;
 
-[Singletone]
+[Singleton]
 public class MockEventBusRabbitMQ : IEventBus, IDisposable
 {
     public void Dispose()

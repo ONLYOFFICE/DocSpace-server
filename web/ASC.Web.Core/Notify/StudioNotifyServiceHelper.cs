@@ -67,14 +67,6 @@ public class StudioNotifyServiceHelper
         await SendNoticeToAsync(action, objectID, recipients, senderNames, false, null, args);
     }
 
-    public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)
-    {
-        var subscriptionSource = _studioNotifyHelper.NotifySource.GetSubscriptionProvider();
-        var recipients = await subscriptionSource.GetRecipientsAsync(action, null);
-
-        await SendNoticeToAsync(action, null, recipients, null, false, null, args);
-    }
-
     public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri, params ITagValue[] args)
     {
         var item = new NotifyItemIntegrationEvent(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantIdAsync())
@@ -102,7 +94,7 @@ public class StudioNotifyServiceHelper
                     recipient.CheckActivation = d.CheckActivation;
                 }
 
-                if (r is IRecipientsGroup g)
+                if (r is IRecipientsGroup)
                 {
                     recipient.IsGroup = true;
                 }
@@ -122,5 +114,13 @@ public class StudioNotifyServiceHelper
         }
 
         _eventBus.Publish(item);
+    }
+    
+    public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)
+    {
+        var subscriptionSource = _studioNotifyHelper.NotifySource.GetSubscriptionProvider();
+        var recipients = await subscriptionSource.GetRecipientsAsync(action, null);
+
+        await SendNoticeToAsync(action, null, recipients, null, false, null, args);
     }
 }

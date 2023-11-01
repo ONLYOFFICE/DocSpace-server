@@ -86,27 +86,27 @@ public interface IFolderDao<T>
     /// <param name="subjectID"></param>
     /// <param name="searchText"></param>
     /// <param name="withSubfolders"></param>
-    /// <param name="exludeSubject"></param>
+    /// <param name="excludeSubject"></param>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool exludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
     /// </summary>
     /// <param name="folderIds"></param>
-    /// <param name="filterTypes"></param>
+    /// <param name="filterType"></param>
     /// <param name="subjectGroup"></param>
     /// <param name="subjectID"></param>
     /// <param name="searchText"></param>
     /// <param name="searchSubfolders"></param>
     /// <param name="checkShare"></param>
-    /// <param name="exludeSubject"></param>
+    /// <param name="excludeSubject"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, FilterType filterTypes = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool exludeSubject = false);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false);
 
     /// <summary>
     ///     Get folder, contains folder with id

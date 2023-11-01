@@ -50,7 +50,7 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
         Size = new Size(width, height);
     }
 
-    public Point Point { get; set; }
+    public Point Point { get; init; }
 
     public Size Size { get; set; }
 

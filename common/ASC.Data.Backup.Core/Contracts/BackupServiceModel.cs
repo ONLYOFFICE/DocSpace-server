@@ -39,11 +39,11 @@ public enum BackupStorageType
 
 public class StartBackupRequest
 {
-    public int TenantId { get; set; }
-    public Guid UserId { get; set; }
-    public BackupStorageType StorageType { get; set; }
+    public int TenantId { get; init; }
+    public Guid UserId { get; init; }
+    public BackupStorageType StorageType { get; init; }
     public string StorageBasePath { get; set; }
-    public Dictionary<string, string> StorageParams { get; set; }
+    public Dictionary<string, string> StorageParams { get; init; }
 }
 
 /// <summary>
@@ -73,9 +73,9 @@ public class BackupHistoryRecord
 
 public class StartTransferRequest
 {
-    public int TenantId { get; set; }
-    public string TargetRegion { get; set; }
-    public bool NotifyUsers { get; set; }
+    public int TenantId { get; init; }
+    public string TargetRegion { get; init; }
+    public bool NotifyUsers { get; init; }
 }
 
 public class TransferRegion
@@ -87,26 +87,26 @@ public class TransferRegion
 
 public class StartRestoreRequest
 {
-    public int TenantId { get; set; }
+    public int TenantId { get; init; }
     public Guid BackupId { get; set; }
     public BackupStorageType StorageType { get; set; }
     public string FilePathOrId { get; set; }
-    public bool NotifyAfterCompletion { get; set; }
+    public bool NotifyAfterCompletion { get; init; }
     public Dictionary<string, string> StorageParams { get; set; }
 }
 
 public class CreateScheduleRequest : StartBackupRequest
 {
-    public string Cron { get; set; }
-    public int NumberOfBackupsStored { get; set; }
+    public string Cron { get; init; }
+    public int NumberOfBackupsStored { get; init; }
 }
 
 public class ScheduleResponse
 {
-    public BackupStorageType StorageType { get; set; }
-    public string StorageBasePath { get; set; }
-    public int NumberOfBackupsStored { get; set; }
-    public string Cron { get; set; }
-    public DateTime LastBackupTime { get; set; }
-    public Dictionary<string, string> StorageParams { get; set; }
+    public BackupStorageType StorageType { get; init; }
+    public string StorageBasePath { get; init; }
+    public int NumberOfBackupsStored { get; init; }
+    public string Cron { get; init; }
+    public DateTime LastBackupTime { get; init; }
+    public Dictionary<string, string> StorageParams { get; init; }
 }

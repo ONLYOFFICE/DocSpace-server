@@ -65,17 +65,17 @@ public static class UserExtensions
         return await userManager.IsUserAsync(ui);
     }
 
-    public static bool IsUser(this UserManager userManager, Guid id)
-    {
-        var ui = userManager.GetUsers(id);
-        return userManager.IsUser(ui);
-    }
-
     public static async Task<bool> IsUserAsync(this UserManager userManager, UserInfo ui)
     {
         return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupUser.ID);
     }
 
+    public static bool IsUser(this UserManager userManager, Guid id)
+    {
+        var ui = userManager.GetUsers(id);
+        return userManager.IsUser(ui);
+    }
+    
     public static bool IsUser(this UserManager userManager, UserInfo ui)
     {
         return ui != null && userManager.IsUserInGroup(ui.Id, Constants.GroupUser.ID);

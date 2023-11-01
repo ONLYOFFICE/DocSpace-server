@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 public class SubscriptionServiceCache
 {
     internal readonly ICache Cache;
@@ -153,19 +153,19 @@ public class CachedSubscriptionService : ISubscriptionService
     public async Task SaveSubscriptionAsync(SubscriptionRecord s)
     {
         await _service.SaveSubscriptionAsync(s);
-        _notifyRecord.Publish(s, CacheNotifyAction.InsertOrUpdate);
+        await _notifyRecord.PublishAsync(s, CacheNotifyAction.InsertOrUpdate);
     }
 
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId)
     {
         await _service.RemoveSubscriptionsAsync(tenant, sourceId, actionId);
-        _notifyRecord.Publish(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId }, CacheNotifyAction.Remove);
+        await _notifyRecord.PublishAsync(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId }, CacheNotifyAction.Remove);
     }
 
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId, string objectId)
     {
         await _service.RemoveSubscriptionsAsync(tenant, sourceId, actionId, objectId);
-        _notifyRecord.Publish(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId, ObjectId = objectId }, CacheNotifyAction.Remove);
+        await _notifyRecord.PublishAsync(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId, ObjectId = objectId }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<SubscriptionMethod>> GetSubscriptionMethodsAsync(int tenant, string sourceId, string actionId, string recipientId)
@@ -180,7 +180,7 @@ public class CachedSubscriptionService : ISubscriptionService
     public async Task SetSubscriptionMethodAsync(SubscriptionMethod m)
     {
         await _service.SetSubscriptionMethodAsync(m);
-        _notifyMethod.Publish(m, CacheNotifyAction.Any);
+        await _notifyMethod.PublishAsync(m, CacheNotifyAction.Any);
     }
 
 
@@ -228,15 +228,22 @@ internal class SubsciptionsStore
 
     public IEnumerable<SubscriptionRecord> GetSubscriptions(string recipientId, string objectId)
     {
-        return recipientId != null ?
-            _recordsByRec.ContainsKey(recipientId) ? _recordsByRec[recipientId].ToList() : new List<SubscriptionRecord>() :
-            _recordsByObj.ContainsKey(objectId ?? string.Empty) ? _recordsByObj[objectId ?? string.Empty].ToList() : new List<SubscriptionRecord>();
+        var oId = objectId ?? string.Empty;
+
+        if (recipientId != null)
+        {
+            return _recordsByRec.TryGetValue(recipientId, out var value1)
+                ? value1.ToList()
+                : new List<SubscriptionRecord>();
+        }
+        
+        return _recordsByObj.TryGetValue(oId, out var value) ? value.ToList() : new List<SubscriptionRecord>();
     }
 
     public SubscriptionRecord GetSubscription(string recipientId, string objectId)
     {
-        return _recordsByRec.ContainsKey(recipientId) ?
-            _recordsByRec[recipientId].Where(s => s.ObjectId == (objectId ?? "")).FirstOrDefault() :
+        return _recordsByRec.TryGetValue(recipientId, out var value) ?
+            value.Find(s => s.ObjectId == (objectId ?? "")) :
             null;
     }
 
@@ -270,13 +277,13 @@ internal class SubsciptionsStore
     {
         return string.IsNullOrEmpty(recipientId) ?
             _methods.ToList() :
-            _methodsByRec.ContainsKey(recipientId) ? _methodsByRec[recipientId].ToList() : new List<SubscriptionMethod>();
+            _methodsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionMethod>();
     }
 
     public void SetSubscriptionMethod(SubscriptionMethod m)
     {
         _methods.RemoveAll(r => r.Tenant == m.Tenant && r.Source == m.Source && r.Action == m.Action && r.Recipient == m.Recipient);
-        if (m.Methods != null && 0 < m.Methods.Length)
+        if (m.Methods is { Length: > 0 })
         {
             _methods.Add(m);
         }

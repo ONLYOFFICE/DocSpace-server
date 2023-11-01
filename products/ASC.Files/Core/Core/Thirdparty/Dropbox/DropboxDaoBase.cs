@@ -39,7 +39,7 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
         FileUtility fileUtility, 
         TempPath tempPath,
         AuthContext authContext, 
-        RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
+        RegexDaoSelectorBase<FileMetadata, FolderMetadata, Metadata> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
     {
     }
 
@@ -162,7 +162,7 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
 
     public bool IsRoot(FolderMetadata dropboxFolder)
     {
-        return dropboxFolder != null && dropboxFolder.Id == "/";
+        return dropboxFolder is { Id: "/" };
     }
 
     private File<string> ToErrorFile(ErrorFile dropboxFile)

@@ -56,7 +56,7 @@ public abstract class TagsController<T> : ApiControllerBase
     private readonly FileStorageService _fileStorageService;
     private readonly EntryManager _entryManager;
 
-    public TagsController(
+    protected TagsController(
         FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
@@ -64,7 +64,6 @@ public abstract class TagsController<T> : ApiControllerBase
     {
         _fileStorageService = fileStorageService;
         _entryManager = entryManager;
-        _fileDtoHelper = fileDtoHelper;
     }
 
     /// <summary>

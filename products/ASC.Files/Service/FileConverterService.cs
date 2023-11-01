@@ -26,7 +26,7 @@
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singletone(Additional = typeof(FileConverterQueueExtension))]
+[Singleton(Additional = typeof(FileConverterQueueExtension))]
 internal class FileConverterService<T> : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -163,8 +163,7 @@ internal class FileConverterService<T> : BackgroundService
                 }
                 catch (Exception exception)
                 {
-                    var password1 = exception.InnerException is DocumentServiceException documentServiceException
-                                          && documentServiceException.Code == DocumentServiceException.ErrorCode.ConvertPassword;
+                    var password1 = exception.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword };
 
                     logger.ErrorConvertFileWithUrl(file.Id.ToString(), fileUri, exception);
 

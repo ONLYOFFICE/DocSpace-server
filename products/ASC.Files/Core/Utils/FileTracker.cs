@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Utils;
 
-[Singletone]
+[Singleton]
 public class FileTrackerHelper
 {
     private const string Tracker = "filesTracker";
@@ -76,14 +76,14 @@ public class FileTrackerHelper
         var tracker = GetTracker(fileId);
         if (tracker != null)
         {
-            if (tabId != default)
+            if (tabId != Guid.Empty)
             {
                 tracker.EditingBy.Remove(tabId);
                 SetTracker(fileId, tracker);
 
                 return;
             }
-            if (userId != default)
+            if (userId != Guid.Empty)
             {
                 var listForRemove = tracker.EditingBy
                                            .Where(b => tracker.EditingBy[b.Key].UserId == userId);
@@ -217,7 +217,7 @@ public class FileTrackerHelper
 
     private Action<object, object, EvictionReason, object> EvictionCallback<T>(T fileId, FileTracker fileTracker)
     {
-        return async (key, value, reason, state) =>
+        return async (_, _, reason, _) =>
         {
             if (reason != EvictionReason.Expired)
             {
@@ -239,7 +239,6 @@ public class FileTrackerHelper
                 var helper = scope.ServiceProvider.GetRequiredService<DocumentServiceHelper>();
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
                 var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-                var socketManager = scope.ServiceProvider.GetRequiredService<SocketManager>();
 
                 var docKey = await helper.GetDocKeyAsync(await daoFactory.GetFileDao<T>().GetFileAsync(fileId));
 

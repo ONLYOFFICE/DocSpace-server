@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Utils;
 
-[Singletone]
+[Singleton]
 public class TimeZoneConverter
 {
     private TimeZoneInfo _defaultTimeZone;
@@ -236,7 +236,7 @@ public class TimeZoneConverter
             return _isMono ? timeZone.Id : timeZone.DisplayName;
         }
 
-        return _translations.ContainsKey(timeZone.Id) ? _translations[timeZone.Id] : timeZone.DisplayName;
+        return _translations.TryGetValue(timeZone.Id, out var translation) ? translation : timeZone.DisplayName;
     }
 
     private TimeZoneInfo GetTimeZoneDefault()
@@ -248,7 +248,7 @@ public class TimeZoneConverter
                 var tz = TimeZoneInfo.Local;
                 if (Path.DirectorySeparatorChar == '/')
                 {
-                    if (tz.StandardName == "UTC" || tz.StandardName == "UCT")
+                    if (tz.StandardName is "UTC" or "UCT")
                     {
                         tz = TimeZoneInfo.Utc;
                     }
@@ -329,7 +329,7 @@ public class TimeZoneConverter
         }
     }
 
-    private class MapZone
+    private sealed class MapZone
     {
         public string OlsonTimeZoneId { get; set; }
         public string WindowsTimeZoneId { get; set; }

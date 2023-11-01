@@ -28,7 +28,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singletone]
+[Singleton]
 public class ThumbnailSettings
 {
     public ThumbnailSettings(ConfigurationExtension configuration)
@@ -74,7 +74,7 @@ public class ThumbnailSettings
                 return _formatsArray;
             }
 
-            _formatsArray = (Formats ?? "").Split(new char[] { '|', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            _formatsArray = (Formats ?? "").Split(new[] { '|', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             return _formatsArray;
         }

@@ -198,23 +198,17 @@ public class ProductEntryPoint : Product
                 continue;
             }
 
-            if (e.Action == (int)MessageAction.FileCreated
-                || e.Action == (int)MessageAction.FileUpdatedRevisionComment
-                || e.Action == (int)MessageAction.FileUploaded
-                || e.Action == (int)MessageAction.UserFileUpdated)
+            if (e.Action is (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated)
             {
                 activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
             }
 
-            AdditionalNotificationInfo additionalInfo = null;
-
             var obj = e.Description.LastOrDefault();
-            additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
+            var additionalInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(obj);
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 
-            if (e.Action == (int)MessageAction.UserCreated
-                || e.Action == (int)MessageAction.UserUpdated)
+            if (e.Action is (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated)
             {
                 if (docSpaceAdmin)
                 {
@@ -319,9 +313,9 @@ public class ProductEntryPoint : Product
         }
 
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
-        var ArchiveFolderId = await _globalFolder.GetFolderArchiveAsync<int>(_daoFactory);
+        var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, ArchiveFolderId }, FilterType.None, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, FilterType.None, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
 
         foreach (var room in rooms)
         {
@@ -357,10 +351,7 @@ public class ProductEntryPoint : Product
 
         bool IsRoomAdminAction()
         {
-            if (action == MessageAction.RoomRenamed
-                || action == MessageAction.RoomArchived
-                || action == MessageAction.RoomCreateUser
-                || action == MessageAction.RoomRemoveUser)
+            if (action is MessageAction.RoomRenamed or MessageAction.RoomArchived or MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser)
             {
                 return true;
             }
@@ -370,9 +361,7 @@ public class ProductEntryPoint : Product
 
         bool IsRoomAdminOrTargetUserAction()
         {
-            if (action == MessageAction.RoomUpdateAccessForUser
-                || action == MessageAction.RoomDeleted
-                || action == MessageAction.UsersUpdatedType)
+            if (action is MessageAction.RoomUpdateAccessForUser or MessageAction.RoomDeleted or MessageAction.UsersUpdatedType)
             {
                 return true;
             }

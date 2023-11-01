@@ -53,7 +53,7 @@ public static class PredicateBuilder
 
 internal class SubstExpressionVisitor : ExpressionVisitor
 {
-    internal Dictionary<Expression, Expression> Subst = new Dictionary<Expression, Expression>();
+    internal readonly Dictionary<Expression, Expression> Subst = new();
 
     protected override Expression VisitParameter(ParameterExpression node)
     {

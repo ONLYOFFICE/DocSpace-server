@@ -165,7 +165,7 @@ public class StudioNotifySource : NotifySource
     }
 
 
-    private class AdminNotifySubscriptionProvider : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider : ISubscriptionProvider
     {
         private readonly ISubscriptionProvider _provider;
 
@@ -180,9 +180,9 @@ public class StudioNotifySource : NotifySource
             return await _provider.GetSubscriptionRecordAsync(GetAdminAction(action), recipient, objectID);
         }
 
-        public async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscription = true)
+        public async Task<string[]> GetSubscriptionsAsync(INotifyAction action, IRecipient recipient, bool checkSubscribe = true)
         {
-            return await _provider.GetSubscriptionsAsync(GetAdminAction(action), recipient, checkSubscription);
+            return await _provider.GetSubscriptionsAsync(GetAdminAction(action), recipient, checkSubscribe);
         }
 
         public async Task SubscribeAsync(INotifyAction action, string objectID, IRecipient recipient)

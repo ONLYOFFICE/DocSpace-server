@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Linq;
-
-using ASC.Files.Core.Core.Thirdparty.ProviderDao;
-
 namespace ASC.Data.Backup.Tasks.Modules;
 
 public class FilesModuleSpecifics : ModuleSpecificsBase
@@ -42,7 +38,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
     private const string _bunchRightNodeStartTrash = "files/trash/";
     private const string _bunchRightNodeStartPrivacy = "files/privacy/";
 
-    private static readonly Regex _regexIsInteger = new Regex(@"^\d+$", RegexOptions.Compiled);
+    private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
     private readonly Helpers _helpers;
     private readonly ILogger<ModuleProvider> _logger;
     private readonly TableInfo[] _tables = new[]
@@ -261,7 +257,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
     {
-        if (table.Name == "files_thirdparty_account" && (columnName == "password" || columnName == "token") && value != null)
+        if (table.Name == "files_thirdparty_account" && columnName is "password" or "token" && value != null)
         {
             try
             {
@@ -274,7 +270,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
             }
             return true;
         }
-        if (table.Name == "files_folder" && (columnName == "create_by" || columnName == "modified_by"))
+        if (table.Name == "files_folder" && columnName is "create_by" or "modified_by")
         {
             base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
 
@@ -300,7 +296,7 @@ public class FilesModuleSpecifics2 : ModuleSpecificsBase
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _rels;
 
-    private static readonly Regex _regexIsInteger = new Regex(@"^\d+$", RegexOptions.Compiled);
+    private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
     private const string _tagStartMessage = "Message";
     private const string _tagStartTask = "Task";
     private const string _tagStartProject = "Project";

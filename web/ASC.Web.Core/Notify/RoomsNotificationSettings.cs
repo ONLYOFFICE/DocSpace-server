@@ -30,7 +30,7 @@ using AutoMapper.Internal;
 namespace ASC.Web.Core.Notify;
 public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 {
-    public List<int> DisabledRooms { get; set; }
+    public List<int> DisabledRooms { get; init; }
 
     [JsonIgnore]
     public Guid ID

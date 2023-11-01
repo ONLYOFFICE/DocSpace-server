@@ -30,7 +30,7 @@ namespace ASC.Notify.Textile;
 public class PushStyler : IPatternStyler
 {
     private static readonly Regex _velocityArgumentsRegex
-        = new Regex(NVelocityPatternFormatter.NoStylePreffix + "(?'arg'.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
+        = new(NVelocityPatternFormatter.NoStylePreffix + "(?'arg'.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
     public void ApplyFormating(NoticeMessage message)

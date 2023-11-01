@@ -46,34 +46,34 @@ public class TelegramDao
             TelegramUserId = telegramId
         };
 
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         await dbContext.AddOrUpdateAsync(q => q.Users, user);
         await dbContext.SaveChangesAsync();
     }
 
     public async Task<TelegramUser> GetUserAsync(Guid userId, int tenantId)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         return await dbContext.Users.FindAsync(tenantId, userId);
     }
 
     public async Task<List<TelegramUser>> GetUsersAsync(long telegramId)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.TelegramUsersAsync(dbContext, telegramId).ToListAsync();
     }
 
     public async Task DeleteAsync(Guid userId, int tenantId)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteTelegramUsersAsync(dbContext, tenantId, userId);
     }
 
     public async Task DeleteAsync(long telegramId)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteTelegramUsersByTelegramIdAsync(dbContext, telegramId);
     }

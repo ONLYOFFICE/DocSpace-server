@@ -89,7 +89,7 @@ public class FilesMappingAction : IMappingAction<DbFolderQuery, Folder<int>>, IM
                 destination.RootFolderType = destination.FolderType;
             }
 
-            if (destination.RootCreateBy == default)
+            if (destination.RootCreateBy == Guid.Empty)
             {
                 destination.RootCreateBy = destination.CreateBy;
             }

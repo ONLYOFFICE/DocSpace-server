@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone(Additional = typeof(FirebaseSenderExtension))]
+[Singleton(Additional = typeof(FirebaseSenderExtension))]
 public class PushSender : INotifySender
 {
     private readonly ILogger _logger;

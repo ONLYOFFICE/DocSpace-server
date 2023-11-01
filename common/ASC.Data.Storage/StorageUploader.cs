@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone]
+[Singleton]
 public class StorageUploader
 {
     protected readonly DistributedTaskQueue _queue;
@@ -180,7 +180,7 @@ public class MigrateOperation : DistributedTaskProgress
                 }
 
                 files = (await oldStore.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true).ToArrayAsync())
-                .Where(path => domains.All(domain => !path.Contains(domain + "/")))
+                .Where(path => domains.TrueForAll(domain => !path.Contains(domain + "/")))
                 .ToArray();
 
                 foreach (var file in files)

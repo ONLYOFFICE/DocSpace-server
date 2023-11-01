@@ -100,24 +100,11 @@ Er is een back-upbestand met data van uw "${__VirtualRootPath}":"${__VirtualRoot
 Om meer te weten te komen over de back-upprocedure ga alstublieft naar onze "Data back-up": "https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" handleiding.
 
 
-Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support.onlyoffice.com":"http://support.onlyoffice.com"
+Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Met vriendelijke groet,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
-  </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Verzoek wijzigen wachtwoord voor het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
-
-Er is een verzoek gedaan om uw wachtwoord te wijzigen waarmee u inlogt op het ${LetterLogoText} portaal.
-
-Klik alstublieft op de onderstaande link om uw wachtwoord te wijzigen:
-
-$OrangeButton
-
-*Let op*: deze link is maar 7 dagen geldig. Voltooi het proces om uw wachtwoord te wijzigen alstublieft binnen die periode. 
-
-Als u uw wachtwoord niet wilt wijzigen of deze e-mail ten onrechte ontvangt, kunt u deze negeren of contact opnemen met uw "${__VirtualRootPath}":"${__VirtualRootPath}" portaalbeheerder om meer informatie te krijgen.</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Verzoek wijzigen mobiel telefoonnummer
@@ -176,7 +163,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -197,7 +184,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -218,7 +205,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -239,7 +226,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Bericht van het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
@@ -269,7 +256,7 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support
 
 Vriendelijke groet,
 ONLYOFFICE™ Supportteam
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Om het notificatietype te veranderen, beheer alstublieft uw "abonnementsinstellingen": "$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -282,7 +269,7 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support
 
 Vriendelijke groet,
 ONLYOFFICE™ Supportteam
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Om het notificatietype te veranderen, beheer alstublieft uw "abonnementsinstellingen": "$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -297,7 +284,7 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support
 
 Vriendelijke groet,
 ONLYOFFICE™ Supportteam
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deactivatie van het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
@@ -319,7 +306,7 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support
 
 Met vriendelijke groet,
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Verwijdering van het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
@@ -344,7 +331,7 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support
 
 Met vriendelijke groet,
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Verandering van portaaladres
@@ -420,7 +407,7 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "support
 
 Met vriendelijke groet,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Om het notificatietype te veranderen, kunt u dit beheren in uw "abonnementsinstellingen":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -602,7 +589,7 @@ Beleef een nieuwe manier van samenwerken aan documenten!
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -617,7 +604,7 @@ Beleef een nieuwe manier van samenwerken aan documenten!
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -639,7 +626,7 @@ Beleef een nieuwe manier van samenwerken aan documenten!
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -654,7 +641,7 @@ Beleef een nieuwe manier van samenwerken aan documenten!
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -667,7 +654,7 @@ Ontvang gratis ONLYOFFICE apps om vanaf elk van uw apparaten aan documenten te w
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -686,7 +673,7 @@ $OrangeButton
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -705,7 +692,7 @@ $OrangeButton
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -724,7 +711,7 @@ $OrangeButton
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -743,7 +730,7 @@ $OrangeButton
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -764,7 +751,7 @@ _Let op: Degene die het abonnement betaalt, wordt de betaler. Alleen de betaler 
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -785,7 +772,7 @@ _Let op: Degene die het abonnement betaalt, wordt de betaler. Alleen de betaler 
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -806,7 +793,7 @@ _Let op: Degene die het abonnement betaalt, wordt de betaler. Alleen de betaler 
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -827,7 +814,7 @@ _Let op: Degene die het abonnement betaalt, wordt de betaler. Alleen de betaler 
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -838,7 +825,7 @@ $OrangeButton
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -849,7 +836,7 @@ $OrangeButton
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -860,7 +847,7 @@ $OrangeButton
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Hallo!
@@ -871,7 +858,7 @@ $OrangeButton
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -892,7 +879,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -913,7 +900,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -934,7 +921,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -955,7 +942,7 @@ Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onl
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Bericht van het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
@@ -977,7 +964,7 @@ Ontvang gratis ONLYOFFICE apps om vanaf elk van uw apparaten aan documenten te w
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -990,7 +977,7 @@ Ontvang gratis ONLYOFFICE apps om vanaf elk van uw apparaten aan documenten te w
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Hallo!
@@ -1021,7 +1008,7 @@ Hartelijk dank en veel succes!
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1048,7 +1035,7 @@ Ga naar ons "Helpcentrum":"https://helpcenter.onlyoffice.com/" voor meer informa
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>U heeft uw ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" al meer dan een half jaar niet ingevoerd. 
@@ -1063,7 +1050,7 @@ Als u denkt dat dit een fout is en u wilt ONLYOFFICE DocSpace blijven gebruiken,
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Hallo!
@@ -1076,7 +1063,7 @@ Nadat u op de uitnodigingslink hebt geklikt, stelt u een nieuw wachtwoord in voo
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hallo, $UserName!
@@ -1141,7 +1128,7 @@ Nadat u op de uitnodigingslink hebt geklikt, stelt u een nieuw wachtwoord in voo
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Wat is er nieuw op uw portaal voor $Date</value>
@@ -1332,11 +1319,11 @@ Er is een back-up bestand gemaakt met gegevens van uw [${__VirtualRootPath}](${_
 
 Raadpleeg voor meer informatie over de back-up procedure onze gebruikershandleiding [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Als u vragen hebt of hulp nodig hebt, kunt u contact met ons opnemen via [support.onlyoffice.com](http://support.onlyoffice.com).
+Als u vragen hebt of hulp nodig hebt, kunt u contact met ons opnemen via [support.onlyoffice.com](https://support.onlyoffice.com).
 
 Met vriendelijke groet,
 ONLYOFFICE™ Ondersteuningsteam
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Wilt u het e-mailadres op uw ${LetterLogoText} account wijzigen?
@@ -1545,7 +1532,7 @@ Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [
 
 Met vriendelijke groet,
 ONLYOFFICE™ Ondersteuningsteam
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Verwijdering van het [${__VirtualRootPath}](${__VirtualRootPath}) portaal
@@ -1570,7 +1557,7 @@ Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [
 
 Met vriendelijke groet,
 ONLYOFFICE™ Ondersteuningsteam
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Gebruiker $FromUserName":"$FromUserLink" heeft zijn/haar profiel verwijderd, en dit profiel is nu geblokkeerd. Alle bestanden van de gebruiker zijn nog steeds aan hem/haar toegewezen en nemen schijfruimte in beslag. 
@@ -1673,7 +1660,7 @@ Wij sturen u ook af en toe nuttige tips en het laatste ONLYOFFICE nieuws. U kunt
 
 Hoogachtend,
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portaal profiel wijziging melding

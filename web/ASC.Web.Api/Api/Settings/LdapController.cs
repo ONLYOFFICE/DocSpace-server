@@ -28,8 +28,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class LdapController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly SettingsManager _settingsManager;
     private readonly TenantManager _tenantManager;
     private readonly LdapNotifyService _ldapNotifyHelper;
@@ -195,7 +193,9 @@ public class LdapController : BaseSettingsController
 
         var userId = _authContext.CurrentAccount.ID.ToString();
 
-        var result = await _ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, Tenant, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -217,7 +217,9 @@ public class LdapController : BaseSettingsController
 
         var ldapSettings = await _settingsManager.LoadAsync<LdapSettings>();
 
-        var result = await _ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, Tenant);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -247,7 +249,9 @@ public class LdapController : BaseSettingsController
 
         var userId = _authContext.CurrentAccount.ID.ToString();
 
-        var result = await _ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, Tenant, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -270,7 +274,9 @@ public class LdapController : BaseSettingsController
 
         var userId = _authContext.CurrentAccount.ID.ToString();
 
-        var result = await _ldapSaveSyncOperation.TestLdapSaveAsync(inDto, Tenant, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -290,7 +296,9 @@ public class LdapController : BaseSettingsController
     {
         await CheckLdapPermissionsAsync();
 
-        var result = _ldapSaveSyncOperation.ToLdapOperationStatus(Tenant.Id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = _ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -317,7 +325,7 @@ public class LdapController : BaseSettingsController
 
     private async Task CheckLdapPermissionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!_coreBaseSettings.Standalone
             && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())

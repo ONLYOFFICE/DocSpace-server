@@ -28,8 +28,8 @@ namespace ASC.Data.Backup.Tasks;
 
 public class ColumnMapper
 {
-    private readonly Dictionary<string, object> _mappings = new Dictionary<string, object>();
-    private readonly Dictionary<string, object> _newMappings = new Dictionary<string, object>();
+    private readonly Dictionary<string, object> _mappings = new();
+    private readonly Dictionary<string, object> _newMappings = new();
     private readonly DateTime _now = DateTime.UtcNow;
 
     public int GetTenantMapping()
@@ -137,7 +137,7 @@ public class ColumnMapper
 
     private object GetMappingInternal(string key)
     {
-        return _newMappings.ContainsKey(key) ? _newMappings[key] : _mappings[key];
+        return _newMappings.TryGetValue(key, out var mapping) ? mapping : _mappings[key];
     }
 
     private bool HasMapping(string key)
@@ -155,7 +155,7 @@ public class ColumnMapper
         return string.Format("{0};v:{1}", GetMappingKey(tableName, columnName), oldValue).ToLowerInvariant();
     }
 
-    private class MappingWithCondition
+    private sealed class MappingWithCondition
     {
         public object NewValue { get; set; }
         public object OldValue { get; set; }

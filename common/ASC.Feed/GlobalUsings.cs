@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Data;
 global using System.Linq.Expressions;
 
 global using ASC.Common;
@@ -39,8 +38,6 @@ global using ASC.Feed.Core;
 global using ASC.Feed.Data;
 global using ASC.Feed.Mapping;
 global using ASC.Feed.Model;
-
-global using Autofac;
 
 global using AutoMapper;
 

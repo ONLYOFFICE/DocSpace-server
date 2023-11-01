@@ -44,7 +44,7 @@ public class CapabilitiesDto
 
     /// <summary>Specifies if OAuth is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool OauthEnabled { get; set; }
+    public bool OauthEnabled { get; init; }
 
     /// <summary>SSO URL. If this parameter is empty, then the SSO settings are disabled</summary>
     /// <type>System.String, System</type>

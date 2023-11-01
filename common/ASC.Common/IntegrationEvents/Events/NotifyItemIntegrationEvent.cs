@@ -32,7 +32,7 @@ namespace ASC.Common.IntegrationEvents.Events;
 public record NotifyItemIntegrationEvent : IntegrationEvent
 {
     [ProtoMember(1)]
-    public NotifyActionItem Action { get; set; }
+    public NotifyActionItem Action { get; init; }
 
     [ProtoMember(2)]
     public string ObjectId { get; set; }
@@ -47,12 +47,12 @@ public record NotifyItemIntegrationEvent : IntegrationEvent
     public List<Tag> Tags { get; set; }
 
     [ProtoMember(6)]
-    public bool CheckSubsciption { get; set; }
+    public bool CheckSubsciption { get; init; }
 
     [ProtoMember(7)]
-    public string BaseUrl { get; set; }
+    public string BaseUrl { get; init; }
 
-    private NotifyItemIntegrationEvent() : base()
+    private NotifyItemIntegrationEvent()
     {
 
     }
@@ -71,23 +71,23 @@ public record NotifyItemIntegrationEvent : IntegrationEvent
 public record NotifyActionItem
 {
     [ProtoMember(1)]
-    public string Id { get; set; }
+    public string Id { get; init; }
 }
 
 [ProtoContract]
 public record Recipient
 {
     [ProtoMember(1)]
-    public string Id { get; set; }
+    public string Id { get; init; }
 
     [ProtoMember(2)]
-    public string Name { get; set; }
+    public string Name { get; init; }
 
     [ProtoMember(3)]
     public bool CheckActivation { get; set; }
 
     [ProtoMember(4)]
-    public List<string> Addresses { get; set; }
+    public List<string> Addresses { get; init; }
 
     [ProtoMember(5)]
     public bool IsGroup { get; set; }
@@ -97,8 +97,8 @@ public record Recipient
 public record Tag
 {
     [ProtoMember(1)]
-    public string Key { get; set; }
+    public string Key { get; init; }
 
     [ProtoMember(2)]
-    public string Value { get; set; }
+    public string Value { get; init; }
 }

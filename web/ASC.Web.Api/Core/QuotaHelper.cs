@@ -84,19 +84,17 @@ public class QuotaHelper
     {
         var assembly = GetType().Assembly;
 
-        var features = quota.Features.Split(' ', ',', ';');
-
         foreach (var feature in quota.TenantQuotaFeatures.
-            Where(r =>
-             {
-                 if (r.Standalone)
-                 {
-                     return _coreBaseSettings.Standalone;
-                 }
+                     Where(r =>
+                     {
+                         if (r.Standalone)
+                         {
+                             return _coreBaseSettings.Standalone;
+                         }
 
-                 return r.Visible;
-             })
-           .OrderBy(r => r.Order))
+                         return r.Visible;
+                     })
+                     .OrderBy(r => r.Order))
         {
             var result = new TenantQuotaFeatureDto
             {
@@ -153,7 +151,7 @@ public class QuotaHelper
                     try
                     {
                         using var memoryStream = new MemoryStream();
-                        img.CopyTo(memoryStream);
+                        await img.CopyToAsync(memoryStream);
                         result.Image = Encoding.UTF8.GetString(memoryStream.ToArray());
                     }
                     catch (Exception)

@@ -52,7 +52,7 @@ public class TextLoader : ResourceLoader
 public static class VelocityFormatter
 {
     private static bool _initialized;
-    private static readonly ConcurrentDictionary<string, Template> _patterns = new ConcurrentDictionary<string, Template>();
+    private static readonly ConcurrentDictionary<string, Template> _patterns = new();
 
     public static string FormatText(string templateText, IDictionary<string, object> values)
     {

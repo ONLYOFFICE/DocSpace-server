@@ -28,16 +28,6 @@ namespace ASC.Files.Core.Data;
 
 public class AbstractDao
 {
-
-    protected internal int TenantID
-    {
-        get
-        {
-            return _tenantManager.GetCurrentTenant().Id;
-        }
-    }
-
-    protected readonly ICache _cache;
     protected readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     protected readonly UserManager _userManager;
     protected readonly TenantManager _tenantManager;
@@ -61,10 +51,8 @@ public class AbstractDao
         CoreConfiguration coreConfiguration,
         SettingsManager settingsManager,
         AuthContext authContext,
-        IServiceProvider serviceProvider,
-        ICache cache)
+        IServiceProvider serviceProvider)
     {
-        _cache = cache;
         _dbContextFactory = dbContextFactory;
         _userManager = userManager;
         _tenantManager = tenantManager;
@@ -79,23 +67,26 @@ public class AbstractDao
     }
 
 
-    protected IQueryable<T> Query<T>(DbSet<T> set) where T : class, IDbFile
+    protected async Task<IQueryable<T>> Query<T>(DbSet<T> set) where T : class, IDbFile
     {
-        var tenantId = TenantID;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         return set.Where(r => r.TenantId == tenantId);
     }
 
-    protected internal IQueryable<DbFile> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
+    protected async Task<IQueryable<DbFile>> GetFileQuery(FilesDbContext filesDbContext, Expression<Func<DbFile, bool>> where)
     {
-        return Query(filesDbContext.Files)
+        return (await Query(filesDbContext.Files))
             .Where(where);
     }
 
     protected async Task GetRecalculateFilesCountUpdateAsync(int folderId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var folders = await Queries.FoldersAsync(filesDbContext, TenantID, folderId).ToListAsync();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        var folders = await Queries.FoldersAsync(filesDbContext, tenantId, folderId).ToListAsync();
 
         foreach (var f in folders)
         {
@@ -104,11 +95,11 @@ public class AbstractDao
         await filesDbContext.SaveChangesAsync();
     }
 
-    protected ValueTask<object> MappingIDAsync(object id)
+    protected int MappingIDAsync(int id)
     {
-        return MappingIDAsync(id, false);
+        return id;
     }
-
+    
     protected ValueTask<object> MappingIDAsync(object id, bool saveIfNotExist = false)
     {
         if (id == null)
@@ -126,41 +117,34 @@ public class AbstractDao
         return InternalMappingIDAsync(id, saveIfNotExist);
     }
 
-    protected int MappingIDAsync(int id)
-    {
-        return MappingIDAsync(id, false);
-    }
-
-    protected int MappingIDAsync(int id, bool saveIfNotExist = false)
-    {
-        return id;
-    }
-
     private async ValueTask<object> InternalMappingIDAsync(object id, bool saveIfNotExist = false)
     {
         object result;
 
         var sId = id.ToString();
-        if (Selectors.All.Any(s => sId.StartsWith(s.Id)))
+        if (Selectors.All.Exists(s => sId.StartsWith(s.Id)))
         {
             result = Regex.Replace(BitConverter.ToString(Hasher.Hash(id.ToString(), HashAlg.MD5)), "-", "").ToLower();
         }
         else
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
-            result = await Queries.IdAsync(filesDbContext, TenantID, id.ToString());
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            result = await Queries.IdAsync(filesDbContext, tenantId, id.ToString());
         }
 
         if (saveIfNotExist)
         {
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            
             var newItem = new DbFilesThirdpartyIdMapping
             {
                 Id = id.ToString(),
                 HashId = result.ToString(),
-                TenantId = TenantID
+                TenantId = tenantId
             };
 
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyIdMapping, newItem);
             await filesDbContext.SaveChangesAsync();
         }
@@ -168,22 +152,22 @@ public class AbstractDao
         return result;
     }
 
-    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearhTypeEnum searhTypeEnum) where T : IDbSearch
+    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string text, SearchType searchType) where T : IDbSearch
     {
         var lowerText = GetSearchText(text);
 
-        return searhTypeEnum switch
+        return searchType switch
         {
-            SearhTypeEnum.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
-            SearhTypeEnum.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
-            SearhTypeEnum.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
+            SearchType.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
+            SearchType.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
+            SearchType.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
             _ => query,
         };
     }
 
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
 
-    internal enum SearhTypeEnum
+    internal enum SearchType
     {
         Start,
         End,
@@ -218,7 +202,7 @@ static file class Queries
                 ctx.ThirdpartyIdMapping
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.HashId == hashId)
-                    
+
                     .Select(r => r.Id)
                     .FirstOrDefault());
 }

@@ -26,7 +26,7 @@
 
 namespace ASC.Feed.Configuration;
 
-[Singletone]
+[Singleton]
 public class FeedSettings
 {
     public string ServerRoot

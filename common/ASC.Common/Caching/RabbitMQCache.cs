@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
 {
     private IConnection _connection;
@@ -40,7 +40,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
 
-    private readonly object _lock = new object();
+    private readonly object _lock = new();
     private bool _disposed;
 
     public RabbitMQCache(IConfiguration configuration, ILogger<RabbitMQCache<T>> logger)
@@ -78,7 +78,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
 
         channel.QueueBind(_queueName, _exchangeName, string.Empty, null);
 
-        channel.CallbackException += (sender, ea) =>
+        channel.CallbackException += (_, ea) =>
         {
             _logger.WarningRecreatingRabbitMQ(ea.Exception);
 
@@ -120,14 +120,14 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
             }
 
             _connection = _factory.CreateConnection();
-            _connection.ConnectionShutdown += (s, e) => TryConnect();
-            _connection.CallbackException += (s, e) => TryConnect();
-            _connection.ConnectionBlocked += (s, e) => TryConnect();
+            _connection.ConnectionShutdown += (_, _) => TryConnect();
+            _connection.CallbackException += (_, _) => TryConnect();
+            _connection.ConnectionBlocked += (_, _) => TryConnect();
         }
     }
 
 
-    public bool IsConnected => _connection != null && _connection.IsOpen && !_disposed;
+    public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
     private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
     {

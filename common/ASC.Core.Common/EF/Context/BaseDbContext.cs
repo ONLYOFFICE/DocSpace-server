@@ -53,18 +53,14 @@ public class InstallerOptionsAction
         optionsBuilder.UseLoggerFactory(loggerFactory);
         optionsBuilder.EnableSensitiveDataLogging();
 
-        var _provider = Provider.MySql;
-        switch (connectionString.ProviderName)
+        var provider = connectionString.ProviderName switch
         {
-            case "MySql.Data.MySqlClient":
-                _provider = Provider.MySql;
-                break;
-            case "Npgsql":
-                _provider = Provider.PostgreSql;
-                break;
-        }
+            "MySql.Data.MySqlClient" => Provider.MySql,
+            "Npgsql" => Provider.PostgreSql,
+            _ => Provider.MySql
+        };
 
-        switch (_provider)
+        switch (provider)
         {
             case Provider.MySql:
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
@@ -100,14 +96,6 @@ public static class BaseDbContextExtension
     {
         var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
         services.AddPooledDbContextFactory<T>(installerOptionsAction.OptionsAction);
-
-        return services;
-    }
-
-    public static IServiceCollection AddBaseDbContext<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext
-    {
-        var installerOptionsAction = new InstallerOptionsAction(region, nameConnectionString);
-        services.AddDbContext<T>(installerOptionsAction.OptionsAction);
 
         return services;
     }

@@ -90,7 +90,7 @@ public class CustomNavigationController : BaseSettingsController
     [HttpGet("customnavigation/get/{id}")]
     public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(Guid id)
     {
-        return (await _settingsManager.LoadAsync<CustomNavigationSettings>()).Items.FirstOrDefault(item => item.Id == id);
+        return (await _settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == id);
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public class CustomNavigationController : BaseSettingsController
     [HttpPost("customnavigation/create")]
     public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await _settingsManager.LoadAsync<CustomNavigationSettings>();
 
@@ -167,21 +167,21 @@ public class CustomNavigationController : BaseSettingsController
     [HttpDelete("customnavigation/delete/{id}")]
     public async Task DeleteCustomNavigationItem(Guid id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await _settingsManager.LoadAsync<CustomNavigationSettings>();
 
-        var terget = settings.Items.FirstOrDefault(item => item.Id == id);
+        var target = settings.Items.Find(item => item.Id == id);
 
-        if (terget == null)
+        if (target == null)
         {
             return;
         }
 
-        await _storageHelper.DeleteLogoAsync(terget.SmallImg);
-        await _storageHelper.DeleteLogoAsync(terget.BigImg);
+        await _storageHelper.DeleteLogoAsync(target.SmallImg);
+        await _storageHelper.DeleteLogoAsync(target.BigImg);
 
-        settings.Items.Remove(terget);
+        settings.Items.Remove(target);
         await _settingsManager.SaveAsync(settings);
 
         await _messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);

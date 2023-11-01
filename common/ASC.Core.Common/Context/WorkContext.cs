@@ -29,11 +29,10 @@ using NotifyContext = ASC.Notify.Context;
 
 namespace ASC.Core;
 
-[Singletone]
+[Singleton]
 public class WorkContext
 {
-    private static readonly object _syncRoot = new object();
-    private readonly IServiceProvider _serviceProvider;
+    private static readonly object _syncRoot = new();
     private readonly IConfiguration _configuration;
     private readonly DispatchEngine _dispatchEngine;
     private readonly JabberSender _jabberSender;
@@ -42,11 +41,11 @@ public class WorkContext
     private readonly NotifyServiceSender _notifyServiceSender;
     private readonly TelegramSender _telegramSender;
     private readonly PushSender _pushSender;
-    private static bool _notifyStarted;
+    private bool _notifyStarted;
     private static bool? _isMono;
 
-    public NotifyContext NotifyContext { get; private set; }
-    public NotifyEngine NotifyEngine { get; private set; }
+    private readonly NotifyContext _notifyContext;
+    private readonly NotifyEngine _notifyEngine;
 
     public static string[] DefaultClientSenders => new[] { Constants.NotifyEMailSenderSysName };
     public event Action<NotifyContext, INotifyClient> NotifyClientRegistration;
@@ -66,9 +65,7 @@ public class WorkContext
         }
     }
 
-    public WorkContext(
-        IServiceProvider serviceProvider,
-        IConfiguration configuration,
+    public WorkContext(IConfiguration configuration,
         DispatchEngine dispatchEngine,
         NotifyEngine notifyEngine,
         NotifyContext notifyContext,
@@ -80,11 +77,10 @@ public class WorkContext
         PushSender pushSender
         )
     {
-        _serviceProvider = serviceProvider;
         _configuration = configuration;
         _dispatchEngine = dispatchEngine;
-        NotifyEngine = notifyEngine;
-        NotifyContext = notifyContext;
+        _notifyEngine = notifyEngine;
+        _notifyContext = notifyContext;
         _jabberSender = jabberSender;
         _awsSender = awsSender;
         _smtpSender = smtpSender;
@@ -138,12 +134,12 @@ public class WorkContext
                 emailSender.Init(properties);
             }
 
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyEMailSenderSysName, new EmailSenderSink(emailSender));
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyMessengerSenderSysName, new JabberSenderSink(jabberSender));
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyTelegramSenderSysName, new TelegramSenderSink(telegramSender));
-            NotifyContext.RegisterSender(_dispatchEngine, Constants.NotifyPushSenderSysName, new PushSenderSink(pushSender));
+            _notifyContext.RegisterSender(_dispatchEngine, Constants.NotifyEMailSenderSysName, new EmailSenderSink(emailSender));
+            _notifyContext.RegisterSender(_dispatchEngine, Constants.NotifyMessengerSenderSysName, new JabberSenderSink(jabberSender));
+            _notifyContext.RegisterSender(_dispatchEngine, Constants.NotifyTelegramSenderSysName, new TelegramSenderSink(telegramSender));
+            _notifyContext.RegisterSender(_dispatchEngine, Constants.NotifyPushSenderSysName, new PushSenderSink(pushSender));
 
-            NotifyEngine.AddAction<NotifyTransferRequest>();
+            _notifyEngine.AddAction<NotifyTransferRequest>();
 
             _notifyStarted = true;
         }
@@ -151,12 +147,12 @@ public class WorkContext
 
     public void RegisterSendMethod(Func<DateTime, Task> method, string cron)
     {
-        NotifyEngine.RegisterSendMethod(method, cron);
+        _notifyEngine.RegisterSendMethod(method, cron);
     }
 
     public void UnregisterSendMethod(Func<DateTime, Task> method)
     {
-        NotifyEngine.UnregisterSendMethod(method);
+        _notifyEngine.UnregisterSendMethod(method);
     }
 
     public INotifyClient RegisterClient(IServiceProvider serviceProvider, INotifySource source)
@@ -164,7 +160,7 @@ public class WorkContext
         //ValidateNotifySource(source);
         var client = serviceProvider.GetService<NotifyClientImpl>();
         client.Init(source);
-        NotifyClientRegistration?.Invoke(NotifyContext, client);
+        NotifyClientRegistration?.Invoke(_notifyContext, client);
 
         return client;
     }
