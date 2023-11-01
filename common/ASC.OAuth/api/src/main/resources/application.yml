@@ -140,6 +140,9 @@ resilience4j:
       updateClientRetryRateLimiter:
         maxRetryAttempts: 4
         waitDuration: 1s
+      getScopesRetryRateLimiter:
+        maxRetryAttempts: 2
+        waitDuration: 1s
   ratelimiter:
     configs:
       default:
@@ -160,6 +163,8 @@ resilience4j:
       updateClientRateLimiter:
         baseConfig: default
         limitForPeriod: 15
+      getScopesRateLimiter:
+        baseConfig: default
   timelimiter:
     instances:
       mutateTimeLimiter:

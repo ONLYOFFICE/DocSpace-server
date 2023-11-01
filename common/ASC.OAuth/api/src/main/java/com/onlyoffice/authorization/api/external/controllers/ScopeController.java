@@ -7,6 +7,7 @@ import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.core.exceptions.ScopeNotFoundException;
 import com.onlyoffice.authorization.api.core.transfer.response.ScopeDTO;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,8 @@ public class ScopeController {
     }
 
     @GetMapping
-    @RateLimiter(name = "getRateLimiter")
+    @Retry(name = "getScopesRetryRateLimiter")
+    @RateLimiter(name = "getScopesRateLimiter")
     @SneakyThrows
     public ResponseEntity<Iterable<ScopeDTO>> getScopes() {
         log.info("received a request to list scopes");
@@ -55,7 +57,8 @@ public class ScopeController {
     }
 
     @GetMapping("/{name}")
-    @RateLimiter(name = "getRateLimiter")
+    @Retry(name = "getScopesRetryRateLimiter")
+    @RateLimiter(name = "getScopesRateLimiter")
     @SneakyThrows
     public ResponseEntity<ScopeDTO> getScope(@PathVariable @NotEmpty String name) {
         log.info("received a get {} scope", name);
