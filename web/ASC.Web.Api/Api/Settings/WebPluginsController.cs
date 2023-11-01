@@ -31,6 +31,7 @@ public class WebPluginsController : BaseSettingsController
     private readonly PermissionContext _permissionContext;
     private readonly WebPluginManager _webPluginManager;
     private readonly TenantManager _tenantManager;
+    private readonly CspSettingsHelper _cspSettingsHelper;
     private readonly IMapper _mapper;
 
     public WebPluginsController(
@@ -41,11 +42,13 @@ public class WebPluginsController : BaseSettingsController
         PermissionContext permissionContext,
         WebPluginManager webPluginManager,
         TenantManager tenantManager,
+        CspSettingsHelper cspSettingsHelper,
         IMapper mapper) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _permissionContext = permissionContext;
         _webPluginManager = webPluginManager;
         _tenantManager = tenantManager;
+        _cspSettingsHelper = cspSettingsHelper;
         _mapper = mapper;
     }
 
@@ -70,6 +73,8 @@ public class WebPluginsController : BaseSettingsController
         var file = HttpContext.Request.Form.Files[0] ?? throw new ArgumentException("Input file is null");
 
         var plugin = await _webPluginManager.AddWebPluginFromFileAsync(tenantId, file);
+
+        await ChangeCspSettings(plugin, plugin.Enabled);
 
         var outDto = _mapper.Map<DbWebPlugin, WebPluginDto>(plugin);
 
@@ -146,7 +151,10 @@ public class WebPluginsController : BaseSettingsController
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await _webPluginManager.UpdateWebPluginAsync(tenant.Id, id, inDto.Enabled);
+
+        var plugin = await _webPluginManager.UpdateWebPluginAsync(tenant.Id, id, inDto.Enabled);
+
+        await ChangeCspSettings(plugin, inDto.Enabled);
     }
 
     [HttpDelete("webplugins/{id}")]
@@ -155,7 +163,10 @@ public class WebPluginsController : BaseSettingsController
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await _webPluginManager.DeleteWebPluginAsync(tenant.Id, id);
+
+        var plugin = await _webPluginManager.DeleteWebPluginAsync(tenant.Id, id);
+
+        await ChangeCspSettings(plugin, false);
     }
 
 
@@ -181,7 +192,9 @@ public class WebPluginsController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _webPluginManager.UpdateSystemWebPluginAsync(name, inDto.Enabled);
+        var plugin = await _webPluginManager.UpdateSystemWebPluginAsync(name, inDto.Enabled);
+
+        await ChangeCspSettings(plugin, inDto.Enabled);
     }
 
     [HttpDelete("webplugins/system/{name}")]
@@ -189,6 +202,33 @@ public class WebPluginsController : BaseSettingsController
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _webPluginManager.DeleteSystemWebPluginAsync(name);
+        var plugin = await _webPluginManager.DeleteSystemWebPluginAsync(name);
+
+        await ChangeCspSettings(plugin, false);
+    }
+
+    private async Task ChangeCspSettings(DbWebPlugin plugin, bool enabled)
+    {
+        if (string.IsNullOrEmpty(plugin.CspDomains))
+        {
+            return;
+        }
+
+        var settings = await _cspSettingsHelper.LoadAsync();
+
+        var domains = plugin.CspDomains.Split(',');
+
+        var currentDomains = settings.Domains.ToList();
+
+        if (enabled)
+        {
+            currentDomains.AddRange(domains);
+        }
+        else
+        {
+            _ = currentDomains.RemoveAll(x => domains.Contains(x));
+        }
+
+        _ = await _cspSettingsHelper.SaveAsync(currentDomains.Distinct(), settings.SetDefaultIfEmpty);
     }
 }
