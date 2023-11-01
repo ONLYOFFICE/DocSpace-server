@@ -433,37 +433,6 @@ public abstract class FilesController<T> : ApiControllerBase
         return await _filesControllerHelper.UpdateFileStreamAsync(_filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), fileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
-    /// <summary>
-    /// Returns file properties of the specified file.
-    /// </summary>
-    /// <short>Get file properties</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.ApiModels.RequestDto.EntryPropertiesRequestDto, ASC.Files.Core">File properties</returns>
-    /// <path>api/2.0/files/{fileId}/properties</path>
-    /// <httpMethod>GET</httpMethod>
-    [HttpGet("{fileId}/properties")]
-    public async Task<EntryPropertiesRequestDto> GetProperties(T fileId)
-    {
-        return _mapper.Map<EntryProperties, EntryPropertiesRequestDto>(await _fileStorageService.GetFileProperties(fileId));
-    }
-
-
-    /// <summary>
-    /// Saves file properties to the specified file.
-    /// </summary>
-    /// <short>Save file properties to a file</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.EntryPropertiesRequestDto, ASC.Files.Core" name="inDto">File properties request parameters</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.EntryProperties, ASC.Files.Core">File properties</returns>
-    /// <path>api/2.0/files/{fileId}/properties</path>
-    /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{fileId}/properties")]
-    public Task<EntryProperties> SetProperties(T fileId, EntryPropertiesRequestDto inDto)
-    {
-        return _fileStorageService.SetFileProperties(fileId, _mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto));
-    }
 }
 
 public class FilesControllerCommon : ApiControllerBase
@@ -583,48 +552,4 @@ public class FilesControllerCommon : ApiControllerBase
         return await _fileStorageService.CreateThumbnailsAsync(inDto.FileIds.ToList());
     }
 
-
-    /// <summary>
-    /// Saves file properties to the specified files.
-    /// </summary>
-    /// <short>Save file properties to files</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchEntryPropertiesRequestDto, ASC.Files.Core" name="inDto">Batch entry properties request parameters</param>
-    /// <category>Files</category>
-    /// <returns type="ASC.Files.Core.EntryProperties, ASC.Files.Core">List of file properties: collects the data from the filled forms or not, folder ID where a file will be saved, folder path where a file will be saved, new folder title, file name mask</returns>
-    /// <path>api/2.0/files/batch/properties</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <collection>list</collection>
-    [HttpPut("batch/properties")]
-    public async Task<List<EntryProperties>> SetProperties(BatchEntryPropertiesRequestDto inDto)
-    {
-        var result = new List<EntryProperties>();
-
-        foreach (var fileId in inDto.FilesId)
-        {
-            if (fileId.ValueKind == JsonValueKind.String)
-            {
-                await AddProps(fileId.GetString());
-            }
-            else if (fileId.ValueKind == JsonValueKind.String)
-            {
-                await AddProps(fileId.GetInt32());
-            }
-        }
-
-        return result;
-
-        async Task AddProps<T>(T fileId)
-        {
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
-            var fileStorageService = scope.ServiceProvider.GetRequiredService<FileStorageService>();
-            var props = _mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto.FileProperties);
-            if (inDto.CreateSubfolder)
-            {
-                var file = await fileStorageService.GetFileAsync(fileId, -1).NotFoundIfNull("File not found");
-                props.FormFilling.CreateFolderTitle = Path.GetFileNameWithoutExtension(file.Title);
-            }
-
-            result.Add(await fileStorageService.SetFileProperties(fileId, props));
-        }
-    }
 }

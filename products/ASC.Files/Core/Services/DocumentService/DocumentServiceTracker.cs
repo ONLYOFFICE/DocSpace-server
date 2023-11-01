@@ -468,10 +468,6 @@ public class DocumentServiceTrackerHelper
                 await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), _documentServiceConnector.ReplaceDocumentAdress(fileData.ChangesUrl));
             }
 
-            if (fileData.Status == TrackerStatus.ForceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit)
-            {
-                await _entryManager.SubmitFillForm(file);
-            }
         }
 
         return new TrackResponse { Message = saveMessage };
