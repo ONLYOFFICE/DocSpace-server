@@ -138,6 +138,20 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return _mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
 
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(FolderType type, int parentId)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+
+        var q = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
+
+        q = q.Where(f => f.FolderType == type);
+
+        await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
+        {
+            yield return _mapper.Map<DbFolderQuery, Folder<int>>(e);
+        }
+
+    }
     public IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId)
     {
         return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);

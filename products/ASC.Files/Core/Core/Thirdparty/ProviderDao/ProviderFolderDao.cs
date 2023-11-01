@@ -165,7 +165,14 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
             yield return room;
         }
     }
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        var selector = _selectorFactory.GetSelector(parentId);
+        var folderDao = selector.GetFolderDao(parentId);
+        var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId));
 
+        return folders.Where(r => r != null);
+    }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var selector = _selectorFactory.GetSelector(parentId);

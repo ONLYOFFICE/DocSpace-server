@@ -803,7 +803,8 @@ public class FileSecurity : IFileSecurity
                               FilesSecurityActions.Edit or
                               FilesSecurityActions.Move or
                               FilesSecurityActions.MoveTo or
-                              FilesSecurityActions.Rename
+                              FilesSecurityActions.Rename or
+                              FilesSecurityActions.Create
                     && (folder.FolderType == FolderType.ReadyFormFolder || folder.FolderType == FolderType.InProcessFormFolder))
                 {
                     return false;

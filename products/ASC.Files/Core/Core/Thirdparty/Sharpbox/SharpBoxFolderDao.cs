@@ -106,7 +106,12 @@ internal class SharpBoxFolderDao : SharpBoxDaoBase, IFolderDao<string>
             yield return room;
         }
         }
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        var parentFolder = SharpBoxProviderInfo.Storage.GetFolder(MakePath(parentId));
 
+        return parentFolder.OfType<ICloudDirectoryEntry>().Select(ToFolder).ToAsyncEnumerable();
+    }
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var parentFolder = SharpBoxProviderInfo.Storage.GetFolder(MakePath(parentId));

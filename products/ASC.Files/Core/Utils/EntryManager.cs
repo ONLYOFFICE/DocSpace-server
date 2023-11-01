@@ -273,7 +273,7 @@ public class EntryStatusManager
     }
 }
 
-[Scope]
+[Scope] 
 public class EntryManager
 {
     private const string _updateList = "filesUpdateList";
@@ -307,7 +307,8 @@ public class EntryManager
     private readonly FilesMessageService _filesMessageService;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly SocketManager _socketManager;
-
+    private readonly SecurityContext _securityContext;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     public EntryManager(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
@@ -337,7 +338,9 @@ public class EntryManager
         FilesMessageService filesMessageService,
         ThumbnailSettings thumbnailSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        SocketManager socketManager)
+        SocketManager socketManager,
+        SecurityContext securityContext,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
@@ -368,6 +371,8 @@ public class EntryManager
         _thumbnailSettings = thumbnailSettings;
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _socketManager = socketManager;
+        _securityContext = securityContext;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
@@ -1103,21 +1108,21 @@ public class EntryManager
         var sourceFileDao = _daoFactory.GetFileDao<T>();
         var linkDao = _daoFactory.GetLinkDao();
 
-        var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
+            var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
 
-        if (linkedId != null)
-        {
-            linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
-            if (linkedFile == null
-                || !await _fileSecurity.CanFillFormsAsync(linkedFile)
-                || await FileLockedForMeAsync(linkedFile.Id)
-                || linkedFile.RootFolderType == FolderType.TRASH)
+            if (linkedId != null)
             {
-                await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
-                linkedFile = null;
+                linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+                if (linkedFile == null
+                    || !await _fileSecurity.CanFillFormsAsync(linkedFile)
+                    || await FileLockedForMeAsync(linkedFile.Id)
+                    || linkedFile.RootFolderType == FolderType.TRASH)
+                {
+                    await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
+                    linkedFile = null;
+                }
             }
-        }
-
+       
         if (linkedFile == null)
         {
             var folderId = sourceFile.ParentId;
@@ -1132,24 +1137,75 @@ public class EntryManager
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
             }
-
+            string title;
             var ext = FileUtility.GetFileExtension(sourceFile.Title);
             var sourceTitle = Path.GetFileNameWithoutExtension(sourceFile.Title);
-            var title = $"{sourceTitle}-{DateTime.UtcNow:s}";
-
-            if (sourceFile.ProviderEntry)
-            {
-                var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
-                var displayedName = user.DisplayUserName(_displayUserSettingsHelper);
-
-                title += $" ({displayedName})";
-            }
-
-            title += ext;
 
             linkedFile = _serviceProvider.GetService<File<T>>();
+
+            if (folderIfNew.FolderType == FolderType.FormRoom)
+            {
+                var inProcessFormFolder = await folderDao.GetFoldersAsync(FolderType.InProcessFormFolder, folderId).ToListAsync();
+                var properties = await fileDao.GetProperties(sourceFile.Id);
+                var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+                title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
+
+                if (properties == null)
+                {
+                    var newFolder = _serviceProvider.GetService<Folder<T>>();
+                    newFolder.Title = sourceTitle;
+                    newFolder.ParentId = inProcessFormFolder.FirstOrDefault().Id;
+                    newFolder.FolderType = FolderType.DEFAULT;
+                    newFolder.CreateBy = folderIfNew.CreateBy;
+                    newFolder.Private = false;
+
+                    var formFolderId = await folderDao.SaveFolderAsync(newFolder);
+                    var formFolder = await folderDao.GetFolderAsync(formFolderId);
+                    linkedFile.ParentId = formFolder.Id;
+
+                    var currentProperies = new EntryProperties();
+                        
+                    try
+                    {
+                        var tmp = _serviceProvider.GetService<FormFillingProperties>();
+                        currentProperies.FormFilling = _serviceProvider.GetService<FormFillingProperties>();
+                        currentProperies.FormFilling.ToFolderId = formFolder.Id.ToString();
+                        currentProperies.FormFilling.ToFolderPath = "";
+                        currentProperies.FormFilling.CollectFillForm = true;
+                        currentProperies.FormFilling.CreateFolderTitle = "";
+                        currentProperies.FormFilling.CreateFileMask = "";
+
+                        await fileDao.SaveProperties(sourceFile.Id, currentProperies);
+                    }
+                    catch (Exception e)
+                    {
+                        var exp = e.Message;
+                    }
+
+                }
+                else
+                {
+                    linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
+                }
+                 
+            }
+            else
+            {
+                title = $"{sourceTitle}-{DateTime.UtcNow:s}";
+
+                if (sourceFile.ProviderEntry)
+                {
+                    var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+                    var displayedName = user.DisplayUserName(_displayUserSettingsHelper);
+
+                    title += $" ({displayedName})";
+                }
+
+                title += ext;
+                linkedFile.ParentId = folderIfNew.Id;
+            }
+
             linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
-            linkedFile.ParentId = folderIfNew.Id;
             linkedFile.FileStatus = sourceFile.FileStatus;
             linkedFile.ConvertedType = sourceFile.ConvertedType;
             linkedFile.Comment = FilesCommonResource.CommentCreateFillFormDraft;

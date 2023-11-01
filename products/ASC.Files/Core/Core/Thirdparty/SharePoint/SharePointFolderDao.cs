@@ -108,7 +108,15 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
             yield return room;
         }
         }
+    public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(FolderType type, string parentId)
+    {
+        var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);
 
+        foreach (var i in folderFolders)
+        {
+            yield return SharePointProviderInfo.ToFolder(i);
+        }
+    }
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(parentId);

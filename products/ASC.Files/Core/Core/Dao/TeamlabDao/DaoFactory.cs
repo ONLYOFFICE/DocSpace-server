@@ -92,5 +92,6 @@ public static class DaoFactoryExtension
         services.TryAdd<ILinkDao, LinkDao>();
 
         services.TryAdd<EditHistory>();
+        services.TryAdd<FormFillingProperties>();
     }
 }
