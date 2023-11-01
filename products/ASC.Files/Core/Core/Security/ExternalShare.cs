@@ -284,15 +284,40 @@ public class LinkData
     public string Token { get; init; }
 }
 
+/// <summary>
+/// </summary>
 public class ValidationInfo
 {
+    /// <summary>External data status</summary>
+    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
     public Status Status { get; set; }
+   
+    /// <summary>External data ID</summary>
+    /// <type>System.String, System</type>
     public string Id { get; set; }
+   
+    /// <summary>External data title</summary>
+    /// <type>System.String, System</type>
     public string Title { get; set; }
+
+    /// <summary>Sharing rights</summary>
+    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
+
+    /// <summary>Type of a folder where the external data is located</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
     public FolderType FolderType { get; set; }
+
+    /// <summary>Room logo</summary>
+    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
     public Logo Logo { get; set; }
+
+    /// <summary>Tenant ID</summary>
+    /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
+
+    /// <summary>Specifies whether to share the external data or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
 }
 
@@ -316,6 +341,8 @@ public class DownloadSession
     public Guid LinkId { get; init; }
 }
 
+/// <summary>
+/// </summary>
 public enum Status
 {
     Ok,
