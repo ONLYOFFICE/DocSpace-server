@@ -103,7 +103,7 @@ public class QuotaUsageDto
 {
     /// <summary>Storage size</summary>
     /// <type>System.UInt64, System</type>
-    public ulong StorageSize { get; set; }
+    public ulong StorageSize { get; init; }
 
     /// <summary>Maximum file size</summary>
     /// <type>System.UInt64, System</type>
@@ -111,15 +111,15 @@ public class QuotaUsageDto
 
     /// <summary>Used size</summary>
     /// <type>System.UInt64, System</type>
-    public ulong UsedSize { get; set; }
+    public ulong UsedSize { get; init; }
 
     /// <summary>maximum number of room administrators</summary>
     /// <type>System.Int32, System</type>
-    public int MaxRoomAdminsCount { get; set; }
+    public int MaxRoomAdminsCount { get; init; }
 
     /// <summary>Number of room administrators</summary>
     /// <type>System.Int32, System</type>
-    public int RoomAdminCount { get; set; }
+    public int RoomAdminCount { get; init; }
 
     /// <summary>Available size</summary>
     /// <type>System.UInt64, System</type>

@@ -40,6 +40,7 @@ public class DbWebPlugin : BaseEntity
     public string PluginName { get; set; }
     public string Scopes { get; set; }
     public string Image { get; set; }
+    public string CspDomains { get; set; }
 
     public Guid CreateBy { get; set; }
     public DateTime CreateOn { get; set; }
@@ -122,6 +123,10 @@ public static class WebPluginExtension
                 .HasColumnName("image")
                 .HasColumnType("varchar(255)");
 
+            entity.Property(e => e.CspDomains)
+                .HasColumnName("csp_domains")
+                .HasColumnType("text");
+
             entity.Property(e => e.CreateBy)
                 .IsRequired()
                 .HasColumnName("create_by")
@@ -192,6 +197,9 @@ public static class WebPluginExtension
             entity.Property(e => e.Image)
                 .HasColumnName("image")
                 .HasMaxLength(255);
+
+            entity.Property(e => e.CspDomains)
+                .HasColumnName("csp_domains");
 
             entity.Property(e => e.CreateBy)
                 .IsRequired()

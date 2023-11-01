@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.IO;
-
 using ASC.Common.Web;
 
 using Microsoft.AspNetCore.Http.Features;
@@ -71,7 +69,7 @@ public class StorageHandler
                 expire = storageExpire.TotalMinutes.ToString(CultureInfo.InvariantCulture);
             }
 
-            var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(path + "." + header + "." + expire, auth ?? "", TimeSpan.FromMinutes(Convert.ToDouble(expire)));
+            var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(path + "." + header + "." + expire, auth, TimeSpan.FromMinutes(Convert.ToDouble(expire)));
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -179,12 +177,19 @@ public class StorageHandler
 
     private long ProcessRangeHeader(HttpContext context, long fullLength, ref long offset)
     {
-        if (context == null) throw new ArgumentNullException();
-        if (context.Request.Headers["Range"] == StringValues.Empty) return fullLength;
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
+
+        if (context.Request.Headers["Range"] == StringValues.Empty)
+        {
+            return fullLength;
+        }
 
         long endOffset = -1;
 
-        var range = context.Request.Headers["Range"][0].Split(new[] { '=', '-' });
+        var range = context.Request.Headers["Range"][0].Split('=', '-');
         offset = Convert.ToInt64(range[1]);
         if (range.Count() > 2 && !string.IsNullOrEmpty(range[2]))
         {

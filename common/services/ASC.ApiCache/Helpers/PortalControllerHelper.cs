@@ -49,7 +49,7 @@ public class PortalControllerHelper
             TenantAlias = tenant.ToLowerInvariant()
         };
 
-        await using var context = _teamlabSiteContext.CreateDbContext();
+        await using var context = await _teamlabSiteContext.CreateDbContextAsync();
         await context.Cache.AddAsync(cache);
         await context.SaveChangesAsync();
     }
@@ -57,7 +57,7 @@ public class PortalControllerHelper
     public async Task RemoveTenantFromCacheAsync(string domain)
     {
         domain = domain.ToLowerInvariant();
-        await using var context = _teamlabSiteContext.CreateDbContext();
+        await using var context = await _teamlabSiteContext.CreateDbContextAsync();
         var cache = await Queries.DbCacheAsync(context, domain);
         context.Cache.Remove(cache);
         await context.SaveChangesAsync();
@@ -71,7 +71,7 @@ public class PortalControllerHelper
         portalName = (portalName ?? "").Trim().ToLowerInvariant();
 
         // forbidden or exists
-        await using var context = _teamlabSiteContext.CreateDbContext();
+        await using var context = await _teamlabSiteContext.CreateDbContextAsync();
         var exists = await Queries.AnyDbCacheAsync(context, portalName);
 
         if (exists)

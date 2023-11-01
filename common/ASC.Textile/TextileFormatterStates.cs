@@ -29,8 +29,8 @@ public partial class TextileFormatter
 {
     #region State Registration
 
-    private static readonly List<Type> _registeredStates = new List<Type>();
-    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = new List<FormatterStateAttribute>();
+    private static readonly List<Type> _registeredStates = new();
+    private static readonly List<FormatterStateAttribute> _registeredStatesAttributes = new();
 
     public static void RegisterFormatterState(Type formatterStateType)
     {
@@ -39,7 +39,7 @@ public partial class TextileFormatter
             throw new ArgumentException("The formatter state must be a sub-public class of FormatterStateBase.");
         }
 
-        if (formatterStateType.GetConstructor(new Type[] { typeof(TextileFormatter) }) == null)
+        if (formatterStateType.GetConstructor(new[] { typeof(TextileFormatter) }) == null)
         {
             throw new ArgumentException("The formatter state must have a constructor that takes a TextileFormatter reference.");
         }
@@ -58,8 +58,8 @@ public partial class TextileFormatter
 
     #region State Management
 
-    private readonly List<Type> _disabledFormatterStates = new List<Type>();
-    private readonly Stack<FormatterState> _stackOfStates = new Stack<FormatterState>();
+    private readonly List<Type> _disabledFormatterStates = new();
+    private readonly Stack<FormatterState> _stackOfStates = new();
 
     private bool IsFormatterStateEnabled(Type type)
     {
@@ -119,12 +119,9 @@ public partial class TextileFormatter
 
     internal void ChangeState(FormatterState formatterState)
     {
-        if (CurrentState != null && CurrentState.GetType() == formatterState.GetType())
+        if (CurrentState != null && CurrentState.GetType() == formatterState.GetType() && !CurrentState.ShouldNestState(formatterState))
         {
-            if (!CurrentState.ShouldNestState(formatterState))
-            {
-                return;
-            }
+            return;
         }
         PushState(formatterState);
     }

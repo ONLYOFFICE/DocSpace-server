@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage.Configuration;
 
-[Singletone(Additional = typeof(StorageSettingsExtension))]
+[Singleton(Additional = typeof(StorageSettingsExtension))]
 public class BaseStorageSettingsListener
 {
     private readonly IServiceProvider _serviceProvider;
@@ -106,7 +106,7 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
 public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<StorageSettings>
 {
     [JsonIgnore]
-    public override Guid ID => new Guid("F13EAF2D-FA53-44F1-A6D6-A5AEDA46FA2B");
+    public override Guid ID => new("F13EAF2D-FA53-44F1-A6D6-A5AEDA46FA2B");
 
     StorageSettings ISettings<StorageSettings>.GetDefault()
     {
@@ -120,7 +120,7 @@ public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<S
 public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISettings<CdnStorageSettings>
 {
     [JsonIgnore]
-    public override Guid ID => new Guid("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
+    public override Guid ID => new("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
 
     public override Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d.Cdn;
 
@@ -219,7 +219,7 @@ public class StorageSettingsHelper
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {
-            _cache.Publish(new DataStoreCacheItem() { TenantId = path, Module = module }, CacheNotifyAction.Remove);
+            await _cache.PublishAsync(new DataStoreCacheItem() { TenantId = path, Module = module }, CacheNotifyAction.Remove);
         }
     }
 }

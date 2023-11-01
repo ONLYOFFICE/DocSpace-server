@@ -234,20 +234,18 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         var httpClient = _clientFactory.CreateClient();
         var response = await httpClient.SendAsync(request);
 
-        if (offset == 0 && file.Size.HasValue && file.Size > 0)
+        if (offset == 0 && file.Size is > 0)
         {
             return new ResponseStream(await response.Content.ReadAsStreamAsync(), file.Size.Value);
         }
 
         var tempBuffer = _tempStream.Create();
-        await using (var str = await response.Content.ReadAsStreamAsync())
+        await using var str = await response.Content.ReadAsStreamAsync();
+        if (str != null)
         {
-            if (str != null)
-            {
-                await str.CopyToAsync(tempBuffer);
-                await tempBuffer.FlushAsync();
-                tempBuffer.Seek(offset, SeekOrigin.Begin);
-            }
+            await str.CopyToAsync(tempBuffer);
+            await tempBuffer.FlushAsync();
+            tempBuffer.Seek(offset, SeekOrigin.Begin);
         }
 
         return tempBuffer;
@@ -428,12 +426,21 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         }
         else
         {
-            var bytesToTransfer = lastChunk ? (googleDriveSession.BytesTransfered + chunkLength).ToString() : "*";
+            if (lastChunk) 
+            {
+                var bytesToTransfer = googleDriveSession.BytesTransfered + chunkLength;
 
-            request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                           googleDriveSession.BytesTransfered,
-                                           googleDriveSession.BytesTransfered + chunkLength - 1,
-                                           Convert.ToInt64(bytesToTransfer));
+                request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
+                                               googleDriveSession.BytesTransfered,
+                                               googleDriveSession.BytesTransfered + chunkLength - 1,
+                                               bytesToTransfer);
+            }
+            else
+            {
+                request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
+                                               googleDriveSession.BytesTransfered,
+                                               googleDriveSession.BytesTransfered + chunkLength - 1);
+            }
         }
         var httpClient = _clientFactory.CreateClient();
         HttpResponseMessage response;

@@ -29,6 +29,7 @@ namespace ASC.FederatedLogin.LoginProviders;
 [Scope]
 public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 {
+    private const string _appleUrlKeys = "https://appleid.apple.com/auth/keys";
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly RequestHelper _requestHelper;
 
@@ -63,11 +64,11 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         _requestHelper = requestHelper;
     }
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {
-            var token = Auth(context, Scopes, out var redirect, @params, additionalStateArgs);
+            var token = Auth(context, Scopes, out _, @params, additionalStateArgs);
             var claims = ValidateIdToken(JObject.Parse(token.OriginJson).Value<string>("id_token"));
             return GetProfileFromClaims(claims);
         }
@@ -107,7 +108,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     {
         return new LoginProfile(Signature, InstanceCrypto)
         {
-            Id = claims.FindFirst(ClaimTypes.NameIdentifier).Value,
+            Id = claims.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             EMail = claims.FindFirst(ClaimTypes.Email)?.Value,
             Provider = ProviderConstants.AppleId,
         };
@@ -123,7 +124,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         var token = handler.CreateJwtSecurityToken(
             issuer: TeamId,
             audience: "https://appleid.apple.com",
-            subject: new ClaimsIdentity(new List<Claim> { new Claim("sub", ClientID) }),
+            subject: new ClaimsIdentity(new List<Claim> { new("sub", ClientID) }),
             issuedAt: DateTime.UtcNow,
             notBefore: DateTime.UtcNow,
             expires: DateTime.UtcNow.AddMinutes(5),
@@ -151,14 +152,14 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
             ValidateLifetime = true
 
-        }, out var _);
+        }, out _);
 
         return claims;
     }
 
     private IEnumerable<SecurityKey> GetApplePublicKeys()
     {
-        var appplePublicKeys = _requestHelper.PerformRequest("https://appleid.apple.com/auth/keys");
+        var appplePublicKeys = _requestHelper.PerformRequest(_appleUrlKeys);
 
         var keys = new List<SecurityKey>();
         foreach (var webKey in JObject.Parse(appplePublicKeys).Value<JArray>("keys"))

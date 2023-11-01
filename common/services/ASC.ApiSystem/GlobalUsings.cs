@@ -69,8 +69,6 @@ global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Context;
 
-global using Autofac;
-
 global using HealthChecks.UI.Client;
 
 global using Microsoft.AspNetCore.Authentication;

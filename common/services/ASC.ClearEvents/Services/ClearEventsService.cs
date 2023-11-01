@@ -95,7 +95,7 @@ public class ClearEventsService : IHostedService, IDisposable
         do
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            await using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
             var table = compile.Invoke(ef);
 
             var ae = table

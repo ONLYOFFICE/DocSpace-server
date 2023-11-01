@@ -26,7 +26,7 @@
 
 namespace ASC.Security.Cryptography;
 
-[Singletone]
+[Singleton]
 public class PasswordHasher
 {
     public int Size { get; private set; }

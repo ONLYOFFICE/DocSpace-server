@@ -29,14 +29,14 @@ namespace ASC.Webhooks.Core;
 
 public class WebHooksSettings : ISettings<WebHooksSettings>
 {
-    public List<int> Ids { get; set; }
+    public List<int> Ids { get; init; }
 
     [JsonIgnore]
-    public Guid ID => new Guid("6EFA0EAB-D033-4720-BDB3-DEB057EBC140");
+    public Guid ID => new("6EFA0EAB-D033-4720-BDB3-DEB057EBC140");
 
-    public WebHooksSettings GetDefault() => new WebHooksSettings()
+    public WebHooksSettings GetDefault() => new()
     {
-        Ids = new List<int> { }
+        Ids = new List<int>()
     };
 }
 

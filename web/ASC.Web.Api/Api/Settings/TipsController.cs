@@ -28,14 +28,13 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class TipsController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly AuthContext _authContext;
     private readonly StudioNotifyHelper _studioNotifyHelper;
     private readonly SettingsManager _settingsManager;
     private readonly SetupInfo _setupInfo;
     private readonly ILogger _log;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly TenantManager _tenantManager;
 
     public TipsController(
         ILoggerProvider option,
@@ -47,6 +46,7 @@ public class TipsController : BaseSettingsController
         SetupInfo setupInfo,
         IMemoryCache memoryCache,
         IHttpClientFactory clientFactory,
+        TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _log = option.CreateLogger("ASC.Api");
@@ -55,6 +55,7 @@ public class TipsController : BaseSettingsController
         _settingsManager = settingsManager;
         _setupInfo = setupInfo;
         _clientFactory = clientFactory;
+        _tenantManager = tenantManager;
     }
 
     /// <summary>
@@ -76,6 +77,7 @@ public class TipsController : BaseSettingsController
         {
             try
             {
+                var tenant = await _tenantManager.GetCurrentTenantAsync();
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"{_setupInfo.TipsAddress}/tips/deletereaded")
@@ -84,13 +86,13 @@ public class TipsController : BaseSettingsController
                 var data = new NameValueCollection
                 {
                     ["userId"] = _authContext.CurrentAccount.ID.ToString(),
-                    ["tenantId"] = Tenant.Id.ToString(CultureInfo.InvariantCulture)
+                    ["tenantId"] = tenant.Id.ToString(CultureInfo.InvariantCulture)
                 };
                 var body = JsonSerializer.Serialize(data);//todo check
                 request.Content = new StringContent(body);
 
                 var httpClient = _clientFactory.CreateClient();
-                using var response = httpClient.Send(request);
+                using var response = await httpClient.SendAsync(request);
 
             }
             catch (Exception e)

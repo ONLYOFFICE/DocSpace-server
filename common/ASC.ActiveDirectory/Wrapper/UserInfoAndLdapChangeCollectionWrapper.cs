@@ -28,5 +28,5 @@ namespace ASC.ActiveDirectory.Wrapper;
 public class UserInfoAndLdapChangeCollectionWrapper
 {
     public UserInfo UserInfo { get; set; }
-    public LdapChangeCollection LdapChangeCollection { get; set; }
+    public LdapChangeCollection LdapChangeCollection { get; init; }
 }

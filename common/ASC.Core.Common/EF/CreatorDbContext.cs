@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-[Singletone]
+[Singleton]
 public class CreatorDbContext
 {
     private readonly IServiceProvider _serviceProvider;

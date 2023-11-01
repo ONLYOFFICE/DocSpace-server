@@ -201,7 +201,7 @@ public class FileUploader
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
         }
 
-        if (relativePath != null && relativePath.Count > 0)
+        if (relativePath is { Count: > 0 })
         {
             var subFolderTitle = Global.ReplaceInvalidCharsAndTruncate(relativePath.FirstOrDefault());
 
@@ -218,7 +218,7 @@ public class FileUploader
                     folderId = await folderDao.SaveFolderAsync(newFolder);
                     folder = await folderDao.GetFolderAsync(folderId);
                     await _socketManager.CreateFolderAsync(folder);
-                    _ = _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
+                    await _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
                 }
 
                 folderId = folder.Id;

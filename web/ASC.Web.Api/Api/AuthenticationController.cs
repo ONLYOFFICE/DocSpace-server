@@ -75,7 +75,6 @@ public class AuthenticationController : ControllerBase
     private readonly BruteForceLoginManager _bruteForceLoginManager;
     private readonly ILogger<AuthenticationController> _logger;
     private readonly InvitationLinkService _invitationLinkService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMapper _mapper;
 
     public AuthenticationController(
@@ -114,8 +113,7 @@ public class AuthenticationController : ControllerBase
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILogger<AuthenticationController> logger,
-        InvitationLinkService invitationLinkService,
-        IHttpContextAccessor httpContextAccessor, 
+        InvitationLinkService invitationLinkService, 
         IMapper mapper)
     {
         _userManager = userManager;
@@ -154,7 +152,6 @@ public class AuthenticationController : ControllerBase
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _logger = logger;
         _invitationLinkService = invitationLinkService;
-        _httpContextAccessor = httpContextAccessor;
         _mapper = mapper;
     }
 
@@ -186,7 +183,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
-        var tenant = _tenantManager.GetCurrentTenant().Id;
+        var tenant = (await _tenantManager.GetCurrentTenantAsync()).Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
         var sms = false;
 
@@ -429,7 +426,7 @@ public class AuthenticationController : ControllerBase
     public async Task<AuthenticationTokenDto> SaveMobilePhoneAsync(MobileRequestsDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-        var user = _userManager.GetUsers(_authContext.CurrentAccount.ID);
+        var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         inDto.MobilePhone = await _smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
         await _messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), inDto.MobilePhone);
 
@@ -534,15 +531,9 @@ public class AuthenticationController : ControllerBase
                 }
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
-                LoginProfile thirdPartyProfile;
-                if (!string.IsNullOrEmpty(inDto.SerializedProfile))
-                {
-                    thirdPartyProfile = new LoginProfile(_signature, _instanceCrypto, inDto.SerializedProfile);
-                }
-                else
-                {
-                    thirdPartyProfile = _providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
-                }
+                var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
+                    new LoginProfile(_signature, _instanceCrypto, inDto.SerializedProfile) : 
+                    _providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
 
@@ -585,16 +576,16 @@ public class AuthenticationController : ControllerBase
 
             var userInfo = Constants.LostUser;
 
-            (var succ, var userId) = await TryGetUserByHashAsync(loginProfile.HashId);
-            if (succ)
+            var (success, userId) = await TryGetUserByHashAsync(loginProfile.HashId);
+            if (success)
             {
-                userInfo = _userManager.GetUsers(userId);
+                userInfo = await _userManager.GetUsersAsync(userId);
             }
 
             var isNew = false;
             if (_coreBaseSettings.Personal)
             {
-                if (_userManager.UserExists(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
+                if (await _userManager.UserExistsAsync(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
                 {
                     try
                     {
@@ -608,7 +599,7 @@ public class AuthenticationController : ControllerBase
                     }
                 }
 
-                if (!_userManager.UserExists(userInfo.Id))
+                if (!await _userManager.UserExistsAsync(userInfo.Id))
                 {
                     userInfo = await JoinByThirdPartyAccount(loginProfile);
 
@@ -664,7 +655,7 @@ public class AuthenticationController : ControllerBase
         }
 
         var userInfo = await _userManager.GetUserByEmailAsync(loginProfile.EMail);
-        if (!_userManager.UserExists(userInfo.Id))
+        if (!await _userManager.UserExistsAsync(userInfo.Id))
         {
             var newUserInfo = ProfileToUserInfo(loginProfile);
 
