@@ -169,10 +169,10 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
     private string ToRoundTripString(DateTime date, TimeSpan offset)
     {
-        var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.CurrentCulture);
+        var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.InvariantCulture);
         var offsetString = offset.Ticks == 0
             ? "Z" : ((offset < TimeSpan.Zero)
-            ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.CurrentCulture);
+            ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.InvariantCulture);
 
         return dateString + offsetString;
     }

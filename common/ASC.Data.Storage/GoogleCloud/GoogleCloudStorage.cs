@@ -223,7 +223,7 @@ public class GoogleCloudStorage : BaseStorage
             uploaded.Metadata = new Dictionary<string, string>();
         }
 
-        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R");
+        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
 
         if (!string.IsNullOrEmpty(contentDisposition))
         {
@@ -605,7 +605,7 @@ public class GoogleCloudStorage : BaseStorage
             uploaded.Metadata = new Dictionary<string, string>();
         }
 
-        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R");
+        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
         uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
         await storage.UpdateObjectAsync(uploaded);

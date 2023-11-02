@@ -64,10 +64,10 @@ public abstract class FileEntry : ICloneable
     }
 
     [JsonIgnore]
-    public string CreateOnString => CreateOn.Equals(default) ? null : CreateOn.ToString("g");
+    public string CreateOnString => CreateOn.Equals(default) ? null : CreateOn.ToString("g", CultureInfo.InvariantCulture);
 
     [JsonIgnore]
-    public string ModifiedOnString => ModifiedOn.Equals(default) ? null : ModifiedOn.ToString("g");
+    public string ModifiedOnString => ModifiedOn.Equals(default) ? null : ModifiedOn.ToString("g", CultureInfo.InvariantCulture);
 
     public string Error { get; set; }
     public FileShare Access { get; set; }
