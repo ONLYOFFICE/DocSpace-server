@@ -169,10 +169,10 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
     private string ToRoundTripString(DateTime date, TimeSpan offset)
     {
-        var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.InvariantCulture);
+        var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.CurrentCulture);
         var offsetString = offset.Ticks == 0
             ? "Z" : ((offset < TimeSpan.Zero)
-            ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.InvariantCulture);
+            ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.CurrentCulture);
 
         return dateString + offsetString;
     }
@@ -383,18 +383,14 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
         {
             return new ApiDateTime(result, TimeSpan.Zero);
         }
-        else
-        {
-            if (DateTime.TryParseExact(reader.GetString(), ApiDateTime.Formats,
+
+        if (DateTime.TryParseExact(reader.GetString(), ApiDateTime.Formats,
                 CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dateTime))
-            {
-                return new ApiDateTime(dateTime, TimeSpan.Zero);
-            }
-            else
-            {
-                return new ApiDateTime();
-            }
+        {
+            return new ApiDateTime(dateTime, TimeSpan.Zero);
         }
+
+        return new ApiDateTime();
     }
 
     public override void Write(Utf8JsonWriter writer, ApiDateTime value, JsonSerializerOptions options)
