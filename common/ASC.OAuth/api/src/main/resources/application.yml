@@ -4,6 +4,11 @@ server:
     port: ${SOCKET_SERVER_PORT:8585}
   host: ${SERVER_HOST:127.0.0.1}
   port: ${SERVER_PORT:9090}
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+    include-exception: false
 
 application:
   security:
@@ -79,6 +84,15 @@ spring:
     loadbalancer:
       ribbon:
         enable: false
+    openfeign:
+      circuitbreaker:
+        enabled: true
+        alphanumeric-ids: true
+      client:
+        config:
+          default:
+            connectTimeout: 1500
+            readTimeout: 3000
   flyway:
     enabled: true
     baselineOnMigrate: true
@@ -126,6 +140,18 @@ spring:
           multiplier: 3.0
 
 resilience4j:
+  circuitbreaker:
+    instances:
+      docspace:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
   retry:
     instances:
       getClientRetryRateLimiter:

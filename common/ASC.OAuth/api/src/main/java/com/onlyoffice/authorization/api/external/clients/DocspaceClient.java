@@ -17,7 +17,7 @@ import java.net.URI;
 /**
  *
  */
-@FeignClient(url = "http://localhost", value = "docspace")
+@FeignClient(url = "http://localhost", value = "docspace", fallback = DocspaceClientFallback.class)
 public interface DocspaceClient {
     @RequestMapping(method = RequestMethod.GET, value = "/api/2.0/people/@self")
     DocspaceResponseDTO<MeDTO> getMe(URI base, @RequestHeader("Cookie") String cookie);

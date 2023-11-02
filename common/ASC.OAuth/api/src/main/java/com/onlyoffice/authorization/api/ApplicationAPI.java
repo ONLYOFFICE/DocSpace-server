@@ -15,8 +15,8 @@ import java.util.TimeZone;
 /**
  *
  */
-@EnableTransactionManagement
 @EnableFeignClients
+@EnableTransactionManagement
 @SpringBootApplication
 public class ApplicationAPI {
 	public static void main(String[] args) {
