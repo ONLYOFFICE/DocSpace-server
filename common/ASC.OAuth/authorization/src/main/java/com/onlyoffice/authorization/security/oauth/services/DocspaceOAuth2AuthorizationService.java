@@ -133,7 +133,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             ((ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes()).getResponse()
                     .addCookie(cookie);
-            System.out.println(msg.getState());
         }
 
         var tasks = new ArrayList<Callable<Boolean>>();
