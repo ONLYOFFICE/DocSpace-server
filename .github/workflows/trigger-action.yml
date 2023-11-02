@@ -4,7 +4,8 @@ name: Trigger action
 on:
   push:
     branches:
-      - release/v2.0.0
+      - 'hotfix/v*'
+      - 'release/v*'
 
 jobs:
   dispatch:
