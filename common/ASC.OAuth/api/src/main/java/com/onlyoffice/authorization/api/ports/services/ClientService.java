@@ -171,9 +171,9 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
-        log.info("changing client's {} activation to {}", clientId, activationDTO.getEnabled());
+        log.info("changing client's {} activation to {}", clientId, activationDTO.getStatus());
         try {
-            mutationUsecases.changeActivation(clientId, activationDTO.getEnabled());
+            mutationUsecases.changeActivation(clientId, activationDTO.getStatus());
             return true;
         } catch (RuntimeException e) {
             log.error("could not change client's activation: %s", e.getMessage());

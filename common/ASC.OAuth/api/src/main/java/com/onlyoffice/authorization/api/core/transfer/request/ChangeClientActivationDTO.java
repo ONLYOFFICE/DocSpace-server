@@ -18,7 +18,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class ChangeClientActivationDTO implements Serializable {
-    @JsonProperty("enabled")
+    @JsonProperty("status")
     @NotNull(message = "enabled field is expected to be set")
-    private Boolean enabled;
+    private Boolean status;
 }
