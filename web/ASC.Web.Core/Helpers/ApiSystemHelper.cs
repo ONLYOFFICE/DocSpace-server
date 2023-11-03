@@ -136,7 +136,7 @@ public class ApiSystemHelper
                     { "tenant_domain", new AttributeValue {
                             S = tenantDomain
                         }},
-                    { "region", new AttributeValue {
+                    { "tenant_region", new AttributeValue {
                             S = tenantRegion
                     }}
                 }
@@ -156,7 +156,7 @@ public class ApiSystemHelper
                 {
                     { "tenant_domain", new AttributeValue { S = oldTenantDomain } }
                 },
-            ProjectionExpression = "region",
+            ProjectionExpression = "tenant_region",
             ConsistentRead = true
         };
 
@@ -172,7 +172,7 @@ public class ApiSystemHelper
 
         var request = new DeleteItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Key = new Dictionary<string, AttributeValue>()
                 {
                   { "tenant_domain", new AttributeValue { S = tenantDomain }
@@ -191,12 +191,12 @@ public class ApiSystemHelper
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Key = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue { S = tenantDomain } }
                 },
-            ProjectionExpression = "origin_domain",
+            ProjectionExpression = "tenant_region",
             ConsistentRead = true
         };
 
@@ -219,11 +219,11 @@ public class ApiSystemHelper
 
         var scanRequest = new ScanRequest
         {
-            TableName = "docspace-tenants_origin",
-            FilterExpression = "begins_with(tenant_domain, :v_origin_domain)",
+            TableName = "docspace-tenants_region",
+            FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
-                                                {":v_origin_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = "origin_domain",
+                                                {":v_tenant_domain", new AttributeValue { S =  portalName }} },
+            ProjectionExpression = "tenant_region",
             ConsistentRead = true
         };
 
