@@ -7,6 +7,7 @@ import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistence
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +28,9 @@ public class LoginController {
             HttpServletRequest request,
             @RequestParam(name = CLIENT_ID) String clientId
     ) {
+        MDC.put("client_id", clientId);
+        log.info("Get login request");
+        MDC.clear();
         var client = queryUsecases.getClientByClientId(clientId);
         return String.format("redirect:%s", UriComponentsBuilder
                 .fromUriString(client.getTenantUrl())

@@ -88,9 +88,8 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     @RateLimiter(name = "mutateRateLimiter")
     public void save(OAuth2Authorization authorization) {
-        Assert.notNull(authorization, "authorization cannot be null");
         MDC.put("id", authorization.getId());
-        log.info("trying to save authorization with id");
+        log.info("Trying to save authorization");
 
         String state = authorization.getAttribute(OAuth2ParameterNames.STATE);
         OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode =
@@ -100,33 +99,33 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken =
                 authorization.getToken(OAuth2RefreshToken.class);
 
+        log.info("Adding authorization to the cache");
         cache.put(authorization.getId(), authorization);
-        log.info("adding authorization with id to the cache");
-        MDC.clear();
         if (state != null && !state.isBlank()) {
             MDC.put("state", state);
-            log.info("adding authorization with state to the cache");
+            log.debug("Adding authorization with state to the cache");
             MDC.clear();
             cache.put(state, authorization);
         } else if (authorizationCode != null && authorizationCode.getToken() != null) {
             MDC.put("code", authorizationCode.getToken().getTokenValue());
-            log.info("adding authorization with code to the cache");
+            log.debug("Adding authorization with code to the cache");
             MDC.clear();
             cache.put(authorizationCode.getToken().getTokenValue(), authorization);
         } else if (accessToken != null && accessToken.getToken() != null) {
             MDC.put("access_token", accessToken.getToken().getTokenValue());
-            log.info("adding authorization with access token to the cache");
+            log.debug("Adding authorization with access token to the cache");
             MDC.clear();
             cache.put(accessToken.getToken().getTokenValue(), authorization);
         } else if (refreshToken != null && refreshToken.getToken() != null) {
             MDC.put("refresh_token", refreshToken.getToken().getTokenValue());
-            log.debug("adding authorization with refresh token to the cache");
+            log.debug("Adding authorization with refresh token to the cache");
             MDC.clear();
             cache.put(refreshToken.getToken().getTokenValue(), authorization);
         }
 
         var msg = toMessage(authorization);
         if (msg.getState() != null && !msg.getState().isBlank()) {
+            log.info("Setting authorization state cookie");
             Cookie cookie = new Cookie(CLIENT_STATE_COOKIE, msg.getState());
             cookie.setPath("/");
             cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
@@ -139,10 +138,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (msg.getAuthorizationCodeValue() != null && !msg.getAuthorizationCodeValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to encrypt authorization code");
                     msg.setAuthorizationCodeValue(cipher.encrypt(msg.getAuthorizationCodeValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not encrypt authorization code", e);
                     return false;
                 }
             });
@@ -150,10 +150,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (msg.getAccessTokenValue() != null && !msg.getAccessTokenValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to encrypt authorization access token");
                     msg.setAccessTokenValue(cipher.encrypt(msg.getAccessTokenValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not encrypt authorization access token", e);
                     return false;
                 }
             });
@@ -161,10 +162,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (msg.getRefreshTokenValue() != null && !msg.getRefreshTokenValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to encrypt authorization refresh token");
                     msg.setRefreshTokenValue(cipher.encrypt(msg.getRefreshTokenValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not encrypt authorization refresh token", e);
                     return false;
                 }
             });
@@ -172,7 +174,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         try {
             pool.invokeAll(tasks);
         } catch (InterruptedException e) {
-            log.error(e.getMessage());
+            log.error("Could not execute encryption tasks", e);
         }
 
         this.amqpTemplate.convertAndSend(
@@ -183,9 +185,8 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     @RateLimiter(name = "mutateRateLimiter")
     public void remove(OAuth2Authorization authorization) {
-        Assert.notNull(authorization, "authorization cannot be null");
         MDC.put("id", authorization.getId());
-        log.info("trying to remove authorization by id");
+        log.info("Trying to remove authorization by id");
 
         String state = authorization.getAttribute(OAuth2ParameterNames.STATE);
         OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode =
@@ -195,27 +196,26 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken =
                 authorization.getToken(OAuth2RefreshToken.class);
 
+        log.info("Removing authorization from the cache");
         cache.delete(authorization.getId());
-        log.info("deleting authorization by id from the cache");
-        MDC.clear();
         if (state != null && !state.isBlank()) {
             MDC.put("state", state);
-            log.info("deleting authorization with state from the cache");
+            log.debug("Removing authorization with state from the cache");
             MDC.clear();
             cache.delete(state);
         } else if (authorizationCode != null && authorizationCode.getToken() != null) {
             MDC.put("code", authorizationCode.getToken().getTokenValue());
-            log.info("deleting authorization with code from the cache");
+            log.info("Removing authorization with code from the cache");
             MDC.clear();
             cache.delete(authorizationCode.getToken().getTokenValue());
         } else if (accessToken != null && accessToken.getToken() != null) {
             MDC.put("access_token", accessToken.getToken().getTokenValue());
-            log.info("deleting authorization with access token from the cache");
+            log.info("Removing authorization with access token from the cache");
             MDC.clear();
             cache.delete(accessToken.getToken().getTokenValue());
         } else if (refreshToken != null && refreshToken.getToken() != null) {
             MDC.put("refresh_token", refreshToken.getToken().getTokenValue());
-            log.info("deleting authorization with refresh token from the cache");
+            log.info("Removing authorization with refresh token from the cache");
             MDC.clear();
             cache.delete(refreshToken.getToken().getTokenValue());
         }
@@ -234,28 +234,33 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationFallback")
     public OAuth2Authorization findById(String id) {
-        Assert.hasText(id, "id cannot be empty");
         MDC.put("id", id);
-        log.info("trying to find authorization by id");
+        log.info("Trying to find authorization by id");
 
         var authorization = this.cache.get(id);
         if (authorization != null) {
-            log.info("found authorization with id in the cache");
+            log.info("Found authorization in the cache");
             this.cache.delete(authorization.getId());
-            log.info("authorization has been removed from the cache by id");
+            log.info("Removing authorization from the cache");
             MDC.clear();
             return authorization;
         }
 
+        MDC.clear();
+
         var tasks = new ArrayList<Callable<Boolean>>();
         var msg = this.queryUsecases.getById(id);
+
+        MDC.put("id", id);
+        log.info("Found authorization in the database");
         if (msg.getAuthorizationCodeValue() != null && !msg.getAuthorizationCodeValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to decrypt authorization code");
                     msg.setAuthorizationCodeValue(cipher.decrypt(msg.getAuthorizationCodeValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not decrypt authorization code", e);
                     return false;
                 }
             });
@@ -263,10 +268,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (msg.getAccessTokenValue() != null && !msg.getAccessTokenValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to decrypt authorization access token");
                     msg.setAccessTokenValue(cipher.decrypt(msg.getAccessTokenValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not decrypt authorization access token", e);
                     return false;
                 }
             });
@@ -274,10 +280,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (msg.getRefreshTokenValue() != null && !msg.getRefreshTokenValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to decrypt authorization refresh token");
                     msg.setRefreshTokenValue(cipher.decrypt(msg.getRefreshTokenValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not decrypt authorization refresh token", e);
                     return false;
                 }
             });
@@ -285,7 +292,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         try {
             pool.invokeAll(tasks);
         } catch (InterruptedException e) {
-            log.error(e.getMessage());
+            log.error("Could not execute decryption tasks", e);
         }
 
         MDC.clear();
@@ -294,8 +301,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private OAuth2Authorization findAuthorizationFallback(String id, Throwable e) {
         MDC.put("id", id);
-        MDC.put("reason", e.getMessage());
-        log.warn("authorization request is blocked due to rate-limiting");
+        log.warn("Find authorization request is blocked due to rate-limiting", e);
         MDC.clear();
         return null;
     }
@@ -303,45 +309,45 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationByTokenFallback")
     @SneakyThrows
     public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
-        Assert.hasText(token, "token cannot be empty");
         MDC.put("token", token);
-        log.info("trying to find authorization by token");
+        log.debug("Trying to find authorization by token");
 
         var authorization = this.cache.get(token);
         if (authorization != null) {
-            log.info("found authorization by token in the cache");
+            log.debug("Found authorization in the cache");
             this.cache.delete(authorization.getId());
-            log.info("authorization with token has been removed from the cache");
+            log.debug("Removing authorization from the cache");
+            MDC.clear();
             return authorization;
         }
 
         MDC.clear();
         Authorization result;
         if (tokenType == null) {
-            log.info("trying to find authorization by any value");
+            log.info("Trying to find authorization by any value");
             result = this.queryUsecases.getByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(token);
         } else if (OAuth2ParameterNames.STATE.equals(tokenType.getValue())) {
             MDC.put("state", token);
-            log.info("trying to find authorization by state");
+            log.debug("Trying to find authorization by state");
             MDC.clear();
             result = this.queryUsecases.getByState(token);
         } else if (OAuth2ParameterNames.CODE.equals(tokenType.getValue())) {
             MDC.put("authorization_code", token);
-            log.info("trying to find authorization by authorization code");
+            log.debug("Trying to find authorization by authorization code");
             MDC.clear();
             result = this.queryUsecases.getByAuthorizationCodeValue(token);
         } else if (OAuth2ParameterNames.ACCESS_TOKEN.equals(tokenType.getValue())) {
             MDC.put("access_token", token);
-            log.info("trying to find authorization by access token");
+            log.debug("Trying to find authorization by access token");
             MDC.clear();
             result = this.queryUsecases.getByAccessTokenValue(token);
         } else if (OAuth2ParameterNames.REFRESH_TOKEN.equals(tokenType.getValue())) {
             MDC.put("refresh_token", token);
-            log.debug("trying to find authorization by refresh token");
+            log.debug("Trying to find authorization by refresh token");
             MDC.clear();
             result = this.queryUsecases.getByRefreshTokenValue(token);
         } else {
-            log.info("empty authorization");
+            log.info("Empty authorization");
             return null;
         }
 
@@ -349,10 +355,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (result.getAuthorizationCodeValue() != null && !result.getAuthorizationCodeValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to decrypt authorization code");
                     result.setAuthorizationCodeValue(cipher.decrypt(result.getAuthorizationCodeValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not decrypt authorization code", e);
                     return false;
                 }
             });
@@ -360,10 +367,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (result.getAccessTokenValue() != null && !result.getAccessTokenValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to decrypt authorization access token");
                     result.setAccessTokenValue(cipher.decrypt(result.getAccessTokenValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not decrypt authorization access token", e);
                     return false;
                 }
             });
@@ -371,10 +379,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (result.getRefreshTokenValue() != null && !result.getRefreshTokenValue().isBlank())
             tasks.add(() -> {
                 try {
+                    log.info("Trying to decrypt authorization refresh token");
                     result.setRefreshTokenValue(cipher.decrypt(result.getRefreshTokenValue()));
                     return true;
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("Could not decrypt authorization refresh token", e);
                     return false;
                 }
             });
@@ -382,7 +391,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         try {
             pool.invokeAll(tasks);
         } catch (InterruptedException e) {
-            log.error(e.getMessage());
+            log.error("Could not perform authorization decryption tasks", e);
         }
 
         return toObject(result);
@@ -390,8 +399,7 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private OAuth2Authorization findAuthorizationByTokenFallback(String token, OAuth2TokenType tokenType, Throwable e) {
         MDC.put("token", token);
-        MDC.put("reason", e.getMessage());
-        log.warn("authorization token request is blocked due to rate-limiting");
+        log.warn("Authorization token request is blocked due to rate-limiting", e);
         MDC.clear();
         return null;
     }

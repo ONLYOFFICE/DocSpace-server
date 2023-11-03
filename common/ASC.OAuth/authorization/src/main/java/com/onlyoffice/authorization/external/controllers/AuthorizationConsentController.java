@@ -10,6 +10,7 @@ import com.onlyoffice.authorization.security.access.aspects.annotations.Invalida
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,12 +38,17 @@ public class AuthorizationConsentController {
             @CookieValue(name = ASC_AUTH_COOKIE) String authCookie,
             @CookieValue(name = CLIENT_ID_COOKIE) String clientId
     ) {
-        log.info("got a new consent request");
+        MDC.put("client_id", clientId);
+        log.info("Got a new consent request");
+        log.info("Trying to get client by client id");
         var client = queryUsecases.getClientByClientId(clientId);
         try {
             var cookie = String.format("%s=%s", "asc_auth_key", authCookie);
             var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie)
                     .getResponse();
+            MDC.put("client_id", clientId);
+            MDC.put("principal_name", me.getEmail());
+            log.info("Trying to get consent by principal name and client");
             var auth = authorizationRepository.getByPrincipalNameAndRegisteredClientId(me.getEmail(), clientId);
             return String.format("redirect:%s", UriComponentsBuilder
                     .fromUriString(client.getTenantUrl())
@@ -52,13 +58,15 @@ public class AuthorizationConsentController {
                     .queryParam("state", auth.getState())
                     .build());
         } catch (Exception e) {
-            log.error("could not redirect to consent page", e);
+            log.error("Could not redirect to consent page", e);
             return String.format("redirect:%s", UriComponentsBuilder
                     .fromUriString(client.getTenantUrl())
                     .path("login")
                     .queryParam("type", "oauth2")
                     .queryParam("client_id", clientId)
                     .build());
+        } finally {
+            MDC.clear();
         }
     }
 }

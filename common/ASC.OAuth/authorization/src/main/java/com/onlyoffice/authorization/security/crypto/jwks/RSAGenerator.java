@@ -24,7 +24,7 @@ import java.util.UUID;
 @Qualifier("rsa")
 public class RSAGenerator implements JwksKeyPairGenerator {
     public JWK generateKey() throws NoSuchAlgorithmException {
-        log.info("generating rsa jwk key");
+        log.info("Generating rsa jwks key");
         KeyPair keyPair = generateKeyPair();
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
@@ -35,7 +35,7 @@ public class RSAGenerator implements JwksKeyPairGenerator {
     }
 
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-        log.info("generating rsa jwk key pair");
+        log.info("Generating rsa jwks key pair");
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         return keyPairGenerator.generateKeyPair();

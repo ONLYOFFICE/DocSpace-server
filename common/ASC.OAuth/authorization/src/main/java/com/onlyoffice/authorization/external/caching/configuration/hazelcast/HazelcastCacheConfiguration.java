@@ -33,7 +33,7 @@ public class HazelcastCacheConfiguration {
             NetworkConfig networkConfig,
             PartitionGroupConfig groupConfig
     ) {
-        log.info("initializing a new production hazelcast configuration");
+        log.info("Initializing a new production hazelcast configuration");
         Config config = new Config();
         config.setClusterName("Authorization Server");
         config.setInstanceName("Authorization Server Cache - " + UUID.randomUUID());
@@ -55,7 +55,7 @@ public class HazelcastCacheConfiguration {
             NetworkConfig networkConfig,
             PartitionGroupConfig groupConfig
     ) {
-        log.info("initializing a new development hazelcast configuration");
+        log.info("Initializing a new development hazelcast configuration");
         Config config = new Config();
         config.setClusterName("DEV Cache");
         config.setInstanceName("DEV Cache - " + UUID.randomUUID());
@@ -74,7 +74,7 @@ public class HazelcastCacheConfiguration {
 
     @Bean
     public PartitionGroupConfig partitionGroupConfig() {
-        log.info("initializing a new partitioning config");
+        log.info("Initializing a new partitioning config");
         return new PartitionGroupConfig().setEnabled(true)
                 .setGroupType(PartitionGroupConfig.MemberGroupType.PER_MEMBER);
     }
@@ -82,7 +82,7 @@ public class HazelcastCacheConfiguration {
     @ConditionalOnMissingBean(value = NetworkConfig.class)
     @Bean
     public NetworkConfig developmentNetworkConfig() {
-        log.info("initializing a new development network config");
+        log.info("Initializing a new development network config");
         JoinConfig joinConfig = new JoinConfig()
                 .setTcpIpConfig(new TcpIpConfig()
                         .setEnabled(true)
@@ -99,7 +99,7 @@ public class HazelcastCacheConfiguration {
     @Profile(value = {"prod", "production", "p"})
     @Bean
     public NetworkConfig productionNetworkConfig() {
-        log.info("initializing a new production network config");
+        log.info("Initializing a new production network config");
         JoinConfig joinConfig = new JoinConfig()
                 .setKubernetesConfig(
                         new KubernetesConfig()

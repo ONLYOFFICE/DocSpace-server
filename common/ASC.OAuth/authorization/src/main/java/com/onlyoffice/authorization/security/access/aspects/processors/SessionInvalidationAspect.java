@@ -48,7 +48,7 @@ public class SessionInvalidationAspect {
         if (request != null && address.isPresent() && Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_KEY))
                 .findFirst().isEmpty()) {
-            log.info("trying to remove jsession");
+            log.info("Trying to remove JSESSIONID");
             HttpSession session = request.getSession(false);
             if (session != null)
                 session.invalidate();
@@ -59,7 +59,7 @@ public class SessionInvalidationAspect {
             SecurityContextHolder.clearContext();
             context.setAuthentication(null);
             if (response != null) {
-                log.info("removing jsession and redirecting to docspace");
+                log.info("Removing JSESSIONID and redirecting to Docspace");
                 Cookie cookie = new Cookie(JSESSIONID, null);
                 String cookiePath = StringUtils.hasText(contextPath) ? contextPath : "/";
                 cookie.setPath(cookiePath);

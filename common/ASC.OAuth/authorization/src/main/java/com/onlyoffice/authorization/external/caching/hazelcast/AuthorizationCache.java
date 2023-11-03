@@ -20,7 +20,7 @@ public class AuthorizationCache {
 
     public OAuth2Authorization put(String key, OAuth2Authorization authorization){
         MDC.put("authorization", key);
-        log.info("adding authorization to the cache");
+        log.info("Adding authorization to the cache");
         MDC.clear();
         IMap<String, OAuth2Authorization> map = hazelcastInstance
                 .getMap(HazelcastCacheAuthorizationMapConfiguration.AUTHORIZATIONS);
@@ -29,7 +29,7 @@ public class AuthorizationCache {
 
     public OAuth2Authorization get(String key){
         MDC.put("authorization", key);
-        log.info("getting authorization from the cache");
+        log.info("Getting authorization from the cache");
         MDC.clear();
         IMap<String, OAuth2Authorization> map = hazelcastInstance
                 .getMap(HazelcastCacheAuthorizationMapConfiguration.AUTHORIZATIONS);
@@ -38,7 +38,7 @@ public class AuthorizationCache {
 
     public void delete(String key) {
         MDC.put("authorization", key);
-        log.info("removing authorization from the map");
+        log.info("Removing authorization from the map");
         MDC.clear();
         IMap<String, OAuth2Authorization> map = hazelcastInstance
                 .getMap(HazelcastCacheAuthorizationMapConfiguration.AUTHORIZATIONS);

@@ -36,31 +36,42 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
 
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
+        log.info("Trying to authenticate a user");
         var request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest();
 
         var clientCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equalsIgnoreCase(CLIENT_ID_COOKIE))
                 .findFirst();
 
-        if (clientCookie.isEmpty())
+        if (clientCookie.isEmpty()) {
+            log.warn("Docspace client cookie is empty");
             throw new BadCredentialsException("Docspace client cookie is empty");
+        }
 
+        MDC.put("client_id", clientCookie.get().getValue());
+        log.info("Trying to get client by client id");
+        MDC.clear();
         var client = queryUsecases.getClientByClientId(clientCookie.get().getValue());
 
         var authCookie = Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equalsIgnoreCase(ASC_AUTH_COOKIE))
                 .findFirst();
 
-        if (authCookie.isEmpty())
+        if (authCookie.isEmpty()) {
+            log.warn("Docspace authorization cookie is empty");
             throw new BadCredentialsException("Docspace authorization cookie is empty");
+        }
 
         MDC.put("cookie", authCookie.get().getValue());
-        log.info("trying to validate a docspace authorization");
+        log.debug("Trying to validate a Docspace authorization");
         MDC.clear();
 
         var cookie = String.format("%s=%s", authCookie.get().getName(),
                 authCookie.get().getValue());
 
+        MDC.put("tenant_url", client.getTenantUrl());
+        log.info("Trying to get current user profile");
+        MDC.clear();
         var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie);
         if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin())
             throw new BadCredentialsException("Invalid docspace authorization");

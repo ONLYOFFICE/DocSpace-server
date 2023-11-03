@@ -41,14 +41,15 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
 
     @RateLimiter(name = "mutateRateLimiter")
     public void save(OAuth2AuthorizationConsent authorizationConsent) {
-        Assert.notNull(authorizationConsent, "authorization consent cannot be null");
         MDC.put("client_id", authorizationConsent.getRegisteredClientId());
         MDC.put("principal_name", authorizationConsent.getPrincipalName());
-        log.info("trying to save consent");
+        log.info("Trying to save authorization consent");
         MDC.clear();
+        log.info("Setting authorization consent in distributed cache");
         cacheManager.getCache("consent").put(String
                 .format("%s:%s", authorizationConsent.getRegisteredClientId(),
                         authorizationConsent.getPrincipalName()), authorizationConsent);
+        log.info("Publishing an authorization save consent message");
         this.amqpTemplate.convertAndSend(
                 configuration.getConsent().getExchange(),
                 configuration.getConsent().getRouting(),
@@ -58,16 +59,17 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
 
     @RateLimiter(name = "mutateRateLimiter")
     public void remove(OAuth2AuthorizationConsent authorizationConsent) {
-        Assert.notNull(authorizationConsent, "authorization consent cannot be null");
         MDC.put("client_id", authorizationConsent.getRegisteredClientId());
         MDC.put("principal_name", authorizationConsent.getPrincipalName());
-        log.info("trying to remove consent");
+        log.info("Trying to remove authorization consent");
         MDC.clear();
         var msg = toMessage(authorizationConsent);
         msg.setInvalidated(true);
+        log.info("Evicting authorization consent from distributed cache");
         cacheManager.getCache("consent").evict(String
                 .format("%s:%s", authorizationConsent.getRegisteredClientId(),
                         authorizationConsent.getPrincipalName()));
+        log.info("Publishing an authorization consent delete message");
         this.amqpTemplate.convertAndSend(
                 configuration.getConsent().getExchange(),
                 configuration.getConsent().getRouting(),
@@ -77,21 +79,18 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
 
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findConsentFallback")
     public OAuth2AuthorizationConsent findById(String registeredClientId, String principalName) {
-        Assert.hasText(registeredClientId, "registered client id cannot be empty");
-        Assert.hasText(principalName, "principal name cannot be empty");
+        MDC.put("registered_client_id", registeredClientId);
+        MDC.put("principal_name", principalName);
+        log.info("Trying to find authorization consent in the cache");
         var cached = cacheManager.getCache("consent").get(String
                 .format("%s:%s", registeredClientId, principalName));
         if (cached != null && (cached.get() instanceof OAuth2AuthorizationConsent consent)) {
-            MDC.put("registered_client_id", registeredClientId);
-            MDC.put("principal_name", principalName);
-            log.info("found consent in-memory");
+            log.info("Found authorization consent consent in the cache");
             MDC.clear();
             return consent;
         }
 
-        MDC.put("client_id", registeredClientId);
-        MDC.put("principal_name", principalName);
-        log.info("trying to find consent with client_id and principal name", registeredClientId, principalName);
+        log.info("Trying to find authorization consent in the database");
         MDC.clear();
         return toObject(this.consentUsecases.getByRegisteredClientIdAndPrincipalName(
                 registeredClientId, principalName));
@@ -100,8 +99,7 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
     private OAuth2AuthorizationConsent findConsentFallback(String registeredClientId, String principalName, Throwable e) {
         MDC.put("client_id", registeredClientId);
         MDC.put("principal_name", principalName);
-        log.warn("request is blocked due to rate-limiting for client id {} with principal name {}. Reason: {}",
-                registeredClientId, principalName, e.getMessage());
+        log.warn("Request to find authorization consent is blocked due to rate-limiting", e);
         MDC.clear();
         return null;
     }

@@ -35,24 +35,30 @@ public class ClientService implements ClientRetrieveUsecases {
     private final ClientPersistenceQueryUsecases clientUsecases;
 
     public RegisteredClient getClientById(String id) throws ClientPermissionException {
-        MDC.put("id", id);
-        log.info("trying to get client by id");
-        MDC.clear();
+        MDC.put("client_id", id);
+        log.info("Trying to get client by id");
         var client = clientUsecases.getById(id);
-        if (!client.isEnabled())
+        if (!client.isEnabled()) {
+            log.info("Client is disabled");
+            MDC.clear();
             throw new ClientPermissionException(String
                     .format("client with id %s is disabled", id));
+        }
+        MDC.clear();
         return toObject(client);
     }
 
     public RegisteredClient getClientByClientId(String clientId) throws ClientPermissionException {
         MDC.put("client_id", clientId);
-        log.info("trying to get client by client_id");
-        MDC.clear();
+        log.info("Trying to get client by client id");
         var client = clientUsecases.getClientByClientId(clientId);
-        if (!client.isEnabled())
+        if (!client.isEnabled()) {
+            log.info("Client id disabled");
+            MDC.clear();
             throw new ClientPermissionException(String
                     .format("client with client_id %s is disabled", clientId));
+        }
+        MDC.clear();
         return toObject(client);
     }
 

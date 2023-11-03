@@ -31,33 +31,35 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
 
     public void save(RegisteredClient registeredClient) {
         MDC.put("client_id", registeredClient.getClientId());
-        MDC.put("client name", registeredClient.getClientName());
-        log.info("request to save registered client");
+        MDC.put("client_name", registeredClient.getClientName());
+        log.error("Docspace registered client repository supports only read operations");
         MDC.clear();
         throw new ReadOnlyOperationException("Docspace registered client repository supports only read operations");
     }
 
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findById(String id) {
-        MDC.put("client id", id);
+        MDC.put("client_id", id);
+        log.info("Trying to find registered client by id");
         var cache = cacheManager.getCache("registered_clients");
         var cached = cache.get(id);
         if (cached != null && (cached instanceof RegisteredClient client)) {
-            log.info("found client in memory");
+            log.info("Found registered client in memory");
             MDC.clear();
             return client;
         }
 
-        log.info("trying to find registered client");
         try {
             var client = retrieveUsecases.getClientById(id);
+            log.info("Found registered client in database. Decrypting the secret");
             client = RegisteredClient.from(client)
                     .clientSecret(cipher.decrypt(client.getClientSecret()))
                     .build();
+            log.info("Putting registered client in cache");
             cache.put(id, client);
             return client;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Could not find registered client", e);
             return null;
         } finally {
             MDC.clear();
@@ -67,24 +69,26 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
     @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findByClientId(String clientId) {
         MDC.put("client_id", clientId);
+        log.info("Trying to find registered client by id");
         var cache = cacheManager.getCache("registered_clients");
         var cached = cache.get(clientId);
         if (cached != null && (cached instanceof RegisteredClient client)) {
-            log.info("found client in memory");
+            log.info("Found registered client in memory");
             MDC.clear();
             return client;
         }
 
-        log.info("trying to find registered client");
         try {
             var client = retrieveUsecases.getClientByClientId(clientId);
+            log.info("Found registered client in database. Decrypting the secret");
             client = RegisteredClient.from(client)
                     .clientSecret(cipher.decrypt(client.getClientSecret()))
                     .build();
+            log.info("Putting registered client in cache");
             cache.put(clientId, client);
             return client;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Could not find registered client", e);
             return null;
         } finally {
             MDC.clear();
@@ -93,7 +97,7 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
 
     private RegisteredClient findClientFallback(String id, Throwable e) {
         MDC.put("id/client_id", id);
-        log.warn("registered client request is blocked due to rate-limiting {}", e.getMessage());
+        log.warn("Registered client request is blocked due to rate-limiting", e);
         MDC.clear();
         return null;
     }

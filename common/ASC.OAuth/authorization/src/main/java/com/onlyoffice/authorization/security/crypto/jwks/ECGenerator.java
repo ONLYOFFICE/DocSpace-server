@@ -31,7 +31,7 @@ import java.util.UUID;
 @Qualifier("ec")
 public class ECGenerator implements JwksKeyPairGenerator {
     public JWK generateKey() throws NoSuchAlgorithmException {
-        log.info("generating elliptic curve jwk key");
+        log.info("Generating elliptic curve jwk key");
         KeyPair keyPair = generateKeyPair();
         ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
         ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
@@ -43,7 +43,7 @@ public class ECGenerator implements JwksKeyPairGenerator {
     }
 
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-        log.info("generating elliptic curve jwk key pair");
+        log.info("Generating elliptic curve jwk key pair");
         EllipticCurve ellipticCurve = new EllipticCurve(
                 new ECFieldFp(
                         new BigInteger("115792089210356248762697446949407573530086143415290314195533631308867097853951")),
@@ -65,6 +65,7 @@ public class ECGenerator implements JwksKeyPairGenerator {
             keyPairGenerator.initialize(ecParameterSpec);
             keyPair = keyPairGenerator.generateKeyPair();
         } catch (Exception ex) {
+            log.error("Could not generate a jwks key pair", ex);
             throw new NoSuchAlgorithmException(ex);
         }
 

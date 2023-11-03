@@ -103,9 +103,17 @@ management:
         enabled: true
 
 logging:
+  config: classpath:log4j2.xml
   level:
     root: INFO
     org:
       hibernate:
         stat: DEBUG
         SQL: DEBUG
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+logging:
+  config: classpath:log4j2-dev.xml
