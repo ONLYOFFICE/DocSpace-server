@@ -595,7 +595,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         return uploadSession;
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -605,7 +605,6 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }
@@ -630,17 +629,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = MakeId(uploadSession.File);
-        }
+        uploadSession.File = MakeId(uploadSession.File);
 
         return uploadSession.File;
     }

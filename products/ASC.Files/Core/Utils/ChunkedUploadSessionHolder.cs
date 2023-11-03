@@ -34,36 +34,67 @@ public class ChunkedUploadSessionHolder
     private readonly GlobalStore _globalStore;
     private readonly SetupInfo _setupInfo;
     private readonly TempPath _tempPath;
-    private readonly FileHelper _fileHelper;
+    private CommonChunkedUploadSessionHolder _holder;
+    private CommonChunkedUploadSessionHolder _currentHolder;
+    private readonly ICache _cache;
 
     public ChunkedUploadSessionHolder(
         GlobalStore globalStore,
         SetupInfo setupInfo,
         TempPath tempPath,
-        FileHelper fileHelper)
+        ICache cache)
     {
         _globalStore = globalStore;
         _setupInfo = setupInfo;
         _tempPath = tempPath;
-        _fileHelper = fileHelper;
+        _cache = cache;
     }
 
-    public async Task StoreSessionAsync<T>(ChunkedUploadSession<T> s)
+    public void StoreSession<T>(ChunkedUploadSession<T> s)
     {
-        await (await CommonSessionHolderAsync(false)).StoreAsync(s);
+        _cache.Insert(s.Id, s, SlidingExpiration);
     }
 
-    public async Task RemoveSessionAsync<T>(ChunkedUploadSession<T> s)
+    public void StoreChunk<T>(ChunkedUploadSession<T> s, int number, string eTag, long size)
     {
-        await (await CommonSessionHolderAsync(false)).RemoveAsync(s);
+        var chunk = new Chunk
+        {
+            ETag = eTag,
+            Size = size
+        };
+
+        _cache.Insert($"{s.Id} - {number}", chunk, SlidingExpiration);
     }
 
-    public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
+    public Dictionary<int, Chunk> GetChunks<T>(ChunkedUploadSession<T> s)
     {
-        await using var stream = await (await CommonSessionHolderAsync(false)).GetStreamAsync(sessionId);
-        var chunkedUploadSession = ChunkedUploadSession<T>.Deserialize(stream, _fileHelper);
+        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
 
-        return chunkedUploadSession;
+        var dict = new Dictionary<int, Chunk>();
+        for (var i = 1; i <= count; i++)
+        {
+            dict.Add(i, _cache.Get<Chunk>($"{s.Id} - {i}"));
+        }
+
+        return dict;
+    }
+
+    public void RemoveSession<T>(ChunkedUploadSession<T> s)
+    {
+        _cache.Remove(s.Id);
+
+        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
+        for (var i = 1; i <= count; i++)
+        {
+            _cache.Remove($"{s.Id} - {i}");
+        }
+    }
+
+    public ChunkedUploadSession<T> GetSession<T>(string sessionId)
+    {
+        return _cache.Get<ChunkedUploadSession<T>>(sessionId);
     }
 
     public async Task<ChunkedUploadSession<T>> CreateUploadSessionAsync<T>(File<T> file, long contentLength)
@@ -74,14 +105,26 @@ public class ChunkedUploadSessionHolder
         return result;
     }
 
-    public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length)
+    public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length, int chunkNumber)
     {
-        await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length);
+        (var path, var eTag) = await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
+        StoreChunk(uploadSession, chunkNumber, eTag, length);
     }
 
     public async Task FinalizeUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
-        await (await CommonSessionHolderAsync()).FinalizeAsync(uploadSession);
+        var chunks = GetChunks(uploadSession);
+        var uploadSize = chunks.Sum(c => c.Value == null ? 0 : c.Value.Size);
+        if (uploadSize != uploadSession.BytesTotal)
+        {
+            throw new ArgumentException("uploadSize != bytesTotal");
+        }
+        else
+        {
+            var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
+            uploadSession.Items["ETag"] = eTags;
+            await (await CommonSessionHolderAsync()).FinalizeAsync(uploadSession);
+        }
     }
 
     public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath)
@@ -101,6 +144,21 @@ public class ChunkedUploadSessionHolder
 
     private async Task<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
     {
-        return new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+        if (currentTenant)
+        {
+            if (_currentHolder == null)
+            {
+                _currentHolder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+            }
+            return _currentHolder;
+        }
+        else
+        {
+            if (_holder == null)
+            {
+                _holder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+            }
+            return _holder;
+        }
     }
 }

@@ -71,8 +71,9 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         return uploadSession;
     }
 
-    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength)
+    public override async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
+        long.TryParse(uploadSession.GetItemOrDefault<string>("BytesUploaded"), out var uploaded);
         if (!uploadSession.UseChunks)
         {
             if (uploadSession.BytesTotal == 0)
@@ -81,7 +82,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, stream);
-            uploadSession.BytesUploaded = chunkLength;
+            uploadSession.Items["BytesUploaded"] = uploaded + chunkLength.ToString();
 
             return uploadSession.File;
         }
@@ -90,7 +91,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         {
             var dropboxSession = uploadSession.GetItemOrDefault<string>("DropboxSession");
             var storage = (DropboxStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(dropboxSession, uploadSession.BytesUploaded, stream);
+            await storage.TransferAsync(dropboxSession, uploaded, stream);
         }
         else
         {
@@ -99,17 +100,8 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
             await stream.CopyToAsync(fs);
         }
 
-        uploadSession.BytesUploaded += chunkLength;
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
-        {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
-        }
-        else
-        {
-            uploadSession.File = RestoreIds(uploadSession.File);
-        }
+        uploadSession.File = RestoreIds(uploadSession.File);
+        uploadSession.Items["BytesUploaded"] = uploaded + chunkLength.ToString();
 
         return uploadSession.File;
     }
@@ -123,16 +115,17 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
 
             Metadata dropboxFile;
             var file = uploadSession.File;
+            long.TryParse(uploadSession.GetItemOrDefault<string>("BytesUploaded"), out var uploaded);
             if (file.Id != null)
             {
                 var dropboxFilePath = Dao.MakeThirdId(file.Id);
-                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, dropboxFilePath, uploadSession.BytesUploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, dropboxFilePath, uploaded);
             }
             else
             {
                 var folderPath = Dao.MakeThirdId(file.ParentId);
                 var title = await Dao.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
-                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title, uploadSession.BytesUploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title, uploaded);
             }
 
             await ProviderInfo.CacheResetAsync(Dao.MakeThirdId(dropboxFile));

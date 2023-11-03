@@ -1023,7 +1023,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await _chunkedUploadSessionHolder.CreateUploadSessionAsync(file, contentLength);
     }
 
-    public async Task<File<int>> UploadChunkAsync(ChunkedUploadSession<int> uploadSession, Stream stream, long chunkLength)
+    public async Task<File<int>> UploadChunkAsync(ChunkedUploadSession<int> uploadSession, Stream stream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -1035,14 +1035,14 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
             return uploadSession.File;
         }
-
-        await _chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength);
-
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
+        if (!chunkNumber.HasValue)
         {
-            uploadSession.BytesTotal = uploadSession.BytesUploaded;
-            uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
+            int.TryParse(uploadSession.GetItemOrDefault<string>("ChunksUploaded"), out var number);
+            number++;
+            uploadSession.Items["ChunksUploaded"] = number.ToString();
+            chunkNumber = number;
         }
+        await _chunkedUploadSessionHolder.UploadChunkAsync(uploadSession, stream, chunkLength, chunkNumber.Value);
 
         return uploadSession.File;
     }

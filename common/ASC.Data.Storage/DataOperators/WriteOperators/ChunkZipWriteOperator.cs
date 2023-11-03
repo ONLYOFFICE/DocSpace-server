@@ -35,6 +35,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     private readonly SHA256 _sha;
     private Stream _fileStream;
     private readonly TempStream _tempStream;
+    private int _chunkNumber = 1;
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -50,7 +51,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         CommonChunkedUploadSession chunkedUploadSession,
         CommonChunkedUploadSessionHolder sessionHolder)
     {
-        _tempStream = tempStream; 
+        _tempStream = tempStream;
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
 
@@ -66,7 +67,7 @@ public class ChunkZipWriteOperator : IDataWriteOperator
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);
@@ -113,13 +114,11 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             theMemStream.Position = 0;
             if (bytesRead == chunkUploadSize || last)
             {
-                if (_fileStream.Position == _fileStream.Length && last)
-                {
-                    _chunkedUploadSession.LastChunk = true;
-                }
-                    
                 theMemStream.Position = 0;
-                StoragePath = await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length);
+
+                await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, _chunkNumber++);
+                _chunkedUploadSession.BytesTotal += theMemStream.Length;
+
                 _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
             }
             else
@@ -134,6 +133,8 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         }
         if (last)
         {
+            _chunkedUploadSession.BytesTotal++;
+            StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
             _sha.TransformFinalBlock(buffer, 0, 0);
         }
     }
@@ -143,7 +144,6 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
 
-        _chunkedUploadSession.BytesTotal = _chunkedUploadSession.BytesUploaded;
         await UploadAsync(true);
         await _fileStream.DisposeAsync();
 

@@ -74,10 +74,15 @@ public class CrossModuleTransferUtility
                 Stream memstream = null;
                 try
                 {
+                    var i = 1;
                     while (GetStream(stream, out memstream))
                     {
                         memstream.Seek(0, SeekOrigin.Begin);
-                        await holder.UploadChunkAsync(session, memstream, _chunkSize);
+                        (var _, var eTag) = await holder.UploadChunkAsync(session, memstream, _chunkSize, i++);
+
+                        var eTags = session.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
+                        eTags.Add(i, eTag);
+                        session.Items["ETag"] = eTags;
                         await memstream.DisposeAsync();
                     }
                 }

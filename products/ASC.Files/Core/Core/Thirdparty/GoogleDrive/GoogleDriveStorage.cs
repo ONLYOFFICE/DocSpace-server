@@ -398,7 +398,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         return uploadSession;
     }
 
-    public async ValueTask TransferAsync(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength, bool lastChunk)
+    public async ValueTask TransferAsync(ResumableUploadSession googleDriveSession, Stream stream, long chunkLength)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
@@ -423,21 +423,12 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         }
         else
         {
-            if (lastChunk) 
-            {
-                var bytesToTransfer = googleDriveSession.BytesTransfered + chunkLength;
+            var bytesToTransfer = googleDriveSession.BytesTransfered + chunkLength;
 
-                request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                               googleDriveSession.BytesTransfered,
-                                               googleDriveSession.BytesTransfered + chunkLength - 1,
-                                               bytesToTransfer);
-            }
-            else
-            {
-                request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                               googleDriveSession.BytesTransfered,
-                                               googleDriveSession.BytesTransfered + chunkLength - 1);
-            }
+            request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
+                                           googleDriveSession.BytesTransfered,
+                                           googleDriveSession.BytesTransfered + chunkLength - 1,
+                                           bytesToTransfer);
         }
         var httpClient = _clientFactory.CreateClient();
         HttpResponseMessage response;

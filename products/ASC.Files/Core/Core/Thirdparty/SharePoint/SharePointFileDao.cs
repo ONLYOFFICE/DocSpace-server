@@ -452,7 +452,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         return Task.FromResult(new ChunkedUploadSession<string>(FixId(file), contentLength) { UseChunks = false });
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null)
     {
         if (!uploadSession.UseChunks)
         {
@@ -462,7 +462,6 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
             }
 
             uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-            uploadSession.BytesUploaded = chunkLength;
 
             return uploadSession.File;
         }

@@ -211,10 +211,14 @@ public class DiscDataStore : BaseStorage
 
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
-        var target = GetTarget(domain, path);
-        var mode = chunkNumber == 0 ? FileMode.Create : FileMode.Append;
+        var target = GetTarget(domain, path + "chunks");
 
-        await using (var fs = new FileStream(target, mode))
+        if (!Directory.Exists(target))
+        {
+            Directory.CreateDirectory(target);
+        }
+
+        await using (var fs = new FileStream(Path.Combine(target, chunkNumber.ToString()), FileMode.Create))
         {
             await stream.CopyToAsync(fs);
         }
@@ -226,13 +230,26 @@ public class DiscDataStore : BaseStorage
     {
         var target = GetTarget(domain, path);
 
+        var targetChunks = target + "chunks";
+        if (!Directory.Exists(targetChunks))
+        {
+            throw new FileNotFoundException("file not found " + target);
+        }
+
+        var sortETags = eTags.OrderBy(e => e.Key);
+
+        await using (var fs = new FileStream(target, FileMode.Create))
+        {
+            foreach (var eTag in sortETags)
+            {
+                await using var eTagFs = new FileStream(Path.Combine(targetChunks, eTag.Key.ToString()), FileMode.Open);
+                await eTagFs.CopyToAsync(fs);
+            }
+        }
+        Directory.Delete(Path.Combine(targetChunks), true);
+
         if (QuotaController != null)
         {
-            if (!File.Exists(target))
-            {
-                throw new FileNotFoundException("file not found " + target);
-            }
-
             var size = _crypt.GetFileSize(target);
             await QuotaUsedAddAsync(domain, size);
         }
@@ -244,10 +261,10 @@ public class DiscDataStore : BaseStorage
 
     public override Task AbortChunkedUploadAsync(string domain, string path, string uploadId)
     {
-        var target = GetTarget(domain, path);
-        if (File.Exists(target))
+        var target = GetTarget(domain, path + "chunks");
+        if (Directory.Exists(target))
         {
-            File.Delete(target);
+            Directory.Delete(target);
         }
         return Task.CompletedTask;
     }

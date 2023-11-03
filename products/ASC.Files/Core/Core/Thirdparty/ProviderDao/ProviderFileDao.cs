@@ -432,8 +432,12 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
         return await fileDao.CreateUploadSessionAsync(ConvertId(file), contentLength);
     }
 
-    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength)
+    public async Task<File<string>> UploadChunkAsync(ChunkedUploadSession<string> uploadSession, Stream chunkStream, long chunkLength, int? chunkNumber = null)
     {
+        if (chunkNumber.HasValue)
+        {
+            throw new ArgumentException("Can not async upload in provider folder.");
+        }
         var fileDao = GetFileDao(uploadSession.File);
         uploadSession.File = ConvertId(uploadSession.File);
         await fileDao.UploadChunkAsync(uploadSession, chunkStream, chunkLength);

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Storage.ChunkedUploader;
+
 namespace ASC.Data.Storage.DataOperators;
 public class S3TarWriteOperator : IDataWriteOperator
 {
@@ -32,12 +34,13 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly S3Storage _store;
     private readonly string _domain;
     private readonly string _key;
+    private readonly ICache _cache;
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload => false;
 
-    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, ICache cache)
     {
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
@@ -45,11 +48,12 @@ public class S3TarWriteOperator : IDataWriteOperator
 
         _key = _chunkedUploadSession.TempPath;
         _domain = _sessionHolder.TempDomain;
+        _cache = cache;
     }
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        if (store is S3Storage) 
+        if (store is S3Storage)
         {
             var s3Store = store as S3Storage;
             var fullPath = s3Store.MakePath(domain, path);
@@ -59,7 +63,7 @@ public class S3TarWriteOperator : IDataWriteOperator
         else
         {
             var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-            
+
             if (fileStream != null)
             {
                 await WriteEntryAsync(tarKey, fileStream);
@@ -75,19 +79,35 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async ValueTask DisposeAsync()
     {
-        await _store.AddEndAsync(_domain ,_key);
-        await _store.RemoveFirstBlockAsync(_domain ,_key);
+        await _store.AddEndAsync(_domain, _key);
+        await _store.RemoveFirstBlockAsync(_domain, _key);
 
         var contentLength = await _store.GetFileSizeAsync(_domain, _key);
         Hash = (await _store.GetFileEtagAsync(_domain, _key)).Trim('\"');
 
         var (uploadId, eTags, partNumber) = await _store.InitiateConcatAsync(_domain, _key, lastInit: true);
 
-        _chunkedUploadSession.BytesUploaded = contentLength;
         _chunkedUploadSession.BytesTotal = contentLength;
         _chunkedUploadSession.UploadId = uploadId;
+
         _chunkedUploadSession.Items["ETag"] = eTags.ToDictionary(e => e.PartNumber, e => e.ETag);
         _chunkedUploadSession.Items["ChunksUploaded"] = (partNumber - 1).ToString();
+
+        var first = true;
+        foreach (var etag in eTags)
+        {
+            var chunk = new Chunk
+            {
+                ETag = etag.ETag,
+                Size = 0
+            };
+            if (first)
+            {
+                chunk.Size = contentLength;
+                first = false;
+            }
+            _cache.Insert($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
+        }
 
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
     }
