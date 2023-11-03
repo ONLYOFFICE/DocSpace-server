@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,7 +53,7 @@ public class ScopeController {
     @RateLimiter(name = "getScopesRateLimiter")
     @SneakyThrows
     public ResponseEntity<Iterable<ScopeDTO>> getScopes() {
-        log.info("received a request to list scopes");
+        log.info("Received a request to list scopes");
         return ResponseEntity.ok(this.scopes);
     }
 
@@ -61,7 +62,9 @@ public class ScopeController {
     @RateLimiter(name = "getScopesRateLimiter")
     @SneakyThrows
     public ResponseEntity<ScopeDTO> getScope(@PathVariable @NotEmpty String name) {
-        log.info("received a get {} scope", name);
+        MDC.put("scope", name);
+        log.info("Received get a specific scope");
+        MDC.clear();
         var scope = this.scopes.stream()
                 .filter(s -> s.getName().equals(name))
                 .findFirst()

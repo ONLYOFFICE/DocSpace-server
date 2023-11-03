@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class RateLimiterExceptionHandler {
     @ExceptionHandler(RequestNotPermitted.class)
     public ResponseEntity<ErrorDTO> handleRequestNotPermitted(RequestNotPermitted ex, HttpServletRequest request) {
+        log.error(ex.getMessage());
         return new ResponseEntity<ErrorDTO>(ErrorDTO
                 .builder()
                 .reason("too many requests")

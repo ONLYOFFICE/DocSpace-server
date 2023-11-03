@@ -11,6 +11,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreat
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -49,11 +50,11 @@ public class ClientListener {
             @Header(AmqpHeaders.DELIVERY_TAG) long tag
     ) {
         if (messages.size() == configuration.getPrefetch()) {
-            log.warn("client message queue is full");
+            log.warn("Client message queue is full");
             return;
         }
 
-        log.info("adding a client message to the queue");
+        log.info("Adding a client message to the queue");
 
         messages.add(MessageWrapper.
                 <ClientMessage>builder().
@@ -71,7 +72,9 @@ public class ClientListener {
     private void persistClients() {
         if (messages.size() > 0) {
             lastBatchProcessed.set(messages.size());
-            log.info("persisting client messages (count {})", messages.size());
+            MDC.put("number of messages", String.valueOf(messages.size()));
+            log.info("Persisting client messages");
+            MDC.clear();
 
             var ids = creationUsecases.saveClients(messages.stream()
                     .map(msg -> msg.getData())
@@ -94,7 +97,9 @@ public class ClientListener {
                         );
                     } else
                         channel.basicNack(tag, false, true);
-                } catch (IOException e) {} finally {
+                } catch (IOException e) {
+                    log.error("Could not persist clients", e);
+                } finally {
                     return true;
                 }
             });

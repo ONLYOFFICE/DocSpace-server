@@ -11,6 +11,7 @@ import com.rabbitmq.client.Channel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -45,11 +46,11 @@ public class AuthorizationListener {
             @Header(AmqpHeaders.DELIVERY_TAG) long tag
     ) {
         if (messages.size() > configuration.getPrefetch()) {
-            log.warn("authorization message queue is full");
+            log.warn("Authorization message queue is full");
             return;
         }
 
-        log.info("adding an authorization message to the queue");
+        log.info("Adding an authorization message to the queue");
 
         messages.add(MessageWrapper.
                 <AuthorizationMessage>builder()
@@ -62,7 +63,9 @@ public class AuthorizationListener {
     @Scheduled(fixedDelay = 1000)
     private void persistAuthorizations() {
         if (messages.size() > 0) {
-            log.info("persisting authorization messages (count {})", messages.size());
+            MDC.put("number of messages", String.valueOf(messages.size()));
+            log.info("Persisting authorization messages");
+            MDC.clear();
 
             var ids = creationUsecases.saveAuthorizations(messages
                     .stream().map(s -> s.getData())
@@ -77,7 +80,9 @@ public class AuthorizationListener {
                         channel.basicAck(tag, true);
                     else
                         channel.basicNack(tag, false, true);
-                } catch (IOException e) {} finally {
+                } catch (IOException e) {
+                    log.error("Could not persist authorizations", e);
+                } finally {
                     return true;
                 }
             });

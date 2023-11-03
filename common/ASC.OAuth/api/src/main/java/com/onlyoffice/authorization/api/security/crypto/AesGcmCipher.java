@@ -6,6 +6,7 @@ package com.onlyoffice.authorization.api.security.crypto;
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -25,12 +26,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
  *
  */
-@Profile(value = {"prod", "production", "p"})
+@Profile(value = {"prod", "production", "p", "testing", "t", "test"})
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -49,11 +51,17 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.security.c
     private byte[] getRandomNonce(int length) {
         byte[] nonce = new byte[length];
         new SecureRandom().nextBytes(nonce);
+        MDC.put("nonce", Arrays.toString(nonce));
+        log.debug("=========RANDOM NONCE=========");
+        MDC.clear();
         return nonce;
     }
 
     private SecretKey getSecretKey(String password, byte[] salt)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
+        MDC.put("password", password);
+        log.debug("=========SECRET PASSWORD=========");
+        MDC.clear();
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance(FACTORY_INSTANCE);
@@ -69,7 +77,10 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.security.c
     }
 
     public String encrypt(String plainMessage) throws Exception {
-        log.debug("Trying to encrypt '{}' message", plainMessage);
+        MDC.put("plain_message", plainMessage);
+        log.info("Trying to encrypt plain message");
+        MDC.clear();
+
         byte[] salt = getRandomNonce(SALT_LENGTH_BYTE);
         SecretKey secretKey = getSecretKey(configuration.getSecurity().getCipherSecret(), salt);
 
@@ -83,11 +94,19 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.security.c
                 .put(salt)
                 .put(encryptedMessageByte)
                 .array();
-        return Base64.getEncoder().encodeToString(cipherByte);
+
+        var encrypted = Base64.getEncoder().encodeToString(cipherByte);
+        MDC.put("plain_message", plainMessage);
+        MDC.put("encrypted_message", encrypted);
+        log.info("Managed to encrypt plain text message");
+        MDC.clear();
+        return encrypted;
     }
 
     public String decrypt(String cipherMessage) throws Exception {
-        log.debug("Trying to decrypt '{}' message", cipherMessage);
+        MDC.put("cipher_message", cipherMessage);
+        log.info("Trying to decrypt cipher message");
+        MDC.clear();
         byte[] decodedCipherByte = Base64.getDecoder().decode(cipherMessage.getBytes(UTF_8));
         ByteBuffer byteBuffer = ByteBuffer.wrap(decodedCipherByte);
 
@@ -104,6 +123,12 @@ public class AesGcmCipher implements com.onlyoffice.authorization.api.security.c
         Cipher cipher = initCipher(Cipher.DECRYPT_MODE, secretKey, iv);
 
         byte[] decryptedMessageByte = cipher.doFinal(encryptedByte);
-        return new String(decryptedMessageByte, UTF_8);
+
+        var decrypted = new String(decryptedMessageByte, UTF_8);
+        MDC.put("cipher_message", cipherMessage);
+        MDC.put("decrypted_message", decrypted);
+        log.info("Managed to decrypt cipher text");
+        MDC.clear();
+        return decrypted;
     }
 }

@@ -10,6 +10,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.authorization.Auth
 import com.onlyoffice.authorization.api.core.usecases.service.authorization.AuthorizationCreationUsecases;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,9 @@ public class AuthorizationService implements AuthorizationCleanupUsecases, Autho
 
     @Transactional
     public void saveAuthorization(AuthorizationMessage authorizationMessage) {
-        log.info("saving an authorization with id: {}", authorizationMessage.getId());
+        MDC.put("authorization_id", authorizationMessage.getId());
+        log.info("Saving an authorization", authorizationMessage.getId());
+        MDC.clear();
         mutationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE.toEntity(authorizationMessage));
     }
 
@@ -38,16 +41,19 @@ public class AuthorizationService implements AuthorizationCleanupUsecases, Autho
      */
     @Transactional
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
-        log.info("saving authorizations");
+        log.info("Saving authorizations");
         List<String> ids = new ArrayList<>();
 
         for (AuthorizationMessage authorization : authorizations) {
             try {
-                log.info("Saving an authorization with id: {}", authorization.getId());
+                MDC.put("authorization_id", authorization.getId());
+                log.info("Saving an authorization", authorization.getId());
                 mutationUsecases.saveAuthorization(AuthorizationMapper.INSTANCE.toEntity(authorization));
             } catch (Exception e) {
                 ids.add(authorization.getId());
-                log.error(e.getMessage());
+                log.error("Could not persist an authorization", e);
+            } finally {
+                MDC.clear();
             }
         }
 
@@ -56,19 +62,24 @@ public class AuthorizationService implements AuthorizationCleanupUsecases, Autho
 
     @Transactional
     public void deleteAuthorization(AuthorizationMessage a) {
-        log.info("deleting authorization with id: {}", a.getId());
+        MDC.put("authorization_id", a.getId());
+        log.info("Deleting an authorization", a.getId());
+        MDC.clear();
         mutationUsecases.deleteById(a.getId());
     }
 
     @Transactional
     public void deleteAuthorizations(Iterable<AuthorizationMessage> authorizations) {
-        log.info("deleting authorizations");
+        log.info("Deleting authorizations");
         for (AuthorizationMessage authorization : authorizations) {
             try {
-                log.info("deleting authorization with id {}", authorization.getId());
+                MDC.put("authorization_id", authorization.getId());
+                log.info("Deleting an authorization", authorization.getId());
                 mutationUsecases.deleteById(authorization.getId());
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("Could not remove an authorization", e);
+            } finally {
+                MDC.clear();
             }
         }
     }

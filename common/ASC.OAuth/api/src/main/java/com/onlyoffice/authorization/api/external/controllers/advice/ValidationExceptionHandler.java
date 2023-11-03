@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ValidationExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDTO> handleValidationException(MethodArgumentNotValidException e) {
+        log.error(e.getMessage());
         return new ResponseEntity<>(ErrorDTO
                 .builder()
                 .reason(e.getMessage())

@@ -15,6 +15,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRet
 import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,9 @@ public class ConsentService implements ConsentRetrieveUsecases,
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public Set<ConsentDTO> getAllByPrincipalName(String principalName) throws RuntimeException {
+        MDC.put("principal_name", principalName);
+        log.info("Trying to get all consents by principal name");
+        MDC.clear();
         var response = new HashSet<ConsentDTO>();
         var results = retrieveUsecases.findAllByPrincipalName(principalName);
         results.forEach(r -> response.add(ConsentMapper.INSTANCE.toDTO(r)));
@@ -44,8 +48,10 @@ public class ConsentService implements ConsentRetrieveUsecases,
 
     @Transactional
     public void saveConsent(ConsentMessage consentMessage) {
-        log.info("trying to save a new consent for {} and {}",
-                consentMessage.getPrincipalName(), consentMessage.getRegisteredClientId());
+        MDC.put("principal_name", consentMessage.getPrincipalName());
+        MDC.put("client_id", consentMessage.getRegisteredClientId());
+        log.info("Trying to save a new consent");
+        MDC.clear();
         var entity = ConsentMapper.INSTANCE.toEntity(consentMessage);
         entity.setClient(Client.builder().clientId(consentMessage.getRegisteredClientId()).build());
         mutationUsecases.saveConsent(entity);
@@ -53,24 +59,29 @@ public class ConsentService implements ConsentRetrieveUsecases,
 
     @Transactional
     public void saveConsents(Iterable<ConsentMessage> consents) {
-        log.info("trying to save consents");
         for (ConsentMessage consent : consents) {
             try {
+                MDC.put("principal_name", consent.getPrincipalName());
+                MDC.put("client_id", consent.getRegisteredClientId());
+                log.info("Trying to save consent");
                 var entity = ConsentMapper.INSTANCE.toEntity(consent);
                 entity.setClient(Client.builder().clientId(consent.getRegisteredClientId()).build());
-                log.info("saving a new consent for {} and {}",
-                        consent.getPrincipalName(), consent.getRegisteredClientId());
+                log.info("Saving a new consent");
                 mutationUsecases.saveConsent(entity);
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("Could not persist a new consent", e);
+            } finally {
+                MDC.clear();
             }
         }
     }
 
     @Transactional
     public void deleteConsent(ConsentMessage consentMessage) {
-        log.info("deleting a consent for {} and {}",
-                consentMessage.getPrincipalName(), consentMessage.getRegisteredClientId());
+        MDC.put("principal_name", consentMessage.getPrincipalName());
+        MDC.put("client_id", consentMessage.getRegisteredClientId());
+        log.info("Deleting a consent");
+        MDC.clear();
         mutationUsecases.deleteById(new Consent.ConsentId(
                 consentMessage.getRegisteredClientId(),
                 consentMessage.getPrincipalName()));
@@ -78,7 +89,7 @@ public class ConsentService implements ConsentRetrieveUsecases,
 
     @Transactional
     public void deleteConsents(Iterable<ConsentMessage> consents) {
-        log.info("trying to delete all consents");
+        log.info("Trying to delete all consents");
         mutationUsecases.deleteAll(StreamSupport
                 .stream(consents.spliterator(), false)
                 .map(c -> ConsentMapper.INSTANCE.toEntity(c))

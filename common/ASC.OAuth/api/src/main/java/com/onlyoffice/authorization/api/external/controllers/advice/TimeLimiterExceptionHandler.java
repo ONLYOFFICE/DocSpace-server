@@ -21,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 public class TimeLimiterExceptionHandler {
     @ExceptionHandler(TimeoutException.class)
     public ResponseEntity<ErrorDTO> handleTimeoutException(TimeoutException ex, HttpServletRequest request) {
+        log.error(ex.getMessage());
         return new ResponseEntity<ErrorDTO>(ErrorDTO
                 .builder()
                 .reason("request timeout")

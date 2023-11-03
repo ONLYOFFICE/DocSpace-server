@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +25,10 @@ public class AuthorizationQueueConfiguration {
 
     @Bean
     public Queue authorizationDeadQueue() {
-        log.info("Building an authorization dead queue {} with bytes limit of {}", configuration
-                .getAuthorization().getDeadQueue(), configuration.getAuthorization().getDeadMaxBytes());
+        MDC.put("dead queue", configuration.getAuthorization().getDeadQueue());
+        MDC.put("bytes limit", String.valueOf(configuration.getAuthorization().getDeadMaxBytes()));
+        log.info("Building an authorization dead queue with bytes limit");
+        MDC.clear();
         return QueueBuilder.durable(configuration.getAuthorization().getDeadQueue())
                 .withArgument("x-max-length-bytes", configuration.getAuthorization().getDeadMaxBytes())
                 .withArgument("x-queue-type", "quorum")
@@ -34,10 +37,13 @@ public class AuthorizationQueueConfiguration {
 
     @Bean
     public Queue authorizationQueue() {
-        log.info("Building an authorization queue {} with dead exchange {}, max bytes {} delivery limit {} and ttl {}",
-                configuration.getAuthorization().getQueue(), configuration.getAuthorization().getDeadExchange(),
-                configuration.getAuthorization().getMaxBytes(), configuration.getAuthorization().getDeliveryLimit(),
-                configuration.getAuthorization().getMessageTTL());
+        MDC.put("queue", configuration.getAuthorization().getQueue());
+        MDC.put("dead exchange", configuration.getAuthorization().getDeadExchange());
+        MDC.put("max bytes", String.valueOf(configuration.getAuthorization().getMaxBytes()));
+        MDC.put("delivery limit", String.valueOf(configuration.getAuthorization().getDeliveryLimit()));
+        MDC.put("ttl", String.valueOf(configuration.getAuthorization().getMessageTTL()));
+        log.info("Building an authorization queue with dead exchange, max bytes delivery limit and ttl");
+        MDC.clear();
         return QueueBuilder.durable(configuration.getAuthorization().getQueue())
                 .withArgument("x-dead-letter-exchange", configuration.getAuthorization().getDeadExchange())
                 .withArgument("x-dead-letter-routing-key", configuration.getAuthorization().getDeadRouting())
@@ -51,19 +57,25 @@ public class AuthorizationQueueConfiguration {
 
     @Bean
     public TopicExchange authorizationExchange() {
-        log.info("Building an authorization exchange {}", configuration.getAuthorization().getExchange());
+        MDC.put("exchange", configuration.getAuthorization().getExchange());
+        log.info("Building an authorization exchange");
+        MDC.clear();
         return new TopicExchange(configuration.getAuthorization().getExchange());
     }
 
     @Bean
     public TopicExchange authorizationDeadExchange() {
-        log.info("Building an authorization dead exchange {}", configuration.getAuthorization().getDeadExchange());
+        MDC.put("dead exchange", configuration.getAuthorization().getDeadExchange());
+        log.info("Building an authorization dead exchange");
+        MDC.clear();
         return new TopicExchange(configuration.getAuthorization().getDeadExchange());
     }
 
     @Bean
     public Binding authorizationBinding() {
-        log.info("Building an authorization binding with {}", configuration.getAuthorization().getRouting());
+        MDC.put("binding", configuration.getAuthorization().getRouting());
+        log.info("Building an authorization binding");
+        MDC.clear();
         return BindingBuilder.bind(authorizationQueue())
                 .to(authorizationExchange())
                 .with(configuration.getAuthorization().getRouting());
@@ -71,7 +83,9 @@ public class AuthorizationQueueConfiguration {
 
     @Bean
     public Binding authorizationDeadBinding() {
-        log.info("Building an authorization dead binding with {}", configuration.getAuthorization().getDeadRouting());
+        MDC.put("dead binding", configuration.getAuthorization().getDeadRouting());
+        log.info("Building an authorization dead binding");
+        MDC.clear();
         return BindingBuilder.bind(authorizationDeadQueue())
                 .to(authorizationDeadExchange())
                 .with(configuration.getAuthorization().getDeadRouting());

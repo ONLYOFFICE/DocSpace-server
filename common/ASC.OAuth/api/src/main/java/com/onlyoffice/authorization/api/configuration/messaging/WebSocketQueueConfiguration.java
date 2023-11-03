@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -36,13 +37,17 @@ public class WebSocketQueueConfiguration {
 
     @Bean
     public FanoutExchange socketExchange() {
-        log.info("Building a socket exchange {}", configuration.getSocket().getExchange());
+        MDC.put("exchange", configuration.getSocket().getExchange());
+        log.info("Building a socket exchange");
+        MDC.clear();
         return new FanoutExchange(configuration.getSocket().getExchange());
     }
 
     @Bean
     public Binding socketBinding() {
-        log.info("Building a consent binding with {}", configuration.getSocket().getRouting());
+        MDC.put("binding", configuration.getSocket().getRouting());
+        log.info("Building a consent binding");
+        MDC.clear();
         return BindingBuilder.bind(socketQueue())
                 .to(socketExchange());
     }

@@ -26,6 +26,7 @@ import com.onlyoffice.authorization.api.security.crypto.Cipher;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,9 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     private final Cipher cipher;
 
     public void clientAsyncDeletionTask(String clientId, int tenant) {
-        log.info("trying to create a new client deletion task");
+        MDC.put("client_id", clientId);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Trying to create a new client deletion task");
         try {
             this.amqpTemplate.convertAndSend(
                     configuration.getClient().getExchange(),
@@ -74,14 +77,20 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                             .invalidated(true)
                             .build());
         } catch (RuntimeException e) {
+            log.error("Could not create a client deletion task", e);
             throw new ClientDeletionException(String
                     .format("could not create a client deletion task: %s", e.getMessage()));
+        } finally {
+            MDC.clear();
         }
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean deleteClient(String id, int tenant) {
-        log.info("deleting a client with id {} for tenant {}", id, tenant);
+        MDC.put("client_id", id);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Deleting a client");
+        MDC.clear();
         if (mutationUsecases.deleteByClientIdAndTenant(id, tenant) < 1)
             throw new ClientNotFoundException(String
                     .format("could not find client with client id %s for %d", id, tenant));
@@ -92,25 +101,32 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO saveClient(ClientMessage message) {
-        log.info("trying to create a new client");
+        log.info("Trying to create a new client");
         message.setClientId(UUID.randomUUID().toString());
         message.setClientSecret(cipher.encrypt(UUID.randomUUID().toString()));
-        log.info("a new client's client id is {}", message.getClientId());
+        MDC.put("client_id", message.getClientId());
+        log.info("Credentials have been generated for a new client");
+        MDC.clear();
         return ClientMapper.INSTANCE.fromEntityToQuery(mutationUsecases
                 .saveClient(ClientMapper.INSTANCE.fromMessageToEntity(message)));
     }
 
     @Transactional
     public List<String> saveClients(Iterable<ClientMessage> messages) {
-        log.info("trying to save new clients");
+        log.info("Trying to save new clients");
         List<String> ids = new ArrayList<>();
 
         for (ClientMessage message : messages) {
             try {
+                MDC.put("client_id", message.getClientId());
+                log.debug("Trying to save a new client", message);
                 mutationUsecases.saveClient(ClientMapper.INSTANCE.fromMessageToEntity(message));
+                log.debug("Client has been saved", message);
             } catch (RuntimeException e) {
                 ids.add(message.getClientId());
-                log.debug("could not create client {}: ", message.getClientId(), e.getMessage());
+                log.error("Could not create a client", e);
+            } finally {
+                MDC.clear();
             }
         }
 
@@ -118,7 +134,9 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     }
 
     public ClientDTO clientAsyncCreationTask(CreateClientDTO clientDTO, int tenant, String tenantUrl) {
-        log.info("trying to create a new client creation task");
+        MDC.put("client_name", clientDTO.getName());
+        MDC.put("tenant", tenantUrl);
+        log.info("Trying to create a new client creation task");
         try {
             ClientDTO client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
             var secret = UUID.randomUUID().toString();
@@ -142,14 +160,20 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             client.setClientSecret(secret);
             return client;
         } catch (Exception e) {
+            log.error("Could not create a new client creation task", e);
             throw new ClientCreationException(String
                     .format("could not create a new client creation task: %s", e.getMessage()));
+        } finally {
+            MDC.clear();
         }
     }
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
-        log.info("trying to update a client with id {} for tenant {}", clientId, tenant);
+        MDC.put("client_id", clientId);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Trying to update a client");
+        MDC.clear();
         var c = retrievalUsecases.findClientByClientIdAndTenant(clientId, tenant)
                 .orElseThrow(() -> new ClientNotFoundException(String
                         .format("could not find client with client id %s for %d", clientId, tenant)));
@@ -162,8 +186,13 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public SecretDTO regenerateSecret(String clientId, int tenant) {
-        log.info("regenerating client's secret for tenant {} by client id {}", tenant, clientId);
+        MDC.put("client_id", clientId);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Regenerating client's secret");
         String secret = UUID.randomUUID().toString();
+        MDC.put("client_secret", secret);
+        log.debug("Generated a new client's secret");
+        MDC.clear();
         mutationUsecases.regenerateClientSecretByClientId(clientId,
                 tenant, cipher.encrypt(secret));
         return SecretDTO.builder().clientSecret(secret).build();
@@ -171,19 +200,25 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
-        log.info("changing client's {} activation to {}", clientId, activationDTO.getStatus());
+        MDC.put("client_id", clientId);
+        MDC.put("status", String.valueOf(activationDTO.getStatus()));
+        log.info("Changing client's activation", clientId, activationDTO.getStatus());
         try {
             mutationUsecases.changeActivation(clientId, activationDTO.getStatus());
             return true;
         } catch (RuntimeException e) {
-            log.error("could not change client's activation: %s", e.getMessage());
+            log.error("could not change client's activation", e);
             return false;
+        } finally {
+            MDC.clear();
         }
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO getClient(String clientId) {
-        log.info("trying to get a client with id {}", clientId);
+        MDC.put("client_id", clientId);
+        log.info("Trying to get a client", clientId);
+        MDC.clear();
         return retrievalUsecases
                 .findById(clientId)
                 .filter(c -> !c.isInvalidated())
@@ -193,6 +228,9 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                         query.setClientSecret(cipher.decrypt(query.getClientSecret()));
                         return query;
                     } catch (Exception e) {
+                        MDC.put("client_id", clientId);
+                        log.error("Could not map a client", e);
+                        MDC.clear();
                         throw new ClientNotFoundException(String.
                                 format("could not find and decrypt client secret: %s", e.getMessage()));
                     }
@@ -203,7 +241,11 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public PaginationDTO getTenantClients(int tenant, int page, int limit) {
-        log.info("trying to get tenant {} clients with page {} and limit {}", tenant, page, limit);
+        MDC.put("tenant", String.valueOf(tenant));
+        MDC.put("page", String.valueOf(page));
+        MDC.put("limit", String.valueOf(limit));
+        log.info("Trying to get tenant clients", tenant, page, limit);
+        MDC.clear();
         var data = retrievalUsecases
                 .findAllByTenant(tenant, Pageable.ofSize(limit).withPage(page));
 

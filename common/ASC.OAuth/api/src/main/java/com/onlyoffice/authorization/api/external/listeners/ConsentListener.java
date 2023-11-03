@@ -10,6 +10,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCre
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -43,11 +44,11 @@ public class ConsentListener {
             @Header(AmqpHeaders.DELIVERY_TAG) long tag
     ) {
         if (messages.size() > configuration.getPrefetch()) {
-            log.warn("consent message queue is full");
+            log.warn("Consent message queue is full");
             return;
         }
 
-        log.info("adding a consent message to the queue");
+        log.info("Adding a consent message to the queue");
 
         messages.add(MessageWrapper
                 .<ConsentMessage>builder()
@@ -60,7 +61,9 @@ public class ConsentListener {
     @Scheduled(fixedDelay = 1000)
     private void persistConsents() {
         if (messages.size() > 0) {
-            log.info("persisting consent messages (count {})", messages.size());
+            MDC.put("number of messages", String.valueOf(messages.size()));
+            log.info("Persisting consent messages");
+            MDC.clear();
 
             creationUsecases.saveConsents(messages
                     .stream().map(s -> s.getData())
@@ -72,7 +75,9 @@ public class ConsentListener {
 
                 try {
                     channel.basicAck(tag, true);
-                } catch (IOException e) {} finally {
+                } catch (IOException e) {
+                    log.error("Could not persist consents", e);
+                } finally {
                     return true;
                 }
             });

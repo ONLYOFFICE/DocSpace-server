@@ -8,6 +8,7 @@ import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -73,7 +74,9 @@ public class RabbitMQConfiguration {
             ConnectionFactory rabbitConnectionFactory,
             MessageConverter converter
     ) {
-        log.info("Building a prefetch {} rabbit listener container factory with manual ack", prefetch);
+        MDC.put("prefetch", String.valueOf(prefetch));
+        log.info("Building a prefetch rabbit listener container factory with manual ack", prefetch);
+        MDC.clear();
         var factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(rabbitConnectionFactory);
         factory.setMessageConverter(converter);

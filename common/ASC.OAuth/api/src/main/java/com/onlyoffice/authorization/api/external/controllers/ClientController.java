@@ -26,6 +26,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -82,17 +83,26 @@ public class ClientController {
     ) {
         var cookie = String.format("%s=%s", AUTH_COOKIE_NAME, ascAuth);
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new get clients request for tenant {} with page {} and limit", tenant, page, limit);
-
+        MDC.put("tenant", String.valueOf(tenant));
+        MDC.put("page", String.valueOf(page));
+        MDC.put("limit", String.valueOf(limit));
+        log.info("Received a new get clients request for tenant with page and limit");
+        log.debug("Trying to get tenant clients");
         PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant, page, limit);
+        log.debug("Got clients");
+        MDC.clear();
         pagination.getData().forEach(c -> {
+            MDC.put("profile", c.getModifiedBy());
+            log.debug("Trying to get profile");
             var profile = docspaceClient.getProfile(URI.create(address), cookie, c.getModifiedBy());
             if (profile != null && profile.getResponse() != null) {
+                log.debug("Got profile");
                 var r = profile.getResponse();
                 c.setCreatorAvatar(r.getAvatarSmall());
                 c.setCreatorDisplayName(String
                         .format("%s %s", r.getFirstName(), r.getLastName()).trim());
             }
+            MDC.clear();
         });
 
         for (final ClientDTO client : pagination.getData()) {
@@ -133,7 +143,12 @@ public class ClientController {
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
+        MDC.put("client_id", clientId);
+        log.info("Received a new get client info request");
+        log.debug("Trying to retrieve a client");
         var client = retrieveUsecases.getClient(clientId);
+        log.debug("Found a client", client);
+        MDC.clear();
         return ResponseEntity.ok(ClientMapper.INSTANCE.fromClientToInfoDTO(client));
     }
 
@@ -142,8 +157,14 @@ public class ClientController {
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
         var user = UserContextContainer.context.get();
+        MDC.put("user", user.getResponse().getUserName());
+        log.info("Received a new get clients info");
+        log.debug("Trying to retrieve all clients by principal name");
         var result = consentRetrieveUsecases
                 .getAllByPrincipalName(user.getResponse().getEmail());
+        MDC.put("number of clients", String.valueOf(result.size()));
+        log.debug("Found clients");
+        MDC.clear();
         return ResponseEntity.ok(result);
     }
 
@@ -156,9 +177,13 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new get client {} request for tenant {}", clientId, tenant);
-
+        MDC.put("client_id", clientId);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Received a new get client request for tenant");
+        log.debug("Trying to retrieve client");
+        MDC.clear();
         var client = retrieveUsecases.getClient(clientId);
+        log.debug("Found client", client);
         client.add(linkTo(methodOn(ClientController.class)
                 .updateClient(response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())
@@ -194,16 +219,16 @@ public class ClientController {
             @RequestBody @Valid CreateClientDTO body
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new create client request");
+        log.info("Received a new create client request", body);
         if (!body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
             log.error("could not create a new client with the scopes specified");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        log.info("generating a new client's credentials");
+        log.debug("Generating a new client's credentials");
         var client = creationUsecases.clientAsyncCreationTask(body, 1, address);
-        log.info("successfully submitted a new client broker message");
+        log.debug("Successfully submitted a new client broker message", client);
 
         client.add(linkTo(methodOn(ClientController.class)
                 .getClient(response, address, client.getClientId()))
@@ -242,14 +267,19 @@ public class ClientController {
             @RequestBody @Valid UpdateClientDTO body
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new update client {} request", clientId);
+        MDC.put("client_id", clientId);
+        log.info("Received a new update client request");
         if (body.getScopes() != null && !body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
-            log.error("Could not update client {} with the scopes specified", clientId);
+            log.error("Could not update client with the scopes specified");
+            MDC.clear();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
+        log.debug("Trying to update client with body", body);
         var client = creationUsecases.updateClient(body, clientId, tenant);
+        log.debug("Client has been updated", client);
+        MDC.clear();
         client.add(linkTo(methodOn(ClientController.class)
                 .getClient(response, address, client.getClientId()))
                 .withRel(HttpMethod.GET.name())
@@ -285,8 +315,12 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new regenerate client's {} secret request", clientId);
+        MDC.put("client_id", clientId);
+        log.info("Received a new regenerate client's secret request");
+        log.debug("Trying to regenerate client's secret");
+        MDC.clear();
         var regenerate = mutationUsecases.regenerateSecret(clientId, tenant);
+        log.debug("Regeneration result", regenerate);
 
         regenerate.add(linkTo(methodOn(ClientController.class)
                 .getClient(response, address, clientId))
@@ -323,7 +357,10 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new delete client {} request for tenant {}", clientId, tenant);
+        MDC.put("client_id", clientId);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Received a new delete client request for tenant");
+        MDC.clear();
         cleanupUsecases.clientAsyncDeletionTask(clientId, tenant);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -338,7 +375,10 @@ public class ClientController {
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
         var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        log.info("received a new disable client {} request for tenant {}", clientId, tenant);
+        MDC.put("client_id", clientId);
+        MDC.put("tenant", String.valueOf(tenant));
+        log.info("Received a new change client activation request for tenant");
+        MDC.clear();
         if (mutationUsecases.changeActivation(body, clientId))
             return ResponseEntity.status(HttpStatus.OK).build();
         return ResponseEntity.badRequest().build();

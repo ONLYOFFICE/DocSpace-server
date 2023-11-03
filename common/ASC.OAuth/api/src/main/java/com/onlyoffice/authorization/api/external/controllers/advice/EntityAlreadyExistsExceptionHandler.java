@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class EntityAlreadyExistsExceptionHandler {
     @ExceptionHandler(EntityAlreadyExistsException.class)
     public ResponseEntity<ErrorDTO> handleEntityAlreadyExists(EntityAlreadyExistsException ex, HttpServletRequest request) {
+        log.error(ex.getMessage());
         return new ResponseEntity<>(ErrorDTO
                 .builder()
                 .reason(ex.getMessage())

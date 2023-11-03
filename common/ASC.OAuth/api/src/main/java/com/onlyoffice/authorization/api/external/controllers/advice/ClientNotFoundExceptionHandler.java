@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ClientNotFoundExceptionHandler {
     @ExceptionHandler(ClientNotFoundException.class)
     public ResponseEntity<ErrorDTO> handleClientNotFound(ClientNotFoundException ex, HttpServletRequest request) {
+        log.error(ex.getMessage());
         return new ResponseEntity<>(ErrorDTO
                 .builder()
                 .reason(ex.getMessage())
