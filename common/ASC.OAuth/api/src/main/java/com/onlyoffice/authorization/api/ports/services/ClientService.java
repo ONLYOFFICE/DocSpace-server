@@ -155,7 +155,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                         .format("could not find client with client id %s for %d", clientId, tenant)));
         ClientMapper.INSTANCE.update(c, clientDTO);
         c.setModifiedBy(UserContextContainer.context.get()
-                .getResponse().getUserName());
+                .getResponse().getEmail());
         return ClientMapper.INSTANCE.fromEntityToQuery(c);
     }
 
