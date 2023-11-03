@@ -282,7 +282,7 @@ public class WebPluginManager
         return plugin;
     }
 
-    public async Task UpdateWebPluginAsync(int tenantId, int id, bool enabled)
+    public async Task<DbWebPlugin> UpdateWebPluginAsync(int tenantId, int id, bool enabled)
     {
         DemandWebPlugins();
 
@@ -290,12 +290,16 @@ public class WebPluginManager
 
         await _webPluginService.UpdateAsync(tenantId, plugin.Id, enabled);
 
+        plugin.Enabled = enabled;
+
         var key = GetCacheKey(tenantId);
 
         _webPluginCache.Remove(key);
+
+        return plugin;
     }
 
-    public async Task DeleteWebPluginAsync(int tenantId, int id)
+    public async Task<DbWebPlugin> DeleteWebPluginAsync(int tenantId, int id)
     {
         DemandWebPlugins("delete");
 
@@ -310,8 +314,10 @@ public class WebPluginManager
         var key = GetCacheKey(tenantId);
 
         _webPluginCache.Remove(key);
+
+        return plugin;
     }
-    
+
     public async Task<List<DbWebPlugin>> GetSystemWebPluginsAsync()
     {
         var key = GetCacheKey(Tenant.DefaultTenant);
@@ -407,9 +413,11 @@ public class WebPluginManager
         return webPlugin;
     }
 
-    public async Task UpdateSystemWebPluginAsync(string name, bool enabled)
+    public async Task<DbWebPlugin> UpdateSystemWebPluginAsync(string name, bool enabled)
     {
         DemandWebPlugins();
+
+        var plugin = await GetSystemWebPluginAsync(name) ?? throw new ItemNotFoundException("Plugin not found");
 
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
@@ -428,12 +436,16 @@ public class WebPluginManager
 
         await _settingsManager.SaveForDefaultTenantAsync(systemWebPluginSettings);
 
+        plugin.Enabled = enabled;
+
         var key = GetCacheKey(Tenant.DefaultTenant);
 
         _webPluginCache.Remove(key);
+
+        return plugin;
     }
 
-    public async Task DeleteSystemWebPluginAsync(string name)
+    public async Task<DbWebPlugin> DeleteSystemWebPluginAsync(string name)
     {
         DemandWebPlugins("delete");
 
@@ -442,6 +454,8 @@ public class WebPluginManager
             throw new SecurityException("System plugin");
         }
 
+        var plugin = await GetSystemWebPluginAsync(name) ?? throw new ItemNotFoundException("Plugin not found");
+
         var storage = await GetPluginStorageAsync(Tenant.DefaultTenant);
 
         if (!await storage.IsDirectoryAsync(name))
@@ -449,8 +463,10 @@ public class WebPluginManager
             throw new ItemNotFoundException("Plugin not found");
         }
 
-        await UpdateSystemWebPluginAsync(name, true);
+        await UpdateSystemWebPluginAsync(name, false);
 
         await storage.DeleteDirectoryAsync(name);
+
+        return plugin;
     }
 }

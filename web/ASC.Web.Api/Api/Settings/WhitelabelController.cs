@@ -236,13 +236,13 @@ public class WhitelabelController : BaseSettingsController
     }
 
     /// <summary>
-    /// Returns the is default white label logos.
+    /// Specifies if the white label logos are default or not.
     /// </summary>
     /// <short>
-    /// Get the is default white label logos
+    /// Check the default white label logos
     /// </short>
     /// <category>Rebranding</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.IsDefaultWhiteLabelLogosDto, ASC.Web.Api">Is default white label logos</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.IsDefaultWhiteLabelLogosDto, ASC.Web.Api">Request properties of white label logos</returns>
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>

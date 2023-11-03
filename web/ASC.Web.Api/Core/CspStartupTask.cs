@@ -57,7 +57,7 @@ public class CspStartupTask : IStartupTask
             {
                 tenantManager.SetCurrentTenant(t);
                 var current = settingsManager.Load<CspSettings>();
-                await helper.Save(current.Domains, current.SetDefaultIfEmpty);
+                await helper.SaveAsync(current.Domains, current.SetDefaultIfEmpty);
             }
 
             await _distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);

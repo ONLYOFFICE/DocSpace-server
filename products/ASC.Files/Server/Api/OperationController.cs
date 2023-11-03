@@ -231,12 +231,13 @@ public class OperationController : ApiControllerBase
         }
     }
     /// <summary>
-    /// Finishes all the active operations.
+    /// Finishes an operation with the ID specified in the request or all the active operations.
     /// </summary>
     /// <short>Finish active operations</short>
     /// <category>Operations</category>
+    /// <param type="System.String, System" name="id" method="url">Operation ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">List of file operations</returns>
-    /// <path>api/2.0/files/fileops/terminate</path>
+    /// <path>api/2.0/files/fileops/terminate/{id?}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [AllowAnonymous]

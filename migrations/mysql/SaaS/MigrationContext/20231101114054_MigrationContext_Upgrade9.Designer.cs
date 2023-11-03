@@ -3,6 +3,7 @@ using System;
 using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20231101114054_MigrationContext_Upgrade9")]
+    partial class MigrationContext_Upgrade9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5794,84 +5797,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFileOrder", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<int>("EntryId")
-                        .HasColumnType("int")
-                        .HasColumnName("entry_id");
-
-                    b.Property<sbyte>("EntryType")
-                        .HasColumnType("tinyint")
-                        .HasColumnName("entry_type");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int")
-                        .HasColumnName("order");
-
-                    b.Property<int>("ParentFolderId")
-                        .HasColumnType("int")
-                        .HasColumnName("parent_folder_id");
-
-                    b.HasKey("TenantId", "EntryId", "EntryType")
-                        .HasName("primary");
-
-                    b.HasIndex("TenantId", "ParentFolderId", "EntryType")
-                        .HasDatabaseName("parent_folder_id");
-
-                    b.ToTable("files_order", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int")
-                        .HasColumnName("room_id");
-
-                    b.Property<string>("Color")
-                        .HasColumnType("char(6)")
-                        .HasColumnName("color")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<bool>("HasLogo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("has_logo")
-                        .HasDefaultValueSql("0");
-
-                    b.Property<bool>("Indexing")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("indexing")
-                        .HasDefaultValueSql("0");
-
-                    b.Property<bool>("Private")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("private")
-                        .HasDefaultValueSql("'0'");
-
-                    b.HasKey("TenantId", "RoomId")
-                        .HasName("primary");
-
-                    b.HasIndex("RoomId")
-                        .IsUnique();
-
-                    b.ToTable("files_room_settings", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
             modelBuilder.Entity("ASC.Files.Core.EF.DbFile", b =>
                 {
                     b.Property<int>("TenantId")
@@ -6428,6 +6353,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    b.Property<string>("Color")
+                        .HasColumnType("char(6)")
+                        .HasColumnName("color")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<string>("CreateBy")
                         .IsRequired()
                         .HasColumnType("char(38)")
@@ -6457,6 +6388,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("foldersCount")
                         .HasDefaultValueSql("'0'");
 
+                    b.Property<bool>("HasLogo")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("has_logo");
+
                     b.Property<string>("ModifiedBy")
                         .IsRequired()
                         .HasColumnType("char(38)")
@@ -6472,6 +6407,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("parent_id")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<bool>("Private")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("private")
                         .HasDefaultValueSql("'0'");
 
                     b.Property<int>("TenantId")
@@ -7149,36 +7090,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Feed");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFileOrder", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
-                {
-                    b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
-                        .WithOne("Settings")
-                        .HasForeignKey("ASC.Files.Core.EF.DbRoomSettings", "RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Room");
-
-                    b.Navigation("Tenant");
-                });
-
             modelBuilder.Entity("ASC.Files.Core.EF.DbFile", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7366,11 +7277,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenant", b =>
                 {
                     b.Navigation("Partner");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFolder", b =>
-                {
-                    b.Navigation("Settings");
                 });
 #pragma warning restore 612, 618
         }

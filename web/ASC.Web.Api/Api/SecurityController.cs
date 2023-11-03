@@ -400,7 +400,7 @@ public class SecurityController : ControllerBase
 
         ArgumentNullException.ThrowIfNull(request);
 
-        var header = await _cspSettingsHelper.Save(request.Domains, request.SetDefaultIfEmpty);
+        var header = await _cspSettingsHelper.SaveAsync(request.Domains, request.SetDefaultIfEmpty);
 
         return new CspDto { Domains = request.Domains, Header = header };
     }
@@ -409,7 +409,7 @@ public class SecurityController : ControllerBase
     public async Task<CspDto> Csp()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = _cspSettingsHelper.Load();
+        var settings = await _cspSettingsHelper.LoadAsync();
         return new CspDto
         {
             Domains = settings.Domains,

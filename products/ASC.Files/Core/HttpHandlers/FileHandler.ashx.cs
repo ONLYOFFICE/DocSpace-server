@@ -1055,6 +1055,8 @@ public class FileHandlerService
 
     private async Task ThumbnailFile(HttpContext context, int id, bool force)
     {
+        IFileDao<int> fileDao = null;
+        File<int> file = null;
         try
         {
             var defaultSize = _thumbnailSettings.Sizes.FirstOrDefault();
@@ -1076,8 +1078,8 @@ public class FileHandlerService
                 _ = int.TryParse(sizes[1], out height);
             }
 
-            var fileDao = _daoFactory.GetFileDao<int>();
-            var file = int.TryParse(context.Request.Query[FilesLinkUtility.Version], out var version) && version > 0
+            fileDao = _daoFactory.GetFileDao<int>();
+            file = int.TryParse(context.Request.Query[FilesLinkUtility.Version], out var version) && version > 0
                ? await fileDao.GetFileAsync(id, version)
                : await fileDao.GetFileAsync(id);
 
@@ -1138,6 +1140,7 @@ public class FileHandlerService
         }
         catch (FileNotFoundException ex)
         {
+            await fileDao.SetThumbnailStatusAsync(file, Thumbnail.Waiting);
             _logger.ErrorForUrl(context.Request.Url(), ex);
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             await context.Response.WriteAsync(ex.Message);
