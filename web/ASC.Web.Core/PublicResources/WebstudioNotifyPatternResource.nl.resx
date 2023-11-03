@@ -1809,4 +1809,16 @@ De link is slechts 7 dagen geldig.</value>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>U bent uitgenodigd om lid te worden van ${__VirtualRootPath}</value>
   </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Krijg ONLYOFFICE DocSpace onder de knie met videogidsen</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Hoogachtend, ONLYOFFICE Team</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Vriendelijke groeten, ONLYOFFICE Ondersteuningsteam</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>VOLLEDIGE AFSPEELLIJST BEKIJKEN</value>
+  </data>
 </root>

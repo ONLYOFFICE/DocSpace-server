@@ -1854,4 +1854,16 @@ $OrangeButton
 
 링크는 7일 동안만 유효합니다.</value>
   </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>동영상 가이드로 ONLYOFFICE DocSpace를 마스터하세요</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>감사드립니다, ONLYOFFICE 팀</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>감사합니다, ONLYOFFICE 지원팀</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>전체 재생 목록 보기</value>
+  </data>
 </root>

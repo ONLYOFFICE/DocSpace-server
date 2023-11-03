@@ -1788,4 +1788,16 @@ Ystävällisin terveisin,
 ONLYOFFICE™-tukitiimi
 "www.onlyoffice.com":"http://onlyoffice.com/"</value>
   </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Hallitse ONLYOFFICE DocSpacea video-oppailla</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Ystävällisin terveisin, ONLYOFFICE-tiimi</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Parhain terveisin, ONLYOFFICE SUPPORT-tiimi</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>KATSO KOKO SOITTOLISTA</value>
+  </data>
 </root>

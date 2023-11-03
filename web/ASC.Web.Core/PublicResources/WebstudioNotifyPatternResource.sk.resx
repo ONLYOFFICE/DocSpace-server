@@ -1810,4 +1810,16 @@ Kliknite na tlačidlo nižšie, aby ste prešli na stránku prihlásenia do port
 
 $OrangeButton</value>
   </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Zvládnite ONLYOFFICE DocSpace s videonávodmi</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>S úctou, tím ONLYOFFICE</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>S pozdravom, Tím podpory ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>POZRITE SI CELÝ ZOZNAM SKLADIEB</value>
+  </data>
 </root>

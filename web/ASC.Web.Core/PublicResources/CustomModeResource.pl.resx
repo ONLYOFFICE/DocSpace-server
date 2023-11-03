@@ -73,11 +73,9 @@ Witaj w ONLYOFFICE DocSpace! Twój profil użytkownika został pomyślnie dodany
 
 $OrangeButton
 
-Jeśli potrzebujesz pomocy, sprawdź nasze "Centrum pomocy":"https://helpcenter.onlyoffice.com/" lub skontaktuj się z naszym zespołem wsparcia pod "adresem":"https://www.onlyoffice.com/support-contact-form.aspx".
+Jeśli potrzebujesz pomocy, sprawdź nasze "Centrum pomocy":"${__HelpLink}" lub skontaktuj się z naszym zespołem wsparcia pod "adresem":"${__SupportLink}".
 
-Pozdrawiamy, 
-Zespół ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Chcesz zmienić hasło do swojego konta w chmurze? Kliknij poniższy przycisk, aby potwierdzić.
@@ -95,24 +93,23 @@ Twoje osobiste biuro w chmurze właśnie zostało utworzone.
 
 h3.Jest to wirtualny obszar roboczy, gdzie możesz edytować i przechowywać dokumenty, pracować nad nimi z dowolnego miejsca oraz udostępniać je znajomym lub współpracownikom.
 
-h3. Na dobry początek zobacz, co możesz zrobić w ONLYOFFICE:
+h3.Na dobry początek zobacz, co możesz zrobić w ONLYOFFICE:
 
-- twórz i edytuj dokumenty tekstowe, arkusze kalkulacyjne oraz prezentacje
+- Twórz i edytuj dokumenty tekstowe, arkusze kalkulacyjne oraz prezentacje.
 
-- pracuj ze wszystkimi popularnymi formatami Najwyższa kompatybilność z plikami MS Office
+- Pracuj ze wszystkimi popularnymi formatami Najwyższa kompatybilność z plikami MS Office.
 
-- twórz i współedytuj "gotowe do wypełnienia formularze":"https://www.onlyoffice.com/form-creator.aspx"
+- Twórz i współedytuj "gotowe do wypełnienia formularze":"https://www.onlyoffice.com/form-creator.aspx".
 
-- udostępniaj dokumenty i współpracuj nad nimi online
+- Udostępniaj dokumenty i współpracuj nad nimi online.
 
-- używaj różnych wtyczek, aby zastosować dodatkowe funkcje
+- Używaj różnych wtyczek, aby zastosować dodatkowe funkcje.
 
-- uzyskaj łatwy dostęp do swojej osobistej chmury za pomocą "rozszerzenia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Uzyskaj łatwy dostęp do swojej osobistej chmury za pomocą "rozszerzenia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
 Możesz również edytować dokumenty w trybie offline za pomocą naszych darmowych "edytorów dla komputerów stacjonarnych":"https://www.onlyoffice.com/download-desktop.aspx" lub pobrać pakiet edytorów mobilnych na urządzenia z "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" bądź "Androidem":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-Pozdrawiamy,
-Zespół ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Chcesz zmienić adres e-mail dla swojego konta w chmurze?
@@ -134,8 +131,7 @@ Twoje konto ONLYOFFICE do użytku osobistego zostało pomyślnie utworzone. Klik
 
 Jeśli nie możesz otworzyć linku, skopiuj "$InviteLink":"$InviteLink" i wklej go w pasku adresowym swojej przeglądarki.
 
-Pozdrawiamy,
-Zespół ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Poproszono o zamknięcie Twojego konta na stronie personal.onlyoffice.com. Kliknij link, aby potwierdzić prośbę (link jest aktywny przez 7 dni): 
@@ -144,25 +140,20 @@ Potwierdź zamknięcie konta
 
 *Uwaga*: Po zamknięciu Twoje konto i wszystkie powiązane z nim dane zostaną trwale usunięte zgodnie z naszą "Polityką prywatności":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Dowiedz się więcej na temat procesu zamknięcia konta":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Dowiedz się więcej na temat procesu zamknięcia konta":"${__HelpLink}/administration/configuration.aspx"
 
 Zignoruj tę wiadomość e-mail, jeśli nie chcesz kontynuować. 
 
-W razie jakichkolwiek pytań prosimy o kontakt pod adresem "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+W razie jakichkolwiek pytań prosimy o kontakt pod adresem "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Pozdrawiamy,
-Zespół ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Witaj, {username}
+    <value>Witaj, $UserName,
 
 Proces usuwania danych użytkownika "$FromUserName":"$FromUserLink" został pomyślnie zakończony.
 
-Usunięcie danych osobowych umożliwiło uwolnienie:
-
-# Dokumenty – $DocsSpace
-# Wiadomości – $MailSpace
-# Rozmowy – $TalkSpace</value>
+Usunięcie danych osobowych umożliwiło uwolnienie $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Nowy portal został zarejestrowany

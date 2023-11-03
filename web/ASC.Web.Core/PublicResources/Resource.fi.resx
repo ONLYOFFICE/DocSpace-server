@@ -991,4 +991,22 @@
   <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
     <value>Asetetaan käyttäjä {0} järjestelmänvalvojaksi {1}</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom-asiakastunnus</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom-asiakassecret</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Ota käyttöön kirjautuminen portaaliin Zoom-tilin kautta.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ota käyttöön ONLYOFFICE:en kirjautuminen Zoom-tilien kautta. {0}Mene Zoom-kehittäjien verkkosivustolle ja luo uusi sovellus ONLY OFFICE-integraatiolle. Syötä alla olevat tiedot:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Liian monta kirjautumisyritystä. Ole hyvä ja yritä myöhemmin uudelleen</value>
+  </data>
 </root>

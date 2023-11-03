@@ -1809,4 +1809,16 @@ $OrangeButton
 
 Link jest ważny tylko przez 7 dni.</value>
   </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Opanuj obsługę ONLYOFFICE DocSpace z przewodnikami wideo</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Z poważaniem, Zespół ONLYOFFICE</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Pozdrawiamy, zespół wsparcia ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ZOBACZ PEŁNĄ LISTĘ ODTWARZANIA</value>
+  </data>
 </root>

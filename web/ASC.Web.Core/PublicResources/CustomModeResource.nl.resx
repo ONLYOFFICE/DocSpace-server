@@ -132,11 +132,9 @@ Welkom bij ONLYOFFICE DocSpace! Uw gebruikersprofiel is toegevoegd aan "${__Virt
 
 $OrangeButton
 
-Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onlyoffice.com/" of vraag het aan ons "ondersteuningsteam":"https://www.onlyoffice.com/support-contact-form.aspx".
+Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"${__HelpLink}" of vraag het aan ons "ondersteuningsteam":"${__SupportLink}".
 
-Hoogachtend, 
-ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Wilt u het wachtwoord van uw cloud office account wijzigen? Klik op de onderstaande knop om te bevestigen.
@@ -168,10 +166,9 @@ h3.Voor een snelle start, dit is wat u kunt doen in ONLYOFFICE:
 
 - Gemakkelijk toegang tot uw Persoonlijke cloud via "Chrome-extensie":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
-U kunt documenten ook offline bewerken met onze gratis "desktop editors":"https://www.onlyoffice.com/download-desktop.aspx" of een mobiel editing suite aanschaffen voor uw "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" of "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" device.
+U kunt documenten ook offline bewerken met onze gratis "desktop editors":"https://www.onlyoffice.com/download-desktop.aspx" of een mobiel editing suite aanschaffen voor uw "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" of "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"-apparaat.
 
-Hoogachtend,
-ONLYOFFICE team</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Wilt u de e-mail van uw cloud office account wijzigen?
@@ -193,8 +190,7 @@ u heeft zojuist een account geregistreerd bij de ONLYOFFICE oplossing voor perso
 
 Als u de link niet kunt openen, kopieer dan het volgende "$InviteLink":"$InviteLink" en plak deze in de adresbalk van uw browser.
 
-Hoogachtend,
-ONLYOFFICE team</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>U heeft verzocht om beëindiging van uw account op personal.onlyoffice.com. Volg de link om de aanvraag te voltooien (de link is 7 dagen actief): 
@@ -203,25 +199,20 @@ Accountbeëindiging bevestigen
 
 *Let op*: Na de verwijdering worden uw account en alle bijbehorende gegevens definitief gewist in overeenstemming met onze "Privacyverklaring":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Lees meer over accountbeëindiging":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Lees meer over accountbeëindiging":"${__HelpLink}/administration/configuration.aspx"
 
 Negeer deze e-mail als u niet wilt doorgaan. 
 
-Als u vragen heeft, neem dan contact met ons op via "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Als u vragen heeft, neem dan contact met ons op via "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Hoogachtend,
-ONLYOFFICE team</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Beste $UserName,
 
 Het proces van het verwijderen van gegevens van gebruiker "$FromUserName":"$FromUserLink" is succesvol afgerond.
 
-De verwijdering van persoonsgegevens maakte dit leeg:
-
-# Documenten - $DocsSpace
-# Mail - $MailSpace
-# Talk - $TalkSpace</value>
+De verwijdering van persoonsgegevens maakte dit leeg $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Nieuw portaal is geregistreerd

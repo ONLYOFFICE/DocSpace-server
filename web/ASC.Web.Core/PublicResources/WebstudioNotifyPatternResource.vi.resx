@@ -1815,4 +1815,16 @@ Nhóm hỗ trợ ONLYOFFICE™
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Định cấu hình ứng dụng xác thực</value>
   </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Thành thạo ONLYOFFICE DocSpace với video hướng dẫn</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Trân trọng, Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Trân trọng, Nhóm Hỗ trợ ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>XEM TOÀN BỘ DANH SÁCH PHÁT</value>
+  </data>
 </root>

@@ -122,7 +122,7 @@
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+* Làm việc với những người dùng khác trong phòng mà bạn được mời: *phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
 
 * *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
 
@@ -132,11 +132,9 @@ Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng c�
 
 $OrangeButton
 
-Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}" của chúng tôi.
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Bạn muốn thay đổi mật khẩu cho tài khoản văn phòng đám mây của mình? Hãy nhấp vào nút bên dưới để xác nhận.
@@ -170,11 +168,10 @@ h3.Để bắt đầu nhanh, đây là những gì bạn có thể làm trong ON
 
 Bạn cũng có thể chỉnh sửa tài liệu ngoại tuyến với "trình chỉnh sửa cho máy tính để bàn":"https://www.onlyoffice.com/download-desktop.aspx" miễn phí của chúng tôi hoặc nhận bộ chỉnh sửa cho thiết bị "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" hoặc "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" của bạn.
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
-    <value>Bạn muốn thay đổi email cho tài khoản văn phòng đám mây của mình? 
+    <value>Bạn muốn thay đổi email cho tài khoản văn phòng đám mây của mình?
 
 Hãy nhấp vào nút bên dưới và đăng nhập* vào đám mây của bạn.
 
@@ -193,8 +190,7 @@ Bạn vừa đăng ký một tài khoản tại giải pháp ONLYOFFICE để s�
 
 Nếu bạn không thể mở liên kết, vui lòng sao chép "$InviteLink":"$InviteLink" sau và dán nó vào thanh địa chỉ trình duyệt của bạn.
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Bạn đã yêu cầu chấm dứt tài khoản của mình tại personal.onlyoffice.com. Hãy làm theo liên kết để hoàn thành yêu cầu (liên kết hiệu lực trong 7 ngày): 
@@ -203,25 +199,20 @@ Xác nhận chấm dứt tài khoản
 
 *Lưu ý*: Sau khi xóa, tài khoản của bạn và tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn theo "Chính sách quyền riêng tư":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
 
-"Đọc thêm về việc chấm dứt tài khoản":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Đọc thêm về việc chấm dứt tài khoản":"${__HelpLink}/administration/configuration.aspx"
 
 Hãy bỏ qua email này nếu bạn không muốn tiếp tục. 
 
-Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi tại "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi tại "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Kính gửi $UserName,
 
 Quá trình xóa dữ liệu của người dùng "$FromUserName":"$FromUserLink" đã được hoàn thành.
 
-Việc xóa dữ liệu cá nhân được phép cho các tính năng miễn phí:
-
-# Documents - $DocsSpace
-# Mail - $MailSpace
-# Talk - $TalkSpace</value>
+Việc xóa dữ liệu cá nhân được phép cho các tính năng miễn phí $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Cổng thông tin mới đã được đăng ký
