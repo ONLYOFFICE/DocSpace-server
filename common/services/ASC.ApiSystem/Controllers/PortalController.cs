@@ -464,11 +464,27 @@ public class PortalController : ControllerBase
 
             var tenantsWrapper = new List<object>();
 
+            var owners = statistics
+                ? (await _hostedSolution.FindUsersAsync(tenants.Select(t => t.OwnerId))).Select(owner => new TenantOwnerDto
+                    {
+                        Id = owner.Id,
+                        Email = owner.Email,
+                        DisplayName = _userFormatter.GetUserName(owner)
+                    })
+                : null;
+
             foreach (var t in tenants)
             {
-                var quotaUsage = statistics ? (await _quotaUsageManager.Get(t)) : null;
-
-                tenantsWrapper.Add(_commonMethods.ToTenantWrapper(t, quotaUsage));
+                if (statistics)
+                {
+                    var quotaUsage = await _quotaUsageManager.Get(t);
+                    var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
+                    tenantsWrapper.Add(_commonMethods.ToTenantWrapper(t, quotaUsage, owner));
+                }
+                else
+                {
+                    tenantsWrapper.Add(_commonMethods.ToTenantWrapper(t));
+                }
             }
 
             return Ok(new

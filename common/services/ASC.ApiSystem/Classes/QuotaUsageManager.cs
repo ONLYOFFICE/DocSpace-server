@@ -104,3 +104,10 @@ public class QuotaUsageDto
     public int MaxRoomsCount { get; set; }
     public int RoomsCount { get; set; }
 }
+
+public class TenantOwnerDto
+{
+    public Guid Id { get; set; }
+    public string Email { get; set; }
+    public string DisplayName { get; set; }
+}

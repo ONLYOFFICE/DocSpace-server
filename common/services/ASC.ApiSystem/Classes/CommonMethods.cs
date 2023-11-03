@@ -72,7 +72,7 @@ public class CommonMethods
         _hostedSolution = hostedSolution;
     }
 
-    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null)
+    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
         return new
         {
@@ -88,7 +88,8 @@ public class CommonMethods
             status = t.Status.ToString(),
             tenantId = t.Id,
             timeZoneName = _timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
-            quotaUsage
+            quotaUsage,
+            owner
         };
     }
 
