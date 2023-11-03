@@ -233,32 +233,29 @@ public class PortalController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
-    [AllowNotPayment, AllowAnonymous]
+    [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
+        var quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
+        var docServiceQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
+        
         var result = new TenantExtraDto
         {
             CustomMode = _coreBaseSettings.CustomMode,
             Opensource = _tenantExtra.Opensource,
             Enterprise = _tenantExtra.Enterprise,
-            EnableTariffPage = //TenantExtra.EnableTarrifSettings - think about hide-settings for opensource
+            EnableTariffPage = 
                 (!_coreBaseSettings.Standalone || !string.IsNullOrEmpty(_licenseReader.LicensePath))
                 && string.IsNullOrEmpty(_setupInfo.AmiMetaUrl)
-                && !_coreBaseSettings.CustomMode
+                && !_coreBaseSettings.CustomMode,
+            Tariff = await _tenantExtra.GetCurrentTariffAsync(),
+            Quota = quota,
+            NotPaid = await _tenantExtra.IsNotPaidAsync(),
+            LicenseAccept = (await _settingsManager.LoadForDefaultTenantAsync<TariffSettings>()).LicenseAcceptSetting,
+            DocServerUserQuota = docServiceQuota.Item1,
+            DocServerLicense = docServiceQuota.Item2
         };
-
-
-
-        if (_authContext.IsAuthenticated)
-        {
-            result.Tariff = await _tenantExtra.GetCurrentTariffAsync(refresh);
-            result.Quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
-            result.NotPaid = await _tenantExtra.IsNotPaidAsync();
-            result.LicenseAccept = _settingsManager.LoadForDefaultTenant<TariffSettings>().LicenseAcceptSetting;
-            result.DocServerUserQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
-            result.DocServerLicense = await _documentServiceLicense.GetLicenseAsync();
-        }
 
         return result;
     }
