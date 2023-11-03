@@ -26,10 +26,10 @@
 
 namespace ASC.Notify;
 
-[Singletone]
+[Singleton]
 public class DbWorker : IDisposable
 {
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly NotifyServiceCfg _notifyServiceCfg;
@@ -46,7 +46,7 @@ public class DbWorker : IDisposable
 
         var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-        await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
@@ -86,7 +86,7 @@ public class DbWorker : IDisposable
 
             var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-            await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
             var q = dbContext.NotifyQueue
                 .Join(dbContext.NotifyInfo, r => r.NotifyId, r => r.NotifyId, (queue, info) => new { queue, info })
@@ -129,7 +129,7 @@ public class DbWorker : IDisposable
     public async Task ResetStatesAsync()
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         await Queries.ResetStatesAsync(dbContext);
     }
@@ -137,7 +137,7 @@ public class DbWorker : IDisposable
     public async Task SetStateAsync(int id, MailSendingState result)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         if (result == MailSendingState.Sended)
         {

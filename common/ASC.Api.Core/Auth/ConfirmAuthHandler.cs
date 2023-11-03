@@ -81,7 +81,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
 
         var claims = new List<Claim>()
         {
-                new Claim(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
+                new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };
 
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)
@@ -95,9 +95,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
                 }
                 else
                 {
-                    if (emailValidationKeyModel.Type == ConfirmType.EmailActivation
-                        || emailValidationKeyModel.Type == ConfirmType.EmpInvite
-                        || emailValidationKeyModel.Type == ConfirmType.LinkInvite)
+                    if (emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite)
                     {
                         userId = ASC.Core.Configuration.Constants.CoreSystem.ID;
                     }

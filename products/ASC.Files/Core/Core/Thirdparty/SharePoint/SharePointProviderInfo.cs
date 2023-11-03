@@ -181,14 +181,12 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
         _clientContext.ExecuteQuery();
 
         var tempBuffer = _tempStream.Create();
-        await using (var str = fileInfo.Stream)
+        await using var str = fileInfo.Stream;
+        if (str != null)
         {
-            if (str != null)
-            {
-                await str.CopyToAsync(tempBuffer);
-                await tempBuffer.FlushAsync();
-                tempBuffer.Seek(offset, SeekOrigin.Begin);
-            }
+            await str.CopyToAsync(tempBuffer);
+            await tempBuffer.FlushAsync();
+            tempBuffer.Seek(offset, SeekOrigin.Begin);
         }
 
         return tempBuffer;
@@ -662,8 +660,7 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
 
     private void SetFolderType(Folder<string> folder, bool isRoot)
     {
-        if (isRoot && (RootFolderType == FolderType.VirtualRooms ||
-            RootFolderType == FolderType.Archive))
+        if (isRoot && RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             folder.FolderType = RootFolderType;
         }
@@ -679,7 +676,7 @@ public class SharePointProviderInfo : IProviderInfo<File, Folder, ClientObject>
     }
 }
 
-[Singletone]
+[Singleton]
 public class SharePointProviderInfoHelper
 {
     private readonly TimeSpan _cacheExpiration;
@@ -714,7 +711,7 @@ public class SharePointProviderInfoHelper
 
     public async Task InvalidateAsync()
     {
-        await _notify.PublishAsync(new SharePointProviderCacheItem { }, CacheNotifyAction.Remove);
+        await _notify.PublishAsync(new SharePointProviderCacheItem(), CacheNotifyAction.Remove);
     }
 
     public async Task PublishFolderAsync(string id)

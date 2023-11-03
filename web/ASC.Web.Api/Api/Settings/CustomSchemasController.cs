@@ -97,7 +97,7 @@ public class CustomSchemasController : BaseSettingsController
     [HttpPost("customschemas")]
     public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await _customNamingPeople.SetPeopleNamesAsync(inDto.Id);
 
@@ -120,7 +120,7 @@ public class CustomSchemasController : BaseSettingsController
     [HttpPut("customschemas")]
     public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var usrCaption = (inDto.UserCaption ?? "").Trim();
         var usrsCaption = (inDto.UsersCaption ?? "").Trim();

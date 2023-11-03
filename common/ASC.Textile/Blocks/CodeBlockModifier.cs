@@ -54,7 +54,7 @@ public class CodeBlockModifier : BlockModifier
         line = NoTextileEncoder.DecodeNoTextileZones(line,
                                 @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + @")>)",
                                 @"(?=</code>)",
-                                new string[] { "<", ">" });
+                                new[] { "<", ">" });
         return line;
     }
 

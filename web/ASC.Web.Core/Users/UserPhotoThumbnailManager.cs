@@ -44,7 +44,7 @@ public static class UserPhotoThumbnailManager
 
         var resultBitmaps = new List<ThumbnailItem>();
 
-        (var mainImg, var format) = await thumbnailsData.MainImgBitmapAsync();
+        var (mainImg, _) = await thumbnailsData.MainImgBitmapAsync();
 
         using var img = mainImg;
 
@@ -115,7 +115,7 @@ public static class UserPhotoThumbnailManager
         }
     }
 
-    public static byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize, out IImageFormat imgFormat, out int width, out int height)
+    public static byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize)
     {
         if (data == null || data.Length <= 0)
         {
@@ -132,9 +132,8 @@ public static class UserPhotoThumbnailManager
         try
         {
             using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
-            width = img.Width;
-            height = img.Height;
+            var width = img.Width;
+            var height = img.Height;
             var maxWidth = maxsize.Width;
             var maxHeight = maxsize.Height;
 
@@ -195,7 +194,7 @@ public static class UserPhotoThumbnailManager
 
 public class ThumbnailItem
 {
-    public Size Size { get; set; }
+    public Size Size { get; init; }
     public string ImgUrl { get; set; }
     public Image Image { get; set; }
 }
@@ -213,7 +212,7 @@ public class ThumbnailsData
 
     public async Task<(Image, IImageFormat)> MainImgBitmapAsync()
     {
-        (var img, var imageFormat) = await _userPhotoManager.GetPhotoImageAsync(_userId);
+        var (img, imageFormat) = await _userPhotoManager.GetPhotoImageAsync(_userId);
         return (img, imageFormat);
     }
 
@@ -221,28 +220,28 @@ public class ThumbnailsData
     {
         return new List<ThumbnailItem>
                 {
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.RetinaFotoSize,
                             ImgUrl = await _userPhotoManager.GetRetinaPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.MaxFotoSize,
                             ImgUrl = await _userPhotoManager.GetMaxPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.BigFotoSize,
                             ImgUrl = await _userPhotoManager.GetBigPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.MediumFotoSize,
                             ImgUrl = await _userPhotoManager.GetMediumPhotoURL(_userId)
                         },
-                    new ThumbnailItem
-                        {
+                    new()
+                    {
                             Size = UserPhotoManager.SmallFotoSize,
                             ImgUrl = await _userPhotoManager.GetSmallPhotoURL(_userId)
                         }
@@ -253,7 +252,7 @@ public class ThumbnailsData
     {
         foreach (var item in bitmaps)
         {
-            (var mainImgBitmap, var format) = await MainImgBitmapAsync();
+            var (mainImgBitmap, format) = await MainImgBitmapAsync();
             using var mainImg = mainImgBitmap;
             await _userPhotoManager.SaveThumbnail(_userId, item.Image, format);
         }

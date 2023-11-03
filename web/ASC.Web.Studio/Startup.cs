@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.VirtualRooms;
+
 namespace ASC.Web.Studio;
 public class Startup : BaseStartup
 {
@@ -72,7 +74,8 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<LinkedInLoginProvider>();
         DIHelper.TryAdd<SsoHandlerService>();
         DIHelper.TryAdd<RemovePortalIntegrationEventHandler>();
-
+        DIHelper.TryAdd<RoomLogoValidator>();
+        
         services.AddHttpClient();
 
         DIHelper.TryAdd<DbWorker>();
@@ -85,7 +88,7 @@ public class Startup : BaseStartup
 
         var lifeTime = TimeSpan.FromMinutes(5);
 
-        Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, request) =>
+        Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, _) =>
         {
             var settings = s.GetRequiredService<Settings>();
 
@@ -102,11 +105,11 @@ public class Startup : BaseStartup
         services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
         .SetHandlerLifetime(lifeTime)
         .AddPolicyHandler(policyHandler)
-        .ConfigurePrimaryHttpMessageHandler((s) =>
+        .ConfigurePrimaryHttpMessageHandler((_) =>
         {
             return new HttpClientHandler()
             {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };
         });
     }

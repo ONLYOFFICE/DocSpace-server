@@ -28,7 +28,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ConfirmDto : IMapFrom<Validation>
 {
-    public EmailValidationKeyProvider.ValidationResult Result { get; set; }
+    public ValidationResult Result { get; set; }
     public string RoomId { get; set; }
     public string Title { get; set; }
 }

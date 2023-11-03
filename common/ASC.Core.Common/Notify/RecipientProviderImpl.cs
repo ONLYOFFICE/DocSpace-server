@@ -85,7 +85,7 @@ public class RecipientProviderImpl : IRecipientProvider
             if (recipient is IRecipientsGroup)
             {
                 var group = await _userManager.GetGroupInfoAsync(recID);
-                while (group != null && group.Parent != null)
+                while (group is { Parent: not null })
                 {
                     result.Add(new RecipientsGroup(group.Parent.ID.ToString(), group.Parent.Name));
                     group = group.Parent;
@@ -148,7 +148,7 @@ public class RecipientProviderImpl : IRecipientProvider
         if (recipient.CheckActivation)
         {
             //It's direct email
-            if (recipient.Addresses != null && recipient.Addresses.Length > 0)
+            if (recipient.Addresses is { Length: > 0 })
             {
                 //Filtering only missing users and users who activated already
 

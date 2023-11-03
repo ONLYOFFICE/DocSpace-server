@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 class QuotaServiceCache
 {
     internal const string KeyQuota = "quota";
@@ -105,20 +105,20 @@ class CachedQuotaService : IQuotaService
         return quotas;
     }
 
-    public async Task<TenantQuota> GetTenantQuotaAsync(int tenant)
+    public async Task<TenantQuota> GetTenantQuotaAsync(int id)
     {
-        return (await GetTenantQuotasAsync()).SingleOrDefault(q => q.TenantId == tenant);
+        return (await GetTenantQuotasAsync()).SingleOrDefault(q => q.TenantId == id);
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
     {
         var q = await Service.SaveTenantQuotaAsync(quota);
-        CacheNotify.Publish(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
+        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
 
         return q;
     }
 
-    public Task RemoveTenantQuotaAsync(int tenant)
+    public Task RemoveTenantQuotaAsync(int id)
     {
         throw new NotImplementedException();
     }
@@ -126,11 +126,11 @@ class CachedQuotaService : IQuotaService
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
         await Service.SetTenantQuotaRowAsync(row, exchange);
-        CacheNotify.Publish(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
+        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
 
         if (row.UserId != Guid.Empty)
         {
-            CacheNotify.Publish(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
+            await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
         }
     }
 

@@ -28,8 +28,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class GreetingSettingsController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly MessageService _messageService;
     private readonly TenantManager _tenantManager;
     private readonly PermissionContext _permissionContext;
@@ -60,9 +58,10 @@ public class GreetingSettingsController : BaseSettingsController
     /// <path>api/2.0/settings/greetingsettings</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("greetingsettings")]
-    public ContentResult GetGreetingSettings()
+    public async Task<ContentResult> GetGreetingSettings()
     {
-        return new ContentResult { Content = Tenant.Name == "" ? Resource.PortalName : Tenant.Name };
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return new ContentResult { Content = tenant.Name == "" ? Resource.PortalName : tenant.Name };
     }
 
     /// <summary>
@@ -74,9 +73,10 @@ public class GreetingSettingsController : BaseSettingsController
     /// <path>api/2.0/settings/greetingsettings/isdefault</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("greetingsettings/isdefault")]
-    public bool IsDefault()
+    public async Task<bool> IsDefault()
     {
-        return Tenant.Name == "";
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return tenant.Name == "";
     }
 
     /// <summary>
@@ -91,10 +91,11 @@ public class GreetingSettingsController : BaseSettingsController
     [HttpPost("greetingsettings")]
     public async Task<ContentResult> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        Tenant.Name = inDto.Title;
-        await _tenantManager.SaveTenantAsync(Tenant);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        tenant.Name = inDto.Title;
+        await _tenantManager.SaveTenantAsync(tenant);
 
         await _messageService.SendAsync(MessageAction.GreetingSettingsUpdated);
 
@@ -112,13 +113,15 @@ public class GreetingSettingsController : BaseSettingsController
     [HttpPost("greetingsettings/restore")]
     public async Task<ContentResult> RestoreGreetingSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await _tenantInfoSettingsHelper.RestoreDefaultTenantNameAsync();
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         return new ContentResult
         {
-            Content = Tenant.Name == "" ? Resource.PortalName : Tenant.Name
+            Content = tenant.Name == "" ? Resource.PortalName : tenant.Name
         };
     }
 }

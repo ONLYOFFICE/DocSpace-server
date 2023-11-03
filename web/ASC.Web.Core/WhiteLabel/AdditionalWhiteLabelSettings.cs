@@ -45,51 +45,51 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
 
     /// <summary>Specifies if the start document is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool StartDocsEnabled { get; set; }
+    public bool StartDocsEnabled { get; init; }
 
     /// <summary>Specifies if the help center is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool HelpCenterEnabled { get; set; }
+    public bool HelpCenterEnabled { get; init; }
 
     /// <summary>Specifies if feedback and support are available or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool FeedbackAndSupportEnabled { get; set; }
+    public bool FeedbackAndSupportEnabled { get; init; }
 
     /// <summary>Feedback and support URL</summary>
     /// <type>System.String, System</type>
-    public string FeedbackAndSupportUrl { get; set; }
+    public string FeedbackAndSupportUrl { get; init; }
 
     /// <summary>Specifies if the user forum is enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool UserForumEnabled { get; set; }
+    public bool UserForumEnabled { get; init; }
 
     /// <summary>User forum URL</summary>
     /// <type>System.String, System</type>
-    public string UserForumUrl { get; set; }
+    public string UserForumUrl { get; init; }
 
     /// <summary>Specifies if the video guides are enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool VideoGuidesEnabled { get; set; }
+    public bool VideoGuidesEnabled { get; init; }
 
     /// <summary>Video guides URL</summary>
     /// <type>System.String, System</type>
-    public string VideoGuidesUrl { get; set; }
+    public string VideoGuidesUrl { get; init; }
 
     /// <summary>Sales email</summary>
     /// <type>System.String, System</type>
-    public string SalesEmail { get; set; }
+    public string SalesEmail { get; init; }
 
     /// <summary>URL to pay for the portal</summary>
     /// <type>System.String, System</type>
-    public string BuyUrl { get; set; }
+    public string BuyUrl { get; init; }
 
     /// <summary>Specifies if the license agreements are enabled or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool LicenseAgreementsEnabled { get; set; }
+    public bool LicenseAgreementsEnabled { get; init; }
 
     /// <summary>License agreements URL</summary>
     /// <type>System.String, System</type>
-    public string LicenseAgreementsUrl { get; set; }
+    public string LicenseAgreementsUrl { get; init; }
 
     [JsonIgnore]
     public Guid ID
@@ -167,7 +167,7 @@ public class AdditionalWhiteLabelSettingsHelper
 
 /// <summary>
 /// </summary>
-[Singletone]
+[Singleton]
 public class AdditionalWhiteLabelSettingsHelperInit
 {
     private readonly IConfiguration _configuration;

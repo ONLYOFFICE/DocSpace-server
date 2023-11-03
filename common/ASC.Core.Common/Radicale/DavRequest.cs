@@ -28,9 +28,9 @@ namespace ASC.Common.Radicale;
 
 public class DavRequest
 {
-    public string Url { get; set; }
-    public string Authorization { get; set; }
+    public string Url { get; init; }
+    public string Authorization { get; init; }
     public string Method { get; set; }
-    public string Data { get; set; }
-    public string Header { get; set; }
+    public string Data { get; init; }
+    public string Header { get; init; }
 }

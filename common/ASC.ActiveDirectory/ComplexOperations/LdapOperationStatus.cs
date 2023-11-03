@@ -36,7 +36,7 @@ public class LdapOperationStatus
 
     public string Error { get; set; }
 
-    public string Warning { get; set; }
+    public string Warning { get; init; }
 
     public int Percents { get; set; }
 

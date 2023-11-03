@@ -45,9 +45,9 @@ public enum IdType
 public class TableInfo
 {
     public string[] Columns { get; set; }
-    public string[] UserIDColumns { get; set; }
-    public Dictionary<string, bool> DateColumns { get; set; }
-    public InsertMethod InsertMethod { get; set; }
+    public string[] UserIDColumns { get; init; }
+    public Dictionary<string, bool> DateColumns { get; init; }
+    public InsertMethod InsertMethod { get; init; }
     public string Name { get; private set; }
     public string IdColumn { get; private set; }
     public IdType IdType { get; private set; }

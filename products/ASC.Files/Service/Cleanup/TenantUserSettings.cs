@@ -28,7 +28,7 @@ namespace ASC.Files.AutoCleanUp;
 
 public class TenantUserSettings
 {
-    public int TenantId { get; set; }
-    public Guid UserId { get; set; }
-    public DateToAutoCleanUp Setting { get; set; }
+    public int TenantId { get; init; }
+    public Guid UserId { get; init; }
+    public DateToAutoCleanUp Setting { get; init; }
 }

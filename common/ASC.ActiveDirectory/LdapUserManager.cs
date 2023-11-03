@@ -87,7 +87,7 @@ public class LdapUserManager
     {
         if (string.IsNullOrEmpty(userInfo.Email))
         {
-            throw new ArgumentException(_resource.ErrorEmailEmpty, "userInfo");
+            throw new ArgumentException(_resource.ErrorEmailEmpty, nameof(userInfo));
         }
 
         var uniqueName = new MailAddress(userInfo.Email).User;
@@ -95,7 +95,7 @@ public class LdapUserManager
         var i = 0;
         while (!await TestUniqueUserNameAsync(uniqueName))
         {
-            uniqueName = string.Format("{0}{1}", startUniqueName, (++i).ToString(CultureInfo.InvariantCulture));
+            uniqueName = $"{startUniqueName}{(++i).ToString(CultureInfo.InvariantCulture)}";
         }
         return uniqueName;
     }
@@ -114,7 +114,7 @@ public class LdapUserManager
         {
             if (ldapUserInfo == null)
             {
-                throw new ArgumentNullException("ldapUserInfo");
+                throw new ArgumentNullException(nameof(ldapUserInfo));
             }
 
             _logger.DebugTryAddLdapUser(ldapUserInfo.Sid, ldapUserInfo.Email, ldapUserInfo.UserName);
@@ -164,7 +164,7 @@ public class LdapUserManager
         catch (TenantQuotaException ex)
         {
             // rethrow if quota
-            throw ex;
+            throw;
         }
         catch (Exception ex)
         {
@@ -262,7 +262,7 @@ public class LdapUserManager
                     return wrapper;
                 }
                 wrapper.UserInfo = await TryAddLDAPUser(ldapUserInfo, onlyGetChanges);
-                if (wrapper.UserInfo == Constants.LostUser)
+                if (wrapper.UserInfo.Equals(Constants.LostUser))
                 {
                     if (onlyGetChanges)
                     {
@@ -282,7 +282,6 @@ public class LdapUserManager
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                    var ldapNotifyHelper = scope.ServiceProvider.GetRequiredService<LdapNotifyService>();
                     var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
                     source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
@@ -375,8 +374,6 @@ public class LdapUserManager
         {
             return;
         }
-
-        var ldapUserContacts = ldapUser.Contacts;
 
         var newContacts = new List<string>(ldapUser.ContactsList);
 

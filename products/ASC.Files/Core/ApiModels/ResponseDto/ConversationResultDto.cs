@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// <summary>
 /// Result of file conversation operation.
 /// </summary>
-public class ConversationResultDto<T>
+public class ConversationResultDto
 {
     /// <summary>
     /// Operation ID

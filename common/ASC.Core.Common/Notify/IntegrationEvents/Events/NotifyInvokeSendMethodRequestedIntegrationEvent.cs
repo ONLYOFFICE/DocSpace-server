@@ -29,7 +29,7 @@ namespace ASC.Core.Common.Notify.IntegrationEvents.Events;
 [ProtoContract]
 public record NotifyInvokeSendMethodRequestedIntegrationEvent : IntegrationEvent
 {
-    private NotifyInvokeSendMethodRequestedIntegrationEvent() : base()
+    private NotifyInvokeSendMethodRequestedIntegrationEvent()
     {
 
     }
@@ -40,6 +40,6 @@ public record NotifyInvokeSendMethodRequestedIntegrationEvent : IntegrationEvent
     }
 
     [ProtoMember(1)]
-    public NotifyInvoke NotifyInvoke { get; set; }
+    public NotifyInvoke NotifyInvoke { get; init; }
 }
 

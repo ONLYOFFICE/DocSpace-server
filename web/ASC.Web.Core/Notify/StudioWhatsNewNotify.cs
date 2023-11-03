@@ -40,11 +40,11 @@ public class StudioWhatsNewNotify
     private readonly AuthManager _authManager;
     private readonly AuditEventsRepository _auditEventsRepository;
     private readonly CoreSettings _coreSettings;
-    private readonly IConfiguration _confuguration;
+    private readonly IConfiguration _configuration;
     private readonly WorkContext _workContext;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly IServiceProvider _serviceProvider;
-    public static readonly List<MessageAction?> DailyActions = new List<MessageAction?>()
+    public static readonly List<MessageAction?> DailyActions = new()
     {
         MessageAction.FileCreated,
         MessageAction.FileUpdatedRevisionComment,
@@ -56,7 +56,7 @@ public class StudioWhatsNewNotify
         MessageAction.UserUpdated
     };
 
-    public static readonly List<MessageAction?> RoomsActivityActions = new List<MessageAction?>()
+    public static readonly List<MessageAction?> RoomsActivityActions = new()
     {
          MessageAction.FileUploaded,
          MessageAction.UserFileUpdated,
@@ -74,7 +74,7 @@ public class StudioWhatsNewNotify
         SecurityContext securityContext,
         AuthManager authManager,
         CoreSettings coreSettings,
-        IConfiguration confuguration,
+        IConfiguration configuration,
         WorkContext workContext,
         ILoggerProvider optionsMonitor,
         AuditEventsRepository auditEventsRepository,
@@ -91,7 +91,7 @@ public class StudioWhatsNewNotify
         _securityContext = securityContext;
         _authManager = authManager;
         _coreSettings = coreSettings;
-        _confuguration = confuguration;
+        _configuration = configuration;
         _workContext = workContext;
         _auditEventsRepository = auditEventsRepository;
         _log = optionsMonitor.CreateLogger("ASC.Notify");
@@ -215,7 +215,6 @@ public class StudioWhatsNewNotify
 
         var date = activityInfo.Data;
         var userName = user.DisplayUserName(_displayUserSettingsHelper);
-        var userEmail = user.Email;
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
         var fileTitle = HtmlUtil.GetText(activityInfo.FileTitle, 512);
@@ -343,12 +342,9 @@ public class StudioWhatsNewNotify
         }
 
         var hourToSend = 7;
-        if (!string.IsNullOrEmpty(_confuguration["web:whatsnew-time"]))
+        if (!string.IsNullOrEmpty(_configuration["web:whatsnew-time"]) && int.TryParse(_configuration["web:whatsnew-time"], out var hour))
         {
-            if (int.TryParse(_confuguration["web:whatsnew-time"], out var hour))
-            {
-                hourToSend = hour;
-            }
+            hourToSend = hour;
         }
         return currentTime.Hour == hourToSend;
     }
@@ -370,9 +366,9 @@ public class StudioWhatsNewNotify
 
 public class ActivityInfo
 {
-    public Guid UserId { get; set; }
-    public MessageAction Action { get; set; }
-    public DateTime Data { get; set; }
+    public Guid UserId { get; init; }
+    public MessageAction Action { get; init; }
+    public DateTime Data { get; init; }
     public string FileTitle { get; set; }
     public string FileUrl { get; set; }
     public string RoomUri { get; set; }

@@ -30,15 +30,15 @@ namespace ASC.Notify.Messages;
 public class NotifyInvoke
 {
     [ProtoMember(1)]
-    public string Service { get; set; }
+    public string Service { get; init; }
 
     [ProtoMember(2)]
-    public string Method { get; set; }
+    public string Method { get; init; }
 
     [ProtoMember(3)]
     public List<string> Parameters { get; set; }
 
     [ProtoMember(4)]
-    public int Tenant { get; set; }
+    public int Tenant { get; init; }
 
 }

@@ -43,7 +43,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.RecipientsAsync(userDbContext, tenant, sourceId, actionId, objectId ?? string.Empty).ToArrayAsync();
     }
@@ -53,7 +53,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await Queries.SubscriptionsAsync(userDbContext, tenant, sourceId, actionId).ToListAsync();
 
@@ -65,7 +65,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.SubscriptionsByRecipientIdAsync(userDbContext, tenant, sourceId, actionId, recipientId, objectId ?? string.Empty);
 
@@ -78,7 +78,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.SubscriptionsByRecipientAsync(userDbContext, tenant, sourceId, actionId, recipientId, objectId ?? string.Empty);
 
@@ -91,7 +91,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.AnySubscriptionsByRecipientAsync(userDbContext, tenant, sourceId, actionId, recipientId, objectId ?? string.Empty);
     }
@@ -102,7 +102,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.ObjectsAsync(userDbContext, tenant, sourceId, actionId, recipientId, checkSubscribe).ToArrayAsync();
     }
@@ -121,7 +121,7 @@ public class DbSubscriptionService : ISubscriptionService
             TenantId = s.Tenant
         };
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Subscriptions, subs);
         await userDbContext.SaveChangesAsync();
     }
@@ -136,7 +136,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var sub = await Queries.SubscriptionsByObjectAsync(userDbContext, tenant, sourceId, actionId, objectId ?? string.Empty);
 
@@ -153,7 +153,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var methods = await Queries.DbSubscriptionMethodsAsync(userDbContext, tenant, sourceId, recipientId).ToListAsync();
         var result = new List<SubscriptionMethod>();
@@ -185,7 +185,7 @@ public class DbSubscriptionService : ISubscriptionService
     {
         ArgumentNullException.ThrowIfNull(m);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         if (m.Methods == null || m.Methods.Length == 0)
         {

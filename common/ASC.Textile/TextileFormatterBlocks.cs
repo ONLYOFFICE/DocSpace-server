@@ -30,8 +30,8 @@ public partial class TextileFormatter
 {
     #region Block Modifiers Registration
 
-    private static readonly List<BlockModifier> _blockModifiers = new List<BlockModifier>();
-    private static readonly List<Type> _blockModifiersTypes = new List<Type>();
+    private static readonly List<BlockModifier> _blockModifiers = new();
+    private static readonly List<Type> _blockModifiersTypes = new();
 
     public static void RegisterBlockModifier(BlockModifier blockModifer)
     {
@@ -43,7 +43,7 @@ public partial class TextileFormatter
 
     #region Block Modifiers Management
 
-    private readonly List<Type> _disabledBlockModifiers = new List<Type>();
+    private readonly List<Type> _disabledBlockModifiers = new();
 
     public bool IsBlockModifierEnabled(Type type)
     {

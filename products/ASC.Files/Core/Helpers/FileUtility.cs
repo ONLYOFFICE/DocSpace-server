@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Helpers;
 
-[Singletone]
+[Singleton]
 public class FileUtilityConfiguration
 {
     private readonly IConfiguration _configuration;
@@ -140,8 +140,8 @@ public class FileUtilityConfiguration
 
     public Dictionary<FileType, string> InternalExtension
     {
-        get => new Dictionary<FileType, string>
-            {
+        get => new()
+        {
                 { FileType.Document, _configuration["files:docservice:internal-doc"] ?? ".docx" },
                 { FileType.Spreadsheet, _configuration["files:docservice:internal-xls"] ?? ".xlsx" },
                 { FileType.Presentation, _configuration["files:docservice:internal-ppt"] ?? ".pptx" }
@@ -495,7 +495,7 @@ public class FileUtility
                 return _extsConvertible;
             }
 
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
 
             foreach (var item in list)
@@ -650,62 +650,62 @@ public class FileUtility
     private readonly FileUtilityConfiguration _fileUtilityConfiguration;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    public static readonly List<string> ExtsArchive = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsArchive =  new List<string>()
+    {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
                 ".jar", ".lha", ".lzh", ".pak", ".pk3",
                 ".tar", ".tgz", ".gz", ".uu", ".uue", ".xxe",
                 ".z", ".zoo"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsVideo = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsVideo =  new List<string>()
+    {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
                 ".mkv", ".mov", ".mp4", ".mpeg",
                 ".mpg", ".mts", ".ogv", ".svi",
                 ".vob", ".webm", ".wmv"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsAudio = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsAudio =  new List<string>()
+    {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
                 ".mid", ".mka", ".mp3", ".mpc",
                 ".oga", ".ogg", ".pcm", ".ra",
                 ".raw", ".wav", ".wma"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsImage = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsImage =  new List<string>()
+    {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
                 ".png", ".ppm", ".rgb", ".svg", ".xbm", ".xpm", ".xwd",
                 ".svgt", ".svgy", ".gdraw", ".webp"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsSpreadsheet = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>()
+    {
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
                 ".ods", ".fods", ".ots", ".csv",
                 ".xlst", ".xlsy", ".xlsb",
                 ".gsheet"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsPresentation = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsPresentation = new List<string>()
+    {
                 ".pps", ".ppsx", ".ppsm",
                 ".ppt", ".pptx", ".pptm",
                 ".pot", ".potx", ".potm",
                 ".odp", ".fodp", ".otp",
                 ".pptt", ".ppty",
                 ".gslides"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsDocument = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsDocument = new List<string>()
+    {
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
                 ".odt", ".fodt", ".ott", ".rtf", ".txt",
@@ -713,25 +713,25 @@ public class FileUtility
                 ".pdf", ".djvu", ".fb2", ".epub", ".xps",".oxps",
                 ".doct", ".docy",
                 ".gdoc"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsFormTemplate = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>()
+    {
                 ".docxf"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsOForm = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsOForm = new List<string>()
+    {
                 ".oform"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsTemplate = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsTemplate = new List<string>()
+    {
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx",
-            };
+            }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }

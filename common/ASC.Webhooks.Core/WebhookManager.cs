@@ -36,11 +36,11 @@ public class Webhook : IMapFrom<DbWebhook>
 
     /// <summary>Route</summary>
     /// <type>System.String, System</type>
-    public string Route { get; set; }
+    public string Route { get; init; }
 
     /// <summary>Method</summary>
     /// <type>System.String, System</type>
-    public string Method { get; set; }
+    public string Method { get; init; }
 
     /// <summary>Specifies if a webhook is disabled or not</summary>
     /// <type>System.Boolean, System</type>

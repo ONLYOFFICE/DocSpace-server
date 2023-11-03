@@ -80,7 +80,7 @@ public class OwnerController : BaseSettingsController
     [HttpPost("owner")]
     public async Task<object> SendOwnerChangeInstructionsAsync(SettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var curTenant = await _tenantManager.GetCurrentTenantAsync();
         var owner = await _userManager.GetUsersAsync(curTenant.OwnerId);

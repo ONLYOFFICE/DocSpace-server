@@ -93,7 +93,7 @@ public class AuditEventsRepository
         Guid? withoutUserId = null)
     {
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var auditTrailContext = _dbContextFactory.CreateDbContext();
+        await using var auditTrailContext = await _dbContextFactory.CreateDbContextAsync();
 
         var query =
            from q in auditTrailContext.AuditEvents
@@ -132,13 +132,13 @@ public class AuditEventsRepository
 
             if (productType.HasValue && productType.Value != ProductType.None)
             {
-                var productMapper = _auditActionMapper.Mappers.FirstOrDefault(m => m.Product == productType.Value);
+                var productMapper = _auditActionMapper.Mappers.Find(m => m.Product == productType.Value);
 
                 if (productMapper != null)
                 {
                     if (moduleType.HasValue && moduleType.Value != ModuleType.None)
                     {
-                        var moduleMapper = productMapper.Mappers.FirstOrDefault(m => m.Module == moduleType.Value);
+                        var moduleMapper = productMapper.Mappers.Find(m => m.Module == moduleType.Value);
                         if (moduleMapper != null)
                         {
                             actionsList = moduleMapper.Actions;
@@ -184,7 +184,7 @@ public class AuditEventsRepository
             {
                 if (hasToFilter)
                 {
-                    query = query.Where(q => q.Event.Date >= from.Value & q.Event.Date <= to.Value);
+                    query = query.Where(q => q.Event.Date >= from.Value && q.Event.Date <= to.Value);
                 }
                 else
                 {
@@ -231,7 +231,7 @@ public class AuditEventsRepository
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)
     {
-        await using var feedDbContext = _dbContextFactory.CreateDbContext();
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.TenantsAsync(feedDbContext, from, to).ToListAsync();
     }

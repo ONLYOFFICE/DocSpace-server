@@ -26,16 +26,16 @@
 
 namespace ASC.Common;
 
-public enum DIAttributeEnum
+public enum DIAttributeType
 {
-    Singletone,
+    Singleton,
     Scope,
     Transient
 }
 
 public class TransientAttribute : DIAttribute
 {
-    public override DIAttributeEnum DIAttributeEnum => DIAttributeEnum.Transient;
+    public override DIAttributeType DiAttributeType => DIAttributeType.Transient;
 
     public TransientAttribute() { }
 
@@ -58,7 +58,7 @@ public class TransientAttribute : DIAttribute
 
 public class ScopeAttribute : DIAttribute
 {
-    public override DIAttributeEnum DIAttributeEnum => DIAttributeEnum.Scope;
+    public override DIAttributeType DiAttributeType => DIAttributeType.Scope;
 
     public ScopeAttribute() { }
 
@@ -79,15 +79,15 @@ public class ScopeAttribute : DIAttribute
     }
 }
 
-public class SingletoneAttribute : DIAttribute
+public class SingletonAttribute : DIAttribute
 {
-    public override DIAttributeEnum DIAttributeEnum => DIAttributeEnum.Singletone;
+    public override DIAttributeType DiAttributeType => DIAttributeType.Singleton;
 
-    public SingletoneAttribute() { }
+    public SingletonAttribute() { }
 
-    public SingletoneAttribute(Type service) : base(service) { }
+    public SingletonAttribute(Type service) : base(service) { }
 
-    public SingletoneAttribute(Type service, Type implementation) : base(service, implementation) { }
+    public SingletonAttribute(Type service, Type implementation) : base(service, implementation) { }
 
     public override void TryAdd(IServiceCollection services, Type service, Type implementation = null)
     {
@@ -104,7 +104,7 @@ public class SingletoneAttribute : DIAttribute
 
 public abstract class DIAttribute : Attribute
 {
-    public abstract DIAttributeEnum DIAttributeEnum { get; }
+    public abstract DIAttributeType DiAttributeType { get; }
     protected internal Type Implementation { get; }
     protected internal Type Service { get; }
     public Type Additional { get; init; }
@@ -127,30 +127,25 @@ public abstract class DIAttribute : Attribute
 
 public class DIHelper
 {
-    public Dictionary<DIAttributeEnum, List<string>> Services { get; set; }
-    public List<string> Added { get; set; }
-    public List<string> Configured { get; set; }
+    private readonly Dictionary<DIAttributeType, List<string>> _services;
+    private readonly List<string> _added;
+    private readonly List<string> _configured;
     public IServiceCollection ServiceCollection { get; private set; }
 
     public DIHelper()
     {
-        Services = new Dictionary<DIAttributeEnum, List<string>>()
+        _services = new Dictionary<DIAttributeType, List<string>>()
             {
-                { DIAttributeEnum.Singletone, new List<string>() },
-                { DIAttributeEnum.Scope, new List<string>() },
-                { DIAttributeEnum.Transient, new List<string>() }
+                { DIAttributeType.Singleton, new List<string>() },
+                { DIAttributeType.Scope, new List<string>() },
+                { DIAttributeType.Transient, new List<string>() }
             };
 
-        Added = new List<string>();
-        Configured = new List<string>();
+        _added = new List<string>();
+        _configured = new List<string>();
     }
 
     public DIHelper(IServiceCollection serviceCollection) : this()
-    {
-        ServiceCollection = serviceCollection;
-    }
-
-    public void Configure(IServiceCollection serviceCollection)
     {
         ServiceCollection = serviceCollection;
     }
@@ -209,12 +204,12 @@ public class DIHelper
 
         var serviceName = $"{service}{implementation}";
 
-        if (Added.Contains(serviceName))
+        if (_added.Contains(serviceName))
         {
             return false;
         }
 
-        Added.Add(serviceName);
+        _added.Add(serviceName);
 
         var di = serviceGenericTypeDefinition != null && (
             serviceGenericTypeDefinition == typeof(IConfigureOptions<>) ||
@@ -288,7 +283,7 @@ public class DIHelper
                             var a1 = a.GetGenericTypeDefinition();
                             var b = a.GetGenericArguments().FirstOrDefault();
 
-                            if (b != null && b.IsGenericType)
+                            if (b is { IsGenericType: true })
                             {
                                 var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
 
@@ -364,7 +359,7 @@ public class DIHelper
                             var a1 = a.GetGenericTypeDefinition();
                             var b = a.GetGenericArguments().FirstOrDefault();
 
-                            if (b != null && b.IsGenericType)
+                            if (b is { IsGenericType: true })
                             {
                                 var b1 = b.GetGenericTypeDefinition().MakeGenericType(service.GetGenericArguments());
 
@@ -424,48 +419,27 @@ public class DIHelper
     {
         var serviceName = $"{typeof(TService)}";
 
-        if (!Services[DIAttributeEnum.Singletone].Contains(serviceName))
+        if (!_services[DIAttributeType.Singleton].Contains(serviceName))
         {
-            Services[DIAttributeEnum.Singletone].Add(serviceName);
+            _services[DIAttributeType.Singleton].Add(serviceName);
             ServiceCollection.TryAddSingleton(implementationFactory);
         }
 
         return this;
     }
 
-    public DIHelper TryAddSingleton<TService, TImplementation>() where TService : class where TImplementation : class, TService
+    public void Configure(IServiceCollection serviceCollection)
     {
-        var serviceName = $"{typeof(TService)}{typeof(TImplementation)}";
-
-        if (!Services[DIAttributeEnum.Singletone].Contains(serviceName))
-        {
-            Services[DIAttributeEnum.Singletone].Add(serviceName);
-            ServiceCollection.TryAddSingleton<TService, TImplementation>();
-        }
-
-        return this;
-    }
-
-    public DIHelper Configure<TOptions>(Action<TOptions> configureOptions) where TOptions : class
-    {
-        var serviceName = $"{typeof(TOptions)}";
-
-        if (!Configured.Contains(serviceName))
-        {
-            Configured.Add(serviceName);
-            ServiceCollection.Configure(configureOptions);
-        }
-
-        return this;
+        ServiceCollection = serviceCollection;
     }
 
     public DIHelper Configure<TOptions>(string name, Action<TOptions> configureOptions) where TOptions : class
     {
         var serviceName = $"{typeof(TOptions)}{name}";
 
-        if (!Configured.Contains(serviceName))
+        if (!_configured.Contains(serviceName))
         {
-            Configured.Add(serviceName);
+            _configured.Add(serviceName);
             ServiceCollection.Configure(name, configureOptions);
         }
 
@@ -495,10 +469,10 @@ public class DIHelper
 
         var serviceName = $"{service}{implementation}";
 
-        if (!Services[c.DIAttributeEnum].Contains(serviceName))
+        if (!_services[c.DiAttributeType].Contains(serviceName))
         {
             c.TryAdd(ServiceCollection, service, implementation);
-            Services[c.DIAttributeEnum].Add(serviceName);
+            _services[c.DiAttributeType].Add(serviceName);
 
             return true;
         }

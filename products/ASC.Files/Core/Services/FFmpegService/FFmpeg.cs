@@ -30,7 +30,7 @@ using File = System.IO.File;
 
 namespace ASC.Web.Files.Services.FFmpegService;
 
-[Singletone]
+[Singleton]
 public class FFmpegService
 {
     public List<string> MustConvertable
@@ -47,11 +47,11 @@ public class FFmpegService
     }
 
     private readonly List<string> _convertableMedia;
-    private readonly List<string> _fFmpegExecutables = new List<string>() { "ffmpeg", "avconv" };
+    private readonly List<string> _fFmpegExecutables = new() { "ffmpeg", "avconv" };
     private readonly string _fFmpegPath;
     private readonly string _fFmpegArgs;
     private readonly string _fFmpegThumbnailsArgs;
-    private readonly List<string> _fFmpegFormats;
+    private readonly ImmutableList<string> _fFmpegFormats;
 
     private readonly ILogger<FFmpegService> _logger;
 
@@ -94,7 +94,8 @@ public class FFmpegService
         _fFmpegPath = configuration["files:ffmpeg:value"];
         _fFmpegArgs = configuration["files:ffmpeg:args"] ?? "-i - -preset ultrafast -movflags frag_keyframe+empty_moov -f {0} -";
         _fFmpegThumbnailsArgs = configuration["files:ffmpeg:thumbnails:args"] ?? "-i \"{0}\" -frames:v 1 \"{1}\" -y";
-        _fFmpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>() ?? FileUtility.ExtsVideo;
+        var ffMpegFormats = configuration.GetSection("files:ffmpeg:thumbnails:formats").Get<List<string>>();
+        _fFmpegFormats = ffMpegFormats != null ? ffMpegFormats.ToImmutableList() : FileUtility.ExtsVideo;
 
         _convertableMedia = (configuration.GetSection("files:ffmpeg:exts").Get<string[]>() ?? Array.Empty<string>()).ToList();
 
@@ -185,6 +186,6 @@ public class FFmpegService
 
         await ProcessLog(process.StandardError.BaseStream);
 
-        process.WaitForExit();
+        await process.WaitForExitAsync();
     }
 }

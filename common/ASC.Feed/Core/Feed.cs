@@ -38,7 +38,7 @@ public class Feed
     public string Module { get; set; }
     public string ExtraLocationTitle { get; set; }
     public string ExtraLocation { get; set; }
-    public FeedAction Action { get; set; }
+    public FeedActions Actions { get; set; }
     public string Title { get; set; }
     public string ItemUrl { get; set; }
     public string Description { get; set; }
@@ -56,9 +56,10 @@ public class Feed
     public string Id => $"{Item}_{ItemId}";
     public string ContextId { get; set; }
     public bool IsAllDayEvent { get; set; }
-
-    // this means that the news can be updated (eg adding comments);
-    // hence permissions may be outdated
+    
+    /// <summary>
+    ///this means that the news can be updated (eg adding comments);hence permissions may be outdated 
+    /// </summary>
     public bool Variate { get; private set; }
 
     public Feed() { }
@@ -71,7 +72,7 @@ public class Feed
         CreatedDate = date;
         ModifiedDate = date;
 
-        Action = FeedAction.Created;
+        Actions = FeedActions.Created;
         Variate = variate;
     }
 }

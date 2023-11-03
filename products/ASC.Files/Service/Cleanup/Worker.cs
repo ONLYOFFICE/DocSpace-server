@@ -26,7 +26,7 @@
 
 namespace ASC.Files.AutoCleanUp;
 
-[Singletone]
+[Singleton]
 public class Worker
 {
     private readonly ILogger<Worker> _logger;
@@ -74,69 +74,65 @@ public class Worker
 
         try
         {
-            await using (var scope = _serviceScopeFactory.CreateAsyncScope())
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
+
+            var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
+            var fileStorageService = scope.ServiceProvider.GetRequiredService<FileStorageService>();
+            var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
+
+            var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
+
+            if (Equals(userAccount, ASC.Core.Configuration.Constants.Guest))
             {
-                var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
-
-                var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
-                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-                var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-                var fileStorageService = scope.ServiceProvider.GetRequiredService<FileStorageService>();
-                var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
-
-                var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
-
-                if (userAccount == ASC.Core.Configuration.Constants.Guest)
-                {
-                    return;
-                }
-
-                await securityContext.AuthenticateMeWithoutCookieAsync(userAccount);
-
-                var fileDao = daoFactory.GetFileDao<int>();
-                var folderDao = daoFactory.GetFolderDao<int>();
-                var now = DateTime.UtcNow;
-
-                var filesList = new List<int>();
-                var foldersList = new List<int>();
-
-                var trashId = await folderDao.GetFolderIDTrashAsync(false, tenantUser.UserId);
-
-                foldersList.AddRange((await folderDao.GetFoldersAsync(trashId).ToListAsync(cancellationToken: cancellationToken))
-                    .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
-                    .Select(f => f.Id));
-
-                filesList.AddRange((await fileDao.GetFilesAsync(trashId, null, default(FilterType), false, Guid.Empty, string.Empty, false).ToListAsync(cancellationToken: cancellationToken))
-                    .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
-                    .Select(y => y.Id));
-
-                if (foldersList.Count == 0 && filesList.Count == 0)
-                {
-                    return;
-                }
-
-                _logger.InfoCleanUp(tenantUser.TenantId, trashId);
-
-                await fileStorageService.DeleteItemsAsync("delete", filesList, foldersList, true, false, true);
-
-                _logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
-
-                while (true)
-                {
-                    var statuses = fileStorageService.GetTasksStatuses();
-
-                    if (statuses.TrueForAll(r => r.Finished))
-                    {
-                        break;
-                    }
-
-                    await Task.Delay(100, cancellationToken);
-                }
-
-                _logger.InfoCleanUpFinish(tenantUser.TenantId, trashId);
-
+                return;
             }
+
+            await securityContext.AuthenticateMeWithoutCookieAsync(userAccount);
+
+            var fileDao = daoFactory.GetFileDao<int>();
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var now = DateTime.UtcNow;
+
+            var trashId = await folderDao.GetFolderIDTrashAsync(false, tenantUser.UserId);
+
+            var foldersList = await folderDao.GetFoldersAsync(trashId)
+                .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
+                .Select(f => f.Id)
+                .ToListAsync(cancellationToken);
+
+            var filesList = await fileDao.GetFilesAsync(trashId, null, default, false, Guid.Empty, string.Empty, false)
+                .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
+                .Select(y => y.Id)
+                .ToListAsync(cancellationToken);
+
+            if (foldersList.Count == 0 && filesList.Count == 0)
+            {
+                return;
+            }
+
+            _logger.InfoCleanUp(tenantUser.TenantId, trashId);
+
+            await fileStorageService.DeleteItemsAsync("delete", filesList, foldersList, true, false, true);
+
+            _logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
+
+            while (true)
+            {
+                var statuses = fileStorageService.GetTasksStatuses();
+
+                if (statuses.TrueForAll(r => r.Finished))
+                {
+                    break;
+                }
+
+                await Task.Delay(100, cancellationToken);
+            }
+
+            _logger.InfoCleanUpFinish(tenantUser.TenantId, trashId);
         }
         catch (Exception ex)
         {
@@ -162,7 +158,7 @@ static file class Queries
                     .Where(x => x.tenants.Status == TenantStatus.Active &&
                                 x.settings.Id == filesSettingsId &&
                                 Convert.ToBoolean(DbFunctionsExtension.JsonValue(nameof(x.settings.Data).ToLower(),
-                                    "AutomaticallyCleanUp.IsAutoCleanUp")) == true)
+                                    "AutomaticallyCleanUp.IsAutoCleanUp")))
                     .Select(r => new TenantUserSettings()
                     {
                         TenantId = r.tenants.Id,

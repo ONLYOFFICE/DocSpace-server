@@ -57,7 +57,7 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
         _requestHelper = requestHelper;
     }
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {
@@ -163,6 +163,6 @@ public class MailRuLoginProvider : BaseLoginProvider<MailRuLoginProvider>
 
         var parser = JObject.Parse(token.OriginJson);
 
-        return parser?.Value<string>("x_mailru_vid");
+        return parser.Value<string>("x_mailru_vid");
     }
 }

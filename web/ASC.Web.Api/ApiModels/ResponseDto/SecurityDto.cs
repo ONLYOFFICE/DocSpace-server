@@ -40,7 +40,7 @@ public class SecurityDto
 
     /// <summary>List of groups with the access to the module</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.Models.GroupSummaryDto}, System.Collections.Generic</type>
-    public IEnumerable<GroupSummaryDto> Groups { get; set; }
+    public IEnumerable<GroupSummaryDto> Groups { get; init; }
 
     /// <summary>Specifies if the security settings are enabled or not</summary>
     /// <type>System.Boolean, System</type>

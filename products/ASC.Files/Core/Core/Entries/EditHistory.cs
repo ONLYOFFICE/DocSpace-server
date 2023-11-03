@@ -150,7 +150,7 @@ public class EditHistoryAuthor
         _displayUserSettingsHelper = displayUserSettingsHelper;
     }
 
-    public string Id { get; set; }
+    public string Id { get; init; }
 
     private string _name;
     public string Name
@@ -172,14 +172,14 @@ public class EditHistoryAuthor
                                 : _name
                           : user.DisplayUserName(false, _displayUserSettingsHelper);
         }
-        set => _name = value;
+        init => _name = value;
     }
 }
 
 [DebuggerDisplay("{Author.Name}")]
 public class EditHistoryChanges
 {
-    public EditHistoryAuthor Author { get; set; }
+    public EditHistoryAuthor Author { get; init; }
     public DateTime Date { get; set; }
 }
 
@@ -210,7 +210,7 @@ public class EditHistoryDataDto
 
     /// <summary>File version</summary>
     /// <type>System.Int32, System</type>
-    public int Version { get; set; }
+    public int Version { get; init; }
 
     /// <summary>File type</summary>
     /// <type>System.String, System</type>
@@ -220,7 +220,7 @@ public class EditHistoryDataDto
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
-    public string Key { get; set; }
-    public string Url { get; set; }
+    public string Key { get; init; }
+    public string Url { get; init; }
     public string FileType { get; set; }
 }

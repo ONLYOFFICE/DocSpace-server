@@ -26,7 +26,7 @@
 
 namespace ASC.ApiSystem.Classes;
 
-[Singletone]
+[Singleton]
 public class CommonConstants
 {
     public CommonConstants(IConfiguration configuration)

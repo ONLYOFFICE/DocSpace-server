@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-[Singletone(Additional = typeof(FileOperationsManagerHelperExtention))]
+[Singleton(Additional = typeof(FileOperationsManagerHelperExtention))]
 public class FileOperationsManager
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
@@ -178,7 +178,7 @@ public class FileOperationsManager
     public List<FileOperationResult> Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
         bool isEmptyTrash = false)
     {
-        var op = new FileDeleteOperation<T>(_serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
+        var op = new FileDeleteOperation<T>(_serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
         return QueueTask(userId, op);
     }
 
@@ -188,8 +188,8 @@ public class FileOperationsManager
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
-        var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
+        var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
+        var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
         var op = new FileDeleteOperation(_serviceProvider, op2, op1);
 
         return QueueTask(userId, op);
@@ -295,7 +295,6 @@ public static class FileOperationsManagerHelperExtention
         services.TryAdd<FileMarkAsReadOperationScope>();
         services.TryAdd<FileMoveCopyOperationScope>();
         services.TryAdd<FileOperationScope>();
-        services.TryAdd<FileDownloadOperationScope>();
         services.TryAdd<CompressToArchive>();
     }
 }

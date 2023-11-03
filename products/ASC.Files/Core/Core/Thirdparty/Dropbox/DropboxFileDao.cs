@@ -56,7 +56,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         var uploadSession = new ChunkedUploadSession<string>(file, contentLength);
 
         var storage = (DropboxStorage)await ProviderInfo.StorageAsync;
-        var dropboxSession = await storage.CreateResumableSessionAsync();
+        var dropboxSession = await storage.CreateRenewableSessionAsync();
         if (dropboxSession != null)
         {
             uploadSession.Items["DropboxSession"] = dropboxSession;
@@ -102,8 +102,6 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);
-
-
         uploadSession.Items["BytesUploaded"] = uploaded + chunkLength.ToString();
 
         return uploadSession.File;
@@ -122,13 +120,13 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
             if (file.Id != null)
             {
                 var dropboxFilePath = Dao.MakeThirdId(file.Id);
-                dropboxFile = await storage.FinishResumableSessionAsync(dropboxSession, dropboxFilePath, uploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, dropboxFilePath, uploaded);
             }
             else
             {
                 var folderPath = Dao.MakeThirdId(file.ParentId);
                 var title = await Dao.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
-                dropboxFile = await storage.FinishResumableSessionAsync(dropboxSession, folderPath, title, uploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title, uploaded);
             }
 
             await ProviderInfo.CacheResetAsync(Dao.MakeThirdId(dropboxFile));

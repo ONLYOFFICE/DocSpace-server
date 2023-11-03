@@ -30,7 +30,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singletone(Additional = typeof(ServiceLauncherExtension))]
+[Singleton(Additional = typeof(ServiceLauncherExtension))]
 public class StudioNotifyServiceSender
 {
     private static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }

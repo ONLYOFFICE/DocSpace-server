@@ -36,7 +36,7 @@ public class DistributedTask
     protected string _exeption;
 
     [ProtoMember(11)]
-    protected Dictionary<string, string> _props;
+    protected readonly Dictionary<string, string> _props;
 
     public Action<DistributedTask> Publication { get; set; }
 
@@ -64,7 +64,7 @@ public class DistributedTask
     /// <type>System.Object, System</type>
     public Exception Exception
     {
-        get => new Exception(_exeption);
+        get => new(_exeption);
         set => _exeption = value?.Message ?? "";
     }
 

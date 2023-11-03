@@ -134,9 +134,6 @@ ONLYOFFICEチーム</value>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>個人的なONLYOFFICEへようこそ</value>
   </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>個人的なONLYOFFICE。パスワード アシスタンス</value>
-  </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>個人的なONLYOFFICE。メールアドレスの照合を行ってください</value>
   </data>

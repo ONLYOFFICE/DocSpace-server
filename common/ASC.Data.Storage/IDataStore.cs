@@ -38,6 +38,7 @@ public interface IDataStore
     string GetBackupExtension(bool isConsumerStorage = false);
 
     IQuotaController QuotaController { get; set; }
+    IDataStoreValidator DataStoreValidator { get; set; }
 
     TimeSpan GetExpire(string domain);
 
@@ -216,22 +217,22 @@ public interface IDataStore
     ///<summary>
     /// Moves the contents of one directory to another. s3 for a very expensive procedure.
     ///</summary>
-    ///<param name="srcdomain"></param>
-    ///<param name="srcdir"></param>
-    ///<param name="newdomain"></param>
-    ///<param name="newdir"></param>
-    Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir);
+    ///<param name="srcDomain"></param>
+    ///<param name="srcDir"></param>
+    ///<param name="newDomain"></param>
+    ///<param name="newDir"></param>
+    Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir);
 
     ///<summary>
     /// Moves file
     ///</summary>
-    ///<param name="srcdomain"></param>
-    ///<param name="srcpath"></param>
-    ///<param name="newdomain"></param>
-    ///<param name="newpath"></param>
+    ///<param name="srcDomain"></param>
+    ///<param name="srcPath"></param>
+    ///<param name="newDomain"></param>
+    ///<param name="newPath"></param>
     ///<param name="quotaCheckFileSize"></param>
     ///<returns></returns>
-    Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true);
+    Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
 
     ///<summary>
     /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
@@ -298,8 +299,8 @@ public interface IDataStore
 
     Task<long> GetUsedQuotaAsync(string domain);
 
-    Task<Uri> CopyAsync(string srcdomain, string path, string newdomain, string newpath);
-    Task CopyDirectoryAsync(string srcdomain, string dir, string newdomain, string newdir);
+    Task<Uri> CopyAsync(string srcDomain, string path, string newDomain, string newPath);
+    Task CopyDirectoryAsync(string srcDomain, string dir, string newDomain, string newDir);
 
     //Then there are restarted methods without domain. functionally identical to the top
 
@@ -309,7 +310,7 @@ public interface IDataStore
     Task<Uri> SaveAsync(string path, Stream stream);
     Task DeleteAsync(string path);
     Task DeleteFilesAsync(string folderPath, string pattern, bool recursive);
-    Task<Uri> MoveAsync(string srcpath, string newdomain, string newpath);
+    Task<Uri> MoveAsync(string srcPath, string newDomain, string newPath);
     Task<(Uri, string)> SaveTempAsync(Stream stream);
     IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string path, bool recursive);
     IAsyncEnumerable<Uri> ListFilesAsync(string path, string pattern, bool recursive);
@@ -318,12 +319,12 @@ public interface IDataStore
     Task DeleteDirectoryAsync(string path);
     Task<long> GetFileSizeAsync(string path);
     Task<long> GetDirectorySizeAsync(string path);
-    Task<Uri> CopyAsync(string path, string newdomain, string newpath);
-    Task CopyDirectoryAsync(string dir, string newdomain, string newdir);
+    Task<Uri> CopyAsync(string path, string newDomain, string newPath);
+    Task CopyDirectoryAsync(string dir, string newDomain, string newDir);
 #pragma warning restore 1591
 
 
-    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props);
+    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator);
     IDataStore SetQuotaController(IQuotaController controller);
 
     Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);

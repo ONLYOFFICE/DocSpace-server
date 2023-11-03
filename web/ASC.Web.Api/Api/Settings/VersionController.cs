@@ -28,8 +28,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class VersionController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly TenantManager _tenantManager;
     private readonly PermissionContext _permissionContext;
     private readonly BuildVersion _buildVersion;
@@ -66,7 +64,7 @@ public class VersionController : BaseSettingsController
     }
 
     /// <summary>
-    /// Returns a list of the availibe portal versions including the current version.
+    /// Returns a list of the available portal versions including the current version.
     /// </summary>
     /// <short>
     /// Get the portal versions
@@ -78,7 +76,8 @@ public class VersionController : BaseSettingsController
     [HttpGet("version")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
-        return new TenantVersionDto(Tenant.Version, await _tenantManager.GetTenantVersionsAsync());
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return new TenantVersionDto(tenant.Version, await _tenantManager.GetTenantVersionsAsync());
     }
 
     /// <summary>
@@ -95,10 +94,12 @@ public class VersionController : BaseSettingsController
     [HttpPut("version")]
     public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         (await _tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
-        await _tenantManager.SetTenantVersionAsync(Tenant, inDto.VersionId);
+        
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        await _tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 
         return await GetVersionsAsync();
     }

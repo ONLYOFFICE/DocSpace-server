@@ -25,12 +25,11 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using StackExchange.Redis;
 
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class RedisCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
 {
     private readonly IRedisDatabase _redis;
@@ -85,7 +84,7 @@ public class RedisCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
 
     public void Unsubscribe(CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), (i) =>
+        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), (_) =>
         {
             return Task.FromResult(true);
         })).GetAwaiter()
@@ -130,7 +129,7 @@ public class RedisCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
         {
             _invoctionList.AddOrUpdate(action,
                 new ConcurrentBag<Action<T>> { onChange },
-                (type, bag) =>
+                (_, bag) =>
                 {
                     bag.Add(onChange);
                     return bag;

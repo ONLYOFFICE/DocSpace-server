@@ -50,7 +50,7 @@ public class CompressToZip : ICompress
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
-    public void CreateEntry(string title, DateTime? lastModification)
+    public void CreateEntry(string title, DateTime? lastModification = null)
     {
         _zipEntry = new ZipEntry(title) { IsUnicodeText = true };
 

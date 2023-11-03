@@ -28,10 +28,9 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class WebPluginsController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly PermissionContext _permissionContext;
     private readonly WebPluginManager _webPluginManager;
+    private readonly TenantManager _tenantManager;
     private readonly IMapper _mapper;
 
     public WebPluginsController(
@@ -41,21 +40,24 @@ public class WebPluginsController : BaseSettingsController
         IHttpContextAccessor httpContextAccessor,
         PermissionContext permissionContext,
         WebPluginManager webPluginManager,
+        TenantManager tenantManager,
         IMapper mapper) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _permissionContext = permissionContext;
         _webPluginManager = webPluginManager;
+        _tenantManager = tenantManager;
         _mapper = mapper;
     }
 
     [HttpPost("webplugins")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
     {
-        var tenantId = system ? Tenant.DefaultTenant : Tenant.Id;
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenantId = system ? Tenant.DefaultTenant : tenant.Id;
 
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (HttpContext.Request.Form?.Files == null || HttpContext.Request.Form.Files.Count == 0)
+        if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
             throw new ArgumentException("No input file");
         }
@@ -81,11 +83,13 @@ public class WebPluginsController : BaseSettingsController
     [HttpGet("webplugins")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
     {
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+
         var plugins = new List<DbWebPlugin>();
 
         plugins.AddRange(await _webPluginManager.GetSystemWebPluginsAsync());
 
-        plugins.AddRange(await _webPluginManager.GetWebPluginsAsync(Tenant.Id));
+        plugins.AddRange(await _webPluginManager.GetWebPluginsAsync(tenant.Id));
 
         var outDto = _mapper.Map<List<DbWebPlugin>, List<WebPluginDto>>(plugins);
 
@@ -108,7 +112,7 @@ public class WebPluginsController : BaseSettingsController
 
                 if (!dto.System && urlTemplate == null)
                 {
-                    urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(Tenant.Id);
+                    urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(tenant.Id);
                 }
 
                 dto.Url = string.Format(dto.System ? systemUrlTemplate : urlTemplate, dto.Name);
@@ -121,13 +125,14 @@ public class WebPluginsController : BaseSettingsController
     [HttpGet("webplugins/{id}")]
     public async Task<WebPluginDto> GetWebPluginByIdAsync(int id)
     {
-        var plugin = await _webPluginManager.GetWebPluginByIdAsync(Tenant.Id, id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var plugin = await _webPluginManager.GetWebPluginByIdAsync(tenant.Id, id);
 
         var outDto = _mapper.Map<DbWebPlugin, WebPluginDto>(plugin);
 
         if (outDto != null)
         {
-            var urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(Tenant.Id);
+            var urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(tenant.Id);
 
             outDto.Url = string.Format(urlTemplate, outDto.Name);
         }
@@ -138,19 +143,20 @@ public class WebPluginsController : BaseSettingsController
     [HttpPut("webplugins/{id}")]
     public async Task UpdateWebPluginAsync(int id, WebPluginRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _webPluginManager.UpdateWebPluginAsync(Tenant.Id, id, inDto.Enabled);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        await _webPluginManager.UpdateWebPluginAsync(tenant.Id, id, inDto.Enabled);
     }
 
     [HttpDelete("webplugins/{id}")]
     public async Task DeleteWebPluginAsync(int id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _webPluginManager.DeleteWebPluginAsync(Tenant.Id, id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        await _webPluginManager.DeleteWebPluginAsync(tenant.Id, id);
     }
-
 
 
     [HttpGet("webplugins/system/{name}")]
@@ -173,7 +179,7 @@ public class WebPluginsController : BaseSettingsController
     [HttpPut("webplugins/system/{name}")]
     public async Task UpdateSystemWebPluginAsync(string name, WebPluginRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await _webPluginManager.UpdateSystemWebPluginAsync(name, inDto.Enabled);
     }
@@ -181,7 +187,7 @@ public class WebPluginsController : BaseSettingsController
     [HttpDelete("webplugins/system/{name}")]
     public async Task DeleteSystemWebPluginAsync(string name)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await _webPluginManager.DeleteSystemWebPluginAsync(name);
     }

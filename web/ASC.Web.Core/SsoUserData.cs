@@ -63,7 +63,7 @@ public class SsoUserData
 public class LogoutSsoUserData
 {
     [JsonPropertyName("nameID")]
-    public string NameId { get; set; }
+    public string NameId { get; init; }
 
     [JsonPropertyName("sessionID")]
     public string SessionId { get; set; }

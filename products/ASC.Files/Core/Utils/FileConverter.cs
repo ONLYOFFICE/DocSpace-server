@@ -25,14 +25,13 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace ASC.Web.Files.Utils;
 
-[Singletone]
+[Singleton]
 public class FileConverterQueue
 {
-    private readonly object _locker = new object();
+    private readonly object _locker = new();
     private readonly IDistributedCache _distributedCache;
     private const string Cache_key_prefix = "asc_file_converter_queue_";
 
@@ -113,9 +112,8 @@ public class FileConverterQueue
         return exist.LastOrDefault(x =>
         {
             var fileId = JsonDocument.Parse(x.Source).RootElement.GetProperty("id").Deserialize<T>();
-            var fileVersion = JsonDocument.Parse(x.Source).RootElement.GetProperty("version").Deserialize<int>();
 
-            return String.Compare(file.Id.ToString(), fileId.ToString(), true) == 0;
+            return String.Compare(file.Id.ToString(), fileId.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
         });
     }
 
@@ -132,7 +130,7 @@ public class FileConverterQueue
         var cacheKey = GetCacheKey<T>();
         var queueTasks = LoadFromCache(cacheKey);
 
-        queueTasks = DeleteOrphanCacheItem<T>(queueTasks, cacheKey);
+        queueTasks = DeleteOrphanCacheItem(queueTasks, cacheKey);
 
         return queueTasks;
     }
@@ -199,7 +197,7 @@ public class FileConverterQueue
                                DateTime.UtcNow - x.StopDateTime > TimeSpan.FromMinutes(10));
     }
 
-    private IEnumerable<FileConverterOperationResult> DeleteOrphanCacheItem<T>(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
+    private IEnumerable<FileConverterOperationResult> DeleteOrphanCacheItem(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
     {
         var listTasks = queueTasks.ToList();
 
@@ -495,7 +493,7 @@ public class FileConverter
             Url = _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
             Password = null,
             ServerRootPath = _baseCommonLinkUtility.ServerRootPath,
-            ExternalShareData = await _externalShare.GetLinkIdAsync() != default ? JsonSerializer.Serialize(_externalShare.GetCurrentShareDataAsync()) : null
+            ExternalShareData = await _externalShare.GetLinkIdAsync() != Guid.Empty ? JsonSerializer.Serialize(_externalShare.GetCurrentShareDataAsync()) : null
         };
 
         var operationResultError = string.Empty;
@@ -536,7 +534,7 @@ public class FileConverter
         await _fileMarker.RemoveMarkAsNewAsync(file);
 
         _fileConverterQueue.Add(file, password, (await _tenantManager.GetCurrentTenantAsync()).Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
-            _baseCommonLinkUtility.ServerRootPath, await _externalShare.GetLinkIdAsync() != default ? await _externalShare.GetCurrentShareDataAsync() : null);
+            _baseCommonLinkUtility.ServerRootPath, await _externalShare.GetLinkIdAsync() != Guid.Empty ? await _externalShare.GetCurrentShareDataAsync() : null);
     }
 
     public bool IsConverting<T>(File<T> file)
@@ -551,7 +549,6 @@ public class FileConverter
 
     public async IAsyncEnumerable<FileOperationResult> GetStatusAsync<T>(IEnumerable<KeyValuePair<File<T>, bool>> filesPair)
     {
-        var result = new List<FileOperationResult>();
         foreach (var pair in filesPair)
         {
             var r = await _fileConverterQueue.GetStatusAsync(pair, _fileSecurity);
@@ -651,16 +648,13 @@ public class FileConverter
 
             if (e.StatusCode != HttpStatusCode.NotFound)
             {
-                if (!string.IsNullOrEmpty(e.Message))
-                {
                     errorString += $" Error {e.Message}";
                 }
-            }
 
             throw new Exception(errorString);
         }
 
-        _ = _filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
+        await _filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
 
         var linkDao = _daoFactory.GetLinkDao();
         await linkDao.DeleteAllLinkAsync(file.Id.ToString());
@@ -683,20 +677,6 @@ public class FileConverter
         return newFile;
     }
 }
-
-internal class FileComparer<T> : IEqualityComparer<File<T>>
-{
-    public bool Equals(File<T> x, File<T> y)
-    {
-        return x != null && y != null && Equals(x.Id, y.Id) && x.Version == y.Version;
-    }
-
-    public int GetHashCode(File<T> obj)
-    {
-        return obj.Id.GetHashCode() + obj.Version.GetHashCode();
-    }
-}
-
 
 public static class FileConverterExtension
 {

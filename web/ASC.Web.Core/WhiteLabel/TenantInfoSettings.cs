@@ -116,7 +116,7 @@ public class TenantInfoSettingsHelper
             }
         }
         using (var memory = new MemoryStream(data))
-        using (var image = Image.Load(memory))
+        using (var image = await Image.LoadAsync(memory))
         {
             tenantInfoSettings.CompanyLogoSize = image.Size;
 

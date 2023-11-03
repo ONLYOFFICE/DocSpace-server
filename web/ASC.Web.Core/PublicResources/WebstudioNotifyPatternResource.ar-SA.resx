@@ -596,11 +596,11 @@ $OrangeButton
 لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم "النسخ الاحتياطي للبيانات":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block"
 
 
-إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على "support.onlyoffice.com":"http://support.onlyoffice.com"
+إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 مع خالص تحياتي
 فريق دعم ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath})
@@ -612,10 +612,10 @@ $OrangeButton
 
 لمعرفة المزيد حول إجراء النسخ الاحتياطي ، يرجى الرجوع إلى دليل المستخدم [النسخ الاحتياطي للبيانات](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-إذا كان لديك أي أسئلة أو كنت بحاجة إلى مساعدة ، فلا تتردد في الاتصال بنا على [support.onlyoffice.com](http://support.onlyoffice.com)
+إذا كان لديك أي أسئلة أو كنت بحاجة إلى مساعدة ، فلا تتردد في الاتصال بنا على [support.onlyoffice.com](https://support.onlyoffice.com)
 
 مع خالص تحياتي
-فريق دعم ONLYOFFICE™ [www.onlyoffice.com] (http://onlyoffice.com/)</value>
+فريق دعم ONLYOFFICE™ [www.onlyoffice.com] (https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>هل تريد تغيير كلمة المرور على حساب ONLYOFFICE الخاص بك؟ انقر فوق الزر أدناه للتأكيد.
@@ -686,7 +686,7 @@ $OrangeButton
 
 حقا لك:
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -699,7 +699,7 @@ ONLYOFFICE Team
 أو"Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 حقا لك، 
 فريق ONLYOFFICE 
-" www.onlyoffice.com":"http://onlyoffice.com/"</value>
+" www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Get &lt;span style="color:#FF6F3D;"&gt;free&lt;/span&gt; ONLYOFFICE apps
 	
 
@@ -730,7 +730,7 @@ $OrangeButton
 
 حقا لك، 
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. &lt;span style="color:#FF6F3D;"&gt;5 tips&lt;/span&gt; for effective work on your docs
 	
 	
@@ -772,7 +772,7 @@ _يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصب
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -814,7 +814,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -847,7 +847,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -868,7 +868,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -905,7 +905,7 @@ $OrangeButton
 
 حقا لك:
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -927,7 +927,7 @@ _يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصب
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -980,7 +980,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -1013,7 +1013,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -1034,7 +1034,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -1132,7 +1132,7 @@ SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة ، فلا تتردد في الاتصال بنا على "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 مع خالص التحيات،
 فريق عمل ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":$RecipientSubscriptionConfigURL".^"</value>
   </data>
@@ -1146,7 +1146,7 @@ SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
 مع خالص التحيات،
 فريق عمل ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك":$RecipientSubscriptionConfigURL".^"</value>
   </data>
@@ -1161,7 +1161,7 @@ SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
 مع خالص التحيات،
 فريق عمل ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>العنوان الرئيسي. ترحيل البوابة
@@ -1189,7 +1189,7 @@ $OrangeButton
 
 حقا لك:
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -1208,7 +1208,7 @@ $OrangeButton
 
 حقا لك، 
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. &lt;span style="color:#FF6F3D;"&gt;5 tips&lt;/span&gt; for effective work on your docs
 	
 	
@@ -1249,7 +1249,7 @@ _يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصب
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1302,7 +1302,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -1335,7 +1335,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -1354,7 +1354,7 @@ $OrangeButton
 
 حقا لك، 
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. &lt;span style="color:#FF6F3D;"&gt;5 tips&lt;/span&gt; for effective work on your docs
 	
 	
@@ -1395,7 +1395,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -1472,7 +1472,7 @@ $TrulyYours
 . أو "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
 حقا لك،
-فريقONLYOFFICE "www.onlyoffice.com":"http://onlyoffice.com/"</value>
+فريقONLYOFFICE "www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Get &lt;span style="color:#FF6F3D;"&gt;free&lt;/span&gt; ONLYOFFICE apps
 	
 
@@ -1561,7 +1561,7 @@ $OrangeButton
 
 مع أطيب التحيات،
 فريق دعم ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>إلغاء تنشيط بوابة [${__VirtualRootPath}](${__VirtualRootPath}
@@ -1580,7 +1580,7 @@ _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرج�
 
 مع أطيب التحيات،
 فريق دعم ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>العنوان الرئيسي. حذف مساحة "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1605,7 +1605,7 @@ $OrangeButton
 
 مع أطيب التحيات،
 فريق دعم ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>تم إلغاء تنشيط DocSpace الخاص بك ONLYOFFICE بنجاح. يرجى ملاحظة أنه سيتم حذف جميع بياناتك وفقا ل "سياسة الخصوصية":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
@@ -1618,7 +1618,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. ONLYOFFICE DocSpace has been &lt;span style="color:#FF6F3D;"&gt;deactivated&lt;/span&gt;
 
 
@@ -1658,7 +1658,7 @@ $OrangeButton
  مع أطيب التحيات،
 
 فريق دعم ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>العنوان الرئيسي. تغيير عنوان البوابة الإلكترونية
@@ -1824,7 +1824,7 @@ $OrangeButton
 
 مع أطيب التحيات،
 فريق دعم ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)
+[www.onlyoffice.com](https://onlyoffice.com/)
 
 ^لتغيير نوع الإشعار، يرجى إدارة "إعدادات الاشتراك""$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1848,7 +1848,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 		
 		
@@ -1893,7 +1893,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Configure your &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 	
 	
@@ -1922,7 +1922,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>Your ONLYOFFICE DocSpace will be deleted
 
 
@@ -1952,7 +1952,7 @@ $TrulyYours
 . أو "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
 حقا لك،
-فريقONLYOFFICE "www.onlyoffice.com":"http://onlyoffice.com/"</value>
+فريقONLYOFFICE "www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Get &lt;span style="color:#FF6F3D;"&gt;free&lt;/span&gt; ONLYOFFICE apps
 	
 
@@ -1983,7 +1983,7 @@ $OrangeButton
 
 حقا لك، 
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. &lt;span style="color:#FF6F3D;"&gt;5 tips&lt;/span&gt; for effective work on your docs
 	
 	
@@ -2024,7 +2024,7 @@ _يرجى الملاحظة: الشخص الذي يدفع الاشتراك يصب
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. Discover business subscription of &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -2057,7 +2057,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":" http://onlyoffice.com/"</value>
+"www.onlyoffice.com":" https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
     <value>مرحبا!
@@ -2070,7 +2070,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -2091,7 +2091,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
     <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -2126,7 +2126,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -2139,7 +2139,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>مرحبا $UserName!
@@ -2152,7 +2152,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -2165,7 +2165,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>مرحبا!
@@ -2178,7 +2178,7 @@ $OrangeButton
 
 حقا لك،
 فريق ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>مرحبا!
@@ -2189,7 +2189,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -2210,7 +2210,7 @@ $OrangeButton
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
 	  <comment>h1. to &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 

@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Studio.Core.Quota;
 
-[Singletone(Additional = typeof(QuotaSyncOperationExtension))]
+[Singleton(Additional = typeof(QuotaSyncOperationExtension))]
 public class QuotaSyncOperation
 {
 
@@ -45,7 +45,7 @@ public class QuotaSyncOperation
     public void RecalculateQuota(Tenant tenant)
     {
         var item = _progressQueue.GetAllTasks<QuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             item = null;
@@ -64,7 +64,7 @@ public class QuotaSyncOperation
     public bool CheckRecalculateQuota(Tenant tenant)
     {
         var item = _progressQueue.GetAllTasks<QuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             return false;

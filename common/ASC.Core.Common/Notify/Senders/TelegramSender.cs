@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class TelegramSender : INotifySender
 {
     private readonly ILogger _logger;

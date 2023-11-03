@@ -322,7 +322,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         catch (HttpRequestException e)
         {
             _logger.ErrorBoxAppSaveFile(e);
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
             }
@@ -344,14 +344,11 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         var boxUserId = context.Request.Query["userId"];
 
-        if (_authContext.IsAuthenticated)
+        if (_authContext.IsAuthenticated && !(await CurrentUserAsync(boxUserId)))
         {
-            if (!(await CurrentUserAsync(boxUserId)))
-            {
-                _logger.DebugBoxAppLogout(boxUserId);
-                _cookiesManager.ClearCookies(CookiesType.AuthKey);
-                _authContext.Logout();
-            }
+            _logger.DebugBoxAppLogout(boxUserId);
+            _cookiesManager.ClearCookies(CookiesType.AuthKey);
+            _authContext.Logout();
         }
 
         if (!_authContext.IsAuthenticated)

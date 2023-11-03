@@ -130,7 +130,7 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId, archiveFolderId).Where(p => !string.IsNullOrEmpty(p.FolderId))
             .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         rooms = FilterRoomsAsync(rooms, provider, filterType, subjectId, excludeSubject, subjectFilter, subjectEntriesIds, searchText, withoutTags, tags, filesDbContext);
 
@@ -156,7 +156,7 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
             .Where(p => !string.IsNullOrEmpty(p.FolderId) && (p.Owner == _authContext.CurrentAccount.ID || roomsIds.Contains(p.FolderId)))
             .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         rooms = FilterRoomsAsync(rooms, provider, filterType, subjectId, excludeSubject, subjectFilter, subjectEntriesIds, searchText, withoutTags, tags, filesDbContext);
 
@@ -331,29 +331,24 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
                 : await folderDao.CopyFolderAsync(selector.ConvertId(folderId), selector.ConvertId(toFolderId), null);
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(string[] folderIds, TTo to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<string> folderIds, TTo to)
     {
-        if (to is int tId)
+        return to switch
         {
-            return CanMoveOrCopyAsync(folderIds, tId);
-        }
-
-        if (to is string tsId)
-        {
-            return CanMoveOrCopyAsync(folderIds, tsId);
-        }
-
-        throw new NotImplementedException();
+            int tId => CanMoveOrCopyAsync(folderIds, tId),
+            string tsId => CanMoveOrCopyAsync(folderIds, tsId),
+            _ => throw new NotImplementedException()
+        };
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, int to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, string to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
     {
-        if (folderIds.Length == 0)
+        if (!folderIds.Any())
         {
             return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
         }
@@ -424,10 +419,9 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
     public bool UseRecursiveOperation(string folderId, string toRootFolderId)
     {
         var selector = _selectorFactory.GetSelector(folderId);
-        bool useRecursive;
 
         var folderDao = selector.GetFolderDao(folderId);
-        useRecursive = folderDao.UseRecursiveOperation(folderId, null);
+        var useRecursive = folderDao.UseRecursiveOperation(folderId, null);
 
         if (toRootFolderId != null)
         {
@@ -454,7 +448,7 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         var folderDao = selector.GetFolderDao(folderId);
         var storageMaxUploadSize = await folderDao.GetMaxUploadSizeAsync(selector.ConvertId(folderId), chunkedUpload);
 
-        if (storageMaxUploadSize == -1 || storageMaxUploadSize == long.MaxValue)
+        if (storageMaxUploadSize is -1 or long.MaxValue)
         {
             storageMaxUploadSize = _setupInfo.ProviderMaxUploadSize;
         }

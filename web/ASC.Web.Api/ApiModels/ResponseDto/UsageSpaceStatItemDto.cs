@@ -73,7 +73,7 @@ public class ChartPointDto
 
     /// <summary>Date</summary>
     /// <type>System.DateTime, System</type>
-    public DateTime Date { get; set; }
+    public DateTime Date { get; init; }
 
     /// <summary>Hosts</summary>
     /// <type>System.Int32, System</type>

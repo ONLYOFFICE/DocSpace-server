@@ -28,7 +28,7 @@ using static ASC.Notify.Engine.NotifyEngine;
 
 namespace ASC.Core.Common.Notify.Engine;
 
-[Singletone]
+[Singleton]
 public class NotifySchedulerService : BackgroundService
 {
     private readonly NotifyEngine _notifyEngine;

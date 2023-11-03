@@ -73,6 +73,7 @@ public class EmployeeDtoHelper
 {
     protected readonly UserPhotoManager _userPhotoManager;
     protected readonly UserManager _userManager;
+    protected readonly TenantManager _tenantManager;
     private readonly ILogger<EmployeeDtoHelper> _logger;
     private readonly ApiContext _httpContext;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
@@ -85,10 +86,12 @@ public class EmployeeDtoHelper
         UserPhotoManager userPhotoManager,
         CommonLinkUtility commonLinkUtility,
         UserManager userManager,
+        TenantManager tenantManager,
         ILogger<EmployeeDtoHelper> logger)
     {
         _userPhotoManager = userPhotoManager;
         _userManager = userManager;
+        _tenantManager = tenantManager;
         _logger = logger;
         _httpContext = httpContext;
         _displayUserSettingsHelper = displayUserSettingsHelper;
@@ -102,7 +105,7 @@ public class EmployeeDtoHelper
         {
             employee = await InitAsync(new EmployeeDto(), userInfo);
 
-            _dictionary.AddOrUpdate(userInfo.Id, i => employee, (i, v) => employee);
+            _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
 
         }
         
@@ -118,7 +121,7 @@ public class EmployeeDtoHelper
         catch (Exception e)
         {
             _logger.ErrorWithException(e);
-            return await GetAsync(ASC.Core.Users.Constants.LostUser);
+            return await GetAsync(Constants.LostUser);
         }
     }
 
@@ -142,7 +145,7 @@ public class EmployeeDtoHelper
 
         if (result.Id != Guid.Empty)
         {
-            var profileUrl = _commonLinkUtility.GetUserProfile(userInfo, false);
+            var profileUrl = await _commonLinkUtility.GetUserProfileAsync(userInfo.Id, false);
             result.ProfileUrl = _commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
 

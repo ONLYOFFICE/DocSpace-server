@@ -28,12 +28,7 @@ namespace ASC.Data.Storage;
 
 public static class Wildcard
 {
-    public static bool IsMatch(string pattern, string input)
-    {
-        return IsMatch(pattern, input, false);
-    }
-
-    public static bool IsMatch(string pattern, string input, bool caseInsensitive)
+    public static bool IsMatch(string pattern, string input, bool caseInsensitive = false)
     {
         var offsetInput = 0;
         var isAsterix = false;

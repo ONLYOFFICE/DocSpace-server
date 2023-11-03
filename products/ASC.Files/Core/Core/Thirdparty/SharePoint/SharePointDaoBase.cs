@@ -42,7 +42,7 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
         FileUtility fileUtility,
         TempPath tempPath,
         AuthContext authContext, 
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
+        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
     {
     }
 
@@ -126,12 +126,12 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
             return;
         }
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
             var oldIds = Queries.IdsAsync(filesDbContext, _tenantId, oldValue);

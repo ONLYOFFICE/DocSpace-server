@@ -28,7 +28,7 @@ namespace ASC.Web.Core;
 
 public class WebItemContext
 {
-    public SpaceUsageStatManager SpaceUsageStatManager { get; set; }
+    public SpaceUsageStatManager SpaceUsageStatManager { get; init; }
 
     public Func<string> GetCreateContentPageAbsoluteUrl { get; set; }
 
@@ -42,11 +42,11 @@ public class WebItemContext
 
     public string DisabledIconFileName { get; set; }
 
-    public string IconFileName { get; set; }
+    public string IconFileName { get; init; }
 
-    public string LargeIconFileName { get; set; }
+    public string LargeIconFileName { get; init; }
 
-    public int DefaultSortOrder { get; set; }
+    public int DefaultSortOrder { get; init; }
 
     public bool HasComplexHierarchyOfAccessRights { get; set; }
 

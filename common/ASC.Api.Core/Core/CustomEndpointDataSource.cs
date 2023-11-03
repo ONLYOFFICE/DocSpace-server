@@ -38,14 +38,14 @@ public class CustomEndpointDataSource : EndpointDataSource
         Endpoints = endpoints
             .SelectMany(r =>
             {
-                var endpoints = new List<RouteEndpoint>();
-                var constraintRouteAttr = r.Metadata.OfType<ConstraintRoute>().FirstOrDefault();
-
-                if (r.RoutePattern.Parameters.Any() && constraintRouteAttr != null)
+                var routeEndpoints = new List<RouteEndpoint>();
+                var constraintRouteAttr = r.Metadata.OfType<ConstraintRouteAttribute>().FirstOrDefault();
+                var firstParameters = r.RoutePattern.Parameters.FirstOrDefault();
+                if (firstParameters != null && constraintRouteAttr != null)
                 {
                     var routeValueDictionary = new RouteValueDictionary
                     {
-                        { r.RoutePattern.Parameters.FirstOrDefault().Name, constraintRouteAttr.GetRouteConstraint() }
+                        { firstParameters.Name, constraintRouteAttr.GetRouteConstraint() }
                     };
 
                     AddEndpoints(r.RoutePattern.Defaults, routeValueDictionary);
@@ -56,12 +56,12 @@ public class CustomEndpointDataSource : EndpointDataSource
                     AddEndpoints();
                 }
 
-                return endpoints;
+                return routeEndpoints;
 
                 void AddEndpoints(IReadOnlyDictionary<string, object> defaults = null, RouteValueDictionary policies = null)
                 {
                     var order = constraintRouteAttr != null ? r.Order : r.Order + 2;
-                    endpoints.Add(new RouteEndpoint(r.RequestDelegate, RoutePatternFactory.Parse(r.RoutePattern.RawText, defaults, policies), order + 1, r.Metadata, r.DisplayName));
+                    routeEndpoints.Add(new RouteEndpoint(r.RequestDelegate, RoutePatternFactory.Parse(r.RoutePattern.RawText, defaults, policies), order + 1, r.Metadata, r.DisplayName));
                 }
 
             }).ToList();
@@ -103,10 +103,7 @@ public static class EndpointExtension
 
                 if (disabled == null && httpMethodMetadata != null)
                 {
-                    foreach (var httpMethod in httpMethodMetadata.HttpMethods)
-                    {
-                        result.Add(new Webhook { Method = httpMethod, Route = r.RoutePattern.RawText.ToLower() });
-                    }
+                    result.AddRange(httpMethodMetadata.HttpMethods.Select(httpMethod => new Webhook { Method = httpMethod, Route = r.RoutePattern.RawText.ToLower() }));
                 }
                 return result;
             })

@@ -38,7 +38,7 @@ public class GroupSummaryDto
 
     /// <summary>Name</summary>
     /// <type>System.String, System</type>
-    public string Name { get; set; }
+    public string Name { get; init; }
 
     /// <summary>Manager</summary>
     /// <type>System.String, System</type>

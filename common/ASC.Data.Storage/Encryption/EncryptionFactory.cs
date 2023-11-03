@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage.Encryption;
 
-[Singletone]
+[Singleton]
 public class EncryptionFactory
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;

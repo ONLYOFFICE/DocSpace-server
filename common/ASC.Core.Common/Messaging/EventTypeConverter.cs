@@ -38,7 +38,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
         loginEvent.Login = source.Initiator;
         loginEvent.Active = source.Active;
 
-        if (source.Description != null && source.Description.Count > 0)
+        if (source.Description is { Count: > 0 })
         {
             loginEvent.DescriptionRaw =
                 JsonConvert.SerializeObject(source.Description, new JsonSerializerSettings
@@ -58,7 +58,7 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
         auditEvent.Initiator = source.Initiator;
         auditEvent.Target = source.Target?.ToString();
 
-        if (source.Description != null && source.Description.Count > 0)
+        if (source.Description is { Count: > 0 })
         {
             auditEvent.DescriptionRaw =
                 JsonConvert.SerializeObject(GetSafeDescription(source.Description), new JsonSerializerSettings

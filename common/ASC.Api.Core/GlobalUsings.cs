@@ -61,7 +61,6 @@ global using ASC.Common.Caching.Settings;
 global using ASC.Common.DependencyInjection;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
-global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
@@ -103,8 +102,6 @@ global using ASC.Webhooks.Core.EF.Context;
 global using Autofac;
 global using Autofac.Extensions.DependencyInjection;
 
-global using AutoMapper;
-
 global using Confluent.Kafka;
 
 global using HealthChecks.UI.Client;
@@ -145,8 +142,6 @@ global using NLog;
 global using NLog.AWS.Logger;
 global using NLog.Config;
 global using NLog.Web;
-
-global using RabbitMQ.Client;
 
 global using RedisRateLimiting;
 global using RedisRateLimiting.AspNetCore;

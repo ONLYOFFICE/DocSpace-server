@@ -28,7 +28,7 @@ namespace ASC.Web.Studio.Core;
 
 public class StudioTrustedDomainSettings : ISettings<StudioTrustedDomainSettings>
 {
-    public bool InviteAsUsers { get; set; }
+    public bool InviteAsUsers { get; init; }
 
     [JsonIgnore]
     public Guid ID

@@ -28,10 +28,10 @@ namespace ASC.Data.Backup.Tasks;
 
 public class BackupFileInfo
 {
-    public string Domain { get; set; }
-    public string Module { get; set; }
-    public string Path { get; set; }
-    public int Tenant { get; set; }
+    public string Domain { get; init; }
+    public string Module { get; init; }
+    public string Path { get; init; }
+    public int Tenant { get; init; }
 
     public BackupFileInfo() { }
 

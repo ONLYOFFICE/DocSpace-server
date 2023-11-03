@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone(Additional = typeof(JabberSenderExtension))]
+[Singleton(Additional = typeof(JabberSenderExtension))]
 public class JabberSender : INotifySender
 {
     private readonly ILogger _logger;

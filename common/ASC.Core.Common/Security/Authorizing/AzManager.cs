@@ -68,16 +68,16 @@ public class AzManager
         foreach (var s in await GetSubjectsAsync(subject, objectId, securityObjProvider))
         {
             var aceList = await _permissionProvider.GetAclAsync(s, action, objectId, securityObjProvider);
-            foreach (var ace in aceList)
+            foreach (var reaction in aceList.Select(r=> r.Reaction))
             {
-                if (ace.Reaction == AceType.Deny)
+                if (reaction == AceType.Deny)
                 {
                     acl.IsAllow = false;
                     acl.DenySubject = s;
                     acl.DenyAction = action;
                     exit = true;
                 }
-                if (ace.Reaction == AceType.Allow && !exit)
+                if (reaction == AceType.Allow && !exit)
                 {
                     acl.IsAllow = true;
                     if (!action.Conjunction)
@@ -140,8 +140,8 @@ public class AzManager
         public IAction DenyAction { get; set; }
         public ISubject DenySubject { get; set; }
         public bool IsAllow { get; set; }
-        public static AzManagerAcl Allow => new AzManagerAcl { IsAllow = true };
-        public static AzManagerAcl Default => new AzManagerAcl { IsAllow = false };
+        public static AzManagerAcl Allow => new() { IsAllow = true };
+        public static AzManagerAcl Default => new() { IsAllow = false };
     }
 
     #endregion

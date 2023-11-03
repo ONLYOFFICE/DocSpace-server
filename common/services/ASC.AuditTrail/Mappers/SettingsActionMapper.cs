@@ -55,7 +55,7 @@ internal class GeneralActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(productType, Module)
         {
             {
-                ActionType.Update, new  MessageAction[]
+                ActionType.Update, new[]
                 {
                     MessageAction.LanguageSettingsUpdated, MessageAction.TimeZoneSettingsUpdated, MessageAction.DnsSettingsUpdated,
                     MessageAction.TrustedMailDomainSettingsUpdated,MessageAction.PasswordStrengthSettingsUpdated,MessageAction.TwoFactorAuthenticationSettingsUpdated,
@@ -83,7 +83,7 @@ internal class ProductsActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Projects, Module)
         {
             {
-                ActionType.Update, new  MessageAction[]
+                ActionType.Update, new[]
                 {
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
@@ -98,31 +98,31 @@ internal class ProductsActionMapper : IModuleActionMapper
                 }
             },
             {
-                ActionType.Create, new  MessageAction[]
+                ActionType.Create, new[]
                 {
                     MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator,
                 }
             },
             {
-                ActionType.UpdateAccess, new  MessageAction[]
+                ActionType.UpdateAccess, new[]
                 {
                     MessageAction.ProductAccessOpened,MessageAction.ProductAccessRestricted,MessageAction.AdministratorDeleted, MessageAction.AdministratorOpenedFullAccess
                 }
             },
             {
-                ActionType.Delete, new  MessageAction[]
+                ActionType.Delete, new[]
                 {
                     MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted,
                 }
             },
             {
-                ActionType.Send, new  MessageAction[]
+                ActionType.Send, new[]
                 {
                     MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions,
                 }
             },
             {
-                ActionType.Download, new  MessageAction[]
+                ActionType.Download, new[]
                 {
                     MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded
                 }

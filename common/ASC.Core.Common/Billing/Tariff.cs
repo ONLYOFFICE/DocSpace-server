@@ -74,7 +74,7 @@ public class Tariff
         return t != null
             && t.DueDate == DueDate
             && t.Quotas.Count == Quotas.Count
-            && t.Quotas.Any(Quotas.Contains)
+            && t.Quotas.Exists(Quotas.Contains)
             && t.CustomerId == CustomerId;
     }
 }

@@ -30,9 +30,9 @@ namespace ASC.ElasticSearch;
 public class Selector<T> where T : class, ISearchItem
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new QueryContainerDescriptor<T>();
-    private SortDescriptor<T> _sortContainerDescriptor = new SortDescriptor<T>();
-    private QueryContainer _queryContainer = new QueryContainer();
+    private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new();
+    private SortDescriptor<T> _sortContainerDescriptor = new();
+    private QueryContainer _queryContainer = new();
     private int _limit = 1000, _offset;
 
     public Selector(IServiceProvider serviceProvider)
@@ -246,9 +246,9 @@ public class Selector<T> where T : class, ISearchItem
         return s =>
         {
             var result = s
-            .Query(q => _queryContainer)
+            .Query(_ => _queryContainer)
             .Index(indexer.IndexName)
-            .Sort(r => _sortContainerDescriptor)
+            .Sort(_ => _sortContainerDescriptor)
             .From(_offset)
             .Size(_limit);
 
@@ -266,7 +266,7 @@ public class Selector<T> where T : class, ISearchItem
         return s =>
         {
             var result = s
-                .Query(q => _queryContainer)
+                .Query(_ => _queryContainer)
                 .Index(indexer.IndexName);
             if (immediately)
             {
@@ -282,7 +282,7 @@ public class Selector<T> where T : class, ISearchItem
         return s =>
         {
             var result = s
-                .Query(q => _queryContainer)
+                .Query(_ => _queryContainer)
                 .Index(indexer.IndexName)
                 .Script(script);
 
@@ -364,7 +364,7 @@ public class Selector<T> where T : class, ISearchItem
             return null;
         }
 
-        if (lambdaExpression.Body is MethodCallExpression methodCallExpression && methodCallExpression.Arguments.Count > 1)
+        if (lambdaExpression.Body is MethodCallExpression { Arguments.Count: > 1 } methodCallExpression)
         {
             return methodCallExpression.Arguments[0] is not MemberExpression pathMember
                 ? null

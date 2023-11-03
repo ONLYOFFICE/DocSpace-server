@@ -36,7 +36,7 @@ public interface ITariffService
     Task DeleteDefaultBillingInfoAsync();
     Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null);
     Task<Uri> GetAccountLinkAsync(int tenant, string backUrl);
-    Task<bool> PaymentChangeAsync(int tenant, Dictionary<string, int> quantity);
+    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity);
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();

@@ -30,10 +30,6 @@ public class StringBuilderTextileFormatter : IOutputter
 {
     private StringBuilder _stringBuilder;
 
-    public StringBuilderTextileFormatter()
-    {
-    }
-
     public string GetFormattedText()
     {
         return _stringBuilder.ToString();

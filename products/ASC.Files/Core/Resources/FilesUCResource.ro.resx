@@ -70,4 +70,31 @@
   <data name="Personal" xml:space="preserve">
     <value>Personal</value>
   </data>
+  <data name="CorporateFiles" xml:space="preserve">
+    <value>Comun</value>
+  </data>
+  <data name="Favorites" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="FilesWillBeCompressedTarGz" xml:space="preserve">
+    <value>Fișiere vor fi comprimate în format de fișier {0}.tar.gz{1}</value>
+  </data>
+  <data name="FilesWillBeCompressedZip" xml:space="preserve">
+    <value>Fișiere vor fi comprimate în format de fișier {0}.zip{1}</value>
+  </data>
+  <data name="MyFiles" xml:space="preserve">
+    <value>Documentele mele</value>
+  </data>
+  <data name="PrivacyRoom" xml:space="preserve">
+    <value>Sala privată</value>
+  </data>
+  <data name="ProjectFiles" xml:space="preserve">
+    <value>Din proiecte</value>
+  </data>
+  <data name="Recent" xml:space="preserve">
+    <value>Recente</value>
+  </data>
+  <data name="SharedForMe" xml:space="preserve">
+    <value>Partajate cu mine</value>
+  </data>
 </root>

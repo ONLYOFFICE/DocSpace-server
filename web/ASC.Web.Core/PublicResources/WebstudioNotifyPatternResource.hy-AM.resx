@@ -531,11 +531,11 @@ $OrangeButton
 Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր "Տվյալների կրկնօրինակում":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" օգտատիրոջ ուղեցույցը:
 
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "support.onlyoffice.com":"http://support.onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "support.onlyoffice.com":"https://support.onlyoffice.com" հասցեով:
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի կրկնօրինակը ստեղծվել է
@@ -546,11 +546,11 @@ ONLYOFFICE™ աջակցման թիմ
 
 Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) օգտատիրոջ ուղեցույցը:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support.onlyoffice.com](http://support.onlyoffice.com) հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support.onlyoffice.com](https://support.onlyoffice.com) հասցեով:
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել նամակը ձեր ${LetterLogoText} հաշվի վրա:
@@ -640,7 +640,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -653,7 +653,7 @@ ONLYOFFICE թիմ
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -672,7 +672,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -693,7 +693,7 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -725,7 +725,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -736,7 +736,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -757,7 +757,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -779,7 +779,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -800,7 +800,7 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -832,7 +832,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -843,7 +843,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -864,7 +864,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1. Հաղորդագրություն "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից
@@ -948,7 +948,7 @@ $RegionName տարածաշրջան տեղափոխելիս սխալ է տեղի �
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -962,7 +962,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/":
+"www.onlyoffice.com":"https://onlyoffice.com/":
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -977,7 +977,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Պորտալի միգրացիա
@@ -1012,7 +1012,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1031,7 +1031,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1052,7 +1052,7 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -1084,7 +1084,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -1095,7 +1095,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1114,7 +1114,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1135,7 +1135,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Բարև, $UserName
@@ -1187,7 +1187,7 @@ ONLYOFFICE թիմ</value>
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Ողջույն!
@@ -1264,7 +1264,7 @@ p=. "Reactivate Portal":"$ActivateUrl" (այս հղումը չունի ժամա�
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ապաակտիվացում
@@ -1285,7 +1285,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ջնջում
@@ -1310,7 +1310,7 @@ $OrangeButton
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>Ձեր ONLYOFFICE DocSpace-ը հաջողությամբ ապաակտիվացվել է: Խնդրում ենք նկատի ունենալ, որ ձեր բոլոր տվյալները կջնջվեն մեր "Գաղտնիության քաղաքականության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" համաձայն:
@@ -1323,7 +1323,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի պրոֆիլի փոփոխության ծանուցում
@@ -1431,7 +1431,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1453,7 +1453,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1480,7 +1480,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Դուք չեք մտել ձեր ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" կես տարուց ավելի:
@@ -1495,7 +1495,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ջնջում
@@ -1520,7 +1520,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Պորտալի հասցեի փոփոխություն
@@ -1679,7 +1679,7 @@ $OrangeButton
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/":
+"www.onlyoffice.com":"https://onlyoffice.com/":
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -1700,7 +1700,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1721,7 +1721,7 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -1734,7 +1734,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -1747,7 +1747,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1768,7 +1768,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1833,7 +1833,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -1844,7 +1844,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1865,7 +1865,7 @@ $OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը "$FromUserName":"$FromUserLink" ջնջել է իր պրոֆիլը, և այս պրոֆիլն այժմ արգելափակված է: Օգտատիրոջ բոլոր ֆայլերը դեռ վերագրված են նրան և զբաղեցնում են սկավառակի տարածք:

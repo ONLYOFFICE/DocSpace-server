@@ -28,13 +28,13 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singletone(Additional = typeof(WorkContextExtension))]
+[Singleton(Additional = typeof(WorkContextExtension))]
 public class NotifyConfiguration
 {
     private static bool _configured;
-    private static readonly object _locker = new object();
-    private static readonly Regex _urlReplacer = new Regex(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex _textileLinkReplacer = new Regex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly object _locker = new();
+    private static readonly Regex _urlReplacer = new(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex _textileLinkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
     private readonly NotifyEngine _notifyEngine;
     private readonly WorkContext _workContext;
 
@@ -66,9 +66,9 @@ public class NotifyConfiguration
             "Web.UrlAbsoluter",
             InterceptorPlace.MessageSend,
             InterceptorLifetime.Global,
-            (r, p, scope) =>
+            (r, _, scope) =>
             {
-                if (r != null && r.CurrentMessage != null && r.CurrentMessage.ContentType == Pattern.HtmlContentType)
+                if (r is { CurrentMessage.ContentType: Pattern.HtmlContentType })
                 {
                     var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
 
@@ -121,13 +121,13 @@ public class NotifyConfiguration
             "WhiteLabelInterceptor",
              InterceptorPlace.MessageSend,
              InterceptorLifetime.Global,
-             (r, p, scope) =>
+             (r, _, scope) =>
              {
                  try
                  {
                      var tags = r.Arguments;
 
-                     var logoTextTag = tags.FirstOrDefault(a => a.Tag == CommonTags.LetterLogoText);
+                     var logoTextTag = tags.Find(a => a.Tag == CommonTags.LetterLogoText);
                      var logoText = logoTextTag != null ? (string)logoTextTag.Value : string.Empty;
 
                      if (!string.IsNullOrEmpty(logoText))
@@ -177,32 +177,38 @@ public class ProductSecurityInterceptor
         try
         {
             // culture
-            var u = Constants.LostUser;
-            if (!(_coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID))
+            if (_coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID)
             {
-                var tenant = _tenantManager.GetCurrentTenant();
+                return false;
+            }
 
-                u = await _userManager.SearchUserAsync(r.Recipient.ID);
+            await _tenantManager.GetCurrentTenantAsync();
 
-                if (!Constants.LostUser.Equals(u))
-                {
-                    // security
-                    var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
-                    var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                    if (productId == Guid.Empty)
-                    {
-                        tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
-                        productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                    }
-                    if (productId == Guid.Empty)
-                    {
-                        productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
-                    }
-                    if (productId != Guid.Empty && productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
-                    {
-                        return !await _webItemSecurity.IsAvailableForUserAsync(productId, u.Id);
-                    }
-                }
+            var u = await _userManager.SearchUserAsync(r.Recipient.ID);
+
+            if (Constants.LostUser.Equals(u))
+            {                
+                return false;
+            }
+
+            // security
+            var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
+            var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+            if (productId == Guid.Empty)
+            {
+                tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
+                productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+            }
+
+            if (productId == Guid.Empty)
+            {
+                productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
+            }
+
+            if (productId != Guid.Empty &&
+                productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
+            {
+                return !await _webItemSecurity.IsAvailableForUserAsync(productId, u.Id);
             }
         }
         catch (Exception error)
@@ -313,8 +319,8 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.AuthorName, aname));
         request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, _commonLinkUtility.GetFullAbsolutePath(await _commonLinkUtility.GetUserProfileAsync(aid))));
         request.Arguments.Add(new TagValue(CommonTags.VirtualRootPath, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
-        request.Arguments.Add(new TagValue(CommonTags.ProductID, product != null ? product.ID : Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.ModuleID, module != null ? module.ID : Guid.Empty));
+        request.Arguments.Add(new TagValue(CommonTags.ProductID, product?.ID ?? Guid.Empty));
+        request.Arguments.Add(new TagValue(CommonTags.ModuleID, module?.ID ?? Guid.Empty));
         request.Arguments.Add(new TagValue(CommonTags.ProductUrl, _commonLinkUtility.GetFullAbsolutePath(product != null ? product.StartURL : "~")));
         request.Arguments.Add(new TagValue(CommonTags.DateTime, _tenantUtil.DateTimeNow()));
         request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
@@ -330,7 +336,10 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name));
         request.Arguments.Add(new TagValue(CommonTags.ImagePath, _studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/')));
 
-        await AddLetterLogoAsync(request);
+        if (request.Arguments.TrueForAll(x => x.Tag != CommonTags.TopGif))
+        {
+            await AddLetterLogoAsync(request);
+        }
     }
     public void AfterTransferRequest(NotifyRequest request)
     {
@@ -342,7 +351,7 @@ public class NotifyTransferRequest : INotifyEngineAction
 
         try
         {
-            var attachment = await _tenantLogoManager.GetMailLogoAsAttacmentAsync();
+            var attachment = await _tenantLogoManager.GetMailLogoAsAttachmentAsync();
 
             if (attachment != null)
             {

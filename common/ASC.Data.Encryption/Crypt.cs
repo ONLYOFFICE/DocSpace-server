@@ -234,40 +234,6 @@ public class Crypt : ICrypt
         }
     }
 
-    private Stream GetReadMemoryStream(string filePath, string password)
-    {
-        var decryptedMemoryStream = new MemoryStream(); //TODO: MemoryStream or temporary decrypted file on disk?
-
-        var metadata = new Metadata(Configuration);
-
-        metadata.Initialize(password);
-
-        var fileStream = File.OpenRead(filePath);
-
-        if (!metadata.TryReadFromStream(fileStream, Version))
-        {
-            decryptedMemoryStream.Close();
-            fileStream.Seek(0, SeekOrigin.Begin);
-            return fileStream;
-        }
-
-        metadata.ComputeAndValidateHmacHash(fileStream);
-
-        using (var algorithm = metadata.GetCryptographyAlgorithm())
-        {
-            using var transform = algorithm.CreateDecryptor();
-            using var cryptoStream = new CryptoStreamWrapper(fileStream, transform, CryptoStreamMode.Read);
-            cryptoStream.CopyTo(decryptedMemoryStream);
-            cryptoStream.Close();
-        }
-
-        fileStream.Close();
-
-        decryptedMemoryStream.Seek(0, SeekOrigin.Begin);
-
-        return decryptedMemoryStream;
-    }
-
     private Stream GetReadStream(string filePath, string password)
     {
         var metadata = new Metadata(Configuration);

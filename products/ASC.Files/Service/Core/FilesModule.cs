@@ -118,7 +118,7 @@ public class FilesModule : FeedModule
         foreach (var f in feed1.Where(r => r.Item1.Feed.Target != null && !(r.Item3 != null && r.Item3.Owner == userId)))
         {
             var file = f.Item2;
-            if (await IsTargetAsync(f.Item1.Feed.Target, userId) && !files.Any(r => r.UniqID.Equals(file.UniqID)))
+            if (await IsTargetAsync(f.Item1.Feed.Target, userId) && !files.Exists(r => r.UniqID.Equals(file.UniqID)))
             {
                 files.Add(file);
             }
@@ -128,7 +128,7 @@ public class FilesModule : FeedModule
 
         foreach (var f in feed1)
         {
-            if (await IsTargetAsync(f.Item1.Feed.Target, userId) && canRead.Any(r => r.Item1.Id.Equals(f.Item2.Id)))
+            if (await IsTargetAsync(f.Item1.Feed.Target, userId) && canRead.Exists(r => r.Item1.Id.Equals(f.Item2.Id)))
             {
                 f.Item1.Users.Add(userId);
             }
@@ -146,7 +146,7 @@ public class FilesModule : FeedModule
         var folders = await _folderDao.GetFoldersAsync(folderIDs, checkShare: false).ToListAsync();
         var roomsIds = await _folderDao.GetParentRoomsAsync(folderIDs).ToDictionaryAsync(k => k.FolderId, v => v.ParentRoomId);
 
-        return files.Select(f => new Tuple<Feed.Aggregator.Feed, object>(ToFeed(f, folders.FirstOrDefault(r => r.Id.Equals(f.File.ParentId)),
+        return files.Select(f => new Tuple<Feed.Aggregator.Feed, object>(ToFeed(f, folders.Find(r => r.Id.Equals(f.File.ParentId)),
             roomsIds.GetValueOrDefault(f.File.ParentId)), f));
     }
 
@@ -192,7 +192,7 @@ public class FilesModule : FeedModule
             ItemId = $"{file.Id}_{(file.Version > 1 ? file.Version : 0)}",
             Product = Product,
             Module = Name,
-            Action = updated ? FeedAction.Updated : FeedAction.Created,
+            Actions = updated ? FeedActions.Updated : FeedActions.Created,
             Title = file.Title,
             ExtraLocationTitle = parentFolder.Title,
             ExtraLocation = parentFolder.Id.ToString(),

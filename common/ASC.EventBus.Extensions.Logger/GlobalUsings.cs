@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.ComponentModel.DataAnnotations.Schema;
-global using System.Data.Common;
 global using System.Reflection;
 global using System.Text.Json;
 

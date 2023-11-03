@@ -217,7 +217,7 @@ Jos tarvitset apua, selaa "Help Centeriä":"https://helpcenter.onlyoffice.com/" 
 
 Ystävällisin terveisin, 
 ONLYOFFICE-Tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -238,7 +238,7 @@ Jos tarvitset apua, selaa "Help Centeriä":"https://helpcenter.onlyoffice.com/" 
 
 Ystävällisin terveisin, 
 ONLYOFFICE-Tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -259,7 +259,7 @@ Jos tarvitset apua, selaa "Help Centeriä":"https://helpcenter.onlyoffice.com/" 
 
 Ystävällisin terveisin, 
 ONLYOFFICE-Tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -280,7 +280,7 @@ Jos tarvitset apua, selaa "Help Centeriä":"https://helpcenter.onlyoffice.com/" 
 
 Ystävällisin terveisin, 
 ONLYOFFICE-Tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Tervetuloa ONLYOFFICE DocSpaceen!</value>
@@ -358,7 +358,7 @@ $OrangeButton
 Nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -372,7 +372,7 @@ $OrangeButton
 Nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -386,7 +386,7 @@ $OrangeButton
 Nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -409,7 +409,7 @@ Nauti uudesta tavasta tehdä yhteistyötä asiakirjoilla!
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -423,7 +423,7 @@ Hanki ilmaiset ONLYOFFICE-sovellukset työstääksesi asiakirjoja miltä tahansa
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -442,7 +442,7 @@ $OrangeButton
 
 Ystävällisin terveisin;
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -461,7 +461,7 @@ $OrangeButton
 
 Ystävällisin terveisin;
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -480,7 +480,7 @@ $OrangeButton
 
 Ystävällisin terveisin;
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -501,7 +501,7 @@ _Huom: Henkilöstä, joka maksaa tilauksen, tulee maksaja. Vain maksaja pystyy t
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -522,7 +522,7 @@ _Huom: Henkilöstä, joka maksaa tilauksen, tulee maksaja. Vain maksaja pystyy t
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -543,7 +543,7 @@ _Huom: Henkilöstä, joka maksaa tilauksen, tulee maksaja. Vain maksaja pystyy t
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -564,7 +564,7 @@ _Huom: Henkilöstä, joka maksaa tilauksen, tulee maksaja. Vain maksaja pystyy t
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Hei!
@@ -575,7 +575,7 @@ $OrangeButton
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Hei!
@@ -586,7 +586,7 @@ $OrangeButton
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Hei!
@@ -597,7 +597,7 @@ $OrangeButton
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Hei!
@@ -608,7 +608,7 @@ $OrangeButton
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -629,7 +629,7 @@ Jos tarvitset apua, selaa "Help Centeriämme":"https://helpcenter.onlyoffice.com
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -650,7 +650,7 @@ Jos tarvitset apua, selaa "Help Centeriämme":"https://helpcenter.onlyoffice.com
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -671,7 +671,7 @@ Jos tarvitset apua, selaa "Help Centeriämme":"https://helpcenter.onlyoffice.com
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Hei, $ UserName!
@@ -692,7 +692,7 @@ Jos tarvitset apua, selaa "Help Centeriämme":"https://helpcenter.onlyoffice.com
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1. Viesti "${__VirtualRootPath}":"${__VirtualRootPath}"  portaalista
@@ -714,7 +714,7 @@ Hanki ilmaiset ONLYOFFICE-sovellukset työstääksesi asiakirjoja miltä tahansa
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -727,7 +727,7 @@ Hanki ilmaiset ONLYOFFICE-sovellukset työstääksesi asiakirjoja miltä tahansa
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Hei!
@@ -758,7 +758,7 @@ Kiitos ja hyvää jatkoa!
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Hei, $UserName!
@@ -785,7 +785,7 @@ Käy "Help Centerissämme":"https://helpcenter.onlyoffice.com/" oppiaksesi enemm
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Et ole käyttänyt ONLYOFFICE DocSpaceasi "${__VirtualRootPath}":"${__VirtualRootPath}" yli puoleen vuoteen.
@@ -801,7 +801,7 @@ Jos tämä on mielestäsi virhe ja haluat jatkaa ONLYOFFICE DocSpacen käyttöä
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Hei!
@@ -814,7 +814,7 @@ Aseta uusi salasana tilillesi kutsulinkin klikkaamisen jälkeen.
 
 Ystävällisin terveisin,
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Hei, $UserName!
@@ -880,7 +880,7 @@ Ole hyvä ja aseta tilillesi uusi salasana kutsulinkin klikkaamisen jälkeen.
 Ystävällisin terveisin,
 
 ONLYOFFICE- tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Määritä ONLYOFFICE DocSpacesi</value>
@@ -1141,11 +1141,11 @@ Varmuuskopiotiedosto, joka sisältää tiedot portaalistasi "${__VirtualRootPath
 
 Lisätietoa varmuuskopioinnista löytyy "Tietojen varmuuskopiointi":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" - käyttäjäoppaasta.
 
-Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä "support.onlyoffice.com":"http://support.onlyoffice.com"
+Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Ystävällisin terveisin,
 ONLYOFFICE™-tukitiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portaalin varmuuskopio luotu
@@ -1157,11 +1157,11 @@ Varmuuskopiotiedosto, joka sisältää tiedot portaalistasi [${__VirtualRootPath
 Lisätietoa varmuuskopioinnista löytyy [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) käyttäjäoppaasta.
 
 Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä 
-[support.onlyoffice.com](http://support.onlyoffice.com)
+[support.onlyoffice.com](https://support.onlyoffice.com)
 
 Ystävällisin terveisin,
 ONLYOFFICE™-tukitiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Haluatko vaihtaa sähköpostisi ${LetterLogoText} -tililläsi?
@@ -1318,7 +1318,7 @@ Toiselle alueelle siirrettäessä sattui virhe. Ole hyvä ja kokeile vielä kerr
 Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota meihin yhteyttä osoitteessa "support@onlyoffice.com":mailto:support@onlyoffice.com
 
 Ystävällisin terveisin,
-ONLYOFFICE™- tukitiimi "www.onlyoffice.com":"http://onlyoffice.com/"
+ONLYOFFICE™- tukitiimi "www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Vaihtaaksesi ilmoitustyyppiä, ole hyvä ja muokkaa "tilausasetuksiasi":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1437,7 +1437,7 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteytt
 
 Ystävällisin terveisin;
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath})- portaalin deaktivointi
@@ -1454,7 +1454,7 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteytt
 
 Ystävällisin terveisin;
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1. "${__VirtualRootPath}":"${__VirtualRootPath}"-tilan poistaminen
@@ -1479,7 +1479,7 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteytt
 
 Ystävällisin terveisin,
 ONLYOFFICE™ -tukitiimi
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>"${__VirtualRootPath}":"${__VirtualRootPath}"-portaalin poistaminen
@@ -1504,7 +1504,7 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteytt
 
 Ystävällisin terveisin,
 ONLYOFFICE™ -tukitiimi
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath-portaalin profiilinmuutosilmoitus
@@ -1595,7 +1595,7 @@ Lähetämme sinulle myös silloin tällöin vinkkejä ja uusimmat ONLYOFFICE-uut
 
 Ystävällisin terveisin;
 ONLYOFFICE-tiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Portaalin osoitteenmuutos
@@ -1757,7 +1757,7 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota meihin yhteytt
 
 Ystävällisin terveisin,
 ONLYOFFICE™- tukitiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Muuttaaksesi ilmoitustyyppiä, ole hyvä ja mene "tilauksen hallintaan" :"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1771,7 +1771,7 @@ Portaalisi on nyt käytössä vanhassa osoitteessa "$PortalUrl":"$PortalUrl"
 Jos sinulla on kysyttävää tai tarvitset apua ole hyvä ja ota yhteyttä "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Ystävällisin terveisin,
 ONLYOFFICE™-tukitiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Muuttaaksesi ilmoitustyyppiä, ole hyvä ja hallitse "tilausasetuksia":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1786,6 +1786,6 @@ Jos sinulla on kysyttävää tai tarvitset apua, ole hyvä ja ota yhteyttä "sup
 
 Ystävällisin terveisin,
 ONLYOFFICE™-tukitiimi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
 </root>

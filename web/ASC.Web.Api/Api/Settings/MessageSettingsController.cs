@@ -30,12 +30,9 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class MessageSettingsController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly MessageService _messageService;
     private readonly StudioNotifyService _studioNotifyService;
     private readonly CustomNamingPeople _customNamingPeople;
-    private readonly IPSecurity.IPSecurity _ipSecurity;
     private readonly TenantManager _tenantManager;
     private readonly CookiesManager _cookiesManager;
     private readonly CountPaidUserChecker _countPaidUserChecker;
@@ -56,7 +53,6 @@ public class MessageSettingsController : BaseSettingsController
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
         CustomNamingPeople customNamingPeople,
-        IPSecurity.IPSecurity ipSecurity,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
         TenantManager tenantManager,
@@ -64,7 +60,6 @@ public class MessageSettingsController : BaseSettingsController
         CountPaidUserChecker countPaidUserChecker) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _customNamingPeople = customNamingPeople;
-        _ipSecurity = ipSecurity;
         _tenantManager = tenantManager;
         _cookiesManager = cookiesManager;
         _countPaidUserChecker = countPaidUserChecker;
@@ -91,7 +86,7 @@ public class MessageSettingsController : BaseSettingsController
     [HttpPost("messagesettings")]
     public async Task<object> EnableAdminMessageSettingsAsync(AdminMessageSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await _settingsManager.SaveAsync(new StudioAdminMessageSettings { Enable = inDto.TurnOn });
 
@@ -135,7 +130,7 @@ public class MessageSettingsController : BaseSettingsController
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!SetupInfo.IsVisibleSettings("CookieSettings"))
         {
@@ -211,11 +206,12 @@ public class MessageSettingsController : BaseSettingsController
     {
         try
         {
+            var tenant = await _tenantManager.GetCurrentTenantAsync();
             var email = inDto.Email;
             if (!(
-                (Tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
-                Tenant.TrustedDomains.Count > 0) ||
-                Tenant.TrustedDomainsType == TenantTrustedDomainsType.All))
+                (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
+                tenant.TrustedDomains.Count > 0) ||
+                tenant.TrustedDomainsType == TenantTrustedDomainsType.All))
             {
                 throw new MethodAccessException("Method not available");
             }
@@ -253,12 +249,12 @@ public class MessageSettingsController : BaseSettingsController
                 }
             }
 
-            switch (Tenant.TrustedDomainsType)
+            switch (tenant.TrustedDomainsType)
             {
                 case TenantTrustedDomainsType.Custom:
                     {
                         var address = new MailAddress(email);
-                        if (Tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
+                        if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
                             await _studioNotifyService.SendJoinMsgAsync(email, emplType);
                             await _messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);

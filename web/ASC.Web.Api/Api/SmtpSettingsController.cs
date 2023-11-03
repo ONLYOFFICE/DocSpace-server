@@ -75,7 +75,7 @@ public class SmtpSettingsController : ControllerBase
     [HttpGet("smtp")]
     public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
     {
-        CheckSmtpPermissions();
+        await CheckSmtpPermissionsAsync();
 
         var current = await _coreConfiguration.GetDefaultSmtpSettingsAsync();
 
@@ -104,13 +104,13 @@ public class SmtpSettingsController : ControllerBase
     [HttpPost("smtp")]
     public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
     {
-        CheckSmtpPermissions();
+        ArgumentNullException.ThrowIfNull(inDto);
+        
+        await CheckSmtpPermissionsAsync();
 
         //TODO: Add validation check
 
-        ArgumentNullException.ThrowIfNull(inDto);
-
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        
 
         var settingConfig = ToSmtpSettingsConfig(inDto);
 
@@ -155,11 +155,10 @@ public class SmtpSettingsController : ControllerBase
     [HttpDelete("smtp")]
     public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
     {
-        CheckSmtpPermissions();
+        await CheckSmtpPermissionsAsync();
 
         if (!(await _coreConfiguration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings)
         {
-            await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
             await _coreConfiguration.SetSmtpSettingsAsync(null);
         }
 
@@ -189,11 +188,11 @@ public class SmtpSettingsController : ControllerBase
     [HttpGet("smtp/test")]
     public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
     {
-        CheckSmtpPermissions();
+        await CheckSmtpPermissionsAsync();
 
         var settings = _mapper.Map<SmtpSettings, SmtpSettingsDto>(await _coreConfiguration.GetDefaultSmtpSettingsAsync());
 
-        var tenant = _tenantManager.GetCurrentTenant();
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
 
         _smtpOperation.StartSmtpJob(settings, tenant, _securityContext.CurrentAccount.ID);
 
@@ -211,15 +210,16 @@ public class SmtpSettingsController : ControllerBase
     // <path>api/2.0/smtpsettings/smtp/test/status</path>
     // <httpMethod>GET</httpMethod>
     [HttpGet("smtp/test/status")]
-    public SmtpOperationStatusRequestsDto GetSmtpOperationStatus()
+    public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
     {
-        CheckSmtpPermissions();
+        await CheckSmtpPermissionsAsync();
 
-        return _smtpOperation.GetStatus(_tenantManager.GetCurrentTenant());
+        return _smtpOperation.GetStatus(await _tenantManager.GetCurrentTenantAsync());
     }
 
-    private static void CheckSmtpPermissions()
-    {
+    private async Task CheckSmtpPermissionsAsync()
+    {            
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");

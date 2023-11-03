@@ -44,10 +44,6 @@ public class ChunkedUploaderHandlerService
     private readonly TenantManager _tenantManager;
     private readonly FileUploader _fileUploader;
     private readonly FilesMessageService _filesMessageService;
-    private readonly AuthManager _authManager;
-    private readonly SecurityContext _securityContext;
-    private readonly SetupInfo _setupInfo;
-    private readonly InstanceCrypto _instanceCrypto;
     private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
     private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
     private readonly SocketManager _socketManager;
@@ -60,10 +56,6 @@ public class ChunkedUploaderHandlerService
         TenantManager tenantManager,
         FileUploader fileUploader,
         FilesMessageService filesMessageService,
-        AuthManager authManager,
-        SecurityContext securityContext,
-        SetupInfo setupInfo,
-        InstanceCrypto instanceCrypto,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         ChunkedUploadSessionHelper chunkedUploadSessionHelper,
         SocketManager socketManager,
@@ -73,10 +65,6 @@ public class ChunkedUploaderHandlerService
         _tenantManager = tenantManager;
         _fileUploader = fileUploader;
         _filesMessageService = filesMessageService;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _setupInfo = setupInfo;
-        _instanceCrypto = instanceCrypto;
         _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
         _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
         _socketManager = socketManager;
@@ -97,7 +85,7 @@ public class ChunkedUploaderHandlerService
         }
     }
 
-    public async Task Invoke<T>(HttpContext context)
+    private async Task Invoke<T>(HttpContext context)
     {
         try
         {
@@ -119,7 +107,7 @@ public class ChunkedUploaderHandlerService
 
             if ((await _tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
             {
-                await WriteError(context, "Can't perform upload for deleted or transfering portals");
+                await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
                 return;
             }

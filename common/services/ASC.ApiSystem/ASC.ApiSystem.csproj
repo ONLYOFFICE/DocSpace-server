@@ -20,11 +20,12 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.9" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Common\ASC.Common.csproj" />

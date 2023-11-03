@@ -28,15 +28,15 @@ namespace ASC.Feed;
 
 public class FeedApiFilter
 {
-    public string Id { get; set; }
-    public string Product { get; set; }
-    public string Module { get; set; }
+    public string Id { get; init; }
+    public string Product { get; init; }
+    public string Module { get; init; }
     public DateTime From { get; set; }
     public DateTime To { get; set; }
     public int Offset { get; set; }
     public int Max { get; set; }
-    public Guid Author { get; set; }
-    public string[] SearchKeys { get; set; }
-    public bool OnlyNew { get; set; }
-    public bool History { get; set; }
+    public Guid Author { get; init; }
+    public string[] SearchKeys { get; init; }
+    public bool OnlyNew { get; init; }
+    public bool History { get; init; }
 }

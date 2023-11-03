@@ -58,8 +58,7 @@ public class TransferProgressItem : BaseBackupProgressItem
     private TenantManager _tenantManager;
     private readonly ILogger<TransferProgressItem> _logger;
     private readonly NotifyHelper _notifyHelper;
-    private TransferPortalTask _transferPortalTask;
-    private IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
 
     public TransferProgressItem(
         ILogger<TransferProgressItem> logger,
@@ -70,7 +69,7 @@ public class TransferProgressItem : BaseBackupProgressItem
     {
         _logger = logger;
         _notifyHelper = notifyHelper;
-        BackupProgressItemEnum = BackupProgressItemEnum.Transfer;
+        BackupProgressItemType = BackupProgressItemType.Transfer;
         _configuration = configuration;
     }
 
@@ -104,13 +103,12 @@ public class TransferProgressItem : BaseBackupProgressItem
         {
             await using var scope = _serviceScopeProvider.CreateAsyncScope();
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-            _transferPortalTask = scope.ServiceProvider.GetService<TransferPortalTask>();
+            var transferProgressItem = scope.ServiceProvider.GetService<TransferPortalTask>();
 
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
-            var transferProgressItem = _transferPortalTask;
             transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
-            transferProgressItem.ProgressChanged += (sender, args) =>
+            transferProgressItem.ProgressChanged += (_, args) =>
             {
                 Percentage = args.Progress;
                 PublishChanges();

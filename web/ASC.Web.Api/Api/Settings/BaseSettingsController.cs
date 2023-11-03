@@ -34,7 +34,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute]
 [ApiController]
 [ControllerName("settings")]
-public partial class BaseSettingsController : ControllerBase
+public class BaseSettingsController : ControllerBase
 {
     //private const int ONE_THREAD = 1;
 
@@ -43,7 +43,7 @@ public partial class BaseSettingsController : ControllerBase
     //private static DistributedTaskQueue SMTPTasks { get; } = new DistributedTaskQueue("smtpOperations");
 
     internal readonly ApiContext ApiContext;
-    internal readonly IMemoryCache MemoryCache;
+    private readonly IMemoryCache _memoryCache;
     internal readonly WebItemManager WebItemManager;
     protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly int _maxCount = 10;
@@ -52,28 +52,30 @@ public partial class BaseSettingsController : ControllerBase
     public BaseSettingsController(ApiContext apiContext, IMemoryCache memoryCache, WebItemManager webItemManager, IHttpContextAccessor httpContextAccessor)
     {
         ApiContext = apiContext;
-        MemoryCache = memoryCache;
+        _memoryCache = memoryCache;
         WebItemManager = webItemManager;
         _httpContextAccessor = httpContextAccessor;
     }
 
-    internal void CheckCache(string basekey)
+    internal void CheckCache(string baseKey)
     {
-        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString() + basekey;
-        if (MemoryCache.TryGetValue<int>(key, out var count))
+        var key = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
+        if (_memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
         {
-            if (count > _maxCount)
-            {
-                throw new Exception(Resource.ErrorRequestLimitExceeded);
-            }
+            throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        MemoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        _memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
     internal string GetProductName(Guid productId)
     {
         var product = WebItemManager[productId];
-        return productId == Guid.Empty ? "All" : product != null ? product.Name : productId.ToString();
+        if (productId == Guid.Empty)
+        {
+            return "All";
+        }
+        
+        return product != null ? product.Name : productId.ToString();
     }
 }

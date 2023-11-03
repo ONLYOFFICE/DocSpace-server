@@ -37,12 +37,12 @@ public class SmtpSettings
     public string CredentialsDomain { get; private set; }
     public string CredentialsUserName { get; private set; }
     public string CredentialsUserPassword { get; private set; }
-    public bool EnableSSL { get; set; }
+    public bool EnableSSL { get; init; }
     public bool EnableAuth { get; set; }
     public bool IsDefaultSettings { get; internal set; }
     public bool UseNtlm { get; set; }
 
-    public static readonly SmtpSettings Empty = new SmtpSettings();
+    public static readonly SmtpSettings Empty = new();
 
     private SmtpSettings() { }
 

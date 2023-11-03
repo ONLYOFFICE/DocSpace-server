@@ -28,16 +28,16 @@ namespace ASC.Geolocation;
 
 public class IPGeolocationInfo
 {
-    public string Key { get; set; }
-    public string City { get; set; }
+    public string Key { get; init; }
+    public string City { get; init; }
     public float TimezoneOffset { get; set; }
     public string TimezoneName { get; set; }
     public IPAddress IPStart { get; set; }
     public IPAddress IPEnd { get; set; }
-    public string Continent { get; set; }
+    public string Continent { get; init; }
 
 
-    public static readonly IPGeolocationInfo Default = new IPGeolocationInfo
+    public static readonly IPGeolocationInfo Default = new()
     {
         Key = string.Empty,
         City = string.Empty,

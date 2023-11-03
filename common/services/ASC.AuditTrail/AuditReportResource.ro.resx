@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionCol" xml:space="preserve">
+    <value>Acțiune</value>
+  </data>
+  <data name="ActionIdCol" xml:space="preserve">
+    <value>ID Acțiune</value>
+  </data>
+  <data name="ActionTypeCol" xml:space="preserve">
+    <value>Tip acţiune</value>
+  </data>
+  <data name="AdministratorAdded" xml:space="preserve">
+    <value>Administratorul adăugat: {0}</value>
+  </data>
+  <data name="AdministratorDeleted" xml:space="preserve">
+    <value>Administratorul șters: {0}</value>
+  </data>
+  <data name="AdministratorMessageSettingsUpdated" xml:space="preserve">
+    <value>Setări mesagerie de administrator au fost actualizate</value>
+  </data>
+  <data name="AdministratorOpenedFullAccess" xml:space="preserve">
+    <value>Administratori [{0}]. Acces complet deschis</value>
+  </data>
+  <data name="AttachActionType" xml:space="preserve">
+    <value>Atașare</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Setări durata de audit au fost actualizate</value>
+  </data>
+  <data name="AuditTrailReportDownloaded" xml:space="preserve">
+    <value>Raport Lanț de Audit a fost încărcat</value>
+  </data>
+  <data name="AuditTrailReportName" xml:space="preserve">
+    <value>Raport Lanț de Audit ({0}-{1})</value>
+  </data>
+  <data name="AuthorizationKeysSetting" xml:space="preserve">
+    <value>Chei de autorizare terță parte au fost actualizate</value>
+  </data>
+  <data name="BrowserCol" xml:space="preserve">
+    <value>Browser</value>
+  </data>
+  <data name="ColorThemeChanged" xml:space="preserve">
+    <value>Temă de culori s-a schimbat</value>
+  </data>
+  <data name="CookieSettingsUpdated" xml:space="preserve">
+    <value>Setări cookie actualizate</value>
+  </data>
+  <data name="CopyActionType" xml:space="preserve">
+    <value>Copiere</value>
+  </data>
+  <data name="CreateActionType" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Setări de navigare particularizate au fost actualizate</value>
+  </data>
+  <data name="DateCol" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DefaultStartPageSettingsUpdated" xml:space="preserve">
+    <value>Setări Pagina de pornire implicite au fost actualizate</value>
+  </data>
+  <data name="DeleteActionType" xml:space="preserve">
+    <value>Ștergere</value>
+  </data>
+  <data name="DetachActionType" xml:space="preserve">
+    <value>Detașare</value>
+  </data>
+  <data name="DnsSettingsUpdated" xml:space="preserve">
+    <value>Setări DNS actualizate</value>
+  </data>
+  <data name="DocumentServiceLocationSetting" xml:space="preserve">
+    <value>Locația serviciului de documente a fost actualizată</value>
+  </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Setări de Salvare forţată au fost actualizate</value>
+  </data>
+  <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
+    <value>Setări de suprascriere actualizate</value>
+  </data>
+  <data name="DocumentsProduct" xml:space="preserve">
+    <value>Documente</value>
+  </data>
+  <data name="DocumentsSettingsModule" xml:space="preserve">
+    <value>Setări</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Stocare setări de Salvare forţată actualizată</value>
+  </data>
+  <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
+    <value>Setări terță parte au fost actualizate</value>
+  </data>
+  <data name="DocumentsUploadingFormatsSettingsUpdated" xml:space="preserve">
+    <value>Setări încărcare formate au fost actualizate</value>
+  </data>
+  <data name="DownloadActionType" xml:space="preserve">
+    <value>Descărcare</value>
+  </data>
+  <data name="ExportActionType" xml:space="preserve">
+    <value>Exportare</value>
+  </data>
+  <data name="FileChangeOwner" xml:space="preserve">
+    <value>Desemnare proprietar de [{0}] la [{1}]</value>
+  </data>
+  <data name="FileConverted" xml:space="preserve">
+    <value>Fișierul a fost convertit într-un format intern: {0}</value>
+  </data>
+  <data name="FileCopied" xml:space="preserve">
+    <value>Fișiere [{0}]. Copiere din dosarul "{1}" în dosarul: "{2}"</value>
+  </data>
+  <data name="FileCopiedWithOverwriting" xml:space="preserve">
+    <value>Fișiere [{0}]. Copiere cu suprascriere din dosarul "{1}" în dosarul: "{2}"</value>
+  </data>
+  <data name="FileCreated" xml:space="preserve">
+    <value>Fişier creat: {0}</value>
+  </data>
+  <data name="FileCreatedVersion" xml:space="preserve">
+    <value>Fișiere [{0}]. Revizuire: {1}. Versiunea a fost creată</value>
+  </data>
+  <data name="FileDeleted" xml:space="preserve">
+    <value>Fișier șters: {0}</value>
+  </data>
+  <data name="FileDeletedVersion" xml:space="preserve">
+    <value>Fișiere [{0}]. Revizuire: {1}. Versiunea a fost ștearsă</value>
+  </data>
+  <data name="FileDownloaded" xml:space="preserve">
+    <value>Fișier descărcat: {0}</value>
+  </data>
+  <data name="FileDownloadedAs" xml:space="preserve">
+    <value>Fișiere [{0}]. Descărcare ca: {1}</value>
+  </data>
+  <data name="FileImported" xml:space="preserve">
+    <value>Foldere [{0}]. Fișier importat: {1}. Furnizor: {2}</value>
+  </data>
+  <data name="FileLocked" xml:space="preserve">
+    <value>Fișier blocat: {0}</value>
+  </data>
+  <data name="FileMoved" xml:space="preserve">
+    <value>Fișiere [{0}]. Deplasare din dosarul "{1}" în dosarul: "{2}"</value>
+  </data>
+  <data name="FileMovedToTrash" xml:space="preserve">
+    <value>Fișiere [{0}]. Mutare dosar în Coșul de gunoi</value>
+  </data>
+  <data name="FileMovedWithOverwriting" xml:space="preserve">
+    <value>Fișiere [{0}]. Deplasare cu suprascriere din dosarul "{1}" în dosarul: "{2}"</value>
+  </data>
+  <data name="FileRenamed" xml:space="preserve">
+    <value>Fişier redenumit: {0}</value>
+  </data>
+  <data name="FileRestoreVersion" xml:space="preserve">
+    <value>Fișiere [{0}]. Revizuire: {1}. Versiunea a fost restaurată</value>
+  </data>
+  <data name="FilesDocumentSigned" xml:space="preserve">
+    <value>Documentul {1} a fost semnat prin {0}</value>
+  </data>
+  <data name="FileSendAccessLink" xml:space="preserve">
+    <value>A trimis link-ul partajat către fișierului [{0}]. Destinatarii: [{1}]</value>
+  </data>
+  <data name="FilesModule" xml:space="preserve">
+    <value>Fișiere</value>
+  </data>
+  <data name="FilesRequestSign" xml:space="preserve">
+    <value>Documentul {1} a fost trimis spre semnare prin {0}</value>
+  </data>
+  <data name="FileUnlocked" xml:space="preserve">
+    <value>Fișier deblocat: {0}</value>
+  </data>
+  <data name="FileUpdated" xml:space="preserve">
+    <value>Fişier actualizat: {0}</value>
+  </data>
+  <data name="FileUpdatedAccess" xml:space="preserve">
+    <value>Fișiere [{0}]. Permisiuni de acces actualizate</value>
+  </data>
+  <data name="FileUpdatedRevisionComment" xml:space="preserve">
+    <value>Fișiere [{0}]. Revizuire {1}. Comentariu actualizat</value>
+  </data>
+  <data name="FileUploaded" xml:space="preserve">
+    <value>Fişierul încărcat: {0}</value>
+  </data>
+  <data name="FolderCopied" xml:space="preserve">
+    <value>Foldere [{0}]. Copiere în folderul: {1}</value>
+  </data>
+  <data name="FolderCopiedWithOverwriting" xml:space="preserve">
+    <value>Foldere [{0}]. Copiere cu suprascriere în folderul: {1}</value>
+  </data>
+  <data name="FolderCreated" xml:space="preserve">
+    <value>Folderul creat: {0}</value>
+  </data>
+  <data name="FolderDeleted" xml:space="preserve">
+    <value>Folderul șters: {0}</value>
+  </data>
+  <data name="FolderMoved" xml:space="preserve">
+    <value>Foldere [{0}]. Deplasare în folderul: {1}</value>
+  </data>
+  <data name="FolderMovedToTrash" xml:space="preserve">
+    <value>Foldere [{0}]. Mutare dosar în Coșul de gunoi</value>
+  </data>
+  <data name="FolderMovedWithOverwriting" xml:space="preserve">
+    <value>Foldere [{0}]. Deplasare cu suprascriere în folderul: {1}</value>
+  </data>
+  <data name="FolderRenamed" xml:space="preserve">
+    <value>Folderul redenumit: {0}</value>
+  </data>
+  <data name="FoldersModule" xml:space="preserve">
+    <value>Foldere</value>
+  </data>
+  <data name="FolderUpdatedAccess" xml:space="preserve">
+    <value>Foldere [{0}]. Permisiuni de acces actualizate</value>
+  </data>
+  <data name="FollowActionType" xml:space="preserve">
+    <value>Urmărire</value>
+  </data>
+  <data name="FullTextSearchSetting" xml:space="preserve">
+    <value>Setări Sphinx au fost actualizate</value>
+  </data>
+  <data name="GeneralModule" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="GreetingSettingsUpdated" xml:space="preserve">
+    <value>Setările paginii de întâmpinare au fost actualizate</value>
+  </data>
+  <data name="GroupCreated" xml:space="preserve">
+    <value>Grupul creat: {0}</value>
+  </data>
+  <data name="GroupDeleted" xml:space="preserve">
+    <value>Grupul șters: {0}</value>
+  </data>
+  <data name="GroupsModule" xml:space="preserve">
+    <value>Grupuri</value>
+  </data>
+  <data name="GroupUpdated" xml:space="preserve">
+    <value>Grupul a fost actualizat: {0}</value>
+  </data>
+  <data name="GuestAccount" xml:space="preserve">
+    <value>Cont de invitat</value>
+  </data>
+  <data name="GuestActivated" xml:space="preserve">
+    <value>Invitatul activat: {0}</value>
+  </data>
+  <data name="GuestCreated" xml:space="preserve">
+    <value>Invitatul creat: {0}</value>
+  </data>
+  <data name="GuestCreatedViaInvite" xml:space="preserve">
+    <value>A fost creat un invitat prin invitaţie: {0}</value>
+  </data>
+  <data name="GuestImported" xml:space="preserve">
+    <value>Invitatul importat: {0}</value>
+  </data>
+  <data name="ImportActionType" xml:space="preserve">
+    <value>Importare</value>
+  </data>
+  <data name="IpCol" xml:space="preserve">
+    <value>IP</value>
+  </data>
+  <data name="LanguageSettingsUpdated" xml:space="preserve">
+    <value>Setări de limbă au fost actualizate</value>
+  </data>
+  <data name="LicenseKeyUploaded" xml:space="preserve">
+    <value>Cheia de licență a fost încărcată</value>
+  </data>
+  <data name="LinkActionType" xml:space="preserve">
+    <value>Legătură</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Conectarea nu a reușit. Prea multe încercări</value>
+  </data>
+  <data name="LoginFailDisabledProfile" xml:space="preserve">
+    <value>Conectarea nu a reușit. Profilul a fost dezactivat</value>
+  </data>
+  <data name="LoginFailInvalidCombination" xml:space="preserve">
+    <value>Conectarea nu a reușit. Combinația nume de utilizator și parolă nu este corectă</value>
+  </data>
+  <data name="LoginFailIpSecurity" xml:space="preserve">
+    <value>Securitate IP: Conectarea nu a reușit</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Conectarea nu a reușit. Recaptcha este incorectă</value>
+  </data>
+  <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
+    <value>Conectarea nu a reușit. Contul din reţelele sociale asociat nu a fost găsit</value>
+  </data>
+  <data name="LoginFailViaApi" xml:space="preserve">
+    <value>Conectarea prin API nu a reușit</value>
+  </data>
+  <data name="LoginFailViaApiSms" xml:space="preserve">
+    <value>Conectarea prin API și SMS nu a reușit</value>
+  </data>
+  <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
+    <value>Conectarea prin API și rețele sociale nu a reușit</value>
+  </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Conectarea prin API și aplicația de autentificare nu a reușit</value>
+  </data>
+  <data name="LoginFailViaSms" xml:space="preserve">
+    <value>Conectarea prin SMS nu a reușit</value>
+  </data>
+  <data name="LoginFailViaSSO" xml:space="preserve">
+    <value>Conectarea unică nu a reușit</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Conectarea unică nu a reușit</value>
+  </data>
+  <data name="LoginHistoryReportDownloaded" xml:space="preserve">
+    <value>Raport Istoric de Conectări a fost încărcat</value>
+  </data>
+  <data name="LoginHistoryReportName" xml:space="preserve">
+    <value>Raport Istoric de Conectări ({0}-{1})</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>Conectarea a reușit</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Conectarea prin cont de rețea socială a reușit</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Conectarea prin aplicația de socializare a reușit</value>
+  </data>
+  <data name="LoginSuccessViaApi" xml:space="preserve">
+    <value>Conectarea prin API a reușit</value>
+  </data>
+  <data name="LoginSuccessViaApiSms" xml:space="preserve">
+    <value>Conectarea prin API și SMS a reușit</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Conectarea prin API și aplicația de autentificare a reușit</value>
+  </data>
+  <data name="LoginSuccessViaSms" xml:space="preserve">
+    <value>Conectarea prin SMS a reușit</value>
+  </data>
+  <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
+    <value>Conectarea prin API și rețele sociale a reușit</value>
+  </data>
+  <data name="LoginSuccessViaSSO" xml:space="preserve">
+    <value>Conectarea unică a reușit</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Conectarea prin aplicația de autentificare a reușit</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Deconectare</value>
+  </data>
+  <data name="MailServiceSettingsUpdated" xml:space="preserve">
+    <value>Setări Serviciu de mesagerie au fost actualizate</value>
+  </data>
+  <data name="ModuleCol" xml:space="preserve">
+    <value>Modul</value>
+  </data>
+  <data name="MoveActionType" xml:space="preserve">
+    <value>Mutare</value>
+  </data>
+  <data name="OthersProduct" xml:space="preserve">
+    <value>Alte</value>
+  </data>
+  <data name="OwnerChanged" xml:space="preserve">
+    <value>Schimbare proprietar: {0}</value>
+  </data>
+  <data name="OwnerSentChangeOwnerInstructions" xml:space="preserve">
+    <value>Proprietar [{0}]. A trimis instrucțiuni de schimbare proprietar</value>
+  </data>
+  <data name="OwnerSentPortalDeactivationInstructions" xml:space="preserve">
+    <value>Proprietar [{0}]. Instrucțiuni de dezactivare portal au fost trimise</value>
+  </data>
+  <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
+    <value>Proprietar [{0}]. Instrucțiuni de ștergere portal au fost trimise</value>
+  </data>
+  <data name="PageCol" xml:space="preserve">
+    <value>Pagina</value>
+  </data>
+  <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
+    <value>Setări Nivel de complexitate parolă au fost actualizate</value>
+  </data>
+  <data name="PeopleProduct" xml:space="preserve">
+    <value>Persoane</value>
+  </data>
+  <data name="PlatformCol" xml:space="preserve">
+    <value>Platforma</value>
+  </data>
+  <data name="PortalAccessSettingsUpdated" xml:space="preserve">
+    <value>Setări Acces la portal au fost actualizate</value>
+  </data>
+  <data name="PortalDeactivated" xml:space="preserve">
+    <value>Portalul a fost dezactivat</value>
+  </data>
+  <data name="PortalDeleted" xml:space="preserve">
+    <value>Portalul a fost șters</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Sala privată a fost dezactivată</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Sala privată a fost activată</value>
+  </data>
+  <data name="ProductAccessOpened" xml:space="preserve">
+    <value>Produse [{0}]. Acces deschis</value>
+  </data>
+  <data name="ProductAccessOpenedForGroups" xml:space="preserve">
+    <value>Produse: [{0}]. Grupuri [{1}]. Acces deschis</value>
+  </data>
+  <data name="ProductAccessOpenedForUsers" xml:space="preserve">
+    <value>Produse: [{0}]. Utilizatori [{1}]. Acces deschis</value>
+  </data>
+  <data name="ProductAccessRestricted" xml:space="preserve">
+    <value>Produse [{0}]. Restricție acces</value>
+  </data>
+  <data name="ProductAddedAdministrator" xml:space="preserve">
+    <value>Produse [{0}]. Administratorul adăugat: {1}</value>
+  </data>
+  <data name="ProductCol" xml:space="preserve">
+    <value>Produs</value>
+  </data>
+  <data name="ProductDeletedAdministrator" xml:space="preserve">
+    <value>Produse [{0}]. Administratorul șters: {1}</value>
+  </data>
+  <data name="ProductsListUpdated" xml:space="preserve">
+    <value>Lista produse a fost actualizată</value>
+  </data>
+  <data name="ProductsModule" xml:space="preserve">
+    <value>Produse</value>
+  </data>
+  <data name="ReassignsActionType" xml:space="preserve">
+    <value>Reatribuiri</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Sala arhivată</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Sala dezarhivată</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Sala redenumită: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Sala a fost creată</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Adăugare utilizator: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Sala a fost ștearsă</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Siglă a fost creată</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Siglă a fost ștearsă</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Utilizator șters: {0}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>&gt;{0} desemnat(ți): {1}</value>
+  </data>
+  <data name="SendActionType" xml:space="preserve">
+    <value>Trimitere</value>
+  </data>
+  <data name="SentInviteInstructions" xml:space="preserve">
+    <value>Instrucțiuni de invitare au fost trimise: {0}</value>
+  </data>
+  <data name="SessionCompleted" xml:space="preserve">
+    <value>Sesiunea finalizată</value>
+  </data>
+  <data name="SessionStarted" xml:space="preserve">
+    <value>Sesiunea a început</value>
+  </data>
+  <data name="SettingsProduct" xml:space="preserve">
+    <value>Setări</value>
+  </data>
+  <data name="SSODisabled" xml:space="preserve">
+    <value>Conectarea unică dezactivată</value>
+  </data>
+  <data name="SSOEnabled" xml:space="preserve">
+    <value>Conectarea unică activată</value>
+  </data>
+  <data name="StartBackupSetting" xml:space="preserve">
+    <value>Pornire copiere de rezerva</value>
+  </data>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Pornire decriptare de stocare</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Pornire criptare de stocare</value>
+  </data>
+  <data name="StartTransferSetting" xml:space="preserve">
+    <value>Pornire migrație portal în altă regiune</value>
+  </data>
+  <data name="SystemAccount" xml:space="preserve">
+    <value>Cont de sistem</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Eticheta a fost creată: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Eticheta a fost ștearsă: {0}</value>
+  </data>
+  <data name="TargetIdCol" xml:space="preserve">
+    <value>ID Țintă</value>
+  </data>
+  <data name="TeamTemplateChanged" xml:space="preserve">
+    <value>Model echipă s-a schimbat</value>
+  </data>
+  <data name="ThirdPartyCreated" xml:space="preserve">
+    <value>Partea terță a fost creată: {0}. Furnizor: {1}</value>
+  </data>
+  <data name="ThirdPartyDeleted" xml:space="preserve">
+    <value>Partea terță ștearsă: {0}. Furnizor: {1}</value>
+  </data>
+  <data name="ThirdPartyUpdated" xml:space="preserve">
+    <value>Partea terță actualizată: {0}. Furnizor: {1}</value>
+  </data>
+  <data name="TimeTrackingModule" xml:space="preserve">
+    <value>Urmărire Timp</value>
+  </data>
+  <data name="TimeZoneSettingsUpdated" xml:space="preserve">
+    <value>Setări Fus orar au fost actualizate</value>
+  </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Coșul de gunoi a fost golit</value>
+  </data>
+  <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
+    <value>Setările domeniului de e-mail de încredere au fost actualizate</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Setări Autentificare cu doi factori au fost actualizate: Autentificarea cu doi factori dezactivată</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Setări Autentificare cu doi factori au fost actualizate: Confirmare prin SMS a fost activată</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Setări Autentificare cu doi factori au fost actualizate: Aplicația de autentificare a fost activată</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
+    <value>Setări Autentificare cu doi factori au fost actualizate</value>
+  </data>
+  <data name="UnfollowActionType" xml:space="preserve">
+    <value>Anulare urmărire</value>
+  </data>
+  <data name="UnknownAccount" xml:space="preserve">
+    <value>Cont necunoscut</value>
+  </data>
+  <data name="UnlinkActionType" xml:space="preserve">
+    <value>Anulare legătură</value>
+  </data>
+  <data name="UpdateAccessActionType" xml:space="preserve">
+    <value>Permisiuni de acces actualizate</value>
+  </data>
+  <data name="UpdateActionType" xml:space="preserve">
+    <value>Actualizare</value>
+  </data>
+  <data name="UploadActionType" xml:space="preserve">
+    <value>Încărcare</value>
+  </data>
+  <data name="UserActivated" xml:space="preserve">
+    <value>Utilizatorul activat: {0}</value>
+  </data>
+  <data name="UserAddedAvatar" xml:space="preserve">
+    <value>Utilizatori [{0}]. Avatar adăugat</value>
+  </data>
+  <data name="UserCol" xml:space="preserve">
+    <value>Utilizator</value>
+  </data>
+  <data name="UserCreated" xml:space="preserve">
+    <value>Utilizatorul creat: {0}</value>
+  </data>
+  <data name="UserCreatedViaInvite" xml:space="preserve">
+    <value>A fost creat un utilizator prin invitaţie: {0}</value>
+  </data>
+  <data name="UserDataReassigns" xml:space="preserve">
+    <value>Datele reatribuite: de la utilizatorul {0} la utilizatorul {1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Datele de utilizator {0} au fost șterse</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>Utilizatorul șters: {0}</value>
+  </data>
+  <data name="UserDeletedAvatar" xml:space="preserve">
+    <value>Utilizatori [{0}]. Avatar șters</value>
+  </data>
+  <data name="UserFileUpdated" xml:space="preserve">
+    <value>Utilizatori [{0}]. Fişier actualizat: {1}</value>
+  </data>
+  <data name="UserImported" xml:space="preserve">
+    <value>Utilizatorul șters: {0}</value>
+  </data>
+  <data name="UserLinkedSocialAccount" xml:space="preserve">
+    <value>Cont de rețea socială legat. Furnizor: {0}</value>
+  </data>
+  <data name="UsersDeleted" xml:space="preserve">
+    <value>Utilizatorii şterşi: {0}</value>
+  </data>
+  <data name="UserSentActivationInstructions" xml:space="preserve">
+    <value>Utilizatori [{0}]. Au trimis instrucțiuni de activare</value>
+  </data>
+  <data name="UserSentDeleteInstructions" xml:space="preserve">
+    <value>Au trimis instrucțiuni de ștergere profil</value>
+  </data>
+  <data name="UserSentEmailInstructions" xml:space="preserve">
+    <value>Utilizatori [{0}]. Au trimis instrucțiuni de schimbare adresa de e-mail</value>
+  </data>
+  <data name="UserSentPasswordInstructions" xml:space="preserve">
+    <value>Utilizatori [{0}]. Au trimis instrucțiuni pentru schimbarea parolei</value>
+  </data>
+  <data name="UsersModule" xml:space="preserve">
+    <value>Utilizatori</value>
+  </data>
+  <data name="UsersSentActivationInstructions" xml:space="preserve">
+    <value>Utilizatori [{0}]. Instrucțiuni de activare au fost trimise</value>
+  </data>
+  <data name="UsersUpdatedStatus" xml:space="preserve">
+    <value>Utilizatori [{0}]. S-au actualizat starea</value>
+  </data>
+  <data name="UsersUpdatedType" xml:space="preserve">
+    <value>Utilizatori [{0}]. S-au actualizat tipul</value>
+  </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Aplicația de autentificare a fost deconectată {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Noi coduri de rezervă au fost create</value>
+  </data>
+  <data name="UserUnlinkedSocialAccount" xml:space="preserve">
+    <value>Legătura contului de rețea socială anulată. Furnizor: {0}</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>Utilizatorul actualizat: {0}</value>
+  </data>
+  <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
+    <value>Utilizatori [{0}]. Miniaturi avatar actualizate</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>Adresa de e-mail actualizată</value>
+  </data>
+  <data name="UserUpdatedLanguage" xml:space="preserve">
+    <value>Limba actualizată</value>
+  </data>
+  <data name="UserUpdatedMobileNumber" xml:space="preserve">
+    <value>Utilizatori [{0}]. Număr de telefon mobil actualizat: {1}</value>
+  </data>
+  <data name="UserUpdatedPassword" xml:space="preserve">
+    <value>Parola actualizată</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Adăugare etichete: [{1}]</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Etichete șterse: [{1}]</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>A fost creat un link extern: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>A fost șters un link extern: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>A fost actualizat un link extern: {0}. Rol: {1}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Oraș</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Țară</value>
+  </data>
+  <data name="LoginFail" xml:space="preserve">
+    <value>Conectarea nu a reușit</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Link-ul a fost creat. Rol: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Link-ul a fost șters</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Link-ul a fost actualizat. Rol: {1}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Săli</value>
+  </data>
+</root>

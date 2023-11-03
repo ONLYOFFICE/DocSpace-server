@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Billing;
 
-[Singletone]
+[Singleton]
 public class BillingClient
 {
     public readonly bool Configured;
@@ -125,11 +125,14 @@ public class BillingClient
 
         foreach (var p in products)
         {
-            string url;
             var paymentUrl = (Uri)null;
-            if (paymentUrls.TryGetValue(p, out url) && !string.IsNullOrEmpty(url = ToUrl(url)))
+            if (paymentUrls.TryGetValue(p, out var url))
             {
-                paymentUrl = new Uri(url);
+                url = ToUrl(url);
+                if (!string.IsNullOrEmpty(url))
+                {
+                    paymentUrl = new Uri(url);
+                }
             }
             urls[p] = paymentUrl;
         }
@@ -232,13 +235,11 @@ public class BillingClient
 
     private string CreateAuthToken(string pkey, string machinekey)
     {
-        using (var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey)))
-        {
-            var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
-            return "ASC " + pkey + ":" + now + ":" + hash;
-        }
+        return "ASC " + pkey + ":" + now + ":" + hash;
     }
 
     private string Request(string method, string portalId, Tuple<string, string>[] parameters = null, bool addPolicy = false)
@@ -344,7 +345,7 @@ public static class BillingHttplClientExtension
     {
         services.AddHttpClient(BillingClient.HttpClientOption)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((s, request) =>
+            .AddPolicyHandler((_, request) =>
             {
                 if (!request.RequestUri.AbsolutePath.EndsWith(BillingClient.GetCurrentPaymentsUri))
                 {

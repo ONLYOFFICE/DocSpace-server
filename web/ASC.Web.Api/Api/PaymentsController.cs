@@ -37,7 +37,6 @@ namespace ASC.Web.Api.Controllers;
 [ControllerName("portal")]
 public class PaymentController : ControllerBase
 {
-    private readonly ApiContext _apiContext;
     private readonly UserManager _userManager;
     private readonly TenantManager _tenantManager;
     private readonly ITariffService _tariffService;
@@ -50,10 +49,8 @@ public class PaymentController : ControllerBase
     private readonly StudioNotifyService _studioNotifyService;
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
-    protected Tenant Tenant { get { return _apiContext.Tenant; } }
 
     public PaymentController(
-        ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
@@ -65,7 +62,6 @@ public class PaymentController : ControllerBase
         MessageService messageService,
         StudioNotifyService studioNotifyService)
     {
-        _apiContext = apiContext;
         _userManager = userManager;
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -92,17 +88,20 @@ public class PaymentController : ControllerBase
     [HttpPut("payment/url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        if ((await _tariffService.GetPaymentsAsync(Tenant.Id)).Any() ||
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        if ((await _tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID))
         {
             return null;
         }
 
         var currency = await _regionHelper.GetCurrencyFromRequestAsync();
-
-        return await _tariffService.GetShoppingUriAsync(Tenant.Id,
-            Tenant.AffiliateId,
-            Tenant.PartnerId,
+        
+        return await _tariffService.GetShoppingUriAsync(
+            tenant.Id,
+            tenant.AffiliateId,
+            tenant.PartnerId,
             currency,
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
             (await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).Email,
@@ -124,16 +123,17 @@ public class PaymentController : ControllerBase
     [HttpPut("payment/update")]
     public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
     {
-        var payerId = (await _tariffService.GetTariffAsync(Tenant.Id)).CustomerId;
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await _userManager.GetUserByEmailAsync(payerId);
 
-        if (!(await _tariffService.GetPaymentsAsync(Tenant.Id)).Any() ||
+        if (!(await _tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             _securityContext.CurrentAccount.ID != payer.Id)
         {
             return false;
         }
 
-        return await _tariffService.PaymentChangeAsync(Tenant.Id, inDto.Quantity);
+        return await _tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
     }
 
     /// <summary>
@@ -155,11 +155,12 @@ public class PaymentController : ControllerBase
             return null;
         }
 
-        var payerId = (await _tariffService.GetTariffAsync(Tenant.Id)).CustomerId;
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await _userManager.GetUserByEmailAsync(payerId);
 
         if (_securityContext.CurrentAccount.ID != payer.Id &&
-            _securityContext.CurrentAccount.ID != Tenant.OwnerId)
+            _securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             return null;
         }
@@ -276,16 +277,13 @@ public class PaymentController : ControllerBase
         await _messageService.SendAsync(MessageAction.ContactSalesMailSent);
     }
 
-    internal void CheckCache(string basekey)
+    private void CheckCache(string baseKey)
     {
-        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString() + basekey;
+        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress + baseKey;
 
-        if (_memoryCache.TryGetValue<int>(key, out var count))
+        if (_memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
         {
-            if (count > _maxCount)
-            {
-                throw new Exception(Resource.ErrorRequestLimitExceeded);
-            }
+            throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
         _memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));

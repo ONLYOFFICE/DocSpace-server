@@ -28,11 +28,11 @@ namespace ASC.Core.Common.Security;
 
 public abstract class SecurityObject : ISecurityObject
 {
-    public object SecurityId { get; protected set; }
-    public Type ObjectType { get; protected set; }
-    public string FullId { get; protected set; }
+    public object SecurityId { get; protected init; }
+    public Type ObjectType { get; protected init; }
+    public string FullId { get; protected init; }
     public bool InheritSupported { get; protected set; }
-    public bool ObjectRolesSupported { get; protected set; }
+    public bool ObjectRolesSupported { get; protected init; }
 
     public virtual IEnumerable<IRole> GetObjectRoles(ISubject account, ISecurityObjectId objectId, SecurityCallContext callContext)
     {

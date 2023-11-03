@@ -34,7 +34,7 @@ public class DefaultActiveMQPersistentConnection
     private readonly int _retryCount;
     private IConnection _connection;
     private bool _disposed;
-    readonly object sync_root = new object();
+    readonly object sync_root = new();
 
     public DefaultActiveMQPersistentConnection(IConnectionFactory connectionFactory, ILogger<DefaultActiveMQPersistentConnection> logger, int retryCount = 5)
     {
@@ -47,7 +47,7 @@ public class DefaultActiveMQPersistentConnection
     {
         get
         {
-            return _connection != null && _connection.IsStarted && !_disposed;
+            return _connection is { IsStarted: true } && !_disposed;
         }
     }
 

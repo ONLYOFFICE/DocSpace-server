@@ -153,11 +153,11 @@ Hörmətli $OwnerName,
 
 Yedəkləmə proseduru haqqında daha çox öyrənmək üçün "Məlumatların Yedəklənməsi": "https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" istifadəçi təlimatımıza baxın
 
-Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "support.onlyoffice.com": "http://support.onlyoffice.com"
+Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "support.onlyoffice.com": "https://support.onlyoffice.com"
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək komandası
-"www.onlyoffice.com":"http://onlyoffice.com</value>
+"www.onlyoffice.com":"https://onlyoffice.com</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Portal ehtiyat nüsxəsi [${__VirtualRootPath}](${__VirtualRootPath}) yaradıldı
@@ -168,11 +168,11 @@ Portal məlumatlarınızı ehtiva edən ehtiyat faylı [${__VirtualRootPath}](${
 
 Yedəkləmə prosesi haqqında ətraflı məlumat üçün bu İstifadəçi Təlimatına baxın [Məlumatların ehtiyat nüsxəsi](${__HelpLink} /tipstricks/data-backup-restore.aspx).
 
-Hər hansı bir sualınız varsa və ya köməyə ehtiyacınız varsa, [support.onlyoffice.com](http://support.onlyoffice.com) ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin.
+Hər hansı bir sualınız varsa və ya köməyə ehtiyacınız varsa, [support.onlyoffice.com](https://support.onlyoffice.com) ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin.
 
 Sizin,
 ONLYOFFICE ™ komandası
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} hesabınızdakı e-poçtu dəyişmək istəyirsiniz?
@@ -276,7 +276,7 @@ Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onl
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Salam, $UserName!
@@ -308,7 +308,7 @@ Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onl
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalından mesaj:
@@ -382,7 +382,7 @@ Portalınız indi köhnə "$PortalUrl":"$PortalUrl" ünvanında mövcuddur:
 Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa,  ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Bildiriş növünü dəyişdirmək üçün "abunəlik parametrlərinizi idarə edin":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -397,7 +397,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bi
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Bildiriş növünü dəyişdirmək üçün "abunəlik parametrlərinizi idarə edin":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -412,7 +412,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bi
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Qrupu
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1. Portal miqrasiyası
@@ -457,7 +457,7 @@ Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onl
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Salam, $UserName
@@ -567,7 +567,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, ünvanında biz
 
 Hörmətlə,
 ONLYOFFICE dəstək komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Portalın deaktiv edilməsi: [${__VirtualRootPath}](${__VirtualRootPath})
@@ -588,7 +588,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, [support@onlyof
 
 
 ONLYOFFICE ™ komandası
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalının silinməsi: 
@@ -613,7 +613,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, ünvanında biz
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Qrupu
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portalının silinməsi
@@ -638,7 +638,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, [support@onlyof
 
 
 ONLYOFFICE ™ Dəstək Komandası
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Portal ünvanının dəyişdirilməsi
@@ -799,7 +799,7 @@ Portalın bərpası başladı. Məlumatın miqdarından asılı olaraq bir az va
 
 Hörmətlə,
 ONLYOFFICE™ Dəstək Qrupu
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
     <value>Salam!
@@ -812,7 +812,7 @@ Biz həmçinin vaxtaşırı sizə faydalı məsləhətlər və ən son ONLYOFFIC
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -833,7 +833,7 @@ Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onl
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" Portal profilinin dəyişdirilməsi barədə bildiriş:
@@ -1155,7 +1155,7 @@ $OrangeButton
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1169,7 +1169,7 @@ $OrangeButton
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1183,7 +1183,7 @@ $OrangeButton
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1204,7 +1204,7 @@ Cari tarif planınız START-dır. Tamamilə pulsuzdur və buraya daxildir:
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1217,7 +1217,7 @@ ONLYOFFICE Komandası
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1236,7 +1236,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1254,7 +1254,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1272,7 +1272,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1290,7 +1290,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1311,7 +1311,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1332,7 +1332,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1353,7 +1353,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1374,7 +1374,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Salam!
@@ -1385,7 +1385,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Salam!
@@ -1396,7 +1396,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Salam!
@@ -1407,7 +1407,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Salam!
@@ -1418,7 +1418,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1439,7 +1439,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1460,7 +1460,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1481,7 +1481,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1502,7 +1502,7 @@ $OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalından mesaj
@@ -1525,7 +1525,7 @@ $Body</value>
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1538,7 +1538,7 @@ ONLYOFFICE Komandası
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Salam!
@@ -1561,7 +1561,7 @@ Təşəkkürlər və uğurlar!
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1586,7 +1586,7 @@ ONLYOFFICE DocSpace-in konfiqurasiyası və idarə edilməsi haqqında daha çox
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" Yarım ildən artıqdır daxil olmamısınız.
@@ -1601,7 +1601,7 @@ Bunun səhv olduğunu düşünürsünüzsə və ONLYOFFICE DocSpace-dən istifad
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Salam!
@@ -1614,7 +1614,7 @@ Dəvət linkinə kliklədikdən sonra hesabınız üçün yeni şifrə təyin ed
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1679,7 +1679,7 @@ Dəvət linkinə kliklədikdən sonra hesabınız üçün yeni şifrə təyin ed
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace-ə xoş gəlmisiniz!</value>

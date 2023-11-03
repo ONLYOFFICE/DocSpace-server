@@ -100,30 +100,11 @@ Một file sao lưu chứa dữ liệu từ cổng "${__VirtualRootPath}":"${__V
 Để tìm hiểu thêm về quy trình sao lưu, vui lòng tham khảo hướng dẫn người dùng "Sao lưu dữ liệu":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" của chúng tôi.
 
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support.onlyoffice.com":"http://support.onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
-  </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Người dùng mới được thêm vào cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
-
-"$__AuthorName":"$__AuthorUrl" đã tham gia cổng thông tin của bạn tại "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-^Bạn nhận được email này vì bạn là quản trị viên của cổng "${__VirtualRootPath}":"${__VirtualRootPath}". Nếu bạn không muốn nhận thông báo về người dùng mới, vui lòng điều chỉnh "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^
-
-h1.Yêu cầu thay đổi mật khẩu cho cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
-
-Đã có yêu cầu thay đổi mật khẩu bạn sử dụng để đăng nhập cổng "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Vui lòng truy cập liên kết dưới đây để thay đổi mật khẩu của bạn:
-
-$OrangeButton
-
-*Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi mật khẩu trong khoảng thời gian đó.
-
-Nếu bạn không muốn thay đổi mật khẩu của mình hoặc nhận được địa chỉ email này do nhầm lẫn, hãy bỏ qua nó hoặc liên hệ với quản trị viên cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}" để biết chi tiết.</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Yêu cầu thay đổi điện thoại di động
@@ -181,7 +162,7 @@ Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://he
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Xin chào, $UserName!
@@ -202,7 +183,7 @@ Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://he
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Xin chào, $UserName!
@@ -223,7 +204,7 @@ Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://he
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Xin chào, $UserName!
@@ -244,7 +225,7 @@ Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://he
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Tin nhắn từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -276,7 +257,7 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Để thay đổi hình thức thông báo, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -290,7 +271,7 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Để thay đổi hình thức thông báo, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -305,7 +286,7 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dừng hoạt động cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -325,7 +306,7 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Xoá cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -350,7 +331,7 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Thay đổi địa chỉ cổng thông tin
@@ -431,7 +412,7 @@ Nếu bạn có câu hỏi hoặc cần trợ giúp, vui lòng liên hệ với 
 
 Trân trọng,
 ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Để thay đổi loại thông báo này, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -640,7 +621,7 @@ Tận hưởng một cách cộng tác tài liệu mới!
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -655,7 +636,7 @@ Tận hưởng một cách cộng tác tài liệu mới!
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -677,7 +658,7 @@ Tận hưởng một cách cộng tác tài liệu mới!
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -692,7 +673,7 @@ Tận hưởng một cách cộng tác tài liệu mới!
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -705,7 +686,7 @@ Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên cá
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -724,7 +705,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com": "http://onlyoffice.com/"</value>
+"www.onlyoffice.com": "https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -743,7 +724,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -762,7 +743,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -781,7 +762,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -802,7 +783,7 @@ _Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người t
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -823,7 +804,7 @@ _Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người t
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -844,7 +825,7 @@ _Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người t
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -865,7 +846,7 @@ _Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người t
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Xin chào! 
@@ -876,7 +857,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Xin chào! 
@@ -887,7 +868,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Xin chào! 
@@ -898,7 +879,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Xin chào! 
@@ -909,7 +890,7 @@ $OrangeButton
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -930,7 +911,7 @@ Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://help
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -951,7 +932,7 @@ Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://help
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -972,7 +953,7 @@ Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://help
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -993,7 +974,7 @@ Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://help
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Tin nhắn từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1015,7 +996,7 @@ Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên cá
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1028,7 +1009,7 @@ Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên cá
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Xin chào! 
@@ -1059,7 +1040,7 @@ Cảm ơn và chúc bạn may mắn!
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1086,7 +1067,7 @@ Xin hãy truy cập "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/"
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Bạn chưa vào ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" trong hơn nửa năm. 
@@ -1101,7 +1082,7 @@ Nếu bạn cho rằng đây chỉ là sai sót và muốn tiếp tục sử d�
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Xin chào! 
@@ -1114,7 +1095,7 @@ Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới c
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1179,7 +1160,7 @@ Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới c
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Có gì mới trên cổng thông tin của bạn vào ngày $Date</value>
@@ -1546,7 +1527,7 @@ Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòn
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Xóa cổng thong tin [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1571,7 +1552,7 @@ Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòn
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Người dùng "$FromUserName":"$FromUserLink" đã xóa hồ sơ của mình và hồ sơ này hiện đã bị chặn. Tất cả các tập tin của người dùng vẫn được phân cho anh/cô ấy và chiếm không gian đĩa. 
@@ -1669,7 +1650,7 @@ Thỉnh thoảng chúng tôi cũng sẽ gửi cho bạn các mẹo hữu ích v�
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>Thông báo thay đổi hồ sơ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) 
@@ -1806,11 +1787,11 @@ Tập tin sao lưu chứa dữ liệu từ cổng thông tin [${__VirtualRootPat
 
 Để tìm hiểu thêm về quy trình sao lưu, xin vui lòng tham khảo hướng dẫn sử dụng [Sao lưu dữ liệu](${__HelpLink}/tipstricks/data-backup-restore.aspx) của chúng tôi.
 
-Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [support.onlyoffice.com](http://support.onlyoffice.com)
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Định cấu hình ứng dụng xác thực</value>

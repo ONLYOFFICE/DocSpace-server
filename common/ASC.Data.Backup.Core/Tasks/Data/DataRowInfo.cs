@@ -34,8 +34,8 @@ public class DataRowInfo
     public object this[int index] => _values[index];
     public object this[string columnName] => _values[GetIndex(columnName)];
 
-    private readonly List<string> _columnNames = new List<string>();
-    private readonly List<object> _values = new List<object>();
+    private readonly List<string> _columnNames = new();
+    private readonly List<object> _values = new();
 
     public DataRowInfo(string tableName)
     {

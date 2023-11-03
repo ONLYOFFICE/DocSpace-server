@@ -132,8 +132,8 @@ public class FactoryIndexerFolder : FactoryIndexer<DbFolder>
 
 class FolderTenant
 {
-    public DbTenant DbTenant { get; set; }
-    public DbFolder DbFolder { get; set; }
+    public DbTenant DbTenant { get; init; }
+    public DbFolder DbFolder { get; init; }
 }
 
 public static class FactoryIndexerFolderExtension

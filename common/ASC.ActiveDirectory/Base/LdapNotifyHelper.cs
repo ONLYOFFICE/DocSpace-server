@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.Base;
 
-[Singletone(Additional = typeof(LdapNotifyHelperExtension))]
+[Singleton(Additional = typeof(LdapNotifyHelperExtension))]
 public class LdapNotifyService : BackgroundService
 {
     private readonly ConcurrentDictionary<int, Tuple<INotifyClient, LdapNotifySource>> _clients;

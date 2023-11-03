@@ -154,11 +154,11 @@ Un archivo de copia de seguridad con los datos de su portal ONLYOFFICE™ "${__V
 Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ONLYOFFICE™?":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block"
 
 
-Si hay algunas preguntas o necesita ayuda no dude en ponerse en contacto con nosotros vía "support.onlyoffice.com":"http://support.onlyoffice.com"
+Si hay algunas preguntas o necesita ayuda no dude en ponerse en contacto con nosotros vía "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Saludos,
 Equipo de soporte de ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) copia de seguridad del portal creada
@@ -169,11 +169,11 @@ Se ha creado un archivo de copia de seguridad que contiene los datos de su porta
 
 Para obtener más información sobre el procedimiento de copia de seguridad, consulte nuestra guía de usuario [Copia de seguridad de datos](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Si tiene alguna pregunta o necesita ayuda por favor no dude en contactarnos en [support.onlyoffice.com](http://support.onlyoffice.com)
+Si tiene alguna pregunta o necesita ayuda por favor no dude en contactarnos en [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Cordialmente,
 Equipo de soporte ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>¿Desea cambiar el correo electrónico en su cuenta de ${LetterLogoText}?
@@ -330,7 +330,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 
 Atentamente,
 Equipo de Asistencia ONLYOFFICE™  
-"www.onlyoffice.com": "http://onlyoffice.com/"
+"www.onlyoffice.com": "https://onlyoffice.com/"
 
 ^Para cambiar el tipo de notificación, por favor administre su "configuración de la suscripción":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -344,7 +344,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 
 Atentamente,
 Equipo de Asistencia ONLYOFFICE™  
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Para cambiar el tipo de notificación, por favor administre su "configuración de la suscripción":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -359,7 +359,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 
 Atentamente,
 Equipo de Soporte ONLYOFFICE™ 
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Migración del portal
@@ -481,7 +481,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 
 Atentamente,
 Equipo de Soporte ONLYOFFICE™  
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Desactivación del portal [${__VirtualRootPath}](${__VirtualRootPath})
@@ -501,7 +501,7 @@ Si tiene alguna pregunta o necesita ayuda, por favor no dude en contactarnos en 
 
 Cordialmente,
 Equipo de soporte ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Eliminación del Portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -526,7 +526,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 
 Atentamente,
 Equipo de Soporte ONLYOFFICE™  
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Eliminación del portal [${__VirtualRootPath}](${__VirtualRootPath})
@@ -551,7 +551,7 @@ Si tiene alguna pregunta o necesita ayuda, no dude en contactarnos a través de 
 
 Cordialmente,
 Equipo de soporte ONLYOFFICE™ 
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Cambio de la dirección del portal
@@ -703,7 +703,7 @@ Si usted tiene alguna pregunta o necesita ayuda no dude en contactar con nosotro
 
 Atentamente,
 Equipo de Asistencia ONLYOFFICE™  
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Para cambiar el tipo de notificación, por favor administre su "configuración de la suscripción":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -876,7 +876,7 @@ Si necesita ayuda, consulte nuestro "Centro de Ayuda":"https://helpcenter.onlyof
 
 Cordialmente, 
 Equipo de ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>¡Hola, $UserName!
@@ -897,7 +897,7 @@ Si necesita ayuda, consulte nuestro "Centro de Ayuda":"https://helpcenter.onlyof
 
 Cordialmente, 
 Equipo de ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>¡Hola, $UserName!
@@ -918,7 +918,7 @@ Si necesita ayuda, consulte nuestro "Centro de Ayuda":"https://helpcenter.onlyof
 
 Cordialmente, 
 Equipo de ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>¡Hola, $UserName!
@@ -939,7 +939,7 @@ Si necesita ayuda, consulte nuestro "Centro de Ayuda":"https://helpcenter.onlyof
 
 Cordialmente, 
 Equipo de ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Por favor active su dirección de correo electrónico</value>

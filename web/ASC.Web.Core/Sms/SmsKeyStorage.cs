@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.Sms;
 
-[Singletone]
+[Singleton]
 public class SmsKeyStorageCache
 {
     private readonly ICacheNotify<SmsKeyCacheKey> _keyCacheNotify;
@@ -51,7 +51,7 @@ public class SmsKeyStorage
     private readonly int _keyLength;
     public readonly TimeSpan StoreInterval;
     private readonly int _attemptCount;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly ICache _keyCache;
     private readonly ICache _checkCache;
@@ -91,14 +91,14 @@ public class SmsKeyStorage
 
     public async Task<(bool, string)> GenerateKeyAsync(string phone)
     {
-        string key = null;
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(phone);
+        ArgumentException.ThrowIfNullOrEmpty(phone);
 
         try
         {
             await _semaphore.WaitAsync();
             var cacheKey = await BuildCacheKeyAsync(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey) ?? new Dictionary<string, DateTime>();
+            string key;
             if (phoneKeys.Count > _attemptCount)
             {
                 key = null;
@@ -110,10 +110,6 @@ public class SmsKeyStorage
 
             _keyCache.Insert(cacheKey, phoneKeys, DateTime.UtcNow.Add(StoreInterval));
             return (true, key);
-        }
-        catch
-        {
-            throw;
         }
         finally
         {
@@ -134,10 +130,6 @@ public class SmsKeyStorage
             var cacheKey = await BuildCacheKeyAsync(phone);
             var phoneKeys = _keyCache.Get<Dictionary<string, DateTime>>(cacheKey);
             return phoneKeys != null;
-        }
-        catch
-        {
-            throw;
         }
         finally
         {
@@ -186,10 +178,6 @@ public class SmsKeyStorage
 
             _checkCache.Insert(cacheCheck, (counter - 1).ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(StoreInterval));
             return Result.Ok;
-        }
-        catch
-        {
-            throw;
         }
         finally
         {

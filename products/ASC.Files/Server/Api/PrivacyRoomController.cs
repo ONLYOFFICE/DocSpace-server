@@ -149,7 +149,7 @@ public class PrivacyRoomControllerCommon : ControllerBase
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await PrivacyRoomSettings.GetEnabledAsync(_settingsManager);
     }
@@ -204,7 +204,7 @@ public class PrivacyRoomControllerCommon : ControllerBase
     [HttpPut("")]
     public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (inDto.Enable)
         {

@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Services;
 
-[Singletone]
+[Singleton]
 public sealed class BackupSchedulerService : BackgroundService
 {
     private readonly TimeSpan _backupSchedulerPeriod;

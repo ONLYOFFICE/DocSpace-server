@@ -86,11 +86,9 @@ class PermissionResolver : IPermissionResolver
         }
         else
         {
-            ISubject denySubject = null;
-            IAction denyAction = null;
             foreach (var action in actions)
             {
-                (var allow, denySubject, denyAction) = await _azManager.CheckPermissionAsync(subject, action, objectId, securityObjProvider);
+                var (allow, denySubject, denyAction) = await _azManager.CheckPermissionAsync(subject, action, objectId, securityObjProvider);
                 if (!allow)
                 {
                     denyActions.Add(new DenyResult(action, denySubject, denyAction));

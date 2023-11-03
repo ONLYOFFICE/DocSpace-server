@@ -60,7 +60,7 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         if (Convert.ToBoolean(_configuration[Scheme.Name] ?? "false"))
         {
-            _log.LogDebug("Auth for {0} skipped", Scheme.Name);
+            _log.LogDebug("Auth for {SchemeName} skipped", Scheme.Name);
             Authenticate();
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(Context.User, new AuthenticationProperties(), Scheme.Name)));
         }
@@ -86,16 +86,16 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 
                 if (splitted.Length < 3)
                 {
-                    _log.LogDebug("Auth failed: invalid token {0}.", header);
+                    _log.LogDebug("Auth failed: invalid token {Header}", header);
 
                     return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Unauthorized))));
                 }
 
                 var pkey = splitted[0];
                 var date = splitted[1];
-                var orighash = splitted[2];
+                var origHash = splitted[2];
 
-                _log.LogDebug("Variant of correct auth:" + _apiSystemHelper.CreateAuthToken(pkey));
+                _log.LogDebug("Variant of correct auth: {AuthToken}", _apiSystemHelper.CreateAuthToken(pkey));
 
                 if (!string.IsNullOrWhiteSpace(date))
                 {
@@ -105,27 +105,27 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 
                     if (DateTime.UtcNow > timestamp.Add(trustInterval))
                     {
-                        _log.LogDebug("Auth failed: invalid timesatmp {0}, now {1}.", timestamp, DateTime.UtcNow);
+                        _log.LogDebug("Auth failed: invalid timestamp {Timestamp}, now {Date}", timestamp, DateTime.UtcNow);
 
                         return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Forbidden))));
                     }
                 }
 
-                var skey = _machinePseudoKeys.GetMachineConstant();
-                using var hasher = new HMACSHA1(skey);
+                var sKey = _machinePseudoKeys.GetMachineConstant();
+                using var hasher = new HMACSHA1(sKey);
                 var data = string.Join("\n", date, pkey);
                 var hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(data));
 
-                if (WebEncoders.Base64UrlEncode(hash) != orighash && Convert.ToBase64String(hash) != orighash)
+                if (WebEncoders.Base64UrlEncode(hash) != origHash && Convert.ToBase64String(hash) != origHash)
                 {
-                    _log.LogDebug("Auth failed: invalid token {0}, expect {1} or {2}.", orighash, WebEncoders.Base64UrlEncode(hash), Convert.ToBase64String(hash));
+                    _log.LogDebug("Auth failed: invalid token {Token}, expect {Hash} or {Base64Hash}", origHash, WebEncoders.Base64UrlEncode(hash), Convert.ToBase64String(hash));
 
                     return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Forbidden))));
                 }
             }
             else
             {
-                _log.LogDebug("Auth failed: invalid auth header. Sheme: {0}, parameter: {1}.", Scheme.Name, header);
+                _log.LogDebug("Auth failed: invalid auth header. Scheme: {SchemeName}, parameter: {Header}", Scheme.Name, header);
 
                 return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.Forbidden))));
             }
@@ -136,12 +136,18 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 
             return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.InternalServerError))));
         }
+        
         var identity = new ClaimsIdentity(Scheme.Name);
 
-        _log.LogInformation("Auth success {0}", Scheme.Name);
-        if (_httpContextAccessor?.HttpContext != null) _httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
+        _log.LogInformation("Auth success {SchemeName}", Scheme.Name);
+        
+        if (_httpContextAccessor?.HttpContext != null)
+        {
+            _httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
+        }
 
         Authenticate();
+        
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(Context.User, new AuthenticationProperties(), Scheme.Name)));
     }
 
@@ -149,13 +155,22 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         var account = ASC.Core.Configuration.Constants.SystemAccounts.FirstOrDefault(a => a.ID == ASC.Core.Configuration.Constants.CoreSystem.ID);
 
-        var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Sid, account.ID.ToString()),
-                new Claim(ClaimTypes.Name, account.Name),
-                new Claim(ClaimTypes.Role, Role.System)
-            };
+        if (account == null)
+        {
+            return;
+        }
 
-        _httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Sid, account.ID.ToString()),
+            new(ClaimTypes.Name, account.Name),
+            new(ClaimTypes.Role, Role.System)
+        };
+
+
+        if (_httpContextAccessor.HttpContext != null)
+        {
+            _httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
+        }
     }
 }

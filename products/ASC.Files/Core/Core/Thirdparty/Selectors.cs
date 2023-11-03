@@ -28,15 +28,15 @@ public static class Selectors
 {
     public static Regex Pattern => new(@"^(?'selector'.*)-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
     
-    public static readonly Selector SharpBox = new Selector() { Name = "SharpBox", Id = "sbox" };
-    public static readonly Selector SharePoint = new Selector() { Name = "sharepoint", Id = "spoint" };
-    public static readonly Selector GoogleDrive = new Selector() { Name = "GoogleDrive", Id = "drive" };
-    public static readonly Selector Box = new Selector() { Name = "Box", Id = "box" };
-    public static readonly Selector Dropbox = new Selector() { Name = "Dropbox", Id = "dropbox" };
-    public static readonly Selector OneDrive = new Selector() { Name = "OneDrive", Id = "onedrive" };
+    public static readonly Selector SharpBox = new() { Name = "SharpBox", Id = "sbox" };
+    public static readonly Selector SharePoint = new() { Name = "sharepoint", Id = "spoint" };
+    public static readonly Selector GoogleDrive = new() { Name = "GoogleDrive", Id = "drive" };
+    public static readonly Selector Box = new() { Name = "Box", Id = "box" };
+    public static readonly Selector Dropbox = new() { Name = "Dropbox", Id = "dropbox" };
+    public static readonly Selector OneDrive = new() { Name = "OneDrive", Id = "onedrive" };
 
-    public static readonly List<Selector> All = new List<Selector>() { SharpBox, SharePoint, GoogleDrive, Box, Dropbox, OneDrive };
-    public static readonly List<Selector> StoredCache = new List<Selector>() { GoogleDrive, Box, Dropbox, OneDrive };
+    public static readonly List<Selector> All = new() { SharpBox, SharePoint, GoogleDrive, Box, Dropbox, OneDrive };
+    public static readonly List<Selector> StoredCache = new() { GoogleDrive, Box, Dropbox, OneDrive };
 }
 
 public class Selector

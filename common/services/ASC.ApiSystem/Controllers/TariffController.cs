@@ -65,7 +65,7 @@ public class TariffController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> SetTariffAsync(TariffModel model)
     {
-        (var succ, var tenant) = await CommonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await CommonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             Log.LogError("Model without tenant");
@@ -116,7 +116,7 @@ public class TariffController : ControllerBase
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new Quota(quota.TenantId, 1) },
+            Quotas = new List<Quota> { new(quota.TenantId, 1) },
             DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1),
         };
 
@@ -130,7 +130,7 @@ public class TariffController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> GetTariffAsync([FromQuery] TariffModel model)
     {
-        (var succ, var tenant) = await CommonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await CommonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             Log.LogError("Model without tenant");

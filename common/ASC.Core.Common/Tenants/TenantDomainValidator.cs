@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Tenants;
 
-[Singletone]
+[Singleton]
 public class TenantDomainValidator
 {
     private readonly Regex _validDomain;

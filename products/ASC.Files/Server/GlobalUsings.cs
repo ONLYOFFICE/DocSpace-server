@@ -29,7 +29,6 @@ global using System.Security;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;
-
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Extensions;
@@ -86,7 +85,6 @@ global using AutoMapper;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;

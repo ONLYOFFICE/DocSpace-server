@@ -29,9 +29,9 @@ namespace ASC.Files.Core;
 [DebuggerDisplay("{Login} {Password} {Token} {Url}")]
 public class AuthData
 {
-    public string Login { get; set; }
-    public string Password { get; set; }
-    public string Token { get; set; }
+    public string Login { get; init; }
+    public string Password { get; init; }
+    public string Token { get; init; }
     public string Url { get; set; }
 
     public AuthData(string url = null, string login = null, string password = null, string token = null)

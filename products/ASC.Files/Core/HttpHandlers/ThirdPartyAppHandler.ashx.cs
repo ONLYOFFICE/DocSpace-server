@@ -28,7 +28,7 @@ namespace ASC.Web.Files.HttpHandlers;
 
 public class ThirdPartyAppHandler
 {
-    public static string HandlerPath = "~/ThirdPartyApp";
+    public static readonly string HandlerPath = "~/ThirdPartyApp";
 
     public ThirdPartyAppHandler(RequestDelegate next)
     {
@@ -90,12 +90,9 @@ public class ThirdPartyAppHandlerService
             message = e.Message;
         }
 
-        if (string.IsNullOrEmpty(message))
+        if (string.IsNullOrEmpty(message) && (context.Request.Query["error"].FirstOrDefault() ?? "").Equals("access_denied", StringComparison.InvariantCultureIgnoreCase))
         {
-            if ((context.Request.Query["error"].FirstOrDefault() ?? "").Equals("access_denied", StringComparison.InvariantCultureIgnoreCase))
-            {
-                message = context.Request.Query["error_description"].FirstOrDefault() ?? FilesCommonResource.AppAccessDenied;
-            }
+            message = context.Request.Query["error_description"].FirstOrDefault() ?? FilesCommonResource.AppAccessDenied;
         }
 
         var redirectUrl = _commonLinkUtility.GetDefault();

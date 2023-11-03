@@ -65,15 +65,11 @@ public class DbFactory
     private DbProviderFactory _dbProviderFactory;
     private readonly IConfiguration _configuration;
     private readonly ConfigurationExtension _configurationExtension;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ICache _cache;
 
-    public DbFactory(IConfiguration configuration, ConfigurationExtension configurationExtension, IServiceProvider serviceProvider, ICache cache)
+    public DbFactory(IConfiguration configuration, ConfigurationExtension configurationExtension)
     {
         _configuration = configuration;
         _configurationExtension = configurationExtension;
-        _serviceProvider = serviceProvider;
-        _cache = cache;
     }
 
     public DbConnection OpenConnection(string path = "default", string connectionString = null, string region = "current")

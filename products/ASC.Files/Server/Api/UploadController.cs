@@ -53,7 +53,7 @@ public abstract class UploadController<T> : ApiControllerBase
 {
     private readonly UploadControllerHelper _filesControllerHelper;
 
-    public UploadController(UploadControllerHelper filesControllerHelper,
+    protected UploadController(UploadControllerHelper filesControllerHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
     {

@@ -144,27 +144,34 @@ public abstract class FileEntryDto<T> : FileEntryDto
 [Scope]
 public class FileEntryDtoHelper
 {
-
-
     private readonly ApiDateTimeHelper _apiDateTimeHelper;
-    private readonly EmployeeDtoHelper _employeeWraperHelper;
+    private readonly EmployeeDtoHelper _employeeWrapperHelper;
     private readonly FileSharingHelper _fileSharingHelper;
     protected readonly FileSecurity _fileSecurity;
+    private readonly GlobalFolderHelper _globalFolderHelper;
+    private readonly FilesSettingsHelper _filesSettingsHelper;
+    private readonly FileDateTime _fileDateTime;
 
     public FileEntryDtoHelper(
         ApiDateTimeHelper apiDateTimeHelper,
-        EmployeeDtoHelper employeeWraperHelper,
+        EmployeeDtoHelper employeeWrapperHelper,
         FileSharingHelper fileSharingHelper,
-        FileSecurity fileSecurity
+        FileSecurity fileSecurity,
+        GlobalFolderHelper globalFolderHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime
         )
     {
         _apiDateTimeHelper = apiDateTimeHelper;
-        _employeeWraperHelper = employeeWraperHelper;
+        _employeeWrapperHelper = employeeWrapperHelper;
         _fileSharingHelper = fileSharingHelper;
         _fileSecurity = fileSecurity;
+        _globalFolderHelper = globalFolderHelper;
+        _filesSettingsHelper = filesSettingsHelper;
+        _fileDateTime = fileDateTime;
     }
 
-    protected internal async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
+    protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
         if (entry.Security == null)
         {
@@ -173,6 +180,8 @@ public class FileEntryDtoHelper
 
         CorrectSecurityByLockedStatus(entry);
 
+        var permanentlyDeletedOn = await GetDeletedPermanentlyOn(entry);
+        
         return new T
         {
             Id = entry.Id,
@@ -180,9 +189,9 @@ public class FileEntryDtoHelper
             Access = entry.Access,
             Shared = entry.Shared,
             Created = _apiDateTimeHelper.Get(entry.CreateOn),
-            CreatedBy = await _employeeWraperHelper.GetAsync(entry.CreateBy),
+            CreatedBy = await _employeeWrapperHelper.GetAsync(entry.CreateBy),
             Updated = _apiDateTimeHelper.Get(entry.ModifiedOn),
-            UpdatedBy = await _employeeWraperHelper.GetAsync(entry.ModifiedBy),
+            UpdatedBy = await _employeeWrapperHelper.GetAsync(entry.ModifiedBy),
             RootFolderType = entry.RootFolderType,
             RootFolderId = entry.RootId,
             ProviderItem = entry.ProviderEntry.NullIfDefault(),
@@ -194,7 +203,17 @@ public class FileEntryDtoHelper
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
             OriginRoomTitle = entry.OriginRoomTitle,
-            AutoDelete = entry.DeletedPermanentlyOn != default ? _apiDateTimeHelper.Get(entry.DeletedPermanentlyOn) : null
+            AutoDelete = permanentlyDeletedOn != default ? _apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
+    }
+
+    private async Task<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
+    {
+        if (!entry.ModifiedOn.Equals(default) && Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync) && _filesSettingsHelper.AutomaticallyCleanUp.IsAutoCleanUp)
+        {
+            return _fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, _filesSettingsHelper.AutomaticallyCleanUp.Gap);
+        }
+
+        return default;
     }
 }

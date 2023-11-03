@@ -121,7 +121,7 @@ public class SmsManager
         {
             return;
         }
-        (var succ, var key) = await _smsKeyStorage.GenerateKeyAsync(mobilePhone);
+        var (succ, key) = await _smsKeyStorage.GenerateKeyAsync(mobilePhone);
         if (!succ)
         {
             throw new Exception(Resource.SmsTooMuchError);

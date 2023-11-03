@@ -26,7 +26,7 @@
 
 namespace ASC.ElasticSearch.Service;
 
-[Singletone]
+[Singleton]
 public class Settings
 {
     public string Host { get; set; }

@@ -37,10 +37,6 @@ public class MaxFileSizeChecker : TenantQuotaFeatureChecker<MaxFileSizeFeature, 
 
 public class MaxFileSizeStatistic : ITenantQuotaFeatureStat<MaxFileSizeFeature, long>
 {
-    public MaxFileSizeStatistic()
-    {
-    }
-
     public Task<long> GetValueAsync()
     {
         return Task.FromResult(0L);

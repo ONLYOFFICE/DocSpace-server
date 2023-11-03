@@ -28,11 +28,10 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class IpRestrictionsController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly PermissionContext _permissionContext;
     private readonly SettingsManager _settingsManager;
     private readonly IPRestrictionsService _iPRestrictionsService;
+    private readonly TenantManager _tenantManager;
 
     public IpRestrictionsController(
         ApiContext apiContext,
@@ -41,11 +40,13 @@ public class IpRestrictionsController : BaseSettingsController
         WebItemManager webItemManager,
         IPRestrictionsService iPRestrictionsService,
         IMemoryCache memoryCache,
+        TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _permissionContext = permissionContext;
         _settingsManager = settingsManager;
         _iPRestrictionsService = iPRestrictionsService;
+        _tenantManager = tenantManager;
     }
 
     /// <summary>
@@ -60,8 +61,9 @@ public class IpRestrictionsController : BaseSettingsController
     [HttpGet("iprestrictions")]
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
-        return await _iPRestrictionsService.GetAsync(Tenant.Id);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return await _iPRestrictionsService.GetAsync(tenant.Id);
     }
 
     /// <summary>
@@ -77,8 +79,9 @@ public class IpRestrictionsController : BaseSettingsController
     [HttpPut("iprestrictions")]
     public async Task<IEnumerable<IpRestrictionBase>> SaveIpRestrictionsAsync(IpRestrictionsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
-        return await _iPRestrictionsService.SaveAsync(inDto.IpRestrictions, Tenant.Id);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return await _iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
     }
 
     /// <summary>
@@ -92,7 +95,7 @@ public class IpRestrictionsController : BaseSettingsController
     [HttpGet("iprestrictions/settings")]
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return await _settingsManager.LoadAsync<IPRestrictionsSettings>();
     }
@@ -109,7 +112,7 @@ public class IpRestrictionsController : BaseSettingsController
     [HttpPut("iprestrictions/settings")]
     public async Task<IPRestrictionsSettings> UpdateIpRestrictionsSettingsAsync(IpRestrictionsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = new IPRestrictionsSettings { Enable = inDto.Enable };
         await _settingsManager.SaveAsync(settings);

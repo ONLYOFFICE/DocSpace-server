@@ -75,7 +75,7 @@ public class EncryptionOperation : DistributedTaskProgress
                 throw new NotSupportedException();
             }
 
-            if (_encryptionSettings.Status == EncryprtionStatus.Encrypted || _encryptionSettings.Status == EncryprtionStatus.Decrypted)
+            if (_encryptionSettings.Status is EncryprtionStatus.Encrypted or EncryprtionStatus.Decrypted)
             {
                 log.DebugStorageAlready(_encryptionSettings.Status);
 
@@ -94,7 +94,7 @@ public class EncryptionOperation : DistributedTaskProgress
                     dictionary.Add(module, (DiscDataStore)await storageFactory.GetStorageAsync(tenant.Id, module));
                 }
 
-                await Parallel.ForEachAsync(dictionary, async (elem, token) =>
+                await Parallel.ForEachAsync(dictionary, async (elem, _) =>
                 {
                     await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, log);
                 });
@@ -164,7 +164,7 @@ public class EncryptionOperation : DistributedTaskProgress
             using var reader = new StreamReader(stream);
             string line;
 
-            while ((line = reader.ReadLine()) != null)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
                 encryptedFiles.Add(line);
             }

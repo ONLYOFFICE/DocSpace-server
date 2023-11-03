@@ -65,19 +65,17 @@ public class Recaptcha
 
             var httpClient = _clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
-            using (var reader = new StreamReader(await httpClientResponse.Content.ReadAsStreamAsync()))
-            {
-                var resp = await reader.ReadToEndAsync();
-                var resObj = JObject.Parse(resp);
+            using var reader = new StreamReader(await httpClientResponse.Content.ReadAsStreamAsync());
+            var resp = await reader.ReadToEndAsync();
+            var resObj = JObject.Parse(resp);
 
-                if (resObj["success"] != null && resObj.Value<bool>("success"))
-                {
-                    return true;
-                }
-                if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
-                {
-                    return false;
-                }
+            if (resObj["success"] != null && resObj.Value<bool>("success"))
+            {
+                return true;
+            }
+            if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
+            {
+                return false;
             }
         }
         catch (Exception)

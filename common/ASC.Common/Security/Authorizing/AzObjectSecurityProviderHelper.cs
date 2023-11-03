@@ -29,7 +29,7 @@ namespace ASC.Common.Security.Authorizing;
 public class AzObjectSecurityProviderHelper
 {
     public ISecurityObjectId CurrentObjectId { get; private set; }
-    public bool ObjectRolesSupported => _currSecObjProvider != null && _currSecObjProvider.ObjectRolesSupported;
+    public bool ObjectRolesSupported => _currSecObjProvider is { ObjectRolesSupported: true };
 
     private readonly SecurityCallContext _callContext;
     private readonly bool _currObjIdAsProvider;

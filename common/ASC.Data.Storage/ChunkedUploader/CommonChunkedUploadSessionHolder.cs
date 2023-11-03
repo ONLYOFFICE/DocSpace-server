@@ -32,8 +32,8 @@ public class CommonChunkedUploadSessionHolder
 
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
     private readonly TempPath _tempPath;
-    public readonly string Domain;
-    public long MaxChunkUploadSize;
+    private readonly string _domain;
+    public readonly long MaxChunkUploadSize;
     public string TempDomain;
 
     public const string StoragePath = "sessions";
@@ -46,7 +46,7 @@ public class CommonChunkedUploadSessionHolder
     {
         _tempPath = tempPath;
         DataStore = dataStore;
-        Domain = domain;
+        _domain = domain;
         MaxChunkUploadSize = maxChunkUploadSize;
     }
 
@@ -59,7 +59,7 @@ public class CommonChunkedUploadSessionHolder
         }
 
         var tempPath = Guid.NewGuid().ToString();
-        var uploadId = await DataStore.InitiateChunkedUploadAsync(Domain, tempPath);
+        var uploadId = await DataStore.InitiateChunkedUploadAsync(_domain, tempPath);
 
         chunkedUploadSession.TempPath = tempPath;
         chunkedUploadSession.UploadId = uploadId;
@@ -71,13 +71,14 @@ public class CommonChunkedUploadSessionHolder
         var uploadId = uploadSession.UploadId;
         var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag");
 
-        await DataStore.FinalizeChunkedUploadAsync(Domain, tempPath, uploadId, eTags);
+        await DataStore.FinalizeChunkedUploadAsync(_domain, tempPath, uploadId, eTags);
         return Path.GetFileName(tempPath);
     }
 
-    public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath, bool quotaCheckFileSize = true)
+    public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath,
+        bool quotaCheckFileSize = true)
     {
-        await DataStore.MoveAsync(Domain, chunkedUploadSession.TempPath, string.Empty, newPath, quotaCheckFileSize);
+        await DataStore.MoveAsync(_domain, chunkedUploadSession.TempPath, string.Empty, newPath, quotaCheckFileSize);
     }
 
     public async Task AbortAsync(CommonChunkedUploadSession uploadSession)
@@ -87,7 +88,7 @@ public class CommonChunkedUploadSessionHolder
             var tempPath = uploadSession.TempPath;
             var uploadId = uploadSession.UploadId;
 
-            await DataStore.AbortChunkedUploadAsync(Domain, tempPath, uploadId);
+            await DataStore.AbortChunkedUploadAsync(_domain, tempPath, uploadId);
         }
         else if (!string.IsNullOrEmpty(uploadSession.ChunksBuffer))
         {
@@ -100,12 +101,13 @@ public class CommonChunkedUploadSessionHolder
         var tempPath = uploadSession.TempPath;
         var uploadId = uploadSession.UploadId;
 
-        var eTag = await DataStore.UploadChunkAsync(Domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
+        var eTag = await DataStore.UploadChunkAsync(_domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
 
         return (Path.GetFileName(tempPath), eTag);
     }
 
-    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long chunkLength)
+    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,
+        long chunkLength)
     {
         if (uploadSession.BytesTotal == 0)
         {

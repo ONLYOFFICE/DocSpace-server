@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Storage.Migration;
 
-[Singletone]
+[Singleton]
 public class ServiceClientListener
 {
     private readonly ICacheNotify<MigrationProgress> _progressMigrationNotify;

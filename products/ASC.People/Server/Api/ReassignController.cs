@@ -28,13 +28,11 @@ namespace ASC.People.Api;
 
 public class ReassignController : ApiControllerBase
 {
-    private Tenant Tenant => _apiContext.Tenant;
-
     private readonly PermissionContext _permissionContext;
     private readonly QueueWorkerReassign _queueWorkerReassign;
     private readonly UserManager _userManager;
     private readonly AuthContext _authContext;
-    private readonly ApiContext _apiContext;
+    private readonly TenantManager _tenantManager;
     private readonly SecurityContext _securityContext;
 
     public ReassignController(
@@ -42,14 +40,14 @@ public class ReassignController : ApiControllerBase
         QueueWorkerReassign queueWorkerReassign,
         UserManager userManager,
         AuthContext authContext,
-        ApiContext apiContext,
+        TenantManager tenantManager,
         SecurityContext securityContext)
     {
         _permissionContext = permissionContext;
         _queueWorkerReassign = queueWorkerReassign;
         _userManager = userManager;
         _authContext = authContext;
-        _apiContext = apiContext;
+        _tenantManager = tenantManager;
         _securityContext = securityContext;
     }
 
@@ -67,7 +65,8 @@ public class ReassignController : ApiControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var progressItem = _queueWorkerReassign.GetProgressItemStatus(Tenant.Id, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var progressItem = _queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -96,9 +95,10 @@ public class ReassignController : ApiControllerBase
         }
 
         var fromUser = await _userManager.GetUsersAsync(inDto.FromUserId);
-
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         if (_userManager.IsSystemUser(fromUser.Id)
-            || fromUser.IsOwner(Tenant)
+            || fromUser.IsOwner(tenant)
             || fromUser.IsMe(_authContext)
             || await _userManager.IsUserAsync(toUser)
             || fromUser.Status != EmployeeStatus.Terminated)
@@ -106,7 +106,7 @@ public class ReassignController : ApiControllerBase
             throw new ArgumentException("Can not reassign data from user with id = " + fromUser.Id);
         }
 
-        var progressItem = _queueWorkerReassign.Start(Tenant.Id, fromUser.Id, toUser.Id, _securityContext.CurrentAccount.ID, true, inDto.DeleteProfile);
+        var progressItem = _queueWorkerReassign.Start(tenant.Id, fromUser.Id, toUser.Id, _securityContext.CurrentAccount.ID, true, inDto.DeleteProfile);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
@@ -125,11 +125,12 @@ public class ReassignController : ApiControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var progressItem = _queueWorkerReassign.GetProgressItemStatus(Tenant.Id, inDto.UserId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var progressItem = _queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         if (progressItem != null)
         {
-            _queueWorkerReassign.Terminate(Tenant.Id, inDto.UserId);
+            _queueWorkerReassign.Terminate(tenant.Id, inDto.UserId);
 
             progressItem.Status = DistributedTaskStatus.Canceled;
             progressItem.IsCompleted = true;

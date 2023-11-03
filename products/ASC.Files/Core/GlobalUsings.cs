@@ -26,8 +26,8 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
+global using System.Collections.Immutable;
 global using System.Diagnostics;
-global using System.Diagnostics.CodeAnalysis;
 global using System.Extensions;
 global using System.Globalization;
 global using System.Linq.Expressions;
@@ -35,6 +35,7 @@ global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
 global using System.Net.Mime;
+global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.Serialization;
 global using System.Security;
@@ -79,6 +80,7 @@ global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
+global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
@@ -86,6 +88,7 @@ global using ASC.Core.Users;
 global using ASC.Data.Storage;
 global using ASC.Data.Storage.ChunkedUploader;
 global using ASC.Data.Storage.DataOperators;
+global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;
 global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.Service;
@@ -187,6 +190,8 @@ global using ICSharpCode.SharpZipLib.Tar;
 global using ICSharpCode.SharpZipLib.Zip;
 
 global using JWT;
+global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
+
 global using JWT.Exceptions;
 
 global using Microsoft.AspNetCore.Builder;
@@ -194,8 +199,8 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.EntityFrameworkCore.Infrastructure;
 global using Microsoft.EntityFrameworkCore.Storage;
+global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
@@ -215,8 +220,6 @@ global using Newtonsoft.Json.Linq;
 global using ProtoBuf;
 
 global using SixLabors.ImageSharp;
-
-global using StackExchange.Redis;
 
 global using static ASC.Files.Core.Data.AbstractDao;
 global using static ASC.Files.Core.Helpers.DocumentService;
@@ -243,6 +246,5 @@ global using ContentType = System.Net.Mime.ContentType;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
 global using JsonSerializer = System.Text.Json.JsonSerializer;
 global using JsonTokenType = System.Text.Json.JsonTokenType;
-global using JsonConverter = System.Text.Json.Serialization.JsonConverter;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;

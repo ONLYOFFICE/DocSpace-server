@@ -90,55 +90,55 @@ public class PeopleNamesItem
     public string UserCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _userCaption ?? string.Empty : GetResourceValue(_userCaption); }
-        set { _userCaption = value; }
+        init { _userCaption = value; }
     }
 
     public string UsersCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _usersCaption ?? string.Empty : GetResourceValue(_usersCaption); }
-        set { _usersCaption = value; }
+        init { _usersCaption = value; }
     }
 
     public string GroupCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _groupCaption ?? string.Empty : GetResourceValue(_groupCaption); }
-        set { _groupCaption = value; }
+        init { _groupCaption = value; }
     }
 
     public string GroupsCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _groupsCaption ?? string.Empty : GetResourceValue(_groupsCaption); }
-        set { _groupsCaption = value; }
+        init { _groupsCaption = value; }
     }
 
     public string UserPostCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _userPostCaption ?? string.Empty : GetResourceValue(_userPostCaption); }
-        set { _userPostCaption = value; }
+        init { _userPostCaption = value; }
     }
 
     public string GroupHeadCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _groupHeadCaption ?? string.Empty : GetResourceValue(_groupHeadCaption); }
-        set { _groupHeadCaption = value; }
+        init { _groupHeadCaption = value; }
     }
 
     public string RegDateCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _regDateCaption ?? string.Empty : GetResourceValue(_regDateCaption); }
-        set { _regDateCaption = value; }
+        init { _regDateCaption = value; }
     }
 
     public string GuestCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _guestCaption ?? NamingPeopleResource.CommonGuest : GetResourceValue(_guestCaption); }
-        set { _guestCaption = value; }
+        init { _guestCaption = value; }
     }
 
     public string GuestsCaption
     {
         get { return Id.Equals(CustomID, _cmp) ? _guestsCaption ?? NamingPeopleResource.CommonGuests : GetResourceValue(_guestsCaption); }
-        set { _guestsCaption = value; }
+        init { _guestsCaption = value; }
     }
 
     private static string GetResourceValue(string resourceKey)
@@ -154,10 +154,10 @@ public class PeopleNamesItem
 [Scope]
 public class CustomNamingPeople
 {
-    private static readonly object _locked = new object();
+    private static readonly object _locked = new();
     private static bool _loaded;
 
-    private static readonly List<PeopleNamesItem> _items = new List<PeopleNamesItem>();
+    private static readonly List<PeopleNamesItem> _items = new();
     private readonly SettingsManager _settingsManager;
 
     public CustomNamingPeople(SettingsManager settingsManager)

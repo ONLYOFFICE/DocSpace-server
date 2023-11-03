@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Logging;
 
-[Singletone]
+[Singleton]
 public class EFLoggerFactory : ILoggerFactory
 {
     private readonly ILogger _logger;
@@ -70,9 +70,6 @@ public class EFLogger : ILogger
     {
         switch (eventId.Id)
         {
-            //case 20000:
-            //    CustomLogger.Debug(formatter(state, exception));
-            //    break;
             case 20101:
                 var keyValuePairs = state as IEnumerable<KeyValuePair<string, object>>;
                 var ev = new EFLogEvent("");
@@ -93,7 +90,7 @@ public class EFLogger : ILogger
 
     class EFLogEvent : IEnumerable<KeyValuePair<string, object>>
     {
-        readonly List<KeyValuePair<string, object>> _properties = new List<KeyValuePair<string, object>>();
+        readonly List<KeyValuePair<string, object>> _properties = new();
 
         public string Message { get; }
 
@@ -109,13 +106,12 @@ public class EFLogger : ILogger
 
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-        public EFLogEvent WithProperty(string name, object value)
+        public void WithProperty(string name, object value)
         {
             _properties.Add(new KeyValuePair<string, object>(name, value));
-            return this;
         }
 
-        public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, e) => l.Message;
+        public static Func<EFLogEvent, Exception, string> Formatter { get; } = (l, _) => l.Message;
     }
 
 }

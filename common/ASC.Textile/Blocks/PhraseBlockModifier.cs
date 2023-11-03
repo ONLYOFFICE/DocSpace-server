@@ -28,10 +28,6 @@ namespace Textile.Blocks;
 
 public abstract class PhraseBlockModifier : BlockModifier
 {
-    protected PhraseBlockModifier()
-    {
-    }
-
     protected string PhraseModifierFormat(string input, string modifier, string tag)
     {
         // All phrase modifiers are one character, or a double character. Sometimes,

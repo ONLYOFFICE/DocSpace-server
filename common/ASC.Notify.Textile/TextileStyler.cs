@@ -30,7 +30,7 @@ namespace ASC.Notify.Textile;
 public class TextileStyler : IPatternStyler
 {
     private static readonly Regex _velocityArguments
-        = new Regex(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
+        = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix,
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -298,16 +298,22 @@ public class TextileStyler : IPatternStyler
 
     private string GetPortalUnsubscribeLink(NoticeMessage message, MailWhiteLabelSettings settings)
     {
+        var subscriptionConfigArgument = message.GetArgument("RecipientSubscriptionConfigURL");
+
+        var subscriptionConfigLink = (string)subscriptionConfigArgument?.Value;
+
+        if (!string.IsNullOrEmpty(subscriptionConfigLink))
+        {
+            return subscriptionConfigLink;
+        }
+
         var unsubscribeLinkArgument = message.GetArgument("ProfileUrl");
 
-        if (unsubscribeLinkArgument != null)
-        {
-            var unsubscribeLink = (string)unsubscribeLinkArgument.Value;
+        var unsubscribeLink = (string)unsubscribeLinkArgument?.Value;
 
-            if (!string.IsNullOrEmpty(unsubscribeLink))
-            {
-                return unsubscribeLink + "/notification";
-            }
+        if (!string.IsNullOrEmpty(unsubscribeLink))
+        {
+            return unsubscribeLink + "/notification";
         }
 
         return GetSiteUnsubscribeLink(message, settings);

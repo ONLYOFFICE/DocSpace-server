@@ -46,14 +46,14 @@ public class MobileAppInstallRegistrator : IMobileAppInstallRegistrator
             LastSign = DateTime.UtcNow
         };
 
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         await dbContext.MobileAppInstall.AddAsync(mai);
         await dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> IsInstallRegisteredAsync(string userEmail, MobileAppType? appType)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.AnyMobileAppInstallAsync(dbContext, userEmail, appType);
     }
 }

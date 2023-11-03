@@ -77,7 +77,7 @@ public class OAuth20TokenHelper
 
         var stateUriBuilder = new UriBuilder(u.Scheme, u.Host, u.Port, $"thirdparty/{loginProvider.Name.ToLower()}/code");
 
-        if (additionalStateArgs != null && additionalStateArgs.Count > 0)
+        if (additionalStateArgs is { Count: > 0 })
         {
             var stateQuery = "";
             stateQuery = additionalStateArgs.Keys
@@ -110,9 +110,9 @@ public class OAuth20TokenHelper
         var clientSecret = loginProvider.ClientSecret;
         var redirectUri = loginProvider.RedirectUri;
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(authCode);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(clientID);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(clientSecret);
+        ArgumentException.ThrowIfNullOrEmpty(authCode);
+        ArgumentException.ThrowIfNullOrEmpty(clientID);
+        ArgumentException.ThrowIfNullOrEmpty(clientSecret);
 
         var data = $"code={HttpUtility.UrlEncode(authCode)}&client_id={HttpUtility.UrlEncode(clientID)}&client_secret={HttpUtility.UrlEncode(clientSecret)}";
 

@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.Data;
 
-[Singletone(Additional = typeof(MessagesRepositoryExtension))]
+[Singleton(Additional = typeof(MessagesRepositoryExtension))]
 public class MessagesRepository : IDisposable
 {
     private DateTime _lastSave = DateTime.UtcNow;
@@ -38,8 +38,8 @@ public class MessagesRepository : IDisposable
     private readonly ILogger<MessagesRepository> _logger;
     private readonly Timer _timer;
     private readonly int _cacheLimit;
-    private readonly HashSet<MessageAction> _forceSaveAuditActions = new HashSet<MessageAction>
-        { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private readonly HashSet<MessageAction> _forceSaveAuditActions = new() { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
@@ -81,7 +81,7 @@ public class MessagesRepository : IDisposable
     {
         if (ForseSave(message))
         {
-            var id = 0;
+            int id;
             if (!string.IsNullOrEmpty(message.UAHeader))
             {
                 try
@@ -95,7 +95,7 @@ public class MessagesRepository : IDisposable
             }
 
             using var scope = _serviceScopeFactory.CreateScope();
-            await using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
 
             if ((int)message.Action < 2000)
             {
@@ -111,7 +111,9 @@ public class MessagesRepository : IDisposable
         var now = DateTime.UtcNow;
         var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, message.Id, now.Ticks);
 
-        lock (_cache)
+        await _semaphore.WaitAsync();
+
+        try
         {
             _cache[key] = message;
 
@@ -120,6 +122,10 @@ public class MessagesRepository : IDisposable
                 _timer.Change(0, 100);
                 _timerStarted = true;
             }
+        }
+        finally
+        {
+            _semaphore.Release();
         }
         return 0;
     }
@@ -151,7 +157,7 @@ public class MessagesRepository : IDisposable
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
-        await using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+        await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
 
         var dict = new Dictionary<string, ClientInfo>();
 
@@ -199,11 +205,6 @@ public class MessagesRepository : IDisposable
             events = new List<EventMessage>(_cache.Values);
             _cache.Clear();
             _lastSave = DateTime.UtcNow;
-        }
-
-        if (events.Count == 0)
-        {
-            return;
         }
 
         using var scope = _serviceScopeFactory.CreateScope();

@@ -130,17 +130,13 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
 [Transient]
 internal class SharpBoxStorageDisposableWrapper : IDisposable
 {
-    private readonly ConcurrentDictionary<int, CloudStorage> _storages =
-        new ConcurrentDictionary<int, CloudStorage>();
-
-    public SharpBoxStorageDisposableWrapper()
-    { }
+    private readonly ConcurrentDictionary<int, CloudStorage> _storages = new();
 
     public void Dispose()
     {
         foreach (var (key, storage) in _storages)
         {
-            if (storage != null && storage.IsOpened)
+            if (storage is { IsOpened: true })
             {
                 storage.Close();
                 _storages.Remove(key, out _);

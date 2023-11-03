@@ -26,10 +26,10 @@
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class AWSSender : SmtpSender, IDisposable
 {
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private readonly SemaphoreSlim _semaphore = new(1);
     private AmazonSimpleEmailServiceClient _amazonEmailServiceClient;
     private TimeSpan _refreshTimeout;
     private DateTime _lastRefresh;
@@ -94,14 +94,16 @@ public class AWSSender : SmtpSender, IDisposable
         }
         catch (AmazonSimpleEmailServiceException e)
         {
-            result = e.ErrorType == ErrorType.Sender ? NoticeSendResult.MessageIncorrect : NoticeSendResult.TryOnceAgain;
+            result = e.ErrorType == ErrorType.Sender
+                ? NoticeSendResult.MessageIncorrect
+                : NoticeSendResult.TryOnceAgain;
         }
         catch (Exception)
         {
             result = NoticeSendResult.SendingImpossible;
         }
 
-        if (result == NoticeSendResult.MessageIncorrect || result == NoticeSendResult.SendingImpossible)
+        if (result is NoticeSendResult.MessageIncorrect or NoticeSendResult.SendingImpossible)
         {
             _logger.DebugAmazonSendingFailed(result);
             result = await base.SendAsync(m);
@@ -125,13 +127,14 @@ public class AWSSender : SmtpSender, IDisposable
 
                 return NoticeSendResult.SendingImpossible;
             }
+
             _semaphore.Release();
         }
 
         var message = BuildMailMessage(m);
 
         using var ms = new MemoryStream();
-        message.WriteTo(ms);
+        await message.WriteToAsync(ms);
 
         var request = new SendRawEmailRequest(new RawMessage(ms));
 
@@ -148,17 +151,14 @@ public class AWSSender : SmtpSender, IDisposable
     private void ThrottleIfNeeded()
     {
         //Check last send and throttle if needed
-        if (_sendWindow != TimeSpan.MinValue)
+        if (_sendWindow != TimeSpan.MinValue && DateTime.UtcNow - _lastSend <= _sendWindow)
         {
-            if (DateTime.UtcNow - _lastSend <= _sendWindow)
-            {
                 //Possible BUG: at high frequncies maybe bug with to little differences
                 //This means that time passed from last send is less then message per second
                 _logger.DebugSendRate(_sendWindow);
                 Thread.Sleep(_sendWindow);
             }
         }
-    }
 
     private async Task RefreshQuotaIfNeeded()
     {
@@ -186,6 +186,7 @@ public class AWSSender : SmtpSender, IDisposable
                 _logger.ErrorRefreshingQuota(e);
             }
         }
+
         _semaphore.Release();
     }
 

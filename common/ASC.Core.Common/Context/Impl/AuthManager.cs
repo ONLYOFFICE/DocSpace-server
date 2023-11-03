@@ -60,7 +60,7 @@ public class AuthManager
 
     public async Task<IAccount> GetAccountByIDAsync(int tenantId, Guid id)
     {
-        var s = Configuration.Constants.SystemAccounts.FirstOrDefault(a => a.ID == id);
+        var s = Array.Find(Configuration.Constants.SystemAccounts, a => a.ID == id);
         if (s != null)
         {
             return s;

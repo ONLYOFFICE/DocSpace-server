@@ -41,14 +41,11 @@ public static class WebHostExtensions
 
             var unixSocket = kestrelConfig.GetValue<string>("ListenUnixSocket");
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !string.IsNullOrWhiteSpace(unixSocket))
             {
-                if (!string.IsNullOrWhiteSpace(unixSocket))
-                {
-                    unixSocket = string.Format(unixSocket, hostingContext.HostingEnvironment.ApplicationName.Replace("ASC.", "").Replace(".", ""));
+                unixSocket = string.Format(unixSocket, hostingContext.HostingEnvironment.ApplicationName.Replace("ASC.", "").Replace(".", ""));
 
-                    serverOptions.ListenUnixSocket(unixSocket);
-                }
+                serverOptions.ListenUnixSocket(unixSocket);
             }
 
             configureDelegate?.Invoke(hostingContext, serverOptions);

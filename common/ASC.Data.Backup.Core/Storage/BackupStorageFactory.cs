@@ -29,7 +29,6 @@ namespace ASC.Data.Backup.Storage;
 [Scope]
 public class BackupStorageFactory
 {
-    private readonly ConfigurationExtension _configuration;
     private readonly DocumentsBackupStorage _documentsBackupStorage;
     private readonly ILogger<BackupStorageFactory> _logger;
     private readonly LocalBackupStorage _localBackupStorage;
@@ -39,12 +38,10 @@ public class BackupStorageFactory
     public BackupStorageFactory(
         ConsumerBackupStorage consumerBackupStorage,
         LocalBackupStorage localBackupStorage,
-        ConfigurationExtension configuration,
         DocumentsBackupStorage documentsBackupStorage,
         TenantManager tenantManager,
         ILogger<BackupStorageFactory> logger)
     {
-        _configuration = configuration;
         _documentsBackupStorage = documentsBackupStorage;
         _logger = logger;
         _localBackupStorage = localBackupStorage;
@@ -68,8 +65,6 @@ public class BackupStorageFactory
 
     public async Task<IBackupStorage> GetBackupStorageAsync(BackupStorageType type, int tenantId, Dictionary<string, string> storageParams)
     {
-        var settings = _configuration.GetSetting<BackupSettings>("backup");
-
         switch (type)
         {
             case BackupStorageType.Documents:

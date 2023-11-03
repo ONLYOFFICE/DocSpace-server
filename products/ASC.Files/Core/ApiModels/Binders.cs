@@ -229,12 +229,9 @@ public class BatchModelBinder : BaseBatchModelBinder
             result.DeleteAfter = deleteAfter;
         }
 
-        if (bindingContext.GetFirstValue(nameof(result.ConflictResolveType), out var сonflictResolveTypeValue))
+        if (bindingContext.GetFirstValue(nameof(result.ConflictResolveType), out var conflictResolveTypeValue) && FileConflictResolveTypeExtensions.TryParse(conflictResolveTypeValue, out var conflictResolveType))
         {
-            if (FileConflictResolveTypeExtensions.TryParse(сonflictResolveTypeValue, out var conflictResolveType))
-            {
-                result.ConflictResolveType = conflictResolveType;
-            }
+            result.ConflictResolveType = conflictResolveType;
         }
 
         if (bindingContext.GetFirstValue(nameof(result.DestFolderId), out var firstValue))
@@ -254,10 +251,8 @@ public class InsertFileModelBinder : IModelBinder
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
-        var defaultBindingContext = bindingContext as DefaultModelBindingContext;
-        var composite = bindingContext.ValueProvider as CompositeValueProvider;
-
-        if (defaultBindingContext != null && composite != null && composite.Count == 0)
+        if (bindingContext is DefaultModelBindingContext defaultBindingContext && 
+            bindingContext.ValueProvider is CompositeValueProvider { Count: 0 })
         {
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
         }
@@ -300,7 +295,7 @@ public class UploadModelBinder : IModelBinder
         var defaultBindingContext = bindingContext as DefaultModelBindingContext;
         var composite = bindingContext.ValueProvider as CompositeValueProvider;
 
-        if (defaultBindingContext != null && composite != null && composite.Count == 0)
+        if (defaultBindingContext != null && composite is { Count: 0 })
         {
             bindingContext.ValueProvider = defaultBindingContext.OriginalValueProvider;
         }
@@ -322,20 +317,14 @@ public class UploadModelBinder : IModelBinder
             result.StoreOriginalFileFlag = storeOriginalFileFlag;
         }
 
-        if (bindingContext.GetFirstValue(nameof(result.ContentType), out var contentType))
+        if (bindingContext.GetFirstValue(nameof(result.ContentType), out var contentType) && !string.IsNullOrEmpty(contentType))
         {
-            if (!string.IsNullOrEmpty(contentType))
-            {
-                result.ContentType = new ContentType(contentType);
-            }
+            result.ContentType = new ContentType(contentType);
         }
 
-        if (bindingContext.GetFirstValue(nameof(result.ContentDisposition), out var contentDisposition))
+        if (bindingContext.GetFirstValue(nameof(result.ContentDisposition), out var contentDisposition) && !string.IsNullOrEmpty(contentDisposition))
         {
-            if (!string.IsNullOrEmpty(contentDisposition))
-            {
-                result.ContentDisposition = new ContentDisposition(contentDisposition);
-            }
+            result.ContentDisposition = new ContentDisposition(contentDisposition);
         }
 
         bindingContext.HttpContext.Request.EnableBuffering();
