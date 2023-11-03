@@ -218,7 +218,7 @@ public class WebPluginsController : BaseSettingsController
 
         var domains = plugin.CspDomains.Split(',');
 
-        var currentDomains = settings.Domains.ToList();
+        var currentDomains = settings.Domains?.ToList() ?? new List<string>();
 
         if (enabled)
         {
