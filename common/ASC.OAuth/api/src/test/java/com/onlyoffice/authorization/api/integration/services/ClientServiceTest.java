@@ -70,7 +70,7 @@ public class ClientServiceTest extends ContainerBase {
     @Test
     void shouldChangeClientActivation() {
         clientService.changeActivation(ChangeClientActivationDTO
-                .builder().enabled(false).build(), "client");
+                .builder().status(false).build(), "client");
 
         var c = clientService.getClient("client");
         assertFalse(c.isEnabled());
