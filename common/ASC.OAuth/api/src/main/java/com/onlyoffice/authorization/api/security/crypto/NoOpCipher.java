@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 /**
  *
  */
-@Profile(value = {"dev", "development", "test", "testing", "d", "t"})
+@Profile(value = {"dev", "development", "d"})
 @Component
 @Slf4j
 public class NoOpCipher implements Cipher {
