@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Radicale;
 
-[Singletone]
+[Singleton]
 public class RadicaleClient
 {
     private readonly ILogger<RadicaleClient> _logger;

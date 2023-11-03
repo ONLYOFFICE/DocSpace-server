@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-	  <ImplicitUsings>enable</ImplicitUsings>
+      <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
@@ -12,9 +12,9 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<Nullable>disable</Nullable>
-	</PropertyGroup>
+  <PropertyGroup>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="proto\webhook_request.proto" />
@@ -51,6 +51,75 @@
     <EmbeddedResource Update="Resources\WebHookResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>WebHookResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.ar-SA.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.az.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.bg.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.cs.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.el-GR.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.es.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.fi.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.fr.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.hy-AM.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.it.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.ko-KR.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.lv.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.nl.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.pl.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.pt.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.ro.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.ru.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.sk.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.sl.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.tr.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.uk-UA.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.vi.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\WebHookResource.zh-CN.resx">
+      <DependentUpon>WebHookResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
 

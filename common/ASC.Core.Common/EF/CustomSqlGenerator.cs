@@ -56,8 +56,6 @@ public class CustomMySqlMigrationsSqlGenerator : MySqlMigrationsSqlGenerator
             Options = MigrationsSqlGenerationOptions.Default;
         }
 
-        var test = migrationCommandListBuilder.GetCommandList();
-
         return migrationCommandListBuilder.GetCommandList();
     }
 
@@ -93,7 +91,7 @@ public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
             _isIndexOperation = true;
         }
 
-        if (_isIndexOperation == true)
+        if (_isIndexOperation)
         {
             _operationContainer += o;
         }
@@ -107,9 +105,9 @@ public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
 
     public override MigrationCommandListBuilder AppendLine(string value)
     {
-        if (_isIndexOperation == true)
+        if (_isIndexOperation)
         {
-            AppendIndexOpeartion(_operationContainer);
+            AppendIndexOperation(_operationContainer);
 
             _operationContainer = "";
             _isIndexOperation = false;
@@ -118,20 +116,20 @@ public class CustomMigrationCommandListBuilder : MigrationCommandListBuilder
         return base.AppendLine(value);
     }
 
-    private void AppendIndexOpeartion(string indexOperation)
+    private void AppendIndexOperation(string indexOperation)
     {
-        const string startOpearation = "CREATE ";
+        const string startOperation = "CREATE ";
         const string startUnique = "UNIQUE ";
         const string startIndexName = "INDEX `";
         const string startTableName = "` ON `";
         const string StartColumnsName = "` (`";
         const string endColumnsName = "`)";
 
-        var separatingStrings = new[] { startOpearation, startUnique, startIndexName, startTableName, StartColumnsName, endColumnsName };
-        var separatedOpearion = indexOperation.Split(separatingStrings, StringSplitOptions.RemoveEmptyEntries);
+        var separatingStrings = new[] { startOperation, startUnique, startIndexName, startTableName, StartColumnsName, endColumnsName };
+        var separatedOperation = indexOperation.Split(separatingStrings, StringSplitOptions.RemoveEmptyEntries);
 
-        var indexName = separatedOpearion[0];
-        var tableName = separatedOpearion[1];
+        var indexName = separatedOperation[0];
+        var tableName = separatedOperation[1];
 
         var createIndexForMySQL =
             $"set @x := (select count(*) from information_schema.statistics where table_name = '{tableName}' and index_name = '{indexName}' and table_schema = database()); " +

@@ -35,16 +35,13 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 public class PortalController : ControllerBase
 {
-    protected Tenant Tenant { get { return _apiContext.Tenant; } }
-
-    private readonly ApiContext _apiContext;
-    protected readonly UserManager _userManager;
-    protected readonly TenantManager _tenantManager;
-    protected readonly ITariffService _tariffService;
+    private readonly UserManager _userManager;
+    private readonly TenantManager _tenantManager;
+    private readonly ITariffService _tariffService;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IUrlShortener _urlShortener;
     private readonly AuthContext _authContext;
-    protected readonly SecurityContext _securityContext;
+    private readonly SecurityContext _securityContext;
     private readonly SettingsManager _settingsManager;
     private readonly IMobileAppInstallRegistrator _mobileAppInstallRegistrator;
     private readonly IConfiguration _configuration;
@@ -73,7 +70,6 @@ public class PortalController : ControllerBase
 
     public PortalController(
         ILogger<PortalController> logger,
-        ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
@@ -107,7 +103,6 @@ public class PortalController : ControllerBase
         CspSettingsHelper cspSettingsHelper)
     {
         _log = logger;
-        _apiContext = apiContext;
         _userManager = userManager;
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -153,9 +148,10 @@ public class PortalController : ControllerBase
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("")]
-    public TenantDto Get()
+    public async Task<TenantDto> Get()
     {
-        return _mapper.Map<TenantDto>(Tenant);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();   
+        return _mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
@@ -237,32 +233,29 @@ public class PortalController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
-    [AllowNotPayment, AllowAnonymous]
+    [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
+        var quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
+        var docServiceQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
+        
         var result = new TenantExtraDto
         {
             CustomMode = _coreBaseSettings.CustomMode,
             Opensource = _tenantExtra.Opensource,
             Enterprise = _tenantExtra.Enterprise,
-            EnableTariffPage = //TenantExtra.EnableTarrifSettings - think about hide-settings for opensource
+            EnableTariffPage = 
                 (!_coreBaseSettings.Standalone || !string.IsNullOrEmpty(_licenseReader.LicensePath))
                 && string.IsNullOrEmpty(_setupInfo.AmiMetaUrl)
-                && !_coreBaseSettings.CustomMode
+                && !_coreBaseSettings.CustomMode,
+            Tariff = await _tenantExtra.GetCurrentTariffAsync(),
+            Quota = quota,
+            NotPaid = await _tenantExtra.IsNotPaidAsync(),
+            LicenseAccept = (await _settingsManager.LoadForDefaultTenantAsync<TariffSettings>()).LicenseAcceptSetting,
+            DocServerUserQuota = docServiceQuota.Item1,
+            DocServerLicense = docServiceQuota.Item2
         };
-
-
-
-        if (_authContext.IsAuthenticated)
-        {
-            result.Tariff = await _tenantExtra.GetCurrentTariffAsync(refresh);
-            result.Quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
-            result.NotPaid = await _tenantExtra.IsNotPaidAsync();
-            result.LicenseAccept = _settingsManager.LoadForDefaultTenant<TariffSettings>().LicenseAcceptSetting;
-            result.DocServerUserQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
-            result.DocServerLicense = await _documentServiceLicense.GetLicenseAsync();
-        }
 
         return result;
     }
@@ -281,8 +274,9 @@ public class PortalController : ControllerBase
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
         return Math.Round(
-            (await _tenantManager.FindTenantQuotaRowsAsync(Tenant.Id))
+            (await _tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
                         .Where(q => !string.IsNullOrEmpty(q.Tag) && new Guid(q.Tag) != Guid.Empty)
                         .Sum(q => q.Counter) / 1024f / 1024f / 1024f, 2);
     }
@@ -319,7 +313,8 @@ public class PortalController : ControllerBase
     [HttpGet("tariff")]
     public async Task<Tariff> GetTariffAsync(bool refresh)
     {
-        return await _tariffService.GetTariffAsync(Tenant.Id, refresh: refresh);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return await _tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
     }
 
     /// <summary>
@@ -336,7 +331,8 @@ public class PortalController : ControllerBase
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
     {
-        return await _tenantManager.GetTenantQuotaAsync(Tenant.Id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        return await _tenantManager.GetTenantQuotaAsync(tenant.Id);
     }
 
     /// <summary>
@@ -509,7 +505,7 @@ public class PortalController : ControllerBase
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
         if (string.IsNullOrEmpty(alias))
@@ -620,18 +616,19 @@ public class PortalController : ControllerBase
     [HttpPost("suspend")]
     public async Task SendSuspendInstructionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (_securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        var owner = await _userManager.GetUsersAsync(Tenant.OwnerId);
+        var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
         var suspendUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
 
-        await _studioNotifyService.SendMsgPortalDeactivationAsync(Tenant, suspendUrl, continueUrl);
+        await _studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
 
         await _messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
     }
@@ -648,20 +645,22 @@ public class PortalController : ControllerBase
     [HttpPost("delete")]
     public async Task SendDeleteInstructionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (_securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        var owner = await _userManager.GetUsersAsync(Tenant.OwnerId);
+        var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
 
         var showAutoRenewText = !_coreBaseSettings.Standalone &&
-                        (await _tariffService.GetPaymentsAsync(Tenant.Id)).Any() &&
+                        (await _tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
                         !(await _tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        await _studioNotifyService.SendMsgPortalDeletionAsync(Tenant, await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
+        await _studioNotifyService.SendMsgPortalDeletionAsync(tenant, await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
 
         await _messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
     }
@@ -679,8 +678,9 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
     public async Task ContinuePortalAsync()
     {
-        Tenant.SetStatus(TenantStatus.Active);
-        await _tenantManager.SaveTenantAsync(Tenant);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        tenant.SetStatus(TenantStatus.Active);
+        await _tenantManager.SaveTenantAsync(tenant);
     }
 
     /// <summary>
@@ -695,8 +695,9 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortalAsync()
     {
-        Tenant.SetStatus(TenantStatus.Suspended);
-        await _tenantManager.SaveTenantAsync(Tenant);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        tenant.SetStatus(TenantStatus.Suspended);
+        await _tenantManager.SaveTenantAsync(tenant);
         await _messageService.SendAsync(MessageAction.PortalDeactivated);
     }
 
@@ -713,23 +714,24 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
     public async Task<object> DeletePortalAsync()
     {
-        if (_securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        await _tenantManager.RemoveTenantAsync(Tenant.Id);
+        await _tenantManager.RemoveTenantAsync(tenant.Id);
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(Tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
         }
 
-        var owner = await _userManager.GetUsersAsync(Tenant.OwnerId);
+        var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
         var redirectLink = _setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#";
         var parameters = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
                                                                                 "\",\"lastname\":\"" + owner.LastName +
-                                                                                "\",\"alias\":\"" + Tenant.Alias +
+                                                                                "\",\"alias\":\"" + tenant.Alias +
                                                                                 "\",\"email\":\"" + owner.Email + "\"}"));
 
         redirectLink += HttpUtility.UrlEncode(parameters);
@@ -754,7 +756,7 @@ public class PortalController : ControllerBase
             }
         }
 
-        _eventBus.Publish(new RemovePortalIntegrationEvent(_securityContext.CurrentAccount.ID, Tenant.Id));
+        _eventBus.Publish(new RemovePortalIntegrationEvent(_securityContext.CurrentAccount.ID, tenant.Id));
 
         await _studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 

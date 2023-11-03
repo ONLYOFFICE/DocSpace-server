@@ -56,7 +56,7 @@ public class CustomTagsService
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
         }
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(name);
+        ArgumentException.ThrowIfNullOrEmpty(name);
 
         var tagDao = _daoFactory.GetTagDao<int>();
         var tags = await tagDao.GetTagsInfoAsync(name, TagType.Custom, true).ToListAsync();
@@ -123,7 +123,7 @@ public class CustomTagsService
 
         await tagDao.SaveTags(tags);
 
-        _ = _filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await _filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
 
         return folder;
     }
@@ -148,7 +148,7 @@ public class CustomTagsService
 
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id));
 
-        _ = _filesMessageService.SendAsync(MessageAction.DeletedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await _filesMessageService.SendAsync(MessageAction.DeletedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
 
         return folder;
     }

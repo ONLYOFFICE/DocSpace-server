@@ -81,15 +81,15 @@ public static class ContentDispositionUtil
     // http://greenbytes.de/tech/webdav/draft-reschke-rfc2231-in-http-latest.html
     private static bool IsByteValidHeaderValueCharacter(byte b)
     {
-        if ((byte)'0' <= b && b <= (byte)'9')
+        if (b is >= (byte)'0' and <= (byte)'9')
         {
             return true; // is digit
         }
-        if ((byte)'a' <= b && b <= (byte)'z')
+        if (b is >= (byte)'a' and <= (byte)'z')
         {
             return true; // lowercase letter
         }
-        if ((byte)'A' <= b && b <= (byte)'Z')
+        if (b is >= (byte)'A' and <= (byte)'Z')
         {
             return true; // uppercase letter
         }

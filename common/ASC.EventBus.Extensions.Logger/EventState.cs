@@ -24,7 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-public class GetReferenceDataFromPathDto<T>
+namespace ASC.EventBus.Extensions.Logger;
+
+public enum EventState
 {
-    public string Path { get; set; }
+    NotPublished = 0,
+    InProgress = 1,
+    Published = 2,
+    PublishedFailed = 3
 }
+

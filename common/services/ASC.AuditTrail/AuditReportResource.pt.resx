@@ -135,13 +135,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Sala eliminada</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Link criado. Papel: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Link eliminado</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Link atualizado. Papel: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">

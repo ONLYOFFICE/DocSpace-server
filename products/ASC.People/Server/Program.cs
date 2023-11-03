@@ -41,7 +41,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (logevent) => AppName);
+                                s.RegisterLayoutRenderer("application-context", (_) => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -83,6 +83,6 @@ finally
 
 public partial class Program
 {
-    public static string Namespace = typeof(Startup).Namespace;
-    public static string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
+    public static readonly string Namespace = typeof(Startup).Namespace;
+    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.') + 1);
 }

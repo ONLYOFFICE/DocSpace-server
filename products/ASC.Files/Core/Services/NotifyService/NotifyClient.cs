@@ -127,7 +127,7 @@ public class NotifyClient
             );
     }
 
-    public async Task SendShareNoticeAsync<T>(FileEntry<T> fileEntry, Dictionary<Guid, FileShare> recipients, string message)
+    public async Task SendShareNoticeAsync<T>(FileEntry<T> fileEntry, Dictionary<Guid, FileShare> recipients, string message, string culture = null)
     {
         if (fileEntry == null || recipients.Count == 0)
         {
@@ -173,18 +173,25 @@ public class NotifyClient
         foreach (var recipientPair in recipients)
         {
             var u = await _userManager.GetUsersAsync(recipientPair.Key);
-            var culture = string.IsNullOrEmpty(u.CultureName)
-                              ? (await _tenantManager.GetCurrentTenantAsync()).GetCulture()
-                              : CultureInfo.GetCultureInfo(u.CultureName);
+            CultureInfo userCulture;
 
-            var aceString = GetAccessString(recipientPair.Value, culture);
+            if (!string.IsNullOrEmpty(culture))
+            {
+                userCulture = CultureInfo.GetCultureInfo(culture);
+            }
+            else
+            {
+                userCulture = string.IsNullOrEmpty(u.CultureName)
+                    ? (await _tenantManager.GetCurrentTenantAsync()).GetCulture()
+                    : CultureInfo.GetCultureInfo(u.CultureName);
+            }
+            
+
+            var aceString = GetAccessString(recipientPair.Value, userCulture);
             var recipient = await recipientsProvider.GetRecipientAsync(u.Id.ToString());
 
-            await client.SendNoticeAsync(
-                action,
-                fileEntry.UniqID,
-                recipient,
-                true,
+            var tags = new List<ITagValue>
+            {
                 new TagValue(NotifyConstants.TagDocumentTitle, fileEntry.Title),
                 new TagValue(NotifyConstants.TagDocumentUrl, _baseCommonLinkUtility.GetFullAbsolutePath(url)),
                 new TagValue(NotifyConstants.TagDocumentExtension, fileExtension),
@@ -195,6 +202,19 @@ public class NotifyClient
                 new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType),
                 TagValues.Image(_studioNotifyHelper, 0, "privacy.png"),
                 new AdditionalSenderTag("push.sender")
+            };
+            
+            if (!string.IsNullOrEmpty(culture))
+            {
+                tags.Add(new TagValue(CommonTags.Culture, culture));
+            }
+            
+            await client.SendNoticeAsync(
+                action,
+                fileEntry.UniqID,
+                recipient,
+                true,
+                tags.ToArray()
                 );
         }
     }
@@ -222,9 +242,9 @@ public class NotifyClient
             if (!await _fileSecurity.CanReadAsync(room, recipientId))
             {
                 continue;
-            };
+            }
 
-            var u = _userManager.GetUsers(recipientId);
+            var u = await _userManager.GetUsersAsync(recipientId);
 
             if (!await _studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.RoomsActivity))
             {

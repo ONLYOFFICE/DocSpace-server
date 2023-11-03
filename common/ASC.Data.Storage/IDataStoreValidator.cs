@@ -24,21 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Utils;
+namespace ASC.Data.Storage;
 
-static class FCKEditorPathUtility
+public interface IDataStoreValidator
 {
-    private static readonly Regex _regex = new Regex("(?<start>\\/data\\/(?>htmleditorfiles|fckcomments))(?<tenant>\\/0\\/|\\/[\\d]+\\/\\d\\d\\/\\d\\d\\/)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    public static string CorrectStoragePath(string content, int tenant)
-    {
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return content;
-        }
-
-        var tenantPath = "/" + TenantPath.CreatePath(tenant) + "/";
-
-        return _regex.Replace(content, (m) => m.Success ? m.Groups["start"] + tenantPath : string.Empty);
-    }
+    Task<bool> Validate(string path);
 }

@@ -28,11 +28,11 @@ namespace ASC.ActiveDirectory.Base;
 
 public static class NotifyConstants
 {
-    public static string TagUserName = "UserName";
-    public static string TagUserEmail = "UserEmail";
-    public static string TagMyStaffLink = "MyStaffLink";
+    public static readonly string TagUserName = "UserName";
+    public static readonly string TagUserEmail = "UserEmail";
+    public static readonly string TagMyStaffLink = "MyStaffLink";
 
-    public static INotifyAction ActionLdapActivation = new NotifyAction("user_ldap_activation");
+    public static readonly INotifyAction ActionLdapActivation = new NotifyAction("user_ldap_activation");
 
     public static ITagValue TagOrangeButton(string btnText, string btnUrl)
     {
@@ -43,28 +43,6 @@ public static class NotifyConstants
 
         return new TagValue("OrangeButton", action);
     }
-
-    private class TagActionValue : ITagValue
-    {
-        private readonly Func<string> action;
-
-        public string Tag
-        {
-            get;
-            private set;
-        }
-
-        public object Value
-        {
-            get { return action(); }
-        }
-
-        public TagActionValue(string name, Func<string> action)
-        {
-            Tag = name;
-            this.action = action;
-        }
-    }
 }
 
 public static class NotifyCommonTags
@@ -73,5 +51,5 @@ public static class NotifyCommonTags
 
     public static string MasterTemplate = "MasterTemplate";
 
-    public static string WithoutUnsubscribe = "WithoutUnsubscribe";
+    public static readonly string WithoutUnsubscribe = "WithoutUnsubscribe";
 }

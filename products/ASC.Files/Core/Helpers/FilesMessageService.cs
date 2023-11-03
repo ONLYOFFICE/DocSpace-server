@@ -85,7 +85,7 @@ public class FilesMessageService
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, Guid userId, FileShare userRole, params string[] description)
     {
-        description = description.Append(FileStorageService.GetAccessString(userRole)).ToArray();
+        description = description.Append(FileShareExtensions.GetAccessString(userRole)).ToArray();
         await SendAsync(action, entry, null, userId, userRole, description);
     }
 
@@ -127,7 +127,7 @@ public class FilesMessageService
             description = description.Append(additionalParam).ToArray();
         }
 
-        await _messageService.SendAsync(action, _messageTarget.Create(entry.Id), description);
+        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create(entry.Id), null, description);
     }
 
     public async Task SendAsync<T1, T2>(MessageAction action, FileEntry<T1> entry1, FileEntry<T2> entry2, IDictionary<string, StringValues> headers, params string[] description)
@@ -151,7 +151,7 @@ public class FilesMessageService
             return;
         }
 
-        await _messageService.SendHeadersMessageAsync(action, _messageTarget.CreateFromGroupValues(new[] { entry1.Id.ToString(), entry2.Id.ToString() }), headers, description);
+        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string description)
@@ -229,7 +229,7 @@ public class FilesMessageService
             info.RoomOldTitle = oldTitle;
         }
 
-        if ((action == MessageAction.RoomCreateUser || action == MessageAction.RoomRemoveUser)
+        if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
             && userid != Guid.Empty)
         {
             info.UserIds = new List<Guid> { userid };

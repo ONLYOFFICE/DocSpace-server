@@ -34,8 +34,8 @@ namespace ASC.Web.Core.Helpers;
 [Scope]
 public class ApiSystemHelper
 {
-    public string ApiSystemUrl { get; private set; }
-    private static byte[] _skey;
+    public string ApiSystemUrl { get; }
+    private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
     private readonly AmazonDynamoDBClient _awsDynamoDBClient;
@@ -229,7 +229,7 @@ public class ApiSystemHelper
 
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
-        if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out var uri))
+        if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))
         {
             var appUrl = _commonLinkUtility.GetFullAbsolutePath("/");
             absoluteApiUrl = $"{appUrl.TrimEnd('/')}/{absoluteApiUrl.TrimStart('/')}".TrimEnd('/');

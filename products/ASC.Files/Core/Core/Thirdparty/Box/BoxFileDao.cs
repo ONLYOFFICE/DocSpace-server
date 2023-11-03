@@ -85,8 +85,9 @@ internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
 
         uploadSession.BytesUploaded += chunkLength;
 
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
+        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
                                            FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
             uploadSession.File = await SaveFileAsync(uploadSession.File, fs);

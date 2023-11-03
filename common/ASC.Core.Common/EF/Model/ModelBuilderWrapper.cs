@@ -102,7 +102,7 @@ public class ModelBuilderWrapper
                     }
                 }
 
-                return new SqlFunctionExpression("JSON_EXTRACT", res, true, res.Select((SqlExpression a) => false), typeof(string), null);
+                return new SqlFunctionExpression("JSON_EXTRACT", res, true, res.Select(_ => false), typeof(string), null);
             });
 
         switch (Provider)

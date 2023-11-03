@@ -99,5 +99,20 @@
     <EmbeddedResource Update="AuditReportResource.az.resx">
       <DependentUpon>AuditReportResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ar-SA.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.hy-AM.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ko-KR.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.pt.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AuditReportResource.ro.resx">
+      <DependentUpon>AuditReportResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

@@ -63,23 +63,24 @@ public class DefaultDistributedTaskQueueFactory : IDistributedTaskQueueFactory
         _options = options;
     }
 
-    public DistributedTaskQueue CreateQueue<T>() where T : DistributedTask
+    public DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
     {
-        return CreateQueue(typeof(T).FullName);
+        return CreateQueue(typeof(T).FullName, timeUntilUnregisterInSeconds);
     }
 
-    public DistributedTaskQueue CreateQueue(Type type)
+    public DistributedTaskQueue CreateQueue(Type type, int timeUntilUnregisterInSeconds = 60)
     {
-        return CreateQueue(type.FullName);
+        return CreateQueue(type.FullName, timeUntilUnregisterInSeconds);
     }
 
-    public DistributedTaskQueue CreateQueue(string name = default(string))
+    public DistributedTaskQueue CreateQueue(string name = default(string), int timeUntilUnregisterInSeconds = 60)
     {
         var option = _options.Get(name);
         var queue = _serviceProvider.GetRequiredService<DistributedTaskQueue>();
 
         queue.MaxThreadsCount = option.MaxThreadsCount;
         queue.Name = name;
+        queue.TimeUntilUnregisterInSeconds = timeUntilUnregisterInSeconds;
 
         return queue;
     }

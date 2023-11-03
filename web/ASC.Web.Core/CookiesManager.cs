@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Data;
-
 using Microsoft.Net.Http.Headers;
 
 using Constants = ASC.Core.Users.Constants;
@@ -111,7 +109,7 @@ public class CookiesManager
             {
                 options.Secure = true;
 
-                if (_sameSiteMode.HasValue && _sameSiteMode.Value == SameSiteMode.None)
+                if (_sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = _sameSiteMode.Value;
                 }
@@ -221,7 +219,7 @@ public class CookiesManager
         if (lifeTime > 0)
         {
             settings.Index += 1;
-            settings.LifeTime = lifeTime;
+            settings.LifeTime = lifeTime > 9999 ? 9999 : lifeTime;
         }
         else
         {

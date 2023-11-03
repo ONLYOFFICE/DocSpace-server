@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-[Singletone]
+[Singleton]
 public class MessagePolicy
 {
     private readonly IEnumerable<string> _secretIps;

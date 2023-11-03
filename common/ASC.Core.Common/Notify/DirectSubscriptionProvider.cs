@@ -35,7 +35,7 @@ class DirectSubscriptionProvider : ISubscriptionProvider
 
     public DirectSubscriptionProvider(string sourceID, SubscriptionManager subscriptionManager, IRecipientProvider recipientProvider)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(sourceID);
+        ArgumentException.ThrowIfNullOrEmpty(sourceID);
         _sourceId = sourceID;
         _subscriptionManager = subscriptionManager ?? throw new ArgumentNullException(nameof(subscriptionManager));
         _recipientProvider = recipientProvider ?? throw new ArgumentNullException(nameof(recipientProvider));

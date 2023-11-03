@@ -62,8 +62,6 @@ public class FolderContentDto<T>
     /// <type>System.Int32, System</type>
     public int New { get; set; }
 
-    public FolderContentDto() { }
-
     public static FolderContentDto<int> GetSample()
     {
         return new FolderContentDto<int>
@@ -239,7 +237,7 @@ public class FolderContentDtoHelper
                         }
                         if (currentUsersRecords != null)
                         {
-                            result.InRoom = currentUsersRecords.Any(c => c.EntryId.Equals(fol1.Id));
+                            result.InRoom = currentUsersRecords.Exists(c => c.EntryId.Equals(fol1.Id));
                         }
                     }
                 }

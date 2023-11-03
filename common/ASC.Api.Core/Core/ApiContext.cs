@@ -34,8 +34,6 @@ public class ApiContext : ICloneable
     private readonly IHttpContextAccessor _httpContextAccessor;
     public string[] Fields { get; set; }
     public string[] FilterValues { get; set; }
-    public bool FromCache { get; set; }
-    public Tenant Tenant => _tenant ??= _tenantManager.GetCurrentTenant(_httpContextAccessor?.HttpContext);
     public long? TotalCount
     {
         set
@@ -65,7 +63,7 @@ public class ApiContext : ICloneable
     /// <remarks>
     /// Don't forget to call _context.SetDataPaginated() to prevent SmartList from filtering response if you fetch data from DB with TOP &amp; COUNT
     /// </remarks>
-    public long Count { get; set; }
+    public long Count { get; init; }
 
     /// <summary>
     /// Gets start index to get item from collection. Request parameter "startIndex"
@@ -110,15 +108,12 @@ public class ApiContext : ICloneable
     internal long SpecifiedCount { get; private set; }
     internal long SpecifiedStartIndex { get; set; }
 
-    private Tenant _tenant;
     private static readonly int _maxCount = 1000;
     private readonly SecurityContext _securityContext;
-    private readonly TenantManager _tenantManager;
 
-    public ApiContext(IHttpContextAccessor httpContextAccessor, SecurityContext securityContext, TenantManager tenantManager)
+    public ApiContext(IHttpContextAccessor httpContextAccessor, SecurityContext securityContext)
     {
         _securityContext = securityContext;
-        _tenantManager = tenantManager;
         _httpContextAccessor = httpContextAccessor;
         if (httpContextAccessor.HttpContext == null)
         {

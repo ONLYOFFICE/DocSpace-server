@@ -86,14 +86,14 @@ public class EditorControllerThirdparty : EditorController<string>
     public async Task<Configuration<string>> OpenEditThirdPartyAsync(string fileId)
     {
         fileId = "app-" + fileId;
-        var app = _thirdPartySelector.GetAppByFileId(fileId?.ToString());
-        (var file, var editable) = await app.GetFileAsync(fileId?.ToString());
+        var app = _thirdPartySelector.GetAppByFileId(fileId);
+        var (file, editable) = await app.GetFileAsync(fileId);
         var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
         var configuration = docParams.Configuration;
         configuration.Document.Url = app.GetFileStreamUrl(file);
         configuration.Document.Info.Favorite = null;
         configuration.EditorConfig.Customization.GobackUrl = string.Empty;
-        configuration.EditorType = EditorType.External;
+        configuration.EditorType = EditorType.Desktop;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -121,17 +121,17 @@ public class EditorControllerThirdparty : EditorController<string>
 
 public abstract class EditorController<T> : ApiControllerBase
 {
-    protected readonly FileStorageService _fileStorageService;
+    private readonly FileStorageService _fileStorageService;
     protected readonly DocumentServiceHelper _documentServiceHelper;
     protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper;
     protected readonly SettingsManager _settingsManager;
     protected readonly EntryManager _entryManager;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMapper _mapper;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
 
-    public EditorController(
+    protected EditorController(
         FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
@@ -229,7 +229,7 @@ public abstract class EditorController<T> : ApiControllerBase
         var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
         var configuration = docParams.Configuration;
         var file = docParams.File;
-        configuration.EditorType = EditorType.External;
+        configuration.EditorType = EditorType.Desktop;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -304,14 +304,15 @@ public abstract class EditorController<T> : ApiControllerBase
     }
 
     /// <summary>
-    /// 
+    /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
-    /// <short>Get protect users</short>
+    /// <short>Get users with the access to the protected file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId"></param>
-    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users</returns>
+    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the protected file</returns>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("file/{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> ProtectUsers(T fileId)
     {

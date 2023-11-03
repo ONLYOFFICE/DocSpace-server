@@ -101,7 +101,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -122,7 +122,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -143,7 +143,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -164,7 +164,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizējiet savu e-pastu portālā "${__VirtualRootPath}":"$InviteLink".
@@ -188,23 +188,10 @@ Lai uzzinātu vairāk par rezerves kopēšanu, lūdzu, dodieties uz instrukciju 
 
 
 Ja radušies kādi jautājumi, sazinieties ar mums uz:
- "support.onlyoffice.com":"http://support.onlyoffice.com"
+ "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Ar cieņu,
 ONLYOFFICE™ atbalsta komanda</value>
-  </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Paroles maiņas pieprasījums "${__VirtualRootPath}":"${__VirtualRootPath}" portālam
-
-Ir pieprasīta paroles maiņa, kuru izmantojāt, lai ieietu "${__VirtualRootPath}":"${__VirtualRootPath}" portālā.
-
-Lai mainītu paroli, sekojiet šai saitei:
-
-$OrangeButton
-
-*Piezīme*: šī saite ir derīga tikai 7 dienas. Pabeidziet paroles maiņas procesu šajā laikā. 
-
-Ja nevēlaties mainīt savu paroli vai saņēmāt e-pastu kļūdas pēc, lūdzu, ignorējiet šo ziņu vai sazinieties ar savu  "${__VirtualRootPath}":"${__VirtualRootPath}" portāla administratoru.</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Mobilā tālruņa maiņas pieprasījums
@@ -272,7 +259,7 @@ Your portal is now available at the old address "$PortalUrl":"$PortalUrl"
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinieties ar mums tīmekļa vietnē "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Lai mainītu paziņojuma veidu, pārvaldiet "abonēšanas iestatījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -286,7 +273,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinieties ar mums t
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Lai mainītu paziņojuma veidu, pārvaldiet "abonēšanas iestatījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -301,7 +288,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinieties ar mums t
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Portāla "${__VirtualRootPath}":"${__VirtualRootPath}" deaktivizācija
@@ -321,7 +308,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, rakstiet mu
 
 Ar cieņu
 ONLYOFFICE™ komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portāla dzēšana
@@ -346,7 +333,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, rakstiet mu
 
 Ar cieņu
 ONLYOFFICE™ komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Portāla adreses maiņa
@@ -454,7 +441,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, lūdzu, saz
 
 Ar cieņu,
 ONLYOFFICE™ komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Lai mainītu paziņojuma veidu, lūdzu, labojiet savus "abonēšanas uzstādījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -648,7 +635,7 @@ Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -663,7 +650,7 @@ Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -678,7 +665,7 @@ Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -700,7 +687,7 @@ Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -713,7 +700,7 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -732,7 +719,7 @@ $OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -751,7 +738,7 @@ $OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -770,7 +757,7 @@ $OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -789,7 +776,7 @@ $OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -810,7 +797,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -831,7 +818,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -852,7 +839,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -873,7 +860,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
@@ -884,7 +871,7 @@ $OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
@@ -895,7 +882,7 @@ $OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
@@ -906,7 +893,7 @@ $OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
@@ -917,7 +904,7 @@ $OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -938,7 +925,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -959,7 +946,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -980,7 +967,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1001,7 +988,7 @@ Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https:/
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Ziņojums no portāla "${__VirtualRootPath}":"${__VirtualRootPath}" 
@@ -1023,7 +1010,7 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1036,7 +1023,7 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Sveiki!
@@ -1067,7 +1054,7 @@ Pateicamies un vēlam veiksmi!
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1094,7 +1081,7 @@ Apmeklējiet mūsu palīdzības centru: https://helpcenter.onlyoffice.com/, lai 
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Jūs vairāk nekā pusgadu neesat iegājis savā ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". 
@@ -1109,7 +1096,7 @@ Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ONLYOFFICE DocSp
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Sveiki!
@@ -1122,7 +1109,7 @@ Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli sa
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1187,7 +1174,7 @@ Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli sa
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Laipni lūdzam ONLYOFFICE DocSpace!</value>
@@ -1435,11 +1422,11 @@ Ir izveidots dublējuma fails, kas satur datus no jūsu [${__VirtualRootPath}]($
 
 Lai uzzinātu vairāk par dublēšanas procedūru, skatiet mūsu [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) lietotāja rokasgrāmatu.
 
-Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [support.onlyoffice.com](http://support.onlyoffice.com)
+Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt e-pasta adresi savā ${LetterLogoText} kontā?
@@ -1648,7 +1635,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīm
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portāla dzēšana
@@ -1673,7 +1660,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīm
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Lietotājs "$FromUserName":"$ FromUserLink" izdzēsa savu profilu, un šis profils tagad ir bloķēts. Visi lietotāja faili joprojām ir piešķirti viņam/viņai un aizņem vietu diskā. 
@@ -1745,7 +1732,7 @@ Mēs arī nosūtīsim jums noderīgus padomus un jaunākās ONLYOFFICE ziņas. A
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) paziņojums par portāla profila maiņu

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 class TenantServiceCache
 {
     private const string Key = "tenants";
@@ -73,9 +73,9 @@ class TenantServiceCache
 
     internal class TenantStore
     {
-        private readonly Dictionary<int, Tenant> _byId = new Dictionary<int, Tenant>();
-        private readonly Dictionary<string, Tenant> _byDomain = new Dictionary<string, Tenant>();
-        private readonly object _locker = new object();
+        private readonly Dictionary<int, Tenant> _byId = new();
+        private readonly Dictionary<string, Tenant> _byDomain = new();
+        private readonly object _locker = new();
 
         public Tenant Get(int id)
         {
@@ -221,22 +221,6 @@ class CachedTenantService : ITenantService
         return t;
     }
 
-    public Tenant GetTenant(int id)
-    {
-        var tenants = _tenantServiceCache.GetTenantStore();
-        var t = tenants.Get(id);
-        if (t == null)
-        {
-            t = _service.GetTenant(id);
-            if (t != null)
-            {
-                tenants.Insert(t);
-            }
-        }
-
-        return t;
-    }
-
     public async Task<Tenant> GetTenantAsync(string domain)
     {
         var tenants = _tenantServiceCache.GetTenantStore();
@@ -253,6 +237,22 @@ class CachedTenantService : ITenantService
         return t;
     }
 
+    public Tenant GetTenant(int id)
+    {
+        var tenants = _tenantServiceCache.GetTenantStore();
+        var t = tenants.Get(id);
+        if (t == null)
+        {
+            t = _service.GetTenant(id);
+            if (t != null)
+            {
+                tenants.Insert(t);
+            }
+        }
+
+        return t;
+    }
+    
     public Tenant GetTenant(string domain)
     {
         var tenants = _tenantServiceCache.GetTenantStore();
@@ -304,7 +304,7 @@ class CachedTenantService : ITenantService
     public async Task<Tenant> SaveTenantAsync(CoreSettings coreSettings, Tenant tenant)
     {
         tenant = await _service.SaveTenantAsync(coreSettings, tenant);
-        _cacheNotifyItem.Publish(new TenantCacheItem() { TenantId = tenant.Id }, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = tenant.Id }, CacheNotifyAction.InsertOrUpdate);
 
         return tenant;
     }
@@ -312,13 +312,13 @@ class CachedTenantService : ITenantService
     public async Task RemoveTenantAsync(int id, bool auto = false)
     {
         await _service.RemoveTenantAsync(id, auto);
-        _cacheNotifyItem.Publish(new TenantCacheItem() { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
     }
 
     public async Task PermanentlyRemoveTenantAsync(int id)
     {
         await _service.PermanentlyRemoveTenantAsync(id);
-        _cacheNotifyItem.Publish(new TenantCacheItem() { TenantId = id }, CacheNotifyAction.Remove);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
@@ -328,7 +328,7 @@ class CachedTenantService : ITenantService
 
     public async Task<byte[]> GetTenantSettingsAsync(int tenant, string key)
     {
-        var cacheKey = string.Format("settings/{0}/{1}", tenant, key);
+        var cacheKey = $"settings/{tenant}/{key}";
         var data = _cache.Get<byte[]>(cacheKey);
         if (data == null)
         {
@@ -342,7 +342,7 @@ class CachedTenantService : ITenantService
 
     public byte[] GetTenantSettings(int tenant, string key)
     {
-        var cacheKey = string.Format("settings/{0}/{1}", tenant, key);
+        var cacheKey = $"settings/{tenant}/{key}";
         var data = _cache.Get<byte[]>(cacheKey);
         if (data == null)
         {
@@ -357,15 +357,15 @@ class CachedTenantService : ITenantService
     public async Task SetTenantSettingsAsync(int tenant, string key, byte[] data)
     {
         await _service.SetTenantSettingsAsync(tenant, key, data);
-        var cacheKey = string.Format("settings/{0}/{1}", tenant, key);
+        var cacheKey = $"settings/{tenant}/{key}";
 
-        _cacheNotifySettings.Publish(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
+        await _cacheNotifySettings.PublishAsync(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
     }
 
     public void SetTenantSettings(int tenant, string key, byte[] data)
     {
         _service.SetTenantSettings(tenant, key, data);
-        var cacheKey = string.Format("settings/{0}/{1}", tenant, key);
+        var cacheKey = $"settings/{tenant}/{key}";
 
         _cacheNotifySettings.Publish(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
     }

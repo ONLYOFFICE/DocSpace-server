@@ -28,18 +28,17 @@ namespace ASC.Common.Utils;
 
 public static class HtmlUtil
 {
-    private static readonly Regex _tagReplacer
-        = new Regex("<[^>]*>", RegexOptions.Multiline | RegexOptions.Compiled);
+    private static readonly Regex _tagReplacer = new("<[^>]*>", RegexOptions.Multiline | RegexOptions.Compiled);
 
     private static readonly Regex _commentsReplacer
-        = new Regex("<!--(?s).*?-->", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        = new("<!--(?s).*?-->", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static readonly Regex _xssReplacer
-        = new Regex(@"<\s*(style|script)[^>]*>(.*?)<\s*/\s*(style|script)>", RegexOptions.IgnoreCase
-            | RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.Singleline);
+        = new(@"<\s*(style|script)[^>]*>(.*?)<\s*/\s*(style|script)>", RegexOptions.IgnoreCase
+                                                                       | RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.Singleline);
 
     private static readonly Regex _worder =
-        new Regex(@"\S+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        new(@"\S+", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public static string GetText(string html, int maxLength = 0, string endBlockTemplate = "...")
     {
