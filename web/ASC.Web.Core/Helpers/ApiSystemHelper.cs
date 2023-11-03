@@ -24,10 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ASC.Web.Core.Helpers;
 
@@ -38,9 +38,9 @@ public class ApiSystemHelper
     private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly AmazonDynamoDBClient _awsDynamoDBClient;
     private readonly TenantDomainValidator _tenantDomainValidator;
     private readonly CoreBaseSettings _coreBaseSettings;
+    private readonly IConfiguration _configuration;
 
     public ApiSystemHelper(IConfiguration configuration,
         CoreBaseSettings coreBaseSettings,
@@ -52,20 +52,20 @@ public class ApiSystemHelper
         ApiSystemUrl = configuration["web:api-system"];
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
-
-        var awsAccessKeyId = configuration["aws:dynamoDB:accessKeyId"];
-        var awsSecretAccessKey = configuration["aws:dynamoDB:secretAccessKey"];
-
-        if (!string.IsNullOrEmpty(awsAccessKeyId) && !string.IsNullOrEmpty(awsSecretAccessKey))
-        {
-            _awsDynamoDBClient = new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey);
-        }
-
+        _configuration = configuration;
         _clientFactory = clientFactory;
         _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
     }
 
+    private AmazonDynamoDBClient GetDynamoDBClient()
+    {
+        var awsAccessKeyId = _configuration["aws:dynamoDB:accessKeyId"];
+        var awsSecretAccessKey = _configuration["aws:dynamoDB:secretAccessKey"];
+        var region = _configuration["aws:dynamoDB:region"];
+                
+        return new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey, RegionEndpoint.GetBySystemName(region));
+    }
 
     public string CreateAuthToken(string pkey)
     {
@@ -125,7 +125,9 @@ public class ApiSystemHelper
     #region cache
 
     public async Task AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
-    {      
+    {
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
         var putItemRequest = new PutItemRequest
         {
             TableName = "docspace-tenants_origin",
@@ -145,6 +147,8 @@ public class ApiSystemHelper
 
     public async Task UpdateTenantToCacheAsync(string oldTenantDomain, string newTenantDomain)
     {
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
         var getItemRequest = new GetItemRequest
         {
             TableName = "docspace-tenants_origin",
@@ -156,21 +160,23 @@ public class ApiSystemHelper
             ConsistentRead = true
         };
 
-        var region = (await _awsDynamoDBClient.GetItemAsync(getItemRequest)).Item.Values.First().S;            
+        var region = (await _awsDynamoDBClient.GetItemAsync(getItemRequest)).Item.Values.First().S;
 
         await AddTenantToCacheAsync(newTenantDomain, region);
         await RemoveTenantFromCacheAsync(oldTenantDomain);
     }
 
     public async Task RemoveTenantFromCacheAsync(string tenantDomain)
-    {   
+    {
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
         var request = new DeleteItemRequest
         {
             TableName = "docspace-tenants_origin",
-            Key = new Dictionary<string, AttributeValue>() 
-                { 
-                  { "tenant_domain", new AttributeValue { S = tenantDomain } 
-                } 
+            Key = new Dictionary<string, AttributeValue>()
+                {
+                  { "tenant_domain", new AttributeValue { S = tenantDomain }
+                }
             },
         };
 
@@ -179,6 +185,8 @@ public class ApiSystemHelper
 
     public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)
     {
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
         var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
 
         var getItemRequest = new GetItemRequest
