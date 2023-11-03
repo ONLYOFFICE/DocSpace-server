@@ -115,7 +115,10 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             if (bytesRead == chunkUploadSize || last)
             {
                 theMemStream.Position = 0;
+
                 await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, _chunkNumber++);
+                _chunkedUploadSession.BytesTotal += theMemStream.Length;
+
                 _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
             }
             else
@@ -141,7 +144,6 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
 
-        _chunkedUploadSession.BytesTotal++;
         await UploadAsync(true);
         await _fileStream.DisposeAsync();
 
