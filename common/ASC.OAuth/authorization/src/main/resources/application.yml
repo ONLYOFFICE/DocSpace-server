@@ -59,6 +59,18 @@ spring:
           refreshTokenDaysTTL: ${REFRESH_TOKEN_TTL:365}
           authorizationCodeMinutesTTL: ${AUTHORIZATION_CODE_TTL:1}
   cloud:
+    loadbalancer:
+      ribbon:
+        enable: false
+    openfeign:
+      circuitbreaker:
+        enabled: true
+        alphanumeric-ids: true
+      client:
+        config:
+          default:
+            connectTimeout: 1500
+            readTimeout: 3000
     config:
       enabled: false
   jpa:
@@ -85,12 +97,6 @@ resilience4j:
         baseConfig: default
       mutateRateLimiter:
         baseConfig: default
-  timelimiter:
-    instances:
-      mutateTimeLimiter:
-        timeoutDuration: 2s
-      readTimeLimiter:
-        timeoutDuration: 1s
 
 management:
   endpoints:
