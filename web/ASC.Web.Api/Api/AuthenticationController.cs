@@ -206,7 +206,7 @@ public class AuthenticationController : ControllerBase
                 throw new SecurityException("Auth code is not available");
             }
 
-            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id);
+            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
             var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
             var result = new AuthenticationTokenDto
@@ -310,7 +310,7 @@ public class AuthenticationController : ControllerBase
         try
         {
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
-            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id, action, session);
+            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
 
             var outDto = new AuthenticationTokenDto
             {

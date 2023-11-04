@@ -29,8 +29,7 @@ namespace ASC.IPSecurity;
 [Scope]
 public class IPSecurity
 {
-    public bool IpSecurityEnabled { get; }
-
+    private readonly bool _ipSecurityEnabled;
     private readonly ILogger<IPSecurity> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AuthContext _authContext;
@@ -39,6 +38,7 @@ public class IPSecurity
     private readonly string _currentIpForTest;
     private readonly string _myNetworks;
     private readonly UserManager _userManager;
+    private readonly SettingsManager _settingsManager;
 
     public IPSecurity(
         IConfiguration configuration,
@@ -47,6 +47,7 @@ public class IPSecurity
         TenantManager tenantManager,
         IPRestrictionsService iPRestrictionsService,
         UserManager userManager,
+        SettingsManager settingsManager,
         ILogger<IPSecurity> logger)
     {
         _logger = logger;
@@ -55,21 +56,29 @@ public class IPSecurity
         _tenantManager = tenantManager;
         _ipRestrictionsService = iPRestrictionsService;
         _userManager = userManager;
+        _settingsManager = settingsManager;
         _currentIpForTest = configuration["ipsecurity:test"];
         _myNetworks = configuration["ipsecurity:mynetworks"];
         var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
-        IpSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
+        _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
     }
 
     public async Task<bool> VerifyAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        if (!IpSecurityEnabled)
+        if (!_ipSecurityEnabled)
         {
             return true;
         }
+        
+        var enable = (await _settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
 
+        if (!enable)
+        {
+            return true;
+        }
+        
         if (_httpContextAccessor?.HttpContext == null)
         {
             return true;
@@ -107,10 +116,11 @@ public class IPSecurity
             {
                 return true;
             }
-            if (IsMyNetwork(ips))
-            {
-                return true;
-            }
+            
+            // if (IsMyNetwork(ips))
+            // {
+            //     return true;
+            // }
         }
         catch (Exception ex)
         {
