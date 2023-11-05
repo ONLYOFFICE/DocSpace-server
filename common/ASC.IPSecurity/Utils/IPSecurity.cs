@@ -117,10 +117,10 @@ public class IPSecurity
                 return true;
             }
             
-            // if (IsMyNetwork(ips))
-            // {
-            //     return true;
-            // }
+            if (IsMyNetwork(ips))
+            {
+                return true;
+            }
         }
         catch (Exception ex)
         {
