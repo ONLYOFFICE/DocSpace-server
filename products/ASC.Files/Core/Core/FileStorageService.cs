@@ -2039,8 +2039,18 @@ public class FileStorageService //: IFileStorageService
         List<FileOperationResult> result;
         if (foldersId.Count > 0 || filesId.Count > 0)
         {
-            result = await _fileOperationsManager.MoveOrCopy(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantAsync(), foldersId, filesId, destFolderId, ic, resolve,
-                !deleteAfter, GetHttpHeaders(), await _externalShare.GetCurrentShareDataAsync(), content);
+            result = await _fileOperationsManager.MoveOrCopy(
+                _authContext.CurrentAccount.ID,
+                await _tenantManager.GetCurrentTenantAsync(), 
+                foldersId, 
+                filesId, 
+                destFolderId, 
+                ic, 
+                resolve,
+                !deleteAfter,
+                GetHttpHeaders(), 
+                await _externalShare.GetCurrentShareDataAsync(),
+                content);
         }
         else
         {
