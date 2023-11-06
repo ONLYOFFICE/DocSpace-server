@@ -77,18 +77,18 @@
 
 * *连接任意云存储* 工作中无需在应用之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/"，或询问我们的"支持团队":"https://www.onlyoffice.com/support-contact-form.aspx"。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>想更改云办公帐号的密码吗？请点击下方按钮确认。
 
-$GreenButton
+$OrangeButton
 
 该链接的有效期为 7 天。
  
@@ -125,7 +125,7 @@ ONLYOFFICE 团队</value>
  
 可点击下方的按钮登录*您的云服务。
  
-$GreenButton
+$OrangeButton
  
 链接有效期为 7 天。
  

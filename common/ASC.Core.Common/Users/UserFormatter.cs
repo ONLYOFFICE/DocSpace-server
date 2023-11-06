@@ -26,12 +26,12 @@
 
 namespace ASC.Core.Users;
 
-[Singletone]
+[Singleton]
 public class UserFormatter : IComparer<UserInfo>
 {
     private readonly DisplayUserNameFormat _format;
-    private static bool _forceFormatChecked;
-    private static string _forceFormat;
+    private bool _forceFormatChecked;
+    private string _forceFormat;
 
     public UserFormatter(IConfiguration configuration)
     {
@@ -49,9 +49,14 @@ public class UserFormatter : IComparer<UserInfo>
 
     public string GetUserName(string firstName, string lastName)
     {
-        if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+        if (string.IsNullOrEmpty(firstName))
         {
-            throw new ArgumentException();
+            throw new ArgumentException(firstName);
+        }
+
+        if (string.IsNullOrEmpty(lastName))
+        {
+            throw new ArgumentException(lastName);
         }
 
         return string.Format(GetUserDisplayFormat(DisplayUserNameFormat.Default), firstName, lastName);
@@ -74,15 +79,17 @@ public class UserFormatter : IComparer<UserInfo>
 
     public static int Compare(UserInfo x, UserInfo y, DisplayUserNameFormat format)
     {
-        if (x == null && y == null)
+        if (x == null)
         {
-            return 0;
-        }
-        if (x == null && y != null)
-        {
+            if (y == null)
+            {
+                return 0;
+            }
+            
             return -1;
         }
-        if (x != null && y == null)
+        
+        if (y == null)
         {
             return +1;
         }
@@ -95,25 +102,25 @@ public class UserFormatter : IComparer<UserInfo>
         int result;
         if (format == DisplayUserNameFormat.FirstLast)
         {
-            result = string.Compare(x.FirstName, y.FirstName, true);
+            result = String.Compare(x.FirstName, y.FirstName, StringComparison.OrdinalIgnoreCase);
             if (result == 0)
             {
-                result = string.Compare(x.LastName, y.LastName, true);
+                result = String.Compare(x.LastName, y.LastName, StringComparison.OrdinalIgnoreCase);
             }
         }
         else
         {
-            result = string.Compare(x.LastName, y.LastName, true);
+            result = String.Compare(x.LastName, y.LastName, StringComparison.OrdinalIgnoreCase);
             if (result == 0)
             {
-                result = string.Compare(x.FirstName, y.FirstName, true);
+                result = String.Compare(x.FirstName, y.FirstName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
         return result;
     }
 
-    private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new Dictionary<string, Dictionary<DisplayUserNameFormat, string>>
+    private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new()
         {
             { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
             { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } },

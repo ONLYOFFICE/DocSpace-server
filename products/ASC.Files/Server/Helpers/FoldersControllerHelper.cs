@@ -149,7 +149,7 @@ public class FoldersControllerHelper : FilesHelperBase
 
         if (!withoutTrash && !IsUser)
         {
-            yield return (int)await _globalFolderHelper.FolderTrashAsync;
+            yield return await _globalFolderHelper.FolderTrashAsync;
         }
 
         if (!_coreBaseSettings.DisableDocSpace)
@@ -178,6 +178,6 @@ public class FoldersControllerHelper : FilesHelperBase
         var items = await _fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(_apiContext.Count), filterType, filterType == FilterType.ByUser, userIdOrGroupId.ToString(), _apiContext.FilterValue, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
             roomId: roomId, applyFilterOption: applyFilterOption);
 
-        return await _folderContentDtoHelper.GetAsync(items, startIndex);
+        return await _folderContentDtoHelper.GetAsync(folderId, items, startIndex);
     }
 }

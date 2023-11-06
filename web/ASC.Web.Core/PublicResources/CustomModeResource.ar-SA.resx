@@ -177,20 +177,20 @@ h3.العنوان الفرعي. للاستخدام السريع، هذا ما ي
 
 * * قم بتوصيل أي تخزين سحابي * واعمل دون التبديل بين التطبيقات.
 
-$GreenButton
+$OrangeButton
 
 إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة" https://helpcenter.onlyoffice.com/ أو اسأل "فريق الدعم":" https://www.onlyoffice.com/support-contact-form.aspx ".
 
 حقا لك،
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>هل تريد تغيير بريدك الالكتروني سحابة حسابك؟
 
 اضغط على الزر أدناه وقم بتسجيل الدخول لسحابتك.
 
-$GreenButton
+$OrangeButton
 
  الرابط صالح لمدة 7 أيام.
 
@@ -201,7 +201,7 @@ $GreenButton
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>هل تريد تغير كلمة المرور الخاصة بحساب السحابة الخاص بك؟ قم بالضغط على الزر بالأسفل للتأكيد.
 
-$GreenButton
+$OrangeButton
 
 صلاحية الرابط 7 أيام.
 

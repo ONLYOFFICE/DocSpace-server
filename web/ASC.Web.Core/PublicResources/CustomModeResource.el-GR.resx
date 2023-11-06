@@ -74,18 +74,18 @@
 
 * *Να συνδέετε οποιοδήποτε αποθηκευτικό χώρο στο cloud* και να εργάζεστε χωρίς εναλλαγή μεταξύ εφαρμογών. 
 
-$GreenButton
+$OrangeButton
 
 Αν χρειάζεστε βοήθεια, περιηγηθείτε στο "Κέντρο βοήθειας":"https://helpcenter.onlyoffice.com/" ή ρωτήστε την "ομάδα υποστήριξης":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Με εκτίμηση, 
 Η ομάδα ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Θέλετε να αλλάξετε τον κωδικό πρόσβασης στον λογαριασμό σας στο cloud office; Κάντε κλικ στο παρακάτω κουμπί για επιβεβαίωση.
 
-$GreenButton
+$OrangeButton
 
 Ο σύνδεσμος ισχύει για 7 ημέρες.
 
@@ -122,7 +122,7 @@ h3.Για να ξεκινήσετε, δείτε τι σας προσφέρει �
 
 Κάντε κλικ στο παρακάτω κουμπί και συνδεθείτε* στο cloud σας.
 
-$GreenButton
+$OrangeButton
 
 Ο σύνδεσμος ισχύει για 7 ημέρες.
 

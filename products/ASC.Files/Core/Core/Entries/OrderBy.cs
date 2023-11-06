@@ -38,14 +38,15 @@ public enum SortedByType
     DateAndTimeCreation,
     RoomType,
     Tags,
-    Room
+    Room,
+    CustomOrder
 }
 
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy
 {
     [JsonPropertyName("is_asc")]
-    public bool IsAsc { get; set; }
+    public bool IsAsc { get; init; }
 
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; }

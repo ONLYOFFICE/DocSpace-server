@@ -113,8 +113,6 @@ public class FileDto<T> : FileEntryDto<T>
 
     protected internal override FileEntryType EntryType { get => FileEntryType.File; }
 
-    public FileDto() { }
-
     public static FileDto<int> GetSample()
     {
         return new FileDto<int>
@@ -135,7 +133,7 @@ public class FileDto<T> : FileEntryDto<T>
             FolderId = 12334,
             Version = 3,
             VersionGroup = 1,
-            ViewUrl = "http://www.onlyoffice.com/viewfile?fileid=2221"
+            ViewUrl = "https://www.onlyoffice.com/viewfile?fileid=2221"
         };
     }
 }
@@ -162,8 +160,10 @@ public class FileDtoHelper : FileEntryDtoHelper
         FilesLinkUtility filesLinkUtility,
         FileUtility fileUtility,
         FileSharingHelper fileSharingHelper,
-        BadgesSettingsHelper badgesSettingsHelper)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity)
+        BadgesSettingsHelper badgesSettingsHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;
@@ -174,9 +174,9 @@ public class FileDtoHelper : FileEntryDtoHelper
         _badgesSettingsHelper = badgesSettingsHelper;
     }
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
     {
-        var result = await GetFileWrapperAsync(file);
+        var result = await GetFileWrapperAsync(file, foldersCount, order);
 
         result.FolderId = file.ParentId;
         if (file.RootFolderType == FolderType.USER
@@ -184,11 +184,10 @@ public class FileDtoHelper : FileEntryDtoHelper
         {
             result.RootFolderType = FolderType.SHARE;
             var folderDao = _daoFactory.GetFolderDao<T>();
-            FileEntry<T> parentFolder;
 
             if (folders != null)
             {
-                var folderWithRight = folders.FirstOrDefault(f => f.Item1.Id.Equals(file.ParentId));
+                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(file.ParentId));
                 if (folderWithRight == null || !folderWithRight.Item2)
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
@@ -196,7 +195,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
             else
             {
-                parentFolder = await folderDao.GetFolderAsync(file.ParentId);
+                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(file.ParentId);
                 if (!await _fileSecurity.CanReadAsync(parentFolder))
                 {
                     result.FolderId = await _globalFolderHelper.GetFolderShareAsync<T>();
@@ -209,7 +208,7 @@ public class FileDtoHelper : FileEntryDtoHelper
         return result;
     }
 
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, int foldersCount, string order)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -230,6 +229,19 @@ public class FileDtoHelper : FileEntryDtoHelper
         result.DenySharing = file.DenySharing;
         result.Access = file.Access;
 
+        if (file.Order != 0)
+        {
+            file.Order += foldersCount;
+            if (!string.IsNullOrEmpty(order))
+            {
+                result.Order = string.Join('.', order, file.Order);
+            }
+            else
+            {
+                result.Order = file.Order.ToString();
+            }
+        }
+
         try
         {
             result.ViewUrl = _commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl);
@@ -242,7 +254,7 @@ public class FileDtoHelper : FileEntryDtoHelper
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                result.ThumbnailUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}"; 
+                result.ThumbnailUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileThumbnailUrl(file.Id, file.Version)) + $"&hash={cacheKey}";
             }
         }
         catch (Exception)

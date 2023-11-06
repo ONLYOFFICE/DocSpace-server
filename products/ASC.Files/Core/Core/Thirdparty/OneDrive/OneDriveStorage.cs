@@ -61,7 +61,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
     private readonly IHttpClientFactory _clientFactory;
     private readonly OAuth20TokenHelper _oAuth20TokenHelper;
 
-    public long MaxChunkedUploadFileSize = 10L * 1024L * 1024L * 1024L;
+    public readonly long MaxChunkedUploadFileSize = 10L * 1024L * 1024L * 1024L;
 
     public OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
     {
@@ -121,7 +121,7 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
         catch (Exception ex)
         {
             var serviceException = (ServiceException)ex.InnerException;
-            if (serviceException != null && serviceException.StatusCode == HttpStatusCode.NotFound)
+            if (serviceException is { StatusCode: HttpStatusCode.NotFound })
             {
                 return null;
             }
@@ -269,13 +269,10 @@ internal class OneDriveStorage : IThirdPartyStorage<Item, Item, Item>
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                var responseString = await readStream.ReadToEndAsync();
-                var responseJson = JObject.Parse(responseString);
-                uploadSession.Location = responseJson.Value<string>("uploadUrl");
-            }
+            using var readStream = new StreamReader(responseStream);
+            var responseString = await readStream.ReadToEndAsync();
+            var responseJson = JObject.Parse(responseString);
+            uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
 
         uploadSession.Status = ResumableUploadSessionStatus.Started;

@@ -30,10 +30,10 @@ namespace ASC.Core.Tenants;
 
 /// <summary>
 /// </summary>
-[DebuggerDisplay("{Tenant} {Name}")]
+[DebuggerDisplay("{TenantId} {Name}")]
 public class TenantQuota : IMapFrom<DbQuota>
 {
-    public static readonly TenantQuota Default = new TenantQuota(Tenant.DefaultTenant)
+    public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
         Name = "Default",
         MaxFileSize = 25 * 1024 * 1024, // 25Mb
@@ -499,7 +499,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     internal string GetFeature(string name)
     {
-        return _featuresList.FirstOrDefault(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
+        return _featuresList.Find(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
     }
 
     internal void ReplaceFeature<T>(string name, T value, T defaultValue)

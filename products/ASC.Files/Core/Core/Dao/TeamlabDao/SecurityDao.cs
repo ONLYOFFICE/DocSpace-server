@@ -57,15 +57,14 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
               coreConfiguration,
               settingsManager,
               authContext,
-              serviceProvider,
-              cache)
+              serviceProvider)
     {
         _mapper = mapper;
     }
 
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord> records)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         foreach (var record in records)
         {
@@ -79,10 +78,13 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
     public async Task<bool> IsSharedAsync(T entryId, FileEntryType type)
     {
-        var mappedId = (entryId is int fid ? MappingIDAsync(fid) : await MappingIDAsync(entryId)).ToString();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        return await Queries.IsSharedAsync(filesDbContext, TenantID, mappedId, type);
+        var mappedId = (entryId is int fid ? MappingIDAsync(fid) : await MappingIDAsync(entryId)).ToString();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await Queries.IsSharedAsync(filesDbContext, tenantId, mappedId, type);
     }
 
     public async Task SetShareAsync(FileShareRecord r)
@@ -95,31 +97,33 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
                 return;
             }
 
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
             await strategy.ExecuteAsync(async () =>
             {
-                using var filesDbContext = _dbContextFactory.CreateDbContext();
-                using var tr = await filesDbContext.Database.BeginTransactionAsync();
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+                await using var tr = await context.Database.BeginTransactionAsync();
 
                 var files = new List<string>();
 
                 if (r.EntryType == FileEntryType.Folder)
                 {
                     var folders = new List<string>();
-                    if (int.TryParse(entryId, out var intEntryId))
+                    if (int.TryParse(entryId, out _))
                     {
-                        var foldersInt = await Queries.FolderIdsAsync(filesDbContext, entryId).ToListAsync();
+                        var foldersInt = await Queries.FolderIdsAsync(context, entryId).ToListAsync();
 
                         folders.AddRange(foldersInt.Select(folderInt => folderInt.ToString()));
-                        files.AddRange(await Queries.FilesIdsAsync(filesDbContext, TenantID, foldersInt).ToListAsync());
+                        files.AddRange(await Queries.FilesIdsAsync(context, tenantId, foldersInt).ToListAsync());
                     }
                     else
                     {
                         folders.Add(entryId);
                     }
-                    await Queries.DeleteForSetShareAsync(filesDbContext, r.TenantId, r.Subject, folders, FileEntryType.Folder);
+                    await Queries.DeleteForSetShareAsync(context, r.TenantId, r.Subject, folders, FileEntryType.Folder);
                 }
                 else
                 {
@@ -128,10 +132,10 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
                 if (files.Count > 0)
                 {
-                    await Queries.DeleteForSetShareAsync(filesDbContext, r.TenantId, r.Subject, files, FileEntryType.File);
+                    await Queries.DeleteForSetShareAsync(context, r.TenantId, r.Subject, files, FileEntryType.File);
                 }
 
-                await filesDbContext.SaveChangesAsync();
+                await context.SaveChangesAsync();
                 await tr.CommitAsync();
             });
         }
@@ -140,27 +144,17 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             var toInsert = _mapper.Map<FileShareRecord, DbFilesSecurity>(r);
             toInsert.EntryId = (await MappingIDAsync(r.EntryId, true)).ToString();
 
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await filesDbContext.AddOrUpdateAsync(r => r.Security, toInsert);
             await filesDbContext.SaveChangesAsync();
         }
     }
 
-    public async IAsyncEnumerable<FileShareRecord> GetShareForEntryIdsAsync(Guid subject, IEnumerable<string> roomIds)
-    {
-        var filesDbContext = _dbContextFactory.CreateDbContext();
-        var q = Queries.ShareForEntryIdsAsync(filesDbContext, TenantID, subject, roomIds);
-
-        await foreach (var e in q)
-        {
-            yield return await ToFileShareRecordAsync(e);
-        }
-    }
-
     public async IAsyncEnumerable<FileShareRecord> GetSharesAsync(IEnumerable<Guid> subjects)
     {
-        var filesDbContext = _dbContextFactory.CreateDbContext();
-        var q = Queries.SharesAsync(filesDbContext, TenantID, subjects);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var q = Queries.SharesAsync(filesDbContext, tenantId, subjects);
 
         await foreach (var e in q)
         {
@@ -211,7 +205,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             return 0;
         }
         
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
         var q = await GetPureSharesQuery(entry, filterType, filesDbContext);
 
@@ -233,7 +227,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             yield break;
         }
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetPureSharesQuery(entry, filterType, filesDbContext);
 
@@ -286,11 +280,11 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         {
             yield break;
         }
-
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var tenantId = TenantID;
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var mappedId = (await MappingIDAsync(entry.Id)).ToString();
-
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext);
 
         if (offset > 0)
@@ -317,8 +311,8 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             return 0;
         }
         
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var tenantId = TenantID;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = (await MappingIDAsync(entry.Id)).ToString();
         
         var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext);
@@ -375,10 +369,11 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
     }
 
-    internal async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(List<string> files, List<string> folders)
+    private async IAsyncEnumerable<FileShareRecord> GetPureShareRecordsDbAsync(List<string> files, List<string> folders)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var q = Queries.PureShareRecordsDbAsync(filesDbContext, TenantID, files, folders);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var q = Queries.PureShareRecordsDbAsync(filesDbContext, tenantId, files, folders);
 
         await foreach (var e in q)
         {
@@ -388,9 +383,11 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 
     public async Task RemoveSubjectAsync(Guid subject)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await Queries.RemoveSubjectAsync(filesDbContext, TenantID, subject);
+        await Queries.RemoveSubjectAsync(filesDbContext, tenantId, subject);
 
         await filesDbContext.SaveChangesAsync();
     }
@@ -403,10 +400,11 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
         
         var entryId = await MappingIDAsync(entry.Id);
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
-
-        await foreach (var security in Queries.EntrySharesBySubjectsAsync(filesDbContext, TenantID, entryId.ToString(), entry.FileEntryType, subjects))
+        await foreach (var security in Queries.EntrySharesBySubjectsAsync(filesDbContext, tenantId, entryId.ToString(), entry.FileEntryType, subjects))
         {
             yield return await ToFileShareRecordAsync(security);
         }
@@ -441,12 +439,11 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
     }
 
-    internal IQueryable<DbFilesSecurity> GetQuery(FilesDbContext filesDbContext, Expression<Func<DbFilesSecurity, bool>> where = null)
+    internal async Task<IQueryable<DbFilesSecurity>> GetQuery(FilesDbContext filesDbContext, Expression<Func<DbFilesSecurity, bool>> where = null)
     {
-        var q = Query(filesDbContext.Security);
+        var q = await Query(filesDbContext.Security);
         if (q != null)
         {
-
             q = q.Where(where);
         }
         return q;
@@ -474,10 +471,12 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
     
     private async Task<IQueryable<DbFilesSecurity>> GetPureSharesQuery(FileEntry<T> entry, ShareFilterType filterType, FilesDbContext filesDbContext)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
         var entryId = await MappingIDAsync(entry.Id);
 
         var q = filesDbContext.Security.AsNoTracking()
-            .Where(s => s.TenantId == TenantID && s.EntryId == entryId.ToString() && s.EntryType == entry.FileEntryType);
+            .Where(s => s.TenantId == tenantId && s.EntryId == entryId.ToString() && s.EntryType == entry.FileEntryType);
 
         switch (filterType)
         {
@@ -488,10 +487,16 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
                 q = q.Where(s => s.SubjectType == SubjectType.InvitationLink);
                 break;
             case ShareFilterType.ExternalLink:
+                q = q.Where(s => s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
+                break;
+            case ShareFilterType.AdditionalExternalLink:
                 q = q.Where(s => s.SubjectType == SubjectType.ExternalLink);
                 break;
+            case ShareFilterType.PrimaryExternalLink:
+                q = q.Where(s => s.SubjectType == SubjectType.PrimaryExternalLink);
+                break;
             case ShareFilterType.Link:
-                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink);
+                q = q.Where(s => s.SubjectType == SubjectType.InvitationLink || s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink);
                 break;
         }
 
@@ -530,9 +535,9 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
 
         await SelectFilesAndFoldersForShareAsync(entry, files, null, foldersInt);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = Query(filesDbContext.Security)
+        var q = (await Query(filesDbContext.Security))
             .Join(filesDbContext.Tree, r => r.EntryId, a => a.ParentId.ToString(), 
                 (s, t) => new SecurityTreeRecord
                 {
@@ -553,7 +558,7 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
 
         if (files.Count > 0)
         {
-            var q1 = GetQuery(filesDbContext, r => files.Contains(r.EntryId) && r.EntryType == FileEntryType.File)
+            var q1 = (await GetQuery(filesDbContext, r => files.Contains(r.EntryId) && r.EntryType == FileEntryType.File))
                 .Select(s => new SecurityTreeRecord
                 {
                     TenantId = s.TenantId,
@@ -607,7 +612,7 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
 
         if (expired.Count > 0)
         {
-            var tenantId = TenantID;
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
             await filesDbContext.Security
                 .Where(s => s.TenantId == tenantId && s.SubjectType == SubjectType.InvitationLink && expired.Contains(s.Subject))
@@ -705,17 +710,13 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
             }
 
             var parentFolders = await folderDao.GetParentFoldersAsync(selector.ConvertId(folder.Id)).ToListAsync();
-            if (parentFolders == null || parentFolders.Count == 0)
+            if (parentFolders.Count == 0)
             {
                 continue;
             }
 
             parentFolders.Reverse();
             var pureShareRecords = await GetPureShareRecordsAsync(parentFolders).ToListAsync();
-            if (pureShareRecords == null)
-            {
-                continue;
-            }
 
             foreach (var pureShareRecord in pureShareRecords)
             {
@@ -738,14 +739,14 @@ internal class SecurityTreeRecord
 {
     public int TenantId { get; set; }
     public string EntryId { get; set; }
-    public FileEntryType EntryType { get; set; }
+    public FileEntryType EntryType { get; init; }
     public SubjectType SubjectType { get; set; }
-    public Guid Subject { get; set; }
+    public Guid Subject { get; init; }
     public Guid Owner { get; set; }
     public FileShare Share { get; set; }
     public DateTime TimeStamp { get; set; }
-    public string Options { get; set; }
-    public int FolderId { get; set; }
+    public string Options { get; init; }
+    public int FolderId { get; init; }
     public int ParentId { get; set; }
     public int Level { get; set; }
 }
@@ -758,14 +759,14 @@ public class SecurityUserRecord
 
 public class UserInfoWithShared
 {
-    public UserInfo UserInfo { get; set; }
-    public bool Shared { get; set; }
+    public UserInfo UserInfo { get; init; }
+    public bool Shared { get; init; }
 }
 
 public class UserWithShared
 {
-    public User User { get; set; }
-    public bool Shared { get; set; }
+    public User User { get; init; }
+    public bool Shared { get; init; }
 }
 
 static file class Queries
@@ -807,14 +808,6 @@ static file class Queries
                 ctx.Security.Any(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == type
                                       && !(new[] { FileConstant.DenyDownloadId, FileConstant.DenySharingId }).Contains(
                                           r.Subject)));
-
-    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<string>, IAsyncEnumerable<DbFilesSecurity>>
-        ShareForEntryIdsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid subject, IEnumerable<string> roomIds) =>
-                ctx.Security
-                    .Where(r => r.TenantId == tenantId
-                                && (r.Subject == subject || r.Owner == subject)
-                                && roomIds.Contains(r.EntryId)));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, IAsyncEnumerable<DbFilesSecurity>> SharesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

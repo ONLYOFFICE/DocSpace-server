@@ -86,7 +86,7 @@ public class SendResponse
     public INoticeMessage NoticeMessage { get; internal set; }
     public INotifyAction NotifyAction { get; internal set; }
     public SendResult Result { get; set; }
-    public Exception Exception { get; set; }
+    public Exception Exception { get; init; }
     public string SenderName { get; internal set; }
     public IRecipient Recipient { get; internal set; }
 }

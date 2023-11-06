@@ -83,54 +83,65 @@ public class NotifyHelper
     {
         await _tenantManager.SetCurrentTenantAsync(tenantId);
 
+        var user = await _userManager.GetUsersAsync(userId);
+
         var client = _workContext.RegisterClient(_serviceProvider, _studioNotifySource);
+
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
 
         await client.SendNoticeToAsync(
             Actions.BackupCreated,
-            new[] { await _studioNotifyHelper.ToRecipientAsync(userId) },
+            new[] { user },
             new[] { StudioNotifyService.EMailSenderName },
-            new TagValue(Tags.OwnerName, (await _userManager.GetUsersAsync(userId)).DisplayUserName(_displayUserSettingsHelper)));
+            new TagValue(Tags.OwnerName, user.DisplayUserName(_displayUserSettingsHelper)),
+            TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt));
     }
 
     public async Task SendAboutRestoreStartedAsync(Tenant tenant, bool notifyAllUsers)
     {
-        await _tenantManager.SetCurrentTenantAsync(tenant.Id);
+        _tenantManager.SetCurrentTenant(tenant);
 
         var client = _workContext.RegisterClient(_serviceProvider, _studioNotifySource);
 
-        var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
         var users =
             notifyAllUsers
-                ? await _studioNotifyHelper.RecipientFromEmailAsync((await _userManager.GetUsersAsync(EmployeeStatus.Active)).Where(r => r.ActivationStatus == EmployeeActivationStatus.Activated).Select(u => u.Email).ToList(), false)
-                : owner.ActivationStatus == EmployeeActivationStatus.Activated ? await _studioNotifyHelper.RecipientFromEmailAsync(owner.Email, false) : new IDirectRecipient[0];
+                ? await _userManager.GetUsersAsync(EmployeeStatus.Active)
+                : new[] { await _userManager.GetUsersAsync(tenant.OwnerId) };
 
-        await client.SendNoticeToAsync(
-            Actions.RestoreStarted,
-            users,
-            new[] { StudioNotifyService.EMailSenderName });
+        foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
+        {
+            var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
+
+            await client.SendNoticeToAsync(
+                Actions.RestoreStarted,
+                new[] { user },
+                new[] { StudioNotifyService.EMailSenderName },
+                TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt));
+        }
     }
 
     public async Task SendAboutRestoreCompletedAsync(Tenant tenant, bool notifyAllUsers)
     {
         _tenantManager.SetCurrentTenant(tenant);
+
         var client = _workContext.RegisterClient(_serviceProvider, _studioNotifySource);
 
         var users = notifyAllUsers
             ? await _userManager.GetUsersAsync(EmployeeStatus.Active)
-            : new[] { await _userManager.GetUsersAsync((await _tenantManager.GetCurrentTenantAsync()).OwnerId) };
+            : new[] { await _userManager.GetUsersAsync(tenant.OwnerId) };
 
-        foreach (var user in users)
+        foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
             var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s");
             var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            var greenButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", GetCulture(user));
+            var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", user.GetCulture());
 
             await client.SendNoticeToAsync(
                 Actions.RestoreCompletedV115,
-                new IRecipient[] { user },
+                new[] { user },
                 new[] { StudioNotifyService.EMailSenderName },
-                TagValues.GreenButton(greenButtonText, confirmationUrl));
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl));
         }
     }
 
@@ -140,11 +151,13 @@ public class NotifyHelper
 
         var client = _workContext.RegisterClient(_serviceProvider, _studioNotifySource);
 
-        var users = (await _userManager.GetUsersAsync())
-            .Where(u => notify ? u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated) : u.IsOwner(tenant))
+        var users = (notify
+            ? await _userManager.GetUsersAsync(EmployeeStatus.Active)
+            : new[] { await _userManager.GetUsersAsync(tenant.OwnerId) })
+            .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
             .ToArray();
 
-        if (users.Length > 0)
+        if (users.Any())
         {
             var args = await CreateArgsAsync(region, url);
             if (action == Actions.MigrationPortalSuccessV115)
@@ -156,14 +169,18 @@ public class NotifyHelper
                     var newTenantId = toTenantId.HasValue ? toTenantId.Value : tenant.Id;
                     var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s");
                     var confirmationUrl = url + "/" + _commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
+                    var culture = user.GetCulture();
 
-                    var greenButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", GetCulture(user));
-                    currentArgs.Add(TagValues.GreenButton(greenButtonText, confirmationUrl));
+                    var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", culture);
+                    currentArgs.Add(TagValues.OrangeButton(orangeButtonText, confirmationUrl));
+
+                    var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+                    currentArgs.Add(TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt));
 
                     await client.SendNoticeToAsync(
                         action,
                         null,
-                        new IRecipient[] { user },
+                        new[] { user },
                         new[] { StudioNotifyService.EMailSenderName },
                         currentArgs.ToArray());
                 }
@@ -173,7 +190,7 @@ public class NotifyHelper
                 await client.SendNoticeToAsync(
                     action,
                     null,
-                    await users.ToAsyncEnumerable().SelectAwait(async u => await _studioNotifyHelper.ToRecipientAsync(u.Id)).ToArrayAsync(),
+                    users,
                     new[] { StudioNotifyService.EMailSenderName },
                     args.ToArray());
             }
@@ -193,7 +210,7 @@ public class NotifyHelper
             args.Add(new TagValue(CommonTags.VirtualRootPath, url));
             args.Add(new TagValue(CommonTags.ProfileUrl, url + _commonLinkUtility.GetMyStaff()));
 
-            var attachment = await _tenantLogoManager.GetMailLogoAsAttacmentAsync();
+            var attachment = await _tenantLogoManager.GetMailLogoAsAttachmentAsync();
 
             if (attachment != null)
             {
@@ -203,22 +220,5 @@ public class NotifyHelper
         }
 
         return args;
-    }
-
-    private CultureInfo GetCulture(UserInfo user)
-    {
-        CultureInfo culture = null;
-
-        if (!string.IsNullOrEmpty(user.CultureName))
-        {
-            culture = user.GetCulture();
-        }
-
-        if (culture == null)
-        {
-            culture = _tenantManager.GetCurrentTenant(false)?.GetCulture();
-        }
-
-        return culture;
     }
 }

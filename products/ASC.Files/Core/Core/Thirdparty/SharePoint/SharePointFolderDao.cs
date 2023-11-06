@@ -100,7 +100,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
             rooms = rooms.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
@@ -232,7 +232,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         return null;
     }
 
-    public async Task<bool> IsExistAsync(string title, Microsoft.SharePoint.Client.Folder folder)
+    public async Task<bool> IsExistAsync(string title, Folder folder)
     {
         var folderFolders = await SharePointProviderInfo.GetFolderFoldersAsync(folder.ServerRelativeUrl);
 
@@ -243,14 +243,13 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
     {
         var folder = await SharePointProviderInfo.GetFolderByIdAsync(folderId);
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
-            await using (var tx = await filesDbContext.Database.BeginTransactionAsync())
-            {
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
                 var link = await Queries.TagLinksAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
                 filesDbContext.TagLink.RemoveRange(link);
@@ -271,7 +270,6 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
                 await filesDbContext.SaveChangesAsync();
 
                 await tx.CommitAsync();
-            }
         });
 
 
@@ -343,27 +341,22 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         return moved;
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(string[] folderIds, TTo to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<string> folderIds, TTo to)
     {
-        if (to is int tId)
+        return to switch
         {
-            return CanMoveOrCopyAsync(folderIds, tId);
+            int tId => CanMoveOrCopyAsync(folderIds, tId),
+            string tsId => CanMoveOrCopyAsync(folderIds, tsId),
+            _ => throw new NotImplementedException()
+        };
         }
 
-        if (to is string tsId)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
         {
-            return CanMoveOrCopyAsync(folderIds, tsId);
-        }
-
-        throw new NotImplementedException();
-    }
-
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, string to)
-    {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, int to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
@@ -453,6 +446,16 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
     {
         return Task.FromResult("tar.gz");
     }
+
+    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+}
+
+    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 static file class Queries
@@ -479,9 +482,9 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 from ft in ctx.Tag
-                join ftl in ctx.TagLink.DefaultIfEmpty() on new { TenantId = ft.TenantId, Id = ft.Id } equals new
+                join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
                 {
-                    TenantId = ftl.TenantId,
+                    ftl.TenantId,
                     Id = ftl.TagId
                 }
                 where ftl == null

@@ -109,7 +109,7 @@ public interface IFileDao<T>
     /// <param name="searchText"> </param>
     /// <param name="searchInContent"></param>
     /// <param name="withSubfolders"> </param>
-    /// <param name="exludeSubject"> </param>
+    /// <param name="excludeSubject"> </param>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
@@ -118,7 +118,7 @@ public interface IFileDao<T>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent,
-        bool withSubfolders = false, bool exludeSubject = false, int offset = 0, int count = -1, T roomId = default);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
     /// Get stream of file
@@ -309,6 +309,10 @@ public interface IFileDao<T>
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, T roomId = default);
+
+    Task SetCustomOrder(T fileId, T parentFolderId, int order);
+
+    Task InitCustomOrder(IEnumerable<T> fileIds, T parentFolderId);
 
     #endregion
 }

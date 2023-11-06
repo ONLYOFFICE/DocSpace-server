@@ -158,13 +158,10 @@ public abstract class SmsProvider : Consumer
 
             using var response = await httpClient.SendAsync(request);
             await using var stream = await response.Content.ReadAsStreamAsync();
-            if (stream != null)
-            {
-                using var reader = new StreamReader(stream);
-                var result = await reader.ReadToEndAsync();
-                Log.InformationSMSWasSend(number, result);
-                return true;
-            }
+            using var reader = new StreamReader(stream);
+            var result = await reader.ReadToEndAsync();
+            Log.InformationSMSWasSend(number, result);
+            return true;
         }
         catch (Exception ex)
         {

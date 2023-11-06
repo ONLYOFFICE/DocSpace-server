@@ -89,27 +89,13 @@ Equipe ONLYOFFICE</value>
 
 Clique no botão abaixo e faça o login* em sua nuvem.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
 *Se você não estiver conectado ao seu escritório na nuvem neste navegador, você precisará usar seu e-mail antigo para confirmação.
 
 Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_password" xml:space="preserve">
-    <value>Houve um pedido para alterar sua senha utilizada para entrar no portal "${__VirtualRootPath}": "${__VirtualRootPath}".
-
-Por favor, siga o link abaixo para alterar sua senha:
-
-$GreenButton
-
-*Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
-
-Se você não deseja alterar sua senha ou recebeu este e-mail por engano, por favor, ignore-a.
-
-Atenciosamente,
-Equipe ONLYOFFICE</value>
   </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Olá,
@@ -124,7 +110,7 @@ Equipe ONLYOFFICE</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Você solicitou o encerramento de sua conta em personal.onlyoffice.com. Siga o link para completar a solicitação (o link está ativo por um período de 7 dias): 
 
-$GreenButton
+$OrangeButton
 
 *Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente de acordo com nossa "Declaração de privacidade": "https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
@@ -161,9 +147,6 @@ A exclusão de dados pessoais permitida para liberar $DocsSpace</value>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>Bem vindo ao ONLYOFFICE Pessoal</value>
   </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>Assistência de senha pessoal ONLYOFFICE</value>
-  </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Pessoal. Por favor, ative seu email</value>
   </data>
@@ -179,7 +162,7 @@ A exclusão de dados pessoais permitida para liberar $DocsSpace</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Quer mudar a senha em sua conta de escritório na nuvem? Clique no botão abaixo para confirmar.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -198,12 +181,12 @@ Bem vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com suce
  
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
  
-$GreenButton
+$OrangeButton
  
 Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
  
 Atenciosamente,
 Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+"www.onlyoffice.com":"https://www.onlyoffice.com/pt"</value>
   </data>
 </root>

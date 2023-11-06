@@ -71,18 +71,18 @@ Witaj w ONLYOFFICE DocSpace! Twój profil użytkownika został pomyślnie dodany
 
 * *Podłączyć dowolną pamięć w chmurze* i pracować bez konieczności przełączania się między aplikacjami. 
 
-$GreenButton
+$OrangeButton
 
 Jeśli potrzebujesz pomocy, sprawdź nasze "Centrum pomocy":"https://helpcenter.onlyoffice.com/" lub skontaktuj się z naszym zespołem wsparcia pod "adresem":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Pozdrawiamy, 
 Zespół ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Chcesz zmienić hasło do swojego konta w chmurze? Kliknij poniższy przycisk, aby potwierdzić.
 
-$GreenButton
+$OrangeButton
 
 Link jest ważny przez 7 dni.
 
@@ -119,7 +119,7 @@ Zespół ONLYOFFICE</value>
 
 Kliknij poniższy przycisk, aby zalogować się* do swojej chmury.
 
-$GreenButton
+$OrangeButton
 
 Link jest ważny przez 7 dni.
 

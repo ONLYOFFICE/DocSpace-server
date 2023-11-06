@@ -517,7 +517,7 @@
 
 "${__VirtualRootPath}":"$InviteLink" պորտալի կյանքին մասնակցելու համար դուք պետք է ակտիվացնեք ձեր էլ. հասցեն: Սա արվում է անվտանգության նկատառումներով:
 
-$GreenButton
+$OrangeButton
 
 Այս հղումը գործում է միայն 7 օր։ Խնդրում ենք լրացնել ձեր էլփոստի ակտիվացումը այդ ժամանակահատվածում.</value>
   </data>
@@ -531,11 +531,11 @@ $GreenButton
 Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր "Տվյալների կրկնօրինակում":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" օգտատիրոջ ուղեցույցը:
 
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "support.onlyoffice.com":"http://support.onlyoffice.com" հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "support.onlyoffice.com":"https://support.onlyoffice.com" հասցեով:
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի կրկնօրինակը ստեղծվել է
@@ -546,18 +546,18 @@ ONLYOFFICE™ աջակցման թիմ
 
 Պահուստավորման ընթացակարգի մասին ավելին իմանալու համար այցելեք մեր [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) օգտատիրոջ ուղեցույցը:
 
-Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support.onlyoffice.com](http://support.onlyoffice.com) հասցեով:
+Եթե ունեք հարցեր կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [support.onlyoffice.com](https://support.onlyoffice.com) հասցեով:
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել նամակը ձեր ${LetterLogoText} հաշվի վրա:
 
 Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր։
 
@@ -572,12 +572,12 @@ Authenticator հավելվածի կազմաձևումը, որն օգտագործ
 
 Խնդրում ենք սեղմել ստորև բերված կոճակը՝ պորտալի մուտքի էջ գնալու և իսկորոշիչի հավելվածը կարգավորելու համար.
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր։
 
@@ -590,7 +590,7 @@ $GreenButton
 
 Բջջային հեռախոսը փոխելու համար խնդրում ենք հետևել հետևյալ հղմանը.
 
-$GreenButton
+$OrangeButton
 
 Եթե դուք չեք ցանկանում փոխել ձեր բջջային հեռախոսը կամ սխալմամբ ստացել եք այս էլ.</value>
   </data>
@@ -603,7 +603,7 @@ $GreenButton
 
 Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի սեփականատիրոջ փոփոխության գործընթացը այդ ժամանակահատվածում.</value>
   </data>
@@ -616,7 +616,7 @@ $GreenButton
 
 Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք լրացնել պորտալի հասցեի փոփոխման գործընթացը այդ ժամանակահատվածում.</value>
   </data>
@@ -627,7 +627,7 @@ $GreenButton
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
 Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
 
@@ -640,7 +640,7 @@ $GreenButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -653,7 +653,7 @@ ONLYOFFICE թիմ
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -668,11 +668,11 @@ ONLYOFFICE թիմ
 
 *#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -693,14 +693,14 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Բարև, $UserName:
 
 Դուք հրավիրված եք միանալու "${__VirtualRootPath}":"${__VirtualRootPath}"-ին որպես հյուր օգտատեր: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է ընդամենը 7 օր։
 
@@ -719,24 +719,24 @@ $GreenButton
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:`Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -751,13 +751,13 @@ ONLYOFFICE թիմ
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -766,7 +766,7 @@ ONLYOFFICE թիմ
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
 Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
 
@@ -779,7 +779,7 @@ $GreenButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -800,14 +800,14 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Բարև, $UserName:
 
 $__AuthorName-ը ձեզ հրավիրել է որպես հյուր օգտատեր "${__VirtualRootPath}":"${__VirtualRootPath}": Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է ընդամենը 7 օր։
 
@@ -826,24 +826,24 @@ $GreenButton
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}" o: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -858,13 +858,13 @@ ONLYOFFICE թիմ
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1. Հաղորդագրություն "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալից
@@ -898,7 +898,7 @@ $Body</value>
 
 Հրավերն ընդունելու համար խնդրում ենք մուտքագրել ձեր անունը և գաղտնաբառը հետևյալ հղումով.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 48 ժամ: Խնդրում ենք ավարտել գործողությունը այդ ժամկետում.</value>
   </data>
@@ -948,7 +948,7 @@ $RegionName տարածաշրջան տեղափոխելիս սխալ է տեղի �
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -962,7 +962,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/":
+"www.onlyoffice.com":"https://onlyoffice.com/":
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -977,7 +977,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Պորտալի միգրացիա
@@ -986,7 +986,7 @@ h1."$PortalUrl":"$PortalUrl"
 Ձեր պորտալը տեղափոխվել է նոր տիրույթ: Խնդրում ենք վերականգնել ձեր մուտքը դեպի պորտալ՝ նշելով գաղտնաբառը, որը կօգտագործվի մուտք գործելու համար:
 
 Խնդրում ենք հետևել ստորև բերված հղմանը` ձեր հաշվի գաղտնաբառը սահմանելու համար.
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել մուտքի վերականգնման գործընթացը այդ ժամանակահատվածում:
 
@@ -999,7 +999,7 @@ $GreenButton
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
 Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
 
@@ -1012,7 +1012,7 @@ $GreenButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1027,11 +1027,11 @@ ONLYOFFICE թիմ
 
 *#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1052,7 +1052,7 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
     <value>Բարեւ Ձեզ!
@@ -1078,24 +1078,24 @@ ONLYOFFICE թիմ
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1110,11 +1110,11 @@ ONLYOFFICE թիմ
 
 *#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1129,13 +1129,13 @@ ONLYOFFICE թիմ
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Բարև, $UserName
@@ -1187,7 +1187,7 @@ ONLYOFFICE թիմ</value>
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Ողջույն!
@@ -1203,7 +1203,7 @@ ONLYOFFICE թիմ</value>
 
 Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր։
 
@@ -1214,7 +1214,7 @@ $GreenButton
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ONLYOFFICE անձնական հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր։
 
@@ -1233,7 +1233,7 @@ ONLYOFFICE թիմ</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Դուք խնդրել եք դադարեցնել ձեր հաշիվը personal.onlyoffice.com կայքում: Հարցումը լրացնելու համար հետևեք հղմանը (հղումը ակտիվ է 7-օրյա ժամկետով).
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. Ջնջումից հետո ձեր հաշիվը և դրա հետ կապված բոլոր տվյալները ընդմիշտ կջնջվեն՝ համաձայն մեր "Գաղտնիության հայտարարության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0":
 
@@ -1253,7 +1253,7 @@ ONLYOFFICE թիմ</value>
 
 Դուք խնդրել եք ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ժամանակավոր ապաակտիվացում: Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ապաակտիվացման գործընթացը այդ ժամանակահատվածում:
 
@@ -1264,7 +1264,7 @@ p=. "Reactivate Portal":"$ActivateUrl" (այս հղումը չունի ժամա�
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ապաակտիվացում
@@ -1273,7 +1273,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Դուք խնդրել եք ձեր [${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ժամանակավոր ապաակտիվացում: Գործողությունը հաստատելու համար խնդրում ենք հետևել ստորև նշված հղմանը.
 
-$GreenButton
+$OrangeButton
 
 _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ապաակտիվացման գործընթացը այդ ժամանակահատվածում:
 
@@ -1285,7 +1285,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ջնջում
@@ -1302,7 +1302,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Եթե դեռ ցանկանում եք ջնջել ձեր "${__VirtualRootPath}":"${__VirtualRootPath}" պորտալը, խնդրում ենք հետևել ստորև բերված հղմանը` հաստատելու գործողությունը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ջնջման գործընթացը այդ ժամանակահատվածում:
 
@@ -1310,20 +1310,20 @@ $GreenButton
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>Ձեր ONLYOFFICE DocSpace-ը հաջողությամբ ապաակտիվացվել է: Խնդրում ենք նկատի ունենալ, որ ձեր բոլոր տվյալները կջնջվեն մեր "Գաղտնիության քաղաքականության":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" համաձայն:
 
 Ինչո՞ւ եք որոշել հեռանալ: Կիսվեք ձեր փորձով մեզ հետ:
 
-$GreenButton
+$OrangeButton
 
 Շնորհակալություն և հաջողություն:
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի պրոֆիլի փոփոխության ծանուցում
@@ -1416,7 +1416,7 @@ ONLYOFFICE թիմ</value>
 
 Ընդունեք հրավերը՝ հետևելով ստորև նշված հղմանը և մուտք գործելու համար օգտագործեք ձեր մուտքն ու գաղտնաբառը կորպորատիվ հաշվից:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է միայն 7 օր.</value>
   </data>
@@ -1431,7 +1431,7 @@ $GreenButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1440,7 +1440,7 @@ ONLYOFFICE թիմ
 
 Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր).
 
-$GreenButton
+$OrangeButton
 
 Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է.
 
@@ -1453,7 +1453,7 @@ $GreenButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1474,13 +1474,13 @@ ONLYOFFICE թիմ
 
 * Կատարեք տվյալների կրկնօրինակում:
 
-$GreenButton
+$OrangeButton
 
 Այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" ձեր ONLYOFFICE DocSpace-ի կազմաձևման և կառավարման մասին ավելին իմանալու համար: Դուք կարող եք նաև խորհրդակցել այն, երբ ֆունկցիոնալության վերաբերյալ հարցեր ունեք:
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Դուք չեք մտել ձեր ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" կես տարուց ավելի:
@@ -1489,13 +1489,13 @@ ONLYOFFICE թիմ
 
 Մենք կգնահատենք ձեր կարծիքը: Ինչո՞ւ որոշեցիք դադարեցնել ONLYOFFICE DocSpace-ի օգտագործումը:
 
-$GreenButton
+$OrangeButton
 
 Եթե կարծում եք, որ սա սխալ է և ցանկանում եք շարունակել օգտագործել ONLYOFFICE DocSpace-ը, դիմեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx":
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) պորտալի ջնջում
@@ -1512,7 +1512,7 @@ _Կարևոր! Ձեր պորտալում պահվող բոլոր տվյալնե�
 
 Եթե դուք դեռ ցանկանում եք ջնջել ձեր [${__VirtualRootPath}](${__VirtualRootPath}) պորտալը, խնդրում ենք հետևել ստորև նշված հղմանը` գործողությունը հաստատելու համար.
 
-$GreenButton
+$OrangeButton
 
 _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պորտալի ջնջման գործընթացը այդ ժամանակահատվածում:
 
@@ -1520,7 +1520,7 @@ _Նշում_. այս հղումը գործում է միայն 7 օր: Խնդր�
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Պորտալի հասցեի փոփոխություն
@@ -1538,7 +1538,7 @@ ONLYOFFICE™ աջակցման թիմ
 
 Եթե դուք դեռ ցանկանում եք ջնջել ձեր պրոֆիլը, ապա հետևեք ստորև նշված հղմանը, որպեսզի հաստատեք գործողությունը.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր: Խնդրում ենք ավարտել պրոֆիլի ջնջման գործընթացը այդ ժամանակահատվածում.</value>
   </data>
@@ -1662,7 +1662,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Ձեր պորտալը վերականգնվել է: Այն մուտք գործելու համար դուք պետք է սահմանեք նոր գաղտնաբառ.
 
-$GreenButton
+$OrangeButton
 
 *Նշում*. այս հղումը գործում է միայն 7 օր:
 
@@ -1679,7 +1679,7 @@ $GreenButton
 
 Հարգանքներով՝
 ONLYOFFICE™ աջակցման թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/":
+"www.onlyoffice.com":"https://onlyoffice.com/":
 
 ^Ծանուցման տեսակը փոխելու համար խնդրում ենք կառավարել ձեր "բաժանորդագրման կարգավորումները":"$RecipientSubscriptionConfigURL":^</value>
   </data>
@@ -1696,11 +1696,11 @@ ONLYOFFICE™ աջակցման թիմ
 
 *#4. Միացրեք 3-րդ կողմի ամպերը։* Միացրեք ցանկացած ամպային պահեստ և աշխատեք առանց հավելվածների միջև անցնելու։
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1721,33 +1721,33 @@ _Խնդրում ենք նկատի ունենալ՝ վճարողը դառնում
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հրավերի հղումը սեղմելուց հետո խնդրում ենք նոր գաղտնաբառ սահմանել ձեր հաշվի համար:
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու "${__VirtualRootPath}":"${__VirtualRootPath}"-ին որպես հյուր օգտատեր: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Մենք նաև ձեզ ժամանակ առ ժամանակ կուղարկենք օգտակար խորհուրդներ և ONLYOFFICE-ի վերջին նորությունները: Դուք կարող եք ցանկացած պահի չեղարկել ձեր պրոֆիլի էջի բաժանորդագրությունները, ինչպես նաև նորից միացնել դրանք:
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1762,13 +1762,13 @@ ONLYOFFICE թիմ
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1777,7 +1777,7 @@ ONLYOFFICE թիմ
 
 Համոզվեք, որ վճարեք ձեր բիզնեսի բաժանորդագրությունը մինչև արտոնյալ ժամկետի ավարտը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
@@ -1790,7 +1790,7 @@ ONLYOFFICE թիմ
 
 Մենք խորհուրդ ենք տալիս վճարել ձեր Business բաժանորդագրությունը հիմա և շարունակել օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
@@ -1803,7 +1803,7 @@ ONLYOFFICE թիմ
 
 Համոզվեք, որ որքան հնարավոր է շուտ վճարեք ձեր Բիզնեսի բաժանորդագրությունը: Այսպիսով, դուք նախկինի պես կկարողանաք օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
@@ -1816,7 +1816,7 @@ ONLYOFFICE թիմ
 
 Համոզվեք, որ այսօր վճարեք ձեր Business բաժանորդագրությունը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ONLYOFFICE DocSpace-ի բոլոր առավելությունները:
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
@@ -1827,24 +1827,24 @@ ONLYOFFICE թիմ
 
 Դուք հրավիրված եք միանալու $Message սենյակին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Հրավերի հղումը սեղմելուց հետո խնդրում ենք նոր գաղտնաբառ սահմանել ձեր հաշվի համար:
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Բարեւ Ձեզ!
 
 Դուք հրավիրված եք միանալու ONLYOFFICE DocSpace-ին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղումը.
 
-$GreenButton
+$OrangeButton
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Բարև, $UserName:
@@ -1859,13 +1859,13 @@ ONLYOFFICE թիմ
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու:
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոն":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցության թիմին":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Իսկապես քոնը,
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Օգտատերը "$FromUserName":"$FromUserLink" ջնջել է իր պրոֆիլը, և այս պրոֆիլն այժմ արգելափակված է: Օգտատիրոջ բոլոր ֆայլերը դեռ վերագրված են նրան և զբաղեցնում են սկավառակի տարածք:

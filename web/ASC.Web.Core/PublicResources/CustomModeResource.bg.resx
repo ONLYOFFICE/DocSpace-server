@@ -83,18 +83,18 @@
 
 * *Свържете всяко облачно хранилище* и работете без да превключвате между приложения. 
 
-$GreenButton
+$OrangeButton
 
 Ако имате нужда от помощ, прегледайте нашия "Помощен център":"https://helpcenter.onlyoffice.com/" или попитайте нашия "екип за обслужване на клиенти":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 С уважение, 
 Екипът на ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Искате ли да промените паролата на вашия облачен офис акаунт? Кликнете бутона по-долу, за да потвърдите.
 
-$GreenButton
+$OrangeButton
 
 Линкът е валиден 7 дни.
 
@@ -131,7 +131,7 @@ h3. За бърз старт, ето какво можете да правите
 
 Кликнете върху бутона по-долу и влезте* в облака си.
 
-$GreenButton
+$OrangeButton
 
 Линкът е валиден 7 дни.
 

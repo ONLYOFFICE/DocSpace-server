@@ -130,18 +130,18 @@ Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng c�
 
 * *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
 
-$GreenButton
+$OrangeButton
 
 Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
 
 Trân trọng, 
 Nhóm ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Bạn muốn thay đổi mật khẩu cho tài khoản văn phòng đám mây của mình? Hãy nhấp vào nút bên dưới để xác nhận.
 
-$GreenButton
+$OrangeButton
 
 Liên kết có hiệu lực trong 7 ngày.
 
@@ -178,7 +178,7 @@ Nhóm ONLYOFFICE</value>
 
 Hãy nhấp vào nút bên dưới và đăng nhập* vào đám mây của bạn.
 
-$GreenButton
+$OrangeButton
 
 Liên kết có hiệu lực trong 7 ngày.
 

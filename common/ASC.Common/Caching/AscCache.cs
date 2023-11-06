@@ -24,10 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class AscCacheNotify
 {
     private readonly ICacheNotify<AscCacheItem> _cacheNotify;
@@ -38,7 +37,7 @@ public class AscCacheNotify
         _cacheNotify = cacheNotify;
         _cache = cache;
 
-        _cacheNotify.Subscribe((item) => { OnClearCache(); }, CacheNotifyAction.Any);
+        _cacheNotify.Subscribe((_) => { OnClearCache(); }, CacheNotifyAction.Any);
     }
 
     public void ClearCache() => _cacheNotify.Publish(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);
@@ -49,17 +48,16 @@ public class AscCacheNotify
     }
 }
 
-[Singletone]
-public class AscCache : ICache
+[Singleton]
+public sealed class AscCache : ICache, IDisposable
 {
     private readonly IMemoryCache _memoryCache;
-    private readonly ConcurrentDictionary<string, object> _memoryCacheKeys;
-    private static CancellationTokenSource _resetCacheToken = new CancellationTokenSource();
+    private CancellationTokenSource _resetCacheToken;
 
     public AscCache(IMemoryCache memoryCache)
     {
         _memoryCache = memoryCache;
-        _memoryCacheKeys = new ConcurrentDictionary<string, object>();
+        _resetCacheToken = new();
     }
 
     public T Get<T>(string key) where T : class
@@ -67,9 +65,9 @@ public class AscCache : ICache
         return _memoryCache.Get<T>(key);
     }
 
-    public void Insert(string key, object value, TimeSpan sligingExpiration, Action<object, object, EvictionReason, object> evictionCallback = null)
+    public void Insert(string key, object value, TimeSpan slidingExpiration, Action<object, object, EvictionReason, object> evictionCallback = null)
     {
-        Insert(key, value, sligingExpiration, null, evictionCallback);
+        Insert(key, value, slidingExpiration, null, evictionCallback);
     }
 
     public void Insert(string key, object value, DateTime absolutExpiration, Action<object, object, EvictionReason, object> evictionCallback = null)
@@ -82,12 +80,12 @@ public class AscCache : ICache
         _memoryCache.Remove(key);
     }
 
-    public void Remove(Regex pattern)
+    public void Remove(ConcurrentDictionary<string, object> keys, Regex pattern)
     {
-        var copy = _memoryCacheKeys.ToDictionary(p => p.Key, p => p.Value);
-        var keys = copy.Select(p => p.Key).Where(k => pattern.IsMatch(k));
+        var copy = keys.ToDictionary(p => p.Key, p => p.Value);
+        var matchedKeys = copy.Select(p => p.Key).Where(k => pattern.IsMatch(k));
 
-        foreach (var key in keys)
+        foreach (var key in matchedKeys)
         {
             _memoryCache.Remove(key);
         }
@@ -95,7 +93,7 @@ public class AscCache : ICache
 
     public void Reset()
     {
-        if (_resetCacheToken != null && !_resetCacheToken.IsCancellationRequested && _resetCacheToken.Token.CanBeCanceled)
+        if (_resetCacheToken is { IsCancellationRequested: false, Token.CanBeCanceled: true })
         {
             _resetCacheToken.Cancel();
             _resetCacheToken.Dispose();
@@ -105,7 +103,7 @@ public class AscCache : ICache
     }
 
     public ConcurrentDictionary<string, T> HashGetAll<T>(string key) =>
-        _memoryCache.GetOrCreate(key, r => new ConcurrentDictionary<string, T>());
+        _memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
 
     public T HashGet<T>(string key, string field)
     {
@@ -128,7 +126,7 @@ public class AscCache : ICache
 
         if (value != null)
         {
-            dic.AddOrUpdate(field, value, (k, v) => value);
+            dic.AddOrUpdate(field, value, (_, _) => value);
 
             _memoryCache.Set(key, dic, options);
         }
@@ -150,7 +148,6 @@ public class AscCache : ICache
     private void Insert(string key, object value, TimeSpan? sligingExpiration = null, DateTime? absolutExpiration = null, Action<object, object, EvictionReason, object> evictionCallback = null)
     {
         var options = new MemoryCacheEntryOptions()
-            .RegisterPostEvictionCallback(EvictionCallback)
             .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token));
 
         if (sligingExpiration.HasValue)
@@ -169,11 +166,25 @@ public class AscCache : ICache
         }
 
         _memoryCache.Set(key, value, options);
-        _memoryCacheKeys.TryAdd(key, null);
+    }
+    
+    private void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _memoryCache?.Dispose();
+            _resetCacheToken?.Dispose();
+        }
     }
 
-    private void EvictionCallback(object key, object value, EvictionReason reason, object state)
+    public void Dispose()
     {
-        _memoryCacheKeys.TryRemove(key.ToString(), out _);
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~AscCache()
+    {
+        Dispose(false);
     }
 }

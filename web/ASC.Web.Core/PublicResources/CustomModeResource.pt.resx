@@ -130,18 +130,18 @@ Seja bem-vindo(a) ao DocSpace da ONLYOFFICE! O seu perfil de utilizador foi adic
 
 * *Associe qualquer armazenamento em núvem* e trabalhe sem ter que estar a alternar entre aplicações.
 
-$GreenButton
+$OrangeButton
 
 Se precisar de ajuda, navegue através do nosso "Centro de Ajuda":"https://helpcenter.onlyoffice.com/" ou contacte a nossa "Equipa de suporte":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Com os melhores cumprimentos,
 A Equipa da ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Quer alterar a palavra-passe na sua conta cloud office? Clique no botão abaixo para confirmar.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -198,7 +198,7 @@ A Equipa ONLYOFFICE</value>
 
 Clique no botão abaixo e inicie sessão* na sua nuvem. 
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias. 
 

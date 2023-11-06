@@ -95,13 +95,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -116,13 +116,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -137,13 +137,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -158,13 +158,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Connect any cloud storage* and work without switching between apps. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu, 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Aktivizējiet savu e-pastu portālā "${__VirtualRootPath}":"$InviteLink".
@@ -173,7 +173,7 @@ Sveiki!
 
 Lai uzsāktu darbu portālā "${__VirtualRootPath}":"$InviteLink", jums drošības nolūkos ir jāaktivizē sava e-pasta adrese.
 
-$GreenButton
+$OrangeButton
 
 Šī saite ir derīga vienīgi 7 dienas. Lūdzu, pa šo laiku pabeidziet e-pasta aktivizāciju.</value>
   </data>
@@ -188,23 +188,10 @@ Lai uzzinātu vairāk par rezerves kopēšanu, lūdzu, dodieties uz instrukciju 
 
 
 Ja radušies kādi jautājumi, sazinieties ar mums uz:
- "support.onlyoffice.com":"http://support.onlyoffice.com"
+ "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Ar cieņu,
 ONLYOFFICE™ atbalsta komanda</value>
-  </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Paroles maiņas pieprasījums "${__VirtualRootPath}":"${__VirtualRootPath}" portālam
-
-Ir pieprasīta paroles maiņa, kuru izmantojāt, lai ieietu "${__VirtualRootPath}":"${__VirtualRootPath}" portālā.
-
-Lai mainītu paroli, sekojiet šai saitei:
-
-$GreenButton
-
-*Piezīme*: šī saite ir derīga tikai 7 dienas. Pabeidziet paroles maiņas procesu šajā laikā. 
-
-Ja nevēlaties mainīt savu paroli vai saņēmāt e-pastu kļūdas pēc, lūdzu, ignorējiet šo ziņu vai sazinieties ar savu  "${__VirtualRootPath}":"${__VirtualRootPath}" portāla administratoru.</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Mobilā tālruņa maiņas pieprasījums
@@ -213,7 +200,7 @@ Jūs pieprasījāt mainīt mobilo tālruni, ko ievadīt portālā ${LetterLogoTe
 
 Lai to izdarītu, sekojiet saitei:
 
-$GreenButton
+$OrangeButton
 
 Ja nevēlaties mainīt mobilā tālruņa numuru vai saņēmāt šo ziņu kļūdas dēļ, lūdzu, ignorējiet to vai sazinieties ar portāla administratoru, lai uzzinātu sīkāk.</value>
   </data>
@@ -226,7 +213,7 @@ Ir saņemts pieprasījums mainīt portāla "${__VirtualRootPath}":"${__VirtualRo
 
 Lai apstiprinātu darbību, spiediet zemāk esošo saiti:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet portāla īpašnieka maiņu.</value>
   </data>
@@ -239,7 +226,7 @@ Ir saņemts pieprasījums mainīt "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
 Lai apstiprinātu operāciju, lūdzu, sekojiet zemāk esošajai saitei:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, pabeidziet portāla adreses maiņu šajā laikā.</value>
   </data>
@@ -259,7 +246,7 @@ Jūs lūdzāt pievienoties "${__VirtualRootPath}":"$InviteLink" portālam ${Lett
 
 Lai pieņemtu uzaicinājumu, lūdzu, sekojiet šai saitei un ievadiet savu vārdu un uzvārdu:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga 48 stundas. Lūdzu, šajā laikā pabeidziet šo darbību.</value>
   </data>
@@ -272,7 +259,7 @@ Your portal is now available at the old address "$PortalUrl":"$PortalUrl"
 Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinieties ar mums tīmekļa vietnē "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Lai mainītu paziņojuma veidu, pārvaldiet "abonēšanas iestatījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -286,7 +273,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinieties ar mums t
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Lai mainītu paziņojuma veidu, pārvaldiet "abonēšanas iestatījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -301,7 +288,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinieties ar mums t
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Portāla "${__VirtualRootPath}":"${__VirtualRootPath}" deaktivizācija
@@ -310,7 +297,7 @@ Sveicināti, $OwnerName,
 
 Jūs esat pieprasījuši īslaicīgu sava"${__VirtualRootPath}":"${__VirtualRootPath}" portāla deaktivizāciju. Lūdzu, sekojiet saitei, lai apstiprinātu darbību:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet portāla deaktivizāciju.
 
@@ -321,7 +308,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, rakstiet mu
 
 Ar cieņu
 ONLYOFFICE™ komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portāla dzēšana
@@ -338,7 +325,7 @@ Pirms portāla dzēšanas pārliecinieties, ka automātiskais rēķins ir izslē
 
 Ja joprojām vēlaties dzēst savu "${__VirtualRootPath}":"${__VirtualRootPath}" portālu, lūdzu, sekojiet zemāk esošajai saitei, lai apstiprinātu operāciju:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet portāla dzēšanas procesu. 
 
@@ -346,7 +333,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, rakstiet mu
 
 Ar cieņu
 ONLYOFFICE™ komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Portāla adreses maiņa
@@ -364,7 +351,7 @@ Jūs esat pieprasījuši neatgriezeniski dzēst savu profilu no "${__VirtualRoot
 
 Ja vēlaties dzēst savu profilu, lūdzu, sekojiet zemāk esošajai saitei, lai apstiprinātu darbību: 
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai 7 dienas. Lūdzu, šajā laikā pabeidziet profila dzēšanu.</value>
   </data>
@@ -454,7 +441,7 @@ Ja jums radušies kādi jautājumi vai ir nepieciešama palīdzība, lūdzu, saz
 
 Ar cieņu,
 ONLYOFFICE™ komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Lai mainītu paziņojuma veidu, lūdzu, labojiet savus "abonēšanas uzstādījumus":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -629,7 +616,7 @@ ONLYOFFICE komanda</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt paroli savā ONLYOFFICE kontā? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -642,13 +629,13 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -657,13 +644,13 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -672,13 +659,13 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -687,7 +674,7 @@ Jūs tikko izveidojāt ONLYOFFICE DocSpace - dokumentu centru, kurā varat uzlab
 
 Apstipriniet savu e-pastu (saite ir derīga 7 dienas):
 
-$GreenButton
+$OrangeButton
 
 Jūsu pašreizējais tarifu plāns ir STARTUP. Tas ir pilnīgi bezmaksas un ietver:
 
@@ -700,7 +687,7 @@ Izbaudiet jaunu dokumentu sadarbības veidu!
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -713,7 +700,7 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -728,11 +715,11 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -747,11 +734,11 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -766,11 +753,11 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -785,11 +772,11 @@ Ceram, ka jums patīk izmantot ONLYOFFICE DocSpace. Tālāk ir sniegti daži pad
 
 *#4. Pievienojiet 3. puses mākoņus.* Pievienojiet jebkuru mākoņkrātuvi un strādājiet, nepārslēdzoties starp lietotnēm.
 
-$GreenButton
+$OrangeButton
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -810,7 +797,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -831,7 +818,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -852,7 +839,7 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -873,51 +860,51 @@ _Ņemiet vērā: persona, kas maksā abonementu, ir maksātājs (-a). Tikai maks
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Sveiki!
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -932,13 +919,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "tbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -953,13 +940,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "tbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -974,13 +961,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -995,13 +982,13 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Ziņojums no portāla "${__VirtualRootPath}":"${__VirtualRootPath}" 
@@ -1023,7 +1010,7 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1036,7 +1023,7 @@ Iegūstiet bezmaksas ONLYOFFICE programmas darbam ar dokumentiem no jebkuras jū
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Sveiki!
@@ -1050,7 +1037,7 @@ ONLYOFFICE komanda</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt paroli savā ONLYOFFICE Personal kontā? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
 
-$GreenButton 
+$OrangeButton 
 
 Saite ir derīga septiņas dienas.
 
@@ -1061,13 +1048,13 @@ Vai nevēlaties mainīt paroli? Vienkārši ignorējiet šo ziņojumu.</value>
 
 Kāds jums ir iemesls aiziet? Dalieties savā pieredzē ar mums.
  
-$GreenButton
+$OrangeButton
 
 Pateicamies un vēlam veiksmi!
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1088,13 +1075,13 @@ Pielāgojiet sava ONLYOFFICE DocSpace drošības iestatījumus, lai padarītu to
 
 * Veiciet datu dublēšanu.
 
-$GreenButton
+$OrangeButton
 
 Apmeklējiet mūsu palīdzības centru: https://helpcenter.onlyoffice.com/, lai uzzinātu vairāk par ONLYOFFICE DocSpace konfigurēšanu un pārvaldību. Aicinām konsultēties arī tad, ja jums ir jautājumi par funkcionalitāti.
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Jūs vairāk nekā pusgadu neesat iegājis savā ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". 
@@ -1103,26 +1090,26 @@ Tā kā nolēmt vairs to neizmantot, jūsu ONLYOFFICE DocSpace un visi dati tiks
 
 Mēs būsim pateicīgi par jūsu atsauksmi. Kāpēc nolēmāt pārtraukt lietot ONLYOFFICE DocSpace?
 
-$GreenButton
+$OrangeButton
 
 Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ONLYOFFICE DocSpace, sazinieties ar mūsu "atbalsta komandu":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Sveiki!
 
 Jūs esat aicināts pievienoties ONLYOFFICE DocSpace šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli savam kontam.
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Sveiki, $UserName!
@@ -1131,7 +1118,7 @@ ONLYOFFICE komanda
 
 Pārliecinieties, ka apmaksājiet Business abonementu pirms pagarinājuma perioda beigām. Tādējādi jūs varēsiet turpināt izmantot visas ONLYOFFICE DocSpace priekšrocības.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1144,7 +1131,7 @@ ONLYOFFICE komanda
 
 Mēs iesakām samaksāt jūsu Business abonementu tagad un turpināt izmantot visas jūsu ONLYOFFICE DocSpace priekšrocības.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1157,7 +1144,7 @@ ONLYOFFICE komanda
 
 Pārliecinieties, ka apmaksājat savu Business abonementu, cik drīz vien iespējams. Tādējādi jūs varēsiet izmantot visas ONLYOFFICE DocSpace priekšrocības tāpat kā iepriekš.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1170,7 +1157,7 @@ ONLYOFFICE komanda
 
 Noteikti apmaksājiet Business abonementu jau šodien. Tādējādi jūs varēsiet turpināt izmantot visas ONLYOFFICE DocSpace priekšrocības.
 
-$GreenButton
+$OrangeButton
 
 Jūsu
 ONLYOFFICE komanda
@@ -1181,13 +1168,13 @@ ONLYOFFICE komanda
 
 Jūs esat uzaicināts (-a) pievienoties $Message room šeit "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Pēc tam, kad noklikšķiniet uz uzaicinājuma saites, iestatiet jaunu paroli savam kontam.
 
 Jūsu
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Laipni lūdzam ONLYOFFICE DocSpace!</value>
@@ -1435,18 +1422,18 @@ Ir izveidots dublējuma fails, kas satur datus no jūsu [${__VirtualRootPath}]($
 
 Lai uzzinātu vairāk par dublēšanas procedūru, skatiet mūsu [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) lietotāja rokasgrāmatu.
 
-Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [support.onlyoffice.com](http://support.onlyoffice.com)
+Ja tev ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīmekļa vietnē [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt e-pasta adresi savā ${LetterLogoText} kontā?
 
 Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -1461,14 +1448,14 @@ Autentificētāja lietotnes konfigurācija, ko izmantojat, lai ieietu ${LetterLo
 
 Noklikšķiniet uz tālāk redzamās pogas, lai pārietu uz portāla pieteikšanās lapu un konfigurētu autentificētāja lietojumprogrammu:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Sveiki, $UserName!
 
 Jūs esat uzaicināts pievienoties "${__VirtualRootPath}":"${__VirtualRootPath}" kā viesis. Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga tikai septiņas dienas.
 
@@ -1479,7 +1466,7 @@ Jūs saņemsiet vairāk padomu par to, kā izmantot savu tīmekļa biroju. Abone
 
 $__AuthorName uzaicināja jūs kā viesi "${__VirtualRootPath}":"${__VirtualRootPath}". Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga tikai septiņas dienas.
 
@@ -1535,7 +1522,7 @@ h1."$PortalUrl":"$PortalUrl"
 Jūsu portāls ir migrēts uz jaunu domēnu. Atjaunojiet piekļuvi portālam, norādot paroli, kas tiks izmantota pierakstoties.
 
 Lūdzu, izmantojiet tālāk norādīto saiti, lai iestatītu konta paroli:
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai septiņas dienas. Pabeidziet piekļuves atjaunošanas procesu šajā periodā.
 
@@ -1596,7 +1583,7 @@ ONLYOFFICE komanda</value>
 
 Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -1617,7 +1604,7 @@ ONLYOFFICE komanda</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Jūs pieprasījāt pārtraukt konta darbību personal.onlyoffice.com. Lai pabeigtu pieprasījumu, izmantojiet saiti (saite ir aktīva septiņas dienas): 
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: pēc izdzēšanas jūsu konts un visi ar to saistītie dati tiks neatgriezeniski izdzēsti saskaņā ar mūsu "Paziņojumu par konfidencialitāti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
 
@@ -1637,7 +1624,7 @@ Cien. $OwnerName,
 
 Jūs pieprasījāt sava [${__VirtualRootPath}](${__VirtualRootPath}) portāla pagaidu deaktivizāciju. Izmantojiet tālāk norādīto saiti, lai apstiprinātu darbību:
 
-$GreenButton
+$OrangeButton
 
 _Note_: šī saite ir derīga tikai septiņas dienas. Pabeidziet portāla deaktivizēšanas procesu šajā periodā.
 
@@ -1648,7 +1635,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīm
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portāla dzēšana
@@ -1665,7 +1652,7 @@ Pirms izdzēst portālu, pārliecinieties, vai automātiska norēķināšanās i
 
 Ja joprojām vēlies izdzēst savu [${__VirtualRootPath}](${__VirtualRootPath}) portālu, izmantojiet tālāk norādīto saiti, lai apstiprinātu darbību:
 
-$GreenButton
+$OrangeButton
 
 _Note_: šī saite ir derīga tikai septiņas dienas. Pabeidziet portāla dzēšanas procesu šajā periodā.
 
@@ -1673,7 +1660,7 @@ Ja jums ir kādi jautājumi vai nepieciešama palīdzība, sazinies ar mums tīm
 
 Ar cieņu
 ONLYOFFICE™ atbalsta komanda
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Lietotājs "$FromUserName":"$ FromUserLink" izdzēsa savu profilu, un šis profils tagad ir bloķēts. Visi lietotāja faili joprojām ir piešķirti viņam/viņai un aizņem vietu diskā. 
@@ -1728,7 +1715,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Jūsu portāls ir atjaunots. Lai tai piekļūtu, ir jāiestata jauna parole:
 
-$GreenButton
+$OrangeButton
 
 *Piezīme*: šī saite ir derīga tikai septiņas dienas. 
 
@@ -1739,13 +1726,13 @@ Ja šo e-pasta ziņojumu saņēmāt kļūdas dēļ, ignorējiet to vai sazinieti
 
 Jūs esat uzaicināts pievienoties "${__VirtualRootPath}":"${__VirtualRootPath}" kā viesis. Apstipriniet uzaicinājumu, noklikšķinot uz saites:
 
-$GreenButton
+$OrangeButton
 
 Mēs arī nosūtīsim jums noderīgus padomus un jaunākās ONLYOFFICE ziņas. Abonementus jebkurā brīdī varat atcelt savā profila lapā, kā arī atkārtoti iespējot tos.
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) paziņojums par portāla profila maiņu
@@ -1805,7 +1792,7 @@ Jūs esat uzaicināts pievienoties sava uzņēmuma drošajam tīmekļa birojam, 
 
 Apstipriniet uzaicinājumu, noklikšķinot uz tālāk norādītās saites, un pierakstoties izmantojot uzņēmuma konta lietotājvārdu un paroli. 
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga tikai septiņas dienas.</value>
   </data>

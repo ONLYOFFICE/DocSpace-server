@@ -36,7 +36,7 @@ public static class OneDriveDaoSelectorExtension
         services.TryAdd<ThirdPartyFolderDao<Item, Item, Item>>();   
         services.TryAdd<ThirdPartyTagDao<Item, Item, Item>>();
         services.TryAdd<IDaoBase<Item, Item, Item>, OneDriveDaoBase>();
-        services.TryAdd<IProviderInfo<Item, Item, Item>>();
+        services.TryAdd<IProviderInfo<Item, Item, Item>, OneDriveProviderInfo>();
         services.TryAdd<IDaoSelector<Item, Item, Item>, RegexDaoSelectorBase<Item, Item, Item>>();
     }
 }

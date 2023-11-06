@@ -130,18 +130,18 @@ Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievi
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
 Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/" vai jautājiet mūsu "atbalsta komandai":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Jūsu 
 ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt sava mākoņa biroja konta paroli? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -178,7 +178,7 @@ ONLYOFFICE komanda</value>
 
 Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 

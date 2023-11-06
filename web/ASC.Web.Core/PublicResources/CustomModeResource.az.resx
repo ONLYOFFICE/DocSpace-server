@@ -87,27 +87,13 @@ ONLYOFFICE komandası</value>
 
 Aşağıdakı düyməni basın və buludunuza daxil olun*.
 
-$GreenButton
+$OrangeButton
 
 Link 7 gün ərzində etibarlıdır.
 
 *Bu brauzerdə bulud ofisinizə daxil olmamısınızsa, təsdiq üçün köhnə e-poçtunuzdan istifadə etməlisiniz.
 
 E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_password" xml:space="preserve">
-    <value>"${__VirtualRootPath}":"${__VirtualRootPath}" portalına daxil olmaq üçün istifadə edilən parolunuzu dəyişdirmək tələbi gəlib.
-
-Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
-
-$GreenButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Qeyd olunan müddət ərzində parol dəyişdirmə prosesini tamamlayın.
-
-Əgər parolunuzu dəyişmək istəmirsinizsə və ya bu e-məktubu səhvən almışsınızsa, onu nəzərə almayın.
-
-Hörmətlə,
-ONLYOFFICE komandası</value>
   </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Salam,
@@ -122,7 +108,7 @@ ONLYOFFICE komandası</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com saytında hesabınıza xitam verilməsini xahiş etmisiniz. Sorğunu tamamlamaq üçün linkə daxil olun (link 7 gün ərzində aktivdir):
 
-$GreenButton
+$OrangeButton
 
 *Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid= 5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
 
@@ -159,9 +145,6 @@ ONLYOFFICE komandası</value>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>ONLYOFFICE Personala xoş gəlmisiniz</value>
   </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>ONLYOFFICE Şəxsi parol yardımı</value>
-  </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Personal. Zəhmət olmasa e-poçt ünvanınızı aktivləşdirin</value>
   </data>
@@ -177,7 +160,7 @@ ONLYOFFICE komandası</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Bulud ofis hesabınızdakı parolu dəyişmək istəyirsiniz? Təsdiqləmək üçün aşağıdakı düyməni basın.
 
-$GreenButton
+$OrangeButton
 
 Link 7 gün ərzində etibarlıdır.
 
@@ -201,6 +184,6 @@ $ GreenButton
 Köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" baxın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
 </root>

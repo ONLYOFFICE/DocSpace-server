@@ -130,18 +130,18 @@ Welkom bij ONLYOFFICE DocSpace! Uw gebruikersprofiel is toegevoegd aan "${__Virt
 
 * *Sluit elke cloudopslag* aan en werk zonder tussen apps te schakelen. 
 
-$GreenButton
+$OrangeButton
 
 Als u hulp nodig hebt, blader dan door ons "Helpcentrum":"https://helpcenter.onlyoffice.com/" of vraag het aan ons "ondersteuningsteam":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Hoogachtend, 
 ONLYOFFICE team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Wilt u het wachtwoord van uw cloud office account wijzigen? Klik op de onderstaande knop om te bevestigen.
 
-$GreenButton
+$OrangeButton
 
 De link is 7 dagen geldig.
 
@@ -178,7 +178,7 @@ ONLYOFFICE team</value>
 
 Klik op de onderstaande knop en log in* op uw cloud.
 
-$GreenButton
+$OrangeButton
 
 De link is 7 dagen geldig.
 

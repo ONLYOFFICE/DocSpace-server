@@ -77,12 +77,12 @@ public class OAuth20TokenHelper
 
         var stateUriBuilder = new UriBuilder(u.Scheme, u.Host, u.Port, $"thirdparty/{loginProvider.Name.ToLower()}/code");
 
-        if (additionalStateArgs != null && additionalStateArgs.Count > 0)
+        if (additionalStateArgs is { Count: > 0 })
         {
             var stateQuery = "";
             stateQuery = additionalStateArgs.Keys
                 .Where(a => a != null)
-                .Aggregate(stateQuery, (current, a) => a != null ? $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}" : null);
+                .Aggregate(stateQuery, (current, a) => $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}");
 
             stateUriBuilder.Query = stateQuery.Substring(1);
         }
@@ -94,9 +94,9 @@ public class OAuth20TokenHelper
         {
             query = additionalArgs.Keys.Where(additionalArg => additionalArg != null)
                                   .Aggregate(query, (current, additionalArg) =>
-                                                    additionalArg != null ? current
-                                                                            + "&" + HttpUtility.UrlEncode(additionalArg.Trim())
-                                                                               + "=" + HttpUtility.UrlEncode((additionalArgs[additionalArg] ?? "").Trim()) : null);
+                                                    current
+                                                    + "&" + HttpUtility.UrlEncode(additionalArg.Trim())
+                                                    + "=" + HttpUtility.UrlEncode((additionalArgs[additionalArg] ?? "").Trim()));
         }
 
         return uriBuilder.Uri + "?" + query;
@@ -110,9 +110,9 @@ public class OAuth20TokenHelper
         var clientSecret = loginProvider.ClientSecret;
         var redirectUri = loginProvider.RedirectUri;
 
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(authCode);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(clientID);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(clientSecret);
+        ArgumentException.ThrowIfNullOrEmpty(authCode);
+        ArgumentException.ThrowIfNullOrEmpty(clientID);
+        ArgumentException.ThrowIfNullOrEmpty(clientSecret);
 
         var data = $"code={HttpUtility.UrlEncode(authCode)}&client_id={HttpUtility.UrlEncode(clientID)}&client_secret={HttpUtility.UrlEncode(clientSecret)}";
 

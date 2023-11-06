@@ -119,6 +119,14 @@ public static class CommonTags
 
     public const string HelpLink = "__HelpLink";
 
+    public const string SalesEmail = "__SalesEmail";
+
+    public const string SiteLink = "__SiteLink";
+
+    public const string SupportLink = "__SupportLink";
+
+    public const string SupportEmail = "__SupportEmail";
+
     public const string WithoutUnsubscribe = "WithoutUnsubscribe";
 
     public const string LetterLogo = "LetterLogo";
@@ -130,4 +138,5 @@ public static class CommonTags
     public const string EmbeddedAttachments = "EmbeddedAttachments";
 
     public const string ImagePath = "ImagePath";
+    public const string TopGif = "TopGif";
 }

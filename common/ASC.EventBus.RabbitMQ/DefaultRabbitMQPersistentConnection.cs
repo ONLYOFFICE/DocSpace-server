@@ -34,7 +34,7 @@ public class DefaultRabbitMQPersistentConnection
     private readonly int _retryCount;
     private IConnection _connection;
     private bool _disposed;
-    readonly object _sync_root = new object();
+    readonly object _sync_root = new();
 
     public DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFactory, ILogger<DefaultRabbitMQPersistentConnection> logger, int retryCount = 5)
     {
@@ -47,7 +47,7 @@ public class DefaultRabbitMQPersistentConnection
     {
         get
         {
-            return _connection != null && _connection.IsOpen && !_disposed;
+            return _connection is { IsOpen: true } && !_disposed;
         }
     }
 

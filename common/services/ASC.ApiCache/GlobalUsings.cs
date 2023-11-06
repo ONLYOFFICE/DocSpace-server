@@ -39,16 +39,8 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Teamlabsite.Context;
 global using ASC.Core.Common.EF.Teamlabsite.Model;
-global using ASC.Core.Common.Hosting;
 global using ASC.Core.Tenants;
-global using ASC.EventBus.Extensions.Logger;
-global using ASC.Feed.Context;
-global using ASC.MessagingSystem.EF.Context;
 global using ASC.Web.Core.Helpers;
-global using ASC.Webhooks.Core;
-global using ASC.Webhooks.Core.EF.Context;
-
-global using Autofac;
 
 global using HealthChecks.UI.Client;
 

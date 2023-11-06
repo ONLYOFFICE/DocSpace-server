@@ -120,7 +120,7 @@
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Želite spremeniti geslo na svojem računu ONLYOFFICE? Kliknite spodnji gumb za potrditev.
 
-$GreenButton
+$OrangeButton
 
 Povezava je veljavna 7 dni.
 
@@ -133,13 +133,13 @@ Pravkar ste ustvarili ONLYOFFICE DocSpace, središče za dokumente, kjer lahko o
 
 Prosimo potrdite vaš e-mail (povezava velja 7 dni):
 
-$GreenButton
+$OrangeButton
 
 Uživajte v novem načinu sodelovanja pri dokumentih!
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -148,13 +148,13 @@ Pravkar ste ustvarili ONLYOFFICE DocSpace, središče za dokumente, kjer lahko o
 
 Prosimo potrdite vaš e-mail (povezava velja 7 dni):
 
-$GreenButton
+$OrangeButton
 
 Uživajte v novem načinu sodelovanja pri dokumentih!
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -163,7 +163,7 @@ Pravkar ste ustvarili ONLYOFFICE DocSpace, središče za dokumente, kjer lahko o
 
 Prosimo potrdite vaš e-mail (povezava velja 7 dni):
 
-$GreenButton
+$OrangeButton
 
 Vaš trenutni naročniški paket je STARTUP. Je popolnoma brezplačen in vključuje:
 
@@ -176,7 +176,7 @@ Uživajte v novem načinu sodelovanja pri dokumentih!
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -185,13 +185,13 @@ Pravkar ste ustvarili ONLYOFFICE DocSpace, središče za dokumente, kjer lahko o
 
 Prosimo potrdite vaš e-mail (povezava velja 7 dni):
 
-$GreenButton
+$OrangeButton
 
 Uživajte v novem načinu sodelovanja pri dokumentih!
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -204,7 +204,7 @@ Pridobite brezplačne aplikacije ONLYOFFICE za delo z dokumenti s katero koli od
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -219,11 +219,11 @@ Verjamemo, da boste uživali v uporabi vašega ONLYOFFICE DocSpace. Tukaj je nek
 
 *#4. Povežite oblake tretjih oseb.* Povežite katero koli shrambo v oblaku in delajte brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -238,11 +238,11 @@ Verjamemo, da boste uživali v uporabi vašega ONLYOFFICE DocSpace. Tukaj je nek
 
 *#4. Povežite oblake tretjih oseb.* Povežite katero koli shrambo v oblaku in delajte brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -257,11 +257,11 @@ Verjamemo, da boste uživali v uporabi vašega ONLYOFFICE DocSpace. Tukaj je nek
 
 *#4. Povežite oblake tretjih oseb.* Povežite katero koli shrambo v oblaku in delajte brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -276,11 +276,11 @@ Verjamemo, da boste uživali v uporabi vašega ONLYOFFICE DocSpace. Tukaj je nek
 
 *#4. Povežite oblake tretjih oseb.* Povežite katero koli shrambo v oblaku in delajte brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -301,7 +301,7 @@ _Opomba: Oseba, ki plača naročnino, postane plačnik. Samo plačnik lahko spre
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -322,7 +322,7 @@ _Opomba: Oseba, ki plača naročnino, postane plačnik. Samo plačnik lahko spre
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -343,7 +343,7 @@ _Opomba: Oseba, ki plača naročnino, postane plačnik. Samo plačnik lahko spre
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -364,51 +364,51 @@ _Opomba: Oseba, ki plača naročnino, postane plačnik. Samo plačnik lahko spre
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Pozdravljeni!
 
 Povabljeni ste, da se pridružite ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Pozdravljeni!
 
 Povabljeni ste, da se pridružite ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Pozdravljeni!
 
 Povabljeni ste, da se pridružite ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Pozdravljeni!
 
 Povabljeni ste, da se pridružite ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -423,13 +423,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povezovanje s katero koli shrambo v oblaku* in delo brez preklapljanja med aplikacijami. 
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, jo poiščite v našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "Ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -444,13 +444,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povezovanje s katero koli shrambo v oblaku* in delo brez preklapljanja med aplikacijami. 
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, jo poiščite v našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "Ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -465,13 +465,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povezovanje s katero koli shrambo v oblaku* in delo brez preklapljanja med aplikacijami. 
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, jo poiščite v našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "Ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -486,13 +486,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povezovanje s katero koli shrambo v oblaku* in delo brez preklapljanja med aplikacijami. 
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, jo poiščite v našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "Ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Sporočilo portala "${__VirtualRootPath}":"${__VirtualRootPath}" 
@@ -514,7 +514,7 @@ Pridobite brezplačne aplikacije ONLYOFFICE za delo z dokumenti iz katere koli o
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -527,7 +527,7 @@ Pridobite brezplačne aplikacije ONLYOFFICE za delo z dokumenti iz katere koli o
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Pozdravljeni!
@@ -541,7 +541,7 @@ Ekipa ONLYOFFICE</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Želite spremeniti geslo na svojem osebnem računu ONLYOFFICE? Kliknite spodnji gumb za potrditev.
 
-$GreenButton 
+$OrangeButton 
 
 Povezava je veljavna 7 dni.
 
@@ -552,13 +552,13 @@ Ne želite spremeniti gesla? Prezrite to sporočilo.</value>
 
 Zakaj ste se odločili oditi? Delite svoje izkušnje z nami.
  
-$GreenButton
+$OrangeButton
 
 Hvala in srečno!
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -579,13 +579,13 @@ Prilagodite varnostne nastavitve vašega ONLYOFFICE DocSpace, da bo bolj varen:
 
 * Delajte varnostne kopije.
 
-$GreenButton
+$OrangeButton
 
 Obiščite naš "Center za pomoč":"https://helpcenter.onlyoffice.com/" in izvedite več o konfiguriranju in upravljanju ONLYOFFICE DocSpace. Vabimo vas tudi, da ga obiščete, ko imate vprašanja glede funkcionalnosti.
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>V vaš ONLYOFFICE DocSpace niste vstopili "${__VirtualRootPath}":"${__VirtualRootPath}" že več kot pol leta. 
@@ -594,26 +594,26 @@ Ker ste se odločili, da ga ne boste več uporabljali, bodo vaš ONLYOFFICE DocS
 
 Veseli bomo vaših povratnih informacij. Zakaj ste se odločili prenehati uporabljati ONLYOFFICE DocSpace?
 
-$GreenButton
+$OrangeButton
 
 Če menite, da je to napaka in želite še naprej uporabljati ONLYOFFICE DocSpace, se obrnite na našo "ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx". 
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Pozdravljeni!
 
 Povabljeni ste, da se pridružite ONLYOFFICE DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 Po kliku na povezavo s povabilom nastavite novo geslo za svoj račun.
 
 S spoštovanjem,
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -622,7 +622,7 @@ Upoštevajte, da je za vaš ONLYOFFICE DocSpace aktivirano obdobje odloga $Payme
 
 Poskrbite za plačano poslovno naročnino pred iztekom obdobja odloga. Tako boste lahko še naprej uporabljali vse prednosti vašega ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem,
 Ekipa ONLYOFFICE
@@ -635,7 +635,7 @@ Upoštevajte, da vaša naročnina na ONLYOFFICE DocSpace poteče čez tri dni. N
 
 Priporočamo, da že zdaj plačate poslovno naročnino in še naprej uporabljate vse prednosti vašega ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem,
 Ekipa ONLYOFFICE
@@ -648,7 +648,7 @@ Upoštevajte, da je obdobje odloga $PaymentDelay dni za vaš ONLYOFFICE DocSpace
 
 Poskrbite za plačilo poslovne naročnine čim prej. Tako boste lahko še naprej uporabljali vse prednosti vašega ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem,
 Ekipa ONLYOFFICE
@@ -661,7 +661,7 @@ Upoštevajte, da bo jutri poteklo obdobje odloga $PaymentDelay dni za vaš ONLYO
 
 Poskrbite, da boste svojo poslovno naročnino plačali še danes. Tako boste lahko še naprej uporabljali vse prednosti vašega ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 S spoštovanjem,
 Ekipa ONLYOFFICE
@@ -672,13 +672,13 @@ Ekipa ONLYOFFICE
 
 Povabljeni ste, da se pridružite $Message sobi na "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 Ko kliknete povezavo s povabilom, nastavite novo geslo za svoj račun.
 
 S spoštovanjem,
 Ekipa ONLYOFFICE 
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>Sprejmi</value>
@@ -1083,7 +1083,7 @@ Pozdravljeni!
 
 Za začetek sodelovanja na "${__VirtualRootPath}":"$InviteLink" portalu morate aktivirati svoj mail naslov. To je potrebno iz varnostnih razlogov.
 
-$GreenButton
+$OrangeButton
 
 Ta povezava velja samo 7 dni. Prosimo, dokončajte svojo email aktivacijo v tem obdobju.</value>
   </data>
@@ -1097,11 +1097,11 @@ Datoteka varnostne kopije, ki vsebuje podatke iz vašega "${__VirtualRootPath}":
 Če želite izvedeti več o postopku varnostnega kopiranja, si oglejte uporabniški priročnik "Varnostno kopiranje podatkov":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block".
 
 
-Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na "support.onlyoffice.com":"http://support.onlyoffice.com"
+Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Lep pozdrav,
 ONLYOFFICE™ Ekipa za podporo
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) ustvarjena varnostna kopija portala
@@ -1112,18 +1112,18 @@ Datoteka varnostne kopije, ki vsebuje podatke iz vašega [${__VirtualRootPath}](
 
 Če želite izvedeti več o postopku varnostnega kopiranja, si oglejte naš [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) uporabniški priročnik.
 
-Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [support.onlyoffice.com](http://support.onlyoffice.com)
+Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Lep pozdrav,
 ONLYOFFICE™ Ekipa za podporo
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Želite spremeniti email naslov na svojem ${LetterLogoText} računu?
 
 Kliknite spodnji gumb in se prijavite* v svoj oblak.
 
-$GreenButton
+$OrangeButton
 
 Povezava je veljavna 7 dni.
 
@@ -1138,7 +1138,7 @@ Zahtevali ste spremembo mobilne telefonske številke, s katero ste vstopili na p
 
 Za zamenjavo številke mobilnega telefona sledite spodnji povezavi:
 
-$GreenButton
+$OrangeButton
 
 Če ne želite zamenjati številke svojega mobilnega telefona ali ste ta email prejeli pomotoma, ga prezrite ali se obrnite na skrbnika portala, da dobite podrobne informacije.</value>
   </data>
@@ -1149,7 +1149,7 @@ Konfiguracija aplikacije za avtentikacijo, ki jo uporabljate za vstop na portal 
 
 Kliknite spodnji gumb, da odprete stran za prijavo v portal in konfigurirate aplikacijo za avtentikacijo:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Sprememba "${__VirtualRootPath}":"${__VirtualRootPath}" lastnika portala
@@ -1160,7 +1160,7 @@ Pojavila se je zahteva za spremembo "${__VirtualRootPath}":"${__VirtualRootPath}
 
 Za potrditev operacije sledite spodnji povezavi:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek zamenjave lastnika portala v tem obdobju.</value>
   </data>
@@ -1173,7 +1173,7 @@ Pojavila se je zahteva za spremembo "${__VirtualRootPath}":"${__VirtualRootPath}
 
 Za potrditev operacije sledite spodnji povezavi:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek zamenjave lastnika portala v tem obdobju.</value>
   </data>
@@ -1182,7 +1182,7 @@ $GreenButton
 
 Povabljeni ste, da se pridružite "${__VirtualRootPath}":"${__VirtualRootPath}" kot gostujoči uporabnik. Povabilo sprejmete s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 Povezava velja le 7 dni.
 
@@ -1201,20 +1201,20 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povezovanje katere koli shrambe v oblaku* in delo brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, pobrskajte po našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
 $__AuthorName vas je kot gosta povabil v "${__VirtualRootPath}":"${__VirtualRootPath}". Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 Povezava velja le 7 dni.
 
@@ -1233,13 +1233,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povezovanje katere koli shrambe v oblaku* in delo brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, pobrskajte po našem "Centru za podporo":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Sporočilo iz portala "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1264,7 +1264,7 @@ Zahtevali ste pridružitev portalu "${__VirtualRootPath}":"$InviteLink" na ${Let
 
 Če želite sprejeti povabilo, vnesite svoje ime in geslo na tej povezavi:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja le 48 ur. Prosimo, dokončajte operacijo v tem roku.</value>
   </data>
@@ -1313,7 +1313,7 @@ Vaš portal je zdaj na voljo na starem naslovu "$PortalUrl":"$PortalUrl"
 Če imate kakršna koli vprašanja ali potrebujete pomoč, nas kontaktirajte na "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 S spoštovanjem,
 ekipa ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Če želite spremeniti vrsto obvestil, jih upravljajte v "nastavitvah naročnine":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1327,7 +1327,7 @@ Vaš portal je zdaj na voljo na starem naslovu "$PortalUrl":"$PortalUrl"
 
 S spoštovanjem,
 ekipa ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Če želite spremeniti vrsto obvestil, jih upravljajte v "nastavitvah naročnine":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1342,7 +1342,7 @@ Začela se je selitev portala v regijo $RegionName. Morda bo trajalo nekaj časa
 
 S spoštovanjem,
 podporna ekipa ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Migracija portala
@@ -1351,7 +1351,7 @@ h1."$PortalUrl":"$PortalUrl"
 Vaš portal je bil preseljen na novo domeno. Obnovite dostop do portala tako, da navedete geslo, ki se bo uporabljalo za prijavo.
 
 Za nastavitev gesla za račun sledite spodnji povezavi:
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. V tem obdobju dokončajte postopek obnovitve dostopa.
 
@@ -1381,13 +1381,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povežete katero koli shrambo v oblaku* in delate brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, pobrskajte po našem "Centru za pomoč":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "ekipo za podporo":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Pozdravljeni, $UserName
@@ -1433,7 +1433,7 @@ Ekipa ONLYOFFICE</value>
 
 Kliknite spodnji gumb in se prijavite* v svoj oblak.
 
-$GreenButton
+$OrangeButton
 
 Povezava velja 7 dni.
 
@@ -1454,7 +1454,7 @@ ekipa ONLYOFFICE</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Zahtevali ste ukinitev vašega računa na personal.onlyoffice.com. Sledite povezavi za dokončanje zahteve (povezava je aktivna 7 dni): 
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: Po izbrisu bodo vaš račun in vsi podatki, povezani z njim, trajno izbrisani v skladu z našo "Izjavo o zasebnosti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
@@ -1474,7 +1474,7 @@ Dragi $OwnerName,
 
 Zahtevali ste začasno deaktivacijo vašega "${__VirtualRootPath}":"${__VirtualRootPath}" portala. Za potrditev operacije sledite spodnji povezavi:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. Prosimo, da dokončate postopek deaktivacije portala v tem roku.
 
@@ -1485,7 +1485,7 @@ p=. "Reactivacija Portala":"$ActivateUrl" (ta povezava nima časovne omejitve)
 
 Z najlepšimi pozdravi,
 Podporna ekipa ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Deactivacija portala [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1494,7 +1494,7 @@ Dragi $OwnerName,
 
 Zahtevali ste začasno deaktivacijo vašega portala [${__VirtualRootPath}](${__VirtualRootPath}). Za potrditev operacije sledite spodnji povezavi:
 
-$GreenButton
+$OrangeButton
 
 _Opomba_: ta povezava velja samo 7 dni. Prosimo, da dokončate postopek deaktivacije portala v tem roku.
 
@@ -1505,7 +1505,7 @@ Svoj portal lahko kadar koli znova aktivirate s klikom na naslednjo povezavo:
 
 Z najlepšimi pozdravi,
 Podporna ekipa ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Izbris prostora "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1522,7 +1522,7 @@ Preden izbrišete prostor, se prepričajte, da je samodejno obračunavanje izklo
 
 Če še vedno želite izbrisati svoj prostor "${__VirtualRootPath}":"${__VirtualRootPath}", sledite spodnji povezavi, da potrdite operacijo:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. Prosimo, da dokončate postopek izbrisa portala v tem roku.
 
@@ -1530,7 +1530,7 @@ $GreenButton
 
 Z najlepšimi pozdravi,
 Podporna ekipa ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Brisanje portala [${__VirtualRootPath}](${__VirtualRootPath}) portal
@@ -1547,7 +1547,7 @@ Preden izbrišete portal, se prepričajte, da je samodejno zaračunavanje izklop
 
 Če še vedno želite izbrisati svoj portal [${__VirtualRootPath}](${__VirtualRootPath}), sledite spodnji povezavi, da potrdite operacijo:
 
-$GreenButton
+$OrangeButton
 
 _Opomba_: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek izbrisa portala v tem roku.
 
@@ -1555,7 +1555,7 @@ _Opomba_: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek izbrisa po
 
 Z najlepšimi pozdravi,
 Podporna ekipa ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Sprememba naslova portala
@@ -1573,7 +1573,7 @@ Zahtevali ste trajni izbris svojega profila s portala "${__VirtualRootPath}":"${
 
 Če še vedno želite izbrisati svoj profil, sledite spodnji povezavi, da potrdite operacijo:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni. Prosimo, dokončajte postopek izbrisa profila v tem roku.</value>
   </data>
@@ -1704,7 +1704,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Vaš portal je bil obnovljen. Za dostop morate nastaviti novo geslo:
 
-$GreenButton
+$OrangeButton
 
 *Opomba*: ta povezava velja samo 7 dni.
 
@@ -1721,7 +1721,7 @@ Začela se je obnova portala. Morda bo trajalo nekaj časa, odvisno od količine
 
 S spoštovanjem,
 Ekipa za podporo ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Če želite spremeniti vrsto obvestila, uredite svoje "naročniške nastavitve":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -1730,13 +1730,13 @@ Ekipa za podporo ONLYOFFICE™
 
 Vabimo vas, da se pridružite "${__VirtualRootPath}":"${__VirtualRootPath}" kot gostujoči uporabnik. Sprejmite povabilo s klikom na povezavo:
 
-$GreenButton
+$OrangeButton
 
 Občasno vam bomo pošiljali tudi uporabne nasvete in zadnje novice ONLYOFFICE. Naročnine lahko kadar koli prekličete na strani svojega profila in jih znova omogočite.
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
@@ -1751,13 +1751,13 @@ Dobrodošli v ONLYOFFICE DocSpace! Vaš uporabniški profil je bil uspešno doda
 
 * *Povežete katero koli shrambo v oblaku* in delate brez preklapljanja med aplikacijami.
 
-$GreenButton
+$OrangeButton
 
 Če potrebujete pomoč, prebrskajte naš "Center za podporo":"https://helpcenter.onlyoffice.com/" ali vprašajte našo "ekipo za pomoč":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S spoštovanjem, 
 Ekipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" obvestilo o spremembi profila portala
@@ -1850,7 +1850,7 @@ Vabljeni ste, da se pridružite varni in zaščiteni spletni pisarni vašega pod
 
 Sprejmite povabilo tako, da sledite spodnji povezavi in za prijavo uporabite svojo prijavo in geslo iz računa podjetja. 
 
-$GreenButton
+$OrangeButton
 
 Povezava velja le 7 dni.</value>
   </data>

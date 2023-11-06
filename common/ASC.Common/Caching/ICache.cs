@@ -26,18 +26,18 @@
 
 namespace ASC.Common.Caching;
 
-[Singletone(typeof(AscCache))]
+[Singleton(typeof(AscCache))]
 public interface ICache
 {
     T Get<T>(string key) where T : class;
 
-    void Insert(string key, object value, TimeSpan sligingExpiration, Action<object, object, EvictionReason, object> evictionCallback = null);
+    void Insert(string key, object value, TimeSpan slidingExpiration, Action<object, object, EvictionReason, object> evictionCallback = null);
 
     void Insert(string key, object value, DateTime absolutExpiration, Action<object, object, EvictionReason, object> evictionCallback = null);
 
     void Remove(string key);
 
-    void Remove(Regex pattern);
+    void Remove(ConcurrentDictionary<string, object> keys, Regex pattern);
 
     ConcurrentDictionary<string, T> HashGetAll<T>(string key);
 

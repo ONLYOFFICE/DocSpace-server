@@ -73,7 +73,7 @@ public class WordpressToken
     }
 }
 
-[Singletone]
+[Singleton]
 public class WordpressHelper
 {
     private readonly ILogger<WordpressHelper> _logger;

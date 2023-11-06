@@ -87,7 +87,7 @@ h3.Возможности тестового облака Р7-Офис:
 
 Нажмите на кнопку ниже и войдите* в ваш облачный офис.
 
-$GreenButton
+$OrangeButton
 
 Ссылка действительна в течение 7 дней.
 
@@ -108,7 +108,7 @@ $GreenButton
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Вы запросили удаление своего аккаунта. Перейдите по ссылке, чтобы завершить удаление аккаунта (ссылка действительна в течение 7 дней):
 
-$GreenButton
+$OrangeButton
 
 *Обратите внимание*: После удаления вашего аккаунта все связанные с ним данные будут удалены без возможности восстановления в соответствии с нашим Положением о конфиденциальности.
 
@@ -160,7 +160,7 @@ $GreenButton
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Хотите изменить пароль от своего аккаунта в облачном офисе? Нажмите кнопку ниже для подтверждения.
  
-$GreenButton
+$OrangeButton
  
 Ссылка действительна в течение 7 дней.
  
@@ -179,12 +179,12 @@ $GreenButton
  
 * *Подключать любые облачные хранилища* и работать, не переключаясь между приложениями.
  
-$GreenButton
+$OrangeButton
  
 Если вам требуется помощь, посетите наш "Справочный центр":"https://helpcenter.onlyoffice.com/" или обратитесь в "службу поддержки":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 С уважением,
 команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/ru"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/ru"</value>
   </data>
 </root>

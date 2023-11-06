@@ -28,19 +28,19 @@ namespace ASC.Web.Files.Services.WCFService;
 
 public class AceCollection<T>
 {
-    public IEnumerable<T> Files { get; set; }
-    public IEnumerable<T> Folders { get; set; }
-    public List<AceWrapper> Aces { get; set; }
-    public string Message { get; set; }
-    public AceAdvancedSettingsWrapper AdvancedSettings { get; set; }
+    public IEnumerable<T> Files { get; init; }
+    public IEnumerable<T> Folders { get; init; }
+    public List<AceWrapper> Aces { get; init; }
+    public string Message { get; init; }
+    public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
 public class AceWrapper : IMapFrom<RoomInvitation>
 {
     public Guid Id { get; set; }
-    public string Email { get; set; }
+    public string Email { get; init; }
     public SubjectType SubjectType { get; set; }
-    public FileShareOptions FileShareOptions { get; set; }
+    public FileShareOptions FileShareOptions { get; init; }
     public bool CanEditAccess { get; set; }
 
     [JsonPropertyName("title")]
@@ -61,9 +61,10 @@ public class AceWrapper : IMapFrom<RoomInvitation>
 
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
+    public string RequestToken { get; set; }
 
     [JsonIgnore] 
-    public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink) || !string.IsNullOrEmpty(Link);
+    public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
 
 /// <summary>
@@ -127,5 +128,5 @@ public class AceAdvancedSettingsWrapper
     public bool DenyDownload { get; set; }
     public bool DenySharing { get; set; }
     public bool AllowSharingPrivateRoom { get; set; }
-    public bool InvitationLink { get; set; }
+    public bool InvitationLink { get; init; }
 }

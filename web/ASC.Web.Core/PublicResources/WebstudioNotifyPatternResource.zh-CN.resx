@@ -92,7 +92,7 @@
 
 若想开始参与 "${__VirtualRootPath}":"$InviteLink" 门户网站生活，您需要激活您的电子邮件地址。为安全起见。
 
-$GreenButton
+$OrangeButton
 
 此链接仅7天有效。请在此期限内完成您的电子邮件激活。</value>
   </data>
@@ -106,11 +106,11 @@ $GreenButton
 若想了解关于备份流程的详情，请参考我们的 "数据备份":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" 用户指南。
 
 
-若您有任何问题或需要帮助，请随时联系我们，网站为 "support.onlyoffice.com":"http://support.onlyoffice.com"
+若您有任何问题或需要帮助，请随时联系我们，网站为 "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 祝好，
 ONLYOFFICE™客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_password" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户密码变更请求
@@ -119,7 +119,7 @@ ONLYOFFICE™客服团队
 
 请使用下面的链接，以变更密码:
 
-$GreenButton
+$OrangeButton
 
 *注意*：此链接仅7天有效。请在此期限内完成密码变更过程。
 
@@ -132,7 +132,7 @@ $GreenButton
 
 请使用以下链接更改您的手机：
 
-$GreenButton
+$OrangeButton
 
 若您不想更改手机或错误地收到此电子邮件，请忽略它，或与门户网站管理员联系以了解详细信息。</value>
   </data>
@@ -145,7 +145,7 @@ $GreenButton
 
 请使用下列链接，确认操作
 
-$GreenButton
+$OrangeButton
 
 *注意*: 此链接仅7天有效。请在此期限内完成您的电子邮件激活。</value>
   </data>
@@ -158,7 +158,7 @@ $GreenButton
 
 请使用下列链接，确认操作：
 
-$GreenButton
+$OrangeButton
 
 *注意*：此链接仅7天有效。请在此期限内完成门户网站地址更改流程。</value>
   </data>
@@ -175,13 +175,13 @@ $GreenButton
 
 * *连接任何云存储* ，无需在应用程序之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
 
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>您好，$UserName！
@@ -196,12 +196,12 @@ ONLYOFFICE 团队
 
 * *连接任何云存储* ，无需在应用程序之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>您好，$UserName！
@@ -216,12 +216,12 @@ ONLYOFFICE 团队
 
 * *连接任何云存储* ，无需在应用程序之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>您好，$UserName！
@@ -236,12 +236,12 @@ ONLYOFFICE 团队
 
 * *连接任何云存储* ，无需在应用程序之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.来自 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户的消息
@@ -259,7 +259,7 @@ $Body</value>
 
 若想接受邀请，请使用此链接，并输入您的用户名和密码：
 
-$GreenButton
+$OrangeButton
 
 *注意*：此链接仅在48小时内有效。请在此期限内完成操作。</value>
   </data>
@@ -274,7 +274,7 @@ $GreenButton
 
 祝好，
 ONLYOFFICE™ 客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^若想修改通知类型，请管理您的 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
@@ -288,7 +288,7 @@ ONLYOFFICE™ 客服团队
 
 祝好，
 ONLYOFFICE™ 客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^若想修改通知类型，请管理您的 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
@@ -303,7 +303,7 @@ ONLYOFFICE™ 客服团队
 
 祝好，
 ONLYOFFICE™ 客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"门户停用
@@ -312,7 +312,7 @@ ONLYOFFICE™ 客服团队
 
 您已请求将 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户临时停用。请使用下列链接，确认操作：
 
-$GreenButton
+$OrangeButton
 
 *注意*：此链接仅7天有效。请在此期限内完成门户停用流程。
 
@@ -323,7 +323,7 @@ p=. "重新激活门户":"$ActivateUrl"（此链接无时间限制）
 
 祝好，
 ONLYOFFICE™客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}"门户
@@ -340,7 +340,7 @@ ONLYOFFICE™客服团队
 
 如果您仍想删除 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户，请使用下面的链接确认操作。
 
-$GreenButton
+$OrangeButton
 
 *注意*：此链接仅7天有效。请在此期限内完成门户删除过程。
 
@@ -362,7 +362,7 @@ $GreenButton
 
 若您仍想删除档案，请使用以下链接确认操作：
 
-$GreenButton
+$OrangeButton
 
 *注意*：此链接仅7天有效。请在此期限间完成档案删除过程。</value>
   </data>
@@ -425,7 +425,7 @@ h3.门户地址
 
 祝好,
 ONLYOFFICE™客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^若想修改通知类型，请管理 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
@@ -595,12 +595,12 @@ ONLYOFFICE团队</value>
  
 请确认您的电子邮箱（该链接有效期为7天）：
  
-$GreenButton
+$OrangeButton
  
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>您好， $UserName!
@@ -609,12 +609,12 @@ ONLYOFFICE 团队
  
 请确认您的电子邮箱（该链接有效期为7天）：
  
-$GreenButton
+$OrangeButton
  
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>您好， $UserName!
@@ -623,12 +623,12 @@ ONLYOFFICE 团队
  
 请确认您的电子邮箱（该链接有效期为7天）：
  
-$GreenButton
+$OrangeButton
  
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>您好， $UserName!
@@ -637,7 +637,7 @@ ONLYOFFICE 团队
  
 请确认您的电子邮箱（该链接有效期为7天）：
  
-$GreenButton
+$OrangeButton
  
 您目前的方案是完全免费的初创版，包括：
 * 1 个管理员、2 个高级用户
@@ -648,12 +648,12 @@ $GreenButton
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>想要更改 ONLYOFFICE 帐号的密码吗？请点击下方按钮确认。
 
-$GreenButton
+$OrangeButton
 
 此链接的有效期为 7 天。
 
@@ -670,7 +670,7 @@ $GreenButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -685,11 +685,11 @@ ONLYOFFICE 团队
  
 *#4. 连接第三方云。* 连接任意云存储，工作中无需在应用之间切换。
  
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -704,11 +704,11 @@ ONLYOFFICE 团队
  
 *#4. 连接第三方云。* 连接任意云存储，工作中无需在应用之间切换。
  
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -723,11 +723,11 @@ ONLYOFFICE 团队
  
 *#4. 连接第三方云。* 连接任意云存储，工作中无需在应用之间切换。
  
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -742,11 +742,11 @@ ONLYOFFICE 团队
  
 *#4. 连接第三方云。* 连接任意云存储，工作中无需在应用之间切换。
  
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -767,7 +767,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -788,7 +788,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -809,7 +809,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -830,51 +830,51 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>您好！
 
 您被邀请加入在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>您好！
 
 您被邀请加入在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>您好！
 
 您被邀请加入在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>您好！
 
 您被邀请加入在 "${__VirtualRootPath}":"${__VirtualRootPath}" 的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -889,13 +889,13 @@ ONLYOFFICE 团队
 
 * *连接任意云存储* 工作中无需在应用之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/"，或询问我们的"支持团队":"https://www.onlyoffice.com/support-contact-form.aspx"。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -910,13 +910,13 @@ ONLYOFFICE 团队
 
 * *连接任意云存储* 工作中无需在应用之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/"，或询问我们的"支持团队":"https://www.onlyoffice.com/support-contact-form.aspx"。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -931,13 +931,13 @@ ONLYOFFICE 团队
 
 * *连接任意云存储* 工作中无需在应用之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/"，或询问我们的"支持团队":"https://www.onlyoffice.com/support-contact-form.aspx"。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -952,13 +952,13 @@ ONLYOFFICE 团队
 
 * *连接任意云存储* 工作中无需在应用之间切换。
 
-$GreenButton
+$OrangeButton
 
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/"，或询问我们的"支持团队":"https://www.onlyoffice.com/support-contact-form.aspx"。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.来自"${__VirtualRootPath}"的消息:"${__VirtualRootPath}"门户
@@ -980,7 +980,7 @@ $Body</value>
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -993,7 +993,7 @@ ONLYOFFICE 团队
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>尊敬的用户：
@@ -1009,13 +1009,13 @@ ONLYOFFICE 团队</value>
 
 您为何决定离开？欢迎分享您的体验。
 
-$GreenButton
+$OrangeButton
 
 谢谢，祝您好运！
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -1036,13 +1036,13 @@ ONLYOFFICE 团队
 
 * 做数据备份。
 
-$GreenButton
+$OrangeButton
 
 欢迎访问我们的"帮助中心":"https://helpcenter.onlyoffice.com/"，详细了解有关配置，管理您的 ONLYOFFICE 协作空间。若您对功能有疑问，也欢迎咨询。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>您已经超过半年没有登录您的 ONLYOFFICE 文档空间 "${__VirtualRootPath}":"${__VirtualRootPath}"。
@@ -1051,26 +1051,26 @@ ONLYOFFICE 团队
 
 我们感谢您提供反馈。您为何决定停止使用 ONLYOFFICE 协作空间？
 
-$GreenButton
+$OrangeButton
 
 如果您认为这其中有误，希望继续使用 ONLYOFFICE 协作空间，请联系我们的"支持团队":"https://www.onlyoffice.com/support-contact-form.aspx"。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>您好！
 
 您受邀加入在"${__VirtualRootPath}":"${__VirtualRootPath}"的 ONLYOFFICE 协作空间。点击链接即可接受邀请：
 
-$GreenButton
+$OrangeButton
 
 点击邀请链接后，请为帐号设置一个新密码。
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -1079,7 +1079,7 @@ ONLYOFFICE 团队
 
 请确保在宽限期到期之前支付您的专业版订阅费用，以继续畅享 ONLYOFFICE 协作空间的所有福利。
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
@@ -1091,7 +1091,7 @@ ONLYOFFICE 团队
 
 我们建议您即刻支付专业版订阅费用，以继续畅享 ONLYOFFICE 协作空间的所有福利。
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
@@ -1104,7 +1104,7 @@ ONLYOFFICE 团队
 
 请尽快支付您的专业版订阅费用，以继续畅享 ONLYOFFICE 协作空间的所有福利。
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
@@ -1117,7 +1117,7 @@ ONLYOFFICE 团队
 
 请在今天支付您的专业版订阅费用，以继续畅享 ONLYOFFICE 协作空间的所有福利。
 
-$GreenButton
+$OrangeButton
 
 此致！
 ONLYOFFICE 团队
@@ -1128,18 +1128,18 @@ ONLYOFFICE 团队
  
 您受邀加入在 "${__VirtualRootPath}":"${__VirtualRootPath}"的 $Message 房间。请点击链接接受邀请：
 
-$GreenButton
+$OrangeButton
 
 点击邀请链接后，请为您的帐号设置一个新密码。
  
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>想要更改 ONLYOFFICE 个人版帐号的密码吗？请点击下方按钮确认。
 
-$GreenButton
+$OrangeButton
 
 此链接的有效期为 7 天。
 
@@ -1217,18 +1217,18 @@ $GreenButton
  
 如需了解更多有关备份流程的信息，请参考我们的[数据备份](${__HelpLink}/tipstricks/data-backup-restore.aspx)用户指南。
  
-如果您有任何问题或是需要协助，欢迎随时通过 [support.onlyoffice.com](http://support.onlyoffice.com) 联系我们
+如果您有任何问题或是需要协助，欢迎随时通过 [support.onlyoffice.com](https://support.onlyoffice.com) 联系我们
  
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>想要更改 ${LetterLogoText} 账户中的邮箱？
  
 可点击下方的按钮登录*您的云服务。
  
-$GreenButton
+$OrangeButton
  
 链接有效期为 7 天。
  
@@ -1243,14 +1243,14 @@ $GreenButton
  
 请点击下方的按钮前往门户登录页面并配置身份验证器应用程序：
  
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>您好，$UserName！
  
 您已受邀以访客用户的身份加入"${__VirtualRootPath}":"${__VirtualRootPath}"。点击链接以接受邀请：
  
-$GreenButton
+$OrangeButton
  
 链接有效期为 7 天。
  
@@ -1261,7 +1261,7 @@ $GreenButton
  
 $__AuthorName 已邀请您以访客用户身份加入"${__VirtualRootPath}":"${__VirtualRootPath}"。点击链接以接受邀请：
  
-$GreenButton
+$OrangeButton
  
 链接有效期为 7 天。
  
@@ -1317,7 +1317,7 @@ h1."$PortalUrl":"$PortalUrl"
 您的门户已迁移至新域。请指定门户登录密码以恢复其访问权限。
  
 请点击下方的链接以为您的账户设置密码：
-$GreenButton
+$OrangeButton
  
 *注意*：此链接仅在 7 天内可用。请在这一期限内完成访问权限恢复流程。
  
@@ -1378,7 +1378,7 @@ ONLYOFFICE 团队</value>
  
 可点击下方的按钮登录*您的云服务。
  
-$GreenButton
+$OrangeButton
  
 链接有效期为 7 天。
  
@@ -1399,7 +1399,7 @@ ONLYOFFICE 团队</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>您已提出终止使用 personal.onlyoffice.com 账户的请求。请在链接中完成请求（链接有效期为 7 天）：
  
-$GreenButton
+$OrangeButton
  
 *注意*：删除后，您的账户和与之相关的所有数据都将根据我们的"隐私声明":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"进行永久删除。
  
@@ -1419,7 +1419,7 @@ ONLYOFFICE 团队</value>
  
 您已请求临时停用 [${__VirtualRootPath}](${__VirtualRootPath}) 门户。请点击下方的链接确认操作：
  
-$GreenButton
+$OrangeButton
  
 _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户停用流程。
  
@@ -1430,7 +1430,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户停
  
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>删除 [${__VirtualRootPath}](${__VirtualRootPath}) 门户
@@ -1447,7 +1447,7 @@ _重要！存储在您门户上的所有数据（包括注册信息）都将丢�
  
 如果您仍然想要删除 [${__VirtualRootPath}](${__VirtualRootPath}) 门户，请点击下方的链接以确认操作：
  
-$GreenButton
+$OrangeButton
  
 _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户删除流程。
  
@@ -1455,7 +1455,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户删
  
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>用户 "$FromUserName":"$FromUserLink" 已删除其档案，且此档案现已被屏蔽。该用户的所有文件仍然处于已指派状态并会占用磁盘空间。
@@ -1536,7 +1536,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
  
 您的门户已恢复。如需进行访问，请设置新密码：
  
-$GreenButton
+$OrangeButton
  
 *注意*：此链接仅在 7 天内可用。
  
@@ -1547,13 +1547,13 @@ $GreenButton
  
 您已受邀以访客用户的身份加入"${__VirtualRootPath}":"${__VirtualRootPath}"。点击链接以接受邀请：
  
-$GreenButton
+$OrangeButton
  
 我们稍后还将为您发送实用建议和 ONLYOFFICE 最新消息。您可在档案页面中随时取消或重新启用订阅。
  
 真诚感谢，
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 门户档案变更通知
@@ -1613,7 +1613,7 @@ ONLYOFFICE 团队
  
 点击下方的链接以接受邀请并使用企业账户的登录信息和密码进行登录。
  
-$GreenButton
+$OrangeButton
  
 链接有效期为 7 天。</value>
   </data>

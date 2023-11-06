@@ -159,7 +159,7 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         var selector = _selectorFactory.GetSelector(parentId);
@@ -495,6 +495,20 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
     {
         var fileDao = GetFileDao(file);
         return fileDao.GetThumbnailAsync(file, width, height);
+    }
+
+    public async Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        await fileDao.SetCustomOrder(fileId, parentFolderId, order);
+    }
+
+    public async Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        var selector = _selectorFactory.GetSelector(parentFolderId);
+        var fileDao = selector.GetFileDao(parentFolderId);
+        await fileDao.InitCustomOrder(fileIds, parentFolderId);
     }
 
     #endregion

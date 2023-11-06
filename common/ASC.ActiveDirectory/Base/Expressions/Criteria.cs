@@ -31,8 +31,8 @@ namespace ASC.ActiveDirectory.Base.Expressions;
 public class Criteria : ICloneable
 {
     private readonly CriteriaType _type;
-    private readonly List<Expression> _expressions = new List<Expression>();
-    private readonly List<Criteria> _nestedCriteras = new List<Criteria>();
+    private readonly List<Expression> _expressions = new();
+    private readonly List<Criteria> _nestedCriteras = new();
 
     /// <summary>
     /// Constructor
@@ -85,8 +85,8 @@ public class Criteria : ICloneable
     public override string ToString()
     {
         var criteria = "({0}{1}{2})";
-        var expressions = _expressions.Aggregate(string.Empty, (current, expr) => current + expr.ToString());
-        var criterias = _nestedCriteras.Aggregate(string.Empty, (current, crit) => current + crit.ToString());
+        var expressions = _expressions.Aggregate(string.Empty, (current, expr) => current + expr);
+        var criterias = _nestedCriteras.Aggregate(string.Empty, (current, crit) => current + crit);
         return string.Format(criteria, _type == CriteriaType.And ? "&" : "|", expressions, criterias);
     }
 

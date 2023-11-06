@@ -64,10 +64,10 @@ public class RegionHelper
 
             if (currentRegion == null)
             {
-                var tenant = _tenantManager.GetCurrentTenant(false);
+                var tenant = await _tenantManager.GetCurrentTenantAsync(false);
                 if (tenant != null)
                 {
-                    var owner = _userManager.GetUsers(tenant.OwnerId);
+                    var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
                     var culture = string.IsNullOrEmpty(owner.CultureName) ? tenant.GetCulture() : owner.GetCulture();
                     currentRegion = GetRegionInfo(culture.Name);
                 }
@@ -108,7 +108,7 @@ public class RegionHelper
             {
                 var currentRegion = new RegionInfo(geoinfo.Key);
 
-                if (currentRegion != null && !currentRegion.Name.Equals(defaultRegion.Name))
+                if (!currentRegion.Name.Equals(defaultRegion.Name))
                 {
                     var priceInfo = await _tenantManager.GetProductPriceInfoAsync();
 

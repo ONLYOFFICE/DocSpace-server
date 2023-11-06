@@ -29,8 +29,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "short_links",
                 type: "bigint unsigned",
                 nullable: false,
-                oldClrType: typeof(long),
-                oldType: "bigint(19)")
+                oldClrType: typeof(int),
+                oldType: "int(10)")
                 .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 .OldAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
@@ -83,10 +83,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("MySql:CharSet", "utf8")
                 .OldAnnotation("MySql:CharSet", "utf8");
 
-            migrationBuilder.AlterColumn<long>(
+            migrationBuilder.AlterColumn<int>(
                 name: "id",
                 table: "short_links",
-                type: "bigint(19)",
+                type: "int(10)",
                 nullable: false,
                 oldClrType: typeof(ulong),
                 oldType: "bigint unsigned")

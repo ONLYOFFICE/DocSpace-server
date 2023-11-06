@@ -130,17 +130,17 @@ Tervetuloa ONLYOFFICE DocSpaceen! Käyttäjäprofiilisi on lisätty onnistuneest
 
 * *Yhdistä mihin tahansa pilvitallennustilaan* ja työskentele vaihtelematta sovellusten välillä.
 
-$GreenButton
+$OrangeButton
 
 Jos tarvitset apua, selaa "Apukeskusta":"https://helpcenter.onlyoffice.com/" tai kysy "tukitiimiltämme":"https://www.onlyoffice.com/support-contact-form.aspx".
 Ystävällisin terveisin,
 ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Haluatko vaihtaa pilvi office-tilisi salasanan? Klikkaa alla olevaa painiketta vahvistaaksesi.
 
-$GreenButton
+$OrangeButton
 
 Linkki on voimassa 7 päivää.
 
@@ -177,7 +177,7 @@ ONLYOFFICE- tiimi</value>
 
 Klikkaa alla olevaa painiketta ja kirjaudu sisään pilveesi.
 
-$GreenButton
+$OrangeButton
 
 Linkki on 7 päivää voimassa.
 

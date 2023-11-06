@@ -89,7 +89,7 @@ Cordialement,
 
 Cliquez sur le bouton ci-dessous et connectez-vous* à votre cloud.
 
-$GreenButton
+$OrangeButton
 
 Le lien est valide pendant 7 jours.
 
@@ -164,7 +164,7 @@ L'effacement des données personnelles permet de libérer $DocsSpace</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Vous voulez changer le mot de passe de votre compte cloud office ? Cliquez sur le bouton ci-dessous pour confirmer.
 
-$GreenButton
+$OrangeButton
 
 Le lien est valable pendant 7 jours.
 
@@ -183,7 +183,7 @@ Bienvenue à ONLYOFFICE DocSpace ! Votre profil utilisateur a été ajouté avec
  
 * *Connecter n'importe quel stockage en nuage* et travailler sans passer d'une application à l'autre.
  
-$GreenButton
+$OrangeButton
  
 Si vous avez besoin d'aide, veuillez consulter notre "Centre d'aide":"https://helpcenter.onlyoffice.com/fr/" ou demander à notre "équipe d'assistance":"https://www.onlyoffice.com/fr/support-contact-form.aspx".
  

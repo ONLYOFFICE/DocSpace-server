@@ -26,7 +26,7 @@
 
 namespace ASC.ElasticSearch.Service;
 
-[Singletone]
+[Singleton]
 public class ElasticSearchService
 {
     private readonly IServiceProvider _serviceProvider;
@@ -51,14 +51,14 @@ public class ElasticSearchService
         return _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>().Any(r => r.IndexName == table);
     }
 
-    public void ReIndex(List<string> toReIndex, int tenant)
+    private void ReIndex(List<string> toReIndex, int tenant)
     {
         var allItems = _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>().ToList();
         var tasks = new List<Task>(toReIndex.Count);
 
         foreach (var item in toReIndex)
         {
-            var index = allItems.FirstOrDefault(r => r.IndexName == item);
+            var index = allItems.Find(r => r.IndexName == item);
             if (index == null)
             {
                 continue;
@@ -74,7 +74,7 @@ public class ElasticSearchService
             return;
         }
 
-        Task.WhenAll(tasks).ContinueWith(async r =>
+        Task.WhenAll(tasks).ContinueWith(async _ =>
         {
             using var scope = _serviceProvider.CreateScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();

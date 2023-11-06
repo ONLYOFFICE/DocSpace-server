@@ -1,7 +1,7 @@
 h1
 {
     color: #333333;
-    font-size: 18px;
+    font-size: 40px;
     font-weight: bold;
     margin: 0;
 }
@@ -29,25 +29,26 @@ h4
 
 p
 {
-    font-size: 14px;
-    line-height: 18px;
+    font-size: 18px;
+    line-height: 29px;
     margin-top: 20px;
     word-wrap: break-word !important;
 }
 ol li, ul li {
     font-size: 14px;
     line-height: 18px;
+    text-align: left;
 }
 
 a, p a
 {
-    color: #0078BD !important;
+    color: #FF6F3D !important;
     word-wrap: break-word !important;
 }
 
 strong
 {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: bold;
     margin-top: 5px;    
 }
@@ -97,6 +98,6 @@ td
 }
 
 a:-webkit-any-link {
-    color: #0078BD;
+    color: #FF6F3D;
     word-wrap: break-word !important;
 }

@@ -130,18 +130,18 @@
 
 * *Під’єднати будь-яке хмарне сховище* та працювати без перемикання між застосунками. 
 
-$GreenButton
+$OrangeButton
 
 Якщо вам потрібна допомога, перейдіть до нашого "Довідкового центру":"https://helpcenter.onlyoffice.com/" або зверніться до "служби підтримки":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 З повагою 
 команда ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Хочете змінити пароль свого облікового запису хмарного офісу? Натисніть кнопку нижче, щоб підтвердити.
 
-$GreenButton
+$OrangeButton
 
 Посилання дійсне протягом 7 днів.
 
@@ -178,7 +178,7 @@ h3.Спочатку про те, що можна робити в ONLYOFFICE:
 
 Натисніть кнопку нижче й увійдіть* до своєї хмари.
 
-$GreenButton
+$OrangeButton
 
 Посилання дійсне протягом 7 днів.
 

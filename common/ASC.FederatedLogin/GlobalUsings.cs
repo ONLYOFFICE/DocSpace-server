@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Data;
 global using System.Diagnostics;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net.Http.Headers;
@@ -54,11 +53,7 @@ global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
 global using ASC.Security.Cryptography;
-
-global using Autofac;
-
-global using JWT.Algorithms;
-global using JWT.Builder;
+global using ASC.Web.Core.Files;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;

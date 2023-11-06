@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core.Core;
 
+/// <summary>
+/// </summary>
 public enum ApplyFilterOption
 {
     All,

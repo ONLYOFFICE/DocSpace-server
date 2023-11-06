@@ -87,6 +87,7 @@ public abstract class FileEntry : ICloneable
     public IEnumerable<Tag> Tags { get; set; }
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
+    public int Order { get; set; }
 
     private string _modifiedByString;
     private string _createByString;
@@ -102,12 +103,12 @@ public abstract class FileEntry : ICloneable
     }
 }
 
-public interface IFileEntry<in T>
+public interface IFileEntry
 {
     string UniqID { get; }
 }
 
-public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
+public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry<T>>
 {
     public T Id { get; set; }
     public T ParentId { get; set; }
@@ -117,23 +118,14 @@ public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly FilesSettingsHelper _filesSettingsHelper;
-    private readonly FileDateTime _fileDateTime;
 
 
     protected FileEntry() { }
 
     protected FileEntry(
         FileHelper fileHelper,
-        Global global,
-        GlobalFolderHelper globalFolderHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global)
+        Global global) : base(fileHelper, global)
     {
-        _globalFolderHelper = globalFolderHelper;
-        _filesSettingsHelper = filesSettingsHelper;
-        _fileDateTime = fileDateTime;
     }
 
     public T FolderIdDisplay
@@ -141,21 +133,6 @@ public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
         get => !EqualityComparer<T>.Default.Equals(_folderIdDisplay, default) ? _folderIdDisplay : ParentId;
         set => _folderIdDisplay = value;
     }
-
-    public DateTime DeletedPermanentlyOn
-    {
-        get
-        {
-            if (!ModifiedOn.Equals(default) && Equals(FolderIdDisplay, _globalFolderHelper.FolderTrashAsync.Result) && _filesSettingsHelper.AutomaticallyCleanUp.IsAutoCleanUp)
-            {
-                return _fileDateTime.GetModifiedOnWithAutoCleanUp(ModifiedOn, _filesSettingsHelper.AutomaticallyCleanUp.Gap);
-            }
-
-            return default;
-        }
-    }
-
-    public string DeletedPermanentlyOnString => DeletedPermanentlyOn != default ? DeletedPermanentlyOn.ToString("g") : null;
 
     public bool DenyDownload { get; set; }
 
@@ -168,12 +145,12 @@ public abstract class FileEntry<T> : FileEntry, ICloneable, IFileEntry<T>
 
     public override bool Equals(object obj)
     {
-        return obj is FileEntry<T> f && Equals(f.Id, Id);
+        return obj is FileEntry<T> f && f.FileEntryType == FileEntryType && Equals(f.Id, Id);
     }
 
-    public virtual bool Equals(FileEntry<T> obj)
+    public bool Equals(FileEntry<T> obj)
     {
-        return Equals(obj.Id, Id);
+        return obj != null && Equals(obj.Id, Id);
     }
 
     public override int GetHashCode()

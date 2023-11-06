@@ -38,7 +38,7 @@ public class CspStartupTask : IStartupTask
         _distributedCache = distributedCache;
     }
 
-    public async Task ExecuteAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         await using var scope = _provider.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;
@@ -46,7 +46,7 @@ public class CspStartupTask : IStartupTask
         var tenantManager = serviceProvider.GetService<TenantManager>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
 
-        var oldHeaderValue = await _distributedCache.GetStringAsync(HeaderKey);
+        var oldHeaderValue = await _distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
         var currentHeaderValue = await helper.CreateHeaderAsync(null, true, false);
 
         if (oldHeaderValue != currentHeaderValue)
@@ -57,12 +57,10 @@ public class CspStartupTask : IStartupTask
             {
                 tenantManager.SetCurrentTenant(t);
                 var current = settingsManager.Load<CspSettings>();
-                await helper.Save(current.Domains, current.SetDefaultIfEmpty);
+                await helper.SaveAsync(current.Domains, current.SetDefaultIfEmpty);
             }
 
-            await _distributedCache.SetStringAsync(HeaderKey, currentHeaderValue);
+            await _distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
         }
-
-
     }
 }

@@ -130,18 +130,18 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 * *Připojte libovolné cloudové úložiště* a pracujte bez přepínání mezi aplikacemi. 
 
-$GreenButton
+$OrangeButton
 
 Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 S přátelským pozdravem, 
 Tým ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Chcete změnit heslo ke svému účtu cloud office? Klikněte na tlačítko níže pro potvrzení.
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný 7 dní.
 
@@ -178,7 +178,7 @@ tým ONLYOFFICE</value>
 
 Klikněte na tlačítko níže a přihlaste se* do svého cloudu.
 
-$GreenButton
+$OrangeButton
 
 Odkaz je platný 7 dní.
 

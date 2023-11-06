@@ -89,7 +89,7 @@ ONLYOFFICE Team</value>
 
 Klicken Sie auf die unten stehende Schaltfläche und melden Sie sich* bei Ihrer Cloud an.
 
-$GreenButton
+$OrangeButton
 
 Der Link ist 7 Tage gültig.
 
@@ -110,7 +110,7 @@ ONLYOFFICE Team</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Sie haben Löschen Ihres Kontos bei personal.onlyoffice.com beantragt. Folgen Sie dem Link, um das Löschen des Kontos abzuschließen (der Link ist 7 Tage lang gültig):
 
-$GreenButton
+$OrangeButton
 
 *Bitte beachten*: Nach dem Löschen werden Ihr Konto und alle damit verbundenen Daten gemäß unserer "Datenschutzerklärung":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" dauerhaft gelöscht.
 
@@ -162,7 +162,7 @@ Beim Entfernen persönlicher Daten es wurde freigegeben $DocsSpace</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Möchten Sie das Passwort Ihres Cloud-Office-Kontos ändern? Klicken Sie auf die Schaltfläche unten.
 
-$GreenButton
+$OrangeButton
 
 Der Link ist innerhalb von 7 Tagen gültig.
 
@@ -181,12 +181,12 @@ Willkommen bei ONLYOFFICE DocSpace! Ihr Benutzerprofil wurde erfolgreich zu "${_
  
 * *Verbinden Sie einen beliebigen Cloud-Speicher* und arbeiten Sie, ohne zwischen Anwendungen zu wechseln.
  
-$GreenButton
+$OrangeButton
  
 Wenn Sie Hilfe benötigen, besuchen Sie unser "Hilfe-Center":"https://helpcenter.onlyoffice.com/" oder fragen Sie unser "Support-Team":"https://www.onlyoffice.com/support-contact-form.aspx".
  
 Mit freundlichen Grüßen
 ONLYOFFICE-Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
 </root>

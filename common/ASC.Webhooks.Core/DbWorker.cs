@@ -65,7 +65,7 @@ public class DbWorker
 
     public async Task<WebhooksConfig> AddWebhookConfig(string uri, string name, string secretKey, bool? enabled, bool? ssl)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var objForCreate = await Queries.WebhooksConfigByUriAsync(webhooksDbContext, Tenant, uri, name);
 
@@ -92,7 +92,7 @@ public class DbWorker
 
     public async IAsyncEnumerable<WebhooksConfigWithStatus> GetTenantWebhooksWithStatus()
     {
-        using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.WebhooksConfigWithStatusAsync(webhooksDbContext, Tenant);
 
@@ -104,7 +104,7 @@ public class DbWorker
 
     public async IAsyncEnumerable<WebhooksConfig> GetWebhookConfigs()
     {
-        var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.WebhooksConfigsAsync(webhooksDbContext, Tenant);
 
@@ -116,7 +116,7 @@ public class DbWorker
 
     public async Task<WebhooksConfig> UpdateWebhookConfig(int id, string name, string uri, string key, bool? enabled, bool? ssl)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var updateObj = await Queries.WebhooksConfigAsync(webhooksDbContext, Tenant, id);
 
@@ -156,7 +156,7 @@ public class DbWorker
 
     public async Task<WebhooksConfig> RemoveWebhookConfigAsync(int id)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var removeObj = await Queries.WebhooksConfigAsync(webhooksDbContext, Tenant, id);
 
@@ -194,7 +194,7 @@ public class DbWorker
 
     public async Task<WebhooksLog> ReadJournal(int id)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var fromDb = await Queries.WebhooksLogAsync(webhooksDbContext, id);
 
@@ -203,7 +203,7 @@ public class DbWorker
             fromDb.Log.Config = fromDb.Config;
         }
 
-        return fromDb.Log;
+        return fromDb?.Log;
     }
 
     public async Task<WebhooksLog> WriteToJournal(WebhooksLog webhook)
@@ -211,7 +211,7 @@ public class DbWorker
         webhook.TenantId = await _tenantManager.GetCurrentTenantIdAsync();
         webhook.Uid = _authContext.CurrentAccount.ID;
 
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var entity = await webhooksDbContext.WebhooksLogs.AddAsync(webhook);
         await webhooksDbContext.SaveChangesAsync();
@@ -221,7 +221,7 @@ public class DbWorker
 
     public async Task<WebhooksLog> UpdateWebhookJournal(int id, int status, DateTime delivery, string requestHeaders, string responsePayload, string responseHeaders)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var webhook = (await Queries.WebhooksLogAsync(webhooksDbContext, id))?.Log;
         if (webhook != null)
@@ -241,13 +241,13 @@ public class DbWorker
 
     public async Task Register(List<Webhook> webhooks)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbWebhooks = await Queries.DbWebhooksAsync(webhooksDbContext).ToListAsync();
 
         foreach (var webhook in webhooks)
         {
-            if (!dbWebhooks.Any(r => r.Route == webhook.Route && r.Method == webhook.Method))
+            if (!dbWebhooks.Exists(r => r.Route == webhook.Route && r.Method == webhook.Method))
             {
                 try
                 {
@@ -264,21 +264,21 @@ public class DbWorker
 
     public async Task<List<Webhook>> GetWebhooksAsync()
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
         var webHooks = await Queries.DbWebhooksAsync(webhooksDbContext).ToListAsync();
         return _mapper.Map<List<DbWebhook>, List<Webhook>>(webHooks);
     }
 
     public async Task<Webhook> GetWebhookAsync(int id)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
         var webHook = await Queries.DbWebhookAsync(webhooksDbContext, id);
         return _mapper.Map<DbWebhook, Webhook>(webHook);
     }
 
     public async Task<Webhook> GetWebhookAsync(string method, string routePattern)
     {
-        await using var webhooksDbContext = _dbContextFactory.CreateDbContext();
+        await using var webhooksDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var webHook = await Queries.DbWebhookByMethodAsync(webhooksDbContext, method, routePattern);
 
@@ -356,10 +356,12 @@ public class DbWorker
 }
 public class DbWebhooks
 {
-    public WebhooksLog Log { get; set; }
-    public WebhooksConfig Config { get; set; }
+    public WebhooksLog Log { get; init; }
+    public WebhooksConfig Config { get; init; }
 }
 
+/// <summary>
+/// </summary>
 [Flags]
 public enum WebhookGroupStatus
 {

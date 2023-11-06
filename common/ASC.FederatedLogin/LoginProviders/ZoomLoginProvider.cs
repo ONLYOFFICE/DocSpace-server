@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using static System.Formats.Asn1.AsnWriter;
-
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
@@ -38,13 +36,12 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     public override string CodeUrl => "https://zoom.us/oauth/authorize";
     public override string Scopes => "";
 
-    public const string ApiUrl = "https://api.zoom.us/v2";
+    private const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
-
-    public ZoomLoginProvider() { }
-
+    
     private readonly RequestHelper _requestHelper;
 
+    public ZoomLoginProvider() { }
     public ZoomLoginProvider(
         OAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,
@@ -62,7 +59,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         _requestHelper = requestHelper;
     }
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {
@@ -97,10 +94,10 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
     }
 
-    public OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
+    private OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
     {
         var clientPair = $"{ClientID}:{ClientSecret}";
-        var b64clientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
+        var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
 
         var body = new Dictionary<string, string>()
         {
@@ -116,7 +113,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
 
         var json = _requestHelper.PerformRequest(AccessTokenUrl, "application/x-www-form-urlencoded", "POST",
             body: string.Join("&", body.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}" )),
-            headers: new Dictionary<string, string> { { "Authorization", $"Basic {b64clientPair}" } }
+            headers: new Dictionary<string, string> { { "Authorization", $"Basic {base64ClientPair}" } }
         );
 
         return OAuth20Token.FromJson(json);

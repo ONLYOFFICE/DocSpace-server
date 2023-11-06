@@ -124,13 +124,13 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -139,13 +139,13 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -154,13 +154,13 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -169,25 +169,25 @@ Tocmai ați creat spațiul ONLYOFFICE DocSpace, un hub de documente pentru a ofe
  
 Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):
  
-$GreenButton
+$OrangeButton
  
 Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:
  
 * 1 administrator, 2 utilizatori avansați
 * Până la 12 săli
-*  Un număr nelimitat de utilizatori în fiecare sală
+* Un număr nelimitat de utilizatori în fiecare sală
 * 2 GB de spațiu de stocare
  
 Descoperiți un nou mod de colaborare asupra documentelor!
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE? Faceți clic pe butonul de mai jos pentru a confirma.
  
-$GreenButton
+$OrangeButton
  
 Linkul este valabil timp de 7 zile.
  
@@ -204,7 +204,7 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -219,11 +219,11 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -238,11 +238,11 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -257,11 +257,11 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -270,7 +270,7 @@ Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay�
  
 Aveţi grijă să efectuaţi plata abonamentului dvs Business înainte de expirarea perioadei de graţie Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -295,7 +295,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -310,11 +310,11 @@ Sperăm să vă facă plăcere să utilizați spațiul dvs ONLYOFFICE DocSpace. 
  
 *#4. Conectați un serviciu terț de stocare în cloud.* Conectați orice serviciu de stocare în cloud și lucrați fără a comuta între aplicații.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -335,7 +335,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -356,7 +356,7 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -377,51 +377,51 @@ _Vă rugăm să rețineți: Persoana care plătește abonamentul devine plătito
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Bună!
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Bună!
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Bună!
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Bună!
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -436,13 +436,13 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -457,13 +457,13 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -478,13 +478,13 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -499,13 +499,13 @@ Bun venit în spaţiul ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost a
  
 * *Conectați orice serviciu de stocare în cloud* și lucrați fără a comuta între aplicații. 
  
-$GreenButton
+$OrangeButton
  
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"https://helpcenter.onlyoffice.com/" sau contactați "echipa noastră de asistență":"https://www.onlyoffice.com/support-contact-form.aspx".
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com"</value>
+"www.onlyoffice.com":"https://onlyoffice.com"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Mesajul de la "${__VirtualRootPath}": portalul "${__VirtualRootPath}"
@@ -527,7 +527,7 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -540,7 +540,7 @@ Obțineți gratuit aplicația ONLYOFFICE pentru a lucra cu documente de pe orice
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Salut!
@@ -556,13 +556,13 @@ Echipa ONLYOFFICE</value>
  
 De ce v-ați decis să părăsiți? Împărtășiți-ne experiența dumneavoastră.
  
-$GreenButton
+$OrangeButton
  
 Vă mulțumim și succese!
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -583,13 +583,13 @@ Configurați setările de securitate ale spațiului dvs ONLYOFFICE DocSpace pent
  
 * Creați copii de rezervă.
  
-$GreenButton
+$OrangeButton
  
 Vizitați Centru de ajutor:"https://helpcenter.onlyoffice.com/" pentru a afla mai multe despre configurarea și gestionarea spațiului dvs ONLYOFFICE DocSpace. Sunteți binevenit să consultați Centru de ajutor de fiecare dată când aveți întrebări cu privire la funcționalități.
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Nu s-a înregistrat nicio activitate în contul dvs ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" mai mult de 6 luni. 
@@ -598,26 +598,26 @@ Deoarece ați decis să nu-l mai utilizați, spațiul dvs ONLYOFFICE DocSpace ș
  
 Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ONLYOFFICE DocSpace?
  
-$GreenButton
+$OrangeButton
  
 Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ONLYOFFICE DocSpace, contactați echipa noastră de asistență:"https://www.onlyoffice.com/support-contact-form.aspx".
  
 Cu deosebită considerație, 
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Bună!
  
 Sunteţi invitat să vă asociaţi la spaţiul ONLYOFFICE DocSpace  "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Stimate, $UserName!
@@ -626,7 +626,7 @@ Vă rugăm să țineți cont de faptul că abonamentul dumneavoastră ONLYOFFICE
  
 Vă recomandăm să plătiți abonamentul dvs Business acum pentru a utiliza în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -639,7 +639,7 @@ Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay 
  
 Asigurați-vă că plătiți abonamentul dvs Business cât mai curând posibil. Astfel, veți putea folosi în continuare toate beneficiile oferite de ONLYOFFICE DocSpace ca înainte.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -652,7 +652,7 @@ Vă rugăm să țineți cont de faptul că perioada de grație de $PaymentDelay 
  
 Asigurați-vă că plătiți abonamentul dvs Business astăzi. Astfel, veți putea folosi  în continuare toate beneficiile oferite de ONLYOFFICE DocSpace.
  
-$GreenButton
+$OrangeButton
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
@@ -663,18 +663,18 @@ Echipa ONLYOFFICE
  
 Sunteţi invitat să vă asociaţi la sala $Message la "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
  
-$GreenButton
+$OrangeButton
  
 Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
  
 Cu deosebită considerație,
 Echipa ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com</value>
+"www.onlyoffice.com":https://onlyoffice.com</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Doriți să modificați parola contului dvs ONLYOFFICE Personal? Faceți clic pe butonul de mai jos pentru a confirma.
  
-$GreenButton 
+$OrangeButton 
  
 Linkul este valabil timp de 7 zile.
  
@@ -721,5 +721,395 @@ Nu doriți să modificați parola? Atunci ignorați acest mesaj.</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>${__VirtualRootPath} notificarea privind modificarea profilului de portal</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>${LetterLogoText} asistență cu parole</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. ${__VirtualRootPath} copia de rezervă a portalului a fost creată</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}. Eroare de migrare a portalului la o altă regiune</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}. Migrarea portalului la o altă regiune a început</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}. Migrarea portalului la o altă regiune terminată cu succes</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare parola pentru cutia poștală</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare adresă portal</value>
+  </data>
+  <data name="subject_dns_change" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare adresă portal</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}. Schimbare adresă portal</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de decriptare finalizat</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de decriptare nu a reușit</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de decriptare a început</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de criptare finalizat</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de criptare nu a reușit</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Proces de criptare a început</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}. Creare cutie poșt</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}. Solicitare de schimbare a telefonului mobil</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}. Activați adresa dvs de e-mail</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Restaurare finalizată</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}. Restaurarea a î</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}. Notificare de securitare</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Reatribuirea datelor de utilizator nu a reușit</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Reatribuirea datelor de utilizator finalizată</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Eliminarea datelor de utilizator finalizată</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Eliminarea datelor de utilizator nu a reușit</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath}) copia de rezervă a portalului a fost creată
+
+Stimată/Stimate $OwnerName,
+
+O copie de rezervă, care conține datele din portalul dvs [${__VirtualRootPath}](${__VirtualRootPath}) a fost creată.
+
+Pentru a afla mai multe despre procedura de creare a copiei de rezervă, consultați ghidul nostru pentru utilizatori [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+Echipă de Asistență ONLYOFFICE™
+[www.onlyoffice.com](http://onlyoffice.com/)</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>Notificarea privind modificarea profilului de portal [${__VirtualRootPath}](${__VirtualRootPath})
+ 
+[$__AuthorName]($__AuthorUrl) și-a schimbat detaliile profilului său pe portalul [${__VirtualRootPath}](${__VirtualRootPath}) portal.</value>
+  </data>
+  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <value>5 sfaturi pentru a lucra eficient la documentele dvs</value>
+  </data>
+  <data name="ButtonAccept" xml:space="preserve">
+    <value>Acceptare</value>
+  </data>
+  <data name="AcceptDocSpace" xml:space="preserve">
+    <value>ACCEPTARE</value>
+  </data>
+  <data name="ButtonAccessControlPanel" xml:space="preserve">
+    <value>Accesare Panou de Control</value>
+  </data>
+  <data name="ButtonAccessYourPortal" xml:space="preserve">
+    <value>Accesaţi portalul dvs</value>
+  </data>
+  <data name="ButtonAccessYouWebOffice" xml:space="preserve">
+    <value>Accesaţi biroul dvs web</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Cu stimă, Echipă de Asistență ONLYOFFICE</value>
+  </data>
+  <data name="ButtonChangeEmail" xml:space="preserve">
+    <value>Schimbare adresa de e-mail</value>
+  </data>
+  <data name="ButtonChangePhone" xml:space="preserve">
+    <value>Schimbare număr de telefon mobil</value>
+  </data>
+  <data name="ButtonChangePassword" xml:space="preserve">
+    <value>Schimbare parolă</value>
+  </data>
+  <data name="ButtonActivateEmail" xml:space="preserve">
+    <value>Faceți clic aici pentru a activa adresa dvs de e-mail</value>
+  </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Faceți clic aici pentru a vă asocia la portalul</value>
+  </data>
+  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+    <value>Colaborare în spațiul DocSpace</value>
+  </data>
+  <data name="ButtonConfigureRightNow" xml:space="preserve">
+    <value>Configurează acum</value>
+  </data>
+  <data name="ButtonChangeTfa" xml:space="preserve">
+    <value>Configurare aplicație de autentificare</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>Configurați spațiu dvs ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="ButtonConfirm" xml:space="preserve">
+    <value>Confirmare</value>
+  </data>
+  <data name="ButtonConfirmEmail" xml:space="preserve">
+    <value>CONFIRMARE</value>
+  </data>
+  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <value>Confirmare închidere cont</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>Confirmare schimbare e-mail</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>Confirmare schimbare parolă</value>
+  </data>
+  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+    <value>Confirmare invitație la DocSpace</value>
+  </data>
+  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
+    <value>Confirmarea schimbării adresei de portal</value>
+  </data>
+  <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
+    <value>Confirmarea actualizării proprietarului de portal</value>
+  </data>
+  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <value>Confirmare invitație la sală</value>
+  </data>
+  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <value>Dezactivare portal</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>Dezactivarea portalului ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>Ștergerea profilului din portalul ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>Descoperiți abonamentul ONLYOFFICE DocSpace business</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>Solicitare licență Enterprise</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Obțineți aplicații ONLYOFFICE gratuit</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Obțineți aplicații ONLYOFFICE gratuit</value>
+  </data>
+  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
+    <value>Obțineți aplicații ONLYOFFICE gratuit</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace a fost activată</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace a expirat</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Perioadă de grație pentru ONLYOFFICE DocSpace va expira mâine</value>
+  </data>
+  <data name="ButtonDeletePortal" xml:space="preserve">
+    <value>Ștergere portal</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>Ștergerea portalului ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>Invitația să vă alăturați portalului ${__VirtualRootPath}</value>
+  </data>
+  <data name="ButtonInviteRightNow" xml:space="preserve">
+    <value>Invitați chiar acum</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>Asociere ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>Asociați-vă spaţiului ONLYOFFICE DocSpace</value>
+  </data>
+  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <value>Lasati un feedback</value>
+  </data>
+  <data name="subject_personal_already_exist" xml:space="preserve">
+    <value>Conectați-vă la contul dvs ONLYOFFICE Personal</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Stăpânește spațiul ONLYOFFICE DocSpace cu ajutorul ghidurilor video</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>Un utilizator nou a fost adăugat pe portalul ${LetterLogoText} portal</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>Un utilizator nou a fost adăugat la portalul [${__VirtualRootPath}](${__VirtualRootPath})
+[$__AuthorName]($__AuthorUrl) s-a alăturat portalului dvs [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>Spațiul ONLYOFFICE DocSpace a fost activat</value>
+  </data>
+  <data name="subject_personal_profile_delete" xml:space="preserve">
+    <value>Închiderea contului ONLYOFFICE Personal</value>
+  </data>
+  <data name="subject_personal_confirmation" xml:space="preserve">
+    <value>ONLYOFFICE Personal. Activați adresa dvs de e-mail</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Eliminare profil</value>
+  </data>
+  <data name="ButtonRenewNow" xml:space="preserve">
+    <value>Reînnoiește acum</value>
+  </data>
+  <data name="ButtonRequestCallButton" xml:space="preserve">
+    <value>Solicitați un apel</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>Solicitare plan tarifar SaaS</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>Solicitarea către departamentul de vânzări</value>
+  </data>
+  <data name="ButtonSelectPricingPlans" xml:space="preserve">
+    <value>Alegeți planul tarifar chiar acum</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>Mesaj test SMTP</value>
+  </data>
+  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <value>Începeți o perioadă de încercare gratuită</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Cu deosebită considerație, Echipă ONLYOFFICE</value>
+  </data>
+  <data name="ButtonUseDiscount" xml:space="preserve">
+    <value>Utilizați reducerea</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>Utilizatorul și-a șters profilul</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>Mesaj al utilizatorului către administratorii</value>
+  </data>
+  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <value>Vizitați secțiunea Plăți</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>AFIȘEAZĂ LISTA DE REDARE COMPLETĂ</value>
+  </data>
+  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>Bun venit în spaţiul ONLYOFFICE DocSpace!</value>
+  </data>
+  <data name="subject_personal_activate" xml:space="preserve">
+    <value>Bun venit la soluția personală ONLYOFFICE!</value>
+  </data>
+  <data name="subject_personal_after_registration1" xml:space="preserve">
+    <value>Bun venit la ONLYOFFICE Personal</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>Ce este nou pe portalul dvs. în data de $Date</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>Sunteţi invitat să vă asociaţi ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Abonamentul dvs ONLYOFFICE DocSpace va expira în curînd</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>Spațiul dvs ONLYOFFICE DocSpace va fi șters</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>Profilul dvs pe ${__VirtualRootPath} a fost schimbat</value>
   </data>
 </root>

@@ -226,7 +226,7 @@ public static class DocumentService
         {
             if (responseStream != null)
             {
-                responseStream.Dispose();
+                await responseStream.DisposeAsync();
             }
 
             if (response != null)
@@ -283,7 +283,7 @@ public static class DocumentService
             body.Callback = callbackUrl;
         }
 
-        if (users != null && users.Length > 0)
+        if (users is { Length: > 0 })
         {
             body.Users = users;
         }
@@ -300,21 +300,16 @@ public static class DocumentService
                     { "payload", body }
                 };
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                                              new JsonNetSerializer(),
-                                                              new JwtBase64UrlEncoder());
-#pragma warning restore CS0618 // Type or member is obsolete
+            var token = JsonWebToken.Encode(payload, signatureSecret);
 
-            var token = encoder.Encode(payload, signatureSecret);
             //todo: remove old scheme
             request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
 
-            token = encoder.Encode(body, signatureSecret);
+            token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new System.Text.Json.JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -364,7 +359,7 @@ public static class DocumentService
         string signatureSecret,
        IHttpClientFactory clientFactory)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(docbuilderUrl);
+        ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
 
         if (string.IsNullOrEmpty(requestKey) && string.IsNullOrEmpty(scriptUrl))
         {
@@ -414,7 +409,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new System.Text.Json.JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -427,11 +422,8 @@ public static class DocumentService
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
         {
-            if (responseStream != null)
-            {
-                using var reader = new StreamReader(responseStream);
-                dataResponse = await reader.ReadToEndAsync();
-            }
+            using var reader = new StreamReader(responseStream);
+            dataResponse = await reader.ReadToEndAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))
@@ -466,7 +458,7 @@ public static class DocumentService
 
     public static Task<bool> HealthcheckRequestAsync(string healthcheckUrl, IHttpClientFactory clientFactory)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(healthcheckUrl);
+        ArgumentException.ThrowIfNullOrEmpty(healthcheckUrl);
 
         return InternalHealthcheckRequestAsync(healthcheckUrl, clientFactory);
     }
@@ -605,7 +597,7 @@ public static class DocumentService
     private class CommandBody
     {
         [Newtonsoft.Json.JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public CommandMethod Command { get; set; }
 
         [JsonProperty(PropertyName = "c", Required = Required.Always)]
@@ -740,7 +732,7 @@ public static class DocumentService
     }
 
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
-    private class ConvertionBody
+    private sealed class ConvertionBody
     {
         [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]
@@ -788,7 +780,7 @@ public static class DocumentService
     }
 
     [DebuggerDisplay("{Key}")]
-    private class BuilderBody
+    private sealed class BuilderBody
     {
         [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]

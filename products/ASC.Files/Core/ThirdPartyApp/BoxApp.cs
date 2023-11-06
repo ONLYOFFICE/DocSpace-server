@@ -163,7 +163,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         if (boxFile == null)
         {
-            return (null, editable);
+            return (null, true);
         }
 
         var jsonFile = JObject.Parse(boxFile);
@@ -315,19 +315,14 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
-
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
             _logger.DebugBoxAppSaveFileResponse(result);
         }
         catch (HttpRequestException e)
         {
             _logger.ErrorBoxAppSaveFile(e);
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
             }
@@ -349,14 +344,11 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         var boxUserId = context.Request.Query["userId"];
 
-        if (_authContext.IsAuthenticated)
+        if (_authContext.IsAuthenticated && !(await CurrentUserAsync(boxUserId)))
         {
-            if (!(await CurrentUserAsync(boxUserId)))
-            {
-                _logger.DebugBoxAppLogout(boxUserId);
-                _cookiesManager.ClearCookies(CookiesType.AuthKey);
-                _authContext.Logout();
-            }
+            _logger.DebugBoxAppLogout(boxUserId);
+            _cookiesManager.ClearCookies(CookiesType.AuthKey);
+            _authContext.Logout();
         }
 
         if (!_authContext.IsAuthenticated)
@@ -500,13 +492,6 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         }
 
         var boxUserInfo = JObject.Parse(resultResponse);
-        if (boxUserInfo == null)
-        {
-            _logger.ErrorInUserInfoRequest();
-
-            return null;
-        }
-
         var email = boxUserInfo.Value<string>("login");
         var userInfo = await _userManager.GetUserByEmailAsync(email);
         if (Equals(userInfo, Constants.LostUser))

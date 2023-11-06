@@ -74,21 +74,21 @@ internal class FileMoveCopyOperationData<T> : FileOperationData<T>
 
 class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 {
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly int _daoFolderId;
-    private readonly string _thirdpartyFolderId;
+    private readonly string _thirdPartyFolderId;
     private readonly bool _copy;
     private readonly FileConflictResolveType _resolveType;
     private readonly IDictionary<string, StringValues> _headers;
     private readonly ThumbnailSettings _thumbnailSettings;
-    private readonly Dictionary<T, Folder<T>> _parentRooms = new Dictionary<T, Folder<T>>();
+    private readonly Dictionary<T, Folder<T>> _parentRooms = new();
 
     public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<T> data, ThumbnailSettings thumbnailSettings)
         : base(serviceProvider, data)
     {
         _daoFolderId = data.DaoFolderId;
-        _thirdpartyFolderId = data.ThirdPartyFolderId;
+        _thirdPartyFolderId = data.ThirdPartyFolderId;
         _copy = data.Copy;
         _resolveType = data.ResolveType;
 
@@ -97,16 +97,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         this[OpType] = (int)(_copy ? FileOperationType.Copy : FileOperationType.Move);
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
         if (_daoFolderId != 0)
         {
-            await DoAsync(scope, _daoFolderId);
+            await DoAsync(serviceScope, _daoFolderId);
         }
 
-        if (!string.IsNullOrEmpty(_thirdpartyFolderId))
+        if (!string.IsNullOrEmpty(_thirdPartyFolderId))
         {
-            await DoAsync(scope, _thirdpartyFolderId);
+            await DoAsync(serviceScope, _thirdPartyFolderId);
         }
     }
 
@@ -126,16 +126,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             return;
         }
 
-        if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
+        if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await FilesSecurity.CanCreateAsync(toFolder))
         {
-            if (!await FilesSecurity.CanCreateAsync(toFolder))
-            {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
             }
-        }
 
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
-        if (parentFolders.Any(parent => Folders.Any(r => r.ToString() == parent.Id.ToString())))
+        if (parentFolders.Exists(parent => Folders.Exists(r => r.ToString() == parent.Id.ToString())))
         {
             this[Err] = FilesCommonResource.ErrorMassage_FolderCopyError;
 
@@ -211,10 +208,17 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         needToMark.AddRange(moveOrCopyFilesTask);
 
-        foreach (var folder in moveOrCopyFoldersTask)
+        if (toFolder.FolderType != FolderType.Archive)
         {
-            needToMark.AddRange(await GetFilesAsync(scope, folder));
-            await socketManager.CreateFolderAsync(folder);
+            foreach (var folder in moveOrCopyFoldersTask)
+            {
+                if (!DocSpaceHelper.IsRoom(folder.FolderType))
+                {
+                    needToMark.AddRange(await GetFilesAsync(scope, folder));
+                }
+
+                await socketManager.CreateFolderAsync(folder);
+            }
         }
 
         var ntm = needToMark.Distinct();
@@ -303,7 +307,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 this[Err] = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
             }
-            else if (!isRoom && folder.Private && !await CompliesPrivateRoomRulesAsync(folder, toFolderParents))
+            else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(folder, toFolderParents))
             {
                 this[Err] = FilesCommonResource.ErrorMassage_SecurityException_MoveFolder;
             }
@@ -470,7 +474,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         await _semaphore.WaitAsync();
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-
+                                        await socketManager.DeleteFolder(folder);
+                                        
                                         var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                     }
@@ -478,10 +483,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     }
-                                }
-                                catch (Exception)
-                                {
-                                    throw;
                                 }
                                 finally
                                 {
@@ -840,22 +841,28 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
         else
         {
-            entryParentRoom = await FolderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.Private && DocSpaceHelper.IsRoom(f.FolderType));
+            entryParentRoom = await FolderDao.GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(f => f.SettingsPrivate && DocSpaceHelper.IsRoom(f.FolderType));
             _parentRooms.Add(entry.ParentId, entryParentRoom);
         }
 
-        var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.Private && DocSpaceHelper.IsRoom(f.FolderType));
+        var toFolderParentRoom = toFolderParents.FirstOrDefault(f => f.SettingsPrivate && DocSpaceHelper.IsRoom(f.FolderType));
 
-        if (entryParentRoom == null && toFolderParentRoom == null)
+
+        if (entryParentRoom == null)
         {
-            return true;
+            if(toFolderParentRoom == null)
+            {
+                return true;
         }
 
-        if (entryParentRoom != null && toFolderParentRoom == null
-            || entryParentRoom == null && toFolderParentRoom != null)
+            return false;
+        }
+
+        if(toFolderParentRoom == null)
         {
             return false;
         }
+
 
         return entryParentRoom.Id.Equals(toFolderParentRoom.Id) && !_copy;
     }

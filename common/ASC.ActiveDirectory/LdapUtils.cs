@@ -31,7 +31,7 @@ namespace ASC.ActiveDirectory;
 
 public static class LdapUtils
 {
-    private static readonly Regex _dcRegex = new Regex("dc=([^,]+)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+    private static readonly Regex _dcRegex = new("dc=([^,]+)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
     public static string DistinguishedNameToDomain(string distinguishedName)
     {

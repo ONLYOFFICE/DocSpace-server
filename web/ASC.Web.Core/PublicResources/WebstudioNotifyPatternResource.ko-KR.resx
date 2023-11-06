@@ -120,7 +120,7 @@
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE 계정의 비밀번호를 변경하고 싶으세요? 그러시다면 아래 버튼을 클릭하세요.
 
-$GreenButton
+$OrangeButton
 
 이 링크는 7일 동안만 유효합니다.
 
@@ -133,13 +133,13 @@ $GreenButton
 
 이메일을 확인해주세요(이 링크는 7일 동안만 유효합니다): 
 
-$GreenButton
+$OrangeButton
 
 새로운 방식의 공동 문서 작업을 즐기세요!
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -148,13 +148,13 @@ ONLYOFFICE 팀
 
 이메일을 확인해주세요(이 링크는 7일 동안만 유효합니다): 
 
-$GreenButton
+$OrangeButton
 
 새로운 방식의 공동 문서 작업을 즐기세요!
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -163,7 +163,7 @@ ONLYOFFICE 팀
 
 이메일을 확인해주세요(이 링크는 7일 동안만 유효합니다): 
 
-$GreenButton
+$OrangeButton
 
 현재 요금제는 스타트업으로 완전 무료이며 다음 혜택이 포함됩니다.
 
@@ -176,7 +176,7 @@ $GreenButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -185,13 +185,13 @@ ONLYOFFICE 팀
 
 이메일을 확인해주세요(이 링크는 7일 동안만 유효합니다): 
 
-$GreenButton
+$OrangeButton
 
 새로운 방식의 공동 문서 작업을 즐기세요!
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -204,7 +204,7 @@ ONLYOFFICE 팀
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -219,11 +219,11 @@ ONLYOFFICE DocSpace를 만족스럽게 사용하고 계시길 바랍니다. 다�
 
 *#4. 제3자 클라우드 스토리지를 연결하세요.* 모든 클라우드 스토리지를 연결하고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -238,11 +238,11 @@ ONLYOFFICE DocSpace를 만족스럽게 사용하고 계시길 바랍니다. 다�
 
 *#4. 제3자 클라우드 스토리지를 연결하세요.* 모든 클라우드 스토리지를 연결하고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -257,11 +257,11 @@ ONLYOFFICE DocSpace를 만족스럽게 사용하고 계시길 바랍니다. 다�
 
 *#4. 제3자 클라우드 스토리지를 연결하세요.* 모든 클라우드 스토리지를 연결하고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -276,11 +276,11 @@ ONLYOFFICE DocSpace를 만족스럽게 사용하고 계시길 바랍니다. 다�
 
 *#4. 제3자 클라우드 스토리지를 연결하세요.* 모든 클라우드 스토리지를 연결하고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -301,7 +301,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -322,7 +322,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -343,7 +343,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -364,51 +364,51 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}"의ONLYOFFICE DocSpace에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}"의ONLYOFFICE DocSpace에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}"의ONLYOFFICE DocSpace에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}"의ONLYOFFICE DocSpace에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -423,13 +423,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "Help Center":"https://helpcenter.onlyoffice.com/"를 참고하시거나 저희  "support team":"https://www.onlyoffice.com/support-contact-form.aspx"에 문의하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -444,13 +444,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "Help Center":"https://helpcenter.onlyoffice.com/"를 참고하시거나 저희  "support team":"https://www.onlyoffice.com/support-contact-form.aspx"에 문의하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -465,13 +465,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "Help Center":"https://helpcenter.onlyoffice.com/"를 참고하시거나 저희  "support team":"https://www.onlyoffice.com/support-contact-form.aspx"에 문의하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -486,13 +486,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요.
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "Help Center":"https://helpcenter.onlyoffice.com/"를 참고하시거나 저희 "support team":"https://www.onlyoffice.com/support-contact-form.aspx"에 문의하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털의 메시지
@@ -514,7 +514,7 @@ $Body</value>
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -527,7 +527,7 @@ ONLYOFFICE 팀
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>안녕하세요!
@@ -541,7 +541,7 @@ ONLYOFFICE 팀</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE 개인 계정의 비밀번호를 변경하고 싶으세요? 그러시다면 아래 버튼을 클릭하세요.
 
-$GreenButton
+$OrangeButton
 
 이 링크는 7일 동안만 유효합니다.
 
@@ -552,13 +552,13 @@ $GreenButton
 
 떠나시는 이유가 무엇인가요? 고객님의 경험을 말씀해주세요.
  
-$GreenButton
+$OrangeButton
 
 지금까지 정말 감사했습니다!
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -579,13 +579,13 @@ ONLYOFFICE DocSpace의 보안 설정을 조정하여 더 안전하게 만드세�
 
 * 데이터 백업을 수행하세요.
 
-$GreenButton
+$OrangeButton
 
 ONLYOFFICE DocSpace의 구성 및 관리에 대해 자세히 알아보려면 "Help Center":"https://helpcenter.onlyoffice.com/"를 방문하세요. 기능과 관련하여 궁금한 점이 있는 경우에도 도움이 될 수 있습니다.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>고객님께서는 고객님의 ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"에 반 년 이상 로그인하지 않으셨습니다.
@@ -594,26 +594,26 @@ ONLYOFFICE 팀
 
 피드백을 주시면 정말 감사하겠습니다. ONLYOFFICE DocSpace을 더 이상 사용하지 않으시는 이유가 무엇인가요?
 
-$GreenButton
+$OrangeButton
 
 이것이 잘못 됐다고 생각하시며 계속 ONLYOFFICE DocSpace를 사용하길 원하시는 경우 "support team":"https://www.onlyoffice.com/support-contact-form.aspx"으로 연락주세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>안녕하세요!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}"에서 ONLYOFFICE DocSpace에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
-$GreenButton
+$OrangeButton
 
 초대 링크를 클릭한 후 계정의 새 비밀번호를 설정하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -622,7 +622,7 @@ ONLYOFFICE 팀
 
 유예 기간이 만료되기 전에 비즈니스 구독료를 지불하시고 ONLYOFFICE DocSpace의 모든 혜택을 계속 누리세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
@@ -635,7 +635,7 @@ ONLYOFFICE 팀
 
 지금 비즈니스 구독료를 지불하시고 ONLYOFFICE DocSpace의 모든 혜택을 계속 누리시기 바랍니다.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
@@ -648,7 +648,7 @@ ONLYOFFICE 팀
 
 가능한 한 빨리 비즈니스 구독료를 지불하시고 이전과 같이 ONLYOFFICE DocSpace의 모든 혜택을 누리세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
@@ -661,7 +661,7 @@ ONLYOFFICE 팀
 
 오늘 비즈니스 구독료를 지불하시고 ONLYOFFICE DocSpace의 모든 혜택을 계속 누리세요.
 
-$GreenButton
+$OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
@@ -672,13 +672,13 @@ ONLYOFFICE 팀
 
 "${__VirtualRootPath}":"${__VirtualRootPath}"에서 $Message 방에 초대 받으셨습니다. 이 링크를 클릭하여 초대를 수락해주세요:
 
-$GreenButton
+$OrangeButton
 
 초대 링크를 클릭한 후 계정의 새 비밀번호를 설정하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>수락</value>
@@ -1081,13 +1081,13 @@ ONLYOFFICE 팀
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" 에 게스트 사용자로 초대받으셨습니다. 다음 링크를 클릭하여 초대를 수락하세요.
 
-$GreenButton
+$OrangeButton
 
 유용한 팁과 ONLYOFFICE의 최신 소식을 가끔씩 보내드립니다. 언제든지 프로필 페이지에서 구독을 취소하거나 다시 활성화할 수 있습니다.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -1102,13 +1102,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요. 
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "지원 센터":"https://helpcenter.onlyoffice.com/" 를 참고하시거나 저희 "지원팀":"https://www.onlyoffice.com/support-contact-form.aspx" 에 문의하세요.
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"$InviteLink" 포털에 대한 이메일 주소를 활성화해주세요
@@ -1117,7 +1117,7 @@ ONLYOFFICE 팀
 
 보안상의 이유로, "${__VirtualRootPath}":"$InviteLink" 포털 라이프에 참여하려면 이메일 주소를 활성화해야 합니다.
 
-$GreenButton
+$OrangeButton
 
 이 링크는 7일 동안만 유효합니다. 기간 내에 이메일 활성화를 완료하세요.</value>
   </data>
@@ -1131,11 +1131,11 @@ $OwnerName님,
 백업 절차에 대한 자세한 내용은 저희의 "데이터 백업":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" 사용자 가이드를 참고하세요.
 
 
-문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: "support.onlyoffice.com":"http://support.onlyoffice.com"
+문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 포털 백업이 생성되었습니다
@@ -1146,18 +1146,18 @@ $OwnerName님,
 
 백업 절차에 대한 자세한 내용은 저희의 [데이터 백업](${__HelpLink}/tipstricks/data-backup-restore.aspx) 사용자 가이드를 참고하세요.
 
-문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [support.onlyoffice.com](http://support.onlyoffice.com)
+문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [support.onlyoffice.com](https://support.onlyoffice.com)
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} 계정의 이메일을 변경하고 싶으세요?
 
 클라우드에 로그인*하려면 아래 버튼을 클릭하세요.
 
-$GreenButton
+$OrangeButton
 
 링크는 7일 동안만 유효합니다.
 
@@ -1172,7 +1172,7 @@ ${LetterLogoText} 포털에 입장하기 위해 사용하는 휴대폰의 변경
 
 아래 링크를 따라 휴대폰을 변경하세요.
 
-$GreenButton
+$OrangeButton
 
 휴대폰을 변경하고 싶지 않거나 실수로 이 이메일을 받은 경우 무시하거나 포털 관리자에게 자세한 내용을 문의하세요.</value>
   </data>
@@ -1183,7 +1183,7 @@ ${LetterLogoText} 포털에 입장하는 데 사용하는 인증 앱의 구성�
 
 아래 버튼을 클릭하여 포털 로그인 페이지로 이동하고 인증 애플리케이션을 구성하세요.
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 소유자 변경
@@ -1194,7 +1194,7 @@ $OwnerName님,
 
 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 소유자 변경 프로세스를 완료하세요.</value>
   </data>
@@ -1207,7 +1207,7 @@ $OwnerName님,
 
 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 주소 변경 프로세스를 완료하세요.</value>
   </data>
@@ -1216,7 +1216,7 @@ $GreenButton
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" 에 게스트 사용자로 초대받으셨습니다. 다음 링크를 클릭하여 초대를 수락하세요.
 
-$GreenButton
+$OrangeButton
 
 링크는 7일 동안만 유효합니다.
 
@@ -1235,20 +1235,20 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요. 
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "지원 센터":"https://helpcenter.onlyoffice.com/" 를 참고하시거나 저희 "지원팀":"https://www.onlyoffice.com/support-contact-form.aspx" 에 문의하세요.
 
 감사합니다, 
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
 
 $__AuthorName 님이 고객님을 "${__VirtualRootPath}":"${__VirtualRootPath}" 에 게스트 사용자로 초대하셨습니다. 다음 링크를 클릭하여 초대를 수락하세요.
 
-$GreenButton
+$OrangeButton
 
 링크는 7일 동안만 유효합니다.
 
@@ -1267,13 +1267,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요. 
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "지원 센터":"https://helpcenter.onlyoffice.com/" 를 참고하시거나 저희 "지원팀":"https://www.onlyoffice.com/support-contact-form.aspx" 에 문의하세요.
 
 감사합니다, 
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털의 메시지
@@ -1298,7 +1298,7 @@ $Body</value>
 
 초대를 수락하려면 다음 링크에 이름 및 비밀번호를 입력하세요:
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 48시간 동안만 유효합니다. 기간 내에 작업을 완료하세요.</value>
   </data>
@@ -1347,7 +1347,7 @@ $RegionName 리전으로 마이그레이션하는 동안 오류가 발생했습�
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
@@ -1361,7 +1361,7 @@ ONLYOFFICE™ 지원팀
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
@@ -1376,7 +1376,7 @@ $RegionName으로의 포털 마이그레이션이 시작되었습니다. 데이�
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.포털 마이그레이션
@@ -1385,7 +1385,7 @@ h1."$PortalUrl":"$PortalUrl"
 포털이 새 도메인으로 마이그레이션되었습니다. 로그인에 사용할 비밀번호를 지정하여 포털에 대한 액세스를 복원하세요.
 
 아래 링크에서 계정의 비밀번호를 설정하세요:
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 액세스 복원 프로세스를 완료하세요.
 
@@ -1415,13 +1415,13 @@ ONLYOFFICE DocSpace에 오신 것을 환영합니다! 고객님의 사용자 프
 
 * *모든 클라우드 스토리지를 연결하세요.* 그리고 한 앱에서 편안하게 작업하세요. 
 
-$GreenButton
+$OrangeButton
 
 도움이 필요한 경우 "지원 센터":"https://helpcenter.onlyoffice.com/" 를 참고하시거나 저희 "지원팀":"https://www.onlyoffice.com/support-contact-form.aspx" 에 문의하세요.
 
 감사합니다, 
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>$UserName님, 안녕하세요
@@ -1467,7 +1467,7 @@ ONLYOFFICE 팀</value>
 
 클라우드에 로그인*하려면 아래 버튼을 클릭하세요.
 
-$GreenButton
+$OrangeButton
 
 링크는 7일 동안만 유효합니다.
 
@@ -1488,7 +1488,7 @@ ONLYOFFICE 팀</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>personal.onlyoffice.com에서 계정 해지를 요청하셨습니다. 다음 링크를 따라 요청 프로세스를 완료하세요(이 링크는 7일 동안만 유효합니다).
 
-$GreenButton
+$OrangeButton
 
 *알림*: 삭제 후에는 저희의 "개인 정보 보호 정책":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" 에 따라 고객님의 계정 및 모든 관련 데이터가 영구적으로 삭제됩니다.
 
@@ -1508,7 +1508,7 @@ $OwnerName님,
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" 포털의 임시 비활성화를 요청하셨습니다. 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비활성화 프로세스를 완료하세요.
 
@@ -1519,7 +1519,7 @@ p=. "포털 재활성화":"$ActivateUrl" (이 링크는 시간 제한 없이 유
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 포털 비활성화
@@ -1528,7 +1528,7 @@ $OwnerName님,
 
 [${__VirtualRootPath}](${__VirtualRootPath}) 포털의 임시 비활성화를 요청하셨습니다. 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비활성화 프로세스를 완료하세요.
 
@@ -1539,7 +1539,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 삭제
@@ -1556,7 +1556,7 @@ $OwnerName님,
 
 그래도 "${__VirtualRootPath}":"${__VirtualRootPath}" 포털을 삭제하고 싶다면 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭제 프로세스를 완료하세요.
 
@@ -1564,7 +1564,7 @@ $GreenButton
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 포털 삭제
@@ -1581,7 +1581,7 @@ _중요! 포털에 저장된 모든 데이터 및 등록 정보를 잃게 되며
 
 그래도 [${__VirtualRootPath}](${__VirtualRootPath}) 포털을 삭제하고 싶다면 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭제 프로세스를 완료하세요.
 
@@ -1589,7 +1589,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.포털 주소 변경
@@ -1607,7 +1607,7 @@ $UserDisplayName님,
 
 그래도 프로필을 삭제하고 싶다면 아래 링크를 따라 작업을 확인해주세요.
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다. 기간 내에 프로필 삭제 프로세스를 완료하세요.</value>
   </data>
@@ -1738,7 +1738,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 고객님의 포털이 복원되었습니다. 액세스하기 위해 새로운 비밀번호를 설정해야 합니다.
 
-$GreenButton
+$OrangeButton
 
 *알림*: 이 링크는 7일 동안만 유효합니다.
 
@@ -1755,7 +1755,7 @@ $GreenButton
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
@@ -1850,7 +1850,7 @@ ONLYOFFICE 팀</value>
 
 아래 링크를 따라 초대를 수락하고 회사 계정의 로그인 및 비밀번호를 사용하여 로그인하세요. 
 
-$GreenButton
+$OrangeButton
 
 링크는 7일 동안만 유효합니다.</value>
   </data>

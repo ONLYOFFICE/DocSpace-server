@@ -26,7 +26,7 @@
 
 namespace ASC.FederatedLogin.Helpers;
 
-[Singletone]
+[Singleton]
 public class RequestHelper
 {
     private readonly IHttpClientFactory _httpClientFactory;
@@ -72,11 +72,6 @@ public class RequestHelper
 
         using var response = httpClient.Send(request);
         using var stream = response.Content.ReadAsStream();
-        if (stream == null)
-        {
-            return null;
-        }
-
         using var readStream = new StreamReader(stream);
 
         return readStream.ReadToEnd();

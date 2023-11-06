@@ -97,7 +97,7 @@ il team ONLYOFFICE</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Hai richiesto la chiusura del tuo account su personal.onlyoffice.com. Segui il collegamento per completare la richiesta (il collegamento è attivo per un periodo di 7 giorni):
 
-$GreenButton
+$OrangeButton
 
 * Nota *: dopo la cancellazione, il tuo account e tutti i dati ad esso associati verranno cancellati in modo permanente in conformità con la nostra "Dichiarazione sulla privacy":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
@@ -149,7 +149,7 @@ L'eliminazione dei dati personali ha permesso di liberare $DocsSpace</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>‎Vuoi cambiare la password del tuo account cloud office? Fai clic sul pulsante qui sotto per confermare.
 
-$GreenButton
+$OrangeButton
 
 ‎Il link è valido per 7 giorni.
 
@@ -168,20 +168,20 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Vuoi cambiare l'e-mail del tuo account dell'ufficio nel cloud?
 
 Fai clic sul pulsante in basso e accedi* al tuo cloud.
 
-$GreenButton
+$OrangeButton
 
 Il collegamento è valido per 7 giorni.
 

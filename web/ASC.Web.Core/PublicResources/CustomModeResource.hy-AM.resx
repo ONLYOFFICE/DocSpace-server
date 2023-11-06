@@ -148,7 +148,7 @@ ONLYOFFICE թիմ</value>
 
 Սեղմեք ստորև նշված կոճակը և մուտք գործեք* ձեր ամպ:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր.
 
@@ -159,7 +159,7 @@ $GreenButton
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել գաղտնաբառը ձեր ամպային գրասենյակի հաշվի վրա: Հաստատելու համար սեղմեք ստորև նշված կոճակը:
 
-$GreenButton
+$OrangeButton
 
 Հղումը գործում է 7 օր.
 
@@ -246,12 +246,12 @@ ONLYOFFICE թիմ</value>
 
 * *Միացրեք ցանկացած ամպային պահեստ* և աշխատեք առանց հավելվածների միջև անցնելու. 
 
-$GreenButton
+$OrangeButton
 
 Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոնը":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցող թիմ":"https://www.onlyoffice.com/support-contact-form.aspx".
 
 Սիրով Ձեր՝
 ONLYOFFICE թիմ
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
 </root>

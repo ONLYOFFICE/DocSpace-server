@@ -140,7 +140,7 @@ Ciao!
 
 Per iniziare a partecipare nel "${__VirtualRootPath}":"$InviteLink" portale è necessario attivare il tuo indirizzo email. Ciò è fatto per ragioni di sicurezza.
 
-$GreenButton
+$OrangeButton
 
 Questo link è valido solo per 7 giorni. Si prega di completare l'operazione in quest'arco di tempo.</value>
   </data>
@@ -154,11 +154,11 @@ Un backup contenente i dati dal tuo "${__VirtualRootPath}":"${__VirtualRootPath}
 Per saperne di più sulla procedura di backup fare riferimento alla nostra guida utente "Data backup":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block"
 
 Se hai qualche domanda o necessiti di assistenza non esitare a contattarci su
-"support.onlyoffice.com":"http://support.onlyoffice.com"
+"support.onlyoffice.com":"https://support.onlyoffice.com"
 
 Cordiali Saluti,
 il team ONLYOFFICE®
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) backup del portale creato
@@ -169,11 +169,11 @@ Un file di backup contenente i dati del Suo portale [${__VirtualRootPath}](${__V
 
 Per sapere di più sulla procedura di backup consultare il manuale utente alla sezione [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Per qualsiasi domanda o in caso di assistenza non esitate a contattarci [support.onlyoffice.com](http://support.onlyoffice.com)
+Per qualsiasi domanda o in caso di assistenza non esitate a contattarci [support.onlyoffice.com](https://support.onlyoffice.com)
 
 Cordiali saluti,
 Il team di supporto ONLYOFFICE®
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Richiesta cambio numero di cellulare
@@ -182,7 +182,7 @@ Gentile $UserName, hai richiesto di modificare il numero cellulare usato per acc
 
 Si prega di seguire il link di seguito per completare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 Se non si desidera modificare il telefono cellulare o ricevere per errore questo messaggio, ignoralo o contatta l'amministratore del portale per scoprire i dettagli.</value>
   </data>
@@ -193,7 +193,7 @@ Hai richiesto di modificare i codici di backup utilizzati per accedere al portal
 
 Segui il link sottostante per modificare i tuoi codici di backup:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Cambio del "${__VirtualRootPath}":"${__VirtualRootPath}" proprietario del portale
@@ -204,7 +204,7 @@ C'è stata una richiesta di passaggio di proprietà del portale "${__VirtualRoot
 
 Si prega di andare al link riportato qui sotto per confermare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 *NOTA*: questo link sarà valido solo per 7 giorni. Si prega di completare l'operazione entro il periodo richiesto.</value>
   </data>
@@ -217,7 +217,7 @@ C'è stata una richiesta di modifica dell'indirizzo del portale da "${__VirtualR
 
 Si prega di seguire il link qui sotto per confermare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 * Nota *: questo collegamento è valido solo per 7 giorni. Completa il processo di cambio di indirizzo del portale entro tale periodo.</value>
   </data>
@@ -226,7 +226,7 @@ $GreenButton
 
 $__AuthorName ti ha invitato come ospite su  "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando il link:
 
-$GreenButton
+$OrangeButton
 
 Il link è valido solo per 7 giorni.
 
@@ -245,13 +245,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archiviazione cloud* e lavorare senza passare da un'app all'altra. 
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/it" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Tanti saluti, 
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -266,13 +266,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archiviazione cloud* e lavorare senza passare da un'app all'altra. 
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/it" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Tanti saluti, 
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -287,13 +287,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archiviazione cloud* e lavorare senza passare da un'app all'altra. 
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/it" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Tanti saluti, 
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -308,20 +308,20 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archiviazione cloud* e lavorare senza passare da un'app all'altra. 
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/it" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Tanti saluti, 
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
  </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Salve, $UserName!
 
 $__AuthorName ti ha invitato come ospite su  "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando il link:
 
-$GreenButton
+$OrangeButton
 
 Il link è valido solo per 7 giorni.
 
@@ -350,7 +350,7 @@ Hai richiesto di aderire "${__VirtualRootPath}":"$InviteLink" portal at ${Letter
 
 Per accettare l'invito digita il tuo nome e la password a questo link:
 
-$GreenButton
+$OrangeButton
 
 *Nota*: questo link sara valido solo per 48 ore dalla ricezione di questo messaggio. Si prega di completare l'operazione entro questo arco di tempo.</value>
   </data>
@@ -399,7 +399,7 @@ Il tuo portale è ora disponibile al vecchio indirizzo "$PortalUrl":"$PortalUrl"
 Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indirizzo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 I migliori saluti,
 Team di supporto ONLYOFFICE®
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Per modificare il tipo di notifica, gestisci le tue "impostazioni di sottoscrizione":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -413,7 +413,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 
 I migliori saluti,
 Team di supporto ONLYOFFICE®
-"Www.onlyoffice.com":"http://onlyoffice.com/"
+"Www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Per modificare il tipo di notifica, gestisci le tue "impostazioni di sottoscrizione":"$RecipientSubscriptionConfigURL". ^</value>
   </data>
@@ -428,7 +428,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 
 Cordiali saluti,
 Team di supporto ONLYOFFICE®
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Salve, $UserName
@@ -480,7 +480,7 @@ il Team ONLYOFFICE</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Hai richiesto la chiusura del tuo account su personal.onlyoffice.com. Segui il link per completare la richiesta (il link è attivo per un periodo di 7 giorni):
 
-$GreenButton
+$OrangeButton
 
 *Nota*: Dopo la cancellazione, il tuo account e tutti i dati ad esso associati verranno cancellati in modo permanente in conformità con la nostra "Informativa sulla privacy":"https://help.onlyoffice.com/Products/Files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
@@ -498,7 +498,7 @@ Gentile $OwnerName,
 
 Hai richiesto una disattivazione temporanea del tuo portale "${__VirtualRootPath}":"${__VirtualRootPath}". Vai al link di seguito per confermare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 *Nota*: questo collegamento è valido solo per 7 giorni. Completa il processo di cambio di indirizzo del portale entro tale periodo.
 
@@ -511,7 +511,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 
 Cordiali saluti,
 Team di supporto ONLYOFFICE®
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Disattivazione del portale [${__VirtualRootPath}](${__VirtualRootPath})
@@ -520,7 +520,7 @@ Gentile $OwnerName,
 
 Hai richiesto la disattivazione temporanea del tuo portale:  [${__VirtualRootPath}](${__VirtualRootPath}). Andare al link di seguito per confermare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 _Nota_: questo link ha validità di soli 7 giorni. Si prega di completare il processo di disattivazione entro il periodo.
 
@@ -532,7 +532,7 @@ Per qualsiasi domanda, chiarimento o assistenza non esitare a contattare il supp
 
 Cordiali Saluti,
 Il supporto tecnico ONLYOFFICE®
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Eliminazione del portale "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -549,7 +549,7 @@ Prima di procedere all'eliminazione del portale, assicurati che la fatturazione 
 
 Se vuoi ancora eliminare il tuo portale "${__VirtualRootPath}":"${__VirtualRootPath}" andare sul link seguente per confermare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 * Nota *: questo collegamento è valido solo per 7 giorni. Completa il processo di cambio di indirizzo del portale entro tale periodo.
 
@@ -557,7 +557,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 
 Cordiali saluti,
 Team di supporto ONLYOFFICE®
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Cambio indirizzo portale
@@ -575,7 +575,7 @@ Hai richiesto la rimozione definitiva del tuo profilo dal portale "${__VirtualRo
 
 Se vuoi ancora rimuovere il tuo profilo vai al link seguente per completare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 * Nota *: questo collegamento è valido solo per 7 giorni. Completa il processo di cambio di indirizzo del portale entro tale periodo.</value>
   </data>
@@ -612,7 +612,7 @@ Per visualizzare il tuo profilo vai al link di seguito:
 
 Cordiali saluti
 il Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_reassigns_completed" xml:space="preserve">
     <value>Gentile $UserName,
@@ -684,7 +684,7 @@ Se hai domande o hai bisogno di assistenza, non esitate a contattarci all'indiri
 
 Cordiali saluti,
 Team di supporto ONLYOFFICE®
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Per modificare il tipo di notifica, gestisci le tue "impostazioni di sottoscrizione":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -693,13 +693,13 @@ Team di supporto ONLYOFFICE®
 
 Sei invitato a unirti a "${__VirtualRootPath}":"${__VirtualRootPath}" come utente ospite. Accetta l'invito cliccando il link:
 
-$GreenButton
+$OrangeButton
 
 Ti invieremo anche consigli utili e le ultime notizie su ONLYOFFICE ogni tanto. Puoi annullare gli abbonamenti sulla pagina del tuo profilo in qualsiasi momento così come riattivarli.
 
 Tanti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1.cambio notifica profilo portale "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -750,7 +750,7 @@ Sei stato invitato ad unirti all'ufficio web sicuro e protetto della tua azienda
 
 Accetta l'invito facendo click sul link seguente e utilizza la tua login e password dall'account aziendale per accedere.
 
-$GreenButton
+$OrangeButton
 
 Questo link è valido 7 giorni dalla ricezione di questo messaggio.</value>
   </data>
@@ -929,13 +929,13 @@ Hai appena creato ONLYOFFICE DocSpace, un hub di documenti dove puoi migliorare 
  
 Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
-$GreenButton
+$OrangeButton
  
 Goditi un nuovo modo di collaborare sui documenti!
  
 Tanti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -944,13 +944,13 @@ Hai appena creato ONLYOFFICE DocSpace, un hub di documenti dove puoi migliorare 
  
 Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
-$GreenButton
+$OrangeButton
  
 Goditi un nuovo modo di collaborare sui documenti!
  
 Tanti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -959,13 +959,13 @@ Hai appena creato ONLYOFFICE DocSpace, un hub di documenti dove puoi migliorare 
  
 Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
-$GreenButton
+$OrangeButton
  
 Goditi un nuovo modo di collaborare sui documenti!
  
 Tanti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -974,7 +974,7 @@ Hai appena creato ONLYOFFICE DocSpace, un hub di documenti dove puoi migliorare 
  
 Ti preghiamo di confermare la tua e-mail (il link è valido per 7 giorni):
  
-$GreenButton
+$OrangeButton
  
 La tua tariffa è STARTUP. È assolutamente gratuita e include:
  
@@ -987,12 +987,12 @@ Goditi un nuovo modo di collaborare sui documenti!
  
 Tanti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Vuoi cambiare la password del tuo account ONLYOFFICE? Fai clic sul pulsante in basso per confermare.
 
-$GreenButton
+$OrangeButton
 
 Il link è valido per 7 giorni.
 
@@ -1009,7 +1009,7 @@ Ottieni le app di ONLYOFFICE gratuite per lavorare sui documenti da qualsiasi tu
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1024,11 +1024,11 @@ Ci auguriamo che ti piaccia utilizzare ONLYOFFICE DocSpace. Ecco alcuni suggerim
 
 *#4. Connetti cloud di terze parti.* Connetti qualsiasi cloud storage e lavora senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1043,11 +1043,11 @@ Ci auguriamo che ti piaccia utilizzare ONLYOFFICE DocSpace. Ecco alcuni suggerim
 
 *#4. Connetti cloud di terze parti.* Connetti qualsiasi cloud storage e lavora senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1062,11 +1062,11 @@ Ci auguriamo che ti piaccia utilizzare ONLYOFFICE DocSpace. Ecco alcuni suggerim
 
 *#4. Connetti cloud di terze parti.* Connetti qualsiasi cloud storage e lavora senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1081,11 +1081,11 @@ Ci auguriamo che ti piaccia utilizzare ONLYOFFICE DocSpace. Ecco alcuni suggerim
 
 *#4. Connetti cloud di terze parti.* Connetti qualsiasi cloud storage e lavora senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1106,7 +1106,7 @@ _Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore �
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1115,7 +1115,7 @@ Tieni presente che il periodo di grazia di $PaymentDelay‎ giorni per il tuo ON
 
 Assicurati di pagare il tuo abbonamento Business prima della scadenza del periodo di grazia. Così, sarai in grado di utilizzare ulteriormente tutti i vantaggi del tuo ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
@@ -1140,7 +1140,7 @@ _Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore �
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1161,7 +1161,7 @@ _Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore �
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1182,51 +1182,51 @@ _Nota: la persona che paga l'abbonamento diventa il pagatore. Solo il pagatore �
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Ciao!
 
 Sei invitato a unirti a ONLYOFFICE DocSpace su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Ciao!
 
 Sei invitato a unirti a ONLYOFFICE DocSpace su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Ciao!
 
 Sei invitato a unirti a ONLYOFFICE DocSpace su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Ciao!
 
 Sei invitato a unirti a ONLYOFFICE DocSpace su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1241,13 +1241,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1262,13 +1262,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1283,13 +1283,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1304,13 +1304,13 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
 Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Messaggio dal portale "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1332,7 +1332,7 @@ Ottieni le app di ONLYOFFICE gratuite per lavorare sui documenti da qualsiasi tu
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1345,7 +1345,7 @@ Ottieni le app di ONLYOFFICE gratuite per lavorare sui documenti da qualsiasi tu
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Salve!
@@ -1361,13 +1361,13 @@ Team di ONLYOFFICE</value>
 
 Perché hai deciso di disattivarlo? Condividi la tua esperienza con noi.
 
-$GreenButton
+$OrangeButton
 
 Grazie e buona fortuna!
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/it"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1388,13 +1388,13 @@ Regola le impostazioni di sicurezza del tuo ONLYOFFICE DocSpace per renderlo pi�
 
 * Esegui i backup dei dati.
 
-$GreenButton
+$OrangeButton
 
 Visita il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" per saperne di più sulla configurazione e la gestione del tuo ONLYOFFICE DocSpace. Sei inoltre invitato a consultarlo in caso di domande sulla funzionalità.
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Non hai effettuato l'accesso nel tuo ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" per più di sei mesi.
@@ -1403,26 +1403,26 @@ Dal momento che hai deciso di non usarlo più, il tuo ONLYOFFICE DocSpace e tutt
 
 Apprezzeremmo il tuo feedback. Perché hai deciso di non utilizzare più il tuo ONLYOFFICE DocSpace?
 
-$GreenButton
+$OrangeButton
 
 Se si è verificato un errore e desideri continuare a utilizzare ONLYOFFICE DocSpace, contatta il nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Salve!
 
 Sei invitato a unirti a ONLYOFFICE DocSpace su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
-$GreenButton
+$OrangeButton
 
 Dopo aver cliccato sul link di invito, imposta una nuova password per il tuo account.
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1431,11 +1431,11 @@ Tieni presente che il tuo abbonamento a ONLYOFFICE DocSpace scade tra tre giorni
 
 Ti consigliamo di pagare ora il tuo abbonamento Business e di continuare a utilizzare tutti i vantaggi del tuo spazio documenti di ONLYOFFICE.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Salve, $UserName!
@@ -1444,11 +1444,11 @@ Tieni presente che il periodo di grazia di $PaymentDelay giorni per il tuo ONLYO
 
 Assicurati di pagare il tuo abbonamento Business il prima possibile. Così, sarai in grado di utilizzare tutti i vantaggi del tuo ONLYOFFICE DocSpace come prima.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Ciao, $UserName!
@@ -1457,29 +1457,29 @@ Tieni presente che il periodo di grazia di $PaymentDelay giorni per il tuo ONLYO
 
 Assicurati di pagare il tuo abbonamento Business oggi stesso. Così, sarai in grado di utilizzare ulteriormente tutti i vantaggi del tuo ONLYOFFICE DocSpace.
 
-$GreenButton
+$OrangeButton
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Salve!
 
 Sei invitato a unirti alla stanza $Message su "${__VirtualRootPath}":"${__VirtualRootPath}". Accetta l'invito cliccando sul link:
 
-$GreenButton
+$OrangeButton
 
 Dopo aver cliccato sul link di invito, imposta una nuova password per il tuo account.
 
 Distinti saluti,
 Team di ONLYOFFICE
-"www.onlyoffice.com":http://onlyoffice.com/it</value>
+"www.onlyoffice.com":https://onlyoffice.com/it</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Vuoi cambiare la password del tuo account personale ONLYOFFICE? Fai clic sul pulsante in basso per confermare.
 
-$GreenButton
+$OrangeButton
 
 Il collegamento è valido per 7 giorni.
 
@@ -1526,7 +1526,7 @@ Non vuoi cambiare la tua password? Ignora questo messaggio.</value>
 
 Fai clic sul pulsante qui sotto e accedi* al tuo cloud.
 
-$GreenButton
+$OrangeButton
 
 Il link è valido per 7 giorni.
 
@@ -1541,7 +1541,7 @@ h1."$PortalUrl":"$PortalUrl"
 È stata eseguita la migrazione del tuo portale a un nuovo dominio. Ripristina l'accesso al portale specificando la password che verrà utilizzata per l'accesso.
 
 Segui il link qui sotto per impostare la tua password per l'account:
-$GreenButton
+$OrangeButton
 
 *Nota*: questo link è valido solo per 7 giorni. Ti preghiamo di completare la procedura di ripristino dell'accesso entro tale periodo.
 
@@ -1563,7 +1563,7 @@ Riceverai ulteriori suggerimenti su come utilizzare il tuo web-office. Puoi annu
 
 Clicca sul pulsante qui sotto e accedi* al tuo cloud.
 
-$GreenButton
+$OrangeButton
 
 Il link è valido per 7 giorni.
 
@@ -1586,7 +1586,7 @@ Prima di eliminare il portale, assicurati che la fatturazione automatica sia dis
 
 Se desideri comunque eliminare il tuo portale [${__VirtualRootPath}](${__VirtualRootPath}), segui il link sottostante per confermare l'operazione:
 
-$GreenButton
+$OrangeButton
 
 _Nota_: questo link è valido solo per 7 giorni. Si prega di completare il processo di cancellazione del portale entro tale periodo.
 
@@ -1594,7 +1594,7 @@ Se hai domande o hai bisogno di assistenza, non esitare a contattarci all'indiri
 
 Distinti saluti,
 Team di supporto di ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_request_tariff1" xml:space="preserve">
     <value>h1.Richiesta tariffa SAAS per "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1632,7 +1632,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Il tuo portale è stato ripristinato. Per accedervi è necessario impostare una nuova password:
 
-$GreenButton
+$OrangeButton
 
 *Note*: questo link è valido solo per 7 giorni.
 

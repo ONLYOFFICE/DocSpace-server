@@ -37,7 +37,7 @@ public class FileOperationDto
     /// <summary>Operation type</summary>
     /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; set; }
+    public FileOperationType OperationType { get; init; }
 
     /// <summary>Operation progress</summary>
     /// <type>System.Int32, System</type>
@@ -66,8 +66,6 @@ public class FileOperationDto
     /// <summary>List of folders</summary>
     /// <type>System.Collections.Generic.List{ASC.Files.Core.ApiModels.ResponseDto.FileEntryDto}, System.Collections.Generic</type>
     public List<FileEntryDto> Folders { get; set; }
-
-    public FileOperationDto() { }
 
     public static FileOperationDto GetSample()
     {
