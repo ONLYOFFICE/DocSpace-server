@@ -501,7 +501,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var pins = await TagDao.GetTagsAsync(Guid.Empty, TagType.Pin, new List<FileEntry<T>> { folder }).ToListAsync();
                                     if (pins.Count > 0)
                                     {
-                                        await TagDao.RemoveTags(pins);
+                                        await TagDao.RemoveTagsAsync(pins);
                                     }
 
                                     _ = filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);

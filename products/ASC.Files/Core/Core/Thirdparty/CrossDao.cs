@@ -133,7 +133,7 @@ internal class CrossDao //Additional SharpBox
             {
                 fromFileTags.ForEach(x => x.EntryId = toFile.Id);
 
-                await tagDao.SaveTags(fromFileTags);
+                await tagDao.SaveTagsAsync(fromFileTags);
             }
 
             //Delete source file if needed
@@ -223,7 +223,7 @@ internal class CrossDao //Additional SharpBox
             {
                 fromFileNewTags.ForEach(x => x.EntryId = toFolderId);
 
-                await tagDao.SaveTags(fromFileNewTags);
+                await tagDao.SaveTagsAsync(fromFileNewTags);
             }
 
             if (copyException == null)

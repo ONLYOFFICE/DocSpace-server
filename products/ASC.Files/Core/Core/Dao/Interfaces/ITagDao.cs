@@ -30,26 +30,23 @@ namespace ASC.Files.Core;
 public interface ITagDao<T>
 {
     IAsyncEnumerable<Tag> GetTagsAsync(Guid subject, TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
-    IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<T> parentFolder, bool deepSearch);
     IAsyncEnumerable<Tag> GetTagsAsync(T entryID, FileEntryType entryType, TagType? tagType);
     IAsyncEnumerable<Tag> GetTagsAsync(TagType tagType, IEnumerable<FileEntry<T>> fileEntries);
-    Task<IDictionary<object, IEnumerable<Tag>>> GetTagsAsync(Guid subject, IEnumerable<TagType> tagType, IEnumerable<FileEntry<T>> fileEntries);
+    IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType);
+    IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<T> parentFolder, bool deepSearch);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, IEnumerable<FileEntry<T>> fileEntries);
     IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, FileEntry<T> fileEntry);
-    IAsyncEnumerable<Tag> GetTagsAsync(Guid owner, TagType tagType);
-    IAsyncEnumerable<Tag> GetTagsAsync(string name, TagType tagType);
-    IAsyncEnumerable<Tag> GetTagsAsync(string[] names, TagType tagType);
+    Task<IEnumerable<Tag>> SaveTagsAsync(IEnumerable<Tag> tag, Guid createdBy = default);
+    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(string searchText, TagType tagType, bool byName, int from = 0, int count = 0);
     IAsyncEnumerable<TagInfo> GetTagsInfoAsync(IEnumerable<string> names);
-    Task<IEnumerable<Tag>> SaveTags(IEnumerable<Tag> tag, Guid createdBy = default);
-    Task<IEnumerable<Tag>> SaveTagsAsync(Tag tag);
     Task<TagInfo> SaveTagInfoAsync(TagInfo tagInfo);
     Task UpdateNewTags(IEnumerable<Tag> tag, Guid createdBy = default);
     Task UpdateNewTags(Tag tag);
-    Task IncrementNewTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default);
     Task RemoveTagsAsync(IEnumerable<int> tagsIds);
     Task RemoveTagsAsync(FileEntry<T> entry, IEnumerable<int> tagsIds);
-    Task RemoveTags(IEnumerable<Tag> tag);
-    Task RemoveTags(Tag tag);
+    Task RemoveTagsAsync(IEnumerable<Tag> tag);
+    Task RemoveTagsAsync(Tag tag);
+    Task IncrementNewTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default);
     Task<int> RemoveTagLinksAsync(T entryId, FileEntryType entryType, TagType tagType);
 }
