@@ -8,7 +8,6 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -43,18 +42,18 @@ public class Authorization {
     @Column(name = "authorization_code_value", length = 4000)
     private String authorizationCodeValue;
     @Column(name = "authorization_code_issued_at")
-    private Date authorizationCodeIssuedAt;
+    private Timestamp authorizationCodeIssuedAt;
     @Column(name = "authorization_code_expires_at")
-    private Date authorizationCodeExpiresAt;
+    private Timestamp authorizationCodeExpiresAt;
     @Column(name = "authorization_code_metadata")
     private String authorizationCodeMetadata;
     @Lob
     @Column(name = "access_token_value", length = 4000)
     private String accessTokenValue;
     @Column(name = "access_token_issued_at")
-    private Date accessTokenIssuedAt;
+    private Timestamp accessTokenIssuedAt;
     @Column(name = "access_token_expires_at")
-    private Date accessTokenExpiresAt;
+    private Timestamp accessTokenExpiresAt;
     @Lob
     @Column(name = "access_token_metadata", length = 2000)
     private String accessTokenMetadata;
@@ -66,9 +65,9 @@ public class Authorization {
     @Column(name = "refresh_token_value", length = 4000)
     private String refreshTokenValue;
     @Column(name = "refresh_token_issued_at")
-    private Date refreshTokenIssuedAt;
+    private Timestamp refreshTokenIssuedAt;
     @Column(name = "refresh_token_expires_at")
-    private Date refreshTokenExpiresAt;
+    private Timestamp refreshTokenExpiresAt;
     @Lob
     @Column(name = "refresh_token_metadata", length = 2000)
     private String refreshTokenMetadata;

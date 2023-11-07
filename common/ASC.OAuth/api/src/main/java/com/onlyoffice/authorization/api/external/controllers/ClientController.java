@@ -63,7 +63,6 @@ public class ClientController {
     private final ClientCleanupUsecases cleanupUsecases;
     private final ConsentRetrieveUsecases consentRetrieveUsecases;
 
-
     @PostConstruct
     public void init() {
         this.allowedScopes = applicationConfiguration.getScopes().stream()

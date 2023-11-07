@@ -7,7 +7,6 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  *
@@ -26,18 +25,18 @@ public class AuthorizationMessage implements Serializable {
     private String attributes;
     private String state;
     private String authorizationCodeValue;
-    private Date authorizationCodeIssuedAt;
-    private Date authorizationCodeExpiresAt;
+    private Timestamp authorizationCodeIssuedAt;
+    private Timestamp authorizationCodeExpiresAt;
     private String authorizationCodeMetadata;
     private String accessTokenValue;
-    private Date accessTokenIssuedAt;
-    private Date accessTokenExpiresAt;
+    private Timestamp accessTokenIssuedAt;
+    private Timestamp accessTokenExpiresAt;
     private String accessTokenMetadata;
     private String accessTokenType;
     private String accessTokenScopes;
     private String refreshTokenValue;
-    private Date refreshTokenIssuedAt;
-    private Date refreshTokenExpiresAt;
+    private Timestamp refreshTokenIssuedAt;
+    private Timestamp refreshTokenExpiresAt;
     private String refreshTokenMetadata;
     private Timestamp modifiedAt;
     private Boolean invalidated;

@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.api.configuration.messaging;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.AuthorizationMessage;
 import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
 import lombok.Getter;
@@ -42,9 +43,9 @@ public class RabbitMQConfiguration {
     private int prefetch = 500;
 
     @Bean
-    public MessageConverter jsonMessageConverter() {
+    public MessageConverter jsonMessageConverter(ObjectMapper mapper) {
         log.info("Building a json message converter");
-        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter(mapper);
         DefaultJackson2JavaTypeMapper classMapper = new DefaultJackson2JavaTypeMapper();
         classMapper.setTrustedPackages("*");
         classMapper.setIdClassMapping(Map.of(

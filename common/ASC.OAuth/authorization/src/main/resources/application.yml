@@ -76,6 +76,8 @@ spring:
   jpa:
     properties:
       hibernate:
+        jdbc:
+          time_zone: UTC
         dialect: org.hibernate.dialect.MySQLDialect
 
 resilience4j:

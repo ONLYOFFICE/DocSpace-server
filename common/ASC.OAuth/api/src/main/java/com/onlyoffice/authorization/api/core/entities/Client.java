@@ -89,6 +89,7 @@ public class Client {
     private void prePersist() {
         this.enabled = true;
         this.invalidated = false;
+        this.createdOn = Timestamp.from(Instant.now());
         this.clientIssuedAt = Timestamp.from(Instant.now());
     }
     @PreUpdate

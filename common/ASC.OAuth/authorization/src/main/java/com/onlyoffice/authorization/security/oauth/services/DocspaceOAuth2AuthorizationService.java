@@ -40,13 +40,12 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -503,14 +502,14 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     private void setTokenValues(
             OAuth2Authorization.Token<?> token,
             Consumer<String> tokenValueConsumer,
-            Consumer<Date> issuedAtConsumer,
-            Consumer<Date> expiresAtConsumer,
+            Consumer<Timestamp> issuedAtConsumer,
+            Consumer<Timestamp> expiresAtConsumer,
             Consumer<String> metadataConsumer) {
         if (token != null) {
             OAuth2Token oAuth2Token = token.getToken();
             tokenValueConsumer.accept(oAuth2Token.getTokenValue());
-            issuedAtConsumer.accept(Date.from(oAuth2Token.getIssuedAt()));
-            expiresAtConsumer.accept(Date.from(oAuth2Token.getExpiresAt()));
+            issuedAtConsumer.accept(Timestamp.from(oAuth2Token.getIssuedAt()));
+            expiresAtConsumer.accept(Timestamp.from(oAuth2Token.getExpiresAt()));
             metadataConsumer.accept(writeMap(token.getMetadata()));
         }
     }
