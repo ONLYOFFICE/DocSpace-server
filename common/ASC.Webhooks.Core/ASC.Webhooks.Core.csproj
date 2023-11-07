@@ -17,10 +17,6 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <None Remove="proto\webhook_request.proto" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Grpc.Tools" Version="2.57.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,10 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ASC.Core.Common\ASC.Core.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="proto\webhook_request.proto" />
   </ItemGroup>
 
   <ItemGroup>

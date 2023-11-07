@@ -30,10 +30,10 @@ namespace ASC.Core.Caching;
 public class SubscriptionServiceCache
 {
     internal readonly ICache Cache;
-    internal readonly ICacheNotify<SubscriptionRecord> NotifyRecord;
+    internal readonly ICacheNotify<SubscriptionRecordProto> NotifyRecord;
     internal readonly ICacheNotify<SubscriptionMethodCache> NotifyMethod;
 
-    public SubscriptionServiceCache(ICacheNotify<SubscriptionRecord> notifyRecord, ICacheNotify<SubscriptionMethodCache> notifyMethod, ICache cache)
+    public SubscriptionServiceCache(ICacheNotify<SubscriptionRecordProto> notifyRecord, ICacheNotify<SubscriptionMethodCache> notifyMethod, ICache cache)
     {
         Cache = cache;
         NotifyRecord = notifyRecord;
@@ -99,7 +99,7 @@ public class CachedSubscriptionService : ISubscriptionService
 {
     private readonly ISubscriptionService _service;
     private readonly ICache _cache;
-    private readonly ICacheNotify<SubscriptionRecord> _notifyRecord;
+    private readonly ICacheNotify<SubscriptionRecordProto> _notifyRecord;
     private readonly ICacheNotify<SubscriptionMethodCache> _notifyMethod;
     private readonly TimeSpan _cacheExpiration;
 
@@ -113,7 +113,7 @@ public class CachedSubscriptionService : ISubscriptionService
     }
 
 
-    public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)
+    public async Task<IEnumerable<SubscriptionRecordProto>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)
     {
         var store = await GetSubsciptionsStoreAsync(tenant, sourceId, actionId);
         lock (store)
@@ -122,7 +122,7 @@ public class CachedSubscriptionService : ISubscriptionService
         }
     }
 
-    public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
+    public async Task<IEnumerable<SubscriptionRecordProto>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
     {
         var store = await GetSubsciptionsStoreAsync(tenant, sourceId, actionId);
         lock (store)
@@ -141,7 +141,7 @@ public class CachedSubscriptionService : ISubscriptionService
         return await _service.GetSubscriptionsAsync(tenant, sourceId, actionId, recipientId, checkSubscribe);
     }
 
-    public async Task<SubscriptionRecord> GetSubscriptionAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
+    public async Task<SubscriptionRecordProto> GetSubscriptionAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
     {
         var store = await GetSubsciptionsStoreAsync(tenant, sourceId, actionId);
         lock (store)
@@ -150,7 +150,7 @@ public class CachedSubscriptionService : ISubscriptionService
         }
     }
 
-    public async Task SaveSubscriptionAsync(SubscriptionRecord s)
+    public async Task SaveSubscriptionAsync(SubscriptionRecordProto s)
     {
         await _service.SaveSubscriptionAsync(s);
         await _notifyRecord.PublishAsync(s, CacheNotifyAction.InsertOrUpdate);
@@ -159,13 +159,13 @@ public class CachedSubscriptionService : ISubscriptionService
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId)
     {
         await _service.RemoveSubscriptionsAsync(tenant, sourceId, actionId);
-        await _notifyRecord.PublishAsync(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId }, CacheNotifyAction.Remove);
+        await _notifyRecord.PublishAsync(new SubscriptionRecordProto { Tenant = tenant, SourceId = sourceId, ActionId = actionId }, CacheNotifyAction.Remove);
     }
 
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId, string objectId)
     {
         await _service.RemoveSubscriptionsAsync(tenant, sourceId, actionId, objectId);
-        await _notifyRecord.PublishAsync(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId, ObjectId = objectId }, CacheNotifyAction.Remove);
+        await _notifyRecord.PublishAsync(new SubscriptionRecordProto { Tenant = tenant, SourceId = sourceId, ActionId = actionId, ObjectId = objectId }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<SubscriptionMethod>> GetSubscriptionMethodsAsync(int tenant, string sourceId, string actionId, string recipientId)
@@ -206,14 +206,14 @@ public class CachedSubscriptionService : ISubscriptionService
 
 internal class SubsciptionsStore
 {
-    private readonly List<SubscriptionRecord> _records;
-    private IDictionary<string, List<SubscriptionRecord>> _recordsByRec;
-    private IDictionary<string, List<SubscriptionRecord>> _recordsByObj;
+    private readonly List<SubscriptionRecordProto> _records;
+    private IDictionary<string, List<SubscriptionRecordProto>> _recordsByRec;
+    private IDictionary<string, List<SubscriptionRecordProto>> _recordsByObj;
 
     private readonly List<SubscriptionMethod> _methods;
     private IDictionary<string, List<SubscriptionMethod>> _methodsByRec;
 
-    public SubsciptionsStore(IEnumerable<SubscriptionRecord> records, IEnumerable<SubscriptionMethod> methods)
+    public SubsciptionsStore(IEnumerable<SubscriptionRecordProto> records, IEnumerable<SubscriptionMethod> methods)
     {
         _records = records.ToList();
         _methods = methods.ToList();
@@ -221,27 +221,27 @@ internal class SubsciptionsStore
         BuildMethodsIndex(methods);
     }
 
-    public IEnumerable<SubscriptionRecord> GetSubscriptions()
+    public IEnumerable<SubscriptionRecordProto> GetSubscriptions()
     {
         return _records.ToList();
     }
 
-    public IEnumerable<SubscriptionRecord> GetSubscriptions(string recipientId, string objectId)
+    public IEnumerable<SubscriptionRecordProto> GetSubscriptions(string recipientId, string objectId)
     {
         var objId = objectId ?? string.Empty;
         return recipientId != null ?
-            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionRecord>() :
-            _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : new List<SubscriptionRecord>();
+            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionRecordProto>() :
+            _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : new List<SubscriptionRecordProto>();
     }
 
-    public SubscriptionRecord GetSubscription(string recipientId, string objectId)
+    public SubscriptionRecordProto GetSubscription(string recipientId, string objectId)
     {
         return _recordsByRec.TryGetValue(recipientId, out var value) ?
             value.Find(s => s.ObjectId == (objectId ?? "")) :
             null;
     }
 
-    public void SaveSubscription(SubscriptionRecord s)
+    public void SaveSubscription(SubscriptionRecordProto s)
     {
         var old = GetSubscription(s.RecipientId, s.ObjectId);
         if (old != null)
@@ -285,7 +285,7 @@ internal class SubsciptionsStore
         BuildMethodsIndex(_methods);
     }
 
-    private void BuildSubscriptionsIndex(IEnumerable<SubscriptionRecord> records)
+    private void BuildSubscriptionsIndex(IEnumerable<SubscriptionRecordProto> records)
     {
         _recordsByRec = records.GroupBy(r => r.RecipientId).ToDictionary(g => g.Key, g => g.ToList());
         _recordsByObj = records.GroupBy(r => r.ObjectId ?? string.Empty).ToDictionary(g => g.Key, g => g.ToList());

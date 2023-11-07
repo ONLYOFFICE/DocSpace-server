@@ -55,3 +55,29 @@ public static class GuidExtension
 
     public static Guid FromByteString(this ByteString id) => new(id.ToByteArray());
 }
+
+public class BaseProtobufSerializer<T> : ISerializer<T> where T : new()
+{
+    public byte[] Serialize(T data, Confluent.Kafka.SerializationContext context)
+    {
+        if (data == null)
+        {
+            return Array.Empty<byte>();
+        }
+        using var memoryStream = new MemoryStream();
+        Serializer.Serialize(memoryStream, data);
+        return memoryStream.ToArray();
+    }
+}
+
+public class BaseProtobufDeserializer<T> : IDeserializer<T> where T : new()
+{
+    public T Deserialize(ReadOnlySpan<byte> data, bool isNull, Confluent.Kafka.SerializationContext context)
+    {
+        if (isNull || data.IsEmpty)
+        {
+            return new T();
+        }
+        return Serializer.Deserialize<T>(data);
+    }
+}

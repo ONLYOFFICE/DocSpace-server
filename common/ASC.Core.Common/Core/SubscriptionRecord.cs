@@ -32,7 +32,7 @@ public partial class SubscriptionRecord : IMapFrom<Subscription>
 {
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<Subscription, SubscriptionRecord>()
+        profile.CreateMap<Subscription, SubscriptionRecordProto>()
             .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.Recipient))
             .ForMember(dest => dest.Subscribed, opt => opt.MapFrom(src => !src.Unsubscribed))
             .ForMember(dest => dest.ActionId, opt => opt.MapFrom(src => src.Action))

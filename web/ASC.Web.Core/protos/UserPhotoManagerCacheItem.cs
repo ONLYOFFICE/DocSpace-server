@@ -24,32 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-[ProtoContract]
 public enum CacheSize
 {
-    [EnumMember]
-    [ProtoEnum]
-    Max = 0,
-
-    [EnumMember]
-    [ProtoEnum]
-    Retina = 1,
-
-    [EnumMember]
-    [ProtoEnum]
-    Big = 2,
-
-    [EnumMember]
-    [ProtoEnum]
-    Medium = 3,
-
-    [EnumMember]
-    [ProtoEnum]
-    Small = 4,
-
-    [EnumMember]
-    [ProtoEnum]
-    Original = 5
+    Max,
+    Retina,
+    Big,
+    Medium,
+    Small,
+    Original
 }
 [ProtoContract]
 public record UserPhotoManagerCacheItem

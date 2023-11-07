@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
+public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
 {
     private IProducer<AscCacheItem, T> _producer;
 
@@ -37,10 +37,10 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelationToken;
     private readonly ConcurrentDictionary<string, Action<T>> _actions;
-    private readonly ProtobufSerializer<T> _valueSerializer = new();
-    private readonly ProtobufDeserializer<T> _valueDeserializer = new();
-    private readonly ProtobufSerializer<AscCacheItem> _keySerializer = new();
-    private readonly ProtobufDeserializer<AscCacheItem> _keyDeserializer = new();
+    private readonly BaseProtobufSerializer<T> _valueSerializer = new();
+    private readonly BaseProtobufDeserializer<T> _valueDeserializer = new();
+    private readonly BaseProtobufSerializer<AscCacheItem> _keySerializer = new();
+    private readonly BaseProtobufDeserializer<AscCacheItem> _keyDeserializer = new();
     private readonly Guid _key;
 
     public KafkaCacheNotify(ConfigurationExtension configuration, ILogger<KafkaCacheNotify<T>> logger)
