@@ -35,6 +35,7 @@ public class ConsentQueueConfiguration {
         MDC.clear();
         return QueueBuilder.durable(configuration.getConsent().getDeadQueue())
                 .withArgument("x-max-length-bytes", configuration.getConsent().getDeadMaxBytes())
+                .withArgument("x-message-ttl", configuration.getConsent().getMessageTTL())
                 .withArgument("x-queue-type", "quorum")
                 .build();
     }

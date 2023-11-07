@@ -31,6 +31,7 @@ public class AuthorizationQueueConfiguration {
         MDC.clear();
         return QueueBuilder.durable(configuration.getAuthorization().getDeadQueue())
                 .withArgument("x-max-length-bytes", configuration.getAuthorization().getDeadMaxBytes())
+                .withArgument("x-message-ttl", configuration.getAuthorization().getMessageTTL())
                 .withArgument("x-queue-type", "quorum")
                 .build();
     }

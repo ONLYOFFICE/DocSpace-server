@@ -33,6 +33,7 @@ public class ClientQueueConfiguration {
         MDC.clear();
         return QueueBuilder.durable(configuration.getClient().getDeadQueue())
                 .withArgument("x-max-length-bytes", configuration.getClient().getDeadMaxBytes())
+                .withArgument("x-message-ttl", configuration.getClient().getMessageTTL())
                 .withArgument("x-queue-type", "quorum")
                 .build();
     }
