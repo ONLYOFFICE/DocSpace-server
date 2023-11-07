@@ -534,12 +534,6 @@ public class PortalController : ControllerBase
                 await _tenantManager.CheckTenantAddressAsync(newAlias.Trim());
             }
 
-
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
-            {
-                await _apiSystemHelper.AddTenantToCacheAsync(newAlias, user.Id);
-            }
-
             var oldDomain = tenant.GetTenantDomain(_coreSettings);
             tenant.Alias = alias;
             tenant = await _tenantManager.SaveTenantAsync(tenant);
@@ -547,9 +541,9 @@ public class PortalController : ControllerBase
 
             await _cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(_coreSettings));
 
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone)
             {
-                await _apiSystemHelper.RemoveTenantFromCacheAsync(oldAlias, user.Id);
+                await _apiSystemHelper.UpdateTenantToCacheAsync(oldDomain, tenant.GetTenantDomain(_coreSettings));
             }
 
             if (!localhost || string.IsNullOrEmpty(tenant.MappedDomain))
@@ -592,9 +586,9 @@ public class PortalController : ControllerBase
 
         await _tenantManager.RemoveTenantAsync(tenant.Id);
 
-        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+        if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _securityContext.CurrentAccount.ID);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
         }
 
         try
@@ -729,9 +723,9 @@ public class PortalController : ControllerBase
 
         await _tenantManager.RemoveTenantAsync(tenant.Id);
 
-        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+        if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _securityContext.CurrentAccount.ID);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
         }
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
