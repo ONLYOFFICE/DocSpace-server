@@ -30,14 +30,18 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 public record BulkDownloadIntegrationEvent : IntegrationEvent
 {
     private BulkDownloadIntegrationEvent() : base() { }
+
     public BulkDownloadIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
 
     [ProtoMember(1)]
-    public Dictionary<string, string> FolderIdsString { get; set; }
+    public Dictionary<string, string> FolderStringIds { get; set; }
 
     [ProtoMember(2)] 
-    public Dictionary<string, string> FileIdsString { get; set; }
+    public Dictionary<string, string> FileStringIds { get; set; }
+
+    [ProtoMember(3)]
+    public string TaskId { get; set; }
 }

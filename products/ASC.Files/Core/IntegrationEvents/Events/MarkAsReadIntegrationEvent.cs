@@ -30,18 +30,24 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 public record MarkAsReadIntegrationEvent : IntegrationEvent
 {
     private MarkAsReadIntegrationEvent() : base() { }
+
     public MarkAsReadIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
 
     [ProtoMember(1)]
-    public List<string> FolderIdsString { get; set; }
+    public List<string> FolderStringIds { get; set; }
 
     [ProtoMember(2)] 
-    public List<string> FileIdsString { get; set; }
+    public List<string> FileStringIds { get; set; }
+
     [ProtoMember(3)]
-    public List<int> FolderIdsInt { get; set; }
+    public List<int> FolderIntIds { get; set; }
+
     [ProtoMember(4)]
-    public List<int> FileIdsInt { get; set; }
+    public List<int> FileIntIds { get; set; }
+
+    [ProtoMember(5)]
+    public string TaskId { get; set; }
 }

@@ -65,7 +65,7 @@ public class EmptyTrashIntegrationEventHandler : IIntegrationEventHandler<EmptyT
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await _fileStorageService.EmptyTrashAsync();
+            await _fileStorageService.EmptyTrashAsync(true, @event.TaskId);
         }
 
     }

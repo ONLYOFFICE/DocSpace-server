@@ -30,6 +30,7 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 public record MoveOrCopyIntegrationEvent : IntegrationEvent
 {
     private MoveOrCopyIntegrationEvent() : base() { }
+
     public MoveOrCopyIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
@@ -42,14 +43,16 @@ public record MoveOrCopyIntegrationEvent : IntegrationEvent
     public bool Ic { get; set; }
 
     [ProtoMember(3)]
-    public List<string> FolderIdsString { get; set; }
+    public List<string> FolderStringIds { get; set; }
 
     [ProtoMember(4)]
-    public List<string> FileIdsString { get; set; }
+    public List<string> FileStringIds { get; set; }
+
     [ProtoMember(5)]
-    public List<int> FolderIdsInt { get; set; }
+    public List<int> FolderIntIds { get; set; }
+
     [ProtoMember(6)]
-    public List<int> FileIdsInt { get; set; }
+    public List<int> FileIntIds { get; set; }
 
     [ProtoMember(7)]
     public bool Content { get; set; }
@@ -59,4 +62,7 @@ public record MoveOrCopyIntegrationEvent : IntegrationEvent
 
     [ProtoMember(9)]
     public string DestFolderId { get; set; }
+
+    [ProtoMember(10)]
+    public string TaskId { get; set;}
 }

@@ -108,7 +108,9 @@ public abstract class FoldersController<T> : ApiControllerBase
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(T folderId, DeleteFolderDto inDto)
     {
-        foreach (var e in await _fileStorageService.DeleteFolderAsync("delete", folderId, false, inDto.DeleteAfter, inDto.Immediately))
+        var (tasks, _) = await _fileStorageService.DeleteFolderAsync("delete", folderId, false, inDto.DeleteAfter, inDto.Immediately);
+
+        foreach (var e in tasks)
         {
             yield return await _fileOperationDtoHelper.GetAsync(e);
         }

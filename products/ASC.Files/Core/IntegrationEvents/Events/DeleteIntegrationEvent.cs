@@ -30,6 +30,7 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 public record DeleteIntegrationEvent : IntegrationEvent
 {
     private DeleteIntegrationEvent() : base() { }
+
     public  DeleteIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
@@ -42,14 +43,17 @@ public record DeleteIntegrationEvent : IntegrationEvent
     public bool Immediately { get; set; }
 
     [ProtoMember(3)]
-    public List<string> FolderIdsString { get; set; }
+    public List<string> FolderStringIds { get; set; }
 
     [ProtoMember(4)]
-    public List<string> FileIdsString { get; set; }
+    public List<string> FileStringIds { get; set; }
 
     [ProtoMember(5)]
-    public List<int> FolderIdsInt { get; set; }
+    public List<int> FolderIntIds { get; set; }
 
     [ProtoMember(6)]
-    public List<int> FileIdsInt { get; set; }
+    public List<int> FileIntIds { get; set; }
+
+    [ProtoMember(7)]
+    public string TaskId { get; set; }
 }

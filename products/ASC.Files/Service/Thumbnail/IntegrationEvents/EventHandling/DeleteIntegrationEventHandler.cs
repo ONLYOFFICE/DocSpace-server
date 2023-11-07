@@ -65,7 +65,7 @@ public class DeleteIntegrationEventHandler : IIntegrationEventHandler<DeleteInte
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
-            await _fileStorageService.DeleteItemsAsync("delete", @event.FolderIdsString, @event.FileIdsString, @event.FolderIdsInt, @event.FileIdsInt, false, @event.DeleteAfter, @event.Immediately);
+            await _fileStorageService.DeleteItemsAsync("delete", @event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, false, @event.DeleteAfter, @event.Immediately, true, @event.TaskId);
         }
 
     }

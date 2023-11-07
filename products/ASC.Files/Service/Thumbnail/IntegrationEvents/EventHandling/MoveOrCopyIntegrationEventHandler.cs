@@ -71,7 +71,7 @@ public class MoveOrCopyIntegrationEventHandler : IIntegrationEventHandler<MoveOr
                 return doc.RootElement.Clone();
             }
 
-            await _fileStorageService.MoveOrCopyItemsAsync(@event.FolderIdsString, @event.FileIdsString, @event.FolderIdsInt, @event.FileIdsInt, ToJsonElement(@event.DestFolderId), @event.ConflictResolveType, @event.Ic, @event.DeleteAfter, @event.Content);
+            await _fileStorageService.MoveOrCopyItemsAsync(@event.FolderStringIds, @event.FileStringIds, @event.FolderIntIds, @event.FileIntIds, ToJsonElement(@event.DestFolderId), @event.ConflictResolveType, @event.Ic, @event.DeleteAfter, @event.Content, true, @event.TaskId);
         }
 
     }

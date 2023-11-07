@@ -30,8 +30,12 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 public record EmptyTrashIntegrationEvent : IntegrationEvent
 {
     private EmptyTrashIntegrationEvent() : base() { }
+
     public EmptyTrashIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
+
+    [ProtoMember(1)]
+    public string TaskId { get; set; }
 }
