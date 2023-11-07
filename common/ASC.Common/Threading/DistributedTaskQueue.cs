@@ -161,11 +161,7 @@ public class DistributedTaskQueue
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
-        if (distributedTask.Publication == null)
-        {
-            distributedTask.Publication = GetPublication();
-        }
-        distributedTask.PublishChanges();
+        _ = PublishTask(distributedTask);
 
         task.Start(Scheduler);
 
@@ -236,6 +232,18 @@ public class DistributedTaskQueue
 
         _logger.TraceEnqueueTask(id, INSTANCE_ID);
 
+    }
+
+    public string PublishTask(DistributedTask distributedTask)
+    {
+        if (distributedTask.Publication == null)
+        {
+            distributedTask.Publication = GetPublication();
+        }
+
+        distributedTask.PublishChanges();
+
+        return distributedTask.Id;
     }
 
     private void OnCompleted(Task task, string id)
