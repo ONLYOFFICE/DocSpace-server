@@ -83,7 +83,7 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
             }
             else
             {
-                await _backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams);
+                await _backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, true, @event.TaskId);
             }
         }
     }

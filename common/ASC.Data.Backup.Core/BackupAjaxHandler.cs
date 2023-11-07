@@ -69,7 +69,7 @@ public class BackupAjaxHandler
         _storageFactory = storageFactory;
     }
 
-    public async Task StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, bool enqueueTask = true, string taskId = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -99,7 +99,7 @@ public class BackupAjaxHandler
 
         await _messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        _backupService.StartBackup(backupRequest);
+        return _backupService.StartBackup(backupRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()

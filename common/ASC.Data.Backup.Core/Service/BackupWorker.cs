@@ -81,7 +81,7 @@ public class BackupWorker
         }
     }
 
-    public BackupProgress StartBackup(StartBackupRequest request)
+    public BackupProgress StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
         lock (_synchRoot)
         {
@@ -99,7 +99,19 @@ public class BackupWorker
 
                 item.Init(request, false, TempFolder, _limit);
 
-                _progressQueue.EnqueueTask(item);
+                if (!string.IsNullOrEmpty(taskId))
+                {
+                    item.Id = taskId;
+                }
+
+                if (enqueueTask)
+                {
+                    _progressQueue.EnqueueTask(item);
+                }
+                else
+                {
+                    _progressQueue.PublishTask(item);
+                }
             }
 
             item.PublishChanges();
@@ -282,7 +294,8 @@ public class BackupWorker
             Progress = (int)progressItem.Percentage,
             Error = progressItem.Exception != null ? progressItem.Exception.Message : "",
             TenantId = progressItem.TenantId,
-            BackupProgressEnum = progressItem.BackupProgressItemEnum.Convert()
+            BackupProgressEnum = progressItem.BackupProgressItemEnum.Convert(),
+            TaskId = progressItem.Id
         };
 
         if ((progressItem.BackupProgressItemEnum == BackupProgressItemEnum.Backup || progressItem.BackupProgressItemEnum == BackupProgressItemEnum.Transfer) && progressItem.Link != null)

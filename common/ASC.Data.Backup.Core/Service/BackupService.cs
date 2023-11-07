@@ -49,13 +49,14 @@ public class BackupService : IBackupService
         _configuration = configuration;
     }
 
-    public void StartBackup(StartBackupRequest request)
+    public string StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
-        var progress = _backupWorker.StartBackup(request);
+        var progress = _backupWorker.StartBackup(request, enqueueTask, taskId);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
         }
+        return progress.TaskId;
     }
 
     public async Task DeleteBackupAsync(Guid id)

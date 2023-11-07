@@ -39,7 +39,7 @@ public interface IBackupService
     Task DeleteAllBackupsAsync(int tenantId);
     Task DeleteBackupAsync(Guid backupId);
     Task DeleteScheduleAsync(int tenantId);
-    void StartBackup(StartBackupRequest request);
+    string StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null);
     Task StartRestoreAsync(StartRestoreRequest request);
     void StartTransfer(StartTransferRequest request);
 }

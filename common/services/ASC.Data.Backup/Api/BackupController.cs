@@ -118,11 +118,14 @@ public class BackupController : ControllerBase
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
+        var taskId = await _backupHandler.StartBackupAsync(storageType, storageParams, false);
+
         _eventBus.Publish(new BackupRequestIntegrationEvent(
              tenantId: _tenantId,
              storageParams: storageParams,
              storageType: storageType,
-             createBy: _currentUserId
+             createBy: _currentUserId,
+             taskId: taskId
         ));
 
         return await _backupHandler.GetBackupProgressAsync();
