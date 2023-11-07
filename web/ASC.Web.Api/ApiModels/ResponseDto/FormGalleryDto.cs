@@ -34,4 +34,5 @@ public class FormGalleryDto : IMapFrom<OFormSettings>
     public string UploadPath { get; set; }
     public string UploadDomain { get; set; }
     public string UploadExt { get; set; }
+    public string UploadDashboard { get; set; }
 }
