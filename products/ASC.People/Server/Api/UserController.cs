@@ -1411,70 +1411,93 @@ public class UserController : PeopleControllerBase
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
+
+        var changed = false;
         var self = _securityContext.CurrentAccount.ID.Equals(user.Id);
-        var resetDate = new DateTime(1900, 01, 01);
-
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID);
+        
         //Update it
-
-        var isLdap = user.IsLDAP();
-        var isSso = user.IsSSO();
-        var isDocSpaceAdmin = await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID);
-
-        if (!isLdap && !isSso)
+        if (self)
         {
-            //Set common fields
+            var isLdap = user.IsLDAP();
+            var isSso = user.IsSSO();
 
-            user.FirstName = inDto.Firstname ?? user.FirstName;
-            user.LastName = inDto.Lastname ?? user.LastName;
-            user.Location = inDto.Location ?? user.Location;
-
-            if (isDocSpaceAdmin)
+            if (!isLdap && !isSso)
             {
-                user.Title = inDto.Title ?? user.Title;
+                //Set common fields
+
+                user.FirstName = inDto.Firstname ?? user.FirstName;
+                user.LastName = inDto.Lastname ?? user.LastName;
+                user.Location = inDto.Location ?? user.Location;
+
+                if (isDocSpaceAdmin)
+                {
+                    user.Title = inDto.Title ?? user.Title;
+                }
             }
+
+            if (!_userFormatter.IsValidUserName(user.FirstName, user.LastName))
+            {
+                throw new Exception(Resource.ErrorIncorrectUserName);
+            }
+
+            user.Notes = inDto.Comment ?? user.Notes;
+
+            user.Sex = inDto.Sex switch
+            {
+                "male" => true,
+                "female" => false,
+                _ => user.Sex
+            };
+
+
+            user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
+
+            var resetDate = new DateTime(1900, 01, 01);
+            if (user.BirthDate == resetDate)
+            {
+                user.BirthDate = null;
+            }
+
+            user.WorkFromDate = inDto.Worksfrom != null
+                ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom)
+                : user.WorkFromDate;
+
+            if (user.WorkFromDate == resetDate)
+            {
+                user.WorkFromDate = null;
+            }
+
+            //Update contacts
+            await UpdateContactsAsync(inDto.Contacts, user);
+            await UpdateDepartmentsAsync(inDto.Department, user);
+
+            if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            {
+                await UpdatePhotoUrlAsync(inDto.Files, user);
+            }
+
+            changed = true;
         }
-
-        if (!_userFormatter.IsValidUserName(user.FirstName, user.LastName))
-        {
-            throw new Exception(Resource.ErrorIncorrectUserName);
-        }
-
-        user.Notes = inDto.Comment ?? user.Notes;
-        user.Sex = ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
-            ? true
-            : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : (bool?)null)) ?? user.Sex;
-
-        user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
-
-        if (user.BirthDate == resetDate)
-        {
-            user.BirthDate = null;
-        }
-
-        user.WorkFromDate = inDto.Worksfrom != null ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : user.WorkFromDate;
-
-        if (user.WorkFromDate == resetDate)
-        {
-            user.WorkFromDate = null;
-        }
-
-        //Update contacts
-        await UpdateContactsAsync(inDto.Contacts, user);
-        await UpdateDepartmentsAsync(inDto.Department, user);
-
-        if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
-        {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
-        }
-        if (inDto.Disable.HasValue)
+        
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var owner = user.IsOwner(tenant);
+        var statusChanged = false;
+        
+        if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
             user.TerminatedDate = inDto.Disable.Value ? DateTime.UtcNow : null;
+            changed = true;
+            statusChanged = true;
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+
         // change user type
-        var canBeGuestFlag = !user.IsOwner(tenant) && !await _userManager.IsDocSpaceAdminAsync(user) && (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && !user.IsMe(_authContext);
+        var canBeGuestFlag = !owner && 
+                             !await _userManager.IsDocSpaceAdminAsync(user) && 
+                             (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && 
+                             !self;
 
         if (inDto.IsUser.HasValue)
         {
@@ -1482,11 +1505,12 @@ public class UserController : PeopleControllerBase
             try
             {
                 await _semaphore.WaitAsync();
-                if (isUser && !await _userManager.IsUserAsync(user) && canBeGuestFlag)
+                if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
                 {
                     await _countUserChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                     _webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
                 }
 
                 if (!self && !isUser && await _userManager.IsUserAsync(user))
@@ -1494,6 +1518,7 @@ public class UserController : PeopleControllerBase
                     await _countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     _webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
                 }
             }
             finally
@@ -1501,14 +1526,19 @@ public class UserController : PeopleControllerBase
                 _semaphore.Release();
             }
         }
-        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-        await _messageService.SendAsync(MessageAction.UserUpdated, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), user.Id);
-
-        if (inDto.Disable.HasValue && inDto.Disable.Value)
+        if (changed)
         {
-            await _cookiesManager.ResetUserCookieAsync(user.Id);
-            await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+
+            await _messageService.SendAsync(MessageAction.UserUpdated, _messageTarget.Create(user.Id),
+                user.DisplayUserName(false, _displayUserSettingsHelper), user.Id);
+
+            if (statusChanged && inDto.Disable.HasValue && inDto.Disable.Value)
+            {
+                await _cookiesManager.ResetUserCookieAsync(user.Id);
+                await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+            }
         }
 
         return await _employeeFullDtoHelper.GetFullAsync(user);
