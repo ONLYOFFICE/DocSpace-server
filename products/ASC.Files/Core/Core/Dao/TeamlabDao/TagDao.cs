@@ -132,13 +132,13 @@ internal abstract class BaseTagDao<T> : AbstractDao
         return GetTagsAsync(Guid.Empty, tagType, fileEntries);
     }
 
-    public async IAsyncEnumerable<Tag> GetTagsAsync(T entryID, FileEntryType entryType, TagType tagType)
+    public async IAsyncEnumerable<Tag> GetTagsAsync(T entryID, FileEntryType entryType, TagType? tagType)
     {
         var mappedId = (entryID is int fid ? MappingIDAsync(fid) : await MappingIDAsync(entryID)).ToString();
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q = Queries.GetTagsbyEntryTypeAsync(filesDbContext, tenantId, tagType, entryType, mappedId);
+        var q = Queries.GetTagsByEntryTypeAsync(filesDbContext, tenantId, tagType, entryType, mappedId);
 
         await foreach (var e in q)
         {
@@ -673,9 +673,6 @@ internal abstract class BaseTagDao<T> : AbstractDao
 
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, IEnumerable<FileEntry<T>> fileEntries)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
         var entryIds = new HashSet<string>();
         var entryTypes = new HashSet<int>();
 
@@ -691,6 +688,8 @@ internal abstract class BaseTagDao<T> : AbstractDao
 
         if (entryIds.Count > 0)
         {
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var sqlQuery = Queries.TagLinkDataAsync(filesDbContext, tenantId, entryIds, entryTypes, subject);
 
             await foreach (var e in sqlQuery)
@@ -1144,12 +1143,12 @@ static file class Queries
                     .Where(r => r.Link.EntryType == FileEntryType.File && filesId.Contains(r.Link.EntryId)
                                 || r.Link.EntryType == FileEntryType.Folder && foldersId.Contains(r.Link.EntryId)));
 
-    public static readonly Func<FilesDbContext, int, TagType, FileEntryType, string, IAsyncEnumerable<TagLinkData>> GetTagsbyEntryTypeAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-        (FilesDbContext ctx, int tenantId, TagType tagType, FileEntryType entryType, string mappedId) =>
+    public static readonly Func<FilesDbContext, int, TagType?, FileEntryType, string, IAsyncEnumerable<TagLinkData>> GetTagsByEntryTypeAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, TagType? tagType, FileEntryType entryType, string mappedId) =>
             ctx.Tag.Where(r => r.TenantId == tenantId)
             .Join(ctx.TagLink, r => r.Id, l => l.TagId, (tag, link) => new TagLinkData { Tag = tag, Link = link })
             .Where(r => r.Link.TenantId == r.Tag.TenantId)
-            .Where(r => r.Tag.Type == tagType)
+            .Where(r => tagType == null || r.Tag.Type == tagType)
             .Where(r => r.Link.EntryType == entryType)
             .Where(r => r.Link.EntryId == mappedId));
 

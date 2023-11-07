@@ -218,14 +218,17 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(folder == null, FilesCommonResource.ErrorMassage_FolderNotFound);
         ErrorIf(!await _fileSecurity.CanReadAsync(folder), FilesCommonResource.ErrorMassage_SecurityException_ReadFolder);
 
-        await _entryStatusManager.SetIsFavoriteFolderAsync(folder);
-
         var tag = await tagDao.GetNewTagsAsync(_authContext.CurrentAccount.ID, folder).FirstOrDefaultAsync();
         if (tag != null)
         {
             folder.NewForMe = tag.Count;
         }
 
+        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, null).ToListAsync();
+        folder.Pinned = tags.Any(r => r.Type == TagType.Pin);
+        folder.IsFavorite = tags.Any(r => r.Type == TagType.Favorite);
+        folder.Tags = tags.Where(r=> r.Type == TagType.Custom).ToList();
+        
         return folder;
     }
 
