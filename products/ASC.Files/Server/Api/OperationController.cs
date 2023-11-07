@@ -276,14 +276,14 @@ public class OperationController : ApiControllerBase
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var (tasks, currentTaskId) = await _fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content, false);
+        var (tasks, currentTaskId) = await _fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content, false);
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         _eventBus.Publish(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             DeleteAfter = inDto.DeleteAfter,
-            Ic = true,
+            Ic = false,
             FileStringIds = fileStringIds,
             FolderStringIds = folderStringIds,
             FileIntIds = fileIntIds, 
