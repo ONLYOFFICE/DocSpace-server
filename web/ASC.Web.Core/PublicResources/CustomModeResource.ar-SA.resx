@@ -151,7 +151,7 @@ h3.العنوان الفرعي. للاستخدام السريع، هذا ما ي
 
 - العمل على جميع الصيغ المعروفة. أكثر توافقاً مع ملفات مايكروسوفت أوفيس.
 
-- إنشاء والتعديل بشكل جماعي على "نماذج جاهزة للتعبئة: "https://www.onlyoffice.com/form-creator.aspx".
+- إنشاء والتعديل بشكل جماعي على "نماذج جاهزة للتعبئة":"https://www.onlyoffice.com/form-creator.aspx".
 
 - شارك وتعاون مع الآخرين في المستندات عن بعد.
 
@@ -159,10 +159,9 @@ h3.العنوان الفرعي. للاستخدام السريع، هذا ما ي
 
 - إمكانية وصول أسهل لسحابتك من خلال "إضافات كروم":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
-- يمكنك أيضاً تعديل الملفات بدون اتصال من خلال "سطح مكتب المحررين" المجاني: https://www.onlyoffice.com/download-desktop.aspx أو تحصل على حزمة iOS :https://apps.apple.com/app/onlyoffice-documents/id944896972 أو أندرويد "https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+- يمكنك أيضاً تعديل الملفات بدون اتصال من خلال "سطح مكتب المحررين المجاني":"https://www.onlyoffice.com/download-desktop.aspx" أو تحصل على حزمة "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" أو "أندرويد":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-ولكم جزيل الشكر
-فريق ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
@@ -171,19 +170,17 @@ h3.العنوان الفرعي. للاستخدام السريع، هذا ما ي
 
 * العمل مع مستخدمين آخرين في الغرفة التي تمت دعوتك إليها: * غرف التعاون للتأليف المشترك في الوقت الفعلي أو غرف مخصصة مع إعدادات مرنة لأي غرض *.
 
-* * العمل مع ملفات بتنسيقات مختلفة *: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.
+* *العمل مع ملفات بتنسيقات مختلفة *: المستندات النصية وجداول البيانات والعروض التقديمية والنماذج الرقمية وملفات PDF والكتب الإلكترونية والوسائط المتعددة.
 
-* * التعاون في المستندات * مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.
+* *التعاون في المستندات * مع وضعين للتحرير المشترك: في الوقت الفعلي أو قفل الفقرة. تتبع التغييرات أو التواصل في الوقت الفعلي باستخدام الدردشة المدمجة أو إجراء مكالمات صوتية ومرئية.
 
-* * قم بتوصيل أي تخزين سحابي * واعمل دون التبديل بين التطبيقات.
+* *قم بتوصيل أي تخزين سحابي * واعمل دون التبديل بين التطبيقات.
 
 $OrangeButton
 
-إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة" https://helpcenter.onlyoffice.com/ أو اسأل "فريق الدعم":" https://www.onlyoffice.com/support-contact-form.aspx ".
+إذا كنت بحاجة إلى مساعدة، فتصفح "مركز المساعدة":"${__HelpLink}" أو اسأل "فريق الدعم":"${__SupportLink}".
 
-حقا لك،
-ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>هل تريد تغيير بريدك الالكتروني سحابة حسابك؟
@@ -194,7 +191,7 @@ $OrangeButton
 
  الرابط صالح لمدة 7 أيام.
 
-* إذا كنت غير مسجل للدخول لسحابتك من هذا المتصفح، سيتوجب عليك أن تستخد بريدك السابق للتأكيد.
+*إذا كنت غير مسجل للدخول لسحابتك من هذا المتصفح، سيتوجب عليك أن تستخد بريدك السابق للتأكيد.
 
 إذا كنت لا ترغب بتغيير بريدك الالكتروني تجاهل الرسالة.</value>
   </data>
@@ -214,8 +211,7 @@ $OrangeButton
 
 إذا لم تقدر على فتح الرابط، قم بنسخ الرابط التالي "$InviteLink":"$InviteLink" ولصقه في متصفحك.
 
-لكم جزيل الشكر
-فريق ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>لقد قمت بطلب إيقاف حسابك في personal.onlyoffice.com. اتبع الرابط التالي لاكمال الطلب (الرابط صالح لمدة 7 أيام)
@@ -224,14 +220,13 @@ $OrangeButton
 
 *ملاحظة* بعد حذف الحساب سيتم مسح جميع بياناتك بشكل دائم وذلك وفقاً "سياسية الخصوصية":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"اقرأ المزيد عن معلومات الحساب":https://helpcenter.onlyoffice.com/administration/configuration.aspx
+"اقرأ المزيد عن معلومات الحساب":"${__HelpLink}/administration/configuration.aspx"
 
 تجاهل هذا البريد إذا كنت لا تريد المتابعة.
 
-إذا كان لديك استفسارات أخرى، يرجى التواصل معنا من خلال "support@onlyoffice.com":mailto:support@onlyoffice.com
+إذا كان لديك استفسارات أخرى، يرجى التواصل معنا من خلال "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-لكم جزيل الشكر
-فريق ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>عزيزي $UserName،

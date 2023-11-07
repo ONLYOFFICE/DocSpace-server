@@ -1053,4 +1053,22 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>عمليات دمج الجهات الخارجية</value>
   </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>تم ارسال رابط لتأكيد العملية إلى: البريد(عنوان بريد مالك البوابة).</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>معرف مستخدم الزووم</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>الرمز السري لمستخدم الزووم</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>تفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب الزووم.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام حسابات الزووم الخاصة بهم.  {0}انتقل إلى موقع ويب Zoom Developers وأنشئ تطبيقًا جديدًا متكاملاً مع ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>فشلت محاولات تسجيل الدخول. يرحى المحاولة لاحقاً</value>
+  </data>
 </root>

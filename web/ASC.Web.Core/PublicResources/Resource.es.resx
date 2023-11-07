@@ -991,4 +991,22 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integraciones de terceros</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID de cliente de Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Secreto de cliente de Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Habilite la aplicación para iniciar sesión en el portal utilizando una cuenta de Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Habilite esta aplicación para permitir a sus usuarios iniciar sesión en ONLYOFFICE utilizando sus cuentas de Zoom. {0}Vaya a la página web de Zoom Developers y cree una nueva app de integración con ONLYOFFICE. Inserte los datos que ha recibido abajo:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Demasiados intentos de inicio de sesión. Vuelva a intentarlo más tarde</value>
+  </data>
 </root>
