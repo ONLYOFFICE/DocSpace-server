@@ -76,7 +76,8 @@ ALTER TABLE identity_clients
 ALTER TABLE identity_consents
 	ADD CONSTRAINT FK_client_id
 	FOREIGN KEY (registered_client_id)
-	REFERENCES identity_clients (client_id);
+	REFERENCES identity_clients (client_id)
+	ON DELETE CASCADE;
 
 CREATE EVENT IF NOT EXISTS delete_invalidated_clients
 ON SCHEDULE EVERY 1 hour
