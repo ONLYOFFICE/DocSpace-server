@@ -105,7 +105,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         {
             var googleDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("GoogleDriveSession");
             var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
-            await storage.TransferAsync(googleDriveSession, stream, chunkLength);
+            await storage.TransferAsync(googleDriveSession, stream, chunkLength, uploadSession.Items.ContainsKey("lastChunk"));
         }
         else
         {

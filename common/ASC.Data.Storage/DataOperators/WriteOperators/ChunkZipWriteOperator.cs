@@ -114,6 +114,10 @@ public class ChunkZipWriteOperator : IDataWriteOperator
             theMemStream.Position = 0;
             if (bytesRead == chunkUploadSize || last)
             {
+                if (last)
+                {
+                    _chunkedUploadSession.Items["lastChunk"] = "true";
+                }
                 theMemStream.Position = 0;
 
                 await _sessionHolder.UploadChunkAsync(_chunkedUploadSession, theMemStream, theMemStream.Length, _chunkNumber++);

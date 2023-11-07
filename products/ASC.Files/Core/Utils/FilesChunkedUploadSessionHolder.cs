@@ -40,20 +40,20 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
     {
         if (uploadSession is ChunkedUploadSession<int>)
         {
-            return ((await InternalUploadChunkAsync<int>(uploadSession, stream, length, chunkNumber)).ToString(), null);
+            return ((await InternalUploadChunkAsync<int>(uploadSession, stream, length)).ToString(), null);
         }
         else
         {
-            return (await InternalUploadChunkAsync<string>(uploadSession, stream, length, chunkNumber), null);
+            return (await InternalUploadChunkAsync<string>(uploadSession, stream, length), null);
         }
     }
 
-    private async Task<T> InternalUploadChunkAsync<T>(CommonChunkedUploadSession uploadSession, Stream stream, long length, int chunkNumber)
+    private async Task<T> InternalUploadChunkAsync<T>(CommonChunkedUploadSession uploadSession, Stream stream, long length)
     {
         var chunkedUploadSession = uploadSession as ChunkedUploadSession<T>;
         chunkedUploadSession.File.ContentLength += stream.Length;
         var fileDao = GetFileDao<T>();
-        var file = await fileDao.UploadChunkAsync(chunkedUploadSession, stream, length, chunkNumber);
+        var file = await fileDao.UploadChunkAsync(chunkedUploadSession, stream, length);
         return file.Id;
     }
 
