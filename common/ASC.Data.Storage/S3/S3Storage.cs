@@ -78,7 +78,7 @@ public class S3Storage : BaseStorage
 
     public Uri GetUriInternal(string path)
     {
-        return new Uri(SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? _bucketSSlRoot : _bucketRoot, path);
+        return new Uri(SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? _bucketSSlRoot : _bucketRoot, path ?? "");
     }
 
     public Uri GetUriShared(string domain, string path)

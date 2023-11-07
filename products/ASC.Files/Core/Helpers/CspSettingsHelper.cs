@@ -61,7 +61,7 @@ public class CspSettingsHelper
         _configuration = configuration;
     }
 
-    public async Task<string> Save(IEnumerable<string> domains, bool setDefaultIfEmpty)
+    public async Task<string> SaveAsync(IEnumerable<string> domains, bool setDefaultIfEmpty)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(_coreSettings);
@@ -117,15 +117,15 @@ public class CspSettingsHelper
         await _settingsManager.ManageAsync<CspSettings>(current =>
         {
             current.Domains = domains;
-            current.SetDefaultIfEmpty = setDefaultIfEmpty;            
+            current.SetDefaultIfEmpty = setDefaultIfEmpty;
         });
 
         return headerValue;
     }
 
-    public CspSettings Load()
+    public async Task<CspSettings> LoadAsync()
     {
-        return _settingsManager.Load<CspSettings>();
+        return await _settingsManager.LoadAsync<CspSettings>();
     }
 
     public async Task RenameDomain(string oldDomain, string newDomain)
@@ -161,10 +161,20 @@ public class CspSettingsHelper
             defaultOptions.Def.Add($"*.{_coreBaseSettings.Basedomain}");
         }
 
-        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage && !string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
+        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage)
         {
-            defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
-            defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+            var internalUrl = s3Storage.GetUriInternal(null).ToString();
+
+            if (!string.IsNullOrEmpty(internalUrl))
+            {
+                defaultOptions.Def.Add(internalUrl);
+            }
+
+            if (!string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
+            {
+                defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+            }
         }
 
         options.Add(defaultOptions);

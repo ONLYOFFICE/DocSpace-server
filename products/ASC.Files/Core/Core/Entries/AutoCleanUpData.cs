@@ -26,6 +26,8 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// </summary>
 public enum DateToAutoCleanUp
 {
     OneWeek = 1,
@@ -36,10 +38,16 @@ public enum DateToAutoCleanUp
     ThreeMonths
 }
 
+/// <summary>
+/// </summary>
 public class AutoCleanUpData
 {
+    /// <summary>Specifies if the auto-clearing setting is enabled or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool IsAutoCleanUp { get; init; }
 
+    /// <summary>The period when the trash bin will be cleared</summary>
+    /// <type>ASC.Files.Core.DateToAutoCleanUp, ASC.Files.Core</type>
     public DateToAutoCleanUp Gap { get; init; }
 }
 

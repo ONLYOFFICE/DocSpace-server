@@ -755,7 +755,7 @@ public class UserController : PeopleControllerBase
     /// <param type="System.Nullable{System.Guid}, System" name="groupId">Group ID</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
-    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" name="employeeTypes"></param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
@@ -851,7 +851,7 @@ public class UserController : PeopleControllerBase
     /// <param type="System.Nullable{System.Guid}, System" name="groupId">Group ID</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
     /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
-    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" name="employeeTypes"></param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
     /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
     /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>

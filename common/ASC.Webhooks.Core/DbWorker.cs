@@ -360,6 +360,8 @@ public class DbWebhooks
     public WebhooksConfig Config { get; init; }
 }
 
+/// <summary>
+/// </summary>
 [Flags]
 public enum WebhookGroupStatus
 {

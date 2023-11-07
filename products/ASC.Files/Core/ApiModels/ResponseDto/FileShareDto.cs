@@ -76,6 +76,8 @@ public class FileShareLink
     public string RequestToken { get; set; }
 }
 
+/// <summary>
+/// </summary>
 public enum LinkType
 {
     Invitation,

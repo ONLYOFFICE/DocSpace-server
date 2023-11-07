@@ -161,7 +161,7 @@ public class LdapUserManager
 
             await _securityContext.SetUserPasswordHashAsync(portalUserInfo.Id, passwordHash);
         }
-        catch (TenantQuotaException ex)
+        catch (TenantQuotaException)
         {
             // rethrow if quota
             throw;
