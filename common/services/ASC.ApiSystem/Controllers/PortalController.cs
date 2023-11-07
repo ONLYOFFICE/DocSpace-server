@@ -243,7 +243,7 @@ public class PortalController : ControllerBase
         try
         {    
             /****REGISTRATION!!!*****/
-            if (!_coreBaseSettings.Standalone)
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
                 await _apiSystemHelper.AddTenantToCacheAsync(info.Address, info.HostedRegion);
 
@@ -534,7 +534,7 @@ public class PortalController : ControllerBase
 
         try
         {
-            if (!_coreBaseSettings.Standalone)
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
                 await ValidateTenantAliasAsync(portalName.Trim());
             }

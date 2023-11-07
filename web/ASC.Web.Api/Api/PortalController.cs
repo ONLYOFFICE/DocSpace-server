@@ -541,7 +541,7 @@ public class PortalController : ControllerBase
 
             await _cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(_coreSettings));
 
-            if (!_coreBaseSettings.Standalone)
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
                 await _apiSystemHelper.UpdateTenantToCacheAsync(oldDomain, tenant.GetTenantDomain(_coreSettings));
             }

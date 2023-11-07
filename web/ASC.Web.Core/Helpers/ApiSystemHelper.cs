@@ -35,6 +35,8 @@ namespace ASC.Web.Core.Helpers;
 public class ApiSystemHelper
 {
     public string ApiSystemUrl { get; }
+    public bool ApiCacheEnable { get; }
+
     private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
@@ -56,6 +58,14 @@ public class ApiSystemHelper
         _clientFactory = clientFactory;
         _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
+
+        if (!String.IsNullOrEmpty(_configuration["aws:dynamoDB:accessKeyId"]) &&
+           !String.IsNullOrEmpty(_configuration["aws:dynamoDB:secretAccessKey"])) 
+        {
+            ApiCacheEnable = true;
+        }
+
+
     }
 
     private AmazonDynamoDBClient GetDynamoDBClient()
@@ -63,7 +73,7 @@ public class ApiSystemHelper
         var awsAccessKeyId = _configuration["aws:dynamoDB:accessKeyId"];
         var awsSecretAccessKey = _configuration["aws:dynamoDB:secretAccessKey"];
         var region = _configuration["aws:dynamoDB:region"];
-                
+        
         return new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey, RegionEndpoint.GetBySystemName(region));
     }
 

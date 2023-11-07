@@ -243,7 +243,7 @@ public class StudioPeriodicNotify
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!_coreBaseSettings.Standalone)
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
                             await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
@@ -332,7 +332,7 @@ public class StudioPeriodicNotify
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!_coreBaseSettings.Standalone)
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
                             await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
