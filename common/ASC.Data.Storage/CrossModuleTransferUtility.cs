@@ -35,13 +35,15 @@ public class CrossModuleTransferUtility
     private readonly int _chunkSize;
     private readonly TempStream _tempStream;
     private readonly TempPath _tempPath;
+    private readonly ICache _cache;
 
     public CrossModuleTransferUtility(
         ILogger option,
         TempStream tempStream,
         TempPath tempPath,
         IDataStore source,
-        IDataStore destination)
+        IDataStore destination,
+        ICache cache)
     {
         _logger = option;
         _tempStream = tempStream;
@@ -50,6 +52,7 @@ public class CrossModuleTransferUtility
         _destination = destination ?? throw new ArgumentNullException(nameof(destination));
         _maxChunkUploadSize = 10 * 1024 * 1024;
         _chunkSize = 5 * 1024 * 1024;
+        _cache = cache;
     }
 
     public async ValueTask CopyFileAsync(string srcDomain, string srcPath, string destDomain, string destPath)
@@ -67,7 +70,7 @@ public class CrossModuleTransferUtility
         else
         {
             var session = new CommonChunkedUploadSession(stream.Length);
-            var holder = new CommonChunkedUploadSessionHolder(_tempPath, _destination, destDomain);
+            var holder = new CommonChunkedUploadSessionHolder(_tempPath, _destination, _cache, destDomain);
             await holder.InitAsync(session);
             try
             {
@@ -78,11 +81,7 @@ public class CrossModuleTransferUtility
                     while (GetStream(stream, out memstream))
                     {
                         memstream.Seek(0, SeekOrigin.Begin);
-                        (var _, var eTag) = await holder.UploadChunkAsync(session, memstream, _chunkSize, i++);
-
-                        var eTags = session.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
-                        eTags.Add(i, eTag);
-                        session.Items["ETag"] = eTags;
+                        await holder.UploadChunkAsync(session, memstream, _chunkSize, i++);
                         await memstream.DisposeAsync();
                     }
                 }

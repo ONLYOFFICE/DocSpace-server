@@ -55,31 +55,6 @@ public class ChunkedUploadSessionHolder
         _cache.Insert(s.Id, s, SlidingExpiration);
     }
 
-    public void StoreChunk<T>(ChunkedUploadSession<T> s, int number, string eTag, long size)
-    {
-        var chunk = new Chunk
-        {
-            ETag = eTag,
-            Size = size
-        };
-
-        _cache.Insert($"{s.Id} - {number}", chunk, SlidingExpiration);
-    }
-
-    public Dictionary<int, Chunk> GetChunks<T>(ChunkedUploadSession<T> s)
-    {
-        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
-        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
-
-        var dict = new Dictionary<int, Chunk>();
-        for (var i = 1; i <= count; i++)
-        {
-            dict.Add(i, _cache.Get<Chunk>($"{s.Id} - {i}"));
-        }
-
-        return dict;
-    }
-
     public void RemoveSession<T>(ChunkedUploadSession<T> s)
     {
         _cache.Remove(s.Id);
@@ -90,6 +65,11 @@ public class ChunkedUploadSessionHolder
         {
             _cache.Remove($"{s.Id} - {i}");
         }
+    }
+
+    public async Task<Dictionary<int, Chunk>> GetChunksAsync<T>(ChunkedUploadSession<T> s)
+    {
+        return (await CommonSessionHolderAsync()).GetChunks(s);
     }
 
     public ChunkedUploadSession<T> GetSession<T>(string sessionId)
@@ -107,24 +87,12 @@ public class ChunkedUploadSessionHolder
 
     public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length, int chunkNumber)
     {
-        (var path, var eTag) = await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
-        StoreChunk(uploadSession, chunkNumber, eTag, length);
+        await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
     }
 
     public async Task FinalizeUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
-        var chunks = GetChunks(uploadSession);
-        var uploadSize = chunks.Sum(c => c.Value == null ? 0 : c.Value.Size);
-        if (uploadSize != uploadSession.BytesTotal)
-        {
-            throw new ArgumentException("uploadSize != bytesTotal");
-        }
-        else
-        {
-            var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
-            uploadSession.Items["ETag"] = eTags;
-            await (await CommonSessionHolderAsync()).FinalizeAsync(uploadSession);
-        }
+        await (await CommonSessionHolderAsync()).FinalizeAsync(uploadSession);
     }
 
     public async Task MoveAsync<T>(ChunkedUploadSession<T> chunkedUploadSession, string newPath)
@@ -142,13 +110,13 @@ public class ChunkedUploadSessionHolder
         return await (await CommonSessionHolderAsync()).UploadSingleChunkAsync(uploadSession, stream, chunkLength);
     }
 
-    private async Task<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
+    private async ValueTask<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
     {
         if (currentTenant)
         {
             if (_currentHolder == null)
             {
-                _currentHolder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+                _currentHolder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), _cache, FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
             }
             return _currentHolder;
         }
@@ -156,7 +124,7 @@ public class ChunkedUploadSessionHolder
         {
             if (_holder == null)
             {
-                _holder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+                _holder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), _cache, FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
             }
             return _holder;
         }

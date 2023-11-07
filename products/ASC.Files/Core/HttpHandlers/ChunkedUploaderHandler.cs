@@ -130,8 +130,8 @@ public class ChunkedUploaderHandlerService
                     {
                         var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize);
 
-                        var chunks = _chunkedUploadSessionHolder.GetChunks(resumedSession);
-                        var bytesUploaded = chunks.Sum(c => c.Value == null ? 0 : c.Value.Size);
+                        var chunks = await _chunkedUploadSessionHolder.GetChunksAsync(resumedSession);
+                        var bytesUploaded = chunks.Sum(c => c.Value == null ? 0 : c.Value.Length);
                         if (bytesUploaded == resumedSession.BytesTotal)
                         {
                             resumedSession = await _fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);

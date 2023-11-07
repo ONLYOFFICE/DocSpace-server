@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Storage.ChunkedUploader;
-
 namespace ASC.Data.Storage.DataOperators;
 public class S3TarWriteOperator : IDataWriteOperator
 {
@@ -90,20 +88,17 @@ public class S3TarWriteOperator : IDataWriteOperator
         _chunkedUploadSession.BytesTotal = contentLength;
         _chunkedUploadSession.UploadId = uploadId;
 
-        _chunkedUploadSession.Items["ETag"] = eTags.ToDictionary(e => e.PartNumber, e => e.ETag);
-        _chunkedUploadSession.Items["ChunksUploaded"] = (partNumber - 1).ToString();
-
         var first = true;
         foreach (var etag in eTags)
         {
             var chunk = new Chunk
             {
                 ETag = etag.ETag,
-                Size = 0
+                Length = 0
             };
             if (first)
             {
-                chunk.Size = contentLength;
+                chunk.Length = contentLength;
                 first = false;
             }
             _cache.Insert($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
