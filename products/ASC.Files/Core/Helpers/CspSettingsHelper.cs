@@ -241,6 +241,7 @@ public class CspSettingsHelper
 
         foreach (var domain in options.SelectMany(r => r.Frame).Distinct())
         {
+            csp.AllowFrames.From(domain);
             csp.AllowFraming.From(domain);
         }
 
