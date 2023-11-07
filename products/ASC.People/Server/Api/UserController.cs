@@ -1426,8 +1426,16 @@ public class UserController : PeopleControllerBase
             {
                 //Set common fields
 
-                user.FirstName = inDto.Firstname ?? user.FirstName;
-                user.LastName = inDto.Lastname ?? user.LastName;
+                var firstName = inDto.Firstname ?? user.FirstName;
+                var lastName = inDto.Lastname ?? user.LastName;
+
+                if (!_userFormatter.IsValidUserName(firstName, lastName))
+                {
+                    throw new Exception(Resource.ErrorIncorrectUserName);
+                }
+
+                user.FirstName = firstName;
+                user.LastName = lastName;
                 user.Location = inDto.Location ?? user.Location;
 
                 if (isDocSpaceAdmin)
@@ -1435,10 +1443,12 @@ public class UserController : PeopleControllerBase
                     user.Title = inDto.Title ?? user.Title;
                 }
             }
-
-            if (!_userFormatter.IsValidUserName(user.FirstName, user.LastName))
+            else
             {
-                throw new Exception(Resource.ErrorIncorrectUserName);
+                if (!_userFormatter.IsValidUserName(user.FirstName, user.LastName))
+                {
+                    throw new Exception(Resource.ErrorIncorrectUserName);
+                }
             }
 
             user.Notes = inDto.Comment ?? user.Notes;
