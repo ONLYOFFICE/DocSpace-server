@@ -36,7 +36,7 @@ public class Rule
     {
         ActionId = actionId;
         Data = data;
-        _key = actionId.ToString() + data?.Key;
+        _key = actionId + data?.Key;
     }
 
     public Rule(Guid actionId)

@@ -314,15 +314,14 @@ public class OperationController : ApiControllerBase
     public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
-        List<object> checkedFolders;
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            (checkedFiles, checkedFolders) = await _fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
+            (checkedFiles, _) = await _fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
         }
         else
         {
-            (checkedFiles, checkedFolders) = await _fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
+            (checkedFiles, _) = await _fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
         }
 
         var entries = await _fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFiles.OfType<int>().Select(Convert.ToInt32), FilterType.FilesOnly, false, "", "");
@@ -335,12 +334,13 @@ public class OperationController : ApiControllerBase
         }
     }
     /// <summary>
-    /// Finishes all the active operations.
+    /// Finishes an operation with the ID specified in the request or all the active operations.
     /// </summary>
     /// <short>Finish active operations</short>
     /// <category>Operations</category>
+    /// <param type="System.String, System" name="id" method="url">Operation ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileOperationDto, ASC.Files.Core">List of file operations</returns>
-    /// <path>api/2.0/files/fileops/terminate</path>
+    /// <path>api/2.0/files/fileops/terminate/{id?}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [AllowAnonymous]

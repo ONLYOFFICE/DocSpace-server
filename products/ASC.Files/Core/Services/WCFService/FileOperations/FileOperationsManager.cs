@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-[Singletone(Additional = typeof(FileOperationsManagerHelperExtention))]
+[Singleton(Additional = typeof(FileOperationsManagerHelperExtention))]
 public class FileOperationsManager
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
@@ -205,7 +205,7 @@ public class FileOperationsManager
     public (List<FileOperationResult>, string) Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
         bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
-        var op = new FileDeleteOperation<T>(_serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
+        var op = new FileDeleteOperation<T>(_serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
 
         if (!string.IsNullOrEmpty(taskId))
         {
@@ -227,8 +227,8 @@ public class FileOperationsManager
     public (List<FileOperationResult>, string) Delete(Guid userId, Tenant tenant, List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool isEmptyTrash = false, bool enqueueTask = true, string taskId = null)
     {
-        var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(foldersIdInt, filesIdInt, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
-        var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(foldersIdString, filesIdString, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash), _thumbnailSettings);
+        var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(foldersIdInt, filesIdInt, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
+        var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(foldersIdString, filesIdString, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
         var op = new FileDeleteOperation(_serviceProvider, op2, op1);
 
         if (!string.IsNullOrEmpty(taskId))
@@ -345,7 +345,6 @@ public static class FileOperationsManagerHelperExtention
         services.TryAdd<FileMarkAsReadOperationScope>();
         services.TryAdd<FileMoveCopyOperationScope>();
         services.TryAdd<FileOperationScope>();
-        services.TryAdd<FileDownloadOperationScope>();
         services.TryAdd<CompressToArchive>();
     }
 }

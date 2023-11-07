@@ -84,6 +84,19 @@ public class BackupController : ControllerBase
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
             Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day),
         };
+
+        if (storageType == BackupStorageType.Documents)
+        {
+
+            if (int.TryParse(storageParams["folderId"], out var fId))
+            {
+                await _backupHandler.CheckAccessToFolderAsync(fId);
+            }
+            else
+            {
+                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+            }
+        }
         await _backupHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron);
         return true;
     }
@@ -117,6 +130,19 @@ public class BackupController : ControllerBase
     {
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+
+        if (storageType == BackupStorageType.Documents)
+        {
+
+            if (int.TryParse(storageParams["folderId"], out var fId))
+            {
+                await _backupHandler.CheckAccessToFolderAsync(fId);
+            }
+            else
+            {
+                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+            }
+        }
 
         var taskId = await _backupHandler.StartBackupAsync(storageType, storageParams, false);
 

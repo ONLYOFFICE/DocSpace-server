@@ -27,26 +27,23 @@
 namespace ASC.Data.Backup.Services;
 
 [Scope]
-public class BackupService : IBackupService
+public class BackupService
 {
     private readonly ILogger<BackupService> _logger;
     private readonly BackupStorageFactory _backupStorageFactory;
     private readonly BackupWorker _backupWorker;
     private readonly BackupRepository _backupRepository;
-    private readonly ConfigurationExtension _configuration;
 
     public BackupService(
         ILogger<BackupService> logger,
         BackupStorageFactory backupStorageFactory,
         BackupWorker backupWorker,
-        BackupRepository backupRepository,
-        ConfigurationExtension configuration)
+        BackupRepository backupRepository)
     {
         _logger = logger;
         _backupStorageFactory = backupStorageFactory;
         _backupWorker = backupWorker;
         _backupRepository = backupRepository;
-        _configuration = configuration;
     }
 
     public string StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
@@ -59,9 +56,9 @@ public class BackupService : IBackupService
         return progress.TaskId;
     }
 
-    public async Task DeleteBackupAsync(Guid id)
+    public async Task DeleteBackupAsync(Guid backupId)
     {
-        var backupRecord = await _backupRepository.GetBackupRecordAsync(id);
+        var backupRecord = await _backupRepository.GetBackupRecordAsync(backupId);
         await _backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
 
         var storage = await _backupStorageFactory.GetBackupStorageAsync(backupRecord);
@@ -136,12 +133,9 @@ public class BackupService : IBackupService
 
     public async Task StartRestoreAsync(StartRestoreRequest request)
     {
-        if (request.StorageType == BackupStorageType.Local)
+        if (request.StorageType == BackupStorageType.Local && (string.IsNullOrEmpty(request.FilePathOrId) || !File.Exists(request.FilePathOrId)))
         {
-            if (string.IsNullOrEmpty(request.FilePathOrId) || !File.Exists(request.FilePathOrId))
-            {
-                throw new FileNotFoundException();
-            }
+            throw new FileNotFoundException();
         }
 
         if (!request.BackupId.Equals(Guid.Empty))
@@ -220,9 +214,7 @@ public class BackupService : IBackupService
 
             return tmp;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 }

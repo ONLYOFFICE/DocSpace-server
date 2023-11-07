@@ -31,7 +31,7 @@ public class SearchSettings : ISettings<SearchSettings>
     public string Data { get; set; }
 
     [JsonIgnore]
-    public Guid ID => new Guid("{93784AB2-10B5-4C2F-9B36-F2662CCCF316}");
+    public Guid ID => new("{93784AB2-10B5-4C2F-9B36-F2662CCCF316}");
     internal List<SearchSettingsItem> Items
     {
         get
@@ -62,7 +62,7 @@ public class SearchSettings : ISettings<SearchSettings>
     {
         var wrapper = Items.FirstOrDefault(r => r.ID == name);
 
-        return wrapper != null && wrapper.Enabled;
+        return wrapper is { Enabled: true };
     }
 }
 
@@ -132,7 +132,7 @@ public class SearchSettingsHelper
         var action = new ReIndexAction() { Tenant = await _tenantManager.GetCurrentTenantIdAsync() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
-        _cacheNotify.Publish(action, CacheNotifyAction.Any);
+        await _cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
     }
 
     public async Task<bool> CanIndexByContentAsync<T>() where T : class, ISearchItem
@@ -188,7 +188,7 @@ public class SearchSettingsHelper
 
 public class SearchSettingsItem
 {
-    public string ID { get; set; }
-    public bool Enabled { get; set; }
+    public string ID { get; init; }
+    public bool Enabled { get; init; }
     public string Title { get; set; }
 }

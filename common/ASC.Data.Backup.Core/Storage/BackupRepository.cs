@@ -38,46 +38,46 @@ public class BackupRepository : IBackupRepository
         _creatorDbContext = creatorDbContext;
     }
 
-    public async Task SaveBackupRecordAsync(BackupRecord backup)
+    public async Task SaveBackupRecordAsync(BackupRecord backupRecord)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
-        await backupContext.AddOrUpdateAsync(b => b.Backups, backup);
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
+        await backupContext.AddOrUpdateAsync(b => b.Backups, backupRecord);
         await backupContext.SaveChangesAsync();
     }
 
     public async Task<BackupRecord> GetBackupRecordAsync(Guid id)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await backupContext.Backups.FindAsync(id);
     }
 
     public async Task<BackupRecord> GetBackupRecordAsync(string hash, int tenant)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupAsync(backupContext, tenant, hash);
     }
 
     public async Task<List<BackupRecord>> GetExpiredBackupRecordsAsync()
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.ExpiredBackupsAsync(backupContext).ToListAsync();
     }
 
     public async Task<List<BackupRecord>> GetScheduledBackupRecordsAsync()
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.ScheduledBackupsAsync(backupContext).ToListAsync();
     }
 
     public async Task<List<BackupRecord>> GetBackupRecordsByTenantIdAsync(int tenantId)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupsAsync(backupContext, tenantId).ToListAsync();
     }
 
     public async Task MigrationBackupRecordsAsync(int tenantId, int newTenantId, string region)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
 
         var backups = await Queries.BackupsForMigrationAsync(backupContext, tenantId).ToListAsync();
 
@@ -94,7 +94,7 @@ public class BackupRepository : IBackupRepository
 
     public async Task DeleteBackupRecordAsync(Guid id)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
 
         var backup = await backupContext.Backups.FindAsync(id);
         if (backup != null)
@@ -107,26 +107,26 @@ public class BackupRepository : IBackupRepository
 
     public async Task SaveBackupScheduleAsync(BackupSchedule schedule)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         await backupContext.AddOrUpdateAsync(q => q.Schedules, schedule);
         await backupContext.SaveChangesAsync();
     }
 
     public async Task DeleteBackupScheduleAsync(int tenantId)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         await Queries.DeleteSchedulesAsync(backupContext, tenantId);
     }
 
     public async Task<List<BackupSchedule>> GetBackupSchedulesAsync()
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupSchedulesAsync(backupContext).ToListAsync();
     }
 
     public async Task<BackupSchedule> GetBackupScheduleAsync(int tenantId)
     {
-        await using var backupContext = _dbContextFactory.CreateDbContext();
+        await using var backupContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.BackupScheduleAsync(backupContext, tenantId);
     }
 }

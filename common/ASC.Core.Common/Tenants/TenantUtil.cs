@@ -29,8 +29,8 @@ namespace ASC.Core.Tenants;
 [Scope]
 public class TenantUtil
 {
-    internal TenantManager _tenantManager;
-    internal TimeZoneConverter _timeZoneConverter;
+    internal readonly TenantManager _tenantManager;
+    internal readonly TimeZoneConverter _timeZoneConverter;
 
     public TenantUtil() { }
 

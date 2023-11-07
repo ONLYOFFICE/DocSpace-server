@@ -69,7 +69,7 @@ public class DistributedTaskQueue
     /// </summary>
     private int _maxThreadsCount = 1;
     private string _name;
-    private readonly int _timeUntilUnregisterInSeconds = 60;
+    private int _timeUntilUnregisterInSeconds;
     private TaskScheduler Scheduler { get; set; } = TaskScheduler.Default;
 
     public DistributedTaskQueue(
@@ -85,6 +85,12 @@ public class DistributedTaskQueue
         _cancelations = new ConcurrentDictionary<string, CancellationTokenSource>();
         _logger = logger;
         _subscribed = false;
+    }
+
+    public int TimeUntilUnregisterInSeconds
+    {
+        get => _timeUntilUnregisterInSeconds;
+        set => _timeUntilUnregisterInSeconds = value;
     }
 
     public string Name
@@ -337,7 +343,7 @@ public class DistributedTaskQueue
 
     private bool IsOrphanCacheItem(DistributedTask obj)
     {
-        return obj.LastModifiedOn.AddSeconds(_timeUntilUnregisterInSeconds) < DateTime.UtcNow;
+        return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
     }
 
 

@@ -46,7 +46,7 @@ public class TenantLogoHelper
         _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
     }
 
-    public async Task<string> GetLogo(WhiteLabelLogoTypeEnum type, bool isDefIfNoWhiteLabel = false, bool dark = false)
+    public async Task<string> GetLogo(WhiteLabelLogoType type, bool isDefIfNoWhiteLabel = false, bool dark = false)
     {
         string imgUrl;
         if (_tenantLogoManager.WhiteLabelEnabled)
@@ -62,7 +62,7 @@ public class TenantLogoHelper
             }
             else
             {
-                if (type == WhiteLabelLogoTypeEnum.LoginPage)
+                if (type == WhiteLabelLogoType.LoginPage)
                 {
                     /*** simple scheme ***/
                     var _tenantInfoSettings = await _settingsManager.LoadAsync<TenantInfoSettings>();

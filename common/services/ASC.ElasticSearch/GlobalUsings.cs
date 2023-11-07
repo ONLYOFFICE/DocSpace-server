@@ -26,7 +26,6 @@
 
 global using System.Collections;
 global using System.Collections.Concurrent;
-global using System.Data;
 global using System.Globalization;
 global using System.Linq.Expressions;
 global using System.Text;
@@ -44,8 +43,6 @@ global using ASC.Core.Tenants;
 global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.Log;
 global using ASC.ElasticSearch.Service;
-
-global using Autofac;
 
 global using Elasticsearch.Net;
 

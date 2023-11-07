@@ -93,6 +93,18 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
+    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    {
+        if (table.Name == "core_acl" && int.Parse((string)row["tenant"]) == -1)
+        {
+            preparedRow = null;
+
+            return false;
+        }
+
+        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+    }
+
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
     {
         if (table.Name == "core_usergroup" && columnName == "last_modified")
@@ -104,22 +116,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
         return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
     }
-
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
-    {
-        if (table.Name == "core_acl")
-        {
-            if (int.Parse((string)row["tenant"]) == -1)
-            {
-                preparedRow = null;
-
-                return false;
-            }
-        }
-
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
-    }
-
+    
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
         if (relation.ChildTable == "core_acl" && relation.ChildColumn == "object")
@@ -144,7 +141,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
     {
         var relationList = relations.ToList();
 
-        if (relationList.All(x => x.ChildTable == "core_subscription" && x.ChildColumn == "object" && x.ParentTable.StartsWith("projects_")))
+        if (relationList.TrueForAll(x => x.ChildTable == "core_subscription" && x.ChildColumn == "object" && x.ParentTable.StartsWith("projects_")))
         {
             var valParts = Convert.ToString(value).Split('_');
 
@@ -166,9 +163,9 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
             return true;
         }
 
-        if (relationList.All(x => x.ChildTable == "core_subscription" && x.ChildColumn == "recipient")
-            || relationList.All(x => x.ChildTable == "core_subscriptionmethod" && x.ChildColumn == "recipient")
-            || relationList.All(x => x.ChildTable == "core_acl" && x.ChildColumn == "subject"))
+        if (relationList.TrueForAll(x => x.ChildTable == "core_subscription" && x.ChildColumn == "recipient")
+            || relationList.TrueForAll(x => x.ChildTable == "core_subscriptionmethod" && x.ChildColumn == "recipient")
+            || relationList.TrueForAll(x => x.ChildTable == "core_acl" && x.ChildColumn == "subject"))
         {
             var strVal = Convert.ToString(value);
             if (_helpers.IsEmptyOrSystemUser(strVal) || _helpers.IsEmptyOrSystemGroup(strVal))
@@ -193,23 +190,10 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         return base.TryPrepareValue(dump, connection, columnMapper, table, columnName, relationList, ref value);
     }
 
-    private static bool ValidateSource(Guid expectedValue, DataRowInfo row)
-    {
-        var source = Convert.ToString(row["source"]);
-        try
-        {
-            return expectedValue == new Guid(source);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     private static bool IsDocumentsStorageType(string strStorageType)
     {
         var storageType = int.Parse(strStorageType);
 
-        return storageType == 0 || storageType == 1;
+        return storageType is 0 or 1;
     }
 }

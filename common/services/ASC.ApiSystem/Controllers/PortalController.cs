@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Api.Core;
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -46,6 +48,7 @@ public class PortalController : ControllerBase
     private readonly TimeZonesProvider _timeZonesProvider;
     private readonly TimeZoneConverter _timeZoneConverter;
     private readonly PasswordHasher _passwordHasher;
+    private readonly CspSettingsHelper _cspSettingsHelper;
     private readonly ILogger<PortalController> _log;
 
     public PortalController(
@@ -64,7 +67,8 @@ public class PortalController : ControllerBase
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
         TimeZoneConverter timeZoneConverter,
-        PasswordHasher passwordHasher)
+        PasswordHasher passwordHasher,
+        CspSettingsHelper cspSettingsHelper)
     {
         _configuration = configuration;
         _securityContext = securityContext;
@@ -81,6 +85,7 @@ public class PortalController : ControllerBase
         _timeZonesProvider = timeZonesProvider;
         _timeZoneConverter = timeZoneConverter;
         _passwordHasher = passwordHasher;
+        _cspSettingsHelper = cspSettingsHelper;
         _log = option;
     }
 
@@ -244,7 +249,8 @@ public class PortalController : ControllerBase
             }
 
             t = await _hostedSolution.RegisterTenantAsync(info);
-
+            _tenantManager.SetCurrentTenant(t);
+            await _cspSettingsHelper.SaveAsync(null, true);
             /*********/
 
             _log.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
@@ -276,7 +282,7 @@ public class PortalController : ControllerBase
 
                 var tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new Quota(trialQuotaId, 1) },
+                    Quotas = new List<Quota> { new(trialQuotaId, 1) },
                     DueDate = dueDate
                 };
                 await _hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -327,7 +333,7 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
-        (var succ, var tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             _log.LogError("Model without tenant");
@@ -363,7 +369,7 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
-        (var succ, var tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             _log.LogError("Model without tenant");
@@ -558,7 +564,7 @@ public class PortalController : ControllerBase
             return (false, error);
         }
 
-        return (true, error);
+        return (true, null);
     }
 
     private bool CheckValidName(string name, out object error)

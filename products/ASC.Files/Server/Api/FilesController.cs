@@ -74,8 +74,8 @@ public class FilesControllerThirdparty : FilesController<string>
     public async Task<FileEntryDto> GetFileInfoThirdPartyAsync(string fileId)
     {
         fileId = "app-" + fileId;
-        var app = _thirdPartySelector.GetAppByFileId(fileId?.ToString());
-        (var file, var editable) = await app.GetFileAsync(fileId?.ToString());
+        var app = _thirdPartySelector.GetAppByFileId(fileId);
+        var (file, editable) = await app.GetFileAsync(fileId);
         var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
         return await GetFileEntryWrapperAsync(docParams.File);
     }
@@ -83,12 +83,12 @@ public class FilesControllerThirdparty : FilesController<string>
 
 public abstract class FilesController<T> : ApiControllerBase
 {
-    protected readonly FilesControllerHelper _filesControllerHelper;
+    private readonly FilesControllerHelper _filesControllerHelper;
     private readonly FileStorageService _fileStorageService;
     private readonly IMapper _mapper;
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
 
-    public FilesController(
+    protected FilesController(
         FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
         IMapper mapper,
@@ -131,7 +131,7 @@ public abstract class FilesController<T> : ApiControllerBase
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("file/{fileId}/checkconversion")]
-    public async IAsyncEnumerable<ConversationResultDto<T>> CheckConversionAsync(T fileId, bool start)
+    public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(T fileId, bool start)
     {
         await foreach (var r in _filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>()
         {
@@ -375,7 +375,7 @@ public abstract class FilesController<T> : ApiControllerBase
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("file/{fileId}/checkconversion")]
-    public IAsyncEnumerable<ConversationResultDto<T>> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
+    public IAsyncEnumerable<ConversationResultDto> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
     {
         if (inDto == null)
         {
@@ -613,7 +613,7 @@ public class FilesControllerCommon : ApiControllerBase
             {
                 await AddProps(fileId.GetString());
             }
-            else if (fileId.ValueKind == JsonValueKind.String)
+            else if (fileId.ValueKind == JsonValueKind.Number)
             {
                 await AddProps(fileId.GetInt32());
             }

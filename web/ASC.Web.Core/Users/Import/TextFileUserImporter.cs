@@ -30,7 +30,7 @@ public class TextFileUserImporter : IUserImporter
 {
     private readonly Stream _stream;
 
-    protected Dictionary<string, string> NameMapping { get; set; }
+    protected Dictionary<string, string> NameMapping { get; init; }
 
     protected IList<string> ExcludeList { get; private set; }
 

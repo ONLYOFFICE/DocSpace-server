@@ -28,9 +28,9 @@ namespace ASC.Core.Tenants;
 
 public class TenantUserQuotaSettings : ISettings<TenantUserQuotaSettings>
 {
-    public bool EnableUserQuota { get; set; }
+    public bool EnableUserQuota { get; init; }
 
-    public long DefaultUserQuota { get; set; }
+    public long DefaultUserQuota { get; init; }
 
     public TenantUserQuotaSettings GetDefault()
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Utils;
+namespace ASC.Api.Core.Routing;
 
-static class FCKEditorPathUtility
+public class ConstraintRouteAttribute : Attribute
 {
-    private static readonly Regex _regex = new Regex("(?<start>\\/data\\/(?>htmleditorfiles|fckcomments))(?<tenant>\\/0\\/|\\/[\\d]+\\/\\d\\d\\/\\d\\d\\/)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private readonly string _constraint;
 
-    public static string CorrectStoragePath(string content, int tenant)
+    public ConstraintRouteAttribute(string constraint)
     {
-        if (string.IsNullOrWhiteSpace(content))
+        _constraint = constraint;
+    }
+
+    public IRouteConstraint GetRouteConstraint()
+    {
+        switch (_constraint)
         {
-            return content;
+            case "int":
+                return new IntRouteConstraint();
         }
 
-        var tenantPath = "/" + TenantPath.CreatePath(tenant) + "/";
-
-        return _regex.Replace(content, (m) => m.Success ? m.Groups["start"] + tenantPath : string.Empty);
+        return null;
     }
 }

@@ -24,22 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Contracts;
+namespace ASC.Data.Storage;
 
-[ServiceContract]
-public interface IBackupService
+public interface IDataStoreValidator
 {
-    BackupProgress GetBackupProgress(int tenantId);
-    BackupProgress GetRestoreProgress(int tenantId);
-    BackupProgress GetTransferProgress(int tenantId);
-    Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(int tenantId);
-    Task<ScheduleResponse> GetScheduleAsync(int tenantId);
-    string GetTmpFolder();
-    Task CreateScheduleAsync(CreateScheduleRequest request);
-    Task DeleteAllBackupsAsync(int tenantId);
-    Task DeleteBackupAsync(Guid backupId);
-    Task DeleteScheduleAsync(int tenantId);
-    string StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null);
-    Task StartRestoreAsync(StartRestoreRequest request);
-    void StartTransfer(StartTransferRequest request);
+    Task<bool> Validate(string path);
 }

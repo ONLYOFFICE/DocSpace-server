@@ -113,12 +113,12 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
         {
             Email = user.Email,
             Portal = (await _tenantManager.GetCurrentTenantAsync()).TrustedDomains.FirstOrDefault(),
-            OriginalUrl = originalUrl != null && originalUrl.Value != null ? originalUrl.Value.ToString() : "",
+            OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {
-                Id = folderId != null && folderId.Value != null ? folderId.Value.ToString() : "",
-                ParentId = rootFolderId != null && rootFolderId.Value != null ? rootFolderId.Value.ToString() : "",
-                RootFolderType = rootFolderType != null && rootFolderType.Value != null ? (int)rootFolderType.Value : 0
+                Id = folderId is { Value: not null } ? folderId.Value.ToString() : "",
+                ParentId = rootFolderId is { Value: not null } ? rootFolderId.Value.ToString() : "",
+                RootFolderType = rootFolderType is { Value: not null } ? (int)rootFolderType.Value : 0
             },
         };
 
@@ -132,8 +132,8 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
             notifyData.File = new NotifyFileData()
             {
                 Id = msg.ObjectID.Substring(5),
-                Title = documentTitle != null && documentTitle.Value != null ? documentTitle.Value.ToString() : "",
-                Extension = documentExtension != null && documentExtension.Value != null ? documentExtension.Value.ToString() : ""
+                Title = documentTitle is { Value: not null } ? documentTitle.Value.ToString() : "",
+                Extension = documentExtension is { Value: not null } ? documentExtension.Value.ToString() : ""
 
             };
         }
@@ -150,12 +150,12 @@ public class PushSenderSinkMessageCreator : SinkMessageCreator
         {
             TenantId = tenant.Id,
             Reciever = username,
-            Subject = fromTag != null && fromTag.Value != null ? fromTag.Value.ToString() : message.Subject,
+            Subject = fromTag is { Value: not null } ? fromTag.Value.ToString() : message.Subject,
             ContentType = message.ContentType,
             Content = message.Body,
             Sender = Constants.NotifyPushSenderSysName,
             CreationDate = DateTime.UtcNow,
-            ProductID = fromTag != null && fromTag.Value != null ? productID.Value.ToString() : null,
+            ProductID = fromTag is { Value: not null } ? productID.Value.ToString() : null,
             Data = jsonNotifyData
         };
 

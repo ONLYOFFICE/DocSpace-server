@@ -151,7 +151,7 @@ public class FilesMessageService
             return;
         }
 
-        await _messageService.SendHeadersMessageAsync(action, _messageTarget.CreateFromGroupValues(new[] { entry1.Id.ToString(), entry2.Id.ToString() }), headers, description);
+        await _messageService.SendHeadersMessageAsync(action, _messageTarget.Create((IEnumerable<string>)new List<string> {entry1.Id.ToString(), entry2.Id.ToString()}), headers, description);
     }
 
     public async Task SendAsync<T>(MessageAction action, FileEntry<T> entry, string description)
@@ -229,7 +229,7 @@ public class FilesMessageService
             info.RoomOldTitle = oldTitle;
         }
 
-        if ((action == MessageAction.RoomCreateUser || action == MessageAction.RoomRemoveUser)
+        if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
             && userid != Guid.Empty)
         {
             info.UserIds = new List<Guid> { userid };

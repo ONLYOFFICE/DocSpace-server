@@ -68,7 +68,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     }
 
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         if (!string.IsNullOrEmpty(context.Request.Query["denied"]))
         {
