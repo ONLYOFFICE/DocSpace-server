@@ -81,3 +81,22 @@ public class BaseProtobufDeserializer<T> : IDeserializer<T> where T : new()
         return Serializer.Deserialize<T>(data);
     }
 }
+
+public class ProtobufContractSerializer
+{
+    public static byte[] Serialize<T>(T data)
+    {
+        if (data == null)
+        {
+            return Array.Empty<byte>();
+        }
+        using var memoryStream = new MemoryStream();
+        Serializer.Serialize(memoryStream, data);
+        return memoryStream.ToArray();
+    }
+    public static T Deserialize<T>(byte[] data)
+    {
+        using var memoryStream = new MemoryStream(data);
+        return Serializer.Deserialize<T>(memoryStream);
+    }
+}
