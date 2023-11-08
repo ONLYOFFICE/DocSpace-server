@@ -4,10 +4,11 @@
 package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
-import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.core.entities.Client;
+import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.ports.services.ClientService;
+import com.onlyoffice.authorization.api.security.crypto.Cipher;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,8 @@ public class ClientServiceTest extends ContainerBase {
     private ClientService clientService;
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private Cipher cipher;
 
     @BeforeEach
     @SneakyThrows
@@ -41,9 +44,12 @@ public class ClientServiceTest extends ContainerBase {
         clientRepository.save(Client
                 .builder()
                         .clientId("client")
-                        .clientSecret("secret")
+                        .clientSecret(cipher.encrypt("secret"))
                         .tenant(1)
                         .invalidated(false)
+                        .redirectUris("http://example.com")
+                        .logoutRedirectUri("http://example.com")
+                        .allowedOrigins("http://example.com")
                         .enabled(true)
                         .scopes("accounts:read")
                         .authenticationMethod("mock")
