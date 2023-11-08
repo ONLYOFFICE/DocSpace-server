@@ -71,10 +71,16 @@ public class ExportToCSV
     {
         try
         {
-            var data = DataTableToCsv(dataTable);
-            using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(data));
-
             var fileDao = _daoFactory.GetFileDao<T>();
+
+            await using var source = await fileDao.GetFileStreamAsync(file);
+            using var reader = new StreamReader(source);
+            var oldData = await reader.ReadToEndAsync();
+
+            var data = DataTableToCsv(dataTable, true);
+            var resultData = oldData + data;
+            using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(resultData));
+
             file.Version++;
             await fileDao.SaveFileAsync(file, textStream);
             return file.Id;
@@ -86,26 +92,28 @@ public class ExportToCSV
         }
     }
 
-    private static string DataTableToCsv(DataTable dataTable)
+    private static string DataTableToCsv(DataTable dataTable, bool onlyRows = false)
     {
         var result = new StringBuilder();
 
         var columnsCount = dataTable.Columns.Count;
 
-        for (var index = 0; index < columnsCount; index++)
+        if (!onlyRows)
         {
-            if (index != columnsCount - 1)
+            for (var index = 0; index < columnsCount; index++)
             {
-                result.Append(dataTable.Columns[index].Caption + ",");
+                if (index != columnsCount - 1)
+                {
+                    result.Append(dataTable.Columns[index].Caption + ",");
+                }
+                else
+                {
+                    result.Append(dataTable.Columns[index].Caption);
+                }
             }
-            else
-            {
-                result.Append(dataTable.Columns[index].Caption);
-            }
+            result.Append(Environment.NewLine);
         }
-
-        result.Append(Environment.NewLine);
-
+        
         foreach (DataRow row in dataTable.Rows)
         {
             for (var i = 0; i < columnsCount; i++)

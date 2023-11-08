@@ -1264,8 +1264,9 @@ public class FileStorageService //: IFileStorageService
                 else
                 {
                     var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-                    var dt = JsonConvert.DeserializeObject<DataTable>(data);
-                    await _exportToCSV.UpdateCsvReport(resultsFile, dt); 
+
+                    var updateDt = JsonConvert.DeserializeObject<DataTable>(data);
+                    await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
 
                 }
 
