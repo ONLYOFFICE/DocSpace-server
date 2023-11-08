@@ -69,7 +69,7 @@ public class SsoController : BaseSettingsController
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("ssov2")]
-    [AllowAnonymous]
+    [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()
     {
         var settings = await _settingsManager.LoadAsync<SsoSettingsV2>();
