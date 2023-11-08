@@ -1099,21 +1099,21 @@ public class EntryManager
         var sourceFileDao = _daoFactory.GetFileDao<T>();
         var linkDao = _daoFactory.GetLinkDao();
 
-            var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
+        var linkedId = await linkDao.GetLinkedAsync(sourceFile.Id.ToString());
 
-            if (linkedId != null)
+        if (linkedId != null)
+        {
+            linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
+            if (linkedFile == null
+                || !await _fileSecurity.CanFillFormsAsync(linkedFile)
+                || await FileLockedForMeAsync(linkedFile.Id)
+                || linkedFile.RootFolderType == FolderType.TRASH)
             {
-                linkedFile = await fileDao.GetFileAsync((T)Convert.ChangeType(linkedId, typeof(T)));
-                if (linkedFile == null
-                    || !await _fileSecurity.CanFillFormsAsync(linkedFile)
-                    || await FileLockedForMeAsync(linkedFile.Id)
-                    || linkedFile.RootFolderType == FolderType.TRASH)
-                {
-                    await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
-                    linkedFile = null;
-                }
+                await linkDao.DeleteLinkAsync(sourceFile.Id.ToString());
+                linkedFile = null;
             }
-       
+        }
+
         if (linkedFile == null)
         {
             var folderId = sourceFile.ParentId;
@@ -1137,29 +1137,39 @@ public class EntryManager
             if (folderIfNew.FolderType == FolderType.FormRoom)
             {
                 var inProcessFormFolder = await folderDao.GetFoldersAsync(FolderType.InProcessFormFolder, folderId).ToListAsync();
+                var readyFormFolder = await folderDao.GetFoldersAsync(FolderType.ReadyFormFolder, folderId).ToListAsync();
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
                 title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
                 if (properties == null)
                 {
-                    var newFolder = _serviceProvider.GetService<Folder<T>>();
-                    newFolder.Title = sourceTitle;
-                    newFolder.ParentId = inProcessFormFolder.FirstOrDefault().Id;
-                    newFolder.FolderType = FolderType.DEFAULT;
-                    newFolder.CreateBy = folderIfNew.CreateBy;
-
-                    var formFolderId = await folderDao.SaveFolderAsync(newFolder);
-                    var formFolder = await folderDao.GetFolderAsync(formFolderId);
-                    linkedFile.ParentId = formFolder.Id;
-
-                    var currentProperies = new EntryProperties();
-                        
                     try
                     {
+                        var templatesFolder = _serviceProvider.GetService<Folder<T>>();
+                        templatesFolder.Title = sourceTitle;
+                        templatesFolder.ParentId = inProcessFormFolder.FirstOrDefault().Id;
+                        templatesFolder.FolderType = FolderType.DEFAULT;
+                        templatesFolder.CreateBy = folderIfNew.CreateBy;
+
+                        var resultsFolder = _serviceProvider.GetService<Folder<T>>();
+                        resultsFolder.Title = sourceTitle;
+                        resultsFolder.ParentId = readyFormFolder.FirstOrDefault().Id;
+                        resultsFolder.FolderType = FolderType.DEFAULT;
+                        resultsFolder.CreateBy = folderIfNew.CreateBy;
+
+                        var templatesFolderId = await folderDao.SaveFolderAsync(templatesFolder);
+                        var resultsFolderId = await folderDao.SaveFolderAsync(resultsFolder);
+                        linkedFile.ParentId = templatesFolderId;
+
+                        var currentProperies = new EntryProperties();
+
                         var tmp = _serviceProvider.GetService<FormFillingProperties>();
                         currentProperies.FormFilling = _serviceProvider.GetService<FormFillingProperties>();
-                        currentProperies.FormFilling.ToFolderId = formFolder.Id.ToString();
+
+                        currentProperies.FormFilling.Title = sourceTitle;
+                        currentProperies.FormFilling.ToFolderId = templatesFolderId.ToString();
+                        currentProperies.FormFilling.ResultsFolderId = resultsFolderId.ToString();
                         currentProperies.FormFilling.CollectFillForm = true;
 
                         await fileDao.SaveProperties(sourceFile.Id, currentProperies);
@@ -1174,7 +1184,7 @@ public class EntryManager
                 {
                     linkedFile.ParentId = (T)Convert.ChangeType(properties.FormFilling.ToFolderId, typeof(T));
                 }
-                 
+
             }
             else
             {

@@ -165,8 +165,8 @@ public class FilesControllerHelper : FilesHelperBase
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
-            extension = ".html";
-        }
+                extension = ".html";
+            }
 
         return await CreateFileAsync(folderId, title, content, extension);
     }
@@ -224,6 +224,11 @@ public class FilesControllerHelper : FilesHelperBase
         return CheckConversionAsync(cheqConversionRequestDto);
     }
 
+    public async Task<T> SignedFormAsync<T>(T formId, string data)
+    {
+        return await _fileStorageService.SignedFormAsync(formId, data);
+    }
+
     public async Task<string> UpdateCommentAsync<T>(T fileId, int version, string comment)
     {
         return await _fileStorageService.UpdateCommentAsync(fileId, version, comment);
@@ -278,7 +283,7 @@ public class FilesControllerHelper : FilesHelperBase
         }
 
         await using var fileStream = await _fileConverter.ExecAsync(file, destExt, password);
-        var controller = _serviceProvider.GetService<FilesControllerHelper>();
-        return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+            var controller = _serviceProvider.GetService<FilesControllerHelper>();
+            return await controller.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+        }
     }
-}

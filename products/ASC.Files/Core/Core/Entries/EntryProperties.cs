@@ -76,6 +76,10 @@ public class FormFillingProperties
 
     /// <summary>Folder ID where a file will be saved</summary>
     /// <type>System.String, System</type>
+    public string Title { get; set; }
     public string ToFolderId { get; set; }
+    public string ResultsFolderId { get; set; }
+
+    public string ResultsFileID { get; set; }
 
 }

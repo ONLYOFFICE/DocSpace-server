@@ -90,7 +90,8 @@ public class FileStorageService //: IFileStorageService
     private readonly ExternalShare _externalShare;
     private readonly TenantUtil _tenantUtil;
     private readonly RoomLogoManager _roomLogoManager;
-
+    private readonly ExportToCSV _exportToCSV;
+    
     public FileStorageService(
         Global global,
         GlobalStore globalStore,
@@ -149,7 +150,8 @@ public class FileStorageService //: IFileStorageService
         QuotaSocketManager quotaSocketManager,
         ExternalShare externalShare,
         TenantUtil tenantUtil,
-        RoomLogoManager roomLogoManager)
+        RoomLogoManager roomLogoManager,
+        ExportToCSV exportToCSV)
     {
         _global = global;
         _globalStore = globalStore;
@@ -209,6 +211,7 @@ public class FileStorageService //: IFileStorageService
         _externalShare = externalShare;
         _tenantUtil = tenantUtil;
         _roomLogoManager = roomLogoManager;
+        _exportToCSV = exportToCSV;
     }
 
     public async Task<Folder<T>> GetFolderAsync<T>(T folderId)
@@ -1219,7 +1222,58 @@ public class FileStorageService //: IFileStorageService
 
         return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
     }
+    public async Task<T> SignedFormAsync<T>(T formId, string data)
+    {
+        FileEntry<T> form;
+        var fileDao = GetFileDao<T>();
+        var folderDao = GetFolderDao<int>();
 
+        form = await fileDao.GetFileAsync(formId);
+        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(form);
+
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if(room.FolderType == FolderType.FormRoom)
+        {
+            var linkDao = _daoFactory.GetLinkDao();
+            var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
+
+            if (sourceId != null)
+            {
+                EntryProperties properties;
+
+                if (int.TryParse(sourceId, out var sourceInt))
+                {
+                    properties = _daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
+                }
+                else
+                {
+                    properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
+                }
+
+                if (properties.FormFilling.ResultsFileID == null)
+                {
+                    var dt = JsonConvert.DeserializeObject<DataTable>(data);
+
+                    var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
+                    var resultsFileID = await _exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
+
+                    properties.FormFilling.ResultsFileID = resultsFileID.ToString();
+                    await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
+                }
+                else
+                {
+                    var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
+                    var dt = JsonConvert.DeserializeObject<DataTable>(data);
+                    await _exportToCSV.UpdateCsvReport(resultsFile, dt); 
+
+                }
+
+                //TODO move form, delete link
+            }
+        }
+        return formId;
+    }
     public async Task<string> UpdateCommentAsync<T>(T fileId, int version, string comment)
     {
         var fileDao = GetFileDao<T>();
