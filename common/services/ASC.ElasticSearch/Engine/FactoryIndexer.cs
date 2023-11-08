@@ -715,6 +715,18 @@ public class FactoryIndexer
 
         try
         {
+            if (_client.Instance == null)
+            {
+                if (cacheState)
+                {
+                    _cache.Insert(key, "false", cacheTime);
+                }
+
+                Log.DebugCheckStatePing("Client instance is null");
+
+                return false;
+            }
+
             var result = await _client.Instance.PingAsync(new PingRequest());
 
             var isValid = result.IsValid;
