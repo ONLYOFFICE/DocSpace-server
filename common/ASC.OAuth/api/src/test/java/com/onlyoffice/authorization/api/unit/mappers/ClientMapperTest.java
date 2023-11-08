@@ -32,6 +32,7 @@ public class ClientMapperTest {
             .authenticationMethod("mock")
             .redirectUris("redirect")
             .logoutRedirectUri("logoutredirect")
+            .allowedOrigins("origins")
             .scopes("scopes")
             .tenant(1)
             .enabled(true)
