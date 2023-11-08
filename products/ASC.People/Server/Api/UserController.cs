@@ -1443,13 +1443,6 @@ public class UserController : PeopleControllerBase
                     user.Title = inDto.Title ?? user.Title;
                 }
             }
-            else
-            {
-                if (!_userFormatter.IsValidUserName(user.FirstName, user.LastName))
-                {
-                    throw new Exception(Resource.ErrorIncorrectUserName);
-                }
-            }
 
             user.Notes = inDto.Comment ?? user.Notes;
 
