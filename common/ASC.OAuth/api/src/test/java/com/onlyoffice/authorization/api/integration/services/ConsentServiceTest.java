@@ -4,9 +4,11 @@
 package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
+import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.entities.Consent;
 import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.ports.repositories.ConsentRepository;
 import com.onlyoffice.authorization.api.ports.services.ConsentService;
 import org.junit.jupiter.api.AfterEach;
@@ -34,9 +36,15 @@ public class ConsentServiceTest extends ContainerBase {
     private ConsentService consentService;
     @Autowired
     private ConsentRepository consentRepository;
+    @Autowired
+    private ClientRepository clientRepository;
 
     @BeforeEach
     void beforeEach() {
+        clientRepository.save(Client
+                .builder()
+                .clientId("mock")
+                .build());
         consentService.saveConsent(ConsentMessage
                 .builder()
                 .principalName("mock")
