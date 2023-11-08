@@ -1809,4 +1809,16 @@ $OrangeButton
 
 Saite ir derīga tikai septiņas dienas.</value>
   </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Ar cieņu, ONLYOFFICE atbalsta komanda</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>SKATĪTIES PILNU ATSKAŅOŠANAS SARAKSTU</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Apgūstiet ONLYOFFICE DocSpace ar video ceļvežiem</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Jūsu ONLYOFFICE komanda</value>
+  </data>
 </root>
