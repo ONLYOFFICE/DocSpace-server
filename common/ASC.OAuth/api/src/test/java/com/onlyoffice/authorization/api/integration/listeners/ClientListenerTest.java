@@ -5,10 +5,14 @@ package com.onlyoffice.authorization.api.integration.listeners;
 
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.docspace.DocspaceResponseDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.docspace.MeDTO;
 import com.onlyoffice.authorization.api.external.listeners.ClientListener;
 import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.ports.services.ClientService;
+import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +40,24 @@ public class ClientListenerTest extends ContainerBase {
     @Autowired
     private ClientRepository clientRepository;
 
+    @BeforeEach
+    void beforeEach() {
+        UserContextContainer.context.set(DocspaceResponseDTO
+                .<MeDTO>builder()
+                        .status(200)
+                        .statusCode(200)
+                        .response(MeDTO
+                                .builder()
+                                .avatar("avatar")
+                                .avatarSmall("smallAvatar")
+                                .email("admin@admin.com")
+                                .firstName("Admin")
+                                .lastName("Admin")
+                                .userName("Administrator")
+                                .build())
+                .build());
+    }
+
     @Test
     @SneakyThrows
     void shouldCreateClientAsync() {
@@ -43,6 +65,9 @@ public class ClientListenerTest extends ContainerBase {
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
+                .redirectUris(Set.of("http://example.com"))
+                .logoutRedirectUri("http://example.com")
+                .allowedOrigins(Set.of("http://example.com"))
                 .description("mock")
                 .termsUrl("mock")
                 .build(), 1, "http://127.0.0.1");
@@ -57,6 +82,9 @@ public class ClientListenerTest extends ContainerBase {
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
+                .redirectUris(Set.of("http://example.com"))
+                .logoutRedirectUri("http://example.com")
+                .allowedOrigins(Set.of("http://example.com"))
                 .description("mock")
                 .termsUrl("mock")
                 .build(), 1, "http://127.0.0.1");
