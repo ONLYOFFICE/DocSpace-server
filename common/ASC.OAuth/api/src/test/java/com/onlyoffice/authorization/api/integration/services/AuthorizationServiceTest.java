@@ -5,8 +5,8 @@ package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Authorization;
-import com.onlyoffice.authorization.api.external.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.external.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.ports.repositories.AuthorizationRepository;
 import com.onlyoffice.authorization.api.ports.services.AuthorizationService;
 import org.junit.jupiter.api.AfterEach;
@@ -18,8 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -42,16 +42,16 @@ public class AuthorizationServiceTest extends ContainerBase {
                 .builder()
                 .registeredClientId("mock")
                 .principalName("mock")
-                .accessTokenExpiresAt(Date.from(Instant.now()))
-                .accessTokenIssuedAt(Date.from(Instant.now()))
+                .accessTokenExpiresAt(Timestamp.from(Instant.now()))
+                .accessTokenIssuedAt(Timestamp.from(Instant.now()))
                 .accessTokenMetadata("mock")
                 .accessTokenScopes("mock")
                 .accessTokenType("Bearer")
                 .accessTokenValue("mock")
                 .attributes("mock")
                 .id("mock")
-                .authorizationCodeExpiresAt(Date.from(Instant.now()))
-                .authorizationCodeIssuedAt(Date.from(Instant.now()))
+                .authorizationCodeExpiresAt(Timestamp.from(Instant.now()))
+                .authorizationCodeIssuedAt(Timestamp.from(Instant.now()))
                 .authorizationCodeValue("mock")
                 .authorizationGrantType("mock")
                 .build());

@@ -4,12 +4,11 @@
 package com.onlyoffice.authorization.api.unit.mappers;
 
 import com.onlyoffice.authorization.api.core.entities.Authorization;
-import com.onlyoffice.authorization.api.external.mappers.AuthorizationMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.external.mappers.AuthorizationMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
 
@@ -33,18 +32,18 @@ public class AuthorizationMapperTest {
                 .invalidated(false)
                 .attributes("mock")
                 .accessTokenValue("mock")
-                .accessTokenIssuedAt(Date.from(Instant.now()))
+                .accessTokenIssuedAt(Timestamp.from(Instant.now()))
                 .authorizationCodeValue("mock")
-                .authorizationCodeIssuedAt(Date.from(Instant.now()))
-                .authorizationCodeExpiresAt(Date.from(Instant.now()))
+                .authorizationCodeIssuedAt(Timestamp.from(Instant.now()))
+                .authorizationCodeExpiresAt(Timestamp.from(Instant.now()))
                 .authorizationCodeMetadata("mock")
-                .accessTokenExpiresAt(java.util.Date.from(Instant.now()))
+                .accessTokenExpiresAt(Timestamp.from(Instant.now()))
                 .accessTokenMetadata("mock")
                 .accessTokenType("mock")
                 .accessTokenScopes("mock")
                 .refreshTokenValue("mock")
-                .refreshTokenIssuedAt(Date.from(Instant.now()))
-                .refreshTokenExpiresAt(Date.from(Instant.now()))
+                .refreshTokenIssuedAt(Timestamp.from(Instant.now()))
+                .refreshTokenExpiresAt(Timestamp.from(Instant.now()))
                 .refreshTokenMetadata("mock")
                 .registeredClientId("mock")
                 .refreshTokenMetadata("mock")
@@ -67,18 +66,18 @@ public class AuthorizationMapperTest {
                 .invalidated(false)
                 .attributes("mock")
                 .accessTokenValue("mock")
-                .accessTokenIssuedAt(Date.from(Instant.now()))
+                .accessTokenIssuedAt(Timestamp.from(Instant.now()))
                 .authorizationCodeValue("mock")
-                .authorizationCodeIssuedAt(Date.from(Instant.now()))
-                .authorizationCodeExpiresAt(Date.from(Instant.now()))
+                .authorizationCodeIssuedAt(Timestamp.from(Instant.now()))
+                .authorizationCodeExpiresAt(Timestamp.from(Instant.now()))
                 .authorizationCodeMetadata("mock")
-                .accessTokenExpiresAt(java.util.Date.from(Instant.now()))
+                .accessTokenExpiresAt(Timestamp.from(Instant.now()))
                 .accessTokenMetadata("mock")
                 .accessTokenType("mock")
                 .accessTokenScopes("mock")
                 .refreshTokenValue("mock")
-                .refreshTokenIssuedAt(Date.from(Instant.now()))
-                .refreshTokenExpiresAt(Date.from(Instant.now()))
+                .refreshTokenIssuedAt(Timestamp.from(Instant.now()))
+                .refreshTokenExpiresAt(Timestamp.from(Instant.now()))
                 .refreshTokenMetadata("mock")
                 .registeredClientId("mock")
                 .refreshTokenMetadata("mock")
