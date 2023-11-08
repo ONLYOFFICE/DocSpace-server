@@ -79,7 +79,6 @@ public class FormFillingProperties
     public string Title { get; set; }
     public string ToFolderId { get; set; }
     public string ResultsFolderId { get; set; }
-
     public string ResultsFileID { get; set; }
 
 }

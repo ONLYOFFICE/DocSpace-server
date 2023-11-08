@@ -1224,55 +1224,17 @@ public class FileStorageService //: IFileStorageService
     }
     public async Task<T> SignedFormAsync<T>(T formId, string data)
     {
-        FileEntry<T> form;
         var fileDao = GetFileDao<T>();
-        var folderDao = GetFolderDao<int>();
+        var folderDao = GetFolderDao<T>();
 
-        form = await fileDao.GetFileAsync(formId);
+        var form = await fileDao.GetFileAsync(formId);
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(form);
 
-        var room = await folderDao.GetFolderAsync(roomId);
+        var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
 
         if(room.FolderType == FolderType.FormRoom)
         {
-            var linkDao = _daoFactory.GetLinkDao();
-            var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
-
-            if (sourceId != null)
-            {
-                EntryProperties properties;
-
-                if (int.TryParse(sourceId, out var sourceInt))
-                {
-                    properties = _daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
-                }
-                else
-                {
-                    properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
-                }
-
-                if (properties.FormFilling.ResultsFileID == null)
-                {
-                    var dt = JsonConvert.DeserializeObject<DataTable>(data);
-
-                    var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                    var resultsFileID = await _exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
-
-                    properties.FormFilling.ResultsFileID = resultsFileID.ToString();
-                    await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
-                }
-                else
-                {
-                    var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-
-                    var updateDt = JsonConvert.DeserializeObject<DataTable>(data);
-                    await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
-
-                }
-
-                await fileDao.MoveFileAsync(formId, (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
-                await linkDao.DeleteLinkAsync(sourceId);
-            }
+            await SaveFormFillingResult(form, data);
         }
         return formId;
     }
@@ -3569,6 +3531,52 @@ public class FileStorageService //: IFileStorageService
         };
 
         await SetAceObjectAsync(aceCollection, notify);
+    }
+    private async Task SaveFormFillingResult<T>(File<T> form, string data)
+    {
+        var fileDao = GetFileDao<T>();
+        var folderDao = GetFolderDao<T>();
+        var linkDao = _daoFactory.GetLinkDao();
+        var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
+
+        if (sourceId != null)
+        {
+            EntryProperties properties;
+
+            if (int.TryParse(sourceId, out var sourceInt))
+            {
+                properties = _daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
+            }
+            else
+            {
+                properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
+            }
+
+            if (properties.FormFilling.ResultsFileID == null)
+            {
+                var dt = JsonConvert.DeserializeObject<DataTable>(data);
+
+                var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
+                var resultsFileID = await _exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
+
+                properties.FormFilling.ResultsFileID = resultsFileID.ToString();
+                await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
+            }
+            else
+            {
+                var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
+
+                var updateDt = JsonConvert.DeserializeObject<DataTable>(data);
+                await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
+            }
+
+            await fileDao.MoveFileAsync(form.Id, (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
+            await linkDao.DeleteLinkAsync(sourceId);
+
+            await _socketManager.UpdateFileAsync(form);
+            var folder = await folderDao.GetFolderAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
+            await _socketManager.UpdateFolderAsync(folder);
+        }
     }
 
     private static readonly IReadOnlyDictionary<SubjectType, IReadOnlyDictionary<EventType, MessageAction>> _actions =
