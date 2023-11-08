@@ -1270,7 +1270,8 @@ public class FileStorageService //: IFileStorageService
 
                 }
 
-                //TODO move form, delete link
+                await fileDao.MoveFileAsync(formId, (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
+                await linkDao.DeleteLinkAsync(sourceId);
             }
         }
         return formId;
