@@ -117,20 +117,20 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
 
-        this[Res] += string.Format("folder_{0}{1}", _daoFolderId, SplitChar);
-
         //TODO: check on each iteration?
         var toFolder = await folderDao.GetFolderAsync(tto);
         if (toFolder == null)
         {
             return;
         }
-
+        
         if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await FilesSecurity.CanCreateAsync(toFolder))
         {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
             }
 
+        this[Res] += $"folder_{tto}{SplitChar}";
+        
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
         if (parentFolders.Exists(parent => Folders.Exists(r => r.ToString() == parent.Id.ToString())))
         {
@@ -194,9 +194,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
         if (!_copy && !await fileSecurity.CanMoveToAsync(toFolder))
         {
-            this[Err] = toFolder.FolderType == FolderType.VirtualRooms ? FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom :
-                toFolder.FolderType == FolderType.Archive ? FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom :
-                FilesCommonResource.ErrorMessage_SecurityException_MoveToFolder;
+            this[Err] = toFolder.FolderType switch
+            {
+                FolderType.VirtualRooms => FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom,
+                FolderType.Archive => FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom,
+                _ => FilesCommonResource.ErrorMessage_SecurityException_MoveToFolder
+            };
 
             return;
         }
@@ -224,13 +227,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var ntm = needToMark.Distinct();
         foreach (var n in ntm)
         {
-            if (n is FileEntry<T> entry1)
+            switch (n)
             {
-                await fileMarker.MarkAsNewAsync(entry1);
-            }
-            else if (n is FileEntry<TTo> entry2)
-            {
-                await fileMarker.MarkAsNewAsync(entry2);
+                case FileEntry<T> entry1:
+                    await fileMarker.MarkAsNewAsync(entry1);
+                    break;
+                case FileEntry<TTo> entry2:
+                    await fileMarker.MarkAsNewAsync(entry2);
+                    break;
             }
         }
     }
@@ -497,7 +501,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var pins = await TagDao.GetTagsAsync(Guid.Empty, TagType.Pin, new List<FileEntry<T>> { folder }).ToListAsync();
                                     if (pins.Count > 0)
                                     {
-                                        await TagDao.RemoveTags(pins);
+                                        await TagDao.RemoveTagsAsync(pins);
                                     }
 
                                     _ = filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);

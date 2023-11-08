@@ -200,13 +200,13 @@ public class RestoreProgressItem : BaseBackupProgressItem
             File.Delete(tempFile);
 
             Percentage = 100;
-            Status = DistributedTaskStatus.Completed;
+            IsCompleted = true;
         }
         catch (Exception error)
         {
             _logger.ErrorRestoreProgressItem(error);
-            Exception = error;
-            Status = DistributedTaskStatus.Failted;
+            Exception = error; 
+            IsCompleted = true;
 
             if (tenant != null)
             {

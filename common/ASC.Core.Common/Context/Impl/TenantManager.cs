@@ -367,7 +367,7 @@ public class TenantManager
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
     {
-        return await GetTenantQuotaAsync((await GetCurrentTenantAsync()).Id, refresh);
+        return await GetTenantQuotaAsync(await GetCurrentTenantIdAsync(), refresh);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant, bool refresh = false)

@@ -50,6 +50,7 @@ public class PortalController : ControllerBase
     private readonly PasswordHasher _passwordHasher;
     private readonly CspSettingsHelper _cspSettingsHelper;
     private readonly ILogger<PortalController> _log;
+    private readonly CoreBaseSettings _coreBaseSettings;
 
     public PortalController(
         IConfiguration configuration,
@@ -60,6 +61,7 @@ public class PortalController : ControllerBase
         CommonMethods commonMethods,
         HostedSolution hostedSolution,
         CoreSettings coreSettings,
+        CoreBaseSettings coreBaseSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
         UserManagerWrapper userManagerWrapper,
@@ -87,6 +89,7 @@ public class PortalController : ControllerBase
         _passwordHasher = passwordHasher;
         _cspSettingsHelper = cspSettingsHelper;
         _log = option;
+        _coreBaseSettings = coreBaseSettings;
     }
 
     #region For TEST api
@@ -237,13 +240,12 @@ public class PortalController : ControllerBase
         }
 
         Tenant t;
-
         try
-        {
+        {    
             /****REGISTRATION!!!*****/
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await _apiSystemHelper.AddTenantToCacheAsync(info.Address, _securityContext.CurrentAccount.ID);
+                await _apiSystemHelper.AddTenantToCacheAsync(info.Address, info.HostedRegion);
 
                 _log.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
             }
@@ -506,14 +508,14 @@ public class PortalController : ControllerBase
 
     #region Validate Method
 
-    private async Task ValidateDomainAsync(string domain)
+    private async Task ValidateTenantAliasAsync(string alias)
     {
         // size
-        _tenantDomainValidator.ValidateDomainLength(domain);
+        _tenantDomainValidator.ValidateDomainLength(alias);
         // characters
-        _tenantDomainValidator.ValidateDomainCharacters(domain);
+        _tenantDomainValidator.ValidateDomainCharacters(alias);
 
-        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(domain, _securityContext.CurrentAccount.ID);
+        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(alias);
 
         if (sameAliasTenants != null)
         {
@@ -532,9 +534,9 @@ public class PortalController : ControllerBase
 
         try
         {
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await ValidateDomainAsync(portalName.Trim());
+                await ValidateTenantAliasAsync(portalName.Trim());
             }
             else
             {

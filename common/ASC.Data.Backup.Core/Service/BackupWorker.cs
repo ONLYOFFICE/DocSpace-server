@@ -45,7 +45,7 @@ public class BackupWorker
         TempPath tempPath)
     {
         _serviceProvider = serviceProvider;
-         _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 15);
+         _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
         TempFolder = Path.Combine(tempPath.GetTempPath(), "backup");
     }
 

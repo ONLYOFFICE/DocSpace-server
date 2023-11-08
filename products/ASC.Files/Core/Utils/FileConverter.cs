@@ -666,7 +666,7 @@ public class FileConverter
         if (tags.Count > 0)
         {
             tags.ForEach(r => r.EntryId = newFile.Id);
-            await tagDao.SaveTags(tags);
+            await tagDao.SaveTagsAsync(tags);
         }
 
         if (markAsTemplate)
