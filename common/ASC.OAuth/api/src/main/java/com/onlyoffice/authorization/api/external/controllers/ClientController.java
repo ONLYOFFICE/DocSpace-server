@@ -226,7 +226,7 @@ public class ClientController {
         }
 
         log.debug("Generating a new client's credentials");
-        var client = creationUsecases.clientAsyncCreationTask(body, 1, address);
+        var client = creationUsecases.clientAsyncCreationTask(body, tenant, address);
         log.debug("Successfully submitted a new client broker message", client);
 
         client.add(linkTo(methodOn(ClientController.class)
