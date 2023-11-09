@@ -1671,6 +1671,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("create_on");
 
+                    b.Property<string>("CspDomains")
+                        .HasColumnType("text")
+                        .HasColumnName("csp_domains");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");

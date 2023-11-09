@@ -84,7 +84,7 @@ public class UsersModule : FeedModule
             AdditionalInfo3 = u.Status.ToString(),
             AdditionalInfo4 = u.ActivationStatus.ToString(),
             Keywords = fullName,
-            Action = u.LastModified > u.CreateDate ? FeedAction.Updated : FeedAction.Created,
+            Actions = u.LastModified > u.CreateDate ? FeedActions.Updated : FeedActions.Created,
         };
 
         return feed;

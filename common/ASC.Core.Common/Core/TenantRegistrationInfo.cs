@@ -28,22 +28,22 @@ namespace ASC.Core.Tenants;
 
 public class TenantRegistrationInfo
 {
-    public string Name { get; set; }
-    public string Address { get; set; }
-    public CultureInfo Culture { get; set; }
-    public TimeZoneInfo TimeZoneInfo { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string MobilePhone { get; set; }
+    public string Name { get; init; }
+    public string Address { get; init; }
+    public CultureInfo Culture { get; init; }
+    public TimeZoneInfo TimeZoneInfo { get; init; }
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+    public string Email { get; init; }
+    public string MobilePhone { get; init; }
     public string PasswordHash { get; set; }
     public EmployeeActivationStatus ActivationStatus { get; set; }
     public string HostedRegion { get; set; }
     public string PartnerId { get; set; }
     public string AffiliateId { get; set; }
-    public TenantIndustry Industry { get; set; }
-    public bool Spam { get; set; }
-    public bool Calls { get; set; }
+    public TenantIndustry Industry { get; init; }
+    public bool Spam { get; init; }
+    public bool Calls { get; init; }
     public string Campaign { get; set; }
     public bool LimitedAccessSpace { get; set; }
 

@@ -51,7 +51,7 @@ public abstract class TfaSettingsHelperBase<T> where T : TfaSettingsBase<T>, new
     private readonly SettingsManager _settingsManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public TfaSettingsHelperBase(
+    protected TfaSettingsHelperBase(
         SettingsManager settingsManager,
         IHttpContextAccessor httpContextAccessor,
         UserManager userManager)

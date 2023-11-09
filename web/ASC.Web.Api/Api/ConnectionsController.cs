@@ -100,7 +100,7 @@ public class ConnectionsController : ControllerBase
         var loginEventId = GetLoginEventIdFromCookie();
         if (loginEventId != 0)
         {
-            var loginEvent = listLoginEvents.FirstOrDefault(x => x.Id == loginEventId);
+            var loginEvent = listLoginEvents.Find(x => x.Id == loginEventId);
             if (loginEvent != null)
             {
                 listLoginEvents.Remove(loginEvent);
@@ -109,7 +109,7 @@ public class ConnectionsController : ControllerBase
         }
         else
         {
-            if (listLoginEvents.Count == 0)
+            if (listLoginEvents.Count == 0 && _httpContextAccessor.HttpContext != null)
             {
                 var request = _httpContextAccessor.HttpContext.Request;
                 var uaHeader = MessageSettings.GetUAHeader(request);

@@ -64,7 +64,7 @@ public class SettingsController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
     {
-        (var succ, var tenantId, var error) = await GetTenantAsync(model);
+        var (succ, tenantId, error) = await GetTenantAsync(model);
         if (!succ)
         {
             return BadRequest(error);
@@ -91,7 +91,7 @@ public class SettingsController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
     {
-        (var succ, var tenantId, var error) = await GetTenantAsync(model);
+        var (succ, tenantId, error) = await GetTenantAsync(model);
         if (!succ)
         {
             return BadRequest(error);
@@ -193,14 +193,14 @@ public class SettingsController : ControllerBase
             return (false, tenantId, error);
         }
 
-        if (model.TenantId.HasValue && model.TenantId.Value == -1)
+        if (model.TenantId is -1)
         {
             tenantId = model.TenantId.Value;
-            return (true, tenantId, error);
+            return (true, tenantId, null);
         }
 
-        (var succ, var tenant) = await CommonMethods.TryGetTenantAsync(model);
-        if (!succ)
+        var (success, tenant) = await CommonMethods.TryGetTenantAsync(model);
+        if (!success)
         {
             error = new
             {
@@ -227,7 +227,7 @@ public class SettingsController : ControllerBase
         }
 
         tenantId = tenant.Id;
-        return (true, tenantId, error);
+        return (true, tenantId, null);
     }
 
     #endregion

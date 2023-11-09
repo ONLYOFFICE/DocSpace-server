@@ -49,8 +49,8 @@ public class PortalController : ControllerBase
     private readonly TimeZoneConverter _timeZoneConverter;
     private readonly PasswordHasher _passwordHasher;
     private readonly CspSettingsHelper _cspSettingsHelper;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly ILogger<PortalController> _log;
+    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly QuotaUsageManager _quotaUsageManager;
 
     public PortalController(
@@ -90,8 +90,8 @@ public class PortalController : ControllerBase
         _timeZoneConverter = timeZoneConverter;
         _passwordHasher = passwordHasher;
         _cspSettingsHelper = cspSettingsHelper;
-        _coreBaseSettings = coreBaseSettings;
         _log = option;
+        _coreBaseSettings = coreBaseSettings;
         _quotaUsageManager = quotaUsageManager;
     }
 
@@ -225,6 +225,7 @@ public class PortalController : ControllerBase
             Industry = (TenantIndustry)model.Industry,
             Spam = model.Spam,
             Calls = model.Calls,
+            HostedRegion = model.Region
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
@@ -243,20 +244,19 @@ public class PortalController : ControllerBase
         }
 
         Tenant t;
-
         try
-        {
+        {    
             /****REGISTRATION!!!*****/
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await _apiSystemHelper.AddTenantToCacheAsync(info.Address, _securityContext.CurrentAccount.ID);
+                await _apiSystemHelper.AddTenantToCacheAsync(info.Address, info.HostedRegion);
 
                 _log.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
             }
 
             t = await _hostedSolution.RegisterTenantAsync(info);
             _tenantManager.SetCurrentTenant(t);
-            await _cspSettingsHelper.Save(null, true);
+            await _cspSettingsHelper.SaveAsync(null, true);
             /*********/
 
             _log.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
@@ -288,7 +288,7 @@ public class PortalController : ControllerBase
 
                 var tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new Quota(trialQuotaId, 1) },
+                    Quotas = new List<Quota> { new(trialQuotaId, 1) },
                     DueDate = dueDate
                 };
                 await _hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -339,7 +339,7 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
-        (var succ, var tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             _log.LogError("Model without tenant");
@@ -375,7 +375,7 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
-        (var succ, var tenant) = await _commonMethods.TryGetTenantAsync(model);
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
             _log.LogError("Model without tenant");
@@ -509,14 +509,14 @@ public class PortalController : ControllerBase
 
     #region Validate Method
 
-    private async Task ValidateDomainAsync(string domain)
+    private async Task ValidateTenantAliasAsync(string alias)
     {
         // size
-        _tenantDomainValidator.ValidateDomainLength(domain);
+        _tenantDomainValidator.ValidateDomainLength(alias);
         // characters
-        _tenantDomainValidator.ValidateDomainCharacters(domain);
+        _tenantDomainValidator.ValidateDomainCharacters(alias);
 
-        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(domain, _securityContext.CurrentAccount.ID);
+        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(alias);
 
         if (sameAliasTenants != null)
         {
@@ -535,9 +535,9 @@ public class PortalController : ControllerBase
 
         try
         {
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await ValidateDomainAsync(portalName.Trim());
+                await ValidateTenantAliasAsync(portalName.Trim());
             }
             else
             {
@@ -567,7 +567,7 @@ public class PortalController : ControllerBase
             return (false, error);
         }
 
-        return (true, error);
+        return (true, null);
     }
 
     private bool CheckValidName(string name, out object error)

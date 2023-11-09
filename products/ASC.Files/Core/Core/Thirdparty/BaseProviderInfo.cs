@@ -31,7 +31,7 @@ public class BaseProviderInfo<TFile, TFolder, TItem>
     where TFolder : class, TItem
     where TItem : class
 {
-    public IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
+    public IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; init; }
     public string Path { get; set; }
-    public string PathPrefix { get; set; }
+    public string PathPrefix { get; init; }
 }

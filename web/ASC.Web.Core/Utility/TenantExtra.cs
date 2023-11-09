@@ -93,9 +93,9 @@ public class TenantExtra
         return Enterprise && (await GetCurrentTariffAsync(withRequestToPaymentSystem)).State < TariffState.NotPaid;
     }
 
-    public async Task<Tariff> GetCurrentTariffAsync(bool withRequestToPaymentSystem = true)
+    public async Task<Tariff> GetCurrentTariffAsync(bool withRequestToPaymentSystem = true, bool refresh = false)
     {
-        return await _tariffService.GetTariffAsync(await _tenantManager.GetCurrentTenantIdAsync(), withRequestToPaymentSystem);
+        return await _tariffService.GetTariffAsync(await _tenantManager.GetCurrentTenantIdAsync(), withRequestToPaymentSystem, refresh);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
@@ -120,10 +120,14 @@ public class TenantExtra
 
     public async Task<bool> IsNotPaidAsync(bool withRequestToPaymentSystem = true)
     {
-        Tariff tariff;
-        return EnableTariffSettings
-               && ((tariff = (await GetCurrentTariffAsync(withRequestToPaymentSystem))).State >= TariffState.NotPaid
-                   || Enterprise && !(await EnterprisePaidAsync(withRequestToPaymentSystem)) && tariff.LicenseDate == DateTime.MaxValue);
+        if (!EnableTariffSettings)
+        {
+            return false;
+        }
+
+        var tariff = await GetCurrentTariffAsync(withRequestToPaymentSystem);
+        
+        return tariff.State >= TariffState.NotPaid || Enterprise && !(await EnterprisePaidAsync(withRequestToPaymentSystem)) && tariff.LicenseDate == DateTime.MaxValue;
     }
 
     /// <summary>

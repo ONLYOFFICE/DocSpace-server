@@ -68,8 +68,8 @@ public class EncryptionKeyPairDtoHelper
 
     public async Task SetKeyPairAsync(string publicKey, string privateKeyEnc)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(publicKey);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(privateKeyEnc);
+        ArgumentException.ThrowIfNullOrEmpty(publicKey);
+        ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
         var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         if (!_authContext.IsAuthenticated || await _userManager.IsUserAsync(user))
@@ -136,7 +136,7 @@ public class EncryptionKeyPairDtoHelper
             throw new NotSupportedException();
         }
 
-        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T> { });
+        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
         fileShares = fileShares.Where(share => !share.SubjectGroup
                                         && !share.Id.Equals(FileConstant.ShareLinkId)

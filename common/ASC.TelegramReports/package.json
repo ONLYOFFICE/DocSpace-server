@@ -71,5 +71,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "engines": {
+    "node": ">=18",
+    "yarn": ">=3"
+  },
+  "packageManager": "yarn@3.2.4"
 }

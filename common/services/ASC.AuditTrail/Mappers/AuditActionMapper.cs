@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Mappers;
 
-[Singletone]
+[Singleton]
 public class AuditActionMapper
 {
     public List<IProductActionMapper> Mappers { get; }

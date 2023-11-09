@@ -32,7 +32,7 @@ public class CustomSynchronizationContext
 {
     public IPrincipal CurrentPrincipal { get; set; }
 
-    private readonly static AsyncLocal<CustomSynchronizationContext> _context = new AsyncLocal<CustomSynchronizationContext>();
+    private readonly static AsyncLocal<CustomSynchronizationContext> _context = new();
     public static CustomSynchronizationContext CurrentContext => _context.Value;
 
     public static void CreateContext()

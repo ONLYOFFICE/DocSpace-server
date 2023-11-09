@@ -26,7 +26,7 @@
 
 namespace ASC.Notify;
 
-[Singletone]
+[Singleton]
 public sealed class Context : INotifyRegistry
 {
     public const string SysRecipient = "_#" + SysRecipientId + "#_";
@@ -34,7 +34,7 @@ public sealed class Context : INotifyRegistry
     internal const string SysRecipientName = "SYS_RECIPIENT_NAME";
     internal const string SysRecipientAddress = "SYS_RECIPIENT_ADDRESS";
 
-    private readonly Dictionary<string, ISenderChannel> _channels = new Dictionary<string, ISenderChannel>(2);
+    private readonly Dictionary<string, ISenderChannel> _channels = new(2);
 
     public void RegisterSender(DispatchEngine dispatchEngine, string senderName, ISink senderSink)
     {

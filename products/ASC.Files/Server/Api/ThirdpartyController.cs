@@ -252,7 +252,7 @@ public class ThirdpartyController : ApiControllerBase
             var blogId = JObject.Parse(meInfo).Value<string>("token_site_id");
             var wordpressUserName = JObject.Parse(meInfo).Value<string>("username");
 
-            var blogInfo = _requestHelper.PerformRequest(WordpressLoginProvider.WordpressSites + blogId, "", "GET", "");
+            var blogInfo = _requestHelper.PerformRequest(WordpressLoginProvider.WordpressSites + blogId);
             var jsonBlogInfo = JObject.Parse(blogInfo);
             jsonBlogInfo.Add("username", wordpressUserName);
 
@@ -286,8 +286,8 @@ public class ThirdpartyController : ApiControllerBase
         var thirdPartyParams = new ThirdPartyParams
         {
             AuthData = new AuthData(inDto.Url, inDto.Login, inDto.Password, inDto.Token),
-            Corporate = inDto.IsRoomsStorage ? false : inDto.IsCorporate,
-            RoomsStorage = inDto.IsCorporate ? false : inDto.IsRoomsStorage,
+            Corporate = !inDto.IsRoomsStorage && inDto.IsCorporate,
+            RoomsStorage = !inDto.IsCorporate && inDto.IsRoomsStorage,
             CustomerTitle = inDto.CustomerTitle,
             ProviderId = inDto.ProviderId,
             ProviderKey = inDto.ProviderKey,
@@ -357,7 +357,7 @@ public class ThirdpartyController : ApiControllerBase
 
             var wordpressUserName = JObject.Parse(meInfo).Value<string>("username");
 
-            var blogInfo = _requestHelper.PerformRequest(WordpressLoginProvider.WordpressSites + blogId, "", "GET", "");
+            var blogInfo = _requestHelper.PerformRequest(WordpressLoginProvider.WordpressSites + blogId);
             var jsonBlogInfo = JObject.Parse(blogInfo);
             jsonBlogInfo.Add("username", wordpressUserName);
 

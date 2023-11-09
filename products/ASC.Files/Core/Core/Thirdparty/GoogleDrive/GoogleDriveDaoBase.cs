@@ -41,7 +41,7 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         FileUtility fileUtility,
         TempPath tempPath,
         AuthContext authContext,
-        RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
+        RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
     {
     }
 

@@ -114,12 +114,12 @@
               &lt;a href="mailto:sales@onlyoffice.com" estilo="color: #333;"&gt; Envíenos un correo electrónico &lt;/a&gt;
             &lt;/ td&gt;
             &lt;td estilo= "alineación vertical: superior; margen: 0; relleno: 0 0 30px; ancho: 210px; fondo: # f6f6f6; -moz-borde-radio-inferiorderecha: 6px; -webkit-borde-inferior-derecha- radio: 6px; borde-inferior-derecho-radio: 6px; "&gt;
-              &lt;a href="http://www.onlyoffice.com/demo-order.aspx" destino="_en blanco" estilo="color: #333;"&gt; Enviar una solicitud &lt;/a&gt;
+              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" destino="_en blanco" estilo="color: #333;"&gt; Enviar una solicitud &lt;/a&gt;
             &lt;/ td&gt;
         &lt;/ tr&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
-    <value>&lt;body style="margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;
+    <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;
 &lt;div style="background-color: #fff; width: 600px; margin: 0 auto; text-align: center;"&gt;
     &lt;table cellspacing="0" cellpadding="0" style="font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border: 0 none; border-collapse: collapse; empty-cells: show; border-spacing: 0;"&gt;
       &lt;tbody&gt;
@@ -181,7 +181,7 @@
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
     <value>Este correo electrónico se ha generado automáticamente y no es necesario que lo responda.&lt;br /&gt;Ha recibido este correo electrónico porque es un usuario registrado de&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Haga clic aquí para cancelar su suscripción a los correos electrónicos de notificación de DocSpace: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Cancelar suscripción&lt;/a&gt;
+&lt;br /&gt; Haga clic aquí para cancelar su suscripción a los correos electrónicos de notificación de DocSpace: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Cancelar suscripción&lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">

@@ -39,13 +39,13 @@ public class TenantManager
     internal IQuotaService QuotaService { get; set; }
     internal ITariffService TariffService { get; set; }
 
-    private static readonly List<string> _thisCompAddresses = new List<string>();
+    private static readonly List<string> _thisCompAddresses = new();
 
     internal IHttpContextAccessor HttpContextAccessor { get; set; }
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal CoreSettings CoreSettings { get; set; }
 
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     static TenantManager()
     {
@@ -105,11 +105,6 @@ public class TenantManager
     public async Task<Tenant> GetTenantAsync(int tenantId)
     {
         return await TenantService.GetTenantAsync(tenantId);
-    }
-
-    public Tenant GetTenant(int tenantId)
-    {
-        return TenantService.GetTenant(tenantId);
     }
 
     public async Task<Tenant> GetTenantAsync(string domain)
@@ -214,16 +209,6 @@ public class TenantManager
         await TenantService.RemoveTenantAsync(tenantId, auto);
     }
 
-    public async Task<Tenant> GetCurrentTenantAsync(HttpContext context)
-    {
-        return await GetCurrentTenantAsync(true, context);
-    }
-
-    public Tenant GetCurrentTenant(HttpContext context)
-    {
-        return GetCurrentTenant(true, context);
-    }
-
     public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
     {
         if (_currentTenant != null)
@@ -266,7 +251,7 @@ public class TenantManager
         return tenant;
     }
 
-    public Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
+    private Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
     {
         if (_currentTenant != null)
         {
@@ -318,17 +303,12 @@ public class TenantManager
         return (await GetCurrentTenantAsync(true)).Id;
     }
 
-    public Tenant GetCurrentTenant()
-    {
-        return GetCurrentTenant(true);
-    }
-
     public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
     {
         return await GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
-
-    public Tenant GetCurrentTenant(bool throwIfNotFound)
+    
+    public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         return GetCurrentTenant(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
@@ -387,7 +367,7 @@ public class TenantManager
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
     {
-        return await GetTenantQuotaAsync((await GetCurrentTenantAsync()).Id, refresh);
+        return await GetTenantQuotaAsync(await GetCurrentTenantIdAsync(), refresh);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant, bool refresh = false)
@@ -455,10 +435,6 @@ public class TenantManager
             await _semaphore.WaitAsync();
             await QuotaService.SetTenantQuotaRowAsync(row, exchange);
         }
-        catch
-        {
-            throw;
-    }
         finally
         {
             _semaphore.Release();

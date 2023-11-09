@@ -40,7 +40,7 @@ public class MailDomainSettingsRequestsDto
 
     /// <summary>Invites as a user or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool InviteAsUsers { get; set; }
+    public bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>

@@ -89,7 +89,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
     public static ApiDateTime Parse(string data, TimeZoneInfo tz, TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(data);
+        ArgumentException.ThrowIfNullOrEmpty(data);
 
         var offsetPart = data.Substring(data.Length - 6, 6);
         if (DateTime.TryParseExact(data, Formats, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))

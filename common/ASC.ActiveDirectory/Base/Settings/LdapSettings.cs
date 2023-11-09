@@ -78,7 +78,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         Mail
     }
 
-    public static readonly Dictionary<AccessRight, Guid> AccessRightsGuids = new Dictionary<AccessRight, Guid>()
+    public static readonly Dictionary<AccessRight, Guid> AccessRightsGuids = new()
         {
             { AccessRight.FullAccess, Guid.Empty },
             { AccessRight.Documents, WebItemManager.DocumentsProductID },

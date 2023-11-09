@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
 {
     private IProducer<AscCacheItem, T> _producer;
@@ -37,10 +37,10 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelationToken;
     private readonly ConcurrentDictionary<string, Action<T>> _actions;
-    private readonly ProtobufSerializer<T> _valueSerializer = new ProtobufSerializer<T>();
-    private readonly ProtobufDeserializer<T> _valueDeserializer = new ProtobufDeserializer<T>();
-    private readonly ProtobufSerializer<AscCacheItem> _keySerializer = new ProtobufSerializer<AscCacheItem>();
-    private readonly ProtobufDeserializer<AscCacheItem> _keyDeserializer = new ProtobufDeserializer<AscCacheItem>();
+    private readonly ProtobufSerializer<T> _valueSerializer = new();
+    private readonly ProtobufDeserializer<T> _valueDeserializer = new();
+    private readonly ProtobufSerializer<AscCacheItem> _keySerializer = new();
+    private readonly ProtobufDeserializer<AscCacheItem> _keyDeserializer = new();
     private readonly Guid _key;
 
     public KafkaCacheNotify(ConfigurationExtension configuration, ILogger<KafkaCacheNotify<T>> logger)
@@ -163,7 +163,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
                     await adminClient.CreateTopicsAsync(
                         new TopicSpecification[]
                         {
-                                new TopicSpecification
+                                new()
                                 {
                                     Name = channelName,
                                     NumPartitions = 1,
@@ -189,7 +189,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
                     try
                     {
                         var cr = c.Consume(_cancelationToken[channelName].Token);
-                        if (cr != null && cr.Message != null && cr.Message.Value != null && !(new Guid(cr.Message.Key.Id)).Equals(_key) && _actions.TryGetValue(channelName, out var act))
+                        if (cr is { Message: not null } && cr.Message.Value != null && !(new Guid(cr.Message.Key.Id)).Equals(_key) && _actions.TryGetValue(channelName, out var act))
                         {
                             try
                             {

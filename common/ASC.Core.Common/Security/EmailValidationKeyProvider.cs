@@ -42,7 +42,7 @@ public class EmailValidationKeyProvider
     public TimeSpan ValidVisitLinkInterval { get; }
 
     private readonly ILogger<EmailValidationKeyProvider> _logger;
-    private static readonly DateTime _from = new DateTime(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime _from = new(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
     private readonly MachinePseudoKeys _machinePseudoKeys;
     private readonly TenantManager _tenantManager;
 
@@ -81,7 +81,7 @@ public class EmailValidationKeyProvider
 
     public string GetEmailKey(int tenantId, string email)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
 
         email = FormatEmail(tenantId, email);
 
@@ -122,7 +122,7 @@ public class EmailValidationKeyProvider
 
     private async Task<ValidationResult> ValidateEmailKeyInternalAsync(string email, string key, TimeSpan validInterval)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
 
         email = FormatEmail(await _tenantManager.GetCurrentTenantIdAsync(), email);
@@ -174,39 +174,39 @@ public class EmailValidationKeyModel
 {
     /// <summary>Key</summary>
     /// <type>System.String, System</type>
-    public string Key { get; set; }
+    public string Key { get; init; }
 
     /// <summary>Employee type</summary>
     /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
-    public EmployeeType? EmplType { get; set; }
+    public EmployeeType? EmplType { get; init; }
 
     /// <summary>Email</summary>
     /// <type>System.String, System</type>
-    public string Email { get; set; }
+    public string Email { get; init; }
 
     /// <summary>User ID</summary>
     /// <type>System.Nullabel{System.Guid}, System</type>
-    public Guid? UiD { get; set; }
+    public Guid? UiD { get; init; }
 
     /// <summary>Confirmation email type</summary>
     /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
-    public ConfirmType? Type { get; set; }
+    public ConfirmType? Type { get; init; }
 
     /// <summary>Module</summary>
     /// <type>System.String, System</type>
-    public string Module { get; set; }
+    public string Module { get; init; }
 
     /// <summary>Access an account for the first time or not</summary>
     /// <type>System.String, System</type>
-    public string First { get; set; }
+    public string First { get; init; }
 
     /// <summary>Sends SMS code or not</summary>
     /// <type>System.String, System</type>
-    public string Sms { get; set; }
+    public string Sms { get; init; }
 
     /// <summary>Room ID</summary>
     /// <type>System.String, System</type>
-    public string RoomId { get; set; }
+    public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string module, out string first, out string sms, out string roomId)
     {

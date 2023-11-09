@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,39 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Text.Json.Serialization;
+namespace ASC.Web.Core.WhiteLabel;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Auth;
-global using ASC.Api.Core.Core;
-global using ASC.Api.Core.Extensions;
-global using ASC.ApiCache;
-global using ASC.ApiCache.Helpers;
-global using ASC.ApiCache.Models;
-global using ASC.Common;
-global using ASC.Common.Logging;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Context;
-global using ASC.Core.Common.EF.Teamlabsite.Context;
-global using ASC.Core.Common.EF.Teamlabsite.Model;
-global using ASC.Core.Common.Hosting;
-global using ASC.Core.Tenants;
-global using ASC.EventBus.Extensions.Logger;
-global using ASC.Feed.Context;
-global using ASC.MessagingSystem.EF.Context;
-global using ASC.Web.Core.Helpers;
-global using ASC.Webhooks.Core;
-global using ASC.Webhooks.Core.EF.Context;
-
-global using Autofac;
-
-global using HealthChecks.UI.Client;
-
-global using Microsoft.AspNetCore.Authentication;
-global using Microsoft.AspNetCore.Authorization;
-global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.Extensions.DependencyInjection.Extensions;
-global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using NLog;
+public enum WhiteLabelLogoType
+{
+    LightSmall = 1,
+    LoginPage = 2,
+    Favicon = 3,
+    DocsEditor = 4,
+    DocsEditorEmbed = 5,
+    LeftMenu = 6,
+    AboutPage = 7,
+    Notification = 8
+}

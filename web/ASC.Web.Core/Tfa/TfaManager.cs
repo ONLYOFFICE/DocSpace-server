@@ -56,7 +56,7 @@ public class BackupCode
 [Scope]
 public class TfaManager
 {
-    private static readonly TwoFactorAuthenticator _tfa = new TwoFactorAuthenticator();
+    private static readonly TwoFactorAuthenticator _tfa = new();
     private ICache Cache { get; set; }
 
     private readonly SettingsManager _settingsManager;
@@ -143,7 +143,7 @@ public class TfaManager
         if (!_securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;
-            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id, action);
+            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))

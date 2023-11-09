@@ -32,7 +32,7 @@ public class SchemaRequestsDto
 {
     /// <summary>Team template ID</summary>
     /// <type>System.String, System</type>
-    public string Id { get; set; }
+    public string Id { get; init; }
 
     /// <summary>Team template name</summary>
     /// <type>System.String, System</type>
@@ -40,37 +40,37 @@ public class SchemaRequestsDto
 
     /// <summary>User caption</summary>
     /// <type>System.String, System</type>
-    public string UserCaption { get; set; }
+    public string UserCaption { get; init; }
 
     /// <summary>Users caption</summary>
     /// <type>System.String, System</type>
-    public string UsersCaption { get; set; }
+    public string UsersCaption { get; init; }
 
     /// <summary>Group caption</summary>
     /// <type>System.String, System</type>
-    public string GroupCaption { get; set; }
+    public string GroupCaption { get; init; }
 
     /// <summary>Groups caption</summary>
     /// <type>System.String, System</type>
-    public string GroupsCaption { get; set; }
+    public string GroupsCaption { get; init; }
 
     /// <summary>User status caption</summary>
     /// <type>System.String, System</type>
-    public string UserPostCaption { get; set; }
+    public string UserPostCaption { get; init; }
 
     /// <summary>Registration date caption</summary>
     /// <type>System.String, System</type>
-    public string RegDateCaption { get; set; }
+    public string RegDateCaption { get; init; }
 
     /// <summary>Group lead caption</summary>
     /// <type>System.String, System</type>
-    public string GroupHeadCaption { get; set; }
+    public string GroupHeadCaption { get; init; }
 
     /// <summary>Guest caption</summary>
     /// <type>System.String, System</type>
-    public string GuestCaption { get; set; }
+    public string GuestCaption { get; init; }
 
     /// <summary>Guests caption</summary>
     /// <type>System.String, System</type>
-    public string GuestsCaption { get; set; }
+    public string GuestsCaption { get; init; }
 }

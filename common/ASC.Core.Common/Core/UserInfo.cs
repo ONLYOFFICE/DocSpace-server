@@ -145,7 +145,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 
     /// <summary>LDAP user quota attribute</summary>
     /// <type>System.Int64, System</type>
-    public long LdapQouta { get; set; } // LDAP user quota attribute
+    public long LdapQouta { get; init; } // LDAP user quota attribute
 
     /// <summary>SSO SAML user identificator</summary>
     /// <type>System.String, System</type>

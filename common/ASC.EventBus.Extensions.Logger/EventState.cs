@@ -24,15 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiCache;
+namespace ASC.EventBus.Extensions.Logger;
 
-public static class ConfigurationManagerExtension
+public enum EventState
 {
-    public static ConfigurationManager AddApiCacheConfiguration(this ConfigurationManager config)
-    {
-        config
-          .AddJsonFile($"apicache.json");
-
-        return config;
-    }
+    NotPublished = 0,
+    InProgress = 1,
+    Published = 2,
+    PublishedFailed = 3
 }
+

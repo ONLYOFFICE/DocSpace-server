@@ -31,7 +31,7 @@ namespace ASC.Notify.Model;
 [Transient]
 class NotifyClientImpl : INotifyClient
 {
-    private readonly InterceptorStorage _interceptors = new InterceptorStorage();
+    private readonly InterceptorStorage _interceptors = new();
     private readonly ILoggerProvider _loggerFactory;
     private INotifySource _notifySource;
     private readonly NotifyEngine _notifyEngine;

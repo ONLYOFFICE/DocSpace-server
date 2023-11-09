@@ -35,7 +35,7 @@ public enum UpdateAction
     Remove
 }
 
-[Singletone]
+[Singleton]
 public class BaseIndexerHelper
 {
     public ConcurrentDictionary<string, bool> IsExist { get; set; }
@@ -48,7 +48,7 @@ public class BaseIndexerHelper
         _notify = cacheNotify;
         _notify.Subscribe((a) =>
         {
-            IsExist.AddOrUpdate(a.Id, false, (string q, bool w) => false);
+            IsExist.AddOrUpdate(a.Id, false, (_, _) => false);
         }, CacheNotifyAction.Any);
     }
 
@@ -74,7 +74,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private readonly BaseIndexerHelper _baseIndexerHelper;
     private readonly Settings _settings;
     private readonly IServiceProvider _serviceProvider;
-    private static readonly object _locker = new object();
+    private static readonly object _locker = new();
 
     public BaseIndexer(
         Client client,
@@ -99,7 +99,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {
-        await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
         var now = DateTime.UtcNow;
         var lastIndexed = await Queries.LastIndexedAsync(webstudioDbContext, Wrapper.IndexName);
 
@@ -206,7 +206,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     internal async Task IndexAsync(T data, bool immediately = true)
     {
-        if (!(await BeforeIndex(data)))
+        if (!(await BeforeIndexAsync(data)))
         {
             return;
         }
@@ -237,7 +237,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 var t = data[i];
                 var runBulk = i == data.Count - 1;
 
-                await BeforeIndex(t);
+                await BeforeIndexAsync(t);
 
                 if (t is not ISearchItemDocument wwd || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
                 {
@@ -258,6 +258,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                             {
                                 throw;
                             }
+                            
                             _logger.ErrorIndex(e);
                         }
                         catch (Exception e)
@@ -268,7 +269,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
                         {
                             wwd.Document.Data = null;
                             wwd.Document = null;
-                            wwd = null;
                             GC.Collect();
                         }
 
@@ -290,10 +290,10 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 if (runBulk)
                 {
                     var portion1 = portion.ToList();
-                    _client.Instance.Bulk(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                    await _client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
                     for (var j = portionStart; j < i; j++)
                     {
-                        if (data[j] is ISearchItemDocument doc && doc.Document != null)
+                        if (data[j] is ISearchItemDocument { Document: not null } doc)
                         {
                             doc.Document.Data = null;
                             doc.Document = null;
@@ -312,10 +312,10 @@ public class BaseIndexer<T> where T : class, ISearchItem
         {
             foreach (var item in data)
             {
-                await BeforeIndex(item);
+                await BeforeIndexAsync(item);
             }
 
-            _client.Instance.Bulk(r => r.IndexMany(data, GetMeta));
+            await _client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
         }
     }
 
@@ -421,11 +421,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
         return (result.Documents, total);
     }
 
-    protected virtual Task<bool> BeforeIndex(T data)
-    {
-        return Task.FromResult(CheckExist(data));
-    }
-
     protected virtual Task<bool> BeforeIndexAsync(T data)
     {
         return Task.FromResult(CheckExist(data));
@@ -433,7 +428,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     private async Task ClearAsync()
     {
-        await using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
         var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (index != null)
@@ -443,7 +438,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
         }
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
-        _client.Instance.Indices.Delete(Wrapper.IndexName);
+        await _client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
         _baseIndexerHelper.Clear(Wrapper);
         CreateIfNotExist(Wrapper);
     }
@@ -468,7 +463,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     {
         var result = desc.Index(IndexName).Id(data.Id);
 
-        if (data is ISearchItemDocument doc && doc.Document != null)
+        if (data is ISearchItemDocument { Document: not null })
         {
             result.Pipeline("attachments");
         }
@@ -606,19 +601,16 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 }
                 break;
             default:
-                throw new ArgumentOutOfRangeException("action", action, null);
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
     }
 
     private string TryGetName(Expression expr, out MemberExpression member)
     {
         member = expr as MemberExpression;
-        if (member == null)
+        if (member == null && expr is UnaryExpression unary)
         {
-            if (expr is UnaryExpression unary)
-            {
-                member = unary.Operand as MemberExpression;
-            }
+            member = unary.Operand as MemberExpression;
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();

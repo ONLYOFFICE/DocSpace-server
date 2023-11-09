@@ -159,7 +159,7 @@ public class CommonMethods
             return (true, tenant);
         }
 
-        if (model != null && model.TenantId.HasValue)
+        if (model is { TenantId: not null })
         {
             tenant = await _hostedSolution.GetTenantAsync(model.TenantId.Value);
             return (true, tenant);
@@ -171,7 +171,7 @@ public class CommonMethods
             return (true, tenant);
         }
 
-        return (false, tenant);
+        return (false, null);
     }
 
     public async Task<List<Tenant>> GetTenantsAsync(TenantModel model)
@@ -269,7 +269,7 @@ public class CommonMethods
             return false;
         }
 
-        _log.LogDebug("PortalName = {0}; Too much reqests from ip: {1}", model.PortalName, clientIP);
+        _log.LogDebug("PortalName = {PortalName}; Too much requests from ip: {Ip}", model.PortalName, clientIP);
         sw.Stop();
 
         return true;
@@ -277,7 +277,7 @@ public class CommonMethods
 
     public string GetClientIp()
     {
-        return _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+        return _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version
 

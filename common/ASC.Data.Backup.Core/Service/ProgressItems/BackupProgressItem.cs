@@ -30,8 +30,8 @@ namespace ASC.Data.Backup.Services;
 [Transient]
 public class BackupProgressItem : BaseBackupProgressItem
 {
-    public Dictionary<string, string> StorageParams { get; set; }
-    public string TempFolder { get; set; }
+    private Dictionary<string, string> _storageParams;
+    private string _tempFolder;
 
     private bool _isScheduled;
     private Guid _userId;
@@ -39,12 +39,6 @@ public class BackupProgressItem : BaseBackupProgressItem
     private string _storageBasePath;
     private int _limit;
     private bool _dump;
-
-    private TenantManager _tenantManager;
-    private BackupStorageFactory _backupStorageFactory;
-    private BackupRepository _backupRepository;
-    private BackupPortalTask _backupPortalTask;
-    private TempStream _tempStream;
     private readonly ILogger<BackupProgressItem> _logger;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly NotifyHelper _notifyHelper;
@@ -67,9 +61,9 @@ public class BackupProgressItem : BaseBackupProgressItem
         TenantId = schedule.TenantId;
         _storageType = schedule.StorageType;
         _storageBasePath = schedule.StorageBasePath;
-        StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams);
+        _storageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams);
         _isScheduled = isScheduled;
-        TempFolder = tempFolder;
+        _tempFolder = tempFolder;
         _limit = limit;
         _dump = schedule.Dump;
     }
@@ -80,9 +74,9 @@ public class BackupProgressItem : BaseBackupProgressItem
         TenantId = request.TenantId;
         _storageType = request.StorageType;
         _storageBasePath = request.StorageBasePath;
-        StorageParams = request.StorageParams.ToDictionary(r => r.Key, r => r.Value);
+        _storageParams = request.StorageParams.ToDictionary(r => r.Key, r => r.Value);
         _isScheduled = isScheduled;
-        TempFolder = tempFolder;
+        _tempFolder = tempFolder;
         _limit = limit;
         _dump = request.Dump;
     }
@@ -91,39 +85,39 @@ public class BackupProgressItem : BaseBackupProgressItem
     {
         await using var scope = _serviceScopeProvider.CreateAsyncScope();
 
-        _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
-        _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
-        _backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
-        _tempStream = scope.ServiceProvider.GetService<TempStream>();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
+        var backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
+        var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
+        var tempStream = scope.ServiceProvider.GetService<TempStream>();
 
         var dateTime = _coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
-        string hash;
         var tempFile = "";
         var storagePath = "";
 
         try
         {
-            var backupStorage = await _backupStorageFactory.GetBackupStorageAsync(_storageType, TenantId, StorageParams);
+            var backupStorage = await backupStorageFactory.GetBackupStorageAsync(_storageType, TenantId, _storageParams);
 
             var getter = backupStorage as IGetterWriteOperator;
-            var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", (await _tenantManager.GetTenantAsync(TenantId)).Alias, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
+            var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", (await tenantManager.GetTenantAsync(TenantId)).Alias, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
 
-            tempFile = CrossPlatform.PathCombine(TempFolder, backupName);
+            tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
             storagePath = tempFile;
 
-            var writer = await DataOperatorFactory.GetWriteOperatorAsync(_tempStream, _storageBasePath, backupName, TempFolder, _userId, getter);
+            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, getter);
 
-            _backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
+            backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
 
-            _backupPortalTask.ProgressChanged += (sender, args) =>
+            backupPortalTask.ProgressChanged += (_, args) =>
             {
                 Percentage = 0.9 * args.Progress;
                 PublishChanges();
             };
 
-            await _backupPortalTask.RunJob();
+            await backupPortalTask.RunJob();
 
+            string hash;
             if (writer.NeedUpload)
             {
                 storagePath = await backupStorage.UploadAsync(_storageBasePath, tempFile, _userId);
@@ -136,7 +130,7 @@ public class BackupProgressItem : BaseBackupProgressItem
             }
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
-            var repo = _backupRepository;
+            var repo = backupRepository;
 
             await repo.SaveBackupRecordAsync(
                 new BackupRecord
@@ -150,7 +144,7 @@ public class BackupProgressItem : BaseBackupProgressItem
                     StoragePath = storagePath,
                     CreatedOn = DateTime.UtcNow,
                     ExpiresOn = _storageType == BackupStorageType.DataStore ? DateTime.UtcNow.AddDays(1) : DateTime.MinValue,
-                    StorageParams = JsonConvert.SerializeObject(StorageParams),
+                    StorageParams = JsonConvert.SerializeObject(_storageParams),
                     Hash = hash,
                     Removed = false
                 });

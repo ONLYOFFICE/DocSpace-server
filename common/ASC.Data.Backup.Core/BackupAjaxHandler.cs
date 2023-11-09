@@ -211,9 +211,7 @@ public class BackupAjaxHandler
     {
         await DemandPermissionsBackupAsync();
 
-        ScheduleResponse response;
-
-        response = await _backupService.GetScheduleAsync(await GetCurrentTenantIdAsync());
+        var response = await _backupService.GetScheduleAsync(await GetCurrentTenantIdAsync());
         if (response == null)
         {
             return null;
@@ -222,7 +220,7 @@ public class BackupAjaxHandler
         var schedule = new Schedule
         {
             StorageType = response.StorageType,
-            StorageParams = response.StorageParams.ToDictionary(r => r.Key, r => r.Value) ?? new Dictionary<string, string>(),
+            StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
             CronParams = new CronParams(response.Cron),
             BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
             LastBackupTime = response.LastBackupTime,
@@ -277,7 +275,7 @@ public class BackupAjaxHandler
 
     private async Task DemandPermissionsBackupAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!_coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
         {
@@ -322,17 +320,15 @@ public class BackupAjaxHandler
 
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        BackupProgress result;
-
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        result = _backupService.GetRestoreProgress(tenant.Id);
+        var result = _backupService.GetRestoreProgress(tenant.Id);
 
         return result;
     }
 
     public async Task DemandPermissionsRestoreAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var quota = await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync());
         if (!SetupInfo.IsVisibleSettings("Restore") ||
@@ -352,7 +348,7 @@ public class BackupAjaxHandler
 
     public async Task DemandPermissionsAutoBackupAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup") ||
             (!_coreBaseSettings.Standalone && !(await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync())).AutoBackupRestore))
@@ -387,7 +383,7 @@ public class BackupAjaxHandler
 
     private async Task DemandPermissionsTransferAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.Migration))
@@ -442,11 +438,11 @@ public class BackupAjaxHandler
 
         /// <summary>Cron parameters</summary>
         /// <type>ASC.Data.Backup.BackupAjaxHandler.CronParams, ASC.Data.Backup.Core</type>
-        public CronParams CronParams { get; set; }
+        public CronParams CronParams { get; init; }
 
         /// <summary>Maximum number of the stored backup copies</summary>
         /// <type>System.Nullable{System.Int32}, System</type>
-        public int? BackupsStored { get; set; }
+        public int? BackupsStored { get; init; }
 
         /// <summary>Last backup creation time</summary>
         /// <type>System.DateTime, System</type>
@@ -456,9 +452,9 @@ public class BackupAjaxHandler
 
     public class CronParams
     {
-        public BackupPeriod Period { get; set; }
-        public int Hour { get; set; }
-        public int Day { get; set; }
+        public BackupPeriod Period { get; init; }
+        public int Hour { get; init; }
+        public int Day { get; init; }
 
         public CronParams() { }
 
