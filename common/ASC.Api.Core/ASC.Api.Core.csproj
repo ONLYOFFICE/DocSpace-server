@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 	  <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -22,7 +23,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="7.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.1.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0-rc.2.23480.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.5" />
