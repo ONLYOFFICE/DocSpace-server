@@ -59,7 +59,8 @@ public class AuthorizationConsentController {
                     .queryParam("state", auth.getState())
                     .build());
         } catch (Exception e) {
-            log.error("Could not redirect to consent page", e);
+            MDC.put("message", e.getMessage());
+            log.info("Could not redirect to consent page. Redirecting to login");
             return String.format("redirect:%s", UriComponentsBuilder
                     .fromUriString(client.getTenantUrl())
                     .path("login")
