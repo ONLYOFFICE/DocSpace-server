@@ -108,10 +108,10 @@ static file class ArabicNumeralHelper
     {
         if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
         {
-            return input.ToString("g", CultureInfo.InvariantCulture);;
+            return input.ToString("g", CultureInfo.InvariantCulture);
         }
         
-        var result = input.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+        var result = input.ToString($"g", new CultureInfo("ar"));
         return result
             .Replace('0', '\u06f0')
             .Replace('1', '\u06f1')
