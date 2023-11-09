@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +48,7 @@ public class AuthorizationServerConfiguration {
     private JwksKeyPairGenerator generator;
     private final ApplicationConfiguration applicationConfiguration;
     private final DocspaceAuthenticationProvider authenticationProvider;
+    private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -58,6 +60,7 @@ public class AuthorizationServerConfiguration {
                 .authorizationEndpoint(e -> {
                     e.consentPage(CONSENT_URL);
                     e.authenticationProvider(authenticationProvider);
+                    e.authorizationResponseHandler(authenticationSuccessHandler);
                 });
 
         http.exceptionHandling(e -> e.defaultAuthenticationEntryPointFor((request, response, authException) -> {
