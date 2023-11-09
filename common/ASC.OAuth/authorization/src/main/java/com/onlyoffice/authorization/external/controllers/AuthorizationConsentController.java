@@ -14,6 +14,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -26,7 +27,7 @@ import java.net.URI;
 @Slf4j
 public class AuthorizationConsentController {
     private final String ASC_AUTH_COOKIE = "asc_auth_key";
-    private final String CLIENT_ID_COOKIE = "client_id";
+    private final String CLIENT_ID = "client_id";
     private final DocspaceClient docspaceClient;
     private final AuthorizationPersistenceQueryUsecases authorizationRepository;
     private final ClientPersistenceQueryUsecases queryUsecases;
@@ -36,7 +37,7 @@ public class AuthorizationConsentController {
     public String consent(
             HttpServletRequest request,
             @CookieValue(name = ASC_AUTH_COOKIE) String authCookie,
-            @CookieValue(name = CLIENT_ID_COOKIE) String clientId
+            @RequestParam(name = CLIENT_ID) String clientId
     ) {
         MDC.put("client_id", clientId);
         log.info("Got a new consent request");
