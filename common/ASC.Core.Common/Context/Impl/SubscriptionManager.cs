@@ -52,7 +52,7 @@ public class SubscriptionManager
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
     {
-        var s = new SubscriptionRecordProto
+        var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
             Subscribed = true,
@@ -83,7 +83,7 @@ public class SubscriptionManager
 
     public async Task UnsubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
     {
-        var s = new SubscriptionRecordProto
+        var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
             Subscribed = false,

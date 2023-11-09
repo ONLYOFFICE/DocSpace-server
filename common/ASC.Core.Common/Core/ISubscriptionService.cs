@@ -31,13 +31,13 @@ public interface ISubscriptionService
 {
     Task<bool> IsUnsubscribeAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId);
     Task<IEnumerable<SubscriptionMethod>> GetSubscriptionMethodsAsync(int tenant, string sourceId, string actionId, string recipientId);
-    Task<IEnumerable<SubscriptionRecordProto>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId);
-    Task<IEnumerable<SubscriptionRecordProto>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId);
+    Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId);
+    Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId);
     Task<string[]> GetRecipientsAsync(int tenant, string sourceID, string actionID, string objectID);
     Task<string[]> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, bool checkSubscribe);
-    Task<SubscriptionRecordProto> GetSubscriptionAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId);
+    Task<SubscriptionRecord> GetSubscriptionAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId);
     Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId);
     Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId, string objectId);
-    Task SaveSubscriptionAsync(SubscriptionRecordProto s);
+    Task SaveSubscriptionAsync(SubscriptionRecord s);
     Task SetSubscriptionMethodAsync(SubscriptionMethod m);
 }

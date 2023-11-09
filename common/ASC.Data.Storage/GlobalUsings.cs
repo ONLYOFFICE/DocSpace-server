@@ -73,6 +73,7 @@ global using ASC.Data.Storage.Tar;
 global using ASC.Data.Storage.DataOperators;
 global using ASC.EventBus.Events;
 global using ASC.Notify.Messages;
+global using ASC.Protos.Migration;
 global using ASC.Security.Cryptography;
 
 global using Google.Apis.Auth.OAuth2;

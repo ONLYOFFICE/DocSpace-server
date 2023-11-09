@@ -48,7 +48,7 @@ public class DbSubscriptionService : ISubscriptionService
         return await Queries.RecipientsAsync(userDbContext, tenant, sourceId, actionId, objectId ?? string.Empty).ToArrayAsync();
     }
 
-    public async Task<IEnumerable<SubscriptionRecordProto>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)
+    public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)
     {
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
@@ -60,7 +60,7 @@ public class DbSubscriptionService : ISubscriptionService
         return GetSubscriptions(q, tenant);
     }
 
-    public async Task<IEnumerable<SubscriptionRecordProto>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
+    public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
     {
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
@@ -72,7 +72,7 @@ public class DbSubscriptionService : ISubscriptionService
         return GetSubscriptions(await q.ToListAsync(), tenant);
     }
 
-    public async Task<SubscriptionRecordProto> GetSubscriptionAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
+    public async Task<SubscriptionRecord> GetSubscriptionAsync(int tenant, string sourceId, string actionId, string recipientId, string objectId)
     {
         ArgumentNullException.ThrowIfNull(recipientId);
         ArgumentNullException.ThrowIfNull(sourceId);
@@ -107,7 +107,7 @@ public class DbSubscriptionService : ISubscriptionService
         return await Queries.ObjectsAsync(userDbContext, tenant, sourceId, actionId, recipientId, checkSubscribe).ToArrayAsync();
     }
 
-    public async Task SaveSubscriptionAsync(SubscriptionRecordProto s)
+    public async Task SaveSubscriptionAsync(SubscriptionRecord s)
     {
         ArgumentNullException.ThrowIfNull(s);
 
@@ -212,14 +212,14 @@ public class DbSubscriptionService : ISubscriptionService
         await userDbContext.SaveChangesAsync();
     }
 
-    private IEnumerable<SubscriptionRecordProto> GetSubscriptions(List<Subscription> subs, int tenant)
+    private IEnumerable<SubscriptionRecord> GetSubscriptions(List<Subscription> subs, int tenant)
     {
-        var result = new List<SubscriptionRecordProto>();
-        var common = new Dictionary<string, SubscriptionRecordProto>();
+        var result = new List<SubscriptionRecord>();
+        var common = new Dictionary<string, SubscriptionRecord>();
 
         foreach (var r in subs)
         {
-            var s = _mapper.Map<Subscription, SubscriptionRecordProto>(r);
+            var s = _mapper.Map<Subscription, SubscriptionRecord>(r);
             var key = s.SourceId + s.ActionId + s.RecipientId + s.ObjectId;
             if (s.Tenant == Tenant.DefaultTenant)
             {
