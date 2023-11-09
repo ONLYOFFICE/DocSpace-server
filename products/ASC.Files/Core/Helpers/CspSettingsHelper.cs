@@ -161,10 +161,20 @@ public class CspSettingsHelper
             defaultOptions.Def.Add($"*.{_coreBaseSettings.Basedomain}");
         }
 
-        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage && !string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
+        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage)
         {
-            defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
-            defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+            var internalUrl = s3Storage.GetUriInternal(null).ToString();
+
+            if (!string.IsNullOrEmpty(internalUrl))
+            {
+                defaultOptions.Def.Add(internalUrl);
+            }
+
+            if (!string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
+            {
+                defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+            }
         }
 
         options.Add(defaultOptions);

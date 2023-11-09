@@ -243,9 +243,9 @@ public class StudioPeriodicNotify
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _authContext.CurrentAccount.ID);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
                     }
 
@@ -332,9 +332,9 @@ public class StudioPeriodicNotify
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _authContext.CurrentAccount.ID);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
                     }
 

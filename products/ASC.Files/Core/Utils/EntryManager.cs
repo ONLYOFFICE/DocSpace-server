@@ -1711,7 +1711,7 @@ public class EntryManager
                 var tagTemplate = Tag.Template(_authContext.CurrentAccount.ID, newFile);
                 var tagDao = _daoFactory.GetTagDao<T>();
 
-                await tagDao.RemoveTags(tagTemplate);
+                await tagDao.RemoveTagsAsync(tagTemplate);
 
                 newFile.IsTemplate = false;
             }

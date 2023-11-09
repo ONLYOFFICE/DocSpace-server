@@ -116,14 +116,19 @@ public class FileOperationDtoHelper
             Finished = o.Finished
         };
 
-        if (!string.IsNullOrEmpty(o.Result) && result.OperationType != FileOperationType.Delete)
+        if (string.IsNullOrEmpty(o.Result) || result.OperationType == FileOperationType.Delete)
+        {
+            return result;
+        }
+
         {
             var arr = o.Result.Split(':');
             var folders = arr
                 .Where(s => s.StartsWith("folder_"))
-                .Select(s => s.Substring(7));
+                .Select(s => s.Substring(7))
+                .ToList();
 
-            if (folders.Any())
+            if (folders.Count > 0)
             {
                 var fInt = new List<int>();
                 var fString = new List<string>();
@@ -140,8 +145,8 @@ public class FileOperationDtoHelper
                     }
                 }
 
-                var internalFolders = GetFoldersAsync(folders).ToListAsync();
-                var thirdPartyFolders = GetFoldersAsync(fInt).ToListAsync();
+                var internalFolders = GetFoldersAsync(fInt).ToListAsync();
+                var thirdPartyFolders = GetFoldersAsync(fString).ToListAsync();
 
                 result.Folders = new List<FileEntryDto>();
                 foreach (var f in await Task.WhenAll(internalFolders.AsTask(), thirdPartyFolders.AsTask()))
@@ -152,9 +157,10 @@ public class FileOperationDtoHelper
 
             var files = arr
                 .Where(s => s.StartsWith("file_"))
-                .Select(s => s.Substring(5));
+                .Select(s => s.Substring(5))
+                .ToList();
 
-            if (files.Any())
+            if (files.Count > 0)
             {
                 var fInt = new List<int>();
                 var fString = new List<string>();
@@ -171,8 +177,8 @@ public class FileOperationDtoHelper
                     }
                 }
 
-                var internalFiles = GetFilesAsync(fString).ToListAsync();
-                var thirdPartyFiles = GetFilesAsync(fInt).ToListAsync();
+                var internalFiles = GetFilesAsync(fInt).ToListAsync();
+                var thirdPartyFiles = GetFilesAsync(fString).ToListAsync();
 
                 result.Files = new List<FileEntryDto>();
 
