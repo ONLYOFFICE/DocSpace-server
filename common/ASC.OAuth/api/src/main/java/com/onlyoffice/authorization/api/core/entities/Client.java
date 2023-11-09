@@ -81,8 +81,7 @@ public class Client {
     private Timestamp modifiedOn;
     @Column(name = "modified_by")
     private String modifiedBy;
-    @OneToMany
-    @JoinColumn(name="registered_client_id", referencedColumnName="client_id")
+    @OneToMany(mappedBy = "client")
     @JsonBackReference
     private Set<Consent> consents;
     @PrePersist

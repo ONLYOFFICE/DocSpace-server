@@ -75,8 +75,14 @@ ALTER TABLE identity_clients
 
 ALTER TABLE identity_consents
 	ADD CONSTRAINT FK_client_id
-	FOREIGN KEY (registered_client_id)
+	FOREIGN KEY (client_client_id)
 	REFERENCES identity_clients (client_id)
+	ON DELETE CASCADE;
+
+ALTER TABLE identity_consents
+	ADD CONSTRAINT FK_authorization_id
+	FOREIGN KEY (principal_name, registered_client_id)
+	REFERENCES identity_authorizations (principal_name, registered_client_id)
 	ON DELETE CASCADE;
 
 CREATE EVENT IF NOT EXISTS delete_invalidated_clients

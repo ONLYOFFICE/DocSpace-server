@@ -75,6 +75,19 @@ public class Authorization {
     private Timestamp modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
+    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "identity_consents",
+            joinColumns = {
+                    @JoinColumn(name = "principal_name"),
+                    @JoinColumn(name = "registered_client_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "registered_client_id"),
+                    @JoinColumn(name = "principal_name")
+            }
+    )
+    private Consent consent;
     @PrePersist
     private void prePersist() {
         this.invalidated = false;
