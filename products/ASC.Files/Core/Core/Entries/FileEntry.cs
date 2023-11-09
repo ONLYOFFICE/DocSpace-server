@@ -111,7 +111,7 @@ static file class ArabicNumeralHelper
             return input.ToString("g", CultureInfo.InvariantCulture);;
         }
         
-        var result = input.ToString("HH:mm dd/MM/yyyy", CultureInfo.InvariantCulture);
+        var result = input.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
         return result
             .Replace('0', '\u06f0')
             .Replace('1', '\u06f1')
