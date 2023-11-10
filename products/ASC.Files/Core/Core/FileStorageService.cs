@@ -241,7 +241,7 @@ public class FileStorageService //: IFileStorageService
         {
             (entries, _) = await _entryManager.GetEntriesAsync(
                 await folderDao.GetFolderAsync(parentId), 0, -1, FilterType.FoldersOnly,
-                false, Guid.Empty, string.Empty, false, false, new OrderBy(SortedByType.AZ, true));
+                false, Guid.Empty, string.Empty, string.Empty, false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -259,6 +259,7 @@ public class FileStorageService //: IFileStorageService
         bool subjectGroup,
         string subject,
         string searchText,
+        string extension,
         bool searchInContent,
         bool withSubfolders,
         OrderBy orderBy,
@@ -318,7 +319,7 @@ public class FileStorageService //: IFileStorageService
         IEnumerable<FileEntry> entries;
         try
         {
-            (entries, total) = await _entryManager.GetEntriesAsync(parent, from, count, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, orderBy, roomId, searchArea,
+            (entries, total) = await _entryManager.GetEntriesAsync(parent, from, count, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy, roomId, searchArea,
                 withoutTags, tagNames, excludeSubject, provider, subjectFilter, applyFilterOption);
         }
         catch (Exception e)
@@ -709,7 +710,8 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string search, bool searchInContent, bool withSubfolders, OrderBy orderBy)
+    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string searchText, string extension, 
+        bool searchInContent, bool withSubfolders, OrderBy orderBy)
     {
         var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);
 
@@ -753,7 +755,7 @@ public class FileStorageService //: IFileStorageService
         {
             try
             {
-                (entries, _) = await _entryManager.GetEntriesAsync(parent, 0, 0, filter, subjectGroup, subjectId, search, searchInContent, withSubfolders, orderBy);
+                (entries, _) = await _entryManager.GetEntriesAsync(parent, 0, 0, filter, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders, orderBy);
             }
             catch (Exception e)
             {
@@ -2474,13 +2476,14 @@ public class FileStorageService //: IFileStorageService
         return files;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string search, bool searchInContent)
+    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string searchText, string extension,
+        bool searchInContent)
     {
         var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);
         var folderDao = GetFolderDao<T>();
         var fileDao = GetFileDao<T>();
 
-        var result = _entryManager.GetTemplatesAsync(folderDao, fileDao, filter, subjectGroup, subjectId, search, searchInContent);
+        var result = _entryManager.GetTemplatesAsync(folderDao, fileDao, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
 
         await foreach (var r in result.Skip(from).Take(count))
         {
@@ -2774,7 +2777,7 @@ public class FileStorageService //: IFileStorageService
                 };
             }
 
-            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, false);
+            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, null, false);
             file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
         }
 
