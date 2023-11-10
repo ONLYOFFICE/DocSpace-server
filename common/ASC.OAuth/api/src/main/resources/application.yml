@@ -81,7 +81,7 @@ messaging:
 
 springdoc:
   api-docs:
-    path: /api/2.0/info
+    path: /api/2.0/oauth/info
 
 spring:
   cloud:
