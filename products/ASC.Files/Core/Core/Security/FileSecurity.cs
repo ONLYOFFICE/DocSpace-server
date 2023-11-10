@@ -191,7 +191,7 @@ public class FileSecurity : IFileSecurity
                 {
                     SubjectType.User, new HashSet<FileShare>
                     {
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None
                     }
                 },
                 {
@@ -899,7 +899,7 @@ public class FileSecurity : IFileSecurity
                               FilesSecurityActions.MoveTo or
                               FilesSecurityActions.Rename or
                               FilesSecurityActions.Create
-                    && (folder.FolderType == FolderType.ReadyFormFolder || folder.FolderType == FolderType.InProcessFormFolder))
+                    && (folder.FolderType == FolderType.ReadyFormFolder || folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.FormFillingFolder))
                 {
                     return false;
                 }

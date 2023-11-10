@@ -1794,13 +1794,13 @@ public class EntryManager
         var templatesFolder = _serviceProvider.GetService<Folder<T>>();
         templatesFolder.Title = sourceTitle;
         templatesFolder.ParentId = inProcessFormFolderId;
-        templatesFolder.FolderType = FolderType.DEFAULT;
+        templatesFolder.FolderType = FolderType.FormFillingFolder;
         templatesFolder.CreateBy = createBy;
 
         var resultsFolder = _serviceProvider.GetService<Folder<T>>();
         resultsFolder.Title = sourceTitle;
         resultsFolder.ParentId = readyFormFolderId;
-        resultsFolder.FolderType = FolderType.DEFAULT;
+        resultsFolder.FolderType = FolderType.FormFillingFolder;
         resultsFolder.CreateBy = createBy;
 
         var templatesFolderId = await folderDao.SaveFolderAsync(templatesFolder);
