@@ -107,7 +107,7 @@ public class AbstractDao
             return ValueTask.FromResult<object>(null);
         }
 
-        var isNumeric = int.TryParse(id.ToString(), out var n);
+        var isNumeric = long.TryParse(id.ToString(), out var n);
 
         if (isNumeric)
         {

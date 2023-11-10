@@ -89,44 +89,18 @@ public class ApiSystemHelper
 
     public async Task ValidatePortalNameAsync(string domain, Guid userId)
     {
-        try
+        var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
+        var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, data);
+        var resObj = JObject.Parse(result);
+        if (resObj["error"] != null)
         {
-            var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
-            await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, data);
-        }
-        catch (WebException exception)
-        {
-            if (exception.Status != WebExceptionStatus.ProtocolError || exception.Response == null)
+            if (resObj["error"].ToString() == "portalNameExist")
             {
-                return;
+                var varians = resObj.Value<JArray>("variants").Select(jv => jv.Value<string>());
+                throw new TenantAlreadyExistsException("Address busy.", varians);
             }
 
-            var response = exception.Response;
-            try
-            {
-                await using var stream = response.GetResponseStream();
-                using var reader = new StreamReader(stream, Encoding.UTF8);
-                var result = await reader.ReadToEndAsync();
-
-                var resObj = JObject.Parse(result);
-                if (resObj["error"] != null)
-                {
-                    if (resObj["error"].ToString() == "portalNameExist")
-                    {
-                        var varians = resObj.Value<JArray>("variants").Select(jv => jv.Value<string>());
-                        throw new TenantAlreadyExistsException("Address busy.", varians);
-                    }
-
-                    throw new Exception(resObj["error"].ToString());
-                }
-            }
-            finally
-            {
-                if (response != null)
-                {
-                    response.Close();
-                }
-            }
+            throw new Exception(resObj["error"].ToString());
         }
     }
 
@@ -140,7 +114,7 @@ public class ApiSystemHelper
 
         var putItemRequest = new PutItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Item = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue {
@@ -161,7 +135,7 @@ public class ApiSystemHelper
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Key = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue { S = oldTenantDomain } }

@@ -130,8 +130,8 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
 
         var folder = GetFolder();
 
-        folder.Id = MakeThirdId(boxFolder.Id);
-        folder.ParentId = isRoot ? null : MakeThirdId(GetParentFolderId(boxFolder));
+        folder.Id = MakeId(boxFolder.Id);
+        folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(boxFolder));
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (boxFolder.CreatedAt?.UtcDateTime ?? default);
         folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (boxFolder.ModifiedAt?.UtcDateTime ?? default);
 
