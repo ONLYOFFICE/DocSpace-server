@@ -48,8 +48,15 @@ public class BackupFileUploadHandler
                 throw new ArgumentException("Access denied.");
             }
             var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
-            var path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
-
+            string path = "";
+            try
+            {
+                path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
+            }
+            catch
+            {
+                throw new Exception("backup_temp is not disc");
+            }
             if (context.Request.Query["Init"].ToString() == "true")
             {
                 long.TryParse(context.Request.Query["totalSize"], out var size);

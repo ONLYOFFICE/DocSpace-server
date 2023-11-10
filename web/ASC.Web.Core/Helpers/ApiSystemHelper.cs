@@ -114,7 +114,7 @@ public class ApiSystemHelper
 
         var putItemRequest = new PutItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Item = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue {
@@ -135,7 +135,7 @@ public class ApiSystemHelper
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Key = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue { S = oldTenantDomain } }
