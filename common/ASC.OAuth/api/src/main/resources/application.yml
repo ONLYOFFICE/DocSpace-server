@@ -79,6 +79,10 @@ messaging:
         deadQueue: socket.dead.queue
         deadRouting: socket.dead.routing
 
+springdoc:
+  api-docs:
+    path: /api/2.0/info
+
 spring:
   cloud:
     loadbalancer:

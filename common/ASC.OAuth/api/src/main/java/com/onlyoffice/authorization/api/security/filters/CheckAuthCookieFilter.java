@@ -83,8 +83,9 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
-        Pattern pattern = Pattern.compile("/api/2.0/clients/consents");
+        Pattern first = Pattern.compile("/api/2.0/clients/consents");
+        Pattern second = Pattern.compile("/api/2.0/info");
         String path = request.getRequestURI();
-        return !pattern.matcher(path).find();
+        return !first.matcher(path).find() || second.matcher(path).find();
     }
 }
