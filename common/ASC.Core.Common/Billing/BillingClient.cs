@@ -236,7 +236,7 @@ public class BillingClient
     private string CreateAuthToken(string pkey, string machinekey)
     {
         using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
         return "ASC " + pkey + ":" + now + ":" + hash;

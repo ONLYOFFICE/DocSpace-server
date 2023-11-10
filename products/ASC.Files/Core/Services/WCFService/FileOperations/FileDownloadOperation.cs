@@ -92,7 +92,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             }
             else
             {
-                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd"), archiveExtension);
+                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
             var store = await globalStore.GetStoreAsync();

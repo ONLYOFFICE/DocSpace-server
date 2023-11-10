@@ -119,7 +119,7 @@ public class StudioNotifyService
             0,
             DateTimeKind.Utc);
 
-        var hash = auditEventDate.ToString("s");
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -783,7 +783,7 @@ public class StudioNotifyService
 
         var portalUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s");
+        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s", CultureInfo.InvariantCulture);
 
         var linkToRecovery = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
