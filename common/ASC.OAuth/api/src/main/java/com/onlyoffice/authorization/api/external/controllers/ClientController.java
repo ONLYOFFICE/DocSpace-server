@@ -12,6 +12,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientClean
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
+import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
@@ -62,6 +63,7 @@ public class ClientController {
     private final ClientMutationUsecases mutationUsecases;
     private final ClientCleanupUsecases cleanupUsecases;
     private final ConsentRetrieveUsecases consentRetrieveUsecases;
+    private final ConsentCleanupUsecases consentCleanupUsecases;
 
     @PostConstruct
     public void init() {
@@ -149,6 +151,19 @@ public class ClientController {
         log.debug("Found a client", client);
         MDC.clear();
         return ResponseEntity.ok(ClientMapper.INSTANCE.fromClientToInfoDTO(client));
+    }
+
+    @DeleteMapping("/{clientId}/revoke")
+    @Retry(name = "batchClientRetryRateLimiter")
+    @RateLimiter(name = "batchClientRateLimiter")
+    public ResponseEntity revokeUserClient(@PathVariable @NotEmpty String clientId) {
+        MDC.put("client_id", clientId);
+        log.info("Received a new user revocation request");
+        MDC.clear();
+        var user = UserContextContainer.context
+                .get().getResponse();
+        consentCleanupUsecases.asyncRevokeConsent(clientId, user.getEmail());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/consents")

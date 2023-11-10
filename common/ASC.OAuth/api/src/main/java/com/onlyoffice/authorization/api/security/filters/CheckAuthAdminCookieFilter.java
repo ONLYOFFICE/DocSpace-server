@@ -106,6 +106,8 @@ public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         Pattern first = Pattern.compile("/api/2.0/clients/.*/info");
         Pattern second = Pattern.compile("/api/2.0/clients/consents");
-        return first.matcher(path).find() || second.matcher(path).find();
+        Pattern third = Pattern.compile("/api/2.0/clients/.*/revoke");
+        return first.matcher(path).find() || second
+                .matcher(path).find() || third.matcher(path).find();
     }
 }
