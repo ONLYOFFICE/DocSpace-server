@@ -110,6 +110,11 @@ public class ApiSystemHelper
 
     public async Task AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
     {
+        if (String.IsNullOrEmpty(tenantRegion))
+        {
+            tenantRegion = "default";
+        }
+
         using var _awsDynamoDBClient = GetDynamoDBClient();
 
         var putItemRequest = new PutItemRequest
@@ -207,7 +212,7 @@ public class ApiSystemHelper
             FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
                                                 {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = "tenant_region",
+            ProjectionExpression = "tenant_domain",
             ConsistentRead = true
         };
 
