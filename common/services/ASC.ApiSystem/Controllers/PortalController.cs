@@ -242,18 +242,22 @@ public class PortalController : ControllerBase
 
         Tenant t;
         try
-        {    
+        {
             /****REGISTRATION!!!*****/
+
+            t = await _hostedSolution.RegisterTenantAsync(info);
+
+            _tenantManager.SetCurrentTenant(t);
+
+            await _cspSettingsHelper.SaveAsync(null, true);
+
             if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
-            {
-                await _apiSystemHelper.AddTenantToCacheAsync(info.Address, info.HostedRegion);
+            { 
+                await _apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(_coreSettings), model.AWSRegion);
 
                 _log.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
             }
 
-            t = await _hostedSolution.RegisterTenantAsync(info);
-            _tenantManager.SetCurrentTenant(t);
-            await _cspSettingsHelper.SaveAsync(null, true);
             /*********/
 
             _log.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
