@@ -218,17 +218,17 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var key = file.Id;
             if (_files.ContainsKey(key) && !string.IsNullOrEmpty(_files[key]))
             {
-                _ = filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
             }
             else
             {
-                _ = filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
+                await filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
             }
         }
 
         foreach (var folder in folderForSend)
         {
-            _ = filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
+            await filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
         }
     }
 
