@@ -248,7 +248,7 @@ public class TransferPortalTask : PortalTaskBase
             Directory.CreateDirectory(BackupDirectory ?? DefaultDirectoryName);
         }
 
-        return CrossPlatform.PathCombine(BackupDirectory ?? DefaultDirectoryName, tenantAlias + DateTime.UtcNow.ToString("(yyyy-MM-dd HH-mm-ss)") + ".backup");
+        return CrossPlatform.PathCombine(BackupDirectory ?? DefaultDirectoryName, tenantAlias + DateTime.UtcNow.ToString("(yyyy-MM-dd HH-mm-ss)", CultureInfo.InvariantCulture) + ".backup");
     }
 
 }

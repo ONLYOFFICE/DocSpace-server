@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
@@ -179,7 +181,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
 
     private void RequestCode(HttpContext context, string scope = null)
     {
-        var timestamp = DateTime.UtcNow.ToString("yyyy.MM.dd HH:mm:ss +0000");
+        var timestamp = DateTime.UtcNow.ToString("yyyy.MM.dd HH:mm:ss +0000", CultureInfo.InvariantCulture);
         var state = Guid.NewGuid().ToString();//HttpContext.Current.Request.Url().AbsoluteUri;
 
         var msg = scope + timestamp + ClientID + state;
@@ -206,7 +208,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
 
     private OAuth20Token GetAccessToken(string state, string code)
     {
-        var timestamp = DateTime.UtcNow.ToString("yyyy.MM.dd HH:mm:ss +0000");
+        var timestamp = DateTime.UtcNow.ToString("yyyy.MM.dd HH:mm:ss +0000", CultureInfo.InvariantCulture);
 
         var msg = Scopes + timestamp + ClientID + state;
         var encodedSignature = SignMsg(msg);

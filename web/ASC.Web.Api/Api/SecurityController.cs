@@ -328,7 +328,7 @@ public class SecurityController : ControllerBase
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToString("MM.dd.yyyy"), to.ToString("MM.dd.yyyy"));
+        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture), to.ToString("MM.dd.yyyy"));
 
         var events = await _auditEventsRepository.GetByFilterAsync(from: from, to: to);
 

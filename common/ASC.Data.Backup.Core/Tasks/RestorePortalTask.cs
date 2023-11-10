@@ -462,7 +462,7 @@ public class RestorePortalTask : PortalTaskBase
             "  statuschanged='{1}' " +
             "where id = '{2}'",
             (int)TenantStatus.Active,
-            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
             tenantId);
 
         var command = connection.CreateCommand().WithTimeout(120);
