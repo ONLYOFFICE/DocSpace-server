@@ -1576,7 +1576,7 @@ public class UserController : PeopleControllerBase
 
         foreach (var user in users)
         {
-            if (user.IsOwner(tenant) || user.IsMe(_authContext))
+            if (user.IsOwner(tenant) || await _userManager.IsDocSpaceAdminAsync(user) || user.IsMe(_authContext))
             {
                 continue;
             }
