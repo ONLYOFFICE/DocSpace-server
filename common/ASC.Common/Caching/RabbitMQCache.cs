@@ -135,7 +135,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         var data = body.Take(body.Length - 1);
 
-        var obj = ProtobufContractSerializer.Deserialize<T>(data.ToArray());
+        var obj = BaseProtobufSerializer.Deserialize<T>(data.ToArray());
 
         var action = (CacheNotifyAction)body[body.Length - 1];
 
@@ -147,7 +147,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     public void Publish(T obj, CacheNotifyAction action)
     {
-        var objAsByteArray = ProtobufContractSerializer.Serialize<T>(obj);
+        var objAsByteArray = BaseProtobufSerializer.Serialize(obj);
 
         var body = new byte[objAsByteArray.Length + 1];
 
