@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,6 +58,7 @@ public class AuthorizationServerConfiguration {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(Customizer.withDefaults())
                 .authorizationEndpoint(e -> {
                     e.consentPage(CONSENT_URL);
                     e.authenticationProvider(authenticationProvider);
