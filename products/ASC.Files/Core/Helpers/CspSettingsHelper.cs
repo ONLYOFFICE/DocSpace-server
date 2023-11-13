@@ -175,6 +175,7 @@ public class CspSettingsHelper
             {
                 defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
                 defaultOptions.Media.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Connect.Add(s3Storage.CdnDistributionDomain);
             }
         }
 
