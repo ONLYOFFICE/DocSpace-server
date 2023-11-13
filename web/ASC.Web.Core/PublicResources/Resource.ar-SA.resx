@@ -330,7 +330,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>قم بتوصيل المشروع لتسجيل الجخول إلى البوابة باستخدام حساب جوجل وقم بإدارة ملفات ومجلدات جوجل درايف.</value>
+    <value>قم بتوصيل المشروع لتسجيل الدخول إلى البوابة باستخدام حساب جوجل و قم بإدارة ملفات و مجلدات جوجل درايف.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق لتوصيل حساب جوجل درايف الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من جوجل درايف مع مستخدمين ONLYOFFICE. {0} انتقل إلى وحدة تحكم Google APIs وأنشئ مشروعاً جديداً لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
