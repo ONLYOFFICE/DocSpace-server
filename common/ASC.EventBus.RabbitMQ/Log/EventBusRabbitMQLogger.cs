@@ -71,4 +71,10 @@ internal static partial class EventBusRabbitMQLogger
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "No subscription for RabbitMQ event: {eventName}")]
     public static partial void WarningNoSubscription(this ILogger<EventBusRabbitMQ> logger, string eventName);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Reject RabbitMQ event: {eventName}")]
+    public static partial void DebugRejectEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Nack RabbitMQ event: {eventName}")]
+    public static partial void DebugNackEvent(this ILogger<EventBusRabbitMQ> logger, string eventName);
 }

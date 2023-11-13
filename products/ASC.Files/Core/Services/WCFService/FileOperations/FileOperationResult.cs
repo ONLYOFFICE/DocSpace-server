@@ -31,17 +31,17 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 public class FileOperationResult
 {
     [ProtoMember(1)]
-    public string Id { get; set; }
+    public string Id { get; init; }
 
     [JsonPropertyName("operation")]
     [ProtoMember(2)]
-    public FileOperationType OperationType { get; set; }
+    public FileOperationType OperationType { get; init; }
 
     [ProtoMember(3)]
     public int Progress { get; set; }
 
     [ProtoMember(4)]
-    public string Source { get; set; }
+    public string Source { get; init; }
 
     [ProtoMember(5)]
     public string Result { get; set; }
@@ -53,5 +53,5 @@ public class FileOperationResult
     public string Processed { get; set; }
 
     [ProtoMember(8)]
-    public bool Finished { get; set; }
+    public bool Finished { get; init; }
 }

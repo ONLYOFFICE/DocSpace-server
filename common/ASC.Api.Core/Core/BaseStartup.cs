@@ -107,7 +107,7 @@ public abstract class BaseStartup
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
 
                 if (userId == null)
                 {
@@ -116,11 +116,9 @@ public abstract class BaseStartup
 
                 var permitLimit = 1500;
 
-                string partitionKey;
+                var partitionKey = $"sw_{userId}";
 
-                partitionKey = $"sw_{userId}";
-
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, key => new RedisSlidingWindowRateLimiterOptions
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
                     PermitLimit = permitLimit,
                     Window = TimeSpan.FromMinutes(1),
@@ -175,7 +173,7 @@ public abstract class BaseStartup
                            return RateLimitPartition.GetNoLimiter("no_limiter");
                        }
 
-                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, key => new RedisFixedWindowRateLimiterOptions
+                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions
                        {
                            PermitLimit = permitLimit,
                            Window = TimeSpan.FromDays(1),
@@ -190,7 +188,7 @@ public abstract class BaseStartup
                 var permitLimit = 5;
                 var partitionKey = $"sensitive_api_{userId}";
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, key => new RedisSlidingWindowRateLimiterOptions
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
                     PermitLimit = permitLimit,
                     Window = TimeSpan.FromMinutes(1),
@@ -298,8 +296,8 @@ public abstract class BaseStartup
             options.DefaultScheme = MultiAuthSchemes;
             options.DefaultChallengeScheme = MultiAuthSchemes;
         }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, a => { })
-          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, a => { })
-          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", a => { })
+          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
+          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
           .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.ForwardDefaultSelector = context =>

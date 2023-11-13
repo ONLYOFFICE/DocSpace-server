@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-public class GetReferenceDataFromPathDto<T>
+using Action = ASC.Common.Security.Authorizing.Action;
+
+namespace ASC.Web.Studio.Core;
+
+public static class SecurityConstants
 {
-    public string Path { get; set; }
+    public static readonly Action EditPortalSettings = new(new Guid("{60DB830E-80A8-4997-8B83-3D6EA525749B}"), "Edit Portal Settings");
 }

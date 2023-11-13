@@ -47,7 +47,6 @@ public class StudioNotifyService
     private readonly SetupInfo _setupInfo;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly SettingsManager _settingsManager;
-    private readonly WebItemSecurity _webItemSecurity;
     private readonly MessageService _messageService;
     private readonly MessageTarget _messageTarget;
     private readonly ILogger _log;
@@ -65,7 +64,6 @@ public class StudioNotifyService
         SetupInfo setupInfo,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         SettingsManager settingsManager,
-        WebItemSecurity webItemSecurity,
         MessageService messageService,
         MessageTarget messageTarget,
         ILoggerProvider option)
@@ -81,7 +79,6 @@ public class StudioNotifyService
         _setupInfo = setupInfo;
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _settingsManager = settingsManager;
-        _webItemSecurity = webItemSecurity;
         _messageService = messageService;
         _messageTarget = messageTarget;
         _userManager = userManager;
@@ -104,56 +101,6 @@ public class StudioNotifyService
             new TagValue(Tags.Body, message),
             new TagValue(Tags.UserEmail, email),
             new TagValue(Tags.UserName, userName));
-    }
-
-    public async Task SendRequestTariffAsync(bool license, string fname, string lname, string title, string email, string phone, string ctitle, string csize, string site, string message)
-    {
-        fname = (fname ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(fname);
-
-        lname = (lname ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(lname);
-
-        title = (title ?? "").Trim();
-        email = (email ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
-
-        phone = (phone ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(phone);
-
-        ctitle = (ctitle ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(ctitle);
-
-        csize = (csize ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(csize);
-        site = (site ?? "").Trim();
-        if (string.IsNullOrEmpty(site) && !_coreBaseSettings.CustomMode)
-        {
-            throw new ArgumentNullException(nameof(site));
-        }
-
-        message = (message ?? "").Trim();
-        if (string.IsNullOrEmpty(message) && !_coreBaseSettings.CustomMode)
-        {
-            throw new ArgumentNullException(nameof(message));
-        }
-
-        var salesEmail = (await _settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).SalesEmail ?? _setupInfo.SalesEmail;
-
-        var recipient = (IRecipient)new DirectRecipient(_authContext.CurrentAccount.ID.ToString(), string.Empty, new[] { salesEmail }, false);
-
-        await _client.SendNoticeToAsync(license ? Actions.RequestLicense : Actions.RequestTariff,
-                             new[] { recipient },
-                             new[] { "email.sender" },
-                             new TagValue(Tags.UserName, fname),
-                             new TagValue(Tags.UserLastName, lname),
-                             new TagValue(Tags.UserPosition, title),
-                             new TagValue(Tags.UserEmail, email),
-                             new TagValue(Tags.Phone, phone),
-                             new TagValue(Tags.Website, site),
-                             new TagValue(Tags.CompanyTitle, ctitle),
-                             new TagValue(Tags.CompanySize, csize),
-                             new TagValue(Tags.Body, message));
     }
 
     #region User Password
@@ -562,52 +509,17 @@ public class StudioNotifyService
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
     }
 
-    public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)
-    {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var admins = (await _userManager.GetUsersAsync()).ToAsyncEnumerable()
-                    .WhereAwait(async u => await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, u.Id));
-
-        ThreadPool.QueueUserWorkItem(async _ =>
-        {
-            try
-            {
-                _tenantManager.SetCurrentTenant(tenant);
-
-                await foreach (var admin in admins)
-                {
-                    var culture = string.IsNullOrEmpty(admin.CultureName) ? tenant.GetCulture() : admin.GetCulture();
-                    CultureInfo.CurrentCulture = culture;
-                    CultureInfo.CurrentUICulture = culture;
-
-                    await _client.SendNoticeToAsync(
-                    Actions.ProfileHasDeletedItself,
-                    null,
-                    new IRecipient[] { admin },
-                    new[] { EMailSenderName },
-                        new TagValue(Tags.FromUserName, user.DisplayUserName(_displayUserSettingsHelper)),
-                    new TagValue(Tags.FromUserLink, GetUserProfileLink(user)));
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.ErrorSendMsgProfileHasDeletedItself(ex);
-            }
-        });
-
-    }
-
     public async Task SendMsgReassignsCompletedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser)
     {
         await _client.SendNoticeToAsync(
         Actions.ReassignsCompleted,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUser)),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
             new TagValue(Tags.ToUserName, toUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.ToUserLink, GetUserProfileLink(toUser)));
+            new TagValue(Tags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id)));
     }
 
     public async Task SendMsgReassignsFailedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser, string message)
@@ -615,13 +527,13 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
         Actions.ReassignsFailed,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUser)),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
             new TagValue(Tags.ToUserName, toUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.ToUserLink, GetUserProfileLink(toUser)),
-        new TagValue(Tags.Message, message));
+            new TagValue(Tags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id)),
+            new TagValue(Tags.Message, message));
     }
 
     public async Task SendMsgRemoveUserDataCompletedAsync(Guid recipientId, UserInfo user, string fromUserName, long docsSpace, long crmSpace, long mailSpace, long talkSpace)
@@ -629,14 +541,14 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
             _coreBaseSettings.CustomMode ? Actions.RemoveUserDataCompletedCustomMode : Actions.RemoveUserDataCompleted,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
-        new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(user)),
-        new TagValue("DocsSpace", FileSizeComment.FilesSizeToString(docsSpace)),
-        new TagValue("CrmSpace", FileSizeComment.FilesSizeToString(crmSpace)),
-        new TagValue("MailSpace", FileSizeComment.FilesSizeToString(mailSpace)),
-        new TagValue("TalkSpace", FileSizeComment.FilesSizeToString(talkSpace)));
+            new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
+            new TagValue("DocsSpace", FileSizeComment.FilesSizeToString(docsSpace)),
+            new TagValue("CrmSpace", FileSizeComment.FilesSizeToString(crmSpace)),
+            new TagValue("MailSpace", FileSizeComment.FilesSizeToString(mailSpace)),
+            new TagValue("TalkSpace", FileSizeComment.FilesSizeToString(talkSpace)));
     }
 
     public async Task SendMsgRemoveUserDataFailedAsync(Guid recipientId, UserInfo user, string fromUserName, string message)
@@ -644,11 +556,11 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
         Actions.RemoveUserDataFailed,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
-        new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(user)),
-        new TagValue(Tags.Message, message));
+            new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
+            new TagValue(Tags.Message, message));
     }
 
     public async Task SendAdminWelcomeAsync(UserInfo newUserInfo)
@@ -807,7 +719,7 @@ public class StudioNotifyService
             var userId = u.Id;
             var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(u.Email, ConfirmType.EmailActivation, null, userId);
 
-            _settingsManager.Save(new FirstEmailConfirmSettings() { IsFirst = true });
+            await _settingsManager.SaveAsync(new FirstEmailConfirmSettings() { IsFirst = true });
 
             var culture = GetCulture(u);
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", culture);
@@ -939,9 +851,9 @@ public class StudioNotifyService
         return _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff());
     }
 
-    private string GetUserProfileLink(UserInfo userInfo)
+    private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
-        return _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetUserProfile(userInfo));
+        return _commonLinkUtility.GetFullAbsolutePath(await _commonLinkUtility.GetUserProfileAsync(userId));
     }
 
     private static string AddHttpToUrl(string url)

@@ -65,7 +65,7 @@ public static class CustomHealthCheck
 
             hcBuilder.AddRedis(redisConfiguration.ConfigurationOptions.ToString(),
                                name: "redis",
-                               tags: new string[] { "redis", "services" },
+                               tags: new[] { "redis", "services" },
                                timeout: new TimeSpan(0, 0, 15));
         }
 
@@ -90,7 +90,7 @@ public static class CustomHealthCheck
             {
                 hcBuilder.AddElasticsearch(elasticSearchUri,
                                           name: "elasticsearch",
-                                          tags: new string[] { "elasticsearch", "services" },
+                                          tags: new[] { "elasticsearch", "services" },
                                           timeout: new TimeSpan(0, 0, 15));
             }
         }
@@ -109,14 +109,14 @@ public static class CustomHealthCheck
         {
             hcBuilder.AddMySql(connectionString.ConnectionString,
                                name: "mysqldb",
-                               tags: new string[] { "mysqldb", "services" },
+                               tags: new[] { "mysqldb", "services" },
                                timeout: new TimeSpan(0, 0, 15));
         }
         else if (string.Equals(connectionString.ProviderName, "Npgsql"))
         {
             hcBuilder.AddNpgSql(connectionString.ConnectionString,
                                name: "postgredb",
-                               tags: new string[] { "postgredb", "services" },
+                               tags: new[] { "postgredb", "services" },
                                timeout: new TimeSpan(0, 0, 15));
         }
 
@@ -133,7 +133,7 @@ public static class CustomHealthCheck
         {
             hcBuilder.AddRabbitMQ(x => x.ConnectionFactory = rabbitMQConfiguration.GetConnectionFactory(),
                               name: "rabbitMQ",
-                              tags: new string[] { "rabbitMQ", "services" },
+                              tags: new[] { "rabbitMQ", "services" },
                               timeout: new TimeSpan(0, 0, 15));
         }
         else
@@ -147,7 +147,7 @@ public static class CustomHealthCheck
 
                 hcBuilder.AddKafka(new ProducerConfig(clientConfig),
                                name: "kafka",
-                               tags: new string[] { "kafka", "services" },
+                               tags: new[] { "kafka", "services" },
                                timeout: new TimeSpan(0, 0, 15)
                                );
 

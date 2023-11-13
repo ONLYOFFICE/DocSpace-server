@@ -78,9 +78,9 @@ public static class ConsumerExtension
 [DebuggerDisplay("({Name},{Value})")]
 public class AuthKey
 {
-    public string Name { get; set; }
+    public string Name { get; init; }
 
-    public string Value { get; set; }
+    public string Value { get; init; }
 
     public string Title { get; set; }
 }

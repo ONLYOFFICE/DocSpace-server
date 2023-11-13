@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Notify;
 
-[Singletone]
+[Singleton]
 public class NotifyServiceClient : INotifyService
 { 
     private readonly SecurityContext _securityContext;

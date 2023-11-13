@@ -28,9 +28,9 @@ namespace ASC.Core.Users;
 
 public static class StudioUserInfoExtension
 {
-    public static string GetUserProfilePageURL(this UserInfo userInfo, CommonLinkUtility commonLinkUtility)
+    public static async Task<string> GetUserProfilePageUrl(this UserInfo userInfo, CommonLinkUtility commonLinkUtility)
     {
-        return userInfo == null ? "" : commonLinkUtility.GetUserProfile(userInfo);
+        return userInfo == null ? "" : await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
     }
 
     public static async Task<List<string>> GetListAdminModulesAsync(this UserInfo ui, WebItemSecurity webItemSecurity, WebItemManager webItemManager)

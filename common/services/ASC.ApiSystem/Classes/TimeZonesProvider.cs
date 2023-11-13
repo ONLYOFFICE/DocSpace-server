@@ -26,7 +26,7 @@
 
 namespace ASC.ApiSystem.Classes;
 
-[Singletone]
+[Singleton]
 public class TimeZonesProvider
 {
     private readonly ILogger<TimeZonesProvider> _log;
@@ -42,7 +42,7 @@ public class TimeZonesProvider
 
     #region Private
 
-    private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new Dictionary<string, KeyValuePair<string, string>>
+    private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new()
     {
         { "", new KeyValuePair<string, string>("Europe/London", "GMT Standard Time") },
         { "fr", new KeyValuePair<string, string>("Europe/Paris", "Romance Standard Time") },
@@ -67,7 +67,7 @@ public class TimeZonesProvider
         { "vi", new KeyValuePair<string, string>("Asia/Shanghai", "China Standard Time") }
     };
 
-    private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new Dictionary<string, CultureInfo>
+    private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new()
     {
         { "", CultureInfo.GetCultureInfo("en-US") },
         { "fr", CultureInfo.GetCultureInfo("fr-FR") },

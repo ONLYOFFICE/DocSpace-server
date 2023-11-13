@@ -34,7 +34,7 @@ public class SubscriptionManager
     private readonly ISubscriptionService _service;
     private readonly TenantManager _tenantManager;
     private readonly ICache _cache;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
     public static readonly List<Guid> Groups = Groups = new List<Guid>
     {
         AuthConstants.DocSpaceAdmin.ID,
@@ -45,7 +45,7 @@ public class SubscriptionManager
 
     public SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
     {
-        _service = service ?? throw new ArgumentNullException("subscriptionManager");
+        _service = service ?? throw new ArgumentNullException(nameof(service));
         _tenantManager = tenantManager;
         _cache = cache;
     }
@@ -126,7 +126,7 @@ public class SubscriptionManager
     {
         IEnumerable<SubscriptionMethod> methods;
 
-        if (Groups.Any(r => r.ToString() == recipientID))
+        if (Groups.Exists(r => r.ToString() == recipientID))
         {
             methods = await GetDefaultSubscriptionMethodsFromCacheAsync(sourceID, actionID, recipientID);
         }
@@ -211,10 +211,6 @@ public class SubscriptionManager
             }
 
             return result;
-        }
-        catch
-        {
-            throw;
         }
         finally
         {

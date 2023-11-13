@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-[Singletone]
+[Singleton]
 public class MessageTarget
 {
     private IEnumerable<string> _items;

@@ -79,7 +79,7 @@ public class MessageMaps
     {
         try
         {
-            return AuditReportResource.ResourceManager.GetString(ActionType.ToString() + "ActionType");
+            return AuditReportResource.ResourceManager.GetString(ActionType + "ActionType");
         }
         catch
         {
@@ -103,7 +103,7 @@ public class MessageMaps
     {
         try
         {
-            return AuditReportResource.ResourceManager.GetString(ProductType == ProductType.CRM ? "CrmProduct" : ProductType.ToString() + "Product");
+            return AuditReportResource.ResourceManager.GetString(ProductType == ProductType.CRM ? "CrmProduct" : ProductType + "Product");
         }
         catch
         {
@@ -115,7 +115,7 @@ public class MessageMaps
     {
         try
         {
-            return AuditReportResource.ResourceManager.GetString(ModuleType.ToString() + "Module");
+            return AuditReportResource.ResourceManager.GetString(ModuleType + "Module");
         }
         catch
         {

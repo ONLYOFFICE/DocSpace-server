@@ -31,9 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.Extensions.S3.Encryption" Version="2.0.5" />
-    <PackageReference Include="AWSSDK.CloudFront" Version="3.7.201.8" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.201.12" />
+    <PackageReference Include="Amazon.Extensions.S3.Encryption" Version="2.1.0" />
+    <PackageReference Include="AWSSDK.CloudFront" Version="3.7.201.57" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.205.19" />
     <PackageReference Include="Google.Api.Gax" Version="4.4.0" />
     <PackageReference Include="Google.Api.Gax.Rest" Version="4.4.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />

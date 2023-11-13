@@ -77,8 +77,6 @@ public static class AutofacExtension
             var module = new ConfigurationModule(root);
             builder.RegisterModule(module);
         }
-
-        return;
     }
 
     public static List<string> FindAndLoad(IConfiguration configuration, string currentDir, string section = "autofac.products.json")
@@ -89,6 +87,7 @@ public static class AutofacExtension
         var root = config.Build();
 
         var sectionSettings = root.GetSection("components");
+
         var folder = configuration["core:products:folder"];
         var subfolder = configuration["core:products:subfolder"];
         string productsDir;
@@ -114,12 +113,12 @@ public static class AutofacExtension
 
         var types = new List<string>();
 
-        foreach (var component in cs)
+        foreach (var component in cs.Select(r=> r.Type))
         {
             try
             {
-                LoadAssembly(component.Type);
-                types.Add(component.Type);
+                LoadAssembly(component);
+                types.Add(component);
             }
             catch (Exception)
             {
