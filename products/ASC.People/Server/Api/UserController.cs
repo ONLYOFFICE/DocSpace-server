@@ -1226,6 +1226,11 @@ public class UserController : PeopleControllerBase
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
+        if (await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
         var existentUser = await _userManager.GetUserByEmailAsync(email);
 
         if (existentUser.Id != Constants.LostUser.Id)
@@ -1571,7 +1576,7 @@ public class UserController : PeopleControllerBase
 
         foreach (var user in users)
         {
-            if (user.IsOwner(tenant) || user.IsMe(_authContext))
+            if (user.IsOwner(tenant) || await _userManager.IsDocSpaceAdminAsync(user) || user.IsMe(_authContext))
             {
                 continue;
             }

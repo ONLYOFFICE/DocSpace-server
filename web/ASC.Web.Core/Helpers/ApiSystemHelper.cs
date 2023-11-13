@@ -80,7 +80,7 @@ public class ApiSystemHelper
     public string CreateAuthToken(string pkey)
     {
         using var hasher = new HMACSHA1(_skey);
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
         return $"ASC {pkey}:{now}:{hash}1"; //hack for .net
     }
@@ -110,6 +110,11 @@ public class ApiSystemHelper
 
     public async Task AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
     {
+        if (String.IsNullOrEmpty(tenantRegion))
+        {
+            tenantRegion = "default";
+        }
+
         using var _awsDynamoDBClient = GetDynamoDBClient();
 
         var putItemRequest = new PutItemRequest
@@ -207,7 +212,7 @@ public class ApiSystemHelper
             FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
                                                 {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = "tenant_region",
+            ProjectionExpression = "tenant_domain",
             ConsistentRead = true
         };
 
