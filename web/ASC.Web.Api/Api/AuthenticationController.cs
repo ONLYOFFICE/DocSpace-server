@@ -296,14 +296,14 @@ public class AuthenticationController : ControllerBase
                 {
                     Tfa = true,
                     TfaKey = (await _tfaManager.GenerateSetupCodeAsync(user)).ManualEntryKey,
-                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation)
+                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation, keyInCookie: true)
                 };
             }
 
             return new AuthenticationTokenDto
             {
                 Tfa = true,
-                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaAuth)
+                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaAuth, keyInCookie: true)
             };
         }
 

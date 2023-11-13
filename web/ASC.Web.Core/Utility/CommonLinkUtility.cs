@@ -67,6 +67,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
     private readonly WebItemManagerSecurity _webItemManagerSecurity;
     private readonly WebItemManager _webItemManager;
     private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
+    private readonly CookiesManager _cookiesManager;
 
     public CommonLinkUtility(
         CoreBaseSettings coreBaseSettings,
@@ -76,8 +77,9 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         WebItemManagerSecurity webItemManagerSecurity,
         WebItemManager webItemManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options) :
-        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider, options)
+        ILoggerProvider options,
+        CookiesManager cookiesManager) :
+        this(null, coreBaseSettings, coreSettings, tenantManager, userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider, options, cookiesManager)
     {
     }
 
@@ -90,9 +92,10 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         WebItemManagerSecurity webItemManagerSecurity,
         WebItemManager webItemManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options) :
+        ILoggerProvider options,
+        CookiesManager cookiesManager) :
         base(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options) =>
-        (_userManager, _webItemManagerSecurity, _webItemManager, _emailValidationKeyProvider) = (userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider);
+        (_userManager, _webItemManagerSecurity, _webItemManager, _emailValidationKeyProvider, _cookiesManager) = (userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider, cookiesManager);
 
     public string Logout
     {
@@ -401,9 +404,9 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     #region confirm links
 
-    public async Task<string> GetConfirmationEmailUrlAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public async Task<string> GetConfirmationEmailUrlAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool keyInCookie = false)
     {
-        return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId));
+        return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId, keyInCookie));
     }
 
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
@@ -411,14 +414,14 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
     }
 
-    public async Task<string> GetConfirmationUrlRelativeAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public async Task<string> GetConfirmationUrlRelativeAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool keyInCookie = false)
     {
-        return GetConfirmationUrlRelative(await _tenantManager.GetCurrentTenantIdAsync(), email, confirmType, postfix, userId);
+        return await GetConfirmationUrlRelativeAsync(await _tenantManager.GetCurrentTenantIdAsync(), email, confirmType, postfix, userId, keyInCookie);
     }
 
-    public string GetConfirmationUrlRelative(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public async Task<string> GetConfirmationUrlRelativeAsync(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool keyInCookie = false)
     {
-        return $"confirm/{confirmType}?{GetToken(tenantId, email, confirmType, postfix, userId)}";
+        return $"confirm/{confirmType}?{await GetTokenAsync(tenantId, email, confirmType, postfix, userId, keyInCookie)}";
     }
 
     public string GetConfirmationUrlRelative(string key, ConfirmType confirmType, Guid userId = default)
@@ -426,11 +429,20 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
     }
 
-    public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public async ValueTask<string> GetTokenAsync(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool keyInCookie = false)
     {
         var validationKey = _emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
 
-        var link = $"type={confirmType}&key={validationKey}";
+        var link = $"type={confirmType}";
+
+        if (keyInCookie)
+        {
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, validationKey, false, $"_{confirmType}");
+        }
+        else
+        {
+            link += $"&key={validationKey}";
+        }
 
         if (!string.IsNullOrEmpty(email))
         {

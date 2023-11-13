@@ -562,7 +562,7 @@ public class PortalController : ControllerBase
                                 Uri.SchemeDelimiter,
                                 tenant.GetTenantDomain(_coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                _commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
+                                await _commonLinkUtility.GetConfirmationUrlRelativeAsync(tenant.Id, user.Email, ConfirmType.Auth)
                );
     }
 
