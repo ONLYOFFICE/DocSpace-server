@@ -29,7 +29,7 @@ public class CreateClientDTO implements Serializable {
     @Size(min = 10, max = 256, message = "client description length is expected to be between 10 and 256 characters")
     private String description;
     @JsonProperty("logo")
-    @Pattern(regexp = "^data:((?:\\w+\\/(?:(?!;).)+)?)((?:;[\\w\\W]*?[^;])*),(.+)$",
+    @Pattern(regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
     message = "client logo is expected to be passed as base64")
     private String logo;
     @JsonProperty("authentication_method")
