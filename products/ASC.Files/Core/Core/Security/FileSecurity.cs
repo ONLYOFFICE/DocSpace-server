@@ -1005,55 +1005,58 @@ public class FileSecurity : IFileSecurity
                 break;
         }
 
-        FileShareRecord ace;
+        var ace = e.ShareRecord;
 
-        if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-            (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId, isRoom), out var value)) || 
-            _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await _externalShare.GetLinkIdAsync(), isRoom), out value))
+        if (ace == null)
         {
-            ace = value.Clone();
-            ace.EntryId = e.Id;
-        }
-        else
-        {
-            var subjects = new List<Guid>();
-            if (shares == null)
+            if (!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) || 
+                _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await _externalShare.GetLinkIdAsync()), out value))
             {
-                subjects = await GetUserSubjectsAsync(userId);
-                shares = await GetSharesAsync(e, subjects);
-            }
-
-            if (e.FileEntryType == FileEntryType.File)
-            {
-                ace = shares
-                    .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
-                    .FirstOrDefault(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.File);
-
-                if (ace == null)
-                {
-                    // share on parent folders
-                    ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
-                        .OrderBy(r => r, new SubjectComparer(subjects))
-                        .ThenBy(r => r.Level)
-                        .FirstOrDefault();
-                }
+                ace = value.Clone();
+                ace.EntryId = e.Id;
             }
             else
             {
-                ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
-                    .OrderBy(r => r, new SubjectComparer(subjects))
-                    .ThenBy(r => r.Level)
-                    .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
-                    .FirstOrDefault();
-            }
-            
-            if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-                ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
-            {
-                var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+                var subjects = new List<Guid>();
+                if (shares == null)
+                {
+                    subjects = await GetUserSubjectsAsync(userId);
+                    shares = await GetSharesAsync(e, subjects);
+                }
 
-                _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id, isRoom), ace);
+                if (e.FileEntryType == FileEntryType.File)
+                {
+                    ace = shares
+                        .OrderBy(r => r, new SubjectComparer(subjects))
+                        .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                        .FirstOrDefault(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.File);
+
+                    if (ace == null)
+                    {
+                        // share on parent folders
+                        ace = shares.Where(r => Equals(r.EntryId, file.ParentId) && r.EntryType == FileEntryType.Folder)
+                            .OrderBy(r => r, new SubjectComparer(subjects))
+                            .ThenBy(r => r.Level)
+                            .FirstOrDefault();
+                    }
+                }
+                else
+                {
+                    ace = shares.Where(r => Equals(r.EntryId, e.Id) && r.EntryType == FileEntryType.Folder)
+                        .OrderBy(r => r, new SubjectComparer(subjects))
+                        .ThenBy(r => r.Level)
+                        .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer())
+                        .FirstOrDefault();
+                }
+            
+                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+                    ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                {
+                    var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+
+                    _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                }
             }
         }
 
@@ -1383,8 +1386,8 @@ public class FileSecurity : IFileSecurity
         var currentUserSubjects = await GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
 
-        var roomsIds = new Dictionary<int, FileShare>();
-        var thirdPartyRoomsIds = new Dictionary<string, FileShare>();
+        var internalRoomsRecords = new Dictionary<int, FileShareRecord>();
+        var thirdPartyRoomsRecords = new Dictionary<string, FileShareRecord>();
 
         var recordGroup = currentUsersRecords.GroupBy(r => new { r.EntryId, r.EntryType }, (_, group) => new
         {
@@ -1402,11 +1405,11 @@ public class FileSecurity : IFileSecurity
 
             switch (record.EntryId)
             {
-                case int roomId when !roomsIds.ContainsKey(roomId):
-                    roomsIds.Add(roomId, record.Share);
+                case int roomId when !internalRoomsRecords.ContainsKey(roomId):
+                    internalRoomsRecords.Add(roomId, record);
                     break;
-                case string thirdPartyRoomId when !thirdPartyRoomsIds.ContainsKey(thirdPartyRoomId):
-                    thirdPartyRoomsIds.Add(thirdPartyRoomId, record.Share);
+                case string thirdPartyRoomId when !thirdPartyRoomsRecords.ContainsKey(thirdPartyRoomId):
+                    thirdPartyRoomsRecords.Add(thirdPartyRoomId, record);
                     break;
             }
         }
@@ -1418,19 +1421,19 @@ public class FileSecurity : IFileSecurity
             _ => new[] { await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory), await _globalFolder.GetFolderArchiveAsync(_daoFactory) }
         };
 
-        var rooms = await folderDao.GetRoomsAsync(roomsIds.Keys, filterType, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, rootFoldersIds)
-             .Where(r => Filter(r, roomsIds)).ToListAsync();
-        var thirdPartyRooms = await folderThirdPartyDao.GetFakeRoomsAsync(rootFoldersIds.Select(id => id.ToString()), thirdPartyRoomsIds.Keys, filterType,
+        var rooms = await folderDao.GetRoomsAsync(internalRoomsRecords.Keys, filterType, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries, rootFoldersIds)
+             .Where(r => Filter(r, internalRoomsRecords)).ToListAsync();
+        var thirdPartyRooms = await folderThirdPartyDao.GetFakeRoomsAsync(rootFoldersIds.Select(id => id.ToString()), thirdPartyRoomsRecords.Keys, filterType,
                 tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectFilter, subjectEntries)
-            .Where(r => Filter(r, thirdPartyRoomsIds)).ToListAsync();
+            .Where(r => Filter(r, thirdPartyRoomsRecords)).ToListAsync();
 
         if (withSubfolders && filterType != FilterType.FoldersOnly)
         {
             var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             
-            entries.AddRange(files.Where(f => Filter(f, roomsIds)));
-            entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRoomsIds)));
+            entries.AddRange(files.Where(f => Filter(f, internalRoomsRecords)));
+            entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRoomsRecords)));
         }
 
         await SetTagsAsync(rooms);
@@ -1441,25 +1444,19 @@ public class FileSecurity : IFileSecurity
         entries.AddRange(rooms);
         entries.AddRange(thirdPartyRooms);
 
-        bool Filter<T>(FileEntry<T> entry, IReadOnlyDictionary<T, FileShare> accesses)
+        bool Filter<T>(FileEntry<T> entry, IReadOnlyDictionary<T, FileShareRecord> records)
         {
             var id = entry.FileEntryType == FileEntryType.Folder ? entry.Id : entry.ParentId;
+            var record = records.GetValueOrDefault(id);
 
             switch (searchArea)
             {
                 case SearchArea.Archive when entry.RootFolderType == FolderType.Archive:
-                    {
-                        entry.Access = accesses.TryGetValue(id, out var share) ? share : FileShare.None;
-                        return true;
-                    }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
-                    {
-                        entry.Access = accesses.TryGetValue(id, out var share) ? share : FileShare.None;
-                        return true;
-                    }
                 case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive:
                     {
-                        entry.Access = accesses.TryGetValue(id, out var share) ? share : FileShare.None;
+                        entry.ShareRecord = record;
+                        entry.Access = record?.Share ?? FileShare.None;
                         return true;
                     }
                 default:
@@ -1848,16 +1845,9 @@ public class FileSecurity : IFileSecurity
         return false;
     }
 
-    private string GetCacheKey<T>(T entryId, Guid userId, bool isRoom)
+    private string GetCacheKey<T>(T parentId, Guid userId)
     {
-        var key = $"{_tenantManager.GetCurrentTenant().Id}-{userId}-{entryId}";
-
-        if (isRoom)
-        {
-            key += $"-room";
-        }
-
-        return key;
+        return $"{_tenantManager.GetCurrentTenant().Id}-{userId}-{parentId}";
     }
 
     private string GetCacheKey<T>(T parentId)

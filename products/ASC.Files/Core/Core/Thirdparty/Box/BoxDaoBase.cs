@@ -203,10 +203,10 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
 
         var file = GetFile();
 
-        file.Id = MakeThirdId(boxFile.Id);
+        file.Id = MakeId(boxFile.Id);
         file.ContentLength = boxFile.Size.HasValue ? (long)boxFile.Size : 0;
         file.CreateOn = boxFile.CreatedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.CreatedAt.Value.UtcDateTime) : default;
-        file.ParentId = MakeThirdId(GetParentFolderId(boxFile));
+        file.ParentId = MakeId(GetParentFolderId(boxFile));
         file.ModifiedOn = boxFile.ModifiedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.ModifiedAt.Value.UtcDateTime) : default;
         file.NativeAccessor = boxFile;
         file.Title = MakeFileTitle(boxFile);
