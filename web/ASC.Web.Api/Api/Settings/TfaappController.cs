@@ -158,7 +158,14 @@ public class TfaappController : BaseSettingsController
         await ApiContext.AuthByClaimAsync();
         var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         _securityContext.Logout();
-        return await _tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+
+        var result = await _tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+
+        var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : "";
+        _cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
+
+        return result;
     }
 
     /// <summary>
