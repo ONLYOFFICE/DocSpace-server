@@ -1226,6 +1226,11 @@ public class UserController : PeopleControllerBase
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
+        if (await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
         var existentUser = await _userManager.GetUserByEmailAsync(email);
 
         if (existentUser.Id != Constants.LostUser.Id)
