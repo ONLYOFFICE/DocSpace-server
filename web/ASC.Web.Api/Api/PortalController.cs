@@ -233,32 +233,30 @@ public class PortalController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
-    [AllowNotPayment, AllowAnonymous]
+    [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
+        var docServiceQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
+        
         var result = new TenantExtraDto
         {
             CustomMode = _coreBaseSettings.CustomMode,
             Opensource = _tenantExtra.Opensource,
             Enterprise = _tenantExtra.Enterprise,
-            EnableTariffPage = //TenantExtra.EnableTarrifSettings - think about hide-settings for opensource
+            EnableTariffPage = 
                 (!_coreBaseSettings.Standalone || !string.IsNullOrEmpty(_licenseReader.LicensePath))
                 && string.IsNullOrEmpty(_setupInfo.AmiMetaUrl)
-                && !_coreBaseSettings.CustomMode
+                && !_coreBaseSettings.CustomMode,
+            Tariff = await _tenantExtra.GetCurrentTariffAsync(),
+            Quota = quota,
+            NotPaid = await _tenantExtra.IsNotPaidAsync(),
+            LicenseAccept = (await _settingsManager.LoadForDefaultTenantAsync<TariffSettings>()).LicenseAcceptSetting,
+            DocServerUserQuota = docServiceQuota.Item1,
+            DocServerLicense = docServiceQuota.Item2
         };
-
-
-
-        if (_authContext.IsAuthenticated)
-        {
-            result.Tariff = await _tenantExtra.GetCurrentTariffAsync(refresh);
-            result.Quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
-            result.NotPaid = await _tenantExtra.IsNotPaidAsync();
-            result.LicenseAccept = _settingsManager.LoadForDefaultTenant<TariffSettings>().LicenseAcceptSetting;
-            result.DocServerUserQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
-            result.DocServerLicense = await _documentServiceLicense.GetLicenseAsync();
-        }
 
         return result;
     }
@@ -536,12 +534,6 @@ public class PortalController : ControllerBase
                 await _tenantManager.CheckTenantAddressAsync(newAlias.Trim());
             }
 
-
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
-            {
-                await _apiSystemHelper.AddTenantToCacheAsync(newAlias, user.Id);
-            }
-
             var oldDomain = tenant.GetTenantDomain(_coreSettings);
             tenant.Alias = alias;
             tenant = await _tenantManager.SaveTenantAsync(tenant);
@@ -549,9 +541,9 @@ public class PortalController : ControllerBase
 
             await _cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(_coreSettings));
 
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await _apiSystemHelper.RemoveTenantFromCacheAsync(oldAlias, user.Id);
+                await _apiSystemHelper.UpdateTenantToCacheAsync(oldDomain, tenant.GetTenantDomain(_coreSettings));
             }
 
             if (!localhost || string.IsNullOrEmpty(tenant.MappedDomain))
@@ -594,9 +586,9 @@ public class PortalController : ControllerBase
 
         await _tenantManager.RemoveTenantAsync(tenant.Id);
 
-        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+        if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _securityContext.CurrentAccount.ID);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
         }
 
         try
@@ -731,9 +723,9 @@ public class PortalController : ControllerBase
 
         await _tenantManager.RemoveTenantAsync(tenant.Id);
 
-        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+        if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _securityContext.CurrentAccount.ID);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
         }
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
