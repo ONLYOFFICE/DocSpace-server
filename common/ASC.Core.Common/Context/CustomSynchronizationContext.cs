@@ -55,14 +55,11 @@ public class SynchronizationContextMiddleware
         _next = next;
     }
 
-    public async Task Invoke(HttpContext context, ILogger<SynchronizationContextMiddleware> logger)
+    public async Task Invoke(HttpContext context)
     {
         CustomSynchronizationContext.CreateContext();
 
-        var sw = Stopwatch.StartNew();
         await _next.Invoke(context);
-        sw.Stop();
-        logger.Debug($"{context.Request.Url().AbsoluteUri} - {sw.ElapsedMilliseconds}ms");
     }
 }
 
