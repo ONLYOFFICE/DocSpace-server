@@ -190,7 +190,7 @@ public class TfaappController : BaseSettingsController
                 ? ConfirmType.TfaAuth
                 : ConfirmType.TfaActivation;
 
-            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType);
+            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType, keyInCookie: true);
         }
 
         return string.Empty;
@@ -441,7 +441,7 @@ public class TfaappController : BaseSettingsController
         await _cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation);
+            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation, keyInCookie: true);
         }
 
         await _studioNotifyService.SendMsgTfaResetAsync(user);
