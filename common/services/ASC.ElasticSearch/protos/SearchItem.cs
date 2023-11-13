@@ -26,6 +26,8 @@
 
 using ProtoBuf;
 
+namespace ASC.ElasticSearch;
+
 [ProtoContract]
 public record ClearIndexAction
 {
