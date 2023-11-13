@@ -129,15 +129,16 @@ public abstract class FoldersController<T> : ApiControllerBase
     /// <param type="System.Nullable{System.Boolean}, System" name="withsubfolders">Specifies whether to return sections with or without subfolders</param>
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Specifies whether to exclude a subject or not</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, System" name="applyFilterOption">Specifies whether to return only files, only folders or all elements from the specified folder</param>
+    /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">Folder contents</returns>
     /// <path>api/2.0/files/{folderId}</path>
     /// <httpMethod>GET</httpMethod>
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
-        ApplyFilterOption? applyFilterOption)
+        ApplyFilterOption? applyFilterOption, string extension)
     {
-        var folder = await _foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption);
+        var folder = await _foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, extension);
 
         return folder.NotFoundIfNull();
     }

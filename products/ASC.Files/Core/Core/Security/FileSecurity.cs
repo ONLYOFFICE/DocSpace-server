@@ -1284,14 +1284,14 @@ public class FileSecurity : IFileSecurity
         return await _daoFactory.GetSecurityDao<T>().GetUsersWithSharedCountAsync(entry, text, employeeStatus, activationStatus, excludeShared);
     }
 
-    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = _daoFactory.GetSecurityDao<int>();
         var subjects = await GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
         var records = await securityDao.GetSharesAsync(subjects).ToListAsync();
 
-        var firstTask = GetSharesForMeAsync<int>(records.Where(r => r.EntryId is int), subjects, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders).ToListAsync();
-        var secondTask = GetSharesForMeAsync<string>(records.Where(r => r.EntryId is string), subjects, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders).ToListAsync();
+        var firstTask = GetSharesForMeAsync<int>(records.Where(r => r.EntryId is int), subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+        var secondTask = GetSharesForMeAsync<string>(records.Where(r => r.EntryId is string), subjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
         foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
         {
@@ -1351,13 +1351,13 @@ public class FileSecurity : IFileSecurity
 
             if (!string.IsNullOrEmpty(search))
             {
-                files = await fileDao.GetFilesAsync(roomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, searchInContent).ToListAsync();
-                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(f => f.Id), FilterType.None, false, Guid.Empty, search, searchInContent).ToListAsync();
+                files = await fileDao.GetFilesAsync(roomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(f => f.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             }
             else
             {
-                files = await fileDao.GetFilesAsync(roomsEntries.Where(r => DocSpaceHelper.IsRoom(r.FolderType)).Select(r => r.Id), FilterType.None, false, Guid.Empty, search, searchInContent).ToListAsync();
-                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, searchInContent).ToListAsync();
+                files = await fileDao.GetFilesAsync(roomsEntries.Where(r => DocSpaceHelper.IsRoom(r.FolderType)).Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+                thirdPartyFiles = await fileThirdPartyDao.GetFilesAsync(thirdPartyRoomsEntries.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             }
 
             entries.AddRange(files);
@@ -1429,8 +1429,8 @@ public class FileSecurity : IFileSecurity
 
         if (withSubfolders && filterType != FilterType.FoldersOnly)
         {
-            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, searchInContent).ToListAsync();
-            var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, searchInContent).ToListAsync();
+            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+            var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             
             entries.AddRange(files.Where(f => Filter(f, internalRoomsRecords)));
             entries.AddRange(thirdPartyFiles.Where(f => Filter(f, thirdPartyRoomsRecords)));
@@ -1505,7 +1505,8 @@ public class FileSecurity : IFileSecurity
         }
     }
 
-    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)
+    private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, 
+        Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
         var fileDao = _daoFactory.GetFileDao<T>();
@@ -1543,7 +1544,7 @@ public class FileSecurity : IFileSecurity
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             var share = await _globalFolder.GetFolderShareAsync<T>(_daoFactory);
 
             await foreach (var x in files)
@@ -1583,7 +1584,7 @@ public class FileSecurity : IFileSecurity
 
         if (filterType != FilterType.FoldersOnly && withSubfolders)
         {
-            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, searchInContent);
+            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
             entries.AddRange(await filesInSharedFolders.Distinct().ToListAsync());
         }
@@ -1625,24 +1626,27 @@ public class FileSecurity : IFileSecurity
         }
     }
 
-    public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = _daoFactory.GetSecurityDao<int>();
         var subjects = await GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
         var records = await securityDao.GetSharesAsync(subjects).ToListAsync();
 
-        await foreach (var e in GetPrivacyForMeAsync<int>(records.Where(r => r.EntryId is int), subjects, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders))
+        await foreach (var e in GetPrivacyForMeAsync<int>(records.Where(r => r.EntryId is int), subjects, filterType, subjectGroup, subjectID, searchText,
+                           extension, searchInContent, withSubfolders))
         {
             yield return e;
         }
 
-        await foreach (var e in GetPrivacyForMeAsync<string>(records.Where(r => r.EntryId is string), subjects, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders))
+        await foreach (var e in GetPrivacyForMeAsync<string>(records.Where(r => r.EntryId is string), subjects, filterType, subjectGroup, subjectID, searchText, 
+                           extension, searchInContent, withSubfolders))
         {
             yield return e;
         }
     }
 
-    private async IAsyncEnumerable<FileEntry<T>> GetPrivacyForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", bool searchInContent = false, bool withSubfolders = false)
+    private async IAsyncEnumerable<FileEntry<T>> GetPrivacyForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, 
+        Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
         var fileDao = _daoFactory.GetFileDao<T>();
@@ -1679,7 +1683,7 @@ public class FileSecurity : IFileSecurity
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             var privateFolder = await _globalFolder.GetFolderPrivacyAsync<T>(_daoFactory);
 
             await foreach (var x in files)
@@ -1719,7 +1723,7 @@ public class FileSecurity : IFileSecurity
 
         if (filterType != FilterType.FoldersOnly && withSubfolders)
         {
-            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, searchInContent);
+            IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);
             entries.AddRange(await filesInSharedFolders.Distinct().ToListAsync());
         }
