@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Nodes;
+
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
@@ -89,20 +91,26 @@ public class ApiSystemHelper
 
     public async Task ValidatePortalNameAsync(string domain, Guid userId)
     {
-        var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
-        var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, data);
-        var resObj = JObject.Parse(result);
+        var data = new
+        {
+            PortalName = HttpUtility.UrlEncode(domain)
+        };
+
+        var dataJson = System.Text.Json.JsonSerializer.Serialize(data);
+        var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
+        var resObj = JsonNode.Parse(result).AsObject();
         if (resObj["error"] != null)
         {
             if (resObj["error"].ToString() == "portalNameExist")
             {
-                var varians = resObj.Value<JArray>("variants").Select(jv => jv.Value<string>());
+                var varians = resObj["variants"].AsArray().Select(r => r.ToString()).ToList();
                 throw new TenantAlreadyExistsException("Address busy.", varians);
             }
 
             throw new Exception(resObj["error"].ToString());
         }
     }
+
 
     #endregion
 
