@@ -24,42 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using IDistributedLock = ASC.Common.Threading.DistributedLock.Abstractions.IDistributedLock;
+namespace ASC.Common.Threading.DistributedLock.RedisLock.Configuration;
 
-namespace ASC.Common.Threading.DistributedLock.RedisLock;
-
-public static class DistributedLockServiceExtensions
+public class RedisLockOptions
 {
-    public static IServiceCollection AddRedisDistributedLock(this IServiceCollection services, RedisLockOptions options)
-    {
-        services.AddTransient<IDistributedLock, RedisLock>();
-        
-        return services.AddSingleton<IDistributedLockProvider>(sp =>
-        {
-            var database = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase().Database;
-
-            return new RedisDistributedSynchronizationProvider(database, optBuilder =>
-            {
-                if (options == null)
-                {
-                    return;
-                }
-
-                if (options.LifeTime.HasValue)
-                {
-                    optBuilder.Expiry(options.LifeTime.Value);
-                }
-
-                if (options.MinCheckTimeout.HasValue && options.MaxCheckTimeout.HasValue)
-                {
-                    optBuilder.BusyWaitSleepTime(options.MinCheckTimeout.Value, options.MaxCheckTimeout.Value);
-                }
-
-                if (options.ExtendTimeout.HasValue)
-                {
-                    optBuilder.ExtensionCadence(options.ExtendTimeout.Value);
-                }
-            });
-        });
-    }
+    public TimeSpan Expiry { get; init; }
+    public TimeSpan ExtendInterval { get; init; }
+    public TimeSpan MinTimeout { get; init; }
 }

@@ -26,35 +26,101 @@
 
 namespace ASC.Common.Threading.DistributedLock.RedisLock;
 
-public class RedisLockHandle : IDistributedLockHandle
+public class RedisLockHandle : LockHandleBase
 {
-    public RedisLockHandle(IDistributedSynchronizationHandle handle)
+    private readonly string _id, _resource, _channelName, _queueKey, _queueItemTimeoutKey;
+    private readonly long _expiryInMilliseconds;
+    private readonly IRedisDatabase _database;
+    private PeriodicTimer _timer;
+    
+    internal RedisLockHandle(
+        IRedisDatabase database, 
+        string resource, 
+        string id,
+        string channelName, 
+        string queueKey, 
+        string queueItemTimeoutKey,
+        PeriodicTimer timer, 
+        long expiryInMilliseconds)
     {
-        _handle = handle;
+        _database = database;
+        _resource = resource;
+        _id = id;
+        _channelName = channelName;
+        _queueKey = queueKey;
+        _timer = timer;
+        _expiryInMilliseconds = expiryInMilliseconds;
+        _queueItemTimeoutKey = queueItemTimeoutKey;
     }
 
-    private readonly IDistributedSynchronizationHandle _handle;
-
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        if (_handle != null)
-        {
-            await _handle.DisposeAsync();
-        }
+        CheckDispose();
+        
+        _timer?.Dispose();
+        _timer = null;
+        
+        await _database.Database.ScriptEvaluateAsync(_lockReleaseScript, 
+            new RedisKey[] { _resource, _queueKey, _channelName, _queueItemTimeoutKey }, 
+            new RedisValue[] { _expiryInMilliseconds, _id, RedisLockUtils.GetNowInMilliseconds() });
+
+        _disposed = true;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _handle?.Dispose();
+        CheckDispose();
+        
+        _timer?.Dispose();
+        _timer = null;
+        
+        _database.Database.ScriptEvaluate(_lockReleaseScript, 
+            new RedisKey[] { _resource, _queueKey, _channelName, _queueItemTimeoutKey }, 
+            new RedisValue[] { _expiryInMilliseconds, _id, RedisLockUtils.GetNowInMilliseconds() });
+        
+        _disposed = true;
     }
 
-    public async Task ReleaseAsync()
-    {
-        await DisposeAsync();
-    }
-
-    public void Release()
-    {
-        Dispose();
-    }
+    private static readonly string _lockReleaseScript = RedisLockUtils.RemoveExtraneousWhitespace(
+        """
+            while true do
+                local firstLockId2 = redis.call('lindex', KEYS[2], 0);
+                if firstLockId2 == false then
+                    break;
+                end;
+            
+                local timeoutKey2 = KEYS[4] .. ':' .. firstLockId2;
+                local timeout = redis.call('get', timeoutKey2);
+            
+                if timeout ~= false then
+                    if tonumber(timeout) <= tonumber(ARGV[3]) then
+                        redis.call('del', timeoutKey2);
+                        redis.call('lpop', KEYS[2]);
+                    else
+                        break;
+                    end;
+                elseif timeout == false then
+                    redis.call('lpop', KEYS[2]);
+                end;
+            end;
+        
+            if (redis.call('exists', KEYS[1]) == 0) then
+                local nextThreadId = redis.call('lindex', KEYS[2], 0);
+                if nextThreadId ~= false then
+                    redis.call('publish', KEYS[3] .. ':' .. nextThreadId, 0);
+                end;
+                return 1;
+            end;
+        
+            if redis.call('get', KEYS[1]) == ARGV[2] then
+        	    redis.call('del', KEYS[1])
+                local nextThreadId = redis.call('lindex', KEYS[2], 0);
+                if nextThreadId ~= false then
+                    redis.call('publish', KEYS[3] .. ':' .. nextThreadId, 0);
+                end;
+                return 1;
+            end
+            
+            return 0;
+        """);
 }

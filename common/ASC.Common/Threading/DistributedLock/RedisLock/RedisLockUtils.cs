@@ -26,10 +26,28 @@
 
 namespace ASC.Common.Threading.DistributedLock.RedisLock;
 
-public class RedisLockOptions
+public static partial class RedisLockUtils
 {
-    public TimeSpan? LifeTime { get; set; }
-    public TimeSpan? ExtendTimeout { get; set; }
-    public TimeSpan? MinCheckTimeout { get; set; }
-    public TimeSpan? MaxCheckTimeout { get; set; }
+    public static long GetNowInMilliseconds()
+    {
+        return (long)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalMilliseconds;
+    }
+    
+    public static string PrefixName(string prefix, string name)
+    {
+        if (name.Contains('{'))
+        {
+            return prefix + '{' + name;
+        }
+
+        return prefix + ":{" + name + "}";
+    }
+    
+    public static string RemoveExtraneousWhitespace(string script)
+    {
+        return RemoveExtraneousWhitespaceRegex().Replace(script.Trim(), " ");
+    }
+    
+    [GeneratedRegex("\\s+")]
+    private static partial Regex RemoveExtraneousWhitespaceRegex();
 }
