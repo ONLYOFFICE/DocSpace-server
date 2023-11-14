@@ -338,7 +338,7 @@ public class WebPluginManager
     {
         var systemPlugins = new List<DbWebPlugin>();
 
-        var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
+        var systemWebPluginSettings = await _settingsManager.LoadAsync<SystemWebPluginSettings>();
 
         var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
@@ -380,7 +380,7 @@ public class WebPluginManager
 
     public async Task<DbWebPlugin> GetSystemWebPluginAsync(string name)
     {
-        var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
+        var systemWebPluginSettings = await _settingsManager.LoadAsync<SystemWebPluginSettings>();
 
         var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
@@ -419,7 +419,7 @@ public class WebPluginManager
 
         var plugin = await GetSystemWebPluginAsync(name) ?? throw new ItemNotFoundException("Plugin not found");
 
-        var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
+        var systemWebPluginSettings = await _settingsManager.LoadAsync<SystemWebPluginSettings>();
 
         var enabledPlugins = systemWebPluginSettings.EnabledPlugins ?? new List<string>();
 
@@ -434,7 +434,7 @@ public class WebPluginManager
 
         systemWebPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
 
-        await _settingsManager.SaveForDefaultTenantAsync(systemWebPluginSettings);
+        await _settingsManager.SaveAsync(systemWebPluginSettings);
 
         plugin.Enabled = enabled;
 
