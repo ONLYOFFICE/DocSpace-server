@@ -437,7 +437,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         if (keyInCookie)
         {
-            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, validationKey, false, $"_{confirmType}");
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, validationKey, true, $"_{confirmType}");
         }
         else
         {
