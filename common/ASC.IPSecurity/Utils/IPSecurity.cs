@@ -84,7 +84,7 @@ public class IPSecurity
             return true;
         }
 
-        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId)
+        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId && !_authContext.IsFromInvite())
         {
             return true;
         }

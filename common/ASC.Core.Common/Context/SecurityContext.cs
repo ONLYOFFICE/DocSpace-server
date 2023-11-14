@@ -361,6 +361,7 @@ public class PermissionContext
 public class AuthContext
 {
     private IHttpContextAccessor HttpContextAccessor { get; }
+    private static readonly List<string> _typesCheck = new List<string>() { ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString() };
 
     public AuthContext()
     {
@@ -379,6 +380,11 @@ public class AuthContext
     public void Logout()
     {
         Principal = null;
+    }
+
+    public bool IsFromInvite()
+    {
+        return Principal.Claims.Any(c => _typesCheck.Contains(c.Value));
     }
 
     internal ClaimsPrincipal Principal
