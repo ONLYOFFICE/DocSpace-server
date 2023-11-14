@@ -104,7 +104,7 @@ public class Worker
                 .Select(f => f.Id)
                 .ToListAsync(cancellationToken);
 
-            var filesList = await fileDao.GetFilesAsync(trashId, null, default, false, Guid.Empty, string.Empty, false)
+            var filesList = await fileDao.GetFilesAsync(trashId, null, default, false, Guid.Empty, string.Empty, null, false)
                 .Where(x => fileDateTime.GetModifiedOnWithAutoCleanUp(x.ModifiedOn, tenantUser.Setting, true) < now)
                 .Select(y => y.Id)
                 .ToListAsync(cancellationToken);

@@ -121,7 +121,8 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+        bool searchInContent, bool checkShared = false)
     {
         foreach (var group in _selectorFactory.GetSelectors(fileIds))
         {
@@ -136,7 +137,8 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
             {
                 var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
 
-                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), filterType, subjectGroup, subjectID, searchText, searchInContent))
+                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), filterType, subjectGroup, subjectID, searchText, 
+                                   extension, searchInContent))
                 {
                     if (file != null)
                     {
@@ -160,12 +162,12 @@ internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject);
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject);
         var result = await files.Where(r => r != null).ToListAsync();
 
         foreach (var r in result)

@@ -131,11 +131,11 @@ public class EmailValidationKeyModelHelper
                 {
                     var auditEventDate = _tenantUtil.DateTimeToUtc(auditEvent.Date);
 
-                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s");
+                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s", CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    hash = passwordStamp.ToString("s");
+                    hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
                 checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + hash, key, _provider.ValidEmailKeyInterval);

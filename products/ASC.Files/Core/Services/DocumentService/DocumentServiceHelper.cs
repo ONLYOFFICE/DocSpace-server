@@ -372,7 +372,7 @@ public class DocumentServiceHelper
 
     public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode()}_{await _global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await _global.GetDocDbKeyAsync()}";
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
                              .AsEnumerable()
