@@ -244,7 +244,7 @@ public class StudioNotifyService
 
     public async Task SendMsgTfaResetAsync(UserInfo userInfo)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email.ToLower(), ConfirmType.TfaActivation, keyInCookie: true);
+        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email.ToLower(), ConfirmType.TfaActivation);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeTfa", GetCulture(userInfo));
 

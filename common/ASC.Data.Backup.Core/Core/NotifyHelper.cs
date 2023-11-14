@@ -168,7 +168,7 @@ public class NotifyHelper
 
                     var newTenantId = toTenantId.HasValue ? toTenantId.Value : tenant.Id;
                     var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
-                    var confirmationUrl = url + "/" + await _commonLinkUtility.GetConfirmationUrlRelativeAsync(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
+                    var confirmationUrl = url + "/" + _commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
                     var culture = user.GetCulture();
 
                     var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", culture);

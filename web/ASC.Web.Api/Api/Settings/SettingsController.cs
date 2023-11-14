@@ -237,7 +237,7 @@ public class SettingsController : BaseSettingsController
         {
             if (!(await _settingsManager.LoadAsync<WizardSettings>()).Completed)
             {
-                settings.WizardToken = await _commonLinkUtility.GetTokenAsync(tenant.Id, "", ConfirmType.Wizard, userId: tenant.OwnerId);
+                settings.WizardToken = _commonLinkUtility.GetToken(tenant.Id, "", ConfirmType.Wizard, userId: tenant.OwnerId);
             }
 
             settings.EnabledJoin =

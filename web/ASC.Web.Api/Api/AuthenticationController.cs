@@ -292,18 +292,22 @@ public class AuthenticationController : ControllerBase
         {
             if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
             {
+                (var urlActivation, var keyActivation) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+                await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
                     Tfa = true,
                     TfaKey = (await _tfaManager.GenerateSetupCodeAsync(user)).ManualEntryKey,
-                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation, keyInCookie: true)
+                    ConfirmUrl = urlActivation
                 };
             }
 
+            (var urlAuth, var keyAuth) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaAuth);
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
                 Tfa = true,
-                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaAuth, keyInCookie: true)
+                ConfirmUrl = urlAuth
             };
         }
 
