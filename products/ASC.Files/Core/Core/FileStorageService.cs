@@ -2515,7 +2515,7 @@ public class FileStorageService //: IFileStorageService
     {
         var room = (await GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
 
-        return await _fileSharing.GetRoomSharesCountAsync(room, filterType);
+        return await _fileSharing.GetPureSharesCountAsync(room, filterType);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, IEnumerable<Guid> subjects)
