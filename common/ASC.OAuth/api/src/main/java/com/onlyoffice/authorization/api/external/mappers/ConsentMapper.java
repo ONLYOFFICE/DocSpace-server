@@ -29,6 +29,7 @@ public interface ConsentMapper {
     ConsentMessage toMessage(Consent consent);
 
     Consent toEntity(ConsentMessage consentMessage);
+    @Mapping(source = "invalidated", target = "invalidated")
     ConsentDTO toDTO(Consent consent);
     default Set<ConsentDTO> toDTOs(Set<Consent> consents) {
         var result = new HashSet<ConsentDTO>();
