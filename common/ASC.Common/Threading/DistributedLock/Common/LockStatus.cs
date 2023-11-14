@@ -24,13 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Log;
+namespace ASC.Common.Threading.DistributedLock.Common;
 
-internal static partial class DistributedLockLogger
+[EnumExtensions]
+public enum LockStatus
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Distributed lock acquired. Resource: '{resource}'. Elapsed: {elapsedMilliseconds} ms")]
-    public static partial void DebugTryAcquireLock(this ILogger logger, string resource, long elapsedMilliseconds);
-    
-    [LoggerMessage(Level = LogLevel.Error, Message = "Distributed lock not acquired. Resource: '{resource}'. Elapsed: {elapsedMilliseconds} ms")]
-    public static partial void ErrorTryAcquireLock(this ILogger logger, string resource, long elapsedMilliseconds);
+    Acquired,
+    NotAcquired,
+    Expired
 }

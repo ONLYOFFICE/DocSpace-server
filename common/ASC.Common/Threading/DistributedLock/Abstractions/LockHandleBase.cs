@@ -26,8 +26,28 @@
 
 namespace ASC.Common.Threading.DistributedLock.Abstractions;
 
-public interface IDistributedLock
+public abstract class LockHandleBase : IDistributedLockHandle
 {
-    Task<IDistributedLockHandle> AcquireAsync(string resource, TimeSpan timeout = default, CancellationToken cancellationToken = default);
-    IDistributedLockHandle Acquire(string resource, TimeSpan timeout = default, CancellationToken cancellationToken = default);
+    protected bool _disposed;
+    
+    public async ValueTask ReleaseAsync()
+    {
+        await DisposeAsync();
+    }
+
+    public void Release()
+    {
+        Dispose();
+    }
+
+    public abstract void Dispose();
+    public abstract ValueTask DisposeAsync();
+
+    protected void CheckDispose()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(null, "Distributed lock disposed");
+        }
+    }
 }

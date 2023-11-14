@@ -57,6 +57,8 @@ global using ASC.Common.Security;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.Common;
+global using ASC.Common.Threading.DistributedLock.RedisLock.Configuration;
 global using ASC.Common.Utils;
 global using ASC.Security.Cryptography;
 
@@ -74,7 +76,6 @@ global using JWT;
 global using JWT.Algorithms;
 
 global using Medallion.Threading;
-global using Medallion.Threading.Redis;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.AspNetCore.Http;
@@ -106,6 +107,7 @@ global using ProtoBuf;
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
 
+global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 
 global using ILogger = Microsoft.Extensions.Logging.ILogger;

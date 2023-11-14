@@ -28,6 +28,6 @@ namespace ASC.Common.Threading.DistributedLock.Abstractions;
 
 public interface IDistributedLockHandle : IDisposable, IAsyncDisposable
 {
-    Task ReleaseAsync();
+    ValueTask ReleaseAsync();
     void Release();
 }

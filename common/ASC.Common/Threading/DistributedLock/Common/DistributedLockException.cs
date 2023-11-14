@@ -24,13 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Log;
+namespace ASC.Common.Threading.DistributedLock.Common;
 
-internal static partial class DistributedLockLogger
+public class DistributedLockException : Exception
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Distributed lock acquired. Resource: '{resource}'. Elapsed: {elapsedMilliseconds} ms")]
-    public static partial void DebugTryAcquireLock(this ILogger logger, string resource, long elapsedMilliseconds);
+    public override string Message { get; }
+    public string Resource { get; }
+    public LockStatus LockStatus { get; }
+    public long ElapsedMilliseconds { get; }
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "Distributed lock not acquired. Resource: '{resource}'. Elapsed: {elapsedMilliseconds} ms")]
-    public static partial void ErrorTryAcquireLock(this ILogger logger, string resource, long elapsedMilliseconds);
+    public DistributedLockException(LockStatus lockStatus, string resource, long elapsedMilliseconds)
+    {
+        LockStatus = lockStatus;
+        ElapsedMilliseconds = elapsedMilliseconds;
+        Resource = resource;
+        Message = $"Distributed Lock Error. Status: {LockStatus.ToStringFast()}, Resource: {Resource}, Elapsed: {ElapsedMilliseconds}";
+    }
 }
