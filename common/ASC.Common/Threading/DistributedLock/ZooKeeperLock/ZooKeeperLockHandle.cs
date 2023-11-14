@@ -24,50 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using IDistributedLock = ASC.Common.Threading.DistributedLock.Abstractions.IDistributedLock;
+namespace ASC.Common.Threading.DistributedLock.ZooKeeperLock;
 
-namespace ASC.Common.Threading.DistributedLock.RedisLock;
-
-public class RedisLock : IDistributedLock
+public class ZooKeeperLockHandle : LockHandleBase
 {
-    private readonly IDistributedLockProvider _distributedLockProvider;
-    private readonly ILogger _logger;
+    private readonly IDistributedSynchronizationHandle _handle;
 
-    public RedisLock(IDistributedLockProvider distributedLockProvider, ILoggerFactory loggerFactory)
+    public ZooKeeperLockHandle(IDistributedSynchronizationHandle handle)
     {
-        _distributedLockProvider = distributedLockProvider;
-        _logger = loggerFactory.CreateLogger("ASC.DistributedLock");
-    }
-    
-    public async Task<IDistributedLockHandle> AcquireAsync(string resource, TimeSpan timeout = default, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(resource);
-
-        var handle = await _distributedLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);
-
-        return GetHandle(handle, resource);
+        _handle = handle;
     }
 
-    public IDistributedLockHandle Acquire(string resource, TimeSpan timeout = default, CancellationToken cancellationToken = default)
+    public override async ValueTask DisposeAsync()
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(resource);
-
-        var handle = _distributedLockProvider.TryAcquireLock(resource, timeout, cancellationToken);
-
-        return GetHandle(handle, resource);
-    }
-
-    private RedisLockHandle GetHandle(IDistributedSynchronizationHandle handle, string resource)
-    {
-        if (handle != null)
-        {
-            _logger.DebugAcquire(resource);
-
-            return new RedisLockHandle(handle);
-        }
+        CheckDispose();
         
-        _logger.ErrorAcquire(resource);
+        if (_handle != null)
+        {
+            await _handle.DisposeAsync();
+        }
 
-        return null;
+        _disposed = true;
+    }
+
+    public override void Dispose()
+    {
+        CheckDispose();
+        
+        _handle?.Dispose();
+        
+        _disposed = true;
     }
 }
