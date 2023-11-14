@@ -39,6 +39,7 @@ public class IPSecurity
     private readonly string _myNetworks;
     private readonly UserManager _userManager;
     private readonly SettingsManager _settingsManager;
+    private static readonly List<string> _typesCheck = new List<string>() { ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString() };
 
     public IPSecurity(
         IConfiguration configuration,
@@ -84,7 +85,7 @@ public class IPSecurity
             return true;
         }
 
-        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId)
+        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId && !_authContext.Principal.Claims.Any(c => _typesCheck.Contains(c.Value)))
         {
             return true;
         }
