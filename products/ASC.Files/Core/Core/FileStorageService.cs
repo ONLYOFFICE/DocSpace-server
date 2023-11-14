@@ -2928,7 +2928,7 @@ public class FileStorageService //: IFileStorageService
         var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
         await folderDao.InitCustomOrder(folders, folderId);
         
-        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, false).Select(r=> r.Id).ToListAsync();
+        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, null, false).Select(r=> r.Id).ToListAsync();
         await fileDao.InitCustomOrder(files, folderId);
 
         if (subfolders)
