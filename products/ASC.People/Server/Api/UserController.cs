@@ -1226,7 +1226,7 @@ public class UserController : PeopleControllerBase
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        if (await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
+        if (!viewer.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
