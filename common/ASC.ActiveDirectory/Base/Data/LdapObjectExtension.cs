@@ -134,14 +134,14 @@ public class LdapObjectExtension
 
         var userName = GetAttribute(ldapUser, settings.LoginAttribute);
 
-        var firstName = settings.LdapMapping.ContainsKey(Mapping.FirstNameAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.FirstNameAttribute]) : string.Empty;
-        var secondName = settings.LdapMapping.ContainsKey(Mapping.SecondNameAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.SecondNameAttribute]) : string.Empty;
-        var birthDay = settings.LdapMapping.ContainsKey(Mapping.BirthDayAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.BirthDayAttribute]) : string.Empty;
-        var gender = settings.LdapMapping.ContainsKey(Mapping.GenderAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.GenderAttribute]) : string.Empty;
-        var primaryPhone = settings.LdapMapping.ContainsKey(Mapping.MobilePhoneAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.MobilePhoneAttribute]) : string.Empty;
-        var mail = settings.LdapMapping.ContainsKey(Mapping.MailAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.MailAttribute]) : string.Empty;
-        var title = settings.LdapMapping.ContainsKey(Mapping.TitleAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.TitleAttribute]) : string.Empty;
-        var location = settings.LdapMapping.ContainsKey(Mapping.LocationAttribute) ? GetAttribute(ldapUser, settings.LdapMapping[Mapping.LocationAttribute]) : string.Empty;
+        var firstName = settings.LdapMapping.TryGetValue(Mapping.FirstNameAttribute, out var value) ? GetAttribute(ldapUser, value) : string.Empty;
+        var secondName = settings.LdapMapping.TryGetValue(Mapping.SecondNameAttribute, out var value1) ? GetAttribute(ldapUser, value1) : string.Empty;
+        var birthDay = settings.LdapMapping.TryGetValue(Mapping.BirthDayAttribute, out var value2) ? GetAttribute(ldapUser, value2) : string.Empty;
+        var gender = settings.LdapMapping.TryGetValue(Mapping.GenderAttribute, out var value3) ? GetAttribute(ldapUser, value3) : string.Empty;
+        var primaryPhone = settings.LdapMapping.TryGetValue(Mapping.MobilePhoneAttribute, out var value4) ? GetAttribute(ldapUser, value4) : string.Empty;
+        var mail = settings.LdapMapping.TryGetValue(Mapping.MailAttribute, out var value5) ? GetAttribute(ldapUser, value5) : string.Empty;
+        var title = settings.LdapMapping.TryGetValue(Mapping.TitleAttribute, out var value6) ? GetAttribute(ldapUser, value6) : string.Empty;
+        var location = settings.LdapMapping.TryGetValue(Mapping.LocationAttribute, out var value7) ? GetAttribute(ldapUser, value7) : string.Empty;
 
         var phones = GetContacts(ldapUser, Mapping.AdditionalPhone, settings);
         var mobilePhones = GetContacts(ldapUser, Mapping.AdditionalMobilePhone, settings);
@@ -149,7 +149,7 @@ public class LdapObjectExtension
         var skype = GetContacts(ldapUser, Mapping.Skype, settings);
 
         var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
-        var quota = settings.LdapMapping.ContainsKey(Mapping.UserQuotaLimit) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, settings.LdapMapping[Mapping.UserQuotaLimit])) : quotaSettings.DefaultUserQuota;
+        var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultUserQuota;
 
         if (string.IsNullOrEmpty(userName))
         {

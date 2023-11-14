@@ -36,10 +36,10 @@ namespace ASC.Files.Api;
 [ControllerName("files")]
 public abstract class ApiControllerBase : ControllerBase
 {
-    protected FolderDtoHelper _folderDtoHelper;
-    protected FileDtoHelper _fileDtoHelper;
+    protected readonly FolderDtoHelper _folderDtoHelper;
+    protected readonly FileDtoHelper _fileDtoHelper;
 
-    public ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDtoHelper fileDtoHelper)
+    protected ApiControllerBase(FolderDtoHelper folderDtoHelper, FileDtoHelper fileDtoHelper)
     {
         _folderDtoHelper = folderDtoHelper;
         _fileDtoHelper = fileDtoHelper;

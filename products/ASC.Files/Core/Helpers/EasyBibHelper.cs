@@ -81,13 +81,11 @@ public class EasyBibHelper : Consumer
             case 2:
                 uri = _searchWebSiteUrl;
                 break;
-            default:
-                break;
         }
         uri += data;
 
         const string method = "GET";
-        var headers = new Dictionary<string, string>() { };
+        var headers = new Dictionary<string, string>();
         try
         {
             return _requestHelper.PerformRequest(uri, "", method, "", headers);
@@ -103,7 +101,7 @@ public class EasyBibHelper : Consumer
     {
 
         const string method = "GET";
-        var headers = new Dictionary<string, string>() { };
+        var headers = new Dictionary<string, string>();
         try
         {
             return _requestHelper.PerformRequest(_easyBibStyles, "", method, "", headers);
@@ -128,7 +126,7 @@ public class EasyBibHelper : Consumer
             const string contentType = "application/json";
             const string method = "POST";
             var body = citationData;
-            var headers = new Dictionary<string, string>() { };
+            var headers = new Dictionary<string, string>();
 
             return _requestHelper.PerformRequest(uri, contentType, method, body, headers);
 
@@ -136,7 +134,6 @@ public class EasyBibHelper : Consumer
         catch (Exception)
         {
             return null;
-            throw;
         }
 
     }

@@ -35,7 +35,7 @@ public class BaseCommonLinkUtility
     private UriBuilder _serverRoot;
     private string _vpath;
 
-    protected IHttpContextAccessor _httpContextAccessor;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
     public string ServerUri
     {
         set
@@ -75,7 +75,7 @@ public class BaseCommonLinkUtility
 
                 _serverRoot = new UriBuilder(u.Scheme, LocalHost, u.Port);
             }
-            else if (_serverRoot == null)
+            else
             {
                 var serverRoot = coreBaseSettings.ServerRoot;
 
@@ -101,9 +101,9 @@ public class BaseCommonLinkUtility
 
     public string VirtualRoot => ToAbsolute("~");
 
-    protected CoreBaseSettings _coreBaseSettings;
+    protected readonly CoreBaseSettings _coreBaseSettings;
     private readonly CoreSettings _coreSettings;
-    protected TenantManager _tenantManager;
+    protected readonly TenantManager _tenantManager;
 
     public string ServerRootPath
     {
@@ -215,10 +215,10 @@ public class BaseCommonLinkUtility
         }
         else
         {
-            foreach (Match match in matches)
+            foreach (var match in matches.Select(r=> r.Value))
             {
-                var values = match.Value.TrimStart('{').TrimEnd('}').Split('|');
-                url = url.Replace(match.Value, values.Contains(lang) ? lang : string.Empty);
+                var values = match.TrimStart('{').TrimEnd('}').Split('|');
+                url = url.Replace(match, values.Contains(lang) ? lang : string.Empty);
             }
         }
         //-

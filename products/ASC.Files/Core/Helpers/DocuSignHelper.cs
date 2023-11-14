@@ -104,8 +104,8 @@ public class DocuSignHelper
 
     public const string UserField = "userId";
 
-    public static readonly List<string> SupportedFormats = new List<string>
-        {
+    private static readonly List<string> _supportedFormats = new()
+    {
             ".as", ".asl", ".doc", ".docm", ".docx", ".dot", ".dotm", ".dotx", ".htm", ".html", ".msg", ".pdf", ".pdx", ".rtf", ".txt", ".wpd", ".wps", ".wpt", ".xps",
             ".emz", ".svg", ".svgz", ".vdx", ".vss", ".vst",
             ".bmp", ".cdr", ".dcx", ".gif", ".ico", ".jpg", ".jpeg", ".pct", ".pic", ".png", ".rgb", ".sam", ".tga", ".tif", ".tiff", ".wpg",
@@ -185,7 +185,7 @@ public class DocuSignHelper
 
         var url = await CreateEnvelopeAsync(account.AccountId, document, docuSignData, apiClient);
 
-        _ = _filesMessageService.SendAsync(MessageAction.DocumentSendToSign, sourceFile, "DocuSign", sourceFile.Title);
+        await _filesMessageService.SendAsync(MessageAction.DocumentSendToSign, sourceFile, "DocuSign", sourceFile.Title);
 
         return url;
     }
@@ -235,7 +235,7 @@ public class DocuSignHelper
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
         }
-        if (!SupportedFormats.Contains(FileUtility.GetFileExtension(file.Title)))
+        if (!_supportedFormats.Contains(FileUtility.GetFileExtension(file.Title)))
         {
             throw new ArgumentException(FilesCommonResource.ErrorMassage_NotSupportedFormat);
         }
@@ -268,8 +268,8 @@ public class DocuSignHelper
             DocumentBase64 = Convert.ToBase64String(fileBytes),
             DocumentFields = new List<NameValue>
                             {
-                                new NameValue {Name = FilesLinkUtility.FolderId, Value = folderId},
-                                new NameValue {Name = FilesLinkUtility.FileTitle, Value = file.Title},
+                                new() {Name = FilesLinkUtility.FolderId, Value = folderId},
+                                new() {Name = FilesLinkUtility.FileTitle, Value = file.Title},
                             },
             DocumentId = "1", //file.ID.ToString(),
             FileExtension = FileUtility.GetFileExtension(file.Title),
@@ -287,9 +287,9 @@ public class DocuSignHelper
                 {
                             //new EnvelopeEvent {EnvelopeEventStatusCode = DocuSignStatus.Sent.ToString()},
                             //new EnvelopeEvent {EnvelopeEventStatusCode = DocuSignStatus.Delivered.ToString()},
-                            new EnvelopeEvent {EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed)},
-                            new EnvelopeEvent {EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined)},
-                            new EnvelopeEvent {EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided)},
+                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed)},
+                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined)},
+                            new() {EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided)},
                 },
             IncludeDocumentFields = "true",
             //RecipientEvents = new List<RecipientEvent>
@@ -332,7 +332,7 @@ public class DocuSignHelper
             {
                 TextCustomFields = new List<TextCustomField>
                     {
-                        new TextCustomField {Name = UserField, Value = _authContext.CurrentAccount.ID.ToString()},
+                        new() {Name = UserField, Value = _authContext.CurrentAccount.ID.ToString()},
                     }
             },
             Documents = new List<Document> { document },
@@ -347,12 +347,12 @@ public class DocuSignHelper
         };
 
         var envelopesApi = new EnvelopesApi(apiClient);
-        var envelopeSummary = envelopesApi.CreateEnvelope(accountId, envelopeDefinition);
+        var envelopeSummary = await envelopesApi.CreateEnvelopeAsync(accountId, envelopeDefinition);
 
         _logger.DebugDocuSingCreatedEnvelope(envelopeSummary.EnvelopeId);
 
         var envelopeId = envelopeSummary.EnvelopeId;
-        var url = envelopesApi.CreateSenderView(accountId, envelopeId, new ReturnUrlRequest
+        var url = await envelopesApi.CreateSenderViewAsync(accountId, envelopeId, new ReturnUrlRequest
         {
             ReturnUrl = _baseCommonLinkUtility.GetFullAbsolutePath(DocuSignHandlerService.Path(_filesLinkUtility) + "?" + FilesLinkUtility.Action + "=redirect")
         });
@@ -363,8 +363,8 @@ public class DocuSignHelper
 
     public async Task<File<T>> SaveDocumentAsync<T>(string envelopeId, string documentId, string documentName, T folderId)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(envelopeId);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(documentId);
+        ArgumentException.ThrowIfNullOrEmpty(envelopeId);
+        ArgumentException.ThrowIfNullOrEmpty(documentId);
 
         var token = await _docuSignToken.GetTokenAsync();
         var account = await GetDocuSignAccountAsync(token);
@@ -406,7 +406,7 @@ public class DocuSignHelper
             file = await fileDao.SaveFileAsync(file, stream);
         }
 
-        _ = _filesMessageService.SendAsync(MessageAction.DocumentSignComplete, file, MessageInitiator.ThirdPartyProvider, "DocuSign", file.Title);
+        await _filesMessageService.SendAsync(MessageAction.DocumentSignComplete, file, MessageInitiator.ThirdPartyProvider, "DocuSign", file.Title);
 
         await _fileMarker.MarkAsNewAsync(file);
 

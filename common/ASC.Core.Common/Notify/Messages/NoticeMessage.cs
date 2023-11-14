@@ -29,7 +29,7 @@ namespace ASC.Notify.Messages;
 public class NoticeMessage : INoticeMessage
 {
     [NonSerialized]
-    private readonly List<ITagValue> _arguments = new List<ITagValue>();
+    private readonly List<ITagValue> _arguments = new();
 
     [NonSerialized]
     private IPattern _pattern;

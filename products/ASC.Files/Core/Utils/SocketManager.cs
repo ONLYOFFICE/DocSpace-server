@@ -112,15 +112,18 @@ public class SocketManager : SocketServiceClient
 
     public async Task ExecMarkAsNewFilesAsync(IEnumerable<Tag> tags)
     {
-        var result = await tags.ToAsyncEnumerable()
-            .SelectAwait(async tag => new
-            {
-                room = await GetFileRoomAsync(tag.EntryId, tag.Owner),
-                fileId = tag.EntryId,
-                count = tag.Count
-            })
-            .ToListAsync();
-
+        var result = new List<object>();
+        
+        foreach (var g in tags.GroupBy(r=> r.EntryId))
+        {
+            var room = await GetFileRoomAsync(g.Key);
+            result.AddRange(g.DistinctBy(r=> r.EntryId).Select(f =>             
+            new {
+                room,
+                fileId = f.EntryId
+            }));
+        }
+        
         SendNotAwaitableRequest("markasnew-file", result);
     }
 

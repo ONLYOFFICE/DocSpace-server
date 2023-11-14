@@ -119,11 +119,11 @@
   </resheader>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
     <value>Acest mesaj de e-mail este generat automat, vă rugăm să nu răspundeţi la acesta scrisiare.&lt;br /&gt;Ați primit acest e-mail pentru că sunteți un utilizator înregistrat al spațiului &lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Faceți clic aici pentru a dezactiva notificările DocSpace prin e-mail: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Unsubscribe&lt;/a&gt;
+&lt;br /&gt; Faceți clic aici pentru a dezactiva notificările DocSpace prin e-mail: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Unsubscribe&lt;/a&gt;
 &lt;br /&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
-    <value>&lt;body style="margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;
+    <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;
 &lt;div style="background-color: #fff; width: 600px; margin: 0 auto; text-align: center;"&gt;
     &lt;table cellspacing="0" cellpadding="0" style="font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border: 0 none; border-collapse: collapse; empty-cells: show; border-spacing: 0;"&gt;
       &lt;tbody&gt;
@@ -210,7 +210,7 @@
               &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Email us&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="http://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
@@ -218,7 +218,7 @@
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
           &lt;td colspan="3" style="margin: 0; padding: 0; background-color: #fff; "&gt;
             &lt;div style="text-align: left; width: 600px; margin: 0; padding: 0;"&gt;
-                &lt;a href="%SITEURL%" style="text-decoration: none; display: inline-block; width: 386px; height: 44px; margin: 0; padding: 0;" target="_blank"&gt;
+                &lt;a href="%SITEURL%" style="text-decoration: none; display: inline-block; width: 600px; height: 360px; margin: 0; padding: 0;" target="_blank"&gt;
                     &lt;img src="%LOGO%" style="border: 0px none; width: 600px; margin: 0; padding: 0;" alt="ONLYOFFICE" /&gt;
                 &lt;/a&gt;
             &lt;/div&gt;

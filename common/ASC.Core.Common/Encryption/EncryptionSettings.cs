@@ -134,7 +134,7 @@ public class EncryptionSettingsHelper
     {
         var punctuations = "!@#$%^&*()_-+=[{]};:>|./?".ToCharArray();
 
-        if (length < 1 || length > 128)
+        if (length is < 1 or > 128)
         {
             throw new ArgumentException("password_length_incorrect", nameof(length));
         }

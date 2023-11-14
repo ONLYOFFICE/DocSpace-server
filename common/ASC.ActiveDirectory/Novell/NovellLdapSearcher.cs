@@ -31,7 +31,7 @@ public class NovellLdapSearcher : IDisposable
 {
     protected readonly ILogger<NovellLdapSearcher> _logger;
     private LdapCertificateConfirmRequest _certificateConfirmRequest;
-    private static readonly object _rootSync = new object();
+    private static readonly object _rootSync = new();
     private readonly IConfiguration _configuration;
     private readonly NovellLdapEntryExtension _novellLdapEntryExtension;
     private LdapConnection _ldapConnection;
@@ -51,7 +51,7 @@ public class NovellLdapSearcher : IDisposable
 
     public bool IsConnected
     {
-        get { return _ldapConnection != null && _ldapConnection.Connected; }
+        get { return _ldapConnection is { Connected: true }; }
     }
 
     public NovellLdapSearcher(
@@ -490,7 +490,7 @@ public class NovellLdapSearcher : IDisposable
                 }
             }
             // if cookie is empty, we are done.
-        } while (cookie != null && cookie.Length > 0);
+        } while (cookie is { Length: > 0 });
 
         var result = _novellLdapEntryExtension.ToLdapObjects(entries, LdapUniqueIdAttribute);
 
@@ -538,11 +538,11 @@ public class NovellLdapSearcher : IDisposable
 
                 var attributeSet = nextEntry.GetAttributeSet();
 
-                var ienum = attributeSet.GetEnumerator();
+                using var ienum = attributeSet.GetEnumerator();
 
                 while (ienum.MoveNext())
                 {
-                    var attribute = (LdapAttribute)ienum.Current;
+                    var attribute = ienum.Current;
                     if (attribute == null)
                     {
                         continue;

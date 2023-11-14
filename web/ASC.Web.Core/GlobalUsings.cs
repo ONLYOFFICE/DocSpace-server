@@ -26,7 +26,6 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel;
-global using System.Data;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
@@ -61,7 +60,6 @@ global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
-global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Notify.Push;
@@ -78,7 +76,6 @@ global using ASC.Data.Storage;
 global using ASC.EventBus.Events;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
-global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
@@ -117,7 +114,6 @@ global using Google.Authenticator;
 global using ICSharpCode.SharpZipLib.Zip;
 
 global using Microsoft.AspNetCore.Builder;
-global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;

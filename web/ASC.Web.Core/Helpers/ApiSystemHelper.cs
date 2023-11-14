@@ -24,29 +24,58 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
+
+
 namespace ASC.Web.Core.Helpers;
 
 [Scope]
 public class ApiSystemHelper
 {
-    public string ApiSystemUrl { get; private set; }
-    public string ApiCacheUrl { get; private set; }
-    private static byte[] _skey;
+    public string ApiSystemUrl { get; }
+    public bool ApiCacheEnable { get; }
+
+    private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly TenantDomainValidator _tenantDomainValidator;
+    private readonly CoreBaseSettings _coreBaseSettings;
+    private readonly IConfiguration _configuration;
 
     public ApiSystemHelper(IConfiguration configuration,
+        CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
-        IHttpClientFactory clientFactory)
+        IHttpClientFactory clientFactory,
+        TenantDomainValidator tenantDomainValidator)
     {
         ApiSystemUrl = configuration["web:api-system"];
-        ApiCacheUrl = configuration["web:api-cache"];
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
+        _configuration = configuration;
         _clientFactory = clientFactory;
+        _tenantDomainValidator = tenantDomainValidator;
+        _coreBaseSettings = coreBaseSettings;
+
+        if (!String.IsNullOrEmpty(_configuration["aws:dynamoDB:accessKeyId"]) &&
+           !String.IsNullOrEmpty(_configuration["aws:dynamoDB:secretAccessKey"])) 
+        {
+            ApiCacheEnable = true;
+        }
+
+
     }
 
+    private AmazonDynamoDBClient GetDynamoDBClient()
+    {
+        var awsAccessKeyId = _configuration["aws:dynamoDB:accessKeyId"];
+        var awsSecretAccessKey = _configuration["aws:dynamoDB:secretAccessKey"];
+        var region = _configuration["aws:dynamoDB:region"];
+        
+        return new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey, RegionEndpoint.GetBySystemName(region));
+    }
 
     public string CreateAuthToken(string pkey)
     {
@@ -60,44 +89,18 @@ public class ApiSystemHelper
 
     public async Task ValidatePortalNameAsync(string domain, Guid userId)
     {
-        try
+        var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
+        var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, data);
+        var resObj = JObject.Parse(result);
+        if (resObj["error"] != null)
         {
-            var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
-            await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, data);
-        }
-        catch (WebException exception)
-        {
-            if (exception.Status != WebExceptionStatus.ProtocolError || exception.Response == null)
+            if (resObj["error"].ToString() == "portalNameExist")
             {
-                return;
+                var varians = resObj.Value<JArray>("variants").Select(jv => jv.Value<string>());
+                throw new TenantAlreadyExistsException("Address busy.", varians);
             }
 
-            var response = exception.Response;
-            try
-            {
-                await using var stream = response.GetResponseStream();
-                using var reader = new StreamReader(stream, Encoding.UTF8);
-                var result = await reader.ReadToEndAsync();
-
-                var resObj = JObject.Parse(result);
-                if (resObj["error"] != null)
-                {
-                    if (resObj["error"].ToString() == "portalNameExist")
-                    {
-                        var varians = resObj.Value<JArray>("variants").Select(jv => jv.Value<string>());
-                        throw new TenantAlreadyExistsException("Address busy.", varians);
-                    }
-
-                    throw new Exception(resObj["error"].ToString());
-                }
-            }
-            finally
-            {
-                if (response != null)
-                {
-                    response.Close();
-                }
-            }
+            throw new Exception(resObj["error"].ToString());
         }
     }
 
@@ -105,31 +108,120 @@ public class ApiSystemHelper
 
     #region cache
 
-    public async Task AddTenantToCacheAsync(string domain, Guid userId)
+    public async Task AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
     {
-        var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
-        await SendToApiAsync(ApiCacheUrl, "portal/add", WebRequestMethods.Http.Post, userId, data);
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
+        var putItemRequest = new PutItemRequest
+        {
+            TableName = "docspace-tenants_region",
+            Item = new Dictionary<string, AttributeValue>()
+                {
+                    { "tenant_domain", new AttributeValue {
+                            S = tenantDomain
+                        }},
+                    { "tenant_region", new AttributeValue {
+                            S = tenantRegion
+                    }}
+                }
+        };
+
+        await _awsDynamoDBClient.PutItemAsync(putItemRequest);
     }
 
-    public async Task RemoveTenantFromCacheAsync(string domain, Guid userId)
+    public async Task UpdateTenantToCacheAsync(string oldTenantDomain, string newTenantDomain)
     {
-        await SendToApiAsync(ApiCacheUrl, "portal/remove?portalname=" + HttpUtility.UrlEncode(domain), "DELETE", userId);
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
+        var getItemRequest = new GetItemRequest
+        {
+            TableName = "docspace-tenants_region",
+            Key = new Dictionary<string, AttributeValue>()
+                {
+                    { "tenant_domain", new AttributeValue { S = oldTenantDomain } }
+                },
+            ProjectionExpression = "tenant_region",
+            ConsistentRead = true
+        };
+
+        var region = (await _awsDynamoDBClient.GetItemAsync(getItemRequest)).Item.Values.First().S;
+
+        await AddTenantToCacheAsync(newTenantDomain, region);
+        await RemoveTenantFromCacheAsync(oldTenantDomain);
     }
 
-    public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string domain, Guid userId)
+    public async Task RemoveTenantFromCacheAsync(string tenantDomain)
     {
-        var result = await SendToApiAsync(ApiCacheUrl, "portal/find?portalname=" + HttpUtility.UrlEncode(domain), WebRequestMethods.Http.Get, userId);
-        var resObj = JObject.Parse(result);
+        using var _awsDynamoDBClient = GetDynamoDBClient();
 
-        var variants = resObj.Value<JArray>("variants");
-        return variants?.Select(jv => jv.Value<string>()).ToList();
+        var request = new DeleteItemRequest
+        {
+            TableName = "docspace-tenants_region",
+            Key = new Dictionary<string, AttributeValue>()
+                {
+                  { "tenant_domain", new AttributeValue { S = tenantDomain }
+                }
+            },
+        };
+
+        await _awsDynamoDBClient.DeleteItemAsync(request);
+    }
+
+    public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)
+    {
+        using var _awsDynamoDBClient = GetDynamoDBClient();
+
+        var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
+
+        var getItemRequest = new GetItemRequest
+        {
+            TableName = "docspace-tenants_region",
+            Key = new Dictionary<string, AttributeValue>()
+                {
+                    { "tenant_domain", new AttributeValue { S = tenantDomain } }
+                },
+            ProjectionExpression = "tenant_region",
+            ConsistentRead = true
+        };
+
+        var getItemResponse = await _awsDynamoDBClient.GetItemAsync(getItemRequest);
+
+        if (getItemResponse.Item.Count == 0) return null;
+
+        // cut number suffix
+        while (true)
+        {
+            if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
+            {
+                portalName = portalName[0..^1];
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        var scanRequest = new ScanRequest
+        {
+            TableName = "docspace-tenants_region",
+            FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
+            ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+                                                {":v_tenant_domain", new AttributeValue { S =  portalName }} },
+            ProjectionExpression = "tenant_region",
+            ConsistentRead = true
+        };
+
+        var scanResponce = await _awsDynamoDBClient.ScanAsync(scanRequest);
+        var result = scanResponce.Items.Select(x => x.Values.First().S.Split('.')[0]);
+
+        return result;
     }
 
     #endregion
 
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
-        if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out var uri))
+        if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))
         {
             var appUrl = _commonLinkUtility.GetFullAbsolutePath("/");
             absoluteApiUrl = $"{appUrl.TrimEnd('/')}/{absoluteApiUrl.TrimStart('/')}".TrimEnd('/');

@@ -82,7 +82,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _notifyHelper = notifyHelper;
         _coreBaseSettings = coreBaseSettings;
 
-        BackupProgressItemEnum = BackupProgressItemEnum.Restore;
+        BackupProgressItemType = BackupProgressItemType.Restore;
     }
 
     public BackupStorageType StorageType { get; set; }
@@ -152,14 +152,12 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             var restoreTask = _restorePortalTask;
             restoreTask.Init(_region, tempFile, TenantId, columnMapper, _upgradesPath);
-            restoreTask.ProgressChanged += (sender, args) =>
+            restoreTask.ProgressChanged += (_, args) =>
             {
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
                 PublishChanges();
             };
             await restoreTask.RunJob();
-
-            Tenant restoredTenant = null;
 
             if (restoreTask.Dump)
             {
@@ -178,7 +176,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             {
                 await _tenantManager.RemoveTenantAsync(tenant.Id);
 
-                restoredTenant = await _tenantManager.GetTenantAsync(columnMapper.GetTenantMapping());
+                var restoredTenant = await _tenantManager.GetTenantAsync(columnMapper.GetTenantMapping());
                 restoredTenant.SetStatus(TenantStatus.Active);
                 restoredTenant.Alias = tenant.Alias;
                 restoredTenant.PaymentId = string.IsNullOrEmpty(restoredTenant.PaymentId) ? _configuration["core:payment:region"] + TenantId : restoredTenant.PaymentId;
@@ -202,13 +200,13 @@ public class RestoreProgressItem : BaseBackupProgressItem
             File.Delete(tempFile);
 
             Percentage = 100;
-            Status = DistributedTaskStatus.Completed;
+            IsCompleted = true;
         }
         catch (Exception error)
         {
             _logger.ErrorRestoreProgressItem(error);
-            Exception = error;
-            Status = DistributedTaskStatus.Failted;
+            Exception = error; 
+            IsCompleted = true;
 
             if (tenant != null)
             {

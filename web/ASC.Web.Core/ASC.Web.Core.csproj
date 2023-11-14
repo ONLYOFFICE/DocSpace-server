@@ -134,6 +134,9 @@
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.hy-AM.resx">
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\NamingPeopleResource.ro.resx">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="PublicResources\Resource.Designer.cs">
@@ -222,6 +225,9 @@
     <EmbeddedResource Update="PublicResources\Resource.hy-AM.resx">
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\Resource.ro.resx">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="PublicResources\UserControlsCommonResource.Designer.cs">
@@ -308,6 +314,9 @@
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.hy-AM.resx">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\UserControlsCommonResource.ro.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
@@ -502,15 +511,16 @@
     <Protobuf Include="protos\user_photo_manager_cache_item.proto" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.203.4" />
     <PackageReference Include="GoogleAuthenticator" Version="3.1.0" />
     <PackageReference Include="Grpc.Tools" Version="2.57.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
-    <PackageReference Include="SkiaSharp" Version="2.88.3" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.3" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
+    <PackageReference Include="SkiaSharp" Version="2.88.6" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.6" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.6" />
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageReference Include="Twilio" Version="6.11.0" />
   </ItemGroup>

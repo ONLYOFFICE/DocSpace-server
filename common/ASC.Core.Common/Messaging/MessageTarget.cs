@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-[Singletone]
+[Singleton]
 public class MessageTarget
 {
     private IEnumerable<string> _items;
@@ -51,7 +51,7 @@ public class MessageTarget
         };
     }
 
-    public MessageTarget CreateFromGroupValues(IEnumerable<string> value)
+    public MessageTarget  Create<T>(IEnumerable<T> value)
     {
         var res = new MessageTarget(_option)
         {
@@ -60,7 +60,7 @@ public class MessageTarget
 
         if (value != null)
         {
-            res._items = value.Select(r => r.ToString()).ToList();
+            res._items = value.Where(r=> r != null).Select(r => r.ToString()).ToList();
         }
 
         return res;
@@ -88,6 +88,6 @@ public class MessageTarget
     public IEnumerable<string> GetItems() { return _items.ToList(); }
     public override string ToString()
     {
-        return string.Join(",", _items);
+        return _items != null ? string.Join(",", _items) : null;
     }
 }

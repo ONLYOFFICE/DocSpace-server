@@ -32,13 +32,13 @@ public interface INotifyEngineAction
     void AfterTransferRequest(NotifyRequest request);
 }
 
-[Singletone]
+[Singleton]
 public class NotifyEngine
 {
     private readonly ILogger _logger;
     private readonly Context _context;
-    internal readonly List<SendMethodWrapper> SendMethods = new List<SendMethodWrapper>();
-    private readonly Dictionary<string, IPatternStyler> _stylers = new Dictionary<string, IPatternStyler>();
+    internal readonly List<SendMethodWrapper> SendMethods = new();
+    private readonly Dictionary<string, IPatternStyler> _stylers = new();
     private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
     internal readonly ICollection<Type> Actions;
 
@@ -59,7 +59,7 @@ public class NotifyEngine
     internal void RegisterSendMethod(Func<DateTime, Task> method, string cron)
     {
         ArgumentNullException.ThrowIfNull(method);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(cron);
+        ArgumentException.ThrowIfNullOrEmpty(cron);
 
         var w = new SendMethodWrapper(method, cron, _logger);
         lock (SendMethods)
@@ -100,7 +100,7 @@ public class NotifyEngine
         }
         else
         {
-            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (s, r) => r.Result), sendResponces);
+            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
         }
         _logger.Debug(result.ToString());
 
@@ -216,7 +216,7 @@ public class NotifyEngine
             _logger.ErrorPrepare(ex);
         }
 
-        if (request._senderNames != null && request._senderNames.Length > 0)
+        if (request._senderNames is { Length: > 0 })
         {
             foreach (var sendertag in request._senderNames)
             {
@@ -259,7 +259,7 @@ public class NotifyEngine
 
         request.CurrentSender = channel.SenderName;
 
-        (var oops, var noticeMessage) = await CreateNoticeMessageFromNotifyRequestAsync(request, channel.SenderName, serviceScope);
+        var (oops, noticeMessage) = await CreateNoticeMessageFromNotifyRequestAsync(request, channel.SenderName, serviceScope);
         if (oops != null)
         {
             return oops;
@@ -280,7 +280,6 @@ public class NotifyEngine
     private async Task<(SendResponse, NoticeMessage)> CreateNoticeMessageFromNotifyRequestAsync(NotifyRequest request, string sender, IServiceScope serviceScope)
     {
         ArgumentNullException.ThrowIfNull(request);
-        NoticeMessage noticeMessage = null;
         var recipientProvider = request.GetRecipientsProvider(serviceScope);
         var recipient = request.Recipient as IDirectRecipient;
 
@@ -292,19 +291,19 @@ public class NotifyEngine
         }
 
         recipient = await recipientProvider.FilterRecipientAddressesAsync(recipient);
-        noticeMessage = request.CreateMessage(recipient);
+        var noticeMessage = request.CreateMessage(recipient);
 
         addresses = recipient.Addresses;
-        if (addresses == null || !addresses.Any(a => !string.IsNullOrEmpty(a)))
+        if (addresses == null || addresses.All(string.IsNullOrEmpty))
         {
             //checking addresses
-            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException(string.Format("For recipient {0} by sender {1} no one addresses getted.", recipient, sender))), noticeMessage);
+            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException($"For recipient {recipient} by sender {sender} no one addresses getted.")), noticeMessage);
         }
 
         var pattern = request.GetSenderPattern(sender);
         if (pattern == null)
         {
-            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException(string.Format("For action \"{0}\" by sender \"{1}\" no one patterns getted.", request.NotifyAction, sender))), noticeMessage);
+            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException($"For action \"{request.NotifyAction}\" by sender \"{sender}\" no one patterns getted.")), noticeMessage);
         }
 
         noticeMessage.Pattern = pattern;
@@ -324,7 +323,7 @@ public class NotifyEngine
                                        {
                                                new TagValue(Context.SysRecipientId, request.Recipient.ID),
                                                new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                                               new TagValue(Context.SysRecipientAddress, addresses != null && addresses.Length > 0 ? addresses[0] : null)
+                                               new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
                                        }
                 );
             //Do styling here

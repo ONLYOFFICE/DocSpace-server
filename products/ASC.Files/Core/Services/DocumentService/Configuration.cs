@@ -32,7 +32,6 @@ public enum EditorType
     Desktop,
     Mobile,
     Embedded,
-    External,
 }
 
 /// <summary>
@@ -65,7 +64,7 @@ public class ActionLinkConfig
 public class CoEditingConfig
 {
     public bool Change { get; set; }
-    public bool Fast { get; set; }
+    public bool Fast { get; init; }
 
     public string Mode
     {
@@ -77,7 +76,7 @@ public class CoEditingConfig
 /// </summary>
 public class Configuration<T>
 {
-    internal static readonly Dictionary<FileType, string> DocType = new Dictionary<FileType, string>
+    internal static readonly Dictionary<FileType, string> DocType = new()
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
@@ -119,7 +118,7 @@ public class Configuration<T>
     public string EditorUrl { get; }
 
     [JsonPropertyName("Error")]
-    public string ErrorMessage { get; set; }
+    public string ErrorMessage { get; init; }
 
     /// <summary>Token</summary>
     /// <type>System.String, System</type>
@@ -576,7 +575,7 @@ public class InfoConfig<T>
     {
         get
         {
-            if (Type == EditorType.Embedded || Type == EditorType.External)
+            if (Type == EditorType.Embedded)
             {
                 return null;
             }
@@ -600,7 +599,6 @@ public class InfoConfig<T>
         get
         {
             if (Type == EditorType.Embedded
-                || Type == EditorType.External
                 || !_fileSharing.CanSetAccessAsync(_file).Result)
             {
                 return null;
@@ -715,7 +713,7 @@ public class CustomerConfig<T>
 
     public string Address => _settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Address;
 
-    public string Logo => _baseCommonLinkUtility.GetFullAbsolutePath(_tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoTypeEnum.LoginPage, false).Result);
+    public string Logo => _baseCommonLinkUtility.GetFullAbsolutePath(_tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false).Result);
 
     public string Mail => _settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Email;
 
@@ -782,7 +780,7 @@ public class CustomizationConfig<T>
                 return null;
             }
 
-            var link = _commonLinkUtility.GetFeedbackAndSupportLink(_settingsManager, true);
+            var link = _commonLinkUtility.GetFeedbackAndSupportLink(_settingsManager);
 
             if (string.IsNullOrEmpty(link))
             {
@@ -811,7 +809,7 @@ public class CustomizationConfig<T>
     {
         get
         {
-            if (_configuration.EditorType == EditorType.Embedded || _configuration.EditorType == EditorType.External)
+            if (_configuration.EditorType == EditorType.Embedded)
             {
                 return null;
             }
@@ -906,9 +904,7 @@ public class CustomizationConfig<T>
                         properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
                     }
 
-                    return properties != null
-                        && properties.FormFilling != null
-                        && properties.FormFilling.CollectFillForm;
+                    return properties is { FormFilling.CollectFillForm: true };
                 }
             }
             return false;
@@ -1029,15 +1025,15 @@ public class LogoConfig<T>
 
             return _configuration.EditorType == EditorType.Embedded
                 || fillingForm
-                    ? _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditorEmbed).Result)
-                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditor).Result);
+                    ? _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed).Result)
+                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor).Result);
         }
     }
 
     public string ImageDark
     {
         set { }
-        get => _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditor).Result);
+        get => _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor).Result);
     }
 
     public string ImageEmbedded
@@ -1046,7 +1042,7 @@ public class LogoConfig<T>
         {
             return _configuration.EditorType != EditorType.Embedded
                     ? null
-                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditorEmbed).Result);
+                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed).Result);
         }
     }
 

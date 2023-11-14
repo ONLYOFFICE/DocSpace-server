@@ -1402,29 +1402,56 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External link created: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link deleted: {0}.
+        /// </summary>
+        public static string RoomExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link updated: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link created. Role: {1}.
         /// </summary>
-        public static string RoomLinkCreated {
+        public static string RoomInvitationLinkCreated {
             get {
-                return ResourceManager.GetString("RoomLinkCreated", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkCreated", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Link deleted.
         /// </summary>
-        public static string RoomLinkDeleted {
+        public static string RoomInvitationLinkDeleted {
             get {
-                return ResourceManager.GetString("RoomLinkDeleted", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkDeleted", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Link updated. Role: {1}.
         /// </summary>
-        public static string RoomLinkUpdated {
+        public static string RoomInvitationLinkUpdated {
             get {
-                return ResourceManager.GetString("RoomLinkUpdated", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkUpdated", resourceCulture);
             }
         }
         

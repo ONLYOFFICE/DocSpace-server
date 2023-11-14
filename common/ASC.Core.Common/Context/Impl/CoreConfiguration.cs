@@ -26,7 +26,7 @@
 
 namespace ASC.Core;
 
-[Singletone]
+[Singleton]
 public class CoreBaseSettings
 {
     private bool? _standalone;
@@ -72,12 +72,15 @@ public class CoreBaseSettings
     public bool Standalone => _standalone ?? (bool)(_standalone = Configuration["core:base-domain"] == "localhost");
 
     public bool Personal =>
-            //TODO:if (CustomMode && HttpContext.Current != null && HttpContext.Current.Request.SailfishApp()) return true;
-            _personal ?? (bool)(_personal = string.Equals(Configuration["core:personal"], "true", StringComparison.OrdinalIgnoreCase));
+        //TODO:if (CustomMode && HttpContext.Current != null && HttpContext.Current.Request.SailfishApp()) return true;
+        _personal ?? (bool)(_personal =
+            string.Equals(Configuration["core:personal"], "true", StringComparison.OrdinalIgnoreCase));
 
-    public bool CustomMode => _customMode ?? (bool)(_customMode = string.Equals(Configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase));
+    public bool CustomMode => _customMode ?? (bool)(_customMode =
+        string.Equals(Configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase));
 
-    public bool DisableDocSpace => _disableDocSpace ?? (bool)(_disableDocSpace = string.Equals(Configuration["core:disableDocspace"], "true", StringComparison.OrdinalIgnoreCase));
+    public bool DisableDocSpace => _disableDocSpace ?? (bool)(_disableDocSpace =
+        string.Equals(Configuration["core:disableDocspace"], "true", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>
@@ -100,6 +103,7 @@ public class CoreSettings : IDisposable
             {
                 result = CoreBaseSettings.Basedomain;
             }
+
             return result;
         }
         set
@@ -137,6 +141,7 @@ public class CoreSettings : IDisposable
         {
             return baseHost;
         }
+
         var subdomain = baseHost.Remove(baseHost.IndexOf('.') + 1);
 
         return hostedRegion.StartsWith(subdomain) ? hostedRegion : (subdomain + hostedRegion.TrimStart('.'));
@@ -144,7 +149,7 @@ public class CoreSettings : IDisposable
 
     public async Task SaveSettingAsync(string key, string value, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         byte[] bytes = null;
         if (value != null)
@@ -157,7 +162,7 @@ public class CoreSettings : IDisposable
 
     public void SaveSetting(string key, string value, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         byte[] bytes = null;
         if (value != null)
@@ -170,7 +175,7 @@ public class CoreSettings : IDisposable
 
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         var bytes = await TenantService.GetTenantSettingsAsync(tenant, key);
 
@@ -181,7 +186,7 @@ public class CoreSettings : IDisposable
 
     public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         var bytes = TenantService.GetTenantSettings(tenant, key);
 
@@ -208,10 +213,6 @@ public class CoreSettings : IDisposable
                         await SaveSettingAsync("PortalId", key);
                     }
                 }
-                catch
-                {
-                    throw;
-                }
                 finally
                 {
                     Semaphore.Release();
@@ -220,16 +221,14 @@ public class CoreSettings : IDisposable
 
             return key;
         }
-        else
-        {
-            var t = await TenantService.GetTenantAsync(tenant);
-            if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
-            {
-                return t.PaymentId;
-            }
 
-            return Configuration["core:payment:region"] + tenant;
+        var t = await TenantService.GetTenantAsync(tenant);
+        if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
+        {
+            return t.PaymentId;
         }
+
+        return Configuration["core:payment:region"] + tenant;
     }
 
     public string GetKey(int tenant)
@@ -250,10 +249,6 @@ public class CoreSettings : IDisposable
                         SaveSetting("PortalId", key);
                     }
                 }
-                catch
-                {
-                    throw;
-                }
                 finally
                 {
                     Semaphore.Release();
@@ -262,38 +257,14 @@ public class CoreSettings : IDisposable
 
             return key;
         }
-        else
-        {
-            var t = TenantService.GetTenant(tenant);
-            if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
-            {
-                return t.PaymentId;
-            }
 
-            return Configuration["core:payment:region"] + tenant;
-        }
-    }
-
-    public async Task<string> GetAffiliateIdAsync(int tenant)
-    {
-        var t = await TenantService.GetTenantAsync(tenant);
-        if (t != null && !string.IsNullOrWhiteSpace(t.AffiliateId))
+        var t = TenantService.GetTenant(tenant);
+        if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
         {
-            return t.AffiliateId;
+            return t.PaymentId;
         }
 
-        return null;
-    }
-
-    public async Task<string> GetCampaignAsync(int tenant)
-    {
-        var t = await TenantService.GetTenantAsync(tenant);
-        if (t != null && !string.IsNullOrWhiteSpace(t.Campaign))
-        {
-            return t.Campaign;
-        }
-
-        return null;
+        return Configuration["core:payment:region"] + tenant;
     }
 
     public void Dispose()
@@ -345,13 +316,13 @@ public class CoreConfiguration
 
         if (tenant != null)
         {
-
             var settingsValue = await GetSettingAsync("SmtpSettings", tenant.Id);
             if (string.IsNullOrEmpty(settingsValue))
             {
                 isDefaultSettings = true;
                 settingsValue = await GetSettingAsync("SmtpSettings");
             }
+
             var settings = SmtpSettings.Deserialize(settingsValue);
             settings.IsDefaultSettings = isDefaultSettings;
 
@@ -418,7 +389,7 @@ public class CoreConfiguration
         var serializedSection = await GetSettingAsync(sectionName, tenantId);
         if (serializedSection == null && tenantId != Tenant.DefaultTenant)
         {
-            serializedSection = await GetSettingAsync(sectionName, Tenant.DefaultTenant);
+            serializedSection = await GetSettingAsync(sectionName);
         }
 
         return serializedSection != null ? JsonConvert.DeserializeObject<T>(serializedSection) : null;

@@ -26,11 +26,11 @@
 
 namespace ASC.ElasticSearch;
 
-[Singletone]
+[Singleton]
 public class Client
 {
-    private static volatile ElasticClient _client;
-    private static readonly object _locker = new object();
+    private ElasticClient _client;
+    private static readonly object _locker = new();
     private readonly ILogger _logger;
     private readonly Settings _settings;
 
@@ -88,7 +88,7 @@ public class Client
                         //    Log.TraceFormat("Request: {0}", Encoding.UTF8.GetString(r.RequestBodyInBytes));
                         //}
 
-                        if (r.HttpStatusCode != null && (r.HttpStatusCode == 403 || r.HttpStatusCode == 500) && r.ResponseBodyInBytes != null)
+                        if (r.HttpStatusCode != null && r.HttpStatusCode is 403 or 500 && r.ResponseBodyInBytes != null)
                         {
                             _logger.TraceResponse(Encoding.UTF8.GetString(r.ResponseBodyInBytes));
                         }

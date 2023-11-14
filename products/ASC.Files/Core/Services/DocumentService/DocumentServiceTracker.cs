@@ -108,7 +108,7 @@ public class DocumentServiceTracker
             }
         }
 
-        public string Message { get; set; }
+        public string Message { get; init; }
 
         public static string Serialize(TrackResponse response)
         {
@@ -265,8 +265,7 @@ public class DocumentServiceTrackerHelper
         var app = _thirdPartySelector.GetAppByFileId(fileId.ToString());
         if (app == null)
         {
-            File<T> fileStable;
-            fileStable = await _daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+            var fileStable = await _daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
             docKey = await _documentServiceHelper.GetDocKeyAsync(fileStable);
         }
@@ -311,13 +310,10 @@ public class DocumentServiceTrackerHelper
             }
         }
 
-        if (usersDrop.Count > 0)
+        if (usersDrop.Count > 0 && !await _documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
-            if (!await _documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
-            {
                 _logger.ErrorDocServiceDropFailed(usersDrop);
             }
-        }
 
         foreach (var removeUserId in users)
         {
@@ -326,22 +322,21 @@ public class DocumentServiceTrackerHelper
 
         await _socketManager.StartEditAsync(fileId);
 
-        if (file != null && fileData.Actions != null && fileData.Actions.Count > 0)
+        if (file != null && fileData.Actions is { Count: > 0 })
         {
-            _ = _filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
+            await _filesMessageService.SendAsync(MessageAction.FileOpenedForChange, file, file.Title);
         }
     }
 
     private async Task<TrackResponse> ProcessSaveAsync<T>(T fileId, TrackerData fileData)
     {
         var comments = new List<string>();
-        if (fileData.Status == TrackerStatus.Corrupted
-            || fileData.Status == TrackerStatus.CorruptedForceSave)
+        if (fileData.Status is TrackerStatus.Corrupted or TrackerStatus.CorruptedForceSave)
         {
             comments.Add(FilesCommonResource.ErrorMassage_SaveCorrupted);
         }
 
-        var forcesave = fileData.Status == TrackerStatus.ForceSave || fileData.Status == TrackerStatus.CorruptedForceSave;
+        var forceSave = fileData.Status is TrackerStatus.ForceSave or TrackerStatus.CorruptedForceSave;
 
         if (fileData.Users == null || fileData.Users.Count == 0 || !Guid.TryParse(fileData.Users[0], out var userId))
         {
@@ -351,8 +346,7 @@ public class DocumentServiceTrackerHelper
         var app = _thirdPartySelector.GetAppByFileId(fileId.ToString());
         if (app == null)
         {
-            File<T> fileStable;
-            fileStable = await _daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
+            var fileStable = await _daoFactory.GetFileDao<T>().GetFileStableAsync(fileId);
 
             var docKey = await _documentServiceHelper.GetDocKeyAsync(fileStable);
             if (!fileData.Key.Equals(docKey))
@@ -412,25 +406,25 @@ public class DocumentServiceTrackerHelper
                 comments.Add(FilesCommonResource.CommentEditEncrypt);
             }
 
-            var forcesaveType = ForcesaveType.None;
-            if (forcesave)
+            var forceSaveType = ForcesaveType.None;
+            if (forceSave)
             {
                 switch (fileData.ForceSaveType)
                 {
                     case TrackerData.ForceSaveInitiator.Command:
-                        forcesaveType = ForcesaveType.Command;
+                        forceSaveType = ForcesaveType.Command;
                         comments.Add(FilesCommonResource.CommentAutosave);
                         break;
                     case TrackerData.ForceSaveInitiator.Timer:
-                        forcesaveType = ForcesaveType.Timer;
+                        forceSaveType = ForcesaveType.Timer;
                         comments.Add(FilesCommonResource.CommentAutosave);
                         break;
                     case TrackerData.ForceSaveInitiator.User:
-                        forcesaveType = ForcesaveType.User;
+                        forceSaveType = ForcesaveType.User;
                         comments.Add(FilesCommonResource.CommentForcesave);
                         break;
                     case TrackerData.ForceSaveInitiator.UserSubmit:
-                        forcesaveType = ForcesaveType.UserSubmit;
+                        forceSaveType = ForcesaveType.UserSubmit;
                         comments.Add(FilesCommonResource.CommentSubmitFillForm);
                         break;
                 }
@@ -438,8 +432,8 @@ public class DocumentServiceTrackerHelper
 
             try
             {
-                file = await _entryManager.SaveEditingAsync(fileId, fileData.Filetype, _documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forcesaveType, true);
-                saveMessage = fileData.Status == TrackerStatus.MustSave || fileData.Status == TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
+                file = await _entryManager.SaveEditingAsync(fileId, fileData.Filetype, _documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true);
+                saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)
             {
@@ -450,7 +444,7 @@ public class DocumentServiceTrackerHelper
             }
         }
 
-        if (!forcesave)
+        if (!forceSave)
         {
             _fileTracker.Remove(fileId);
             await _socketManager.StopEditAsync(fileId);
@@ -460,10 +454,10 @@ public class DocumentServiceTrackerHelper
         {
             if (user != null)
             {
-                _ = _filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, _displayUserSettingsHelper), file.Title);
+                await _filesMessageService.SendAsync(MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, user.DisplayUserName(false, _displayUserSettingsHelper), file.Title);
             }
 
-            if (!forcesave)
+            if (!forceSave)
             {
                 await SaveHistoryAsync(file, (fileData.History ?? "").ToString(), _documentServiceConnector.ReplaceDocumentAdress(fileData.ChangesUrl));
             }
@@ -556,13 +550,8 @@ public class DocumentServiceTrackerHelper
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))
                     await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
                     {
-                        if (stream != null)
-                        {
-                            using (var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName)))
-                            {
-                                message = await reader.ReadToEndAsync();
-                            }
-                        }
+                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                            message = await reader.ReadToEndAsync();
                     }
 
                     break;

@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core;
 
-[Singletone]
+[Singleton]
 public class WebPluginCache
 {
     private readonly ICache _сache;
@@ -176,7 +176,7 @@ public class WebPluginManager
 
     private async Task<DbWebPlugin> SaveWebPluginToStorageAsync(int tenantId, IFormFile file)
     {
-        if (Path.GetExtension(file.FileName)?.ToLowerInvariant() != _webPluginSettings.Extension)
+        if (Path.GetExtension(file.FileName).ToLowerInvariant() != _webPluginSettings.Extension)
         {
             throw new ArgumentException("Wrong file extension");
         }
@@ -188,72 +188,67 @@ public class WebPluginManager
 
         var storage = await GetPluginStorageAsync(tenantId);
 
-        DbWebPlugin webPlugin = null;
-        Uri uri = null;
+        DbWebPlugin webPlugin;
 
-        using (var zipFile = new ZipFile(file.OpenReadStream()))
+        using var zipFile = new ZipFile(file.OpenReadStream());
+        var configFile = zipFile.GetEntry(ConfigFileName);
+        var pluginFile = zipFile.GetEntry(PluginFileName);
+
+        if (configFile == null || pluginFile == null)
         {
-            var configFile = zipFile.GetEntry(ConfigFileName);
-            var pluginFile = zipFile.GetEntry(PluginFileName);
+            throw new ArgumentException("Wrong plugin archive");
+        }
 
-            if (configFile == null || pluginFile == null)
+        await using (var stream = zipFile.GetInputStream(configFile))
+        using (var reader = new StreamReader(stream))
+        {
+            var configContent = await reader.ReadToEndAsync();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+
+            if (webPlugin == null)
             {
                 throw new ArgumentException("Wrong plugin archive");
             }
 
-            using (var stream = zipFile.GetInputStream(configFile))
-            using (var reader = new StreamReader(stream))
+            var nameRegex = new Regex(@"^[a-z0-9_.-]+$");
+
+            if (string.IsNullOrEmpty(webPlugin.Name) || !nameRegex.IsMatch(webPlugin.Name) || webPlugin.Name.StartsWith('.'))
             {
-                var configContent = reader.ReadToEnd();
-
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
-
-                if (webPlugin == null)
-                {
-                    throw new ArgumentException("Wrong plugin archive");
-                }
-
-                var nameRegex = new Regex(@"^[a-z0-9_.-]+$");
-
-                if (string.IsNullOrEmpty(webPlugin.Name) || !nameRegex.IsMatch(webPlugin.Name) || webPlugin.Name.StartsWith('.'))
-                {
-                    throw new ArgumentException("Wrong plugin name");
-                }
-
-                if (await storage.IsDirectoryAsync(webPlugin.Name))
-                {
-                    await storage.DeleteDirectoryAsync(webPlugin.Name);
-                }
-
-                uri = await storage.SaveAsync(Path.Combine(webPlugin.Name, ConfigFileName), stream);
+                throw new ArgumentException("Wrong plugin name");
             }
 
-            using (var stream = zipFile.GetInputStream(pluginFile))
+            if (await storage.IsDirectoryAsync(webPlugin.Name))
             {
-                uri = await storage.SaveAsync(Path.Combine(webPlugin.Name, PluginFileName), stream);
+                await storage.DeleteDirectoryAsync(webPlugin.Name);
             }
 
-            foreach (ZipEntry zipEntry in zipFile)
+            await storage.SaveAsync(Path.Combine(webPlugin.Name, ConfigFileName), stream);
+        }
+
+        await using (var stream = zipFile.GetInputStream(pluginFile))
+        {
+            await storage.SaveAsync(Path.Combine(webPlugin.Name, PluginFileName), stream);
+        }
+
+        foreach (ZipEntry zipEntry in zipFile)
+        {
+            if (zipEntry.IsFile && zipEntry.Name.StartsWith(AssetsFolderName))
             {
-                if (zipEntry.IsFile && zipEntry.Name.StartsWith(AssetsFolderName))
+                var ext = Path.GetExtension(zipEntry.Name);
+
+                if (_webPluginSettings.AssetExtensions.Any() && !_webPluginSettings.AssetExtensions.Contains(ext))
                 {
-                    var ext = Path.GetExtension(zipEntry.Name);
-
-                    if (_webPluginSettings.AssetExtensions.Any() && !_webPluginSettings.AssetExtensions.Contains(ext))
-                    {
-                        continue;
-                    }
-
-                    using (var stream = zipFile.GetInputStream(zipEntry))
-                    {
-                        uri = await storage.SaveAsync(Path.Combine(webPlugin.Name, zipEntry.Name), stream);
-                    }
+                    continue;
                 }
+
+                await using var stream = zipFile.GetInputStream(zipEntry);
+                await storage.SaveAsync(Path.Combine(webPlugin.Name, zipEntry.Name), stream);
             }
         }
 
@@ -287,7 +282,7 @@ public class WebPluginManager
         return plugin;
     }
 
-    public async Task UpdateWebPluginAsync(int tenantId, int id, bool enabled)
+    public async Task<DbWebPlugin> UpdateWebPluginAsync(int tenantId, int id, bool enabled)
     {
         DemandWebPlugins();
 
@@ -295,12 +290,16 @@ public class WebPluginManager
 
         await _webPluginService.UpdateAsync(tenantId, plugin.Id, enabled);
 
+        plugin.Enabled = enabled;
+
         var key = GetCacheKey(tenantId);
 
         _webPluginCache.Remove(key);
+
+        return plugin;
     }
 
-    public async Task DeleteWebPluginAsync(int tenantId, int id)
+    public async Task<DbWebPlugin> DeleteWebPluginAsync(int tenantId, int id)
     {
         DemandWebPlugins("delete");
 
@@ -315,9 +314,9 @@ public class WebPluginManager
         var key = GetCacheKey(tenantId);
 
         _webPluginCache.Remove(key);
+
+        return plugin;
     }
-
-
 
     public async Task<List<DbWebPlugin>> GetSystemWebPluginsAsync()
     {
@@ -341,7 +340,7 @@ public class WebPluginManager
 
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
-        var disabledPlugins = systemWebPluginSettings?.DisabledPlugins ?? new List<string>();
+        var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
         var storage = await GetPluginStorageAsync(Tenant.DefaultTenant);
 
@@ -351,11 +350,11 @@ public class WebPluginManager
         {
             try
             {
-                using var readStream = await storage.GetReadStreamAsync(path);
+                await using var readStream = await storage.GetReadStreamAsync(path);
 
                 using var reader = new StreamReader(readStream);
 
-                var configContent = reader.ReadToEnd();
+                var configContent = await reader.ReadToEndAsync();
 
                 var options = new JsonSerializerOptions
                 {
@@ -366,7 +365,7 @@ public class WebPluginManager
 
                 webPlugin.TenantId = Tenant.DefaultTenant;
                 webPlugin.System = true;
-                webPlugin.Enabled = !disabledPlugins.Contains(webPlugin.Name);
+                webPlugin.Enabled = enabledPlugins.Contains(webPlugin.Name);
 
                 systemPlugins.Add(webPlugin);
             }
@@ -383,7 +382,7 @@ public class WebPluginManager
     {
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
-        var disabledPlugins = systemWebPluginSettings?.DisabledPlugins ?? new List<string>();
+        var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
         var storage = await GetPluginStorageAsync(Tenant.DefaultTenant);
 
@@ -394,11 +393,11 @@ public class WebPluginManager
             throw new ItemNotFoundException("Plugin not found");
         }
 
-        using var readStream = await storage.GetReadStreamAsync(path);
+        await using var readStream = await storage.GetReadStreamAsync(path);
 
         using var reader = new StreamReader(readStream);
 
-        var configContent = reader.ReadToEnd();
+        var configContent = await reader.ReadToEndAsync();
 
         var options = new JsonSerializerOptions
         {
@@ -409,38 +408,44 @@ public class WebPluginManager
 
         webPlugin.TenantId = Tenant.DefaultTenant;
         webPlugin.System = true;
-        webPlugin.Enabled = !disabledPlugins.Contains(webPlugin.Name);
+        webPlugin.Enabled = enabledPlugins.Contains(webPlugin.Name);
 
         return webPlugin;
     }
 
-    public async Task UpdateSystemWebPluginAsync(string name, bool enabled)
+    public async Task<DbWebPlugin> UpdateSystemWebPluginAsync(string name, bool enabled)
     {
         DemandWebPlugins();
 
+        var plugin = await GetSystemWebPluginAsync(name) ?? throw new ItemNotFoundException("Plugin not found");
+
         var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
 
-        var disabledPlugins = systemWebPluginSettings?.DisabledPlugins ?? new List<string>();
+        var enabledPlugins = systemWebPluginSettings.EnabledPlugins ?? new List<string>();
 
         if (enabled)
         {
-            disabledPlugins.Remove(name);
+            enabledPlugins.Add(name);
         }
         else
         {
-            disabledPlugins.Add(name);
+            enabledPlugins.Remove(name);
         }
 
-        systemWebPluginSettings.DisabledPlugins = disabledPlugins.Any() ? disabledPlugins : null;
+        systemWebPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
 
         await _settingsManager.SaveForDefaultTenantAsync(systemWebPluginSettings);
+
+        plugin.Enabled = enabled;
 
         var key = GetCacheKey(Tenant.DefaultTenant);
 
         _webPluginCache.Remove(key);
+
+        return plugin;
     }
 
-    public async Task DeleteSystemWebPluginAsync(string name)
+    public async Task<DbWebPlugin> DeleteSystemWebPluginAsync(string name)
     {
         DemandWebPlugins("delete");
 
@@ -449,6 +454,8 @@ public class WebPluginManager
             throw new SecurityException("System plugin");
         }
 
+        var plugin = await GetSystemWebPluginAsync(name) ?? throw new ItemNotFoundException("Plugin not found");
+
         var storage = await GetPluginStorageAsync(Tenant.DefaultTenant);
 
         if (!await storage.IsDirectoryAsync(name))
@@ -456,8 +463,10 @@ public class WebPluginManager
             throw new ItemNotFoundException("Plugin not found");
         }
 
-        await UpdateSystemWebPluginAsync(name, true);
+        await UpdateSystemWebPluginAsync(name, false);
 
         await storage.DeleteDirectoryAsync(name);
+
+        return plugin;
     }
 }

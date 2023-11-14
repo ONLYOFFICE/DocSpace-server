@@ -28,9 +28,7 @@ global using System.Globalization;
 global using System.Security;
 global using System.Text;
 global using System.Text.Json;
-global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
-global using System.Web;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
@@ -55,7 +53,6 @@ global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
-global using ASC.Files.Core.Data;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
@@ -92,7 +89,6 @@ global using AutoMapper;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;

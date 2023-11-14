@@ -106,11 +106,11 @@ $OrangeButton
 若想了解关于备份流程的详情，请参考我们的 "数据备份":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" 用户指南。
 
 
-若您有任何问题或需要帮助，请随时联系我们，网站为 "support.onlyoffice.com":"http://support.onlyoffice.com"
+若您有任何问题或需要帮助，请随时联系我们，网站为 "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 祝好，
 ONLYOFFICE™客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_change_password" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户密码变更请求
@@ -181,7 +181,7 @@ $OrangeButton
 
 ONLYOFFICE 团队
 
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>您好，$UserName！
@@ -201,7 +201,7 @@ $OrangeButton
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>您好，$UserName！
@@ -221,7 +221,7 @@ $OrangeButton
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>您好，$UserName！
@@ -241,7 +241,7 @@ $OrangeButton
 如果您需要帮助，请浏览我们的"帮助中心":"https://helpcenter.onlyoffice.com/" 或询问我们的"支持团队":"https://www.onlyoffice.com/zh/support-contact-form.aspx"。
 
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.来自 "${__VirtualRootPath}":"${__VirtualRootPath}" 门户的消息
@@ -274,7 +274,7 @@ $OrangeButton
 
 祝好，
 ONLYOFFICE™ 客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^若想修改通知类型，请管理您的 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
@@ -288,7 +288,7 @@ ONLYOFFICE™ 客服团队
 
 祝好，
 ONLYOFFICE™ 客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^若想修改通知类型，请管理您的 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
@@ -303,7 +303,7 @@ ONLYOFFICE™ 客服团队
 
 祝好，
 ONLYOFFICE™ 客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"门户停用
@@ -323,7 +323,7 @@ p=. "重新激活门户":"$ActivateUrl"（此链接无时间限制）
 
 祝好，
 ONLYOFFICE™客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.删除"${__VirtualRootPath}":"${__VirtualRootPath}"门户
@@ -425,7 +425,7 @@ h3.门户地址
 
 祝好,
 ONLYOFFICE™客服团队
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^若想修改通知类型，请管理 "订阅设置":"$RecipientSubscriptionConfigURL"。^</value>
   </data>
@@ -600,7 +600,7 @@ $OrangeButton
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>您好， $UserName!
@@ -614,7 +614,7 @@ $OrangeButton
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>您好， $UserName!
@@ -628,7 +628,7 @@ $OrangeButton
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>您好， $UserName!
@@ -648,7 +648,7 @@ $OrangeButton
 欢迎享受一种新的文档协作方式！
  
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>想要更改 ONLYOFFICE 帐号的密码吗？请点击下方按钮确认。
@@ -670,7 +670,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -689,7 +689,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -708,7 +708,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -727,7 +727,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -746,7 +746,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -767,7 +767,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -788,7 +788,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -809,7 +809,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -830,7 +830,7 @@ _请注意：支付订阅费的人是付款人。只有付款人可以更改订�
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>您好！
@@ -841,7 +841,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>您好！
@@ -852,7 +852,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>您好！
@@ -863,7 +863,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>您好！
@@ -874,7 +874,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -895,7 +895,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -916,7 +916,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -937,7 +937,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -958,7 +958,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.来自"${__VirtualRootPath}"的消息:"${__VirtualRootPath}"门户
@@ -980,7 +980,7 @@ $Body</value>
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -993,7 +993,7 @@ ONLYOFFICE 团队
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>尊敬的用户：
@@ -1015,7 +1015,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/zh"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/zh"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -1042,7 +1042,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>您已经超过半年没有登录您的 ONLYOFFICE 文档空间 "${__VirtualRootPath}":"${__VirtualRootPath}"。
@@ -1057,7 +1057,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>您好！
@@ -1070,7 +1070,7 @@ $OrangeButton
 
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>尊敬的$UserName！，
@@ -1134,7 +1134,7 @@ $OrangeButton
  
 此致！
 ONLYOFFICE 团队
-"www.onlyoffice.com":http://onlyoffice.com/zh</value>
+"www.onlyoffice.com":https://onlyoffice.com/zh</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>想要更改 ONLYOFFICE 个人版帐号的密码吗？请点击下方按钮确认。
@@ -1217,11 +1217,11 @@ $OrangeButton
  
 如需了解更多有关备份流程的信息，请参考我们的[数据备份](${__HelpLink}/tipstricks/data-backup-restore.aspx)用户指南。
  
-如果您有任何问题或是需要协助，欢迎随时通过 [support.onlyoffice.com](http://support.onlyoffice.com) 联系我们
+如果您有任何问题或是需要协助，欢迎随时通过 [support.onlyoffice.com](https://support.onlyoffice.com) 联系我们
  
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>想要更改 ${LetterLogoText} 账户中的邮箱？
@@ -1430,7 +1430,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户停
  
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>删除 [${__VirtualRootPath}](${__VirtualRootPath}) 门户
@@ -1455,7 +1455,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户删
  
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>用户 "$FromUserName":"$FromUserLink" 已删除其档案，且此档案现已被屏蔽。该用户的所有文件仍然处于已指派状态并会占用磁盘空间。
@@ -1553,7 +1553,7 @@ $OrangeButton
  
 真诚感谢，
 ONLYOFFICE 团队
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 门户档案变更通知
