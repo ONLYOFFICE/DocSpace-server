@@ -166,7 +166,7 @@ public class SmsManager
         if (!_securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiSms : MessageAction.LoginSuccessViaSms;
-            await _cookieManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id, action);
+            await _cookieManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (user.MobilePhoneActivationStatus == MobilePhoneActivationStatus.NotActivated)

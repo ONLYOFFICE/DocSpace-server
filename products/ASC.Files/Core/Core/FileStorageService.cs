@@ -220,14 +220,17 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(folder == null, FilesCommonResource.ErrorMassage_FolderNotFound);
         ErrorIf(!await _fileSecurity.CanReadAsync(folder), FilesCommonResource.ErrorMassage_SecurityException_ReadFolder);
 
-        await _entryStatusManager.SetIsFavoriteFolderAsync(folder);
-
         var tag = await tagDao.GetNewTagsAsync(_authContext.CurrentAccount.ID, folder).FirstOrDefaultAsync();
         if (tag != null)
         {
             folder.NewForMe = tag.Count;
         }
 
+        var tags = await tagDao.GetTagsAsync(folder.Id, FileEntryType.Folder, null).ToListAsync();
+        folder.Pinned = tags.Any(r => r.Type == TagType.Pin);
+        folder.IsFavorite = tags.Any(r => r.Type == TagType.Favorite);
+        folder.Tags = tags.Where(r=> r.Type == TagType.Custom).ToList();
+        
         return folder;
     }
 
@@ -1283,7 +1286,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagLocked != null)
             {
-                await tagDao.RemoveTags(tagLocked);
+                await tagDao.RemoveTagsAsync(tagLocked);
 
                 await _filesMessageService.SendAsync(MessageAction.FileUnlocked, file, file.Title);
             }
@@ -2430,7 +2433,7 @@ public class FileStorageService //: IFileStorageService
 
         var tags = entries.Select(entry => Tag.Favorite(_authContext.CurrentAccount.ID, entry));
 
-        await tagDao.SaveTags(tags);
+        await tagDao.SaveTagsAsync(tags);
 
         foreach (var entry in entries)
         {
@@ -2458,7 +2461,7 @@ public class FileStorageService //: IFileStorageService
 
         var tags = entries.Select(entry => Tag.Favorite(_authContext.CurrentAccount.ID, entry));
 
-        await tagDao.RemoveTags(tags);
+        await tagDao.RemoveTagsAsync(tags);
 
         foreach (var entry in entries)
         {
@@ -2488,7 +2491,7 @@ public class FileStorageService //: IFileStorageService
 
         var tags = files.Select(file => Tag.Template(_authContext.CurrentAccount.ID, file));
 
-        await tagDao.SaveTags(tags);
+        await tagDao.SaveTagsAsync(tags);
 
         return files;
     }
@@ -2502,7 +2505,7 @@ public class FileStorageService //: IFileStorageService
 
         var tags = files.Select(file => Tag.Template(_authContext.CurrentAccount.ID, file));
 
-        await tagDao.RemoveTags(tags);
+        await tagDao.RemoveTagsAsync(tags);
 
         return files;
     }
@@ -2890,7 +2893,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            await tagDao.RemoveTags(tag);
+            await tagDao.RemoveTagsAsync(tag);
         }
 
         room.Pinned = pin;

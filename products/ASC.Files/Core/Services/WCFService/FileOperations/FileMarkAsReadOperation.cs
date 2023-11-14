@@ -87,12 +87,12 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
             if (entry.FileEntryType == FileEntryType.File)
             {
                 ProcessedFile(((File<T>)entry).Id);
-                _ = filesMessageService.SendAsync(MessageAction.FileMarkedAsRead, entry, _headers, entry.Title);
+                await filesMessageService.SendAsync(MessageAction.FileMarkedAsRead, entry, _headers, entry.Title);
             }
             else
             {
                 ProcessedFolder(((Folder<T>)entry).Id);
-                _ = filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, _headers, entry.Title);
+                await filesMessageService.SendAsync(MessageAction.FolderMarkedAsRead, entry, _headers, entry.Title);
             }
 
             ProgressStep();

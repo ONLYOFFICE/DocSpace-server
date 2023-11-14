@@ -162,8 +162,6 @@ public class FolderDtoHelper : FileEntryDtoHelper
             if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
             {
                 result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
-
-
             }
 
             if (DocSpaceHelper.IsRoom(folder.FolderType))

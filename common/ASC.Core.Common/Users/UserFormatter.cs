@@ -29,9 +29,17 @@ namespace ASC.Core.Users;
 [Singleton]
 public class UserFormatter : IComparer<UserInfo>
 {
+    private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new()
+    {
+        { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
+        { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } },
+    };
+    
+    private readonly IConfiguration _configuration;
     private readonly DisplayUserNameFormat _format;
     private bool _forceFormatChecked;
     private string _forceFormat;
+    public Regex UserNameRegex { get; }
 
     public UserFormatter(IConfiguration configuration)
     {
@@ -40,7 +48,7 @@ public class UserFormatter : IComparer<UserInfo>
         UserNameRegex = new Regex(_configuration["core:username:regex"] ?? "");
     }
 
-    public string GetUserName(UserInfo userInfo, DisplayUserNameFormat format)
+    public string GetUserName(UserInfo userInfo, DisplayUserNameFormat format = DisplayUserNameFormat.Default)
     {
         ArgumentNullException.ThrowIfNull(userInfo);
 
@@ -62,19 +70,9 @@ public class UserFormatter : IComparer<UserInfo>
         return string.Format(GetUserDisplayFormat(DisplayUserNameFormat.Default), firstName, lastName);
     }
 
-    public string GetUserName(UserInfo userInfo)
-    {
-        return GetUserName(userInfo, DisplayUserNameFormat.Default);
-    }
-
     int IComparer<UserInfo>.Compare(UserInfo x, UserInfo y)
     {
         return Compare(x, y, _format);
-    }
-
-    public static int Compare(UserInfo x, UserInfo y)
-    {
-        return Compare(x, y, DisplayUserNameFormat.Default);
     }
 
     public static int Compare(UserInfo x, UserInfo y, DisplayUserNameFormat format)
@@ -120,13 +118,6 @@ public class UserFormatter : IComparer<UserInfo>
         return result;
     }
 
-    private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new()
-        {
-            { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
-            { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } },
-        };
-
-
     private string GetUserDisplayFormat(DisplayUserNameFormat format)
     {
         if (!_forceFormatChecked)
@@ -157,7 +148,7 @@ public class UserFormatter : IComparer<UserInfo>
         return formats[format];
     }
 
-    public static DisplayUserNameFormat GetUserDisplayDefaultOrder()
+    private static DisplayUserNameFormat GetUserDisplayDefaultOrder()
     {
         var culture = CultureInfo.CurrentCulture.Name;
         if (!_displayFormats.TryGetValue(culture, out var formats))
@@ -172,10 +163,6 @@ public class UserFormatter : IComparer<UserInfo>
 
         return format.IndexOf("{0}") < format.IndexOf("{1}") ? DisplayUserNameFormat.FirstLast : DisplayUserNameFormat.LastFirst;
     }
-
-    public Regex UserNameRegex { get; set; }
-
-    private readonly IConfiguration _configuration;
 
     public bool IsValidUserName(string firstName, string lastName)
     {
