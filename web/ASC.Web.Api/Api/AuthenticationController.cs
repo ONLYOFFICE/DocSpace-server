@@ -404,6 +404,11 @@ public class AuthenticationController : ControllerBase
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {
+        if (string.IsNullOrEmpty(inDto.Key))
+        {
+            inDto.Key = _cookiesManager.GetCookies(CookiesType.ConfirmKey, $"_{inDto.Type}");
+        }
+
         if (inDto.Type != ConfirmType.LinkInvite)
         {
             return new ConfirmDto { Result = await _emailValidationKeyModelHelper.ValidateAsync(inDto)};

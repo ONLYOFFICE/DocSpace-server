@@ -174,7 +174,7 @@ public class EmailValidationKeyModel
 {
     /// <summary>Key</summary>
     /// <type>System.String, System</type>
-    public string Key { get; init; }
+    public string Key { get; set; }
 
     /// <summary>Employee type</summary>
     /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
