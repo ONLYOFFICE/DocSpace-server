@@ -562,7 +562,7 @@ $TrulyYours</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Pozdravljeni!
-Prišlo je do poskusa registracije novega "ONLYOFFICE osebnega":"$PortalUrl" računa z uporabo tega email naslova. Če ste bili vi, vas želimo obvestiti, da račun že obstaja — nadaljujte na ONLYOFFICE osebnem računu in se prijavite.
+Prišlo je do poskusa registracije novega "ONLYOFFICE Osebno":"$PortalUrl" računa z uporabo tega email naslova. Če ste bili vi, vas želimo obvestiti, da račun že obstaja — nadaljujte na ONLYOFFICE osebnem računu in se prijavite.
 Če ste izgubili geslo, ga lahko obnovite na "strani za obnovo gesla":"$LinkToRecovery".
 Če niste poskusili registrirati novega računa, je to verjetno pomotoma storil nekdo drug. V tem primeru prezrite ta email.
 
@@ -971,16 +971,16 @@ $TrulyYours</value>
     <value>Dobrodošli v ONLYOFFICE za osebno rabo!</value>
   </data>
   <data name="subject_personal_after_registration1" xml:space="preserve">
-    <value>Dobrodošli v ONLYOFFICE osebno</value>
+    <value>Dobrodošli v ONLYOFFICE Osebno</value>
   </data>
   <data name="subject_personal_already_exist" xml:space="preserve">
-    <value>Prijavite se v vaš ONLYOFFICE osebni račun</value>
+    <value>Prijavite se v vaš ONLYOFFICE Osebni račun</value>
   </data>
   <data name="subject_personal_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Osebno. Aktivirajte svoj email naslov</value>
   </data>
   <data name="subject_personal_profile_delete" xml:space="preserve">
-    <value>Ukinitev osebnega računa ONLYOFFICE</value>
+    <value>Ukinitev računa ONLYOFFICE Osebno</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivacija portala ${__VirtualRootPath}</value>

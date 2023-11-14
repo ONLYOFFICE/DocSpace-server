@@ -146,27 +146,27 @@ Povezava je veljavna 7 dni.
 Ne želite spremeniti gesla? Prezrite to sporočilo.</value>
   </data>
   <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1.Dobrodošli v ONLYOFFICE osebni pisarni
+    <value>h1.Dobrodošli v ONLYOFFICE Osebno
 
 Pravkar ste ustvarili svojo osebno pisarno v oblaku.
 
-h3.To je navidezni delovni prostor, kjer lahko urejate in shranjujete dokumente, delate z njimi od koder koli, lahko pa omogočate dostop tudi vašim prijateljem ali sodelavcem.
+h3.To je navidezni delovni prostor, kjer lahko urejate in shranjujete dokumente, delate z njimi od koder koli in omogočate dostop vašim prijateljem ali sodelavcem.
 
-h3.Za hiter začetek si oglejte, kaj lahko delate v ONLYOFFICE:
+h3. Za hiter začetek nekaj opravil, ki jih lahko opravljate v ONLYOFFICE:
 
-- Ustvarjate, pregledujete in urejate besedilne dokumente, preglednice, predstavitve.
+- Ustvarite, preglejte in uredite besedilne dokumente, preglednice, predstavitve.
 
-- Delate z vsemi priljubljenimi formati. Najvišja združljivost z datotekami MS Office.
+- Delajte z vsemi priljubljenimi formati. Najvišja združljivost z datotekami MS Office.
 
 - Ustvarite in souredite "obrazce, pripravljene za izpolnjevanje":"https://www.onlyoffice.com/form-creator.aspx".
 
-- Delite dokumente in sodelujete pri njih online.
+- Delite dokumente in sodelujte pri njih preko spleta.
 
 - Za uporabo dodatnih funkcij uporabite različne vtičnike.
 
 - Enostavno dostopajte do osebnega oblaka prek "Chrome razširitve":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
-Dokumente lahko urejate tudi brez povezave z našimi brezplačnimi "namiznimi urejevalniki":"https://www.onlyoffice.com/download-desktop.aspx" ali pridobite program za mobilno urejanje za vašo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ali "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" napravo.
+Dokumente lahko urejate tudi brez povezave z našimi brezplačnimi "desktop urejevalniki":"https://www.onlyoffice.com/download-desktop.aspx" ali pridobite program za mobilno urejanje za vašo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ali "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" napravo.
 
 $TrulyYours</value>
   </data>
@@ -222,7 +222,7 @@ Izbris osebnih podatkov je dovoljen za sprostitev $DocsSpace</value>
     <value>Ustvarite in uredite lastne dokumente ter dokumente v skupni rabi z ustreznimi pravicami dostopa|Omogočite dostop za branje/urejanje drugim uporabnikom do dokumentov in map|Povežite Dropbox, Box in druge račune v razdelku 'Moji dokumenti'</value>
   </data>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>Dobrodošli v ONLYOFFICE osebni pisarni</value>
+    <value>Dobrodošli v ONLYOFFICE Osebno</value>
   </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>ONLYOFFICE osebna pisarna. Aktivirajte svoj email naslov</value>
