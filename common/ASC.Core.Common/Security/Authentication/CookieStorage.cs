@@ -103,7 +103,7 @@ public class CookieStorage
         }
         catch (Exception err)
         {
-            _logger.AuthenticateError(cookie, tenant, userid, indexTenant, expire.ToString(DateTimeFormat), loginEventId, err);
+            _logger.AuthenticateError(cookie, tenant, userid, indexTenant, expire.ToString(DateTimeFormat, CultureInfo.InvariantCulture), loginEventId, err);
         }
 
         return false;

@@ -28,8 +28,9 @@ namespace ASC.Files.Core.Services.OFormService;
 
 public class OFormSettings
 {
-    public string Url { get; set; }
-    public int Period { get; set; }
+    public string Domain { get; set; }
+    public string Path { get; set; }
+    public string Dashboard { get; set; }
     public string Ext { get; set; }
 
     public OFormSettings Upload { get; set; }

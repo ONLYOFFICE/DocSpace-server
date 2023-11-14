@@ -167,13 +167,15 @@ public class CspSettingsHelper
 
             if (!string.IsNullOrEmpty(internalUrl))
             {
-                defaultOptions.Def.Add(internalUrl);
+                defaultOptions.Img.Add(internalUrl);
+                defaultOptions.Media.Add(internalUrl);
             }
 
             if (!string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
             {
-                defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
                 defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Media.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Connect.Add(s3Storage.CdnDistributionDomain);
             }
         }
 
@@ -183,8 +185,9 @@ public class CspSettingsHelper
         {
             options.Add(new CspOptions
             {
-                Def = new List<string> { _filesLinkUtility.DocServiceUrl },
                 Script = new List<string> { _filesLinkUtility.DocServiceUrl },
+                Frame = new List<string> { _filesLinkUtility.DocServiceUrl },
+                Connect = new List<string> { _filesLinkUtility.DocServiceUrl }
             });
         }
 
@@ -194,7 +197,6 @@ public class CspSettingsHelper
             var firebaseOptions = _configuration.GetSection("csp:firebase").Get<CspOptions>();
             if (firebaseOptions != null)
             {
-                firebaseOptions.Def.Add(firebaseDomain);
                 options.Add(firebaseOptions);
             }
         }
@@ -208,7 +210,7 @@ public class CspSettingsHelper
             }
         }
 
-        if (!string.IsNullOrEmpty(_configuration["files:oform:url"]))
+        if (!string.IsNullOrEmpty(_configuration["files:oform:domain"]))
         {
             var oformOptions = _configuration.GetSection("csp:oform").Get<CspOptions>();
             if (oformOptions != null)
@@ -241,12 +243,23 @@ public class CspSettingsHelper
 
         foreach (var domain in options.SelectMany(r => r.Frame).Distinct())
         {
+            csp.AllowFrames.From(domain);
             csp.AllowFraming.From(domain);
         }
 
         foreach (var domain in options.SelectMany(r => r.Fonts).Distinct())
         {
             csp.AllowFonts.From(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Connect).Distinct())
+        {
+            csp.AllowConnections.To(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Media).Distinct())
+        {
+            csp.AllowAudioAndVideo.From(domain);
         }
 
         var (_, headerValue) = csp.BuildCspOptions().ToString(null);
@@ -261,12 +274,14 @@ public class CspSettingsHelper
 
 public class CspOptions
 {
+    public List<string> Def { get; set; } = new();
     public List<string> Script { get; set; } = new();
     public List<string> Style { get; set; } = new();
     public List<string> Img { get; set; } = new();
     public List<string> Frame { get; set; } = new();
     public List<string> Fonts { get; set; } = new();
-    public List<string> Def { get; set; } = new();
+    public List<string> Connect { get; set; } = new();
+    public List<string> Media { get; set; } = new();
 
     public CspOptions()
     {
@@ -281,5 +296,7 @@ public class CspOptions
         Img = new List<string> { domain };
         Frame = new List<string> { domain };
         Fonts = new List<string> { domain };
+        Connect = new List<string> { domain };
+        Media = new List<string> { domain };
     }
 }

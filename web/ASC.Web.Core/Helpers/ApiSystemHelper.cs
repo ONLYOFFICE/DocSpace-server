@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Nodes;
+
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
@@ -80,7 +82,7 @@ public class ApiSystemHelper
     public string CreateAuthToken(string pkey)
     {
         using var hasher = new HMACSHA1(_skey);
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
         return $"ASC {pkey}:{now}:{hash}1"; //hack for .net
     }
@@ -89,14 +91,19 @@ public class ApiSystemHelper
 
     public async Task ValidatePortalNameAsync(string domain, Guid userId)
     {
-        var data = "{\"portalName\":\"" + HttpUtility.UrlEncode(domain) + "\"}";
-        var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, data);
-        var resObj = JObject.Parse(result);
+        var data = new
+        {
+            PortalName = HttpUtility.UrlEncode(domain)
+        };
+
+        var dataJson = System.Text.Json.JsonSerializer.Serialize(data);
+        var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
+        var resObj = JsonNode.Parse(result).AsObject();
         if (resObj["error"] != null)
         {
             if (resObj["error"].ToString() == "portalNameExist")
             {
-                var varians = resObj.Value<JArray>("variants").Select(jv => jv.Value<string>());
+                var varians = resObj["variants"].AsArray().Select(r => r.ToString()).ToList();
                 throw new TenantAlreadyExistsException("Address busy.", varians);
             }
 
@@ -104,17 +111,23 @@ public class ApiSystemHelper
         }
     }
 
+
     #endregion
 
     #region cache
 
     public async Task AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
     {
+        if (String.IsNullOrEmpty(tenantRegion))
+        {
+            tenantRegion = "default";
+        }
+
         using var _awsDynamoDBClient = GetDynamoDBClient();
 
         var putItemRequest = new PutItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Item = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue {
@@ -135,7 +148,7 @@ public class ApiSystemHelper
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = "docspace-tenants_origin",
+            TableName = "docspace-tenants_region",
             Key = new Dictionary<string, AttributeValue>()
                 {
                     { "tenant_domain", new AttributeValue { S = oldTenantDomain } }
@@ -207,7 +220,7 @@ public class ApiSystemHelper
             FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
                                                 {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = "tenant_region",
+            ProjectionExpression = "tenant_domain",
             ConsistentRead = true
         };
 

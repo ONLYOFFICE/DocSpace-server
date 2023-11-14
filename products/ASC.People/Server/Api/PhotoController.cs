@@ -35,6 +35,7 @@ public class PhotoController : PeopleControllerBase
     private readonly SettingsManager _settingsManager;
     private readonly FileSizeComment _fileSizeComment;
     private readonly SetupInfo _setupInfo;
+    private readonly Core.TenantManager _tenantManager;
 
     public PhotoController(
         UserManager userManager,
@@ -49,7 +50,8 @@ public class PhotoController : PeopleControllerBase
         FileSizeComment fileSizeComment,
         SetupInfo setupInfo,
         IHttpClientFactory httpClientFactory,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        Core.TenantManager tenantManager)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _messageService = messageService;
@@ -59,6 +61,7 @@ public class PhotoController : PeopleControllerBase
         _settingsManager = settingsManager;
         _fileSizeComment = fileSizeComment;
         _setupInfo = setupInfo;
+        _tenantManager = tenantManager;
     }
 
     /// <summary>
@@ -141,6 +144,12 @@ public class PhotoController : PeopleControllerBase
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != _securityContext.CurrentAccount.ID)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
         await _messageService.SendAsync(MessageAction.UserDeletedAvatar, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
@@ -194,6 +203,12 @@ public class PhotoController : PeopleControllerBase
             throw new SecurityException();
         }
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != _securityContext.CurrentAccount.ID)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
         if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
             await UpdatePhotoUrlAsync(inDto.Files, user);
@@ -238,6 +253,12 @@ public class PhotoController : PeopleControllerBase
                 }
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
+
+                var tenant = await _tenantManager.GetCurrentTenantAsync();
+                if (_securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != _securityContext.CurrentAccount.ID)
+                {
+                    throw new Exception(Resource.ErrorAccessDenied);
+                }
 
                 var userPhoto = formCollection.Files[0];
 
