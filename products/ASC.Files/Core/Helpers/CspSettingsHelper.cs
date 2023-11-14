@@ -210,7 +210,7 @@ public class CspSettingsHelper
             }
         }
 
-        if (!string.IsNullOrEmpty(_configuration["files:oform:url"]))
+        if (!string.IsNullOrEmpty(_configuration["files:oform:domain"]))
         {
             var oformOptions = _configuration.GetSection("csp:oform").Get<CspOptions>();
             if (oformOptions != null)
