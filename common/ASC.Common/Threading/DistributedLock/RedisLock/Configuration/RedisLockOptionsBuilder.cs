@@ -34,7 +34,9 @@ public sealed class RedisLockOptionsBuilder
     private static readonly TimeSpan _defaultMinimumTimeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan _minimumTimeout = TimeSpan.FromSeconds(5);
 
-    private TimeSpan _expiry, _extendInterval, _timeout;
+    private TimeSpan _expiry = _defaultExpiry;
+    private TimeSpan _timeout = _defaultMinimumTimeout;
+    private TimeSpan _extendInterval;
 
     private RedisLockOptionsBuilder() { }
 
@@ -42,20 +44,16 @@ public sealed class RedisLockOptionsBuilder
     {
         if (expiry < _minimumExpiry || expiry == Timeout.InfiniteTimeSpan || expiry == TimeSpan.MaxValue)
         {
-            _expiry = _defaultExpiry;
-        }
-        else
-        {
-            _expiry = expiry;
+            return this;
         }
 
+        _expiry = expiry;
         return this;
     }
 
     public RedisLockOptionsBuilder ExtendInterval(TimeSpan extendInterval)
     {
         _extendInterval = extendInterval;
-
         return this;
     }
 
@@ -63,13 +61,10 @@ public sealed class RedisLockOptionsBuilder
     {
         if (minimalTimeout < _minimumTimeout || minimalTimeout == Timeout.InfiniteTimeSpan || minimalTimeout == TimeSpan.MaxValue)
         {
-            _timeout = _defaultMinimumTimeout;
-        }
-        else
-        {
-            _timeout = minimalTimeout;
+            return this;
         }
 
+        _timeout = minimalTimeout;
         return this;
     }
 
@@ -87,20 +82,15 @@ public sealed class RedisLockOptionsBuilder
         }
         
         var expiry = options?._expiry ?? _defaultExpiry;
-        
-        if (options?._extendInterval is { } extendInterval)
-        {
-            if (extendInterval <= TimeSpan.Zero || extendInterval >= expiry)
-            {
-                extendInterval = expiry / 3;
-            }
-        }
-        else
-        {
-            extendInterval = expiry / 3;
-        }
-
         var timeout = options?._timeout ?? _defaultMinimumTimeout;
+
+        var extendInterval = expiry / 3;
+        
+        if (options?._extendInterval is { } optExtendInterval 
+            && optExtendInterval > TimeSpan.Zero && optExtendInterval < expiry)
+        {
+            extendInterval = optExtendInterval;
+        }
 
         return new RedisLockOptions
         {
