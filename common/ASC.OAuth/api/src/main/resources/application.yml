@@ -51,33 +51,33 @@ messaging:
   rabbitmq:
     configuration:
       authorization:
-        exchange: authorization.exchange
-        queue: authorization.queue
-        routing: authorization.routing
-        deadExchange: authorization.dead.exchange
-        deadQueue: authorization.dead.queue
-        deadRouting: authorization.dead.routing
+        exchange: asc_identity_authorization_exchange
+        queue: asc_identity_authorization_queue
+        routing: asc_identity_authorization_routing
+        deadExchange: asc_identity_authorization_dlx
+        deadQueue: asc_identity_authorization_dlq
+        deadRouting: asc_identity_authorization_dlr
       client:
-        exchange: client.exchange
-        queue: client.queue
-        routing: client.routing
-        deadExchange: client.dead.exchange
-        deadQueue: client.dead.queue
-        deadRouting: client.dead.routing
+        exchange: asc_identity_client_exchange
+        queue: asc_identity_client_queue
+        routing: asc_identity_client_routing
+        deadExchange: asc_identity_client_dlx
+        deadQueue: asc_identity_client_dlq
+        deadRouting: asc_identity_client_dlr
       consent:
-        exchange: consent.exchange
-        queue: consent.queue
-        routing: consent.routing
-        deadExchange: consent.dead.exchange
-        deadQueue: consent.dead.queue
-        deadRouting: consent.dead.routing
+        exchange: asc_identity_consent_exchange
+        queue: asc_identity_consent_queue
+        routing: asc_identity_consent_routing
+        deadExchange: asc_identity_consent_dlx
+        deadQueue: asc_identity_consent_dlq
+        deadRouting: asc_identity_consent_dlr
       socket:
-        exchange: socket.exchange
+        exchange: asc_identity_socket_exchange
         queue: ${random.uuid}
-        routing: socket.routing
-        deadExchange: socket.dead.exchange
-        deadQueue: socket.dead.queue
-        deadRouting: socket.dead.routing
+        routing: asc_identity_socket_routing
+        deadExchange: asc_identity_socket_dlx
+        deadQueue: asc_identity_socket_dlq
+        deadRouting: asc_identity_socket_dlr
 
 springdoc:
   api-docs:
