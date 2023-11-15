@@ -146,7 +146,7 @@ public class StudioNotifyService
 
     public async Task SendEmailChangeInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID);
+        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID, _authContext.CurrentAccount.ID);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 
