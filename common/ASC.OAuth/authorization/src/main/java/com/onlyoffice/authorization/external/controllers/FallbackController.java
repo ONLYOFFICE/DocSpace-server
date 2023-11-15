@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  *
@@ -27,7 +28,7 @@ public class FallbackController extends AbstractErrorController {
     public void handleError(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         response.sendRedirect(String.format("%s://%s/login/?type=oauth2&clientId=error",
-                request.getScheme(), request.getRemoteHost()));
+                request.getScheme(), request.getRemoteAddr()));
     }
 
     public String getErrorPath() {
