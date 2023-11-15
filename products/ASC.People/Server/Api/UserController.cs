@@ -1252,6 +1252,7 @@ public class UserController : PeopleControllerBase
             user.Email = email;
             user.ActivationStatus = EmployeeActivationStatus.NotActivated;
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await _cookiesManager.ResetUserCookieAsync(user.Id);
             await _studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
         }
 

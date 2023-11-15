@@ -239,17 +239,17 @@ public class CookiesManager
 
     public async Task ResetUserCookieAsync(Guid? userId = null)
     {
-        var currentUserId = _securityContext.CurrentAccount.ID;
+        var targetUserId = userId ?? _securityContext.CurrentAccount.ID;
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(userId ?? currentUserId);
+        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(targetUserId);
         settings.Index += 1;
-        await _tenantCookieSettingsHelper.SetForUserAsync(userId ?? currentUserId, settings);
+        await _tenantCookieSettingsHelper.SetForUserAsync(targetUserId, settings);
 
-        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, userId ?? currentUserId);
+        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, targetUserId);
 
-        if (!userId.HasValue)
+        if (targetUserId == _securityContext.CurrentAccount.ID)
         {
-            await AuthenticateMeAndSetCookiesAsync(currentUserId);
+            await AuthenticateMeAndSetCookiesAsync(targetUserId);
         }
     }
 
