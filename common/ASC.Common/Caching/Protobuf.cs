@@ -26,26 +26,19 @@
 
 namespace ASC.Common.Caching;
 
-public class ProtobufSerializer<T> : ISerializer<T> where T : IMessage<T>, new()
+public class ProtobufSerializer<T> : ISerializer<T> where T : new()
 {
     public byte[] Serialize(T data, Confluent.Kafka.SerializationContext context)
     {
-        return data.ToByteArray();
+        return BaseProtobufSerializer.Serialize(data);
     }
 }
 
-public class ProtobufDeserializer<T> : IDeserializer<T> where T : IMessage<T>, new()
+public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
 {
-    private readonly MessageParser<T> _parser;
-
-    public ProtobufDeserializer()
-    {
-        _parser = new MessageParser<T>(() => new T());
-    }
-
     public T Deserialize(ReadOnlySpan<byte> data, bool isNull, Confluent.Kafka.SerializationContext context)
     {
-        return _parser.ParseFrom(data.ToArray());
+        return BaseProtobufSerializer.Deserialize<T>(data);
     }
 }
 
@@ -54,4 +47,24 @@ public static class GuidExtension
     public static ByteString ToByteString(this Guid id) => ByteString.CopyFrom(id.ToByteArray());
 
     public static Guid FromByteString(this ByteString id) => new(id.ToByteArray());
+}
+
+public class BaseProtobufSerializer
+{
+    public static byte[] Serialize<T>(T data)
+    {
+        using var memoryStream = new MemoryStream();
+        Serializer.Serialize(memoryStream, data);
+        return memoryStream.ToArray();
+    }
+
+    public static T Deserialize<T>(byte[] data)
+    {
+        return Deserialize<T>(new ReadOnlySpan<byte>(data));
+    }
+
+    public static T Deserialize<T>(ReadOnlySpan<byte> data)
+    {
+        return Serializer.Deserialize<T>(data);
+    }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Caching;
+namespace ASC.Web.Core.Users;
 
-[Singleton]
-public interface ICacheNotify<T> where T : new()
+public enum CacheSize
 {
-    void Publish(T obj, CacheNotifyAction action);
+    Max,
+    Retina,
+    Big,
+    Medium,
+    Small,
+    Original
+}
+[ProtoContract]
+public record UserPhotoManagerCacheItem
+{
+    [ProtoMember(1)]
+    public string UserId { get; set; }
 
-    Task PublishAsync(T obj, CacheNotifyAction action);
+    [ProtoMember(2)]
+    public CacheSize Size { get; set; }
 
-    void Subscribe(Action<T> onchange, CacheNotifyAction action);
+    [ProtoMember(3)]
+    public string FileName { get; set; }
 
-    void Unsubscribe(CacheNotifyAction action);
+    [ProtoMember(4)]
+    public int TenantId { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Caching;
+namespace ASC.Protos.Migration;
 
-[Singleton]
-public interface ICacheNotify<T> where T : new()
+[ProtoContract]
+public record MigrationProgress
 {
-    void Publish(T obj, CacheNotifyAction action);
+    [ProtoMember(1)]
+    public bool IsCompleted { get; set; }
 
-    Task PublishAsync(T obj, CacheNotifyAction action);
+    [ProtoMember(2)]
+    public double Progress { get; set; }
 
-    void Subscribe(Action<T> onchange, CacheNotifyAction action);
+    [ProtoMember(3)]
+    public string Error { get; set; }
 
-    void Unsubscribe(CacheNotifyAction action);
+    [ProtoMember(4)]
+    public string Link { get; set; }
+
+    [ProtoMember(5)]
+    public int TenantId { get; set; }
 }

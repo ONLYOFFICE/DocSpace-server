@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Caching;
+namespace ASC.Core.Common.Notify;
 
-[Singleton]
-public interface ICacheNotify<T> where T : new()
+[ProtoContract]
+public record CreateClientProto
 {
-    void Publish(T obj, CacheNotifyAction action);
+    [ProtoMember(1)]
+    public int TenantId { get; set; }
 
-    Task PublishAsync(T obj, CacheNotifyAction action);
+    [ProtoMember(2)]
+    public string Token { get; set; }
 
-    void Subscribe(Action<T> onchange, CacheNotifyAction action);
+    [ProtoMember(3)]
+    public int TokenLifespan { get; set; }
 
-    void Unsubscribe(CacheNotifyAction action);
+    [ProtoMember(4)]
+    public string Proxy { get; set; }
+
+    [ProtoMember(5)]
+    public string Time { get; set; }
 }
+

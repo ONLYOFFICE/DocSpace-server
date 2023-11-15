@@ -66,8 +66,4 @@
   <ItemGroup>
     <ProjectReference Include="..\ASC.EventBus\ASC.EventBus.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="protos\asc_cache_item.proto" />
-    <Protobuf Include="protos\distributed_task_cancelation.proto" />
-  </ItemGroup>
 </Project>

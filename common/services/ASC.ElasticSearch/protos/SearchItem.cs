@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Caching;
+using ProtoBuf;
 
-[Singleton]
-public interface ICacheNotify<T> where T : new()
+namespace ASC.ElasticSearch;
+
+[ProtoContract]
+public record ClearIndexAction
 {
-    void Publish(T obj, CacheNotifyAction action);
-
-    Task PublishAsync(T obj, CacheNotifyAction action);
-
-    void Subscribe(Action<T> onchange, CacheNotifyAction action);
-
-    void Unsubscribe(CacheNotifyAction action);
+    [ProtoMember(1)]
+    public string Id { get; set; }
 }
+
+[ProtoContract]
+public record ReIndexAction
+{
+    [ProtoMember(1)]
+    public int Tenant { get; set; }
+
+    [ProtoMember(2)]
+    public List<string> Names { get; set; }
+}
+
+[ProtoContract]
+public record IndexAction
+{
+    [ProtoMember(1)]
+    public string Indexing { get; set; }
+
+    [ProtoMember(2)]
+    public long LastIndexed { get; set; }
+}
+
+
