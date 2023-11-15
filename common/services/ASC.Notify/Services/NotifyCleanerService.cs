@@ -26,7 +26,7 @@
 
 namespace ASC.Notify.Services;
 
-[Singletone]
+[Singleton]
 public class NotifyCleanerService : BackgroundService
 {
     private readonly ILogger _logger;
@@ -77,7 +77,7 @@ public class NotifyCleanerService : BackgroundService
             var date = DateTime.UtcNow.AddDays(-_notifyServiceCfg.StoreMessagesDays);
 
             using var scope = _scopeFactory.CreateScope();
-            await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
             await Queries.DeleteNotifyInfosAsync(dbContext, date);
             await Queries.DeleteNotifyQueuesAsync(dbContext, date);

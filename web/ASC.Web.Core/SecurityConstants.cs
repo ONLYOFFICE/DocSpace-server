@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+using Action = ASC.Common.Security.Authorizing.Action;
 
-/// <summary>
-/// </summary>
-public class WebhooksSslSettingsDto : IMapFrom<WebHooksSettings>
+namespace ASC.Web.Studio.Core;
+
+public static class SecurityConstants
 {
-    /// <summary>Specifies if the SSL certificate is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool IsEnabled { get; set; }
+    public static readonly Action EditPortalSettings = new(new Guid("{60DB830E-80A8-4997-8B83-3D6EA525749B}"), "Edit Portal Settings");
 }

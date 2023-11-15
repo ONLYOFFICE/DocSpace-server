@@ -85,29 +85,11 @@ public class DocumentServiceLicense
         return commandResponse;
     }
 
-    public async Task<Dictionary<string, DateTime>> GetLicenseQuotaAsync()
+    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
     {
         var commandResponse = await GetDocumentServiceLicenseAsync();
-        if (commandResponse == null
-            || commandResponse.Quota == null
-            || commandResponse.Quota.Users == null)
-        {
-            return null;
-        }
-
-        var result = new Dictionary<string, DateTime>();
-        commandResponse.Quota.Users.ForEach(user => result.Add(user.UserId, user.Expire));
-        return result;
-    }
-
-    public async Task<License> GetLicenseAsync()
-    {
-        var commandResponse = await GetDocumentServiceLicenseAsync();
-        if (commandResponse == null)
-        {
-            return null;
-        }
-
-        return commandResponse.License;
+        return commandResponse == null ? 
+            (null, null) : 
+            (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);
     }
 }

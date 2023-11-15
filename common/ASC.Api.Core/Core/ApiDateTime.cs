@@ -89,7 +89,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
     public static ApiDateTime Parse(string data, TimeZoneInfo tz, TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(data);
+        ArgumentException.ThrowIfNullOrEmpty(data);
 
         var offsetPart = data.Substring(data.Length - 6, 6);
         if (DateTime.TryParseExact(data, Formats, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
@@ -383,18 +383,14 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
         {
             return new ApiDateTime(result, TimeSpan.Zero);
         }
-        else
-        {
-            if (DateTime.TryParseExact(reader.GetString(), ApiDateTime.Formats,
+
+        if (DateTime.TryParseExact(reader.GetString(), ApiDateTime.Formats,
                 CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dateTime))
-            {
-                return new ApiDateTime(dateTime, TimeSpan.Zero);
-            }
-            else
-            {
-                return new ApiDateTime();
-            }
+        {
+            return new ApiDateTime(dateTime, TimeSpan.Zero);
         }
+
+        return new ApiDateTime();
     }
 
     public override void Write(Utf8JsonWriter writer, ApiDateTime value, JsonSerializerOptions options)

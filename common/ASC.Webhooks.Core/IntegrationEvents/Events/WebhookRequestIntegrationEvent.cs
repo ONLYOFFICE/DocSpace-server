@@ -30,7 +30,7 @@ namespace ASC.Webhooks.Core.IntegrationEvents.Events;
 [ProtoContract]
 public record WebhookRequestIntegrationEvent : IntegrationEvent
 {
-    public WebhookRequestIntegrationEvent() : base()
+    public WebhookRequestIntegrationEvent()
     {
 
     }
@@ -42,5 +42,5 @@ public record WebhookRequestIntegrationEvent : IntegrationEvent
     }
 
     [ProtoMember(1)]
-    public int WebhookId { get; set; }
+    public int WebhookId { get; init; }
 }

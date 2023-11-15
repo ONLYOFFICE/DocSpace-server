@@ -123,7 +123,7 @@ public class StudioPeriodicNotify
                 var toowner = false;
                 var topayer = false;
 
-                Func<CultureInfo, string> orangeButtonText = (c) => string.Empty;
+                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
                 var orangeButtonUrl = string.Empty;
 
                 var img1 = string.Empty;
@@ -243,9 +243,9 @@ public class StudioPeriodicNotify
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _authContext.CurrentAccount.ID);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
                     }
 
@@ -332,9 +332,9 @@ public class StudioPeriodicNotify
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _authContext.CurrentAccount.ID);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
                     }
 
@@ -429,7 +429,6 @@ public class StudioPeriodicNotify
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                var dueDateIsNotMax = actualEndDate != DateTime.MaxValue;
                 var dueDate = actualEndDate.Date;
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
@@ -441,7 +440,7 @@ public class StudioPeriodicNotify
                 var toadmins = false;
                 var tousers = false;
 
-                Func<CultureInfo, string> orangeButtonText = (c) => string.Empty;
+                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
                 var orangeButtonUrl = string.Empty;
 
                 Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
@@ -722,22 +721,5 @@ public class StudioPeriodicNotify
         await studioNotifyHelper.SubscribeToNotifyAsync(recipient, Actions.PeriodicNotify, !isSubscribe);
 
         return !isSubscribe;
-    }
-
-    private CultureInfo GetCulture(UserInfo user)
-    {
-        CultureInfo culture = null;
-
-        if (!string.IsNullOrEmpty(user.CultureName))
-        {
-            culture = user.GetCulture();
-        }
-
-        if (culture == null)
-        {
-            culture = _tenantManager.GetCurrentTenant(false)?.GetCulture();
-        }
-
-        return culture;
     }
 }

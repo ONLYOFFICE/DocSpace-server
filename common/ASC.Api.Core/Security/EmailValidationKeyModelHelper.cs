@@ -69,7 +69,7 @@ public class EmailValidationKeyModelHelper
     {
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
-        var type = request.ContainsKey("type") ? request["type"].FirstOrDefault() : null;
+        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : null;
 
         ConfirmType? cType = null;
         if (ConfirmTypeExtensions.TryParse(type, out var confirmType))
@@ -131,11 +131,11 @@ public class EmailValidationKeyModelHelper
                 {
                     var auditEventDate = _tenantUtil.DateTimeToUtc(auditEvent.Date);
 
-                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s");
+                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s", CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    hash = passwordStamp.ToString("s");
+                    hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
                 checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + hash, key, _provider.ValidEmailKeyInterval);

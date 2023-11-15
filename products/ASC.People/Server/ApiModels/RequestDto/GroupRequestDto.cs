@@ -40,5 +40,5 @@ public class GroupRequestDto
 
     /// <summary>List of group member IDs</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
-    public IEnumerable<Guid> Members { get; set; }
+    public IEnumerable<Guid> Members { get; init; }
 }

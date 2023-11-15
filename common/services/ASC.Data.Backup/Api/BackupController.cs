@@ -234,7 +234,7 @@ public class BackupController : ControllerBase
                         ));
 
 
-        return await _backupHandler.GetBackupProgressAsync();
+        return await _backupHandler.GetRestoreProgressAsync();
     }
 
     /// <summary>

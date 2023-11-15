@@ -40,16 +40,23 @@ public class BackupFileUploadHandler
         TenantManager tenantManager,
         SetupInfo setupInfo)
     {
-        BackupFileUploadResult result = null;
+        BackupFileUploadResult result;
         try
         {
-            if (!await permissionContext.CheckPermissionsAsync(SecutiryConstants.EditPortalSettings))
+            if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
             {
                 throw new ArgumentException("Access denied.");
             }
-            var tenantId = tenantManager.GetCurrentTenant().Id;
-            var path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
-
+            var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
+            string path = "";
+            try
+            {
+                path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
+            }
+            catch
+            {
+                throw new Exception("backup_temp is not disc");
+            }
             if (context.Request.Query["Init"].ToString() == "true")
             {
                 long.TryParse(context.Request.Query["totalSize"], out var size);
@@ -98,14 +105,14 @@ public class BackupFileUploadHandler
                 }
 
                 var file = context.Request.Form.Files[0];
-                using var stream = file.OpenReadStream();
+                await using var stream = file.OpenReadStream();
 
                 if (stream.Length > setupInfo.ChunkUploadSize)
                 {
                     throw new ArgumentException("chunkSize more then maxChunkUploadSize");
                 }
 
-                using var fs = File.Open(path + info.Ext, FileMode.Append);
+                await using var fs = File.Open(path + info.Ext, FileMode.Append);
                 await stream.CopyToAsync(fs);
 
                 if (fs.Length >= info.Size)
@@ -160,8 +167,8 @@ internal class BackupFileUploadResult
 
 internal class UploadInfo
 {
-    public long Size { get; set; }
-    public string Ext { get; set; }
+    public long Size { get; init; }
+    public string Ext { get; init; }
 }
 
 public static class BackupFileUploadHandlerExtensions

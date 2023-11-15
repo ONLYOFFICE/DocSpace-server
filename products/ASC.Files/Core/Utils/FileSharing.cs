@@ -99,7 +99,7 @@ public class FileSharingAceHelper
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
 
-        if (!aceWrappers.All(r => r.Id == _authContext.CurrentAccount.ID && r.Access == FileShare.None) && 
+        if (!aceWrappers.TrueForAll(r => r.Id == _authContext.CurrentAccount.ID && r.Access == FileShare.None) && 
             !await _fileSharingHelper.CanSetAccessAsync(entry) && advancedSettings is not { InvitationLink: true })
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
@@ -412,8 +412,6 @@ public class FileSharingHelper
 
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
-        var folder = entry as Folder<T>;
-
         if (entry == null)
         {
             return false;
@@ -536,15 +534,15 @@ public class FileSharing
         {
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
+        
+        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
-        if (!await _fileSecurity.CanReadAsync(entry))
+        if (!await CheckAccessAsync(entry, filterType, canEditAccess))
         {
             _logger.ErrorUserCanTGetSharedInfo(_authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
 
             yield break;
         }
-        
-        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
         var allDefaultAces = await GetDefaultAcesAsync(entry, filterType, status).ToListAsync();
         var defaultAces = allDefaultAces.Skip(offset).Take(count).ToList();
@@ -565,10 +563,24 @@ public class FileSharing
         }
     }
 
-    public async Task<int> GetRoomSharesCountAsync<T>(Folder<T> room, ShareFilterType filterType)
+    public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {
-        var defaultAces = await GetDefaultAcesAsync(room, filterType, null).CountAsync();
-        var sharesCount = await _fileSecurity.GetPureSharesCountAsync(room, filterType, null);
+        if (entry == null)
+        {
+            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+        }
+        
+        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
+
+        if (!await CheckAccessAsync(entry, filterType, canEditAccess))
+        {
+            _logger.ErrorUserCanTGetSharedInfo(_authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
+
+            return 0;
+        }
+        
+        var defaultAces = await GetDefaultAcesAsync(entry, filterType, null).CountAsync();
+        var sharesCount = await _fileSecurity.GetPureSharesCountAsync(entry, filterType, null);
 
         return defaultAces + sharesCount;
     }
@@ -602,6 +614,11 @@ public class FileSharing
 
         foreach (var r in records)
         {
+            if (r.IsLink && !canEditAccess)
+            {
+                continue;
+            }
+            
             if (subjectsTypes != null && !subjectsTypes.Contains(r.SubjectType))
             {
                 continue;
@@ -686,7 +703,7 @@ public class FileSharing
             result.Add(w);
         }
 
-        if (entry.FileEntryType == FileEntryType.File && result.All(w => w.Id != FileConstant.ShareLinkId)
+        if (entry.FileEntryType == FileEntryType.File && result.TrueForAll(w => w.Id != FileConstant.ShareLinkId)
             && entry.FileEntryType == FileEntryType.File
             && !((File<T>)entry).Encrypted)
         {
@@ -702,7 +719,7 @@ public class FileSharing
             result.Add(w);
         }
 
-        if (!result.Any(w => w.Owner) && (subjectsTypes == null || subjectsTypes.Contains(SubjectType.User) || subjectsTypes.Contains(SubjectType.Group)))
+        if (!result.Exists(w => w.Owner) && (subjectsTypes == null || subjectsTypes.Contains(SubjectType.User) || subjectsTypes.Contains(SubjectType.Group)))
         {
             var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
             var w = new AceWrapper
@@ -718,14 +735,14 @@ public class FileSharing
             result.Add(w);
         }
 
-        if (result.Any(w => w.Id == _authContext.CurrentAccount.ID))
+        if (result.Exists(w => w.Id == _authContext.CurrentAccount.ID))
         {
             result.Single(w => w.Id == _authContext.CurrentAccount.ID).LockedRights = true;
         }
 
         if (entry.RootFolderType == FolderType.COMMON)
         {
-            if (result.All(w => w.Id != Constants.GroupAdmin.ID))
+            if (result.TrueForAll(w => w.Id != Constants.GroupAdmin.ID))
             {
                 var w = new AceWrapper
                 {
@@ -797,7 +814,7 @@ public class FileSharing
 
             foreach (var aceForObject in acesForObject)
             {
-                var duplicate = result.FirstOrDefault(ace => ace.Id == aceForObject.Id);
+                var duplicate = result.Find(ace => ace.Id == aceForObject.Id);
                 if (duplicate == null)
                 {
                     if (result.Count > 0)
@@ -845,10 +862,10 @@ public class FileSharing
         }
 
 
-        var ownerAce = result.FirstOrDefault(ace => ace.Owner);
+        var ownerAce = result.Find(ace => ace.Owner);
         result.Remove(ownerAce);
 
-        var meAce = result.FirstOrDefault(ace => ace.Id == _authContext.CurrentAccount.ID);
+        var meAce = result.Find(ace => ace.Id == _authContext.CurrentAccount.ID);
         result.Remove(meAce);
 
         AceWrapper linkAce = null;
@@ -858,7 +875,7 @@ public class FileSharing
         }
         else
         {
-            linkAce = result.FirstOrDefault(ace => ace.Id == FileConstant.ShareLinkId);
+            linkAce = result.Find(ace => ace.Id == FileConstant.ShareLinkId);
         }
 
         result.Sort((x, y) => string.Compare(x.SubjectName, y.SubjectName));
@@ -887,6 +904,16 @@ public class FileSharing
         return new List<AceShortWrapper>(aces
             .Where(aceWrapper => !aceWrapper.Id.Equals(FileConstant.ShareLinkId) || aceWrapper.Access != FileShare.Restrict)
             .Select(aceWrapper => new AceShortWrapper(aceWrapper)));
+    }
+    
+    private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType, bool canEdit)
+    {
+        if (!await _fileSecurity.CanReadAsync(entry))
+        {
+            return false;
+        }
+
+        return filterType == ShareFilterType.User || canEdit;
     }
     
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)

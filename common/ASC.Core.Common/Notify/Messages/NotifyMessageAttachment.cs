@@ -30,11 +30,11 @@ namespace ASC.Notify.Messages;
 public class NotifyMessageAttachment
 {
     [ProtoMember(1)]
-    public string FileName { get; set; }
+    public string FileName { get; init; }
 
     [ProtoMember(2)]
-    public string ContentId { get; set; }
+    public string ContentId { get; init; }
 
     [ProtoMember(3)]
-    public byte[] Content { get; set; }
+    public byte[] Content { get; init; }
 }

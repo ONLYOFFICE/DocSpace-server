@@ -77,8 +77,8 @@ public class TransferPortalTask : PortalTaskBase
     public override async Task RunJob()
     {
         _logger.DebugBeginTransfer(TenantId);
-        var fromDbFactory = new DbFactory(null, null, null, null);
-        var toDbFactory = new DbFactory(null, null, null, null);
+        var fromDbFactory = new DbFactory(null, null);
+        var toDbFactory = new DbFactory(null, null);
         var tenantAlias = GetTenantAlias(fromDbFactory);
         var backupFilePath = GetBackupFilePath(tenantAlias);
         var columnMapper = new ColumnMapper();
@@ -98,7 +98,7 @@ public class TransferPortalTask : PortalTaskBase
             var backupTask = _serviceProvider.GetService<BackupPortalTask>();
             backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(_tempStream, backupFilePath));
             backupTask.ProcessStorage = false;
-            backupTask.ProgressChanged += (sender, args) => SetCurrentStepProgress(args.Progress);
+            backupTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 backupTask.IgnoreModule(moduleName);
@@ -109,7 +109,7 @@ public class TransferPortalTask : PortalTaskBase
             var restoreTask = _serviceProvider.GetService<RestorePortalTask>();
             restoreTask.Init(ToRegion, backupFilePath, columnMapper: columnMapper);
             restoreTask.ProcessStorage = false;
-            restoreTask.ProgressChanged += (sender, args) => SetCurrentStepProgress(args.Progress);
+            restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 restoreTask.IgnoreModule(moduleName);
@@ -248,7 +248,7 @@ public class TransferPortalTask : PortalTaskBase
             Directory.CreateDirectory(BackupDirectory ?? DefaultDirectoryName);
         }
 
-        return CrossPlatform.PathCombine(BackupDirectory ?? DefaultDirectoryName, tenantAlias + DateTime.UtcNow.ToString("(yyyy-MM-dd HH-mm-ss)") + ".backup");
+        return CrossPlatform.PathCombine(BackupDirectory ?? DefaultDirectoryName, tenantAlias + DateTime.UtcNow.ToString("(yyyy-MM-dd HH-mm-ss)", CultureInfo.InvariantCulture) + ".backup");
     }
 
 }

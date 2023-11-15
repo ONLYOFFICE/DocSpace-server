@@ -138,7 +138,7 @@ public class ThirdpartyController : ApiControllerBase
                 continue;
             }
             var loginProvider = _providerManager.GetLoginProvider(provider);
-            if (loginProvider != null && loginProvider.IsEnabled)
+            if (loginProvider is { IsEnabled: true })
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";
@@ -244,7 +244,7 @@ public class ThirdpartyController : ApiControllerBase
 
         var employeeType = linkData.EmployeeType;
 
-        var userID = Guid.Empty;
+        Guid userId;
         try
         {
             await _securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
@@ -254,22 +254,22 @@ public class ThirdpartyController : ApiControllerBase
             var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
             await _messageService.SendAsync(MessageInitiator.System, messageAction, _messageTarget.Create(newUser.Id), newUser.DisplayUserName(false, _displayUserSettingsHelper));
-            userID = newUser.Id;
+            userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
-                await SaveContactImage(userID, thirdPartyProfile.Avatar);
+                await SaveContactImage(userId, thirdPartyProfile.Avatar);
             }
 
-            await _accountLinker.AddLinkAsync(userID.ToString(), thirdPartyProfile);
+            await _accountLinker.AddLinkAsync(userId.ToString(), thirdPartyProfile);
         }
         finally
         {
             _securityContext.Logout();
         }
 
-        var user = await _userManager.GetUsersAsync(userID);
+        var user = await _userManager.GetUsersAsync(userId);
 
-        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id);
+        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
 
         await _studioNotifyService.UserHasJoinAsync();
 
@@ -363,29 +363,25 @@ public class ThirdpartyController : ApiControllerBase
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        using (var memstream = new MemoryStream())
+        using var memstream = new MemoryStream();
+        var request = new HttpRequestMessage
         {
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url)
-            };
+            RequestUri = new Uri(url)
+        };
 
-            var httpClient = _httpClientFactory.CreateClient();
-            using (var response = httpClient.Send(request))
-            await using (var stream = response.Content.ReadAsStream())
-            {
-                var buffer = new byte[512];
-                int bytesRead;
-                while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    memstream.Write(buffer, 0, bytesRead);
-                }
-
-                var bytes = memstream.ToArray();
-
-                await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-            }
+        var httpClient = _httpClientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var buffer = new byte[512];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            memstream.Write(buffer, 0, bytesRead);
         }
+
+        var bytes = memstream.ToArray();
+
+        await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
     }
 
     private string GetEmailAddress(SignupAccountRequestDto inDto)

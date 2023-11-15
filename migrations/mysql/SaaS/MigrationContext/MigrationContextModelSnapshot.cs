@@ -1671,6 +1671,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("create_on");
 
+                    b.Property<string>("CspDomains")
+                        .HasColumnType("text")
+                        .HasColumnName("csp_domains");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
@@ -6863,22 +6867,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebPlugin", b =>
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenantPartner", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
+                        .WithOne("Partner")
+                        .HasForeignKey("ASC.Core.Common.EF.Model.DbTenantPartner", "TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenantPartner", b =>
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebPlugin", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithOne("Partner")
-                        .HasForeignKey("ASC.Core.Common.EF.Model.DbTenantPartner", "TenantId")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

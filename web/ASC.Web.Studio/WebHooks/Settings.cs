@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks;
 
-[Singletone]
+[Singleton]
 public class Settings
 {
     public Settings()

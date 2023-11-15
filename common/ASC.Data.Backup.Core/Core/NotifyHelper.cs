@@ -132,7 +132,7 @@ public class NotifyHelper
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s");
+            var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
             var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
             var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", user.GetCulture());
@@ -167,7 +167,7 @@ public class NotifyHelper
                     var currentArgs = new List<ITagValue>(args);
 
                     var newTenantId = toTenantId.HasValue ? toTenantId.Value : tenant.Id;
-                    var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s");
+                    var hash = (await _authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
                     var confirmationUrl = url + "/" + _commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
                     var culture = user.GetCulture();
 
@@ -210,7 +210,7 @@ public class NotifyHelper
             args.Add(new TagValue(CommonTags.VirtualRootPath, url));
             args.Add(new TagValue(CommonTags.ProfileUrl, url + _commonLinkUtility.GetMyStaff()));
 
-            var attachment = await _tenantLogoManager.GetMailLogoAsAttacmentAsync();
+            var attachment = await _tenantLogoManager.GetMailLogoAsAttachmentAsync();
 
             if (attachment != null)
             {

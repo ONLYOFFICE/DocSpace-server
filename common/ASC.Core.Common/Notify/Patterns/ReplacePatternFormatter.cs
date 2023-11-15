@@ -52,7 +52,7 @@ public sealed class ReplacePatternFormatter : PatternFormatter
             {
                 var value = Array.Find(tagsValues, v => v.Tag == match.Groups["tagName"].Value);
 
-                return value != null && value.Value != null ? Convert.ToString(value.Value) : match.Value;
+                return value is { Value: not null } ? Convert.ToString(value.Value) : match.Value;
             });
 
         return formattedText;

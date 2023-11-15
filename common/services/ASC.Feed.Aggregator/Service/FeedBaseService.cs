@@ -28,13 +28,13 @@ namespace ASC.Feed.Aggregator.Service;
 
 public abstract class FeedBaseService : BackgroundService
 {
-    protected virtual string LoggerName { get; set; } = "ASC.Feed";
+    protected abstract string LoggerName { get; }
 
     protected readonly ILogger _logger;
     protected readonly FeedSettings _feedSettings;
     protected readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public FeedBaseService(
+    protected FeedBaseService(
         FeedSettings feedSettings,
         IServiceScopeFactory serviceScopeFactory,
         ILoggerProvider optionsMonitor)

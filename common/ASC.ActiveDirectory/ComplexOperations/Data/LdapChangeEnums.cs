@@ -60,8 +60,8 @@ public enum LdapChangeAction
 
 public static class LdapUserMapping
 {
-    public static readonly List<string> Fields = new List<string>
-        {
+    public static readonly List<string> Fields = new()
+    {
             Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.FirstName),
             Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.LastName),
             Enum.GetName(typeof(LdapItemChangeKey), LdapItemChangeKey.Mail),

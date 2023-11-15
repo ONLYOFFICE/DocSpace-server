@@ -82,8 +82,6 @@ public class FolderDto<T> : FileEntryDto<T>
 
     protected internal override FileEntryType EntryType { get => FileEntryType.Folder; }
 
-    public FolderDto() { }
-
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>
@@ -126,8 +124,10 @@ public class FolderDtoHelper : FileEntryDtoHelper
         FileSharingHelper fileSharingHelper,
         RoomLogoManager roomLogoManager,
         BadgesSettingsHelper badgesSettingsHelper,
-        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity)
+        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;
@@ -162,31 +162,31 @@ public class FolderDtoHelper : FileEntryDtoHelper
             if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
             {
                 result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
+            }
 
-                var isMuted = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
-                result.Mute = isMuted;
+            if (DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             }
         }
 
-        if (folder.RootFolderType == FolderType.USER
-            && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID))
+        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.SHARE;
 
             var folderDao = _daoFactory.GetFolderDao<T>();
-            FileEntry<T> parentFolder;
 
             if (folders != null)
             {
-                var folderWithRight = folders.FirstOrDefault(f => f.Item1.Id.Equals(folder.ParentId));
-                if (folderWithRight == null || !folderWithRight.Item2)
+                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(folder.ParentId));
+                if (folderWithRight is not { Item2: true })
                 {
                     result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
                 }
             }
             else
             {
-                parentFolder = await folderDao.GetFolderAsync(folder.ParentId);
+                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(folder.ParentId);
                 var canRead = await _fileSecurity.CanReadAsync(parentFolder);
                 if (!canRead)
                 {

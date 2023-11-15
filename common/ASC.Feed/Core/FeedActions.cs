@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ApiCache.Models;
+namespace ASC.Feed;
 
-public class CacheDto
+[Flags]
+public enum FeedActions
 {
-    public string PortalName { get; set; }
+    Created = 0,
+    Updated = 1,
+    Commented = 2,
+    AllDayEventCreated = 3
 }

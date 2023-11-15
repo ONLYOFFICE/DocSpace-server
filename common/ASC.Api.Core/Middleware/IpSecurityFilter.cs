@@ -48,20 +48,18 @@ public class IpSecurityFilter : IAsyncResourceFilter
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (_authContext.IsAuthenticated)
+        if (_authContext.IsAuthenticated && !(await _iPSecurity.VerifyAsync()))
         {
-            var enable = (await _settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
-
-            if (enable && !(await _iPSecurity.VerifyAsync()))
+            context.Result = new ObjectResult(Resource.ErrorIpSecurity)
             {
-                context.Result = new ObjectResult(Resource.ErrorIpSecurity)
-                {
-                    StatusCode = (int)HttpStatusCode.Forbidden
-                };
-                _logger.WarningIPSecurity(_authContext.CurrentAccount.ID);
-                return;
-            }
+                StatusCode = (int)HttpStatusCode.Forbidden
+            };
+            
+            _logger.WarningIPSecurity(_authContext.CurrentAccount.ID);
+            
+            return;
         }
+        
         await next();
     }
 }

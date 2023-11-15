@@ -53,7 +53,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
     }
 
     [JsonIgnore]
-    public Guid ID => new Guid("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
+    public Guid ID => new("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
 }
 
 [Scope]
@@ -116,10 +116,18 @@ public class TenantCookieSettingsHelper
     public async Task<DateTime> GetExpiresTimeAsync(int tenantId)
     {
         var settingsTenant = await GetForTenantAsync(tenantId);
-        var expires = settingsTenant.IsDefault() || !settingsTenant.Enabled ?
-            DateTime.UtcNow.AddYears(1) :
-            settingsTenant.LifeTime == 0 ? DateTime.MaxValue : DateTime.UtcNow.AddMinutes(settingsTenant.LifeTime);
 
+        DateTime expires;
+
+        if (settingsTenant.IsDefault() || !settingsTenant.Enabled)
+        {
+            expires = DateTime.UtcNow.AddYears(1);
+        }
+        else
+        {
+            expires = settingsTenant.LifeTime == 0 ? DateTime.MaxValue : DateTime.UtcNow.AddMinutes(settingsTenant.LifeTime);
+        }
+        
         return expires;
     }
 }

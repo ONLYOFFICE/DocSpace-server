@@ -242,9 +242,9 @@ public class NotifyClient
             if (!await _fileSecurity.CanReadAsync(room, recipientId))
             {
                 continue;
-            };
+            }
 
-            var u = _userManager.GetUsers(recipientId);
+            var u = await _userManager.GetUsersAsync(recipientId);
 
             if (!await _studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.RoomsActivity))
             {

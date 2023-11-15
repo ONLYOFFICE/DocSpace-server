@@ -321,7 +321,7 @@ public class SettingsController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get the trash bin auto-clearing setting.
+    /// Returns the trash bin auto-clearing setting.
     /// </summary>
     /// <short>Get the trash bin auto-clearing setting</short>
     /// <category>Settings</category>

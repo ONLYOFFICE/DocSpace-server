@@ -26,7 +26,7 @@
 
 namespace ASC.Common.Caching;
 
-[Singletone]
+[Singleton]
 public class MemoryCacheNotify<T> : ICacheNotify<T> where T : IMessage<T>, new()
 {
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
