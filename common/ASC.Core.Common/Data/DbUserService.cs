@@ -33,11 +33,6 @@ public class EFUserService : IUserService
     private readonly MachinePseudoKeys _machinePseudoKeys;
     private readonly IMapper _mapper;
 
-    private static readonly Expression<Func<UserWithGroup, int>> _orderByUserType = u => 
-        u.Group == null ? 2 : 
-        u.Group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 : 
-        u.Group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4;
-
     public EFUserService(
         IDbContextFactory<UserDbContext> dbContextFactory,
         MachinePseudoKeys machinePseudoKeys,
@@ -267,6 +262,7 @@ public class EFUserService : IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
         long limit,
@@ -284,7 +280,6 @@ public class EFUserService : IUserService
         q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
 
         var orderedQuery = q.OrderBy(r => r.ActivationStatus);
-        q = orderedQuery;
 
         if (!string.IsNullOrEmpty(sortBy))
         {
@@ -295,9 +290,15 @@ public class EFUserService : IUserService
                         !g.Removed && (g.UserGroupId == Users.Constants.GroupAdmin.ID || g.UserGroupId == Users.Constants.GroupUser.ID ||
                                        g.UserGroupId == Users.Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
                     from @group in joinedGroup.DefaultIfEmpty()
-                    select new UserWithGroup { User = user, Group = @group }).OrderBy(r => r.User.ActivationStatus);
-
-                q = (sortOrderAsc ? q1.ThenBy(_orderByUserType) : q1.ThenByDescending(_orderByUserType)).Select(r => r.User);
+                    select new UserWithGroup { User = user, Group = @group });
+                
+                Expression<Func<UserWithGroup, int>> orderByUserType = u => 
+                    u.User.Id == ownerId ? 0 :
+                    u.Group == null ? 2 : 
+                    u.Group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 : 
+                    u.Group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4;
+                
+                q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
             }
             else
             {
