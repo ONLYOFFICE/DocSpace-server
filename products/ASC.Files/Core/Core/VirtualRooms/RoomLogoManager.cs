@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Image = SixLabors.ImageSharp.Image;
+using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.Files.Core.VirtualRooms;
 
@@ -271,7 +272,7 @@ public class RoomLogoManager
 
         if (imageData is not { Length: > 0 })
     {
-            throw new Web.Core.Users.UnknownImageFormatException();
+            throw new UnknownImageFormatException();
         }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
         {
@@ -302,7 +303,7 @@ public class RoomLogoManager
         }
         catch (ArgumentException error)
         {
-            throw new Web.Core.Users.UnknownImageFormatException(error);
+            throw new UnknownImageFormatException(error);
         }
     }
 

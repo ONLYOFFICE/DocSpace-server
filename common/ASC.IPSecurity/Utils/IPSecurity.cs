@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Users;
+
 namespace ASC.IPSecurity;
 
 [Scope]
@@ -110,7 +112,7 @@ public class IPSecurity
                           ? Array.Empty<string>()
                           : requestIps.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
 
-            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
+            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Constants.GroupAdmin.ID);
 
             if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
             {

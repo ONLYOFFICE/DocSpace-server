@@ -26,8 +26,6 @@
 
 using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Api.Core.Security;
 
 [Transient]

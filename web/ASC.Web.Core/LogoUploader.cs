@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Studio.UserControls.CustomNavigation;
 
 public class LogoUploader
@@ -110,7 +112,7 @@ public class LogoUploader
             result.Success = false;
             result.Message = ex.Message.HtmlEncode();
         }
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result));
     }
 }
 

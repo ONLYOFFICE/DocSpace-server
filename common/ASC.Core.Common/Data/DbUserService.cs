@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Core.Data;
 
 [Scope]
@@ -35,8 +37,8 @@ public class EFUserService : IUserService
 
     private static readonly Expression<Func<UserWithGroup, int>> _orderByUserType = u => 
         u.Group == null ? 2 : 
-        u.Group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 : 
-        u.Group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4;
+        u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
+        u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
 
     public EFUserService(
         IDbContextFactory<UserDbContext> dbContextFactory,
@@ -292,8 +294,8 @@ public class EFUserService : IUserService
             {
                 var q1 = (from user in q
                     join userGroup in userDbContext.UserGroups.Where(g =>
-                        !g.Removed && (g.UserGroupId == Users.Constants.GroupAdmin.ID || g.UserGroupId == Users.Constants.GroupUser.ID ||
-                                       g.UserGroupId == Users.Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                        !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
+                                       g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
                     from @group in joinedGroup.DefaultIfEmpty()
                     select new UserWithGroup { User = user, Group = @group }).OrderBy(r => r.User.ActivationStatus);
 

@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using NotifySourceBase = ASC.Core.Notify.NotifySource;
-using SubscriptionManager = ASC.Core.SubscriptionManager;
 
 namespace ASC.Files.Core.Services.NotifyService;
 

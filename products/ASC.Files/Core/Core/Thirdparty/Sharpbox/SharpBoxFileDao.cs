@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using File = System.IO.File;
+using ResumableUploadSession = AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession;
 
 namespace ASC.Files.Thirdparty.Sharpbox;
 
@@ -623,7 +624,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         if (uploadSession.Items.ContainsKey("SharpboxSession"))
         {
             var sharpboxSession =
-                uploadSession.GetItemOrDefault<AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession>("SharpboxSession");
+                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
 
             var isNewFile = uploadSession.Items.ContainsKey("IsNewFile") && uploadSession.GetItemOrDefault<bool>("IsNewFile");
             var sharpboxFile =
@@ -660,7 +661,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         if (uploadSession.Items.ContainsKey("SharpboxSession"))
         {
             var sharpboxSession =
-                uploadSession.GetItemOrDefault<AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession>("SharpboxSession");
+                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
 
             return ToFile(GetFileById(sharpboxSession.FileId));
         }
@@ -675,7 +676,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         if (uploadSession.Items.ContainsKey("SharpboxSession"))
         {
             var sharpboxSession =
-                uploadSession.GetItemOrDefault<AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession>("SharpboxSession");
+                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
 
             var isNewFile = uploadSession.Items.ContainsKey("IsNewFile") && uploadSession.GetItemOrDefault<bool>("IsNewFile");
             var sharpboxFile =

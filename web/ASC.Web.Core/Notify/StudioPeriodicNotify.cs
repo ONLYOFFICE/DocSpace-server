@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
@@ -358,7 +360,7 @@ public class StudioPeriodicNotify
                     var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
                     var payer = await _userManager.GetUserByEmailAsync(payerId);
 
-                    if (payer.Id != ASC.Core.Users.Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
+                    if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
                         users = users.Concat(new[] { payer });
                     }

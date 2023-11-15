@@ -30,6 +30,7 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ASC.Web.Core.Helpers;
 
@@ -96,7 +97,7 @@ public class ApiSystemHelper
             PortalName = HttpUtility.UrlEncode(domain)
         };
 
-        var dataJson = System.Text.Json.JsonSerializer.Serialize(data);
+        var dataJson = JsonSerializer.Serialize(data);
         var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
         var resObj = JsonNode.Parse(result).AsObject();
         if (resObj["error"] != null)

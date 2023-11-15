@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amazon;
+
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
 namespace ASC.Web.Api.Controllers.Settings;
@@ -573,7 +575,7 @@ public class StorageController : BaseSettingsController, IDisposable
     [HttpGet("storage/s3/regions")]
     public object GetAmazonS3Regions()
     {
-        return Amazon.RegionEndpoint.EnumerableAllRegions;
+        return RegionEndpoint.EnumerableAllRegions;
     }
 
     public void Dispose()
