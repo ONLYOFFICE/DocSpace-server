@@ -26,19 +26,19 @@
 
 namespace ASC.Common.Threading.DistributedLock.Common;
 
-public class DefaultHandle : LockHandleBase
+public class DefaultHandle : IDistributedLockHandle
 {
-    public override ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        CheckDispose();
-        _disposed = true;
-        
         return ValueTask.CompletedTask;
     }
 
-    public override void Dispose()
+    public void Dispose() { }
+
+    public ValueTask ReleaseAsync()
     {
-        CheckDispose();
-        _disposed = true;
+        return ValueTask.CompletedTask;
     }
+
+    public void Release() { }
 }
