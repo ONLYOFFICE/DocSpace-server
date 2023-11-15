@@ -42,13 +42,6 @@ public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
     }
 }
 
-public static class GuidExtension
-{
-    public static ByteString ToByteString(this Guid id) => ByteString.CopyFrom(id.ToByteArray());
-
-    public static Guid FromByteString(this ByteString id) => new(id.ToByteArray());
-}
-
 public class BaseProtobufSerializer
 {
     public static byte[] Serialize<T>(T data)
