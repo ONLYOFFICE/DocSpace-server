@@ -62,7 +62,7 @@ public class RedisLockHandle : LockHandleBase
         
         await _database.Database.ScriptEvaluateAsync(_lockReleaseScript, 
             new RedisKey[] { _resource, _queueKey, _channelName, _queueItemTimeoutKey }, 
-            new RedisValue[] { _expiryInMilliseconds, _id, RedisLockUtils.GetNowInMilliseconds() });
+            new RedisValue[] { _expiryInMilliseconds, _id, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
 
         _disposed = true;
     }
@@ -76,51 +76,51 @@ public class RedisLockHandle : LockHandleBase
         
         _database.Database.ScriptEvaluate(_lockReleaseScript, 
             new RedisKey[] { _resource, _queueKey, _channelName, _queueItemTimeoutKey }, 
-            new RedisValue[] { _expiryInMilliseconds, _id, RedisLockUtils.GetNowInMilliseconds() });
+            new RedisValue[] { _expiryInMilliseconds, _id, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
         
         _disposed = true;
     }
 
     private static readonly string _lockReleaseScript = RedisLockUtils.RemoveExtraneousWhitespace(
         """
-            while true do
-                local firstLockId2 = redis.call('lindex', KEYS[2], 0);
-                if firstLockId2 == false then
+        while true do
+            local firstLockId = redis.call('lindex', KEYS[2], 0);
+            if firstLockId == false then
+                break;
+            end;
+        
+            local timeoutKey = KEYS[4] .. ':' .. firstLockId;
+            local timeout = redis.call('get', timeoutKey);
+        
+            if timeout ~= false then
+                if tonumber(timeout) <= tonumber(ARGV[3]) then
+                    redis.call('del', timeoutKey);
+                    redis.call('lpop', KEYS[2]);
+                else
                     break;
                 end;
-            
-                local timeoutKey2 = KEYS[4] .. ':' .. firstLockId2;
-                local timeout = redis.call('get', timeoutKey2);
-            
-                if timeout ~= false then
-                    if tonumber(timeout) <= tonumber(ARGV[3]) then
-                        redis.call('del', timeoutKey2);
-                        redis.call('lpop', KEYS[2]);
-                    else
-                        break;
-                    end;
-                elseif timeout == false then
-                    redis.call('lpop', KEYS[2]);
-                end;
+            elseif timeout == false then
+                redis.call('lpop', KEYS[2]);
             end;
+        end;
         
-            if (redis.call('exists', KEYS[1]) == 0) then
-                local nextThreadId = redis.call('lindex', KEYS[2], 0);
-                if nextThreadId ~= false then
-                    redis.call('publish', KEYS[3] .. ':' .. nextThreadId, 0);
-                end;
-                return 1;
+        if (redis.call('exists', KEYS[1]) == 0) then
+            local nextLockId = redis.call('lindex', KEYS[2], 0);
+            if nextLockId ~= false then
+                redis.call('publish', KEYS[3] .. ':' .. nextLockId, 0);
             end;
+            return 1;
+        end;
         
-            if redis.call('get', KEYS[1]) == ARGV[2] then
-        	    redis.call('del', KEYS[1])
-                local nextThreadId = redis.call('lindex', KEYS[2], 0);
-                if nextThreadId ~= false then
-                    redis.call('publish', KEYS[3] .. ':' .. nextThreadId, 0);
-                end;
-                return 1;
-            end
-            
-            return 0;
+        if redis.call('get', KEYS[1]) == ARGV[2] then
+            redis.call('del', KEYS[1])
+            local nextLockId = redis.call('lindex', KEYS[2], 0);
+            if nextLockId ~= false then
+                redis.call('publish', KEYS[3] .. ':' .. nextLockId, 0);
+            end;
+            return 1;
+        end
+        
+        return 0;
         """);
 }

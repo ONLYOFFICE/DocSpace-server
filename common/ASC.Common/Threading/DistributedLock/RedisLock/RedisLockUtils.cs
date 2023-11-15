@@ -28,11 +28,6 @@ namespace ASC.Common.Threading.DistributedLock.RedisLock;
 
 public static partial class RedisLockUtils
 {
-    public static long GetNowInMilliseconds()
-    {
-        return (long)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalMilliseconds;
-    }
-    
     public static string PrefixName(string prefix, string name)
     {
         if (name.Contains('{'))

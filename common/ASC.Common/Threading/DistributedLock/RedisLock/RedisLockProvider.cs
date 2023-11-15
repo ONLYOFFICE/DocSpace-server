@@ -153,7 +153,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         
         var code = (int)(await database.Database.ScriptEvaluateAsync(_lockTakeScript,
             new RedisKey[] { resource, queueKey, queueItemTimeoutKey },
-            new RedisValue[] { _expiryInMilliseconds, lockId, timeoutInMilliseconds, RedisLockUtils.GetNowInMilliseconds() }));
+            new RedisValue[] { _expiryInMilliseconds, lockId, timeoutInMilliseconds, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }));
 
         return (LockStatus)code;
     }
@@ -182,12 +182,12 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     private static readonly string _lockTakeScript = RedisLockUtils.RemoveExtraneousWhitespace(
         """
         while true do
-            local firstLockId2 = redis.call('lindex', KEYS[2], 0);
-            if firstLockId2 == false then
+            local firstLockId = redis.call('lindex', KEYS[2], 0);
+            if firstLockId == false then
                 break;
             end;
         
-            local timeoutKey = KEYS[3] .. ':' .. firstLockId2;
+            local timeoutKey = KEYS[3] .. ':' .. firstLockId;
             local timeout = redis.call('get', timeoutKey);
         
             if timeout ~= false then
