@@ -36,7 +36,8 @@ public enum CookiesType
     AuthKey,
     SocketIO,
     ShareLink,
-    AnonymousSessionKey
+    AnonymousSessionKey,
+    ConfirmKey
 }
 
 [Scope]
@@ -46,6 +47,7 @@ public class CookiesManager
     private const string SocketIOCookiesName = "socketio.sid";
     private const string ShareLinkCookiesName = "sharelink";
     private const string AnonymousSessionKeyCookiesName = "anonymous_session_key";
+    private const string ConfirmCookiesName = "asc_confirm_key";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager _userManager;
@@ -98,7 +100,7 @@ public class CookiesManager
             Expires = await GetExpiresDateAsync(session)
         };
 
-        if (type == CookiesType.AuthKey)
+        if (type == CookiesType.AuthKey || type == CookiesType.ConfirmKey)
         {
             options.HttpOnly = true;
 
@@ -313,6 +315,11 @@ public class CookiesManager
         return GetCookiesName(CookiesType.AuthKey);
     }
 
+    public string GetConfirmCookiesName()
+    {
+        return GetCookiesName(CookiesType.ConfirmKey);
+    }
+
     private string GetCookiesName(CookiesType type)
     {
         var result = type switch
@@ -321,6 +328,7 @@ public class CookiesManager
             CookiesType.SocketIO => SocketIOCookiesName,
             CookiesType.ShareLink => ShareLinkCookiesName,
             CookiesType.AnonymousSessionKey => AnonymousSessionKeyCookiesName,
+            CookiesType.ConfirmKey => ConfirmCookiesName,
             _ => string.Empty,
         };
 
