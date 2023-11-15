@@ -12,7 +12,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
     [Migration("20231113185432_MigrationContext_Upgrade10")]
-    partial class MigrationContext_Upgrade10
+    partial class MigrationContext_Upgrade11
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
