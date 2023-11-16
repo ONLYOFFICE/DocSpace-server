@@ -34,9 +34,7 @@ public class CommonChunkedUploadSession : ICloneable
     public DateTime Created { get; set; }
     public DateTime Expired { get; set; }
     public string Location { get; set; }
-    public long BytesUploaded { get; set; }
     public long BytesTotal { get; set; }
-    public bool LastChunk { get; set; }
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
     public bool UseChunks { get; set; }
@@ -72,10 +70,8 @@ public class CommonChunkedUploadSession : ICloneable
     {
         Id = Guid.NewGuid().ToString("N");
         Created = DateTime.UtcNow;
-        BytesUploaded = 0;
         BytesTotal = bytesTotal;
         UseChunks = true;
-        LastChunk = false;
     }
 
     public T GetItemOrDefault<T>(string key)
@@ -96,11 +92,6 @@ public class CommonChunkedUploadSession : ICloneable
             }
         }
         return default(T);
-    }
-
-    public virtual Stream Serialize()
-    {
-        return null;
     }
 
     public void TransformItems()

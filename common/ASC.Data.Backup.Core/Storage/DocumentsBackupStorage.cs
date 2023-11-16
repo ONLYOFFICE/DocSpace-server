@@ -38,6 +38,7 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
     private readonly IServiceProvider _serviceProvider;
     private FilesChunkedUploadSessionHolder _sessionHolder;
     private readonly TempPath _tempPath;
+    private readonly ICache _cache;
 
     public DocumentsBackupStorage(
         SetupInfo setupInfo,
@@ -46,7 +47,8 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
         IDaoFactory daoFactory,
         StorageFactory storageFactory,
         IServiceProvider serviceProvider,
-        TempPath tempPath)
+        TempPath tempPath,
+        ICache cache)
     {
         _setupInfo = setupInfo;
         _tenantManager = tenantManager;
@@ -55,13 +57,14 @@ public class DocumentsBackupStorage : IBackupStorage, IGetterWriteOperator
         _storageFactory = storageFactory;
         _serviceProvider = serviceProvider;
         _tempPath = tempPath;
+        _cache = cache;
     }
 
     public async Task InitAsync(int tenantId)
     {
         _tenantId = tenantId;
         var store = await _storageFactory.GetStorageAsync(_tenantId, "files");
-        _sessionHolder = new FilesChunkedUploadSessionHolder(_daoFactory, _tempPath, store, "", _setupInfo.ChunkUploadSize);
+        _sessionHolder = new FilesChunkedUploadSessionHolder(_daoFactory, _tempPath, store, _cache, "", _setupInfo.ChunkUploadSize);
     }
 
     public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)

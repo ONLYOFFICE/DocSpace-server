@@ -36,6 +36,7 @@ public class StorageUploader
     private readonly TempStream _tempStream;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
     private readonly ILogger<StorageUploader> _logger;
+    private readonly ICache _cache;
 
     static StorageUploader()
     {
@@ -47,13 +48,15 @@ public class StorageUploader
         TempStream tempStream,
         ICacheNotify<MigrationProgress> cacheMigrationNotify,
         IDistributedTaskQueueFactory queueFactory,
-        ILogger<StorageUploader> logger)
+        ILogger<StorageUploader> logger,
+        ICache cache)
     {
         _serviceProvider = serviceProvider;
         _tempStream = tempStream;
         _cacheMigrationNotify = cacheMigrationNotify;
         _logger = logger;
         _queue = queueFactory.CreateQueue();
+        _cache = cache;
     }
 
     public void Start(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
@@ -67,7 +70,7 @@ public class StorageUploader
                 return;
             }
 
-            var migrateOperation = new MigrateOperation(_serviceProvider, _cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, _tempStream, _logger);
+            var migrateOperation = new MigrateOperation(_serviceProvider, _cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, _tempStream, _logger, _cache);
             _queue.EnqueueTask(migrateOperation);
         }
     }
@@ -105,6 +108,7 @@ public class MigrateOperation : DistributedTaskProgress
     private readonly IServiceProvider _serviceProvider;
     private readonly StorageFactoryConfig _storageFactoryConfig;
     private readonly TempStream _tempStream;
+    private readonly ICache _cache;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
 
     static MigrateOperation()
@@ -120,7 +124,8 @@ public class MigrateOperation : DistributedTaskProgress
         StorageSettings settings,
         StorageFactoryConfig storageFactoryConfig,
         TempStream tempStream,
-        ILogger<StorageUploader> logger)
+        ILogger<StorageUploader> logger,
+        ICache cache)
     {
         Id = id;
         Status = DistributedTaskStatus.Created;
@@ -134,6 +139,7 @@ public class MigrateOperation : DistributedTaskProgress
         _modules = storageFactoryConfig.GetModuleList(_configPath, true);
         StepCount = _modules.Count();
         _logger = logger;
+        _cache = cache;
     }
 
     public object Clone()
@@ -163,7 +169,7 @@ public class MigrateOperation : DistributedTaskProgress
                 var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
                 var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
-                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store);
+                var crossModuleTransferUtility = new CrossModuleTransferUtility(options, _tempStream, tempPath, oldStore, store, _cache);
 
                 string[] files;
                 foreach (var domain in domains)

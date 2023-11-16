@@ -42,6 +42,7 @@ public class TransferPortalTask : PortalTaskBase
     private readonly ILogger<TransferPortalTask> _logger;
     private readonly TempStream _tempStream;
     private readonly TempPath _tempPath;
+    private readonly ICache _cache;
     private readonly IServiceProvider _serviceProvider;
 
 
@@ -53,7 +54,8 @@ public class TransferPortalTask : PortalTaskBase
         StorageFactoryConfig storageFactoryConfig,
         ModuleProvider moduleProvider,
         TempStream tempStream,
-        TempPath tempPath)
+        TempPath tempPath,
+        ICache cache)
         : base(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
     {
         DeleteBackupFileAfterCompletion = true;
@@ -63,6 +65,7 @@ public class TransferPortalTask : PortalTaskBase
         _tempStream = tempStream;
         _tempPath = tempPath;
         _serviceProvider = serviceProvider;
+        _cache = cache;
     }
 
     public void Init(int tenantId, string toRegion, int limit, string backupDirectory)
@@ -162,7 +165,7 @@ public class TransferPortalTask : PortalTaskBase
         {
             var baseStorage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
             var destStorage = await StorageFactory.GetStorageAsync(columnMapper.GetTenantMapping(), group.Key, ToRegion);
-            var utility = new CrossModuleTransferUtility(_logger, _tempStream, _tempPath, baseStorage, destStorage);
+            var utility = new CrossModuleTransferUtility(_logger, _tempStream, _tempPath, baseStorage, destStorage, _cache);
 
             foreach (var file in group)
             {

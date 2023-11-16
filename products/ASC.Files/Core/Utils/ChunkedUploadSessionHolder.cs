@@ -34,36 +34,47 @@ public class ChunkedUploadSessionHolder
     private readonly GlobalStore _globalStore;
     private readonly SetupInfo _setupInfo;
     private readonly TempPath _tempPath;
-    private readonly FileHelper _fileHelper;
+    private CommonChunkedUploadSessionHolder _holder;
+    private CommonChunkedUploadSessionHolder _currentHolder;
+    private readonly ICache _cache;
 
     public ChunkedUploadSessionHolder(
         GlobalStore globalStore,
         SetupInfo setupInfo,
         TempPath tempPath,
-        FileHelper fileHelper)
+        ICache cache)
     {
         _globalStore = globalStore;
         _setupInfo = setupInfo;
         _tempPath = tempPath;
-        _fileHelper = fileHelper;
+        _cache = cache;
     }
 
-    public async Task StoreSessionAsync<T>(ChunkedUploadSession<T> s)
+    public void StoreSession<T>(ChunkedUploadSession<T> s)
     {
-        await (await CommonSessionHolderAsync(false)).StoreAsync(s);
+        _cache.Insert(s.Id, s, SlidingExpiration);
     }
 
-    public async Task RemoveSessionAsync<T>(ChunkedUploadSession<T> s)
+    public void RemoveSession<T>(ChunkedUploadSession<T> s)
     {
-        await (await CommonSessionHolderAsync(false)).RemoveAsync(s);
+        _cache.Remove(s.Id);
+
+        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
+        for (var i = 1; i <= count; i++)
+        {
+            _cache.Remove($"{s.Id} - {i}");
+        }
     }
 
-    public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
+    public async Task<Dictionary<int, Chunk>> GetChunksAsync<T>(ChunkedUploadSession<T> s)
     {
-        await using var stream = await (await CommonSessionHolderAsync(false)).GetStreamAsync(sessionId);
-        var chunkedUploadSession = ChunkedUploadSession<T>.Deserialize(stream, _fileHelper);
+        return (await CommonSessionHolderAsync()).GetChunks(s);
+    }
 
-        return chunkedUploadSession;
+    public ChunkedUploadSession<T> GetSession<T>(string sessionId)
+    {
+        return _cache.Get<ChunkedUploadSession<T>>(sessionId);
     }
 
     public async Task<ChunkedUploadSession<T>> CreateUploadSessionAsync<T>(File<T> file, long contentLength)
@@ -74,9 +85,9 @@ public class ChunkedUploadSessionHolder
         return result;
     }
 
-    public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length)
+    public async Task UploadChunkAsync<T>(ChunkedUploadSession<T> uploadSession, Stream stream, long length, int chunkNumber)
     {
-        await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length);
+        await (await CommonSessionHolderAsync()).UploadChunkAsync(uploadSession, stream, length, chunkNumber);
     }
 
     public async Task FinalizeUploadSessionAsync<T>(ChunkedUploadSession<T> uploadSession)
@@ -99,8 +110,23 @@ public class ChunkedUploadSessionHolder
         return await (await CommonSessionHolderAsync()).UploadSingleChunkAsync(uploadSession, stream, chunkLength);
     }
 
-    private async Task<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
+    private async ValueTask<CommonChunkedUploadSessionHolder> CommonSessionHolderAsync(bool currentTenant = true)
     {
-        return new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+        if (currentTenant)
+        {
+            if (_currentHolder == null)
+            {
+                _currentHolder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), _cache, FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+            }
+            return _currentHolder;
+        }
+        else
+        {
+            if (_holder == null)
+            {
+                _holder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), _cache, FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
+            }
+            return _holder;
+        }
     }
 }

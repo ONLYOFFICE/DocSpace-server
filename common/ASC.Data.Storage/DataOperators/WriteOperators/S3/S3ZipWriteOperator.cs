@@ -38,6 +38,8 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly List<Task> _tasks = new(TasksLimit);
     private readonly List<Stream> _streams = new(TasksLimit);
     private readonly TempStream _tempStream;
+    private int _chunkNumber = 1;
+    private readonly object _locker = new object();
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -70,7 +72,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);
@@ -169,11 +171,21 @@ public class S3ZipWriteOperator : IDataWriteOperator
                     _tasks.RemoveAt(i);
                     _streams[i].Dispose();
                     _streams.RemoveAt(i);
-                }
+                }   
             }
         }
         _streams.Add(stream);
-        _tasks.Add(_sessionHolder.UploadChunkAsync(_chunkedUploadSession, stream, stream.Length));
+        _tasks.Add(InternalUploadAsync(_chunkedUploadSession, stream, stream.Length, _chunkNumber++));
+    }
+
+    private async Task InternalUploadAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int number)
+    {
+        await _sessionHolder.UploadChunkAsync(uploadSession, stream, length, number);
+
+        lock (_locker)
+        {
+            uploadSession.BytesTotal += length;
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -185,6 +197,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
         Task.WaitAll(_tasks.ToArray());
 
+        _chunkedUploadSession.BytesTotal++;
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
 
         Hash = BitConverter.ToString(_sha.Hash).Replace("-", string.Empty);
