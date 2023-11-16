@@ -4,6 +4,7 @@
 package com.onlyoffice.authorization.api.security.filters;
 
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
+import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,7 +32,6 @@ import java.util.regex.Pattern;
 public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";
     private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
-    private final String X_TENANT_HEADER = "X-Tenant";
 
     private final DocspaceClient docspaceClient;
 
@@ -96,7 +96,7 @@ public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
         }
 
         UserContextContainer.context.set(me);
-        response.setHeader(X_TENANT_HEADER, String.valueOf(tenant.getResponse().getTenantId()));
+        TenantContextContainer.context.set(tenant);
         chain.doFilter(request, response);
     }
 

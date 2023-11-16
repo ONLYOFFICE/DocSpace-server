@@ -1,6 +1,7 @@
 package com.onlyoffice.authorization.api.security.filters;
 
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
+import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -76,18 +77,27 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
             return;
         }
 
+        var tenant = docspaceClient.getTenant(address, cookie);
+        if (tenant.getStatusCode() != HttpStatus.OK.value()) {
+            MDC.put("address", address.toString());
+            MDC.put("cookie", cookie);
+            log.debug("Could not get tenant info");
+            MDC.clear();
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            return;
+        }
+
         UserContextContainer.context.set(me);
+        TenantContextContainer.context.set(tenant);
         chain.doFilter(request, response);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
-        Pattern first = Pattern.compile("/api/2.0/clients/consents");
-        Pattern second = Pattern.compile("/api/2.0/oauth/info");
-        Pattern third = Pattern.compile("/health/*");
+        Pattern first = Pattern.compile("/api/2.0/oauth/info");
+        Pattern second = Pattern.compile("/health/*");
         String path = request.getRequestURI();
-        return !first.matcher(path).find() || second.matcher(path).find()
-                || third.matcher(path).find();
+        return first.matcher(path).find() || second.matcher(path).find();
     }
 }
