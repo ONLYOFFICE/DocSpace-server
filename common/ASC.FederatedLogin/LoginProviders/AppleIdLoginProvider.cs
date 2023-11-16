@@ -40,9 +40,9 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     public override string CodeUrl { get { return "https://appleid.apple.com/auth/authorize"; } }
     public override string Scopes { get { return ""; } }
 
-    public string TeamId { get { return this["appleIdTeamId"]; } }
-    public string KeyId { get { return this["appleIdKeyId"]; } }
-    public string PrivateKey { get { return this["appleIdPrivateKey"]; } }
+    private string TeamId { get { return this["appleIdTeamId"]; } }
+    private string KeyId { get { return this["appleIdKeyId"]; } }
+    private string PrivateKey { get { return this["appleIdPrivateKey"]; } }
 
     public AppleIdLoginProvider() { }
     public AppleIdLoginProvider(
@@ -116,7 +116,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private string GenerateSecret()
     {
-        using var ecdsa = ECDsa.Create();
+        var ecdsa = ECDsa.Create();
 
         ecdsa.ImportPkcs8PrivateKey(Convert.FromBase64String(PrivateKey), out _);
 
@@ -159,10 +159,10 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
 
     private IEnumerable<SecurityKey> GetApplePublicKeys()
     {
-        var appplePublicKeys = _requestHelper.PerformRequest(_appleUrlKeys);
+        var applePublicKeys = _requestHelper.PerformRequest(_appleUrlKeys);
 
         var keys = new List<SecurityKey>();
-        foreach (var webKey in JObject.Parse(appplePublicKeys).Value<JArray>("keys"))
+        foreach (var webKey in JObject.Parse(applePublicKeys).Value<JArray>("keys"))
         {
             var e = Base64UrlEncoder.DecodeBytes(webKey.Value<string>("e"));
             var n = Base64UrlEncoder.DecodeBytes(webKey.Value<string>("n"));

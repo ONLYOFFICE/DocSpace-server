@@ -421,7 +421,7 @@ public class FileMarker
 
             if (newTags.Count > 0)
             {
-                await tagDao.SaveTags(newTags, obj.CurrentAccountId);
+                await tagDao.SaveTagsAsync(newTags, obj.CurrentAccountId);
             }
         }
         finally
@@ -620,7 +620,7 @@ public class FileMarker
 
         if (removeTags.Count > 0)
         {
-            await tagDao.RemoveTags(removeTags);
+            await tagDao.RemoveTagsAsync(removeTags);
         }
 
         var socketManager = _serviceProvider.GetRequiredService<SocketManager>();

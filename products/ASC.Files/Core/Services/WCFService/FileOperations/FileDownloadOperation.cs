@@ -92,7 +92,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             }
             else
             {
-                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd"), archiveExtension);
+                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
             var store = await globalStore.GetStoreAsync();
@@ -218,17 +218,17 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var key = file.Id;
             if (_files.ContainsKey(key) && !string.IsNullOrEmpty(_files[key]))
             {
-                _ = filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
             }
             else
             {
-                _ = filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
+                await filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
             }
         }
 
         foreach (var folder in folderForSend)
         {
-            _ = filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
+            await filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
         }
     }
 
@@ -315,7 +315,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, true));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true));
 
             await foreach (var file in files)
             {

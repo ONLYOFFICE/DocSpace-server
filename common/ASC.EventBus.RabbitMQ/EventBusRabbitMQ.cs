@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Generic;
+
 namespace ASC.EventBus.RabbitMQ;
 
 public class EventBusRabbitMQ : IEventBus, IDisposable
@@ -44,7 +46,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     private string _queueName;
     private readonly string _deadLetterQueueName;
 
-    private static ConcurrentQueue<Guid> _rejectedEvents;
+    private static ConcurrentDictionary<Guid, byte[]> _rejectedEvents;
 
     public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection,
                             ILogger<EventBusRabbitMQ> logger,
@@ -64,7 +66,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         _retryCount = retryCount;
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         _serializer = serializer;
-        _rejectedEvents = new ConcurrentQueue<Guid>();
+        _rejectedEvents = new ConcurrentDictionary<Guid, byte[]>();
     }
 
     private void SubsManager_OnEventRemoved(object sender, string eventName)
@@ -115,6 +117,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         {
             var properties = channel.CreateBasicProperties();
             properties.DeliveryMode = 2; // persistent
+            properties.MessageId = Guid.NewGuid().ToString();
 
             _logger.TracePublishingEvent(@event.Id);
 
@@ -230,13 +233,28 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         var eventName = eventArgs.RoutingKey;
 
-        // TODO: Need will remove after test
         if (!_subsManager.HasSubscriptionsForEvent(eventName))
         {
             _logger.WarningNoSubscription(eventName);
 
-            // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
-            _consumerChannel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: true);
+            var messageId = Guid.Parse(eventArgs.BasicProperties.MessageId);
+
+            if (_rejectedEvents.ContainsKey(messageId))
+            {
+                _rejectedEvents.TryRemove(messageId, out _);
+                _consumerChannel.BasicReject(eventArgs.DeliveryTag, requeue: false);
+
+                _logger.DebugRejectEvent(eventName);
+            }
+            else
+            {
+                _rejectedEvents.TryAdd(messageId, eventArgs.Body.Span.ToArray());
+                
+                // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
+                _consumerChannel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: true);
+
+                _logger.DebugNackEvent(eventName);
+            }
 
             return;
         }
@@ -259,15 +277,19 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         {
             _logger.WarningProcessingMessage(message, ex);
 
-            if (_rejectedEvents.TryPeek(out var result) && result.Equals(ex.EventId))
+            if (_rejectedEvents.ContainsKey(ex.EventId))
             {
-                _rejectedEvents.TryDequeue(out _);
+                _rejectedEvents.TryRemove(ex.EventId, out _);
                 _consumerChannel.BasicReject(eventArgs.DeliveryTag, requeue: false);
+
+                _logger.DebugRejectEvent(eventName);
             }
             else
             {
-                _rejectedEvents.Enqueue(ex.EventId);
+                _rejectedEvents.TryAdd(ex.EventId, eventArgs.Body.Span.ToArray());
                 _consumerChannel.BasicNack(eventArgs.DeliveryTag, multiple: false, requeue: true);
+
+                _logger.DebugNackEvent(eventName);
             }
         }
         catch (Exception ex)
@@ -343,7 +365,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             return;
         }
 
-        if (_rejectedEvents.TryPeek(out var result) && result.Equals(@event.Id))
+        if (_rejectedEvents.ContainsKey(@event.Id))             
         {
             @event.Redelivered = true;
         }

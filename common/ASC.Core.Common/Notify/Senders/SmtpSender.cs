@@ -281,12 +281,27 @@ public class SmtpSender : INotifySender
 
     protected string GetHtmlView(string body)
     {
+        body = body.StartsWith("<body")
+            ? body
+            : $@"<body style=""background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff;"">{body}</body>";
+
         return $@"<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">
                       <html>
                         <head>
                             <meta content=""text/html;charset=UTF-8"" http-equiv=""Content-Type"">
+                            <meta name=""color-scheme"" content=""light"">
+                            <meta name=""supported-color-schemes"" content=""light only"">
+                            <style type=""text/css"">
+                              :root {{
+                                color-scheme: light;
+                                supported-color-schemes: light;
+                              }}
+                              [data-ogsc] body {{ 
+                                background-color: #ffffff !important;
+                              }}
+                            </style>
                         </head>
-                        <body>{body}</body>
+                        {body}
                       </html>";
     }
 

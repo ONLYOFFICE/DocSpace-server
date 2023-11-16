@@ -325,7 +325,7 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.DateTime, _tenantUtil.DateTimeNow()));
         request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
         request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())));
-        request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, _commonLinkUtility.GetUnsubscribe()));
+        request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetUnsubscribe())));
         request.Arguments.Add(new TagValue(CommonTags.HelpLink, await _commonLinkUtility.GetHelpLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
         request.Arguments.Add(new TagValue(CommonTags.SalesEmail, _commonLinkUtility.GetSalesEmail(_additionalWhiteLabelSettingsHelper)));
         request.Arguments.Add(new TagValue(CommonTags.SiteLink, _commonLinkUtility.GetSiteLink(_mailWhiteLabelSettingsHelper)));

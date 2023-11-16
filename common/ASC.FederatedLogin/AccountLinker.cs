@@ -64,13 +64,15 @@ public class AccountLinker
     private readonly InstanceCrypto _instanceCrypto;
     private readonly AccountLinkerStorage _accountLinkerStorage;
     private readonly IDbContextFactory<AccountLinkContext> _accountLinkContextManager;
+    private readonly TenantManager _tenantManager;
 
-    public AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager)
+    public AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager, TenantManager tenantManager)
     {
         _signature = signature;
         _instanceCrypto = instanceCrypto;
         _accountLinkerStorage = accountLinkerStorage;
         _accountLinkContextManager = accountLinkContextManager;
+        _tenantManager = tenantManager;
     }
 
     public async Task<IEnumerable<string>> GetLinkedObjectsAsync(string id, string provider)
@@ -116,6 +118,12 @@ public class AccountLinker
         };
 
         await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
+        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+
+        if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
+        {
+            throw new Exception("ErrorAccountAlreadyUse");
+        }
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
@@ -192,4 +200,11 @@ static file class Queries
                 ctx.AccountLinks
                     .Where(r => r.Id == id)
                     .Select(r => r.Profile));
+
+    public static readonly Func<AccountLinkContext, int, string, Task<bool>> ExistAccountAsync =
+        EF.CompileAsyncQuery(
+            (AccountLinkContext ctx, int tenant, string hashId) =>
+                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
+                        (accountLink, user) => new { accountLink, user })
+                        .Any(q => q.accountLink.UId == hashId && q.user.TenantId == tenant));
 }

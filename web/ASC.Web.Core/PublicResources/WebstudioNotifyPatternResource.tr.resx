@@ -1064,7 +1064,6 @@ Bağlantı 7 gün boyunca geçerlidir.
 
 Neden ayrılmaya karar verdiniz? Deneyiminizi bizimle paylaşın.
  
-$OrangeButton
 
 Teşekkürler ve iyi şanslar!
 
@@ -1808,5 +1807,17 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Davetlisiniz: ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Video kılavuzlarıyla ONLYOFFICE DocSpace'de ustalaşın</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Saygılarımızla, ONLYOFFICE Ekibi</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>OYNATMA LİSTESİNİN TAMAMINI İZLEYİN</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Saygılarımızla, ONLYOFFICE Destek Ekibi</value>
   </data>
 </root>

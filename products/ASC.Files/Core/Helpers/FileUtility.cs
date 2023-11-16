@@ -690,6 +690,7 @@ public class FileUtility
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
                 ".ods", ".fods", ".ots", ".csv",
+                ".sxc", ".et", ".ett",
                 ".xlst", ".xlsy", ".xlsb",
                 ".gsheet"
             }.ToImmutableList();
@@ -700,6 +701,7 @@ public class FileUtility
                 ".ppt", ".pptx", ".pptm",
                 ".pot", ".potx", ".potm",
                 ".odp", ".fodp", ".otp",
+                ".dps", ".dpt", ".sxi",
                 ".pptt", ".ppty",
                 ".gslides"
             }.ToImmutableList();
@@ -709,8 +711,9 @@ public class FileUtility
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
                 ".odt", ".fodt", ".ott", ".rtf", ".txt",
-                ".html", ".htm", ".mht", ".xml",
+                ".html", ".htm", ".mht", ".mhtml", ".xml",
                 ".pdf", ".djvu", ".fb2", ".epub", ".xps",".oxps",
+                ".sxw", ".stw", ".wps", ".wpt",
                 ".doct", ".docy",
                 ".gdoc"
             }.ToImmutableList();

@@ -119,7 +119,7 @@ public class StudioNotifyService
             0,
             DateTimeKind.Utc);
 
-        var hash = auditEventDate.ToString("s");
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -146,7 +146,7 @@ public class StudioNotifyService
 
     public async Task SendEmailChangeInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID);
+        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID, _authContext.CurrentAccount.ID);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 
@@ -244,7 +244,7 @@ public class StudioNotifyService
 
     public async Task SendMsgTfaResetAsync(UserInfo userInfo)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email.ToLower(), ConfirmType.TfaActivation);
+        var confirmationUrl = _commonLinkUtility.GetFullAbsolutePath(string.Empty);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeTfa", GetCulture(userInfo));
 
@@ -783,7 +783,7 @@ public class StudioNotifyService
 
         var portalUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s");
+        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s", CultureInfo.InvariantCulture);
 
         var linkToRecovery = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 

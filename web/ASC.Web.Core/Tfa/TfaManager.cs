@@ -143,7 +143,7 @@ public class TfaManager
         if (!_securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;
-            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id, action);
+            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))

@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Đặt mật khẩu</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Sao lưu lớn hơn tổng kích thước của cổng thông tin</value>
+  </data>
 </root>

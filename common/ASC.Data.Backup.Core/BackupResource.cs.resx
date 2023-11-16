@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Nastavit heslo</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Záloha je větší než celková velikost portálu</value>
+  </data>
 </root>

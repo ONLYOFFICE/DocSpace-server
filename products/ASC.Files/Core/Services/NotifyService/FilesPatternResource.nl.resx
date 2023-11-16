@@ -59,7 +59,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
-    <value>h1. Alle ondertekenaars hebben ondertekend.</value>
+    <value>h1. Alle ondertekenaars hebben ondertekend.
+
+Dit is een e-mailmelding om je te informeren dat alle ondertekenaars "$DocumentTitle":$DocumentURL" hebben voltooid.</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
     <value>h1. $Message: $DocumentTitle
@@ -81,7 +83,7 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" heeft u toegang verleend tot het "$Do
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1.Toegang Verleend aan Map: "$DocumentTitle":"$DocumentURL"
+    <value>h1. Toegang Verleend aan Map: "$DocumentTitle":"$DocumentURL"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" heeft je toegang gegeven tot de map "$DocumentTitle":"$DocumentURL" met de volgende rechten: "$AccessRights". 
 
