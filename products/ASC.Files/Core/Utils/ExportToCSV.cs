@@ -92,6 +92,24 @@ public class ExportToCSV
         }
     }
 
+    public DataTable CreateDataTable(IEnumerable<FormsItemData> list)
+    {
+        var dataTable = new DataTable();
+        dataTable.TableName = typeof(FormsItemData).FullName;
+        var values = new object[list.Count()];
+
+        var i = 0;
+        foreach (var entity in list)
+        {
+            dataTable.Columns.Add(new DataColumn(entity.Tag));
+
+            values[i] = entity.Value; i++;
+        }
+        dataTable.Rows.Add(values);
+
+        return dataTable;
+    }
+
     private static string DataTableToCsv(DataTable dataTable, bool onlyRows = false)
     {
         var result = new StringBuilder();

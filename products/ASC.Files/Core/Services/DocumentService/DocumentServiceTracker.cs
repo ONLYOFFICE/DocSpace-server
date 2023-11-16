@@ -58,6 +58,7 @@ public class DocumentServiceTracker
         public List<string> Users { get; set; }
         public string UserData { get; set; }
         public bool Encrypted { get; set; }
+        public string FormsDataUrl { get; set; }
 
         [DebuggerDisplay("{Type} - {UserId}")]
         public class Action
@@ -432,7 +433,7 @@ public class DocumentServiceTrackerHelper
 
             try
             {
-                file = await _entryManager.SaveEditingAsync(fileId, fileData.Filetype, _documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true);
+                file = await _entryManager.SaveEditingAsync(fileId, fileData.Filetype, _documentServiceConnector.ReplaceDocumentAdress(fileData.Url), null, string.Empty, string.Join("; ", comments), false, fileData.Encrypted, forceSaveType, true, fileData.FormsDataUrl);
                 saveMessage = fileData.Status is TrackerStatus.MustSave or TrackerStatus.ForceSave ? null : "Status " + fileData.Status;
             }
             catch (Exception ex)

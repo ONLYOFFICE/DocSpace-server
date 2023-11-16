@@ -885,8 +885,7 @@ public class CustomizationConfig<T>
     {
         get
         {
-            if (_configuration.EditorConfig.ModeWrite
-              && _configuration.Document.Info.GetFile().Access == FileShare.FillForms)
+            if (_configuration.EditorConfig.ModeWrite)
             {
                 var linkDao = _daoFactory.GetLinkDao();
                 var sourceId = linkDao.GetSourceAsync(_configuration.Document.Info.GetFile().Id.ToString()).Result;
