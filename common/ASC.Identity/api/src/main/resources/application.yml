@@ -9,6 +9,8 @@ server:
     include-binding-errors: always
     include-stacktrace: always
     include-exception: false
+    whitelabel:
+      enabled: false
 
 application:
   security:
