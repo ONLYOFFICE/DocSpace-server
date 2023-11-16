@@ -6,6 +6,7 @@ package com.onlyoffice.authorization.api.external.controllers;
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.core.exceptions.ScopeNotFoundException;
 import com.onlyoffice.authorization.api.core.transfer.response.ScopeDTO;
+import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +55,13 @@ public class ScopeController {
     @RateLimiter(name = "getScopesRateLimiter")
     @SneakyThrows
     public ResponseEntity<Iterable<ScopeDTO>> getScopes() {
+        var context = TenantContextContainer.context.get();
+        if (context == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         log.info("Received a request to list scopes");
+        MDC.clear();
         return ResponseEntity.ok(this.scopes);
     }
 
@@ -62,7 +70,12 @@ public class ScopeController {
     @RateLimiter(name = "getScopesRateLimiter")
     @SneakyThrows
     public ResponseEntity<ScopeDTO> getScope(@PathVariable @NotEmpty String name) {
+        var context = TenantContextContainer.context.get();
+        if (context == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         MDC.put("scope", name);
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         log.info("Received get a specific scope");
         MDC.clear();
         var scope = this.scopes.stream()

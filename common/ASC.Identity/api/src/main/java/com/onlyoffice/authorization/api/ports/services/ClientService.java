@@ -21,6 +21,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreat
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
+import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import com.onlyoffice.authorization.api.security.crypto.Cipher;
 import lombok.RequiredArgsConstructor;
@@ -58,8 +59,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     private final Cipher cipher;
 
     public void clientAsyncDeletionTask(String clientId, int tenant) {
-        MDC.put("client_id", clientId);
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Trying to create a new client deletion task");
         try {
             this.amqpTemplate.convertAndSend(
@@ -88,8 +91,8 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean deleteClient(String id, int tenant) {
-        MDC.put("client_id", id);
-        MDC.put("tenant", String.valueOf(tenant));
+        MDC.put("tenantId", String.valueOf(tenant));
+        MDC.put("clientId", id);
         log.info("Deleting a client");
         MDC.clear();
         if (mutationUsecases.deleteByClientIdAndTenant(id, tenant) < 1)
@@ -102,11 +105,12 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO saveClient(ClientMessage message) {
+        var context = TenantContextContainer.context.get();
         log.info("Trying to create a new client");
         message.setClientId(UUID.randomUUID().toString());
         message.setClientSecret(cipher.encrypt(UUID.randomUUID().toString()));
         message.getScopes().add(SCOPE_OPENID);
-        MDC.put("client_id", message.getClientId());
+        MDC.put("clientId", message.getClientId());
         log.info("Credentials have been generated for a new client");
         MDC.clear();
         return ClientMapper.INSTANCE.fromEntityToQuery(mutationUsecases
@@ -120,7 +124,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
         for (ClientMessage message : messages) {
             try {
-                MDC.put("client_id", message.getClientId());
+                MDC.put("clientId", message.getClientId());
                 message.getScopes().add(SCOPE_OPENID);
                 log.debug("Trying to save a new client", message);
                 mutationUsecases.saveClient(ClientMapper.INSTANCE.fromMessageToEntity(message));
@@ -137,8 +141,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     }
 
     public ClientDTO clientAsyncCreationTask(CreateClientDTO clientDTO, int tenant, String tenantUrl) {
-        MDC.put("client_name", clientDTO.getName());
-        MDC.put("tenant", tenantUrl);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientName", clientDTO.getName());
         log.info("Trying to create a new client creation task");
         try {
             ClientDTO client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
@@ -174,8 +180,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO updateClient(UpdateClientDTO clientDTO, String clientId, int tenant) {
-        MDC.put("client_id", clientId);
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Trying to update a client");
         MDC.clear();
         var c = retrievalUsecases.findClientByClientIdAndTenant(clientId, tenant)
@@ -190,11 +198,13 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public SecretDTO regenerateSecret(String clientId, int tenant) {
-        MDC.put("client_id", clientId);
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Regenerating client's secret");
         String secret = UUID.randomUUID().toString();
-        MDC.put("client_secret", secret);
+        MDC.put("clientSecret", secret);
         log.debug("Generated a new client's secret");
         MDC.clear();
         mutationUsecases.regenerateClientSecretByClientId(clientId,
@@ -204,7 +214,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public boolean changeActivation(ChangeClientActivationDTO activationDTO, String clientId) {
-        MDC.put("client_id", clientId);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         MDC.put("status", String.valueOf(activationDTO.getStatus()));
         log.info("Changing client's activation", clientId, activationDTO.getStatus());
         try {
@@ -220,7 +233,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO getClient(String clientId) {
-        MDC.put("client_id", clientId);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Trying to get a client", clientId);
         MDC.clear();
         return retrievalUsecases
@@ -232,7 +248,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                         query.setClientSecret(cipher.decrypt(query.getClientSecret()));
                         return query;
                     } catch (Exception e) {
-                        MDC.put("client_id", clientId);
+                        MDC.put("tenantId", String.valueOf(context
+                                .getResponse().getTenantId()));
+                        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+                        MDC.put("clientId", clientId);
                         log.error("Could not map a client", e);
                         MDC.clear();
                         throw new ClientNotFoundException(String.
@@ -245,7 +264,9 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
 
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public PaginationDTO getTenantClients(int tenant, int page, int limit) {
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));
         log.info("Trying to get tenant clients", tenant, page, limit);

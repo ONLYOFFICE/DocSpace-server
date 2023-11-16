@@ -16,6 +16,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCle
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
+import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -82,14 +83,15 @@ public class ClientController {
             @RequestParam(value = "page") @Min(value = 0) int page,
             @RequestParam(value = "limit") @Min(value = 1) @Max(value = 100) int limit
     ) {
+        var context = TenantContextContainer.context.get();
         var cookie = String.format("%s=%s", AUTH_COOKIE_NAME, ascAuth);
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        MDC.put("tenant", String.valueOf(tenant));
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("page", String.valueOf(page));
         MDC.put("limit", String.valueOf(limit));
         log.info("Received a new get clients request for tenant with page and limit");
-        log.debug("Trying to get tenant clients");
-        PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(tenant, page, limit);
+        PaginationDTO<ClientDTO> pagination = retrieveUsecases.getTenantClients(context
+                .getResponse().getTenantId(), page, limit);
         log.debug("Got clients");
         MDC.clear();
         pagination.getData().forEach(c -> {
@@ -144,7 +146,10 @@ public class ClientController {
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
-        MDC.put("client_id", clientId);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Received a new get client info request");
         log.debug("Trying to retrieve a client");
         var client = retrieveUsecases.getClient(clientId);
@@ -157,7 +162,10 @@ public class ClientController {
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity revokeUserClient(@PathVariable @NotEmpty String clientId) {
-        MDC.put("client_id", clientId);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Received a new user revocation request");
         MDC.clear();
         var user = UserContextContainer.context
@@ -170,7 +178,10 @@ public class ClientController {
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
+        var context = TenantContextContainer.context.get();
         var user = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("user", user.getResponse().getUserName());
         log.info("Received a new get clients info");
         log.debug("Trying to retrieve all clients by principal name");
@@ -190,9 +201,10 @@ public class ClientController {
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        MDC.put("client_id", clientId);
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("clientId", clientId);
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         log.info("Received a new get client request for tenant");
         log.debug("Trying to retrieve client");
         MDC.clear();
@@ -232,16 +244,20 @@ public class ClientController {
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestBody @Valid CreateClientDTO body
     ) {
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         log.info("Received a new create client request", body);
         if (!body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
             log.error("could not create a new client with the scopes specified");
+            MDC.clear();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
         log.debug("Generating a new client's credentials");
-        var client = creationUsecases.clientAsyncCreationTask(body, tenant, address);
+        var client = creationUsecases.clientAsyncCreationTask(body, context
+                .getResponse().getTenantId(), address);
         log.debug("Successfully submitted a new client broker message", client);
 
         client.add(linkTo(methodOn(ClientController.class)
@@ -268,6 +284,8 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
 
+        MDC.clear();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(client);
     }
 
@@ -280,8 +298,10 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid UpdateClientDTO body
     ) {
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        MDC.put("client_id", clientId);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Received a new update client request");
         if (body.getScopes() != null && !body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
@@ -291,7 +311,8 @@ public class ClientController {
         }
 
         log.debug("Trying to update client with body", body);
-        var client = creationUsecases.updateClient(body, clientId, tenant);
+        var client = creationUsecases.updateClient(body, clientId, context
+                .getResponse().getTenantId());
         log.debug("Client has been updated", client);
         MDC.clear();
         client.add(linkTo(methodOn(ClientController.class)
@@ -328,12 +349,15 @@ public class ClientController {
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        MDC.put("client_id", clientId);
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Received a new regenerate client's secret request");
         log.debug("Trying to regenerate client's secret");
         MDC.clear();
-        var regenerate = mutationUsecases.regenerateSecret(clientId, tenant);
+        var regenerate = mutationUsecases.regenerateSecret(clientId, context
+                .getResponse().getTenantId());
         log.debug("Regeneration result", regenerate);
 
         regenerate.add(linkTo(methodOn(ClientController.class)
@@ -370,12 +394,13 @@ public class ClientController {
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        MDC.put("client_id", clientId);
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Received a new delete client request for tenant");
         MDC.clear();
-        cleanupUsecases.clientAsyncDeletionTask(clientId, tenant);
+        cleanupUsecases.clientAsyncDeletionTask(clientId, context.getResponse().getTenantId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -388,9 +413,10 @@ public class ClientController {
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
-        var tenant = Integer.parseInt(response.getHeader(X_TENANT_HEADER));
-        MDC.put("client_id", clientId);
-        MDC.put("tenant", String.valueOf(tenant));
+        var context = TenantContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        MDC.put("clientId", clientId);
         log.info("Received a new change client activation request for tenant");
         MDC.clear();
         if (mutationUsecases.changeActivation(body, clientId))
