@@ -214,8 +214,7 @@ public abstract class BaseStartup
                 .AddBaseDbContextPool<IntegrationEventLogContext>()
                 .AddBaseDbContextPool<FeedDbContext>()
                 .AddBaseDbContextPool<MessagesContext>()
-                .AddBaseDbContextPool<WebhooksDbContext>()
-                .AddBaseDbContextPool<WebPluginDbContext>();
+                .AddBaseDbContextPool<WebhooksDbContext>();
 
         if (AddAndUseSession)
         {
