@@ -26,7 +26,7 @@ public class SecurityConfiguration {
     SecurityFilterChain configureSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
-                .addFilterAfter(cookieFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(cookieFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(adminCookieFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(c -> c.disable())
                 .cors(c -> c.disable())
