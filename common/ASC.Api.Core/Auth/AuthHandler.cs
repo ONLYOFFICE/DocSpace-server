@@ -41,13 +41,12 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         IConfiguration configuration,
         ILogger<AuthHandler> log,
         ApiSystemHelper apiSystemHelper,
         MachinePseudoKeys machinePseudoKeys,
         IHttpContextAccessor httpContextAccessor) :
-        base(options, logger, encoder, clock)
+        base(options, logger, encoder)
     {
         _configuration = configuration;
         _log = log;

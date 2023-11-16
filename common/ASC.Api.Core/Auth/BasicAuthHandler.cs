@@ -38,9 +38,8 @@ public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOption
     public BasicAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock
-        ) : base(options, logger, encoder, clock)
+        UrlEncoder encoder
+        ) : base(options, logger, encoder)
     {
 
     }
@@ -49,10 +48,9 @@ public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOption
       IOptionsMonitor<AuthenticationSchemeOptions> options,
       ILoggerFactory logger,
       UrlEncoder encoder,
-      ISystemClock clock,
       UserManager userManager,
       SecurityContext securityContext,
-      PasswordHasher passwordHasher) : this(options, logger, encoder, clock)
+      PasswordHasher passwordHasher) : this(options, logger, encoder)
     {
         _userManager = userManager;
         _securityContext = securityContext;

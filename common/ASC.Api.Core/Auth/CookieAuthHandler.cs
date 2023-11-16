@@ -38,19 +38,17 @@ public class CookieAuthHandler : AuthenticationHandler<AuthenticationSchemeOptio
     public CookieAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock)
-        : base(options, logger, encoder, clock) { }
+        UrlEncoder encoder)
+        : base(options, logger, encoder) { }
 
     public CookieAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         SecurityContext securityContext,
         CookiesManager cookiesManager,
         IHttpContextAccessor httpContextAccessor)
-        : this(options, logger, encoder, clock)
+        : this(options, logger, encoder)
     {
         _securityContext = securityContext;
         _cookiesManager = cookiesManager;
