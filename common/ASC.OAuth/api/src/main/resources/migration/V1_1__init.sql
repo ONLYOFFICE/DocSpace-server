@@ -85,27 +85,27 @@ ALTER TABLE identity_consents
 	REFERENCES identity_authorizations (principal_name, registered_client_id)
 	ON DELETE CASCADE;
 
-CREATE EVENT IF NOT EXISTS delete_invalidated_clients
+CREATE EVENT IF NOT EXISTS identity_delete_invalidated_clients
 ON SCHEDULE EVERY 1 hour
 ON COMPLETION PRESERVE
     DO
       DELETE FROM identity_clients ic WHERE ic.invalidated = 1;
 
-CREATE EVENT IF NOT EXISTS delete_invalidated_consents
+CREATE EVENT IF NOT EXISTS identity_delete_invalidated_consents
 ON SCHEDULE EVERY 1 hour
 ON COMPLETION PRESERVE
     DO
       DELETE FROM identity_consents ic WHERE ic.invalidated = 1;
 
-CREATE EVENT IF NOT EXISTS delete_invalidated_authorization
+CREATE EVENT IF NOT EXISTS identity_delete_invalidated_authorization
 ON SCHEDULE EVERY 1 hour
 ON COMPLETION PRESERVE
     DO
       DELETE FROM identity_authorizations ia WHERE ia.invalidated = 1;
 
-DROP TRIGGER IF EXISTS update_entry_authorizations;
+DROP TRIGGER IF EXISTS identity_update_entry_authorizations;
 
-CREATE TRIGGER update_entry_authorizations
+CREATE TRIGGER identity_update_entry_authorizations
 BEFORE UPDATE ON identity_authorizations
 FOR EACH ROW
 BEGIN
@@ -115,9 +115,9 @@ BEGIN
   END IF;
 END;
 
-DROP TRIGGER IF EXISTS update_entry_consents;
+DROP TRIGGER IF EXISTS identity_update_entry_consents;
 
-CREATE TRIGGER update_entry_consents
+CREATE TRIGGER identity_update_entry_consents
 BEFORE UPDATE ON identity_consents
 FOR EACH ROW
 BEGIN
