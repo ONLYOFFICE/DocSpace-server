@@ -85,7 +85,7 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
             throws ServletException {
         Pattern first = Pattern.compile("/api/2.0/clients/consents");
         Pattern second = Pattern.compile("/api/2.0/oauth/info");
-        Pattern third = Pattern.compile("/health/.*");
+        Pattern third = Pattern.compile("/health/*");
         String path = request.getRequestURI();
         return !first.matcher(path).find() || second.matcher(path).find()
                 || third.matcher(path).find();
