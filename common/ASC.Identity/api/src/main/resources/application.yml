@@ -114,7 +114,7 @@ spring:
     repeatable-sql-migration-prefix: R
     sql-migration-separator: __
     sql-migration-suffixes: .sql
-    locations: classpath:migration
+    locations: classpath:migration/mysql
   application:
     name: ASC.Identity.Authorization.API
   profiles:
