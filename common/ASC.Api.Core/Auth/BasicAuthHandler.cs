@@ -59,7 +59,7 @@ public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOption
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        Response.Headers.Add("WWW-Authenticate", "Basic");
+        Response.Headers.Append("WWW-Authenticate", "Basic");
 
         if (!Request.Headers.ContainsKey("Authorization"))
         {

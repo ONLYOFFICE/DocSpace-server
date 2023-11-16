@@ -599,17 +599,17 @@ public class FileHandlerService
         {
             context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
         }
-        context.Response.Headers.Add("Accept-Ranges", "bytes");
-        context.Response.Headers.Add("Content-Range", $" bytes {offset}-{endOffset}/{fullLength}");
+        context.Response.Headers.Append("Accept-Ranges", "bytes");
+        context.Response.Headers.Append("Content-Range", $" bytes {offset}-{endOffset}/{fullLength}");
 
         return length;
     }
 
     private async Task<bool> SendStreamByChunksAsync(HttpContext context, long toRead, string title, Stream fileStream, bool flushed)
     {
-        context.Response.Headers.Add("Connection", "Keep-Alive");
+        context.Response.Headers.Append("Connection", "Keep-Alive");
         context.Response.ContentLength = toRead;
-        context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(title));
+        context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(title));
         context.Response.ContentType = MimeMapping.GetMimeMapping(title);
 
         var bufferSize = Convert.ToInt32(Math.Min(32 * 1024, toRead)); // 32KB
@@ -776,11 +776,11 @@ public class FileHandlerService
                 return;
             }
 
-            context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(file.Title));
+            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(file.Title));
             context.Response.ContentType = MimeMapping.GetMimeMapping(file.Title);
 
             await using var stream = await fileDao.GetFileStreamAsync(file);
-            context.Response.Headers.Add("Content-Length",
+            context.Response.Headers.Append("Content-Length",
                 stream.CanSeek
                 ? stream.Length.ToString(CultureInfo.InvariantCulture)
                 : file.ContentLength.ToString(CultureInfo.InvariantCulture));
@@ -868,11 +868,11 @@ public class FileHandlerService
                 return;
             }
 
-            context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
+            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
             context.Response.ContentType = MimeMapping.GetMimeMapping(fileName);
 
             await using var stream = await storeTemplate.GetReadStreamAsync("", path);
-            context.Response.Headers.Add("Content-Length",
+            context.Response.Headers.Append("Content-Length",
                 stream.CanSeek
                 ? stream.Length.ToString(CultureInfo.InvariantCulture)
                 : (await storeTemplate.GetFileSizeAsync("", path)).ToString(CultureInfo.InvariantCulture));
@@ -915,7 +915,7 @@ public class FileHandlerService
 
         context.Response.Clear();
         context.Response.ContentType = MimeMapping.GetMimeMapping(fileName);
-        context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
+        context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
 
         var store = await _globalStore.GetStoreAsync();
 
@@ -930,7 +930,7 @@ public class FileHandlerService
 
         await using (var readStream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, path))
         {
-            context.Response.Headers.Add("Content-Length", readStream.Length.ToString(CultureInfo.InvariantCulture));
+            context.Response.Headers.Append("Content-Length", readStream.Length.ToString(CultureInfo.InvariantCulture));
             await readStream.CopyToAsync(context.Response.Body);
         }
 
@@ -1014,11 +1014,11 @@ public class FileHandlerService
                 return;
             }
 
-            context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".zip"));
+            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".zip"));
             context.Response.ContentType = MimeMapping.GetMimeMapping(".zip");
 
             await using var stream = await fileDao.GetDifferenceStreamAsync(file);
-            context.Response.Headers.Add("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
+            context.Response.Headers.Append("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
             await stream.CopyToAsync(context.Response.Body);
         }
         catch (Exception ex)
@@ -1111,7 +1111,7 @@ public class FileHandlerService
             if (force)
             {
                 context.Response.ContentType = MimeMapping.GetMimeMapping(".jpeg");
-                context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".jpeg", true));
+                context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".jpeg", true));
 
                 await using var stream = await fileDao.GetFileStreamAsync(file);
                 var processedImage = await Image.LoadAsync(stream);
@@ -1128,12 +1128,12 @@ public class FileHandlerService
             else
             {
                 context.Response.ContentType = MimeMapping.GetMimeMapping("." + _global.ThumbnailExtension);
-                context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + _global.ThumbnailExtension));
+                context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + _global.ThumbnailExtension));
 
                 var thumbnailFilePath = fileDao.GetUniqThumbnailPath(file, width, height);
 
                 await using var stream = await (await _globalStore.GetStoreAsync()).GetReadStreamAsync(thumbnailFilePath);
-                context.Response.Headers.Add("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
+                context.Response.Headers.Append("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
                 await stream.CopyToAsync(context.Response.Body);
             }
 
@@ -1188,7 +1188,7 @@ public class FileHandlerService
                 _ = int.TryParse(sizes[1], out height);
             }
 
-            context.Response.Headers.Add("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + _global.ThumbnailExtension));
+            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + _global.ThumbnailExtension));
             context.Response.ContentType = MimeMapping.GetMimeMapping("." + _global.ThumbnailExtension);
 
             var fileDao = _daoFactory.GetFileDao<string>();

@@ -38,8 +38,6 @@ public class PaymentFilter : IAsyncResourceFilter
         _tenantExtra = tenantExtra;
     }
 
-    public void OnResourceExecuted(ResourceExecutedContext context) { }
-
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
         if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor

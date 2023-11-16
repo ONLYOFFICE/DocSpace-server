@@ -497,7 +497,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
 
             var contentLength = jsonFile.Value<string>("size");
             _logger.DebugGoogleDriveAppGetFileStreamcontentLength(contentLength);
-            context.Response.Headers.Add("Content-Length", contentLength);
+            context.Response.Headers.Append("Content-Length", contentLength);
 
             _logger.DebugGoogleDriveAppGetFileStreamDownloadUrl(downloadUrl);
             var request = new HttpRequestMessage
