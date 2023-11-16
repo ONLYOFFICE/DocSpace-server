@@ -37,9 +37,4 @@ public class NotifyException : ApplicationException
         : base(message, innerException)
     {
     }
-
-    protected NotifyException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }

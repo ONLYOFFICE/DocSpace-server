@@ -40,18 +40,12 @@ public class TenantTooShortException : Exception
         MinLength = minLength;
         MaxLength = maxLength;
     }
-
-    protected TenantTooShortException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
 }
 
 public class TenantIncorrectCharsException : Exception
 {
     public TenantIncorrectCharsException(string message)
         : base(message) { }
-
-    protected TenantIncorrectCharsException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
 }
 
 public class TenantAlreadyExistsException : Exception
@@ -63,7 +57,4 @@ public class TenantAlreadyExistsException : Exception
     {
         ExistsTenants = existsTenants ?? Enumerable.Empty<string>();
     }
-
-    protected TenantAlreadyExistsException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
 }

@@ -40,9 +40,6 @@ public class UnencodedUri : Uri
     public UnencodedUri(Uri baseUri, Uri relativeUri)
         : base(baseUri, relativeUri) { }
 
-    protected UnencodedUri(SerializationInfo serializationInfo, StreamingContext streamingContext)
-        : base(serializationInfo, streamingContext) { }
-
     public override string ToString()
     {
         return OriginalString;

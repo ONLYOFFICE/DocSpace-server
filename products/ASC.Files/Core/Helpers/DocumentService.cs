@@ -824,24 +824,6 @@ public static class DocumentService
             Code = errorCode;
         }
 
-        protected DocumentServiceException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            if (info != null)
-            {
-                Code = (ErrorCode)info.GetValue("Code", typeof(ErrorCode));
-            }
-        }
-
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-
-            if (info != null)
-            {
-                info.AddValue("Code", Code);
-            }
-        }
-
         public static void ProcessResponseError(string errorCode)
         {
             if (!ErrorCodeExtensions.TryParse(errorCode, true, out var code))
