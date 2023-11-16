@@ -303,13 +303,6 @@ public class ClientController {
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new update client request");
-        if (body.getScopes() != null && !body.getScopes().stream()
-                .allMatch(s -> allowedScopes.contains(s))) {
-            log.error("Could not update client with the scopes specified");
-            MDC.clear();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
         log.debug("Trying to update client with body", body);
         var client = creationUsecases.updateClient(body, clientId, context
                 .getResponse().getTenantId());
