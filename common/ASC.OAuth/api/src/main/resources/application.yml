@@ -97,6 +97,10 @@ spring:
           default:
             connectTimeout: 1500
             readTimeout: 3000
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
   flyway:
     enabled: true
     baselineOnMigrate: true
@@ -204,10 +208,30 @@ resilience4j:
         timeoutDuration: 1s
 
 management:
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    diskspace:
+      enabled: false
+    refresh:
+      enabled: false
   endpoints:
     web:
+      base-path:
+      path-mapping:
+        health: /health
       exposure:
-        include: "*"
+        include: 'health'
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: 'always'
+    env:
+      post:
+        enabled: true
 
 logging:
   config: classpath:log4j2.xml
