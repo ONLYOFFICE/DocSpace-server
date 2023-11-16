@@ -69,9 +69,9 @@ public class WebPluginsController : BaseSettingsController
 
         var file = HttpContext.Request.Form.Files[0] ?? throw new ArgumentException("Input file is null");
 
-        var tenantId = system ? Tenant.DefaultTenant : (await _tenantManager.GetCurrentTenantAsync()).Id;
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        var webPlugin = await _webPluginManager.AddWebPluginFromFileAsync(tenantId, file);
+        var webPlugin = await _webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, system);
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 

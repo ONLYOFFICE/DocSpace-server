@@ -153,22 +153,9 @@ public class WebPluginManager
         return uri?.ToString() ?? string.Empty;
     }
 
-    public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file)
+    public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file, bool system)
     {
         DemandWebPlugins("upload");
-
-        var webPlugin = await SaveWebPluginToStorageAsync(tenantId, file);
-
-        var key = GetCacheKey(tenantId);
-
-        _webPluginCache.Remove(key);
-
-        return webPlugin;
-    }
-
-    private async Task<WebPlugin> SaveWebPluginToStorageAsync(int tenantId, IFormFile file)
-    {
-        var system = tenantId == Tenant.DefaultTenant;
 
         if (system && !_coreBaseSettings.Standalone)
         {
@@ -195,7 +182,7 @@ public class WebPluginManager
             throw new ArgumentException("Wrong plugin archive");
         }
 
-        var storage = await GetPluginStorageAsync(tenantId);
+        var storage = await GetPluginStorageAsync(system ? Tenant.DefaultTenant : tenantId);
 
         WebPlugin webPlugin;
 
@@ -213,27 +200,7 @@ public class WebPluginManager
 
             webPlugin = System.Text.Json.JsonSerializer.Deserialize<WebPlugin>(configContent, options);
 
-            if (webPlugin == null)
-            {
-                throw new ArgumentException("Wrong plugin archive");
-            }
-
-            var nameRegex = new Regex(@"^[a-z0-9_.-]+$");
-
-            if (string.IsNullOrEmpty(webPlugin.Name) || !nameRegex.IsMatch(webPlugin.Name) || webPlugin.Name.StartsWith('.'))
-            {
-                throw new ArgumentException("Wrong plugin name");
-            }
-
-            if (!system)
-            {
-                var systemWebPlugins = await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant);
-
-                if (systemWebPlugins.Any(x => x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    throw new ArgumentException("System plugin with the same name already exist");
-                }
-            }
+            await ValidatePlugin(webPlugin, tenantId, system);
 
             if (await storage.IsDirectoryAsync(webPlugin.Name))
             {
@@ -280,6 +247,65 @@ public class WebPluginManager
         webPlugin = await UpdateWebPluginAsync(tenantId, webPlugin, true, null);
 
         return webPlugin;
+    }
+
+    private async Task ValidatePlugin(WebPlugin webPlugin, int tenantId, bool system)
+    {
+        if (webPlugin == null)
+        {
+            throw new ArgumentException("Wrong plugin archive");
+        }
+
+        var nameRegex = new Regex(@"^[a-z0-9_.-]+$");
+
+        if (string.IsNullOrEmpty(webPlugin.Name) || !nameRegex.IsMatch(webPlugin.Name) || webPlugin.Name.StartsWith('.'))
+        {
+            throw new ArgumentException("Wrong plugin name");
+        }
+
+        var jsVariableRegex = new Regex(@"^[0-9a-zA-Z_$]+$");
+
+        if (string.IsNullOrEmpty(webPlugin.PluginName) || !jsVariableRegex.IsMatch(webPlugin.PluginName))
+        {
+            throw new ArgumentException("Wrong plugin name");
+        }
+
+        var systemWebPlugins = await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant);
+
+        var tenantWebPlugins = await GetWebPluginsFromCacheAsync(tenantId);
+
+        if (system)
+        {
+            if (tenantWebPlugins.Any(x => 
+                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
+                x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new ArgumentException("Plugin with the same name already exist");
+            }
+
+            if (systemWebPlugins.Any(x => 
+                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new ArgumentException("Plugin with the same name already exist");
+            }
+        }
+        else
+        {
+            if (systemWebPlugins.Any(x =>
+                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) ||
+                x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new ArgumentException("Plugin with the same name already exist");
+            }
+
+            if (tenantWebPlugins.Any(x =>
+                x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new ArgumentException("Plugin with the same name already exist");
+            }
+        }
     }
 
     public async Task<List<WebPlugin>> GetWebPluginsAsync(int tenantId)
@@ -407,6 +433,8 @@ public class WebPluginManager
         }
         else
         {
+            settings = null;
+
             enabledPlugins.Remove(webPlugin.Name);
         }
 
