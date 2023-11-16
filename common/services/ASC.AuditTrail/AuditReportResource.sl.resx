@@ -721,4 +721,16 @@
   <data name="CityCol" xml:space="preserve">
     <value>Mesto</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Država</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Zunanja povezava ustvarjena: {0}. Vloga: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Zunanja povezava izbrisana: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Zunanja povezava posodobljena: {0}. Vloga: {1}</value>
+  </data>
 </root>

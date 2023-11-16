@@ -401,7 +401,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte Twitter et rechercher des contacts.</value>
+    <value>Se connecter à l'application pour accéder au portail en utilisant le compte Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à ONLYOFFICE via leur Twitter et reliez les comptes Twitter de vos clients à votre module CRM. {0}Passez au portail des développeurs Twitter et créez une nouvelle application d'intégration ONLYOFFICE. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Intégrations tierces</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Identifiant du client Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Secret du client Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Activez cette application pour permettre à vos utilisateurs de se connecter à ONLYOFFICE en utilisant leurs comptes Zoom. {0}Allez sur le site Zoom Developers et créez une nouvelle application d'intégration ONLYOFFICE. Insérez les données que vous avez reçues ci-dessous :</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Trop de tentatives de connexion. Veuillez réessayer plus tard</value>
   </data>
 </root>
