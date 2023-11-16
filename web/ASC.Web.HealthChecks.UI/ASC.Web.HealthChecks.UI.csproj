@@ -5,6 +5,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <LangVersion>12</LangVersion>
+	  <NoWarn>AD0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
