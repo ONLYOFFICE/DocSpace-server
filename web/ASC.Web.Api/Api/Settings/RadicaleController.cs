@@ -92,7 +92,7 @@ public class RadicaleController : BaseSettingsController
         var currUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         var userName = currUser.Email.ToLower();
         var currentAccountPaswd = _crypto.Encrypt(userName);
-        var cardBuilder = await CardDavAllSerializationAsync(myUri);
+        var cardBuilder = await CardDavAllSerializationAsync();
 
 
         var userAuthorization = userName + ":" + currentAccountPaswd;
@@ -191,7 +191,7 @@ public class RadicaleController : BaseSettingsController
 
     }
 
-    private async Task<string> CardDavAllSerializationAsync(Uri uri)
+    private async Task<string> CardDavAllSerializationAsync()
     {
         var builder = new StringBuilder();
         var users = await _userManager.GetUsersAsync();

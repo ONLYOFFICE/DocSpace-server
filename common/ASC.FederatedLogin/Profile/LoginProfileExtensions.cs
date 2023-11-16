@@ -48,7 +48,7 @@ public static class LoginProfileExtensions
         }
         if (!string.IsNullOrEmpty(queryString[LoginProfile.QueryParamName]))
         {
-            profile.ParseFromUrl(context, uri, memoryCache);
+            profile.ParseFromUrl(uri, memoryCache);
             return profile;
         }
         if (!string.IsNullOrEmpty(queryString[LoginProfile.QueryCacheParamName]))
