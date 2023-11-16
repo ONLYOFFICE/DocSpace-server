@@ -68,7 +68,7 @@ public class WebPluginConfigSettings
 
 public class WebPluginSettings : ISettings<WebPluginSettings>
 {
-    public Dictionary<string, string> EnabledPlugins { get; set; }
+    public Dictionary<string, WebPluginState> EnabledPlugins { get; set; }
 
     [JsonIgnore]
     public Guid ID
@@ -79,5 +79,17 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     public WebPluginSettings GetDefault()
     {
         return new WebPluginSettings();
+    }
+}
+
+public class WebPluginState
+{
+    public bool Enabled { get; set; }
+    public string Settings { get; set; }
+
+    public WebPluginState(bool enabled, string settings)
+    {
+        Enabled = enabled;
+        Settings = settings;
     }
 }

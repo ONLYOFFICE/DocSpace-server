@@ -319,16 +319,16 @@ public class WebPluginManager
 
         var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
 
-        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, string>();
+        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
         if (enabledPlugins.Any())
         {
             foreach (var webPlugin in webPlugins)
             {
-                if (enabledPlugins.TryGetValue(webPlugin.Name, out var settings))
+                if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
                 {
-                    webPlugin.Enabled = true;
-                    webPlugin.Settings = string.IsNullOrEmpty(settings) ? null : _instanceCrypto.Decrypt(settings);
+                    webPlugin.Enabled = webPluginState.Enabled;
+                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : _instanceCrypto.Decrypt(webPluginState.Settings);
                 }
             }
         }
@@ -416,19 +416,21 @@ public class WebPluginManager
     {
         var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
 
-        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, string>();
+        var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
-        if (enabled)
+        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : _instanceCrypto.Encrypt(settings);
+
+        if (enabled || encryptedSettings != null)
         {
-            var encryptedSettings = string.IsNullOrEmpty(settings) ? null : _instanceCrypto.Encrypt(settings);
+            var webPluginState = new WebPluginState(enabled, encryptedSettings);
 
             if (enabledPlugins.ContainsKey(webPlugin.Name))
             {
-                enabledPlugins[webPlugin.Name] = encryptedSettings;
+                enabledPlugins[webPlugin.Name] = webPluginState;
             }
             else
             {
-                enabledPlugins.Add(webPlugin.Name, encryptedSettings);
+                enabledPlugins.Add(webPlugin.Name, webPluginState);
             }
         }
         else
