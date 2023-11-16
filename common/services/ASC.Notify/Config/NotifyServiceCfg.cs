@@ -26,7 +26,7 @@
 
 namespace ASC.Notify.Config;
 
-[Singletone]
+[Singleton]
 public class ConfigureNotifyServiceCfg : IConfigureOptions<NotifyServiceCfg>
 {
     public ConfigureNotifyServiceCfg(IServiceProvider serviceProvider)
@@ -42,7 +42,7 @@ public class ConfigureNotifyServiceCfg : IConfigureOptions<NotifyServiceCfg>
     }
 }
 
-[Singletone(typeof(ConfigureNotifyServiceCfg))]
+[Singleton(typeof(ConfigureNotifyServiceCfg))]
 public class NotifyServiceCfg
 {
     public string ConnectionStringName { get; set; }

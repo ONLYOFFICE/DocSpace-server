@@ -152,21 +152,17 @@ global using AutoMapper;
 
 global using Google.Authenticator;
 
-global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
-
 global using MailKit.Security;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using Microsoft.Extensions.Primitives;
+global using Microsoft.IdentityModel.Tokens;
 
 global using MimeKit;
-
-global using ProtoBuf;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 global using static ASC.Security.Cryptography.EmailValidationKeyProvider;

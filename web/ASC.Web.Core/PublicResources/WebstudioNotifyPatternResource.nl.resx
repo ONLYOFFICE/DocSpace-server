@@ -104,19 +104,6 @@ Als u vragen of hulp nodig heeft neem dan gerust contact met ons op via "${__Sup
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Verzoek wijzigen wachtwoord voor het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
-
-Er is een verzoek gedaan om uw wachtwoord te wijzigen waarmee u inlogt op het ${LetterLogoText} portaal.
-
-Klik alstublieft op de onderstaande link om uw wachtwoord te wijzigen:
-
-$OrangeButton
-
-*Let op*: deze link is maar 7 dagen geldig. Voltooi het proces om uw wachtwoord te wijzigen alstublieft binnen die periode. 
-
-Als u uw wachtwoord niet wilt wijzigen of deze e-mail ten onrechte ontvangt, kunt u deze negeren of contact opnemen met uw "${__VirtualRootPath}":"${__VirtualRootPath}" portaalbeheerder om meer informatie te krijgen.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Verzoek wijzigen mobiel telefoonnummer
 
@@ -1334,7 +1321,7 @@ Als u vragen hebt of hulp nodig hebt, kunt u contact met ons opnemen via [${__Su
 
 Met vriendelijke groet,
 ONLYOFFICE™ Ondersteuningsteam
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Wilt u het e-mailadres op uw ${LetterLogoText} account wijzigen?
@@ -1548,7 +1535,7 @@ Als u vragen heeft of hulp nodig heeft, neem dan gerust contact met ons op via [
 
 Met vriendelijke groet,
 ONLYOFFICE™ Ondersteuningsteam
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Verwijdering van het [${__VirtualRootPath}](${__VirtualRootPath}) ruimte

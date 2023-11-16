@@ -322,9 +322,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <short>Get room access rights</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param name="filterType">
-    /// Share type filter
-    /// </param>
+    /// <param type="ASC.Files.Core.Security.ShareFilterType, ASC.Files.Core" name="filterType">Share type filter</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room files</returns>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <httpMethod>GET</httpMethod>
@@ -354,8 +352,8 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <short>Set an external or invitation link</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LinkRequestDto, ASC.Files.Core" name="inDto">Invitation link request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room</returns>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LinkRequestDto, ASC.Files.Core" name="inDto">Link request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("rooms/{id}/links")]
@@ -375,11 +373,11 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <summary>
     /// Returns the links of a room with the ID specified in the request.
     /// </summary>
-    /// <short>Returns room links</short>
+    /// <short>Get room links</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core" name="type">Link type</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room</returns>
+    /// <param type="System.Nullable{ASC.Files.Core.ApiModels.ResponseDto.LinkType}, System" name="type">Link type</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
@@ -407,12 +405,12 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     }
 
     /// <summary>
-    /// Returns the primary external link with the identifier specified in the request.
+    /// Returns the primary external link of a room with the ID specified in the request.
     /// </summary>
-    /// <short>Returns primary external link</short>
+    /// <short>Get primary external link</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Security information of room</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileShareDto, ASC.Files.Core">Room security information</returns>
     /// <path>api/2.0/files/rooms/{id}/link</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("rooms/{id}/link")]
@@ -661,7 +659,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
         var count = Convert.ToInt32(_apiContext.Count);
         var filterValue = _apiContext.FilterValue;
 
-        var content = await _fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue,
+        var content = await _fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, string.Empty,
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 

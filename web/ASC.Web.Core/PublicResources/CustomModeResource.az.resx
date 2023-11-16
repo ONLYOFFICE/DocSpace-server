@@ -95,20 +95,6 @@ Link 7 gün ərzində etibarlıdır.
 
 E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
   </data>
-  <data name="pattern_personal_custom_mode_change_password" xml:space="preserve">
-    <value>"${__VirtualRootPath}":"${__VirtualRootPath}" portalına daxil olmaq üçün istifadə edilən parolunuzu dəyişdirmək tələbi gəlib.
-
-Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Qeyd olunan müddət ərzində parol dəyişdirmə prosesini tamamlayın.
-
-Əgər parolunuzu dəyişmək istəmirsinizsə və ya bu e-məktubu səhvən almışsınızsa, onu nəzərə almayın.
-
-Hörmətlə,
-ONLYOFFICE komandası</value>
-  </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Salam,
 
@@ -157,9 +143,6 @@ ONLYOFFICE komandası</value>
   </data>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>ONLYOFFICE Personala xoş gəlmisiniz</value>
-  </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>ONLYOFFICE Şəxsi parol yardımı</value>
   </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Personal. Zəhmət olmasa e-poçt ünvanınızı aktivləşdirin</value>

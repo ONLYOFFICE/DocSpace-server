@@ -158,7 +158,14 @@ public class TfaappController : BaseSettingsController
         await ApiContext.AuthByClaimAsync();
         var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         _securityContext.Logout();
-        return await _tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+
+        var result = await _tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
+
+        var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : "";
+        _cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
+
+        return result;
     }
 
     /// <summary>
@@ -190,7 +197,9 @@ public class TfaappController : BaseSettingsController
                 ? ConfirmType.TfaAuth
                 : ConfirmType.TfaActivation;
 
-            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, confirmType);
+            (var url, var key) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, confirmType);
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
+            return url;
         }
 
         return string.Empty;
@@ -208,7 +217,7 @@ public class TfaappController : BaseSettingsController
     [HttpPut("tfaapp")]
     public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var result = false;
 
@@ -441,7 +450,9 @@ public class TfaappController : BaseSettingsController
         await _cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {
-            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation);
+            (var url, var key) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{ConfirmType.TfaActivation}");
+            return url;
         }
 
         await _studioNotifyService.SendMsgTfaResetAsync(user);

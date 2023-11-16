@@ -29,8 +29,7 @@ namespace ASC.IPSecurity;
 [Scope]
 public class IPSecurity
 {
-    public bool IpSecurityEnabled { get; }
-
+    private readonly bool _ipSecurityEnabled;
     private readonly ILogger<IPSecurity> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AuthContext _authContext;
@@ -39,6 +38,7 @@ public class IPSecurity
     private readonly string _currentIpForTest;
     private readonly string _myNetworks;
     private readonly UserManager _userManager;
+    private readonly SettingsManager _settingsManager;
 
     public IPSecurity(
         IConfiguration configuration,
@@ -47,6 +47,7 @@ public class IPSecurity
         TenantManager tenantManager,
         IPRestrictionsService iPRestrictionsService,
         UserManager userManager,
+        SettingsManager settingsManager,
         ILogger<IPSecurity> logger)
     {
         _logger = logger;
@@ -55,27 +56,35 @@ public class IPSecurity
         _tenantManager = tenantManager;
         _ipRestrictionsService = iPRestrictionsService;
         _userManager = userManager;
+        _settingsManager = settingsManager;
         _currentIpForTest = configuration["ipsecurity:test"];
         _myNetworks = configuration["ipsecurity:mynetworks"];
-        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(new[] { ',', ';', ' ' });
-        IpSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
+        var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
+        _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
     }
 
     public async Task<bool> VerifyAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        if (!IpSecurityEnabled)
+        if (!_ipSecurityEnabled)
         {
             return true;
         }
+        
+        var enable = (await _settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
 
+        if (!enable)
+        {
+            return true;
+        }
+        
         if (_httpContextAccessor?.HttpContext == null)
         {
             return true;
         }
 
-        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId)
+        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId && !_authContext.IsFromInvite())
         {
             return true;
         }
@@ -94,7 +103,7 @@ public class IPSecurity
 
             if (string.IsNullOrWhiteSpace(requestIps))
             {
-                requestIps = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+                requestIps = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString();
             }
 
             var ips = string.IsNullOrWhiteSpace(requestIps)
@@ -103,10 +112,11 @@ public class IPSecurity
 
             var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
 
-            if (ips.Any(requestIp => restrictions.Any(restriction => (restriction.ForAdmin ? isDocSpaceAdmin : true) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
+            if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
             {
                 return true;
             }
+            
             if (IsMyNetwork(ips))
             {
                 return true;
@@ -119,7 +129,7 @@ public class IPSecurity
             return false;
         }
 
-        _logger.InformationRestricted(requestIps ?? "", tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
+        _logger.InformationRestricted(requestIps, tenant, _httpContextAccessor.HttpContext.Request.GetDisplayUrl());
 
         return false;
     }
@@ -166,12 +176,11 @@ public class IPSecurity
                 }
             }
 
-            var hostName = Dns.GetHostName();
             var hostAddresses = Dns.GetHostAddresses(Dns.GetHostName());
 
             var localIPs = new List<IPAddress> { IPAddress.IPv6Loopback, IPAddress.Loopback };
 
-            localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
+            localIPs.AddRange(hostAddresses.Where(ip => ip.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6));
 
             foreach (var ipAddress in localIPs)
             {

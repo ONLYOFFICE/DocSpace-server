@@ -1511,7 +1511,7 @@ $TrulyYours</value>
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-[www.onlyoffice.com]( http://onlyoffice.com/)</value>
+[www.onlyoffice.com]( https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Искате ли да промените имейла в акаунта си ${LetterLogoText}?
@@ -1619,7 +1619,7 @@ _Забележка_: този линк е валиден само 7 дни. М�
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Изтриване на портала [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1644,7 +1644,7 @@ _Забележка_: този линк е валиден само 7 дни. М�
 
 С най-добри пожелания,
 Екип за поддръжка на ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Потребителят "$FromUserName":"$FromUserLink" е изтрил своя/нейния профил и сега този профил е блокиран. Всички файлове на потребителя все още им принадлецат и заемат дисково пространство. 

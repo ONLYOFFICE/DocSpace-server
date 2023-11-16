@@ -32,7 +32,6 @@ global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
 global using System.Reflection;
-global using System.Runtime.CompilerServices;
 global using System.Runtime.Loader;
 global using System.Runtime.Serialization;
 global using System.Security.Authentication;
@@ -71,7 +70,6 @@ global using Google.Protobuf;
 
 global using JWT;
 global using JWT.Algorithms;
-global using JWT.Serializers;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.AspNetCore.Http;

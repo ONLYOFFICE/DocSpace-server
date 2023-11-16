@@ -24,7 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-public class GetReferenceDataFromPathDto<T>
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+/// <summary>
+/// </summary>
+public class IsDefaultWhiteLabelLogosDto
 {
-    public string Path { get; set; }
+    /// <summary>White label logo name</summary>
+    /// <type>System.String, System</type>
+    public string Name { get; set; }
+
+    /// <summary>Specifies if the white label logo is default or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool Default { get; set; }
 }

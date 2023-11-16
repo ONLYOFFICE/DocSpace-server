@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
-[Singletone]
+[Singleton]
 public class CustomColorThemesSettingsHelper
 {
     public int Limit { get; set; }
@@ -80,7 +80,7 @@ public class CustomColorThemesSettingsItem
     /// <type>ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsColorItem, ASC.Web.Core</type>
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
-    public static List<CustomColorThemesSettingsItem> Default => new List<CustomColorThemesSettingsItem>
+    public static List<CustomColorThemesSettingsItem> Default => new()
     {
         new CustomColorThemesSettingsItem
         {
@@ -181,9 +181,9 @@ public class CustomColorThemesSettingsColorItem
 {
     /// <summary>Accent color</summary>
     /// <type>System.String, System</type>
-    public string Accent { get; set; }
+    public string Accent { get; init; }
 
     /// <summary>Button color</summary>
     /// <type>System.String, System</type>
-    public string Buttons { get; set; }
+    public string Buttons { get; init; }
 }

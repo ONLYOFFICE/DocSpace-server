@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Studio.Core;
 
-[Singletone]
+[Singleton]
 public class SetupInfo
 {
     private static string _webAutotestSecretEmail;
@@ -134,14 +134,14 @@ public class SetupInfo
         DownloadForAndroidDocuments = GetAppSettings("web.download.for.android.doc", "https://play.google.com/store/apps/details?id=com.onlyoffice.documents");
 
         EnabledCultures = GetAppSettings("web:cultures", "en-US")
-            .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Distinct()
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
             .OrderBy(l => l.DisplayName)
             .ToList();
 
         EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
-            .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Distinct()
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
             .ToList();
@@ -173,7 +173,7 @@ public class SetupInfo
         RecaptchaPrivateKey = GetAppSettings("web:recaptcha:private-key", null);
         RecaptchaVerifyUrl = GetAppSettings("web:recaptcha:verify-url", "https://www.recaptcha.net/recaptcha/api/siteverify");
 
-        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new char[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        _webDisplayMobappsBanner = (configuration["web.display.mobapps.banner"] ?? "").Trim().Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         ShareTwitterUrl = GetAppSettings("web.share.twitter", "https://twitter.com/intent/tweet?text={0}");
         ShareFacebookUrl = GetAppSettings("web.share.facebook", "");
         ControlPanelUrl = GetAppSettings("web:controlpanel:url", "");

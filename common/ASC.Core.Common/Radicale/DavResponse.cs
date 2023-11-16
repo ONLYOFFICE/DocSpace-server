@@ -36,7 +36,7 @@ public class DavResponse
 
     /// <summary>Status code</summary>
     /// <type>System.Int32, System</type>
-    public int StatusCode { get; set; }
+    public int StatusCode { get; init; }
 
     /// <summary>Link to the CardDav address book</summary>
     /// <type>System.String, System</type>
@@ -48,7 +48,7 @@ public class DavResponse
 
     public override string ToString()
     {
-        return StatusCode.ToString() + " " + Error;
+        return StatusCode + " " + Error;
     }
 
 }

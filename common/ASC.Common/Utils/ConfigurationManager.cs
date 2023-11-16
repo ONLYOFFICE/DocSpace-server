@@ -30,7 +30,7 @@ public class ConnectionStringCollection : IEnumerable<ConnectionStringSettings>
 {
     private readonly List<ConnectionStringSettings> _data;
 
-    public ConnectionStringSettings this[string name] => _data.FirstOrDefault(r => r.Name == name);
+    public ConnectionStringSettings this[string name] => _data.Find(r => r.Name == name);
 
     public ConnectionStringCollection(IEnumerable<ConnectionStringSettings> data)
     {
@@ -48,7 +48,7 @@ public class ConnectionStringCollection : IEnumerable<ConnectionStringSettings>
     }
 }
 
-[Singletone]
+[Singleton]
 public class ConfigurationExtension
 {
     public string this[string key]

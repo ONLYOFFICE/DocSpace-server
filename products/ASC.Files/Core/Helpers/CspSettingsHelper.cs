@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Data.Storage.S3;
-using ASC.Web.Files.Classes;
-
 namespace ASC.Web.Api.Core;
 
 [Scope]
@@ -64,7 +61,7 @@ public class CspSettingsHelper
         _configuration = configuration;
     }
 
-    public async Task<string> Save(IEnumerable<string> domains, bool setDefaultIfEmpty)
+    public async Task<string> SaveAsync(IEnumerable<string> domains, bool setDefaultIfEmpty)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var domain = tenant.GetTenantDomain(_coreSettings);
@@ -120,15 +117,15 @@ public class CspSettingsHelper
         await _settingsManager.ManageAsync<CspSettings>(current =>
         {
             current.Domains = domains;
-            current.SetDefaultIfEmpty = setDefaultIfEmpty;            
+            current.SetDefaultIfEmpty = setDefaultIfEmpty;
         });
 
         return headerValue;
     }
 
-    public CspSettings Load()
+    public async Task<CspSettings> LoadAsync()
     {
-        return _settingsManager.Load<CspSettings>();
+        return await _settingsManager.LoadAsync<CspSettings>();
     }
 
     public async Task RenameDomain(string oldDomain, string newDomain)
@@ -164,20 +161,34 @@ public class CspSettingsHelper
             defaultOptions.Def.Add($"*.{_coreBaseSettings.Basedomain}");
         }
 
-        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage && !string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
+        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage)
         {
-            defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
-            defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+            var internalUrl = s3Storage.GetUriInternal(null).ToString();
+
+            if (!string.IsNullOrEmpty(internalUrl))
+            {
+                defaultOptions.Img.Add(internalUrl);
+                defaultOptions.Media.Add(internalUrl);
+                defaultOptions.Connect.Add(internalUrl);
+            }
+
+            if (!string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
+            {
+                defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Media.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Connect.Add(s3Storage.CdnDistributionDomain);
+            }
         }
 
         options.Add(defaultOptions);
 
         if (Uri.IsWellFormedUriString(_filesLinkUtility.DocServiceUrl, UriKind.Absolute))
         {
-            options.Add(new CspOptions()
+            options.Add(new CspOptions
             {
-                Def = new List<string> { _filesLinkUtility.DocServiceUrl },
                 Script = new List<string> { _filesLinkUtility.DocServiceUrl },
+                Frame = new List<string> { _filesLinkUtility.DocServiceUrl },
+                Connect = new List<string> { _filesLinkUtility.DocServiceUrl }
             });
         }
 
@@ -187,7 +198,6 @@ public class CspSettingsHelper
             var firebaseOptions = _configuration.GetSection("csp:firebase").Get<CspOptions>();
             if (firebaseOptions != null)
             {
-                firebaseOptions.Def.Add(firebaseDomain);
                 options.Add(firebaseOptions);
             }
         }
@@ -201,7 +211,7 @@ public class CspSettingsHelper
             }
         }
 
-        if (!string.IsNullOrEmpty(_configuration["files:oform:url"]))
+        if (!string.IsNullOrEmpty(_configuration["files:oform:domain"]))
         {
             var oformOptions = _configuration.GetSection("csp:oform").Get<CspOptions>();
             if (oformOptions != null)
@@ -234,7 +244,23 @@ public class CspSettingsHelper
 
         foreach (var domain in options.SelectMany(r => r.Frame).Distinct())
         {
+            csp.AllowFrames.From(domain);
             csp.AllowFraming.From(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Fonts).Distinct())
+        {
+            csp.AllowFonts.From(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Connect).Distinct())
+        {
+            csp.AllowConnections.To(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Media).Distinct())
+        {
+            csp.AllowAudioAndVideo.From(domain);
         }
 
         var (_, headerValue) = csp.BuildCspOptions().ToString(null);
@@ -249,11 +275,14 @@ public class CspSettingsHelper
 
 public class CspOptions
 {
-    public List<string> Script { get; set; } = new List<string>();
-    public List<string> Style { get; set; } = new List<string>();
-    public List<string> Img { get; set; } = new List<string>();
-    public List<string> Frame { get; set; } = new List<string>();
-    public List<string> Def { get; set; } = new List<string>();
+    public List<string> Def { get; set; } = new();
+    public List<string> Script { get; set; } = new();
+    public List<string> Style { get; set; } = new();
+    public List<string> Img { get; set; } = new();
+    public List<string> Frame { get; set; } = new();
+    public List<string> Fonts { get; set; } = new();
+    public List<string> Connect { get; set; } = new();
+    public List<string> Media { get; set; } = new();
 
     public CspOptions()
     {
@@ -262,10 +291,13 @@ public class CspOptions
 
     public CspOptions(string domain)
     {
-        Def = new List<string>() { };
-        Script = new List<string>() { domain };
-        Style = new List<string>() { domain };
-        Img = new List<string>() { domain };
-        Frame = new List<string>() { domain };
+        Def = new List<string>();
+        Script = new List<string> { domain };
+        Style = new List<string> { domain };
+        Img = new List<string> { domain };
+        Frame = new List<string> { domain };
+        Fonts = new List<string> { domain };
+        Connect = new List<string> { domain };
+        Media = new List<string> { domain };
     }
 }

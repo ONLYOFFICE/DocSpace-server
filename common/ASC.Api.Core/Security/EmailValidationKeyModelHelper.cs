@@ -42,6 +42,7 @@ public class EmailValidationKeyModelHelper
     private readonly AuditEventsRepository _auditEventsRepository;
     private readonly TenantUtil _tenantUtil;
     private readonly MessageTarget _messageTarget;
+    private readonly CookiesManager _cookiesManager;
 
     public EmailValidationKeyModelHelper(
         IHttpContextAccessor httpContextAccessor,
@@ -52,7 +53,8 @@ public class EmailValidationKeyModelHelper
         InvitationLinkHelper invitationLinkHelper,
         AuditEventsRepository auditEventsRepository,
         TenantUtil tenantUtil,
-        MessageTarget messageTarget)
+        MessageTarget messageTarget,
+        CookiesManager cookiesManager)
     {
         _httpContextAccessor = httpContextAccessor;
         _provider = provider;
@@ -63,21 +65,25 @@ public class EmailValidationKeyModelHelper
         _auditEventsRepository = auditEventsRepository;
         _tenantUtil = tenantUtil;
         _messageTarget = messageTarget;
+        _cookiesManager = cookiesManager;
     }
 
     public EmailValidationKeyModel GetModel()
     {
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
-        var type = request.ContainsKey("type") ? request["type"].FirstOrDefault() : null;
+        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : null;
 
         ConfirmType? cType = null;
         if (ConfirmTypeExtensions.TryParse(type, out var confirmType))
         {
             cType = confirmType;
         }
-
-        request.TryGetValue("key", out var key);
+        
+        if (!request.TryGetValue("key", out var key))
+        {
+            key = _httpContextAccessor.HttpContext.Request.Cookies[_cookiesManager.GetConfirmCookiesName() + $"_{type}"];
+        }
 
         request.TryGetValue("emplType", out var emplType);
         EmployeeTypeExtensions.TryParse(emplType, out var employeeType);
@@ -131,11 +137,11 @@ public class EmailValidationKeyModelHelper
                 {
                     var auditEventDate = _tenantUtil.DateTimeToUtc(auditEvent.Date);
 
-                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s");
+                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s", CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    hash = passwordStamp.ToString("s");
+                    hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
                 checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + hash, key, _provider.ValidEmailKeyInterval);

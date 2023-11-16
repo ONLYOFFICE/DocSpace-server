@@ -26,7 +26,7 @@
 
 namespace ASC.FederatedLogin;
 
-[Singletone]
+[Singleton]
 public class AccountLinkerStorage
 {
     private readonly ICache _cache;
@@ -64,13 +64,15 @@ public class AccountLinker
     private readonly InstanceCrypto _instanceCrypto;
     private readonly AccountLinkerStorage _accountLinkerStorage;
     private readonly IDbContextFactory<AccountLinkContext> _accountLinkContextManager;
+    private readonly TenantManager _tenantManager;
 
-    public AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager)
+    public AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager, TenantManager tenantManager)
     {
         _signature = signature;
         _instanceCrypto = instanceCrypto;
         _accountLinkerStorage = accountLinkerStorage;
         _accountLinkContextManager = accountLinkContextManager;
+        _tenantManager = tenantManager;
     }
 
     public async Task<IEnumerable<string>> GetLinkedObjectsAsync(string id, string provider)
@@ -85,7 +87,7 @@ public class AccountLinker
 
     public async Task<IEnumerable<string>> GetLinkedObjectsByHashIdAsync(string hashid)
     {
-        await using var accountLinkContext = _accountLinkContextManager.CreateDbContext();
+        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
         return await Queries.LinkedObjectsByHashIdAsync(accountLinkContext, hashid).ToListAsync();
     }
 
@@ -115,7 +117,13 @@ public class AccountLinker
             Linked = DateTime.UtcNow
         };
 
-        await using var accountLinkContext = _accountLinkContextManager.CreateDbContext();
+        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
+        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+
+        if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
+        {
+            throw new Exception("ErrorAccountAlreadyUse");
+        }
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
@@ -139,7 +147,7 @@ public class AccountLinker
 
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
     {
-        await using var accountLinkContext = _accountLinkContextManager.CreateDbContext();
+        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
 
         var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
 
@@ -151,7 +159,7 @@ public class AccountLinker
 
     private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
     {
-        await using var accountLinkContext = _accountLinkContextManager.CreateDbContext();
+        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
         //Retrieve by uinque id
         return (await Queries.LinkedProfilesFromDbAsync(accountLinkContext, obj).ToListAsync())
                 .ConvertAll(x => LoginProfile.CreateFromSerializedString(_signature, _instanceCrypto, x));
@@ -159,7 +167,7 @@ public class AccountLinker
 
     private async Task<IDictionary<string, LoginProfile>> GetLinkedProfilesAsync(IEnumerable<string> objects)
     {
-        await using var accountLinkContext = _accountLinkContextManager.CreateDbContext();
+        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
 
         return await accountLinkContext.AccountLinks.Where(r => objects.Contains(r.Id))
             .Select(r => new { r.Id, r.Profile })
@@ -192,4 +200,11 @@ static file class Queries
                 ctx.AccountLinks
                     .Where(r => r.Id == id)
                     .Select(r => r.Profile));
+
+    public static readonly Func<AccountLinkContext, int, string, Task<bool>> ExistAccountAsync =
+        EF.CompileAsyncQuery(
+            (AccountLinkContext ctx, int tenant, string hashId) =>
+                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
+                        (accountLink, user) => new { accountLink, user })
+                        .Any(q => q.accountLink.UId == hashId && q.user.TenantId == tenant));
 }

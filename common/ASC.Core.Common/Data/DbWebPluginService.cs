@@ -40,7 +40,7 @@ public class DbWebPluginService
     {
         ArgumentNullException.ThrowIfNull(webPlugin);
 
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await dbContext.AddOrUpdateAsync(q => q.WebPlugins, webPlugin);
         await dbContext.SaveChangesAsync();
@@ -50,35 +50,35 @@ public class DbWebPluginService
 
     public async Task<DbWebPlugin> GetByIdAsync(int tenantId, int id)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.WebPluginByIdAsync(dbContext, tenantId, id);
     }
 
     public async Task<DbWebPlugin> GetByNameAsync(int tenantId, string name)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.WebPluginByNameAsync(dbContext, tenantId, name);
     }
 
     public async Task<List<DbWebPlugin>> GetAsync(int tenantId)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.WebPluginsAsync(dbContext, tenantId).ToListAsync();
     }
 
     public async Task UpdateAsync(int tenantId, int id, bool enabled)
     {
-        using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.UpdateWebPluginStatusAsync(dbContext, tenantId, id, enabled);
     }
 
     public async Task DeleteAsync(int tenantId, int id)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteWebPluginByIdAsync(dbContext, tenantId, id);
     }

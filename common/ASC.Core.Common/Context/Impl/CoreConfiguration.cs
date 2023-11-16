@@ -26,7 +26,7 @@
 
 namespace ASC.Core;
 
-[Singletone]
+[Singleton]
 public class CoreBaseSettings
 {
     private bool? _standalone;
@@ -149,7 +149,7 @@ public class CoreSettings : IDisposable
 
     public async Task SaveSettingAsync(string key, string value, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         byte[] bytes = null;
         if (value != null)
@@ -162,7 +162,7 @@ public class CoreSettings : IDisposable
 
     public void SaveSetting(string key, string value, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         byte[] bytes = null;
         if (value != null)
@@ -175,7 +175,7 @@ public class CoreSettings : IDisposable
 
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         var bytes = await TenantService.GetTenantSettingsAsync(tenant, key);
 
@@ -186,7 +186,7 @@ public class CoreSettings : IDisposable
 
     public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(key);
+        ArgumentException.ThrowIfNullOrEmpty(key);
 
         var bytes = TenantService.GetTenantSettings(tenant, key);
 
@@ -389,7 +389,7 @@ public class CoreConfiguration
         var serializedSection = await GetSettingAsync(sectionName, tenantId);
         if (serializedSection == null && tenantId != Tenant.DefaultTenant)
         {
-            serializedSection = await GetSettingAsync(sectionName, Tenant.DefaultTenant);
+            serializedSection = await GetSettingAsync(sectionName);
         }
 
         return serializedSection != null ? JsonConvert.DeserializeObject<T>(serializedSection) : null;

@@ -26,7 +26,7 @@
 
 namespace ASC.FederatedLogin.Helpers;
 
-[Singletone]
+[Singleton]
 public class RequestHelper
 {
     private readonly IHttpClientFactory _httpClientFactory;

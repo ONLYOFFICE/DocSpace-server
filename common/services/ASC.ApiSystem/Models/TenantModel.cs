@@ -74,6 +74,9 @@ public class TenantModel : IModel
     [StringLength(20)]
     public string Region { get; set; }
 
+    [JsonPropertyName("awsRegion")]
+    public string AWSRegion { get; set; }
+
     public TenantStatus Status { get; set; }
 
     public bool SkipWelcome { get; set; }

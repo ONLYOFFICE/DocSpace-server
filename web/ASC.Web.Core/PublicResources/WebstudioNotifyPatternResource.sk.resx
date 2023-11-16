@@ -140,19 +140,6 @@ Ak máte nejaké otázky alebo potrebujete asistenciu, prosím neváhajte nás k
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Žiadosť o zmenu hesla pre "${__VirtualRootPath}":"${__VirtualRootPath}" portál
-
-Požiadali ste o zmenu Vášho hesla používaného pre vstup do "${__VirtualRootPath}":"${__VirtualRootPath}" portálu.
-
-Prosím, nasledujte link nižšie pre zmenu Vášho hesla: 
-
-$OrangeButton
-
-*Poznámka*: tento link je platný len 7 dní. Prosím, dokončite proces zmeny hesla v tomto období.
-
-Ak nechcete zmeniť heslo alebo ste dostali tento e-mail omylom, prosím ignorujte to alebo kontaktuje Vášho "${__VirtualRootPath}":"${__VirtualRootPath}" portálového administrátora pre zistenie detailov.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Žiadosť o zmenu mobilného telefónu
 
@@ -1410,7 +1397,7 @@ Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktova
 
 S pozdravom,
 Tím podpory ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Chcete zmeniť e-mail na svojom ${LetterLogoText} účte?
@@ -1615,7 +1602,7 @@ Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktova
 
 S pozdravom,
 Tím podpory ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Vymazanie portálu [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1640,7 +1627,7 @@ Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktova
 
 S pozdravom,
 Tím podpory ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Používateľ "$FromUserName":"$FromUserLink" vymazal svoj profil a teraz je tento profil zablokovaný. Všetky súbory používateľa sú mu / jej stále priradené a zaberajú miesto na disku. 

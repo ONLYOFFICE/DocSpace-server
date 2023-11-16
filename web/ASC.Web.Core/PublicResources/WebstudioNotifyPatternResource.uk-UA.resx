@@ -1,85 +1,90 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
             <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="ButtonAccessControlPanel" xml:space="preserve">
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="ButtonAccessControlPanel" xml:space="preserve">
     <value>Панель управління доступом</value>
   </data>
-  <data name="ButtonAccessYourPortal" xml:space="preserve">
+    <data name="ButtonAccessYourPortal" xml:space="preserve">
     <value>Доступ до вашого порталу</value>
   </data>
-  <data name="ButtonAccessYouWebOffice" xml:space="preserve">
+    <data name="ButtonAccessYouWebOffice" xml:space="preserve">
     <value>Доступ до вашого веб-офісу</value>
   </data>
-  <data name="ButtonConfigureRightNow" xml:space="preserve">
+    <data name="ButtonConfigureRightNow" xml:space="preserve">
     <value>Налаштувати прямо зараз</value>
   </data>
-  <data name="ButtonInviteRightNow" xml:space="preserve">
+    <data name="ButtonInviteRightNow" xml:space="preserve">
     <value>Запросіть просто зараз</value>
   </data>
-  <data name="ButtonRequestCallButton" xml:space="preserve">
+    <data name="ButtonRequestCallButton" xml:space="preserve">
     <value>Запросити дзвінок</value>
   </data>
-  <data name="ButtonSelectPricingPlans" xml:space="preserve">
+    <data name="ButtonSelectPricingPlans" xml:space="preserve">
     <value>Виберіть цінові плани прямо зараз</value>
   </data>
-  <data name="pattern_activate_email" xml:space="preserve">
+    <data name="pattern_activate_email" xml:space="preserve">
     <value>h1.Активуйте свою електронну пошту для порталу "${__VirtualRootPath}":"$InviteLink"
 
 Доброго дня!
@@ -90,7 +95,7 @@ $OrangeButton
 
 Це посилання дійсне лише 7 днів. Будь ласка, завершіть активацію вашої електронної пошти протягом цього періоду.</value>
   </data>
-  <data name="pattern_backup_created" xml:space="preserve">
+    <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" створено резервну копію порталу
 
 Шановний $OwnerName,
@@ -104,7 +109,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
+    <data name="pattern_change_password" xml:space="preserve">
     <value>h1.Запит на зміну пароля для порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Отримано запит на зміну вашого пароля, який використовується для входу в портал "${__VirtualRootPath}":"${__VirtualRootPath}".
@@ -117,7 +122,7 @@ $OrangeButton
 
 Якщо ви не бажаєте змінювати пароль або отримали це повідомлення помилково, будь ласка, ігноруйте його або зверніться до свого адміністратора порталу "${__VirtualRootPath}":"${__VirtualRootPath}", щоб дізнатись деталі.</value>
   </data>
-  <data name="pattern_change_phone" xml:space="preserve">
+    <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Запит на зміну мобільний телефон
 
 Ви просили змінити ваш мобільний телефон, який використовується для входу в портал ${LetterLogoText}.
@@ -128,7 +133,7 @@ $OrangeButton
 
 Якщо ви не бажаєте змінювати свій мобільний телефон або отримали це повідомлення помилково, будь ласка, ігноруйте його або зверніться до свого адміністратора порталу, щоб дізнатись подробиці.</value>
   </data>
-  <data name="pattern_confirm_owner_change" xml:space="preserve">
+    <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Зміна Власник порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Шановний $OwnerName,
@@ -141,7 +146,7 @@ $OrangeButton
 
 *Примітка*: це посилання дійсно лише 7 днів. Будь ласка, завершіть процес зміни власника порталу протягом цього періоду.</value>
   </data>
-  <data name="pattern_dns_change" xml:space="preserve">
+    <data name="pattern_dns_change" xml:space="preserve">
     <value>h1.Зміна адреси порталу
 
 Шановний $OwnerName,
@@ -154,7 +159,7 @@ $OrangeButton
 
 *Примітка*: це посилання дійсно лише 7 днів. Будь ласка, завершіть процес зміни адреси порталу протягом цього періоду.</value>
   </data>
-  <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
+    <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -176,7 +181,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -198,7 +203,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
+    <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -220,7 +225,7 @@ $OrangeButton
 
 $TrulyYours</value>
  </data>
-  <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
+    <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -242,14 +247,14 @@ $OrangeButton
 
 $TrulyYours</value>
  </data>
-  <data name="pattern_for_admin_notify" xml:space="preserve">
+    <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Повідомлення з порталу "${__VirtualRootPath}":"${__VirtualRootPath}" portal
 
 Email: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_join" xml:space="preserve">
+    <data name="pattern_join" xml:space="preserve">
     <value>h1.Запрошення приєднатись до порталу "${__VirtualRootPath}":"$InviteLink"
 
 Доброго дня,
@@ -262,7 +267,7 @@ $OrangeButton
 
 *Примітка*: це посилання дійсне лише 48 годин. Будь ласка, завершіть операцію протягом цього періоду.</value>
   </data>
-  <data name="pattern_migration_error" xml:space="preserve">
+    <data name="pattern_migration_error" xml:space="preserve">
     <value>h1.Помилка переміщення порталу до іншого регіону
 
 Під час переміщення в регіон $RegionName сталася помилка. Будь ласка, спробуйте ще раз пізніше.
@@ -274,7 +279,7 @@ $TrulyYours
 
 ^Щоб змінити тип сповіщення, будь ласка,налаштуйте свої "параметрами підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_server_failure" xml:space="preserve">
+    <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Помилка переміщення порталу до іншого регіону
 
 Під час переміщення в інший регіон сталася помилка. Будь ласка, спробуйте ще раз пізніше.
@@ -286,7 +291,7 @@ $TrulyYours
 
 ^Щоб змінити тип сповіщення, будь ласка,налаштуйте свої "параметрами підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_migration_start" xml:space="preserve">
+    <data name="pattern_migration_start" xml:space="preserve">
     <value>h1.Розпочато переміщення порталу до іншого регіону
 
 Запущена міграція порталу до регіону $RegionName. Це може зайняти певний час, залежно від обсягу даних.
@@ -297,7 +302,7 @@ $TrulyYours
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_portal_deactivate" xml:space="preserve">
+    <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Деактивація порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Шановний $OwnerName,
@@ -315,7 +320,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_portal_delete" xml:space="preserve">
+    <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Видалення порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Шановний $OwnerName,
@@ -338,7 +343,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_portal_rename" xml:space="preserve">
+    <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Зміна адреси порталу
 
 Шановний користувач $UserDisplayName
@@ -347,7 +352,7 @@ $TrulyYours</value>
 
 *Примітка*: настройки DNS та варіанти єдиного входу не працюють, поки ви їх не зміните.</value>
   </data>
-  <data name="pattern_profile_delete" xml:space="preserve">
+    <data name="pattern_profile_delete" xml:space="preserve">
     <value>h1.Видалення профілю з порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Ви просили назавжди видалити свій профіль із порталу "${__VirtualRootPath}":"${__VirtualRootPath}".
@@ -358,7 +363,7 @@ $OrangeButton
 
 *Примітка*: це посилання дійсно лише 7 днів. Пройдіть процес видалення профілю протягом цього періоду.</value>
   </data>
-  <data name="pattern_profile_updated" xml:space="preserve">
+    <data name="pattern_profile_updated" xml:space="preserve">
     <value>Ваш профіль на сторінці "$__VirtualRootPath":"$__VirtualRootPath" було змінено
 
 h1.Шановний $UserName
@@ -368,7 +373,7 @@ h1.Шановний $UserName
 Щоб переглянути свій профіль, виконайте наведене нижче посилання.
 "$UserName":"$MyStaffLink"</value>
   </data>
-  <data name="pattern_request_license" xml:space="preserve">
+    <data name="pattern_request_license" xml:space="preserve">
     <value>h1.Запит на ліцензію
 
 h3.Перше ім'я
@@ -401,7 +406,7 @@ $Body
 h3.Портальна адреса
 "${__VirtualRootPath}":"${__VirtualRootPath}"</value>
   </data>
-  <data name="pattern_restore_started" xml:space="preserve">
+    <data name="pattern_restore_started" xml:space="preserve">
     <value>h1.Розпочато відновлення порталу
 
 Реконструкція порталу розпочата. Це може зайняти певний час, залежно від обсягу даних.
@@ -414,7 +419,7 @@ $TrulyYours
 
 ^Щоб змінити тип сповіщення, налаштуйте свої "параметри підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" повідомлення про зміну профілю порталу
 
 "$__AuthorName":"$__AuthorUrl" змінив дані свого профілю на порталі "${__VirtualRootPath}":"${__VirtualRootPath}".
@@ -422,7 +427,7 @@ $TrulyYours
 
 ^Якщо ви не бажаєте отримувати сповіщення про оновлення профілю, будь ласка, налаштуйте свої "параметрами підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="pattern_send_whats_new" xml:space="preserve">
+    <data name="pattern_send_whats_new" xml:space="preserve">
     <value>h1.Ось що нового у вашому DocSpace станом на $Date
 
 #foreach($activity in $Activities)
@@ -430,7 +435,7 @@ $activity
 
 #end</value>
 </data>
-  <data name="pattern_smtp_test" xml:space="preserve">
+    <data name="pattern_smtp_test" xml:space="preserve">
     <value>Тестове повідомлення SMTP
 
 Це повідомлення було сформоване автоматично, щоб протестувати налаштування SMTP. Якщо ви бачите це, це означає, що налаштування правильні, і ви можете використовувати їх на своєму порталі.
@@ -438,7 +443,7 @@ $activity
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_user_has_join" xml:space="preserve">
+    <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Нового користувача додано до "${__VirtualRootPath}":"${__VirtualRootPath}" порталу
 
 "$__AuthorName":"$__AuthorUrl" приєднався до вашого порталу на "${__VirtualRootPath}":"${__VirtualRootPath}".
@@ -446,124 +451,124 @@ $TrulyYours</value>
 
 ^Якщо ви не бажаєте отримувати сповіщення про нових користувачів, будь ласка, налаштуйте свої "параметрами підписки":"$RecipientSubscriptionConfigURL".^</value>
   </data>
-  <data name="subject_activate_email" xml:space="preserve">
+    <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Будь ласка, активуйте свою адресу електронної пошти</value>
   </data>
-  <data name="subject_backup_created" xml:space="preserve">
+    <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootPath} створення резервної копії порталу</value>
   </data>
-  <data name="subject_change_password" xml:space="preserve">
+    <data name="subject_change_password" xml:space="preserve">
     <value>${LetterLogoText} допомога пароля</value>
   </data>
-  <data name="subject_change_phone" xml:space="preserve">
+    <data name="subject_change_phone" xml:space="preserve">
     <value>${LetterLogoText}. Запит на зміну мобільного телефону</value>
   </data>
-  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <data name="subject_confirm_owner_change" xml:space="preserve">
     <value>${LetterLogoText}. Зміна власника порталу</value>
   </data>
-  <data name="subject_dns_change" xml:space="preserve">
+    <data name="subject_dns_change" xml:space="preserve">
     <value>${LetterLogoText}. Зміна адреси порталу</value>
   </data>
-  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_for_admin_notify" xml:space="preserve">
+    <data name="subject_for_admin_notify" xml:space="preserve">
     <value>Повідомлення користувача для адміністраторів</value>
   </data>
-  <data name="subject_join" xml:space="preserve">
+    <data name="subject_join" xml:space="preserve">
     <value>Запрошення приєднатись до порталу ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_migration_error" xml:space="preserve">
+    <data name="subject_migration_error" xml:space="preserve">
     <value>${LetterLogoText}.Інша помилка переміщення регіонального порталу</value>
   </data>
-  <data name="subject_migration_start" xml:space="preserve">
+    <data name="subject_migration_start" xml:space="preserve">
     <value>${LetterLogoText}.Розпочалася інша міграція порталу</value>
   </data>
-  <data name="subject_migration_success" xml:space="preserve">
+    <data name="subject_migration_success" xml:space="preserve">
     <value>${LetterLogoText}. Інше переміщенні регіонального порталу успішно завершено</value>
   </data>
-  <data name="subject_portal_deactivate" xml:space="preserve">
+    <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Деактивація  ${__VirtualRootPath} порталу</value>
   </data>
-  <data name="subject_portal_delete" xml:space="preserve">
+    <data name="subject_portal_delete" xml:space="preserve">
     <value>Видалення порталу ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_portal_rename" xml:space="preserve">
+    <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Зміна адреси порталу</value>
   </data>
-  <data name="subject_profile_delete" xml:space="preserve">
+    <data name="subject_profile_delete" xml:space="preserve">
     <value>Видалення вашого профілю з порталу ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_profile_updated" xml:space="preserve">
+    <data name="subject_profile_updated" xml:space="preserve">
     <value>Ваш профіль у ${__VirtualRootPath} змінено</value>
   </data>
-  <data name="subject_request_license" xml:space="preserve">
+    <data name="subject_request_license" xml:space="preserve">
     <value>Запит ліцензії підприємства</value>
   </data>
-  <data name="subject_request_tariff" xml:space="preserve">
+    <data name="subject_request_tariff" xml:space="preserve">
     <value>Запит на цінове планування SaaS</value>
   </data>
-  <data name="subject_restore_completed" xml:space="preserve">
+    <data name="subject_restore_completed" xml:space="preserve">
     <value>${LetterLogoText}. Відновлення завершено</value>
   </data>
-  <data name="subject_restore_started" xml:space="preserve">
+    <data name="subject_restore_started" xml:space="preserve">
     <value>${LetterLogoText}. Відновлення розпочалося</value>
   </data>
-  <data name="subject_self_profile_updated" xml:space="preserve">
+    <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootPath} повідомлення про зміну профілю порталу</value>
   </data>
-  <data name="subject_smtp_test" xml:space="preserve">
+    <data name="subject_smtp_test" xml:space="preserve">
     <value>Тестове повідомлення SMTP</value>
   </data>
-  <data name="subject_user_has_join" xml:space="preserve">
+    <data name="subject_user_has_join" xml:space="preserve">
     <value>Новий користувач був доданий до порталу ${LetterLogoText}</value>
   </data>
-  <data name="ActionFileUploaded" xml:space="preserve">
+    <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; передав(-ла) новий документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
   </data>
-  <data name="ActionRoomRenamed" xml:space="preserve">
+    <data name="ActionRoomRenamed" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; перейменував(-ла) кімнату: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
-  <data name="ActionRoomCreated" xml:space="preserve">
+    <data name="ActionRoomCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; створив(-ла) нову кімнату: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
-  <data name="ActionUserRemovedFromRoom" xml:space="preserve">
+    <data name="ActionUserRemovedFromRoom" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; було видалено з кімнати: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
-  <data name="ActionFileEdited" xml:space="preserve">
+    <data name="ActionFileEdited" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; відредагував(-ла) документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
   </data>
-  <data name="ActionRoomRemoved" xml:space="preserve">
+    <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; видалив(-ла) кімнату: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
-  <data name="ActionUserAddedToRoom" xml:space="preserve">
+    <data name="ActionUserAddedToRoom" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; було додано до кімнати: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
   </data>
-  <data name="ActionRoomArchived" xml:space="preserve">
+    <data name="ActionRoomArchived" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; перемістив(-ла) кімнату: &lt;a href={1}&gt;{2}&lt;/a&gt; до архіву - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
-  <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
+    <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; було призначено роль &lt;b&gt;{1}&lt;/b&gt; в кімнаті: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
   </data>
-  <data name="ActionUserCreated" xml:space="preserve">
+    <data name="ActionUserCreated" xml:space="preserve">
     <value>Додано нового користувача DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
-  <data name="ActionUsersUpdatedType" xml:space="preserve">
+    <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; змінив(-ла) рівень доступу користувачів &lt;b&gt;{1}&lt;/b&gt; на &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
-  <data name="ActionUserUpdated" xml:space="preserve">
+    <data name="ActionUserUpdated" xml:space="preserve">
     <value>Користувача DocSpace оновлено: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
-  <data name="pattern_change_password_v115" xml:space="preserve">
+    <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Хочете змінити пароль свого облікового запису ONLYOFFICE? Натисніть кнопку нижче, щоб підтвердити.
 
 $OrangeButton
@@ -572,7 +577,7 @@ $OrangeButton
 
 Не хочете змінювати пароль? Просто проігноруйте це повідомлення</value>
   </data>
-  <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
+    <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -588,7 +593,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -604,7 +609,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
+    <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>h1. дo &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -624,7 +629,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
+    <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -640,7 +645,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Отримайте &lt;span style="color:#FF6F3D;"&gt;безкоштовні&lt;/span&gt; застосунки ONLYOFFICE
 
 
@@ -654,7 +659,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 порад&lt;/span&gt; щодо ефективної роботи над документами
 
 
@@ -676,7 +681,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 порад&lt;/span&gt; щодо ефективної роботи над документами
 
 
@@ -698,7 +703,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
+    <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 порад&lt;/span&gt; щодо ефективної роботи над документами
 
 
@@ -720,7 +725,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 порад&lt;/span&gt; щодо ефективної роботи над документами
 
 
@@ -742,7 +747,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
+    <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>h1. Відкрийте для себе бізнес-підписку на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -765,7 +770,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>h1. Відкрийте для себе бізнес-підписку на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -788,7 +793,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
+    <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>h1. Відкрийте для себе бізнес-підписку на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -811,7 +816,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
+    <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>h1. Відкрийте для себе бізнес-підписку на &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -834,7 +839,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
+    <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -846,7 +851,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -858,7 +863,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
+    <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -870,7 +875,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_user_activation_v1" xml:space="preserve">
+    <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -882,7 +887,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
+    <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -904,7 +909,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -926,7 +931,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
+    <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -948,7 +953,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
+    <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>h1. до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
 
 
@@ -970,7 +975,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_for_sales_notify" xml:space="preserve">
+    <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1. Повідомлення з порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Ім’я: $UserName
@@ -979,7 +984,7 @@ $TrulyYours</value>
 
 $Body</value>
   </data>
-  <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
+    <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
     <value>h1. Отримайте &lt;span style="color:#FF6F3D;"&gt;безкоштовні&lt;/span&gt; застосунки ONLYOFFICE
 
 
@@ -993,7 +998,7 @@ $Body</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>h1. Отримайте &lt;span style="color:#FF6F3D;"&gt;безкоштовні&lt;/span&gt; застосунки ONLYOFFICE
 
 
@@ -1007,7 +1012,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_already_exist" xml:space="preserve">
+    <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Вітаємо!
 Повідомляємо про спробу реєстрації нового облікового запису "ONLYOFFICE Personal":"$PortalUrl" з використанням цієї адреси електронної пошти. Якщо це були ви, інформуємо вас, що обліковий запис вже існує. Перейдіть до ONLYOFFICE Personal та увійдіть до системи.
 Якщо ви забули пароль, то можете відновити його на "сторінці відновлення пароля":"$LinkToRecovery".
@@ -1016,7 +1021,7 @@ $TrulyYours</value>
 Гарного дня!
 Команда ONLYOFFICE</value>
   </data>
-  <data name="pattern_personal_change_password_v115" xml:space="preserve">
+    <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Хочете змінити пароль до облікового запису ONLYOFFICE Personal? Для підтвердження натисніть кнопку нижче.
 
 $OrangeButton 
@@ -1025,7 +1030,7 @@ $OrangeButton
 
 Не хочете змінювати пароль? Просто проігноруйте це повідомлення.</value>
   </data>
-  <data name="pattern_portal_delete_success_v1" xml:space="preserve">
+    <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;деактивовано&lt;/span&gt;
 
 
@@ -1037,7 +1042,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
+    <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>h1. Налаштуйте ваш &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1053,7 +1058,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>h1. Ваш ONLYOFFICE DocSpace буде &lt;span style="color:#FF6F3D;"&gt;видалено&lt;/span&gt;
 
 
@@ -1067,7 +1072,7 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_docspace_invite" xml:space="preserve">
+    <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1081,7 +1086,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Зверніть увагу: для вашого ONLYOFFICE DocSpace активовано пільговий період тривалістю $PaymentDelay‎ дн.
@@ -1092,7 +1097,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Зверніть увагу, що термін дії вашої підписки на ONLYOFFICE DocSpace закінчується через три дні. Після цього буде активовано пільговий період тривалістю $PaymentDelay дн.
@@ -1103,7 +1108,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Зверніть увагу, що пільговий період для вашого ONLYOFFICE DocSpace тривалістю $PaymentDelay дн. закінчився.
@@ -1114,7 +1119,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Зверніть увагу, що пільговий період для вашого ONLYOFFICE DocSpace тривалістю $PaymentDelay дн. закінчується завтра.
@@ -1125,7 +1130,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_room_invite" xml:space="preserve">
+    <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Вітаємо!
 
 Вас запросили приєднатися до кімнати $Message за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
@@ -1136,265 +1141,265 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="subject_send_whats_new" xml:space="preserve">
+    <data name="subject_send_whats_new" xml:space="preserve">
     <value>Що нового на вашому порталі для $Date</value>
   </data>
-  <data name="ButtonAccept" xml:space="preserve">
+    <data name="ButtonAccept" xml:space="preserve">
     <value>Прийняти</value>
   </data>
-  <data name="AcceptDocSpace" xml:space="preserve">
+    <data name="AcceptDocSpace" xml:space="preserve">
     <value>ПРИЙНЯТИ</value>
   </data>
-  <data name="ButtonCollaborateDocSpace" xml:space="preserve">
+    <data name="ButtonCollaborateDocSpace" xml:space="preserve">
     <value>Співпрацювати в DocSpace</value>
   </data>
-  <data name="ButtonConfirmEmail" xml:space="preserve">
+    <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>ПІДТВЕРДИТИ</value>
   </data>
-  <data name="ButtonConfirm" xml:space="preserve">
+    <data name="ButtonConfirm" xml:space="preserve">
     <value>Підтвердити</value>
   </data>
-  <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
+    <data name="ButtonConfirmDocSpaceInvite" xml:space="preserve">
     <value>Підтвердити запрошення до DocSpace</value>
   </data>
-  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <data name="ButtonConfirmRoomInvite" xml:space="preserve">
     <value>Підтвердити запрошення до кімнати</value>
   </data>
-  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <data name="ButtonVisitPaymentsSection" xml:space="preserve">
     <value>Відвідати розділ «Платежі»</value>
   </data>
-  <data name="ActionNewComment" xml:space="preserve">
+    <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; додав(-ла) новий коментар до версії документа: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
-  <data name="ActionFileCreated" xml:space="preserve">
+    <data name="ActionFileCreated" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; створив(-ла) новий документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
-  <data name="ButtonActivateEmail" xml:space="preserve">
+    <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Натисніть тут, щоб активувати адресу електронної пошти</value>
   </data>
-  <data name="ButtonChangeEmail" xml:space="preserve">
+    <data name="ButtonChangeEmail" xml:space="preserve">
     <value>Змінити адресу електронної пошти</value>
   </data>
-  <data name="ButtonChangePassword" xml:space="preserve">
+    <data name="ButtonChangePassword" xml:space="preserve">
     <value>Змінити пароль</value>
   </data>
-  <data name="ButtonChangePhone" xml:space="preserve">
+    <data name="ButtonChangePhone" xml:space="preserve">
     <value>Змінити номер мобільного телефону</value>
   </data>
-  <data name="ButtonChangeTfa" xml:space="preserve">
+    <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Настроїти застосунок для аутентифікації</value>
   </data>
-  <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
+    <data name="ButtonConfirmPortalAddressChange" xml:space="preserve">
     <value>Підтвердити зміну адреси порталу</value>
   </data>
-  <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
+    <data name="ButtonConfirmPortalOwnerUpdate" xml:space="preserve">
     <value>Підтвердити оновлення власника порталу</value>
   </data>
-  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Підтвердити закриття облікового запису</value>
   </data>
-  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Деактивувати портал</value>
   </data>
-  <data name="ButtonDeletePortal" xml:space="preserve">
+    <data name="ButtonDeletePortal" xml:space="preserve">
     <value>Видалити портал</value>
   </data>
-  <data name="ButtonJoin" xml:space="preserve">
+    <data name="ButtonJoin" xml:space="preserve">
     <value>Натисніть тут, щоб приєднатися до порталу</value>
   </data>
-  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Залишити відгук</value>
   </data>
-  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <data name="ButtonRemoveProfile" xml:space="preserve">
     <value>Видалити профіль</value>
   </data>
-  <data name="ButtonRenewNow" xml:space="preserve">
+    <data name="ButtonRenewNow" xml:space="preserve">
     <value>Поновити зараз</value>
   </data>
-  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Запустити безкоштовну пробну версію</value>
   </data>
-  <data name="ButtonUseDiscount" xml:space="preserve">
+    <data name="ButtonUseDiscount" xml:space="preserve">
     <value>Використати знижку</value>
   </data>
-  <data name="subject_change_email_v115" xml:space="preserve">
+    <data name="subject_change_email_v115" xml:space="preserve">
     <value>Підтвердьте зміну адреси електронної пошти</value>
   </data>
-  <data name="subject_change_password_v115" xml:space="preserve">
+    <data name="subject_change_password_v115" xml:space="preserve">
     <value>Підтвердьте зміну пароля</value>
   </data>
-  <data name="subject_change_tfa" xml:space="preserve">
+    <data name="subject_change_tfa" xml:space="preserve">
     <value>${LetterLogoText}. Сповіщення безпеки</value>
   </data>
-  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <data name="subject_saas_admin_activation_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <data name="subject_saas_user_welcome_v1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE DocSpace!</value>
   </data>
-  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <data name="subject_opensource_user_activation_v1" xml:space="preserve">
     <value>Приєднайтеся до ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Приєднайтеся до ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
     <value>Приєднайтеся до ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <data name="subject_saas_docspace_invite" xml:space="preserve">
     <value>Приєднайтеся до ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_saas_room_invite" xml:space="preserve">
+    <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Приєднайтеся до ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <data name="subject_saas_user_activation_v1" xml:space="preserve">
     <value>Приєднайтеся до ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Отримайте безкоштовні застосунки ONLYOFFICE</value>
   </data>
-  <data name="subject_personal_after_registration14_v1" xml:space="preserve">
+    <data name="subject_personal_after_registration14_v1" xml:space="preserve">
     <value>Отримайте безкоштовні застосунки ONLYOFFICE</value>
   </data>
-  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Отримайте безкоштовні застосунки ONLYOFFICE</value>
   </data>
-  <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
+    <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>5 порад щодо ефективної роботи над документами</value>
   </data>
-  <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
+    <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>5 порад щодо ефективної роботи над документами</value>
   </data>
-  <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
+    <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>5 порад щодо ефективної роботи над документами</value>
   </data>
-  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Відкрийте для себе бізнес-підписку на ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Відкрийте для себе бізнес-підписку на ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Відкрийте для себе бізнес-підписку на ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
     <value>Приєднайтеся до ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Приєднайтеся до ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
     <value>Приєднайтеся до ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_for_sales_notify" xml:space="preserve">
+    <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Запит відділу продажів</value>
   </data>
-  <data name="subject_mailbox_created" xml:space="preserve">
+    <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}. Створення поштової скриньки</value>
   </data>
-  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <data name="subject_mailbox_password_changed" xml:space="preserve">
     <value>${LetterLogoText}. Зміна паролю до поштової скриньки</value>
   </data>
-  <data name="subject_personal_activate" xml:space="preserve">
+    <data name="subject_personal_activate" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE для особистого використання!</value>
   </data>
-  <data name="subject_personal_after_registration1" xml:space="preserve">
+    <data name="subject_personal_after_registration1" xml:space="preserve">
     <value>Ласкаво просимо до ONLYOFFICE Personal</value>
   </data>
-  <data name="subject_personal_already_exist" xml:space="preserve">
+    <data name="subject_personal_already_exist" xml:space="preserve">
     <value>Увійдіть до свого облікового запису ONLYOFFICE Personal</value>
   </data>
-  <data name="subject_personal_confirmation" xml:space="preserve">
+    <data name="subject_personal_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Personal. Активуйте адресу електронної пошти</value>
   </data>
-  <data name="subject_personal_profile_delete" xml:space="preserve">
+    <data name="subject_personal_profile_delete" xml:space="preserve">
     <value>Закриття облікового запису ONLYOFFICE</value>
   </data>
-  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace деактивовано</value>
   </data>
-  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Користувач видалив свій профіль</value>
   </data>
-  <data name="subject_reassigns_completed" xml:space="preserve">
+    <data name="subject_reassigns_completed" xml:space="preserve">
     <value>${LetterLogoText}. Перепризначення даних користувача завершено</value>
   </data>
-  <data name="subject_reassigns_failed" xml:space="preserve">
+    <data name="subject_reassigns_failed" xml:space="preserve">
     <value>${LetterLogoText}. Не вдалося перепризначити дані користувача</value>
   </data>
-  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <data name="subject_remove_user_data_completed" xml:space="preserve">
     <value>${LetterLogoText}. Видалення даних користувача завершено</value>
   </data>
-  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <data name="subject_remove_user_data_failed" xml:space="preserve">
     <value>${LetterLogoText}. Не вдалося видалити дані користувача</value>
   </data>
-  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <data name="subject_saas_admin_modules_v1" xml:space="preserve">
     <value>Налаштуйте ваш ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Ваш ONLYOFFICE DocSpace буде видалено</value>
   </data>
-  <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
+    <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>5 порад щодо ефективної роботи над документами</value>
   </data>
-  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Відкрийте для себе бізнес-підписку на ONLYOFFICE DocSpace</value>
   </data>
-  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>Приєднайтеся до ${__VirtualRootPath}</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Пільговий період для вашого ONLYOFFICE DocSpace активовано</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Термін дії вашої підписки на ONLYOFFICE DocSpace скоро закінчиться</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Пільговий період для вашого ONLYOFFICE DocSpace закінчився</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Пільговий період для вашого ONLYOFFICE DocSpace закінчується завтра</value>
   </data>
-  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <data name="subject_storage_decryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Збій процесу дешифрування</value>
   </data>
-  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <data name="subject_storage_decryption_start" xml:space="preserve">
     <value>${LetterLogoText}. Процес дешифрування розпочато</value>
   </data>
-  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <data name="subject_storage_decryption_success" xml:space="preserve">
     <value>${LetterLogoText}. Процес дешифрування завершено</value>
   </data>
-  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <data name="subject_storage_encryption_error" xml:space="preserve">
     <value>${LetterLogoText}. Збій процесу шифрування</value>
   </data>
-  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <data name="subject_storage_encryption_start" xml:space="preserve">
     <value>${LetterLogoText}. Процес шифрування розпочато</value>
   </data>
-  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <data name="subject_storage_encryption_success" xml:space="preserve">
     <value>${LetterLogoText}. Процес шифрування завершено</value>
   </data>
-  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Вас запросили приєднатися до ${__VirtualRootPath}</value>
   </data>
-  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Створено резервну копію порталу [${__VirtualRootPath}](${__VirtualRootPath}) 
 
 Вітаємо, $OwnerName!
@@ -1407,9 +1412,9 @@ $TrulyYours</value>
 
 З найкращими побажаннями
 команда підтримки ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
-  <data name="pattern_change_email_v115" xml:space="preserve">
+    <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Хочете змінити адресу електронної пошти у своєму обліковому запису ${LetterLogoText}?
 
 Натисніть кнопку нижче та увійдіть* до своєї хмари.
@@ -1422,7 +1427,7 @@ $OrangeButton
 
 Не хочете змінювати адресу електронної пошти? Просто проігноруйте це повідомлення.</value>
   </data>
-  <data name="pattern_change_tfa" xml:space="preserve">
+    <data name="pattern_change_tfa" xml:space="preserve">
     <value>h1.Сповіщення безпеки
 
 Параметри застосунку для аутентифікації, який ви використовуєте для входу до порталу ${LetterLogoText}, скинуто.
@@ -1431,7 +1436,7 @@ $OrangeButton
 
 $OrangeButton</value>
   </data>
-  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1445,7 +1450,7 @@ $OrangeButton
 
 Ви отримаєте додаткові поради щодо використання вебофісу. Ви можете будь-коли скасовувати підписки на сторінці свого профілю, а також вмикати їх знову.</value>
   </data>
-  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1459,14 +1464,14 @@ $OrangeButton
 
 Ви отримаєте додаткові поради щодо використання вебофісу. Ви можете будь-коли скасовувати підписки на сторінці свого профілю, а також вмикати їх знову.</value>
   </data>
-  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <data name="pattern_for_admin_notify_tg" xml:space="preserve">
     <value>Повідомлення з порталу [${__VirtualRootPath}](${__VirtualRootPath})
 
 Адреса ел. пошти: $UserEmail
 
 $Body</value>
   </data>
-  <data name="pattern_mailbox_created" xml:space="preserve">
+    <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
       Адміністратор створив для вас нову поштову скриньку &lt;b&gt;$Address&lt;/b&gt; на порталі "${__VirtualRootPath}":"${__VirtualRootPath}".
@@ -1488,21 +1493,21 @@ $Body</value>
 
       Якщо ви отримали цей електронний лист помилково, проігноруйте його або зв’яжіться з адміністратором порталу, щоб дізнатися подробиці.</value>
   </data>
-  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <data name="pattern_mailbox_password_changed" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
       Пароль до поштової скриньки &lt;b&gt;$Address&lt;/b&gt; змінено.
 
       Якщо ви отримали цей електронний лист помилково, проігноруйте його або зв’яжіться з адміністратором порталу, щоб дізнатися подробиці.</value>
   </data>
-  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
       Адміністратор створив для вас нову поштову скриньку &lt;b&gt;$Address&lt;/b&gt; на порталі "${__VirtualRootPath}":"${__VirtualRootPath}".
 
       Якщо ви отримали цей електронний лист помилково, проігноруйте його або зв’яжіться з адміністратором порталу, щоб дізнатися подробиці.</value>
   </data>
-  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Перенесення порталу
 h1."$PortalUrl":"$PortalUrl"
 
@@ -1515,7 +1520,7 @@ $OrangeButton
 
 Якщо ви отримали цей лист помилково, проігноруйте його або зв’яжіться з адміністратором порталу "$PortalUrl":"$PortalUrl", щоб дізнатися подробиці.</value>
   </data>
-  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1529,7 +1534,7 @@ $OrangeButton
 
 Ви отримаєте додаткові поради щодо використання вебофісу. Ви можете будь-коли скасовувати підписки на сторінці свого профілю, а також вмикати їх знову.</value>
   </data>
-  <data name="pattern_personal_activate" xml:space="preserve">
+    <data name="pattern_personal_activate" xml:space="preserve">
     <value>Вітаємо, $UserName!
 Ви успішно зареєструвалися в "${__VirtualRootPath}":"${__VirtualRootPath}" ONLYOFFICE Personal.
 
@@ -1541,7 +1546,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_after_registration1" xml:space="preserve">
+    <data name="pattern_personal_after_registration1" xml:space="preserve">
     <value>h1.Ласкаво просимо до ONLYOFFICE Personal!
 
 Ви щойно створили свій персональний офіс у хмарі.
@@ -1566,7 +1571,7 @@ h3.Спочатку про те, що можна робити в ONLYOFFICE:
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_change_email_v115" xml:space="preserve">
+    <data name="pattern_personal_change_email_v115" xml:space="preserve">
     <value>Хочете змінити адресу електронної пошти у своєму обліковому записі ONLYOFFICE?
 
 Натисніть кнопку нижче та увійдіть* до своєї хмари.
@@ -1579,7 +1584,7 @@ $OrangeButton
 
 Не хочете змінювати адресу електронної пошти? Просто проігноруйте це повідомлення.</value>
   </data>
-  <data name="pattern_personal_confirmation" xml:space="preserve">
+    <data name="pattern_personal_confirmation" xml:space="preserve">
     <value>Вітаємо!
 
 Ви щойно зареєстрували обліковий запис ONLYOFFICE для особистого використання. Натисніть "тут":"$InviteLink", щоб підтвердити реєстрацію та створити пароль.
@@ -1588,7 +1593,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_personal_profile_delete" xml:space="preserve">
+    <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Ви подали запит на закриття вашого облікового запису на personal.onlyoffice.com. Для виконання запиту перейдіть за посиланням (посилання активне протягом 7 днів): 
 
 $OrangeButton
@@ -1603,7 +1608,7 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Деактивація порталу [${__VirtualRootPath}](${__VirtualRootPath}) 
 
 Вітаємо, $OwnerName!
@@ -1621,9 +1626,9 @@ _Примітка_. Це посилання дійсне лише протяго
 
 З найкращими побажаннями
 команда підтримки ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
-  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Видалення порталу [${__VirtualRootPath}](${__VirtualRootPath}) 
 
 Вітаємо, $OwnerName!
@@ -1646,16 +1651,16 @@ _Примітка_. Це посилання дійсне лише протяго
 
 З найкращими побажаннями
 команда підтримки ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
-  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>Користувач "$FromUserName":"$FromUserLink" видалив свій профіль, і цей профіль тепер заблоковано. Усі файли користувача все ще призначені йому і займають дисковий простір. 
 
 Ви можете перепризначити документи користувача, до яких надано спільний доступ, іншому активному користувачеві або видалити їх, щоб звільнити місце на диску порталу.
 
 Перейдіть до профілю користувача, використавши "це посилання":"$FromUserLink", щоб перепризначити документи іншому користувачеві або видалити дані.</value>
   </data>
-  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <data name="pattern_profile_updated_tg" xml:space="preserve">
     <value>Ваш профіль у [${__VirtualRootPath}](${__VirtualRootPath}) змінено
 
 Вітаємо, $UserName!
@@ -1665,33 +1670,33 @@ _Примітка_. Це посилання дійсне лише протяго
 Щоб переглянути профіль, перейдіть за посиланням нижче:
 [$UserName]($MyStaffLink)</value>
   </data>
-  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <data name="pattern_reassigns_completed" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес перепризначення даних від користувача "$FromUserName":"$FromUserLink" користувачу "$ToUserName":"$ToUserLink" успішно завершено.</value>
   </data>
-  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <data name="pattern_reassigns_failed" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес перепризначення даних користувача "$FromUserName":"$FromUserLink" користувачу "$ToUserName":"$ToUserLink" закінчився збоєм.
 
 Повідомлення про виняток: $Message</value>
   </data>
-  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <data name="pattern_remove_user_data_completed" xml:space="preserve">
     <value>Вітаємо $UserName!
 
 Процес видалення даних користувача "$FromUserName":"$FromUserLink" успішно завершено.
 
 Видалення персональних даних дозволило вивільнити $DocsSpace</value>
   </data>
-  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес видалення даних користувача "$FromUserName":"$FromUserLink" закінчився збоєм.
 
 Повідомлення про виняток: $Message</value>
   </data>
-  <data name="pattern_request_tariff1" xml:space="preserve">
+    <data name="pattern_request_tariff1" xml:space="preserve">
     <value>h1.Запит тарифу SAAS для "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 h3.Ім’я
@@ -1721,7 +1726,7 @@ $CompanySize
 h3.Запит контенту
 $Body</value>
   </data>
-  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <data name="pattern_restore_completed_v115" xml:space="preserve">
     <value>h1.Відновлення порталу
 h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1733,7 +1738,7 @@ $OrangeButton
 
 Якщо ви отримали цей електронний лист помилково, проігноруйте його або зв’яжіться з адміністратором порталу "${__VirtualRootPath}":"${__VirtualRootPath}", щоб дізнатися подробиці.</value>
   </data>
-  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
 
@@ -1747,58 +1752,58 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>Сповіщення про зміну профілю на порталі [${__VirtualRootPath}](${__VirtualRootPath})
 
 [$__AuthorName]($__AuthorUrl) змінив(-ла) дані у своєму профілі на порталі [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
-  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <data name="pattern_storage_decryption_error" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес дешифрування файлів на вашому порталі "${PortalUrl}":"${PortalUrl}" закінчився збоєм.
 
 Деякі файли не вдається дешифрувати. Додаткову інформацію див. на "панелі керування":"${ControlPanelUrl}/storage".</value>
   </data>
-  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <data name="pattern_storage_decryption_start" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Розпочато процес дешифрування файлів на вашому порталі "${PortalUrl}":"${PortalUrl}".
 
 Дешифрування може зайняти деякий час, тому портал буде тимчасово недоступний. Як тільки дешифрування закінчиться, ви знову зможете працювати зі своїми даними.</value>
   </data>
-  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <data name="pattern_storage_decryption_success" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес дешифрування файлів на вашому порталі "${PortalUrl}":"${PortalUrl}" успішно завершено.
 
 Портал знову доступний.</value>
   </data>
-  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <data name="pattern_storage_encryption_error" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес шифрування файлів на порталі "${PortalUrl}":"${PortalUrl}" завершився збоєм.
 
 Деякі файли не вдається зашифрувати. Додаткову інформацію див. на "панелі керування":"${ControlPanelUrl}/storage".</value>
   </data>
-  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <data name="pattern_storage_encryption_start" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Розпочато процес шифрування файлів на вашому порталі "${PortalUrl}":"${PortalUrl}".
 
 Шифрування може зайняти деякий час, тому портал буде тимчасово недоступний. Як тільки шифрування закінчиться, ви знову зможете працювати зі своїми даними.</value>
   </data>
-  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <data name="pattern_storage_encryption_success" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Процес шифрування файлів на вашому порталі "${PortalUrl}":"${PortalUrl}" успішно завершено.
 
 Портал знову доступний.</value>
   </data>
-  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <data name="pattern_user_has_join_tg" xml:space="preserve">
     <value>Нового користувача додано на портал [${__VirtualRootPath}](${__VirtualRootPath})
 [$__AuthorName]($__AuthorUrl) приєднався(-лась) до вашого порталу за адресою [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
-  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <data name="pattern_user_ldap_activation" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
 Вас запросили приєднатися до безпечного вебофісу вашої компанії, який покращить спільну роботу. Його адреса: "${__VirtualRootPath}":"${__VirtualRootPath}". Рекомендуємо додати це посилання до ваших закладок — ймовірно, ви часто ним користуватиметесь.

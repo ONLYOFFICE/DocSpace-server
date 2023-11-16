@@ -29,7 +29,7 @@ namespace ASC.Files.Core.Entries;
 public class TagInfo : IMapFrom<DbFilesTag>
 {
     public int Id { get; set; }
-    public string Name { get; set; }
+    public string Name { get; init; }
     public Guid Owner { get; set; }
     public TagType Type { get; set; }
 }

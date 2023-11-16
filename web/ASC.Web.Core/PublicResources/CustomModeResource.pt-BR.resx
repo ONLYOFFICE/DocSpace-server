@@ -96,20 +96,6 @@ O link é válido por 7 dias.
 
 Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
   </data>
-  <data name="pattern_personal_custom_mode_change_password" xml:space="preserve">
-    <value>Houve um pedido para alterar sua senha utilizada para entrar no portal "${__VirtualRootPath}": "${__VirtualRootPath}".
-
-Por favor, siga o link abaixo para alterar sua senha:
-
-$OrangeButton
-
-*Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
-
-Se você não deseja alterar sua senha ou recebeu este e-mail por engano, por favor, ignore-a.
-
-Atenciosamente,
-Equipe ONLYOFFICE</value>
-  </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Olá,
 
@@ -159,9 +145,6 @@ A exclusão de dados pessoais permitida para liberar $DocsSpace</value>
   </data>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>Bem vindo ao ONLYOFFICE Pessoal</value>
-  </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>Assistência de senha pessoal ONLYOFFICE</value>
   </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Pessoal. Por favor, ative seu email</value>

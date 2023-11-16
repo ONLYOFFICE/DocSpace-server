@@ -59,7 +59,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
     }
 
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {
@@ -169,6 +169,6 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
 
         var parser = JObject.Parse(token.OriginJson);
 
-        return parser?.Value<string>("email");
+        return parser.Value<string>("email");
     }
 }

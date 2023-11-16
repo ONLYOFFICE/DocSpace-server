@@ -1157,7 +1157,7 @@ $TrulyYours</value>
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Θέλετε να αλλάξετε το email στον λογαριασμό σας ${LetterLogoText};
@@ -1470,7 +1470,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Διαγραφή του χώρου "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1518,7 +1518,7 @@ _Σημείωση_: αυτός ο σύνδεσμος ισχύει μόνο γι�
 
 Με εκτίμηση,
 Η ομάδα υποστήριξης του ONLYOFFICE™
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Αλλαγή διεύθυνσης πύλης

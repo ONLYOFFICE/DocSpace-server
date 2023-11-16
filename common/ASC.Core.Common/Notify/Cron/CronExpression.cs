@@ -40,8 +40,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
     protected const int AllSpec = AllSpecInt;
     protected const int NoSpec = NoSpecInt;
 
-    private static readonly Hashtable _monthMap = new Hashtable(20);
-    private static readonly Hashtable _dayMap = new Hashtable(60);
+    private static readonly Hashtable _monthMap = new(20);
+    private static readonly Hashtable _dayMap = new(60);
     [NonSerialized] protected bool _calendardayOfMonth;
     [NonSerialized] protected bool _calendardayOfWeek;
 
@@ -97,7 +97,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
     public virtual TimeZoneInfo TimeZone
     {
-        set { _timeZone = value; }
+        init { _timeZone = value; }
         get
         {
             if (_timeZone == null)
@@ -180,8 +180,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     {
         long difference = 1000;
 
-        var lastDate =
-            new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second).AddSeconds(-1);
+        var lastDate = new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second).AddSeconds(-1);
 
         while (difference == 1000)
         {
@@ -251,9 +250,10 @@ public class CronExpression : ICloneable, IDeserializationCallback
             var exprOn = Second;
 
 
-#if NET_20                string[] exprsTok = expression.Trim().Split(new char[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+#if NET_20
+                string[] exprsTok = expression.Trim().Split(new char[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 #else
-            var exprsTok = expression.Trim().Split(new[] { ' ', '\t', '\r', '\n' });
+            var exprsTok = expression.Trim().Split(' ', '\t', '\r', '\n');
 #endif
             foreach (var exprTok in exprsTok)
             {
@@ -330,7 +330,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             return i;
         }
         var c = s[i];
-        if ((c >= 'A') && (c <= 'Z') && (!s.Equals("L")) && (!s.Equals("LW")))
+        if (c is >= 'A' and <= 'Z' && (!s.Equals("L")) && (!s.Equals("LW")))
         {
             var sub = s.Substring(i, 3);
             int sval;
@@ -383,7 +383,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                         {
                             i += 4;
                             _nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
-                            if (_nthdayOfWeek < 1 || _nthdayOfWeek > 5)
+                            if (_nthdayOfWeek is < 1 or > 5)
                             {
                                 throw new Exception();
                             }
@@ -440,7 +440,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             return i;
         }
-        if (c == '*' || c == '/')
+        if (c is '*' or '/')
         {
             if (c == '*' && (i + 1) >= s.Length)
             {
@@ -471,7 +471,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 {
                     i++;
                 }
-                if (incr > 59 && (type == Second || type == Minute))
+                if (incr > 59 && type is Second or Minute)
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 60 : {0}", incr));
@@ -528,7 +528,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             return i;
         }
-        else if (c >= '0' && c <= '9')
+        else if (c is >= '0' and <= '9')
         {
             var val = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
             i++;
@@ -539,7 +539,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             else
             {
                 c = s[i];
-                if (c >= '0' && c <= '9')
+                if (c is >= '0' and <= '9')
                 {
                     var vs = GetValue(val, s, i);
                     val = vs.TheValue;
@@ -614,7 +614,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             try
             {
                 _nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
-                if (_nthdayOfWeek < 1 || _nthdayOfWeek > 5)
+                if (_nthdayOfWeek is < 1 or > 5)
                 {
                     throw new Exception();
                 }
@@ -665,7 +665,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 return i;
             }
             c = s[i];
-            if (c >= '0' && c <= '9')
+            if (c is >= '0' and <= '9')
             {
                 var vs = GetValue(v, s, i);
                 var v1 = vs.TheValue;
@@ -685,7 +685,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     return i;
                 }
                 c = s[i];
-                if (c >= '0' && c <= '9')
+                if (c is >= '0' and <= '9')
                 {
                     var vs = GetValue(v2, s, i);
                     var v3 = vs.TheValue;
@@ -721,7 +721,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 return i;
             }
             c = s[i];
-            if (c >= '0' && c <= '9')
+            if (c is >= '0' and <= '9')
             {
                 var vs = GetValue(v2, s, i);
                 var v3 = vs.TheValue;
@@ -838,7 +838,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     protected virtual void AddToSet(int val, int end, int incr, int type)
     {
         var data = GetSet(type);
-        if (type == Second || type == Minute)
+        if (type is Second or Minute)
         {
             if ((val < 0 || val > 59 || end > 59) && (val != AllSpecInt))
             {
@@ -880,7 +880,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     "Day-of-Week values must be between 1 and 7");
             }
         }
-        if ((incr == 0 || incr == -1) && val != AllSpecInt)
+        if (incr is 0 or -1 && val != AllSpecInt)
         {
             if (val != -1)
             {
@@ -900,13 +900,13 @@ public class CronExpression : ICloneable, IDeserializationCallback
             incr = 1;
             data.Add(AllSpec);
         }
-        if (type == Second || type == Minute)
+        if (type is Second or Minute)
         {
             if (stopAt == -1)
             {
                 stopAt = 59;
             }
-            if (startAt == -1 || startAt == AllSpecInt)
+            if (startAt is -1 or AllSpecInt)
             {
                 startAt = 0;
             }
@@ -917,7 +917,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 stopAt = 23;
             }
-            if (startAt == -1 || startAt == AllSpecInt)
+            if (startAt is -1 or AllSpecInt)
             {
                 startAt = 0;
             }
@@ -928,7 +928,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 stopAt = 31;
             }
-            if (startAt == -1 || startAt == AllSpecInt)
+            if (startAt is -1 or AllSpecInt)
             {
                 startAt = 1;
             }
@@ -939,7 +939,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 stopAt = 12;
             }
-            if (startAt == -1 || startAt == AllSpecInt)
+            if (startAt is -1 or AllSpecInt)
             {
                 startAt = 1;
             }
@@ -950,7 +950,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 stopAt = 7;
             }
-            if (startAt == -1 || startAt == AllSpecInt)
+            if (startAt is -1 or AllSpecInt)
             {
                 startAt = 1;
             }
@@ -961,7 +961,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 stopAt = 2099;
             }
-            if (startAt == -1 || startAt == AllSpecInt)
+            if (startAt is -1 or AllSpecInt)
             {
                 startAt = 1970;
             }
@@ -993,7 +993,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             {
                 var i2 = i % max;
 
-                if (i2 == 0 && (type == Month || type == DayOfWeek || type == DayOfMonth))
+                if (i2 == 0 && type is Month or DayOfWeek or DayOfMonth)
                 {
                     i2 = max;
                 }
@@ -1022,7 +1022,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         var c = s[i];
         var sb = new StringBuilder();
         sb.Append(v.ToString(CultureInfo.InvariantCulture));
-        while (c >= '0' && c <= '9')
+        while (c is >= '0' and <= '9')
         {
             sb.Append(c);
             i++;
@@ -1127,11 +1127,9 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
         while (!gotOne)
         {
-            ISortedSet st;
-            int t;
             var sec = d.Second;
 
-            st = _seconds.TailSet(sec);
+            var st = _seconds.TailSet(sec);
             if (st != null && st.Count != 0)
             {
                 sec = (int)st.First();
@@ -1144,7 +1142,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             d = new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond);
             var min = d.Minute;
             var hr = d.Hour;
-            t = -1;
+            var t = -1;
 
             st = _minutes.TailSet(min);
             if (st != null && st.Count != 0)
@@ -1421,7 +1419,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     var dow = (int)_daysOfWeek.First();
 
                     st = _daysOfWeek.TailSet(cDow);
-                    if (st != null && st.Count > 0)
+                    if (st is { Count: > 0 })
                     {
                         dow = (int)st.First();
                     }

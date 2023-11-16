@@ -32,7 +32,6 @@ public class DocumentServiceHelper
     private readonly IDaoFactory _daoFactory;
     private readonly FileShareLink _fileShareLink;
     private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
     private readonly FileSecurity _fileSecurity;
     private readonly SetupInfo _setupInfo;
     private readonly FileUtility _fileUtility;
@@ -49,7 +48,6 @@ public class DocumentServiceHelper
         IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
-        AuthContext authContext,
         FileSecurity fileSecurity,
         SetupInfo setupInfo,
         FileUtility fileUtility,
@@ -59,13 +57,12 @@ public class DocumentServiceHelper
         LockerManager lockerManager,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
-        IServiceProvider serviceProvider, 
+        IServiceProvider serviceProvider,
         ExternalShare externalShare)
     {
         _daoFactory = daoFactory;
         _fileShareLink = fileShareLink;
         _userManager = userManager;
-        _authContext = authContext;
         _fileSecurity = fileSecurity;
         _setupInfo = setupInfo;
         _fileUtility = fileUtility;
@@ -82,13 +79,12 @@ public class DocumentServiceHelper
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
         var lastVersion = true;
-        FileShare linkRight;
 
         var fileDao = _daoFactory.GetFileDao<T>();
 
         var fileOptions = await _fileShareLink.CheckAsync(doc, fileDao);
         var file = fileOptions.File;
-        linkRight = fileOptions.FileShare;
+        var linkRight = fileOptions.FileShare;
 
         if (file == null)
         {
@@ -327,7 +323,7 @@ public class DocumentServiceHelper
             configuration.Document.IsLinkedForMe = !string.IsNullOrEmpty(sourceId);
         }
 
-        if (await _externalShare.GetLinkIdAsync() == default)
+        if (await _externalShare.GetLinkIdAsync() == Guid.Empty)
         {
             return (file, configuration, locatedInPrivateRoom);
         }
@@ -376,10 +372,10 @@ public class DocumentServiceHelper
 
     public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode()}_{await _global.GetDocDbKeyAsync()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await _global.GetDocDbKeyAsync()}";
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
-                             .ToList()
+                             .AsEnumerable()
                              .Concat(_machinePseudoKeys.GetMachineConstant())
                              .ToArray();
 

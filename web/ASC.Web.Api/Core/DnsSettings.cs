@@ -70,7 +70,7 @@ public class DnsSettings
                 throw new Exception(Resource.ErrorNotAllowedOption);
             }
 
-            await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+            await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
             var tenant = await _tenantManager.GetCurrentTenantAsync();
 
@@ -156,7 +156,7 @@ public class DnsSettings
 
     private async Task<string> GenerateDnsChangeConfirmUrlAsync(string email, string dnsName, string tenantAlias, ConfirmType confirmType)
     {
-        var postfix = string.Join(string.Empty, new[] { dnsName, tenantAlias });
+        var postfix = string.Join(string.Empty, dnsName, tenantAlias);
 
         var sb = new StringBuilder();
         sb.Append(await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, confirmType, postfix));

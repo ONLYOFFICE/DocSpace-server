@@ -56,7 +56,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
         var uploadSession = new ChunkedUploadSession<string>(file, contentLength);
 
         var storage = (DropboxStorage)await ProviderInfo.StorageAsync;
-        var dropboxSession = await storage.CreateResumableSessionAsync();
+        var dropboxSession = await storage.CreateRenewableSessionAsync();
         if (dropboxSession != null)
         {
             uploadSession.Items["DropboxSession"] = dropboxSession;
@@ -101,8 +101,9 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
 
         uploadSession.BytesUploaded += chunkLength;
 
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
+        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
         }
         else
@@ -125,13 +126,13 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
             if (file.Id != null)
             {
                 var dropboxFilePath = Dao.MakeThirdId(file.Id);
-                dropboxFile = await storage.FinishResumableSessionAsync(dropboxSession, dropboxFilePath, uploadSession.BytesUploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, dropboxFilePath, uploadSession.BytesUploaded);
             }
             else
             {
                 var folderPath = Dao.MakeThirdId(file.ParentId);
                 var title = await Dao.GetAvailableTitleAsync(file.Title, folderPath, IsExistAsync);
-                dropboxFile = await storage.FinishResumableSessionAsync(dropboxSession, folderPath, title, uploadSession.BytesUploaded);
+                dropboxFile = await storage.FinishRenewableSessionAsync(dropboxSession, folderPath, title, uploadSession.BytesUploaded);
             }
 
             await ProviderInfo.CacheResetAsync(Dao.MakeThirdId(dropboxFile));

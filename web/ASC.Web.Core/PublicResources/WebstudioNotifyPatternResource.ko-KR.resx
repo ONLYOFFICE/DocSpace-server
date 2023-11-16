@@ -139,7 +139,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -154,7 +154,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -176,7 +176,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -191,7 +191,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -204,7 +204,7 @@ ONLYOFFICE 팀
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -223,7 +223,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -242,7 +242,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -261,7 +261,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -280,7 +280,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -301,7 +301,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -322,7 +322,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -343,7 +343,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -364,7 +364,7 @@ _참고: 구독료를 지불하는 사람이 지불자이 되고 지불자만 �
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
@@ -375,7 +375,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
@@ -386,7 +386,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
@@ -397,7 +397,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>안녕하세요!
@@ -408,7 +408,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -429,7 +429,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -450,7 +450,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -471,7 +471,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -492,7 +492,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털의 메시지
@@ -514,7 +514,7 @@ $Body</value>
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -527,7 +527,7 @@ ONLYOFFICE 팀
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>안녕하세요!
@@ -557,7 +557,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -584,7 +584,7 @@ ONLYOFFICE DocSpace의 구성 및 관리에 대해 자세히 알아보려면 "He
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>고객님께서는 고객님의 ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}"에 반 년 이상 로그인하지 않으셨습니다.
@@ -599,7 +599,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>안녕하세요!
@@ -612,7 +612,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -677,7 +677,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="ButtonAccept" xml:space="preserve">
     <value>수락</value>
@@ -1086,7 +1086,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -1107,7 +1107,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_activate_email" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"$InviteLink" 포털에 대한 이메일 주소를 활성화해주세요
@@ -1130,11 +1130,11 @@ $OwnerName님,
 백업 절차에 대한 자세한 내용은 저희의 "데이터 백업":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" 사용자 가이드를 참고하세요.
 
 
-문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: "support.onlyoffice.com":"http://support.onlyoffice.com"
+문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: "support.onlyoffice.com":"https://support.onlyoffice.com"
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 포털 백업이 생성되었습니다
@@ -1145,11 +1145,11 @@ $OwnerName님,
 
 백업 절차에 대한 자세한 내용은 저희의 [데이터 백업](${__HelpLink}/tipstricks/data-backup-restore.aspx) 사용자 가이드를 참고하세요.
 
-문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [support.onlyoffice.com](http://support.onlyoffice.com)
+문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: [support.onlyoffice.com](https://support.onlyoffice.com)
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} 계정의 이메일을 변경하고 싶으세요?
@@ -1240,7 +1240,7 @@ $OrangeButton
 
 감사합니다, 
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
@@ -1272,7 +1272,7 @@ $OrangeButton
 
 감사합니다, 
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털의 메시지
@@ -1346,7 +1346,7 @@ $RegionName 리전으로 마이그레이션하는 동안 오류가 발생했습�
 문의 사항이 있거나 도움이 필요한 경우 언제든지 연락주세요: "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
@@ -1360,7 +1360,7 @@ ONLYOFFICE™ 지원팀
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>
@@ -1375,7 +1375,7 @@ $RegionName으로의 포털 마이그레이션이 시작되었습니다. 데이�
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.포털 마이그레이션
@@ -1420,7 +1420,7 @@ $OrangeButton
 
 감사합니다, 
 ONLYOFFICE 팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>$UserName님, 안녕하세요
@@ -1518,7 +1518,7 @@ p=. "포털 재활성화":"$ActivateUrl" (이 링크는 시간 제한 없이 유
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 포털 비활성화
@@ -1538,7 +1538,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 비
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 삭제
@@ -1563,7 +1563,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) 포털 삭제
@@ -1588,7 +1588,7 @@ _알림_: 이 링크는 7일 동안만 유효합니다. 기간 내에 포털 삭
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.포털 주소 변경
@@ -1754,7 +1754,7 @@ $OrangeButton
 
 감사합니다,
 ONLYOFFICE™ 지원팀
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^알림 유형을 관리하려면 "구독 설정":"$RecipientSubscriptionConfigURL"을 변경하세요.^</value>
   </data>

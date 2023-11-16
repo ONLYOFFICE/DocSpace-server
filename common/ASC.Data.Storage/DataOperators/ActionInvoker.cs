@@ -29,17 +29,6 @@ namespace ASC.Data.Storage.DataOperators;
 public static class ActionInvoker
 {
     public static void Try(
-        Action action,
-        int maxAttempts,
-        Action<Exception> onFailure = null,
-        Action<Exception> onAttemptFailure = null,
-        int sleepMs = 1000,
-        bool isSleepExponential = true)
-    {
-        Try(state => action(), null, maxAttempts, onFailure, onAttemptFailure, sleepMs, isSleepExponential);
-    }
-
-    public static void Try(
         Action<object> action,
         object state,
         int maxAttempts,
@@ -77,15 +66,43 @@ public static class ActionInvoker
         }
     }
 
-    public static async Task TryAsync(
-        Func<Task> action,
+    public static async Task<T> TryAsync<T>(
+        Func<Task<T>> action,
         int maxAttempts,
         Action<Exception> onFailure = null,
         Action<Exception> onAttemptFailure = null,
         int sleepMs = 1000,
         bool isSleepExponential = true)
     {
-        await TryAsync(state => action(), null, maxAttempts, onFailure, onAttemptFailure, sleepMs, isSleepExponential);
+        ArgumentNullException.ThrowIfNull(action);
+
+        if (sleepMs < 0)
+        {
+            sleepMs = 0;
+        }
+        
+        var countAttempts = 0;
+        while (countAttempts++ < maxAttempts)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception error)
+            {
+                if (countAttempts < maxAttempts)
+                {
+                    onAttemptFailure?.Invoke(error);
+                    await Task.Delay(isSleepExponential ? sleepMs * countAttempts : sleepMs);
+                }
+                else
+                {
+                    onFailure?.Invoke(error);
+                }
+            }
+        }
+
+        return default;
     }
 
     public static async Task TryAsync(
@@ -105,7 +122,6 @@ public static class ActionInvoker
             try
             {
                 await action(state);
-                return;
             }
             catch (Exception error)
             {

@@ -1231,7 +1231,7 @@ $OrangeButton
 
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>想要更改 ${LetterLogoText} 账户中的邮箱？
@@ -1457,7 +1457,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户停
 
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>删除 [${__VirtualRootPath}](${__VirtualRootPath}) 门户
@@ -1482,7 +1482,7 @@ _注意_：此链接仅在 7 天内可用。请在这一期限内完成门户删
 
 祝好，
 ONLYOFFICE™ 支持团队
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>用户 "$FromUserName":"$FromUserLink" 已删除其档案，且此档案现已被屏蔽。该用户的所有文件仍然处于已指派状态并会占用磁盘空间。

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.Hosting;
 
-[Singletone]
+[Singleton]
 public class RegisterInstanceWorkerService<T> : BackgroundService where T : IHostedService
 {
     private readonly ILogger _logger;

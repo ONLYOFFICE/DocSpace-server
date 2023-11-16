@@ -39,21 +39,6 @@ public class LockerManager
         _thirdPartySelector = thirdPartySelector;
     }
 
-    public async Task<bool> FileLockedForMe<T>(T fileId, Guid userId = default)
-    {
-        var app = _thirdPartySelector.GetAppByFileId(fileId.ToString());
-        if (app != null)
-        {
-            return false;
-        }
-
-        userId = userId == default ? _authContext.CurrentAccount.ID : userId;
-        var tagDao = _daoFactory.GetTagDao<T>();
-        var lockedBy = await FileLockedBy(fileId, tagDao);
-
-        return lockedBy != Guid.Empty && lockedBy != userId;
-    }
-
     public async Task<bool> FileLockedForMeAsync<T>(T fileId, Guid userId = default)
     {
         var app = _thirdPartySelector.GetAppByFileId(fileId.ToString());
@@ -62,18 +47,11 @@ public class LockerManager
             return false;
         }
 
-        userId = userId == default ? _authContext.CurrentAccount.ID : userId;
+        userId = userId == Guid.Empty ? _authContext.CurrentAccount.ID : userId;
         var tagDao = _daoFactory.GetTagDao<T>();
         var lockedBy = await FileLockedByAsync(fileId, tagDao);
 
         return lockedBy != Guid.Empty && lockedBy != userId;
-    }
-
-    public async Task<Guid> FileLockedBy<T>(T fileId, ITagDao<T> tagDao)
-    {
-        var tagLock = await tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
-
-        return tagLock != null ? tagLock.Owner : Guid.Empty;
     }
 
     public async Task<Guid> FileLockedByAsync<T>(T fileId, ITagDao<T> tagDao)
@@ -235,7 +213,7 @@ public class EntryStatusManager
                 continue;
             }
 
-            if (tagsNew.Any(r => r.EntryId.Equals(file.Id)))
+            if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
             {
                 file.IsNew = true;
             }
@@ -263,12 +241,9 @@ public class EntryStatusManager
 
         var tagsFavorite = await tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Favorite, folders).ToListAsync();
 
-        foreach (var folder in folders)
+        foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
-            if (tagsFavorite.Any(r => r.EntryId.Equals(folder.Id)))
-            {
-                folder.IsFavorite = true;
-            }
+            folder.IsFavorite = true;
         }
     }
 }
@@ -371,10 +346,10 @@ public class EntryManager
     }
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool searchInContent, bool withSubfolders, OrderBy orderBy, T roomId = default, SearchArea searchArea = SearchArea.Active, bool withoutTags = false, IEnumerable<string> tagNames = null,
+        string searchText, string extension, bool searchInContent, bool withSubfolders, OrderBy orderBy, T roomId = default, SearchArea searchArea = SearchArea.Active, bool withoutTags = false, IEnumerable<string> tagNames = null,
         bool excludeSubject = false, ProviderFilter provider = ProviderFilter.None, SubjectFilter subjectFilter = SubjectFilter.Owner, ApplyFilterOption applyFilterOption = ApplyFilterOption.All)
     {
-        var total = 0;
+        int total;
 
         if (parent == null)
         {
@@ -401,16 +376,27 @@ public class EntryManager
         }
 
         var (foldersFilterType, foldersSearchText) = applyFilterOption != ApplyFilterOption.Files ? (filterType, searchText) : (FilterType.None, string.Empty);
-        var (filesFilterType, filesSearchText) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText) : (FilterType.None, string.Empty);
+        var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, string.Empty);
 
+        if (!string.IsNullOrEmpty(extension))
+        {
+            extension = extension.Trim();
+            extension = extension.StartsWith('.') ? extension : $".{extension}";
+            
+            if (applyFilterOption == ApplyFilterOption.All)
+            {
+                filterType = foldersFilterType = FilterType.FilesOnly;
+            }
+        }
+        
         if (parent.FolderType == FolderType.Projects && parent.Id.Equals(await _globalFolderHelper.FolderProjectsAsync))
         {
-
+            
         }
         else if (parent.FolderType == FolderType.SHARE)
         {
             //share
-            var shared = await _fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders).ToListAsync();
+            var shared = await _fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
             entries.AddRange(shared);
 
@@ -418,14 +404,14 @@ public class EntryManager
         }
         else if (parent.FolderType == FolderType.Recent)
         {
-            var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, searchInContent);
+            var files = await GetRecentAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
             entries.AddRange(files);
 
             CalculateTotal();
         }
         else if (parent.FolderType == FolderType.Favorites)
         {
-            var (files, folders) = await GetFavoritesAsync(filterType, subjectGroup, subjectId, searchText, searchInContent);
+            var (files, folders) = await GetFavoritesAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
 
             entries.AddRange(folders);
             entries.AddRange(files);
@@ -436,7 +422,7 @@ public class EntryManager
         {
             var folderDao = _daoFactory.GetFolderDao<T>();
             var fileDao = _daoFactory.GetFileDao<T>();
-            var files = await GetTemplatesAsync(folderDao, fileDao, filterType, subjectGroup, subjectId, searchText, searchInContent).ToListAsync();
+            var files = await GetTemplatesAsync(folderDao, fileDao, filterType, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
             entries.AddRange(files);
 
             CalculateTotal();
@@ -447,9 +433,9 @@ public class EntryManager
             var fileDao = _daoFactory.GetFileDao<T>();
 
             var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, withSubfolders);
-            var files = fileDao.GetFilesAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders);
+            var files = fileDao.GetFilesAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders);
             //share
-            var shared = _fileSecurity.GetPrivacyForMeAsync(filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders);
+            var shared = _fileSecurity.GetPrivacyForMeAsync(filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders);
 
             var task1 = _fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = _fileSecurity.FilterReadAsync(files).ToListAsync();
@@ -461,7 +447,7 @@ public class EntryManager
 
             CalculateTotal();
         }
-        else if ((parent.FolderType == FolderType.VirtualRooms || parent.FolderType == FolderType.Archive) && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive && !parent.ProviderEntry)
         {
             entries = await _fileSecurity.GetVirtualRoomsAsync(filterType, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, subjectFilter);
 
@@ -473,7 +459,7 @@ public class EntryManager
             var fileDao = _daoFactory.GetFileDao<T>();
 
             var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId);
-            var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, roomId);
+            var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId);
 
             var folders = await folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, from, count, roomId)
                 .ToListAsync();
@@ -481,7 +467,7 @@ public class EntryManager
             var filesCount = count - folders.Count;
             var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
-            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId)
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, filesOffset, filesCount, roomId)
                 .ToListAsync();
 
             entries = new List<FileEntry>(folders.Count + files.Count);
@@ -501,12 +487,12 @@ public class EntryManager
         else
         {
             var folders = _daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);
-            var files = _daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, searchInContent, withSubfolders, excludeSubject);
+            var files = _daoFactory.GetFileDao<T>().GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject);
 
             var task1 = _fileSecurity.FilterReadAsync(folders).ToListAsync();
             var task2 = _fileSecurity.FilterReadAsync(files).ToListAsync();
 
-            if (filterType == FilterType.None || filterType == FilterType.FoldersOnly)
+            if (filterType is FilterType.None or FilterType.FoldersOnly)
             {
                 var folderList = GetThirpartyFoldersAsync(parent, searchText);
                 var thirdPartyFolder = FilterEntries(folderList, filterType, subjectGroup, subjectId, searchText, searchInContent);
@@ -629,14 +615,15 @@ public class EntryManager
         }
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent)
+    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, FilterType filter, bool subjectGroup, Guid subjectId, string searchText,
+        string extension, bool searchInContent)
     {
         var tagDao = _daoFactory.GetTagDao<T>();
         var tags = tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Template);
 
         var fileIds = await tags.Where(tag => tag.EntryType == FileEntryType.File).Select(tag => (T)Convert.ChangeType(tag.EntryId, typeof(T))).ToArrayAsync();
 
-        var filesAsync = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, searchInContent);
+        var filesAsync = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
         var files = _fileSecurity.FilterReadAsync(filesAsync.Where(file => file.RootFolderType != FolderType.TRASH));
 
         await foreach (var file in files)
@@ -684,7 +671,7 @@ public class EntryManager
         }
     }
 
-    public async Task<IEnumerable<FileEntry>> GetRecentAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent)
+    public async Task<IEnumerable<FileEntry>> GetRecentAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent)
     {
         var tagDao = _daoFactory.GetTagDao<int>();
         var tags = tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Recent).Where(tag => tag.EntryType == FileEntryType.File).Select(r => r.EntryId);
@@ -709,8 +696,8 @@ public class EntryManager
 
         var files = new List<FileEntry>();
 
-        var firstTask = GetRecentByIdsAsync(fileIdsInt, filter, subjectGroup, subjectId, searchText, searchInContent).ToListAsync();
-        var secondTask = GetRecentByIdsAsync(fileIdsString, filter, subjectGroup, subjectId, searchText, searchInContent).ToListAsync();
+        var firstTask = GetRecentByIdsAsync(fileIdsInt, filter, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
+        var secondTask = GetRecentByIdsAsync(fileIdsString, filter, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
 
         foreach (var items in await Task.WhenAll(firstTask.AsTask(), secondTask.AsTask()))
         {
@@ -729,17 +716,17 @@ public class EntryManager
                 fileId = fileString.Id;
             }
 
-            return listFileIds.IndexOf(fileId.ToString());
+            return listFileIds.IndexOf(fileId);
         });
 
         return result;
 
-        async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent)
+        async IAsyncEnumerable<FileEntry> GetRecentByIdsAsync<T>(IEnumerable<T> fileIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string ext, bool searchInContent)
         {
             var folderDao = _daoFactory.GetFolderDao<T>();
             var fileDao = _daoFactory.GetFileDao<T>();
 
-            var files = _fileSecurity.FilterReadAsync(fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, searchInContent).Where(file => file.RootFolderType != FolderType.TRASH));
+            var files = _fileSecurity.FilterReadAsync(fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, ext, searchInContent).Where(file => file.RootFolderType != FolderType.TRASH));
 
             await foreach (var file in files)
             {
@@ -749,7 +736,7 @@ public class EntryManager
         }
     }
 
-    public async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent)
+    public async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesAsync(FilterType filter, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent)
     {
         var tagDao = _daoFactory.GetTagDao<int>();
         var tags = tagDao.GetTagsAsync(_authContext.CurrentAccount.ID, TagType.Favorite);
@@ -763,30 +750,30 @@ public class EntryManager
         {
             if (tag.EntryType == FileEntryType.File)
             {
-                if (tag.EntryId is int)
+                if (tag.EntryId is int eId)
                 {
-                    fileIdsInt.Add((int)tag.EntryId);
+                    fileIdsInt.Add(eId);
                 }
-                else if (tag.EntryId is string)
+                else if (tag.EntryId is string esId)
                 {
-                    fileIdsString.Add((string)tag.EntryId);
+                    fileIdsString.Add(esId);
                 }
             }
             else
             {
-                if (tag.EntryId is int)
+                if (tag.EntryId is int eId)
                 {
-                    folderIdsInt.Add((int)tag.EntryId);
+                    folderIdsInt.Add(eId);
                 }
-                else if (tag.EntryId is string)
+                else if (tag.EntryId is string esId)
                 {
-                    folderIdsString.Add((string)tag.EntryId);
+                    folderIdsString.Add(esId);
                 }
             }
         }
 
-        var (filesInt, foldersInt) = await GetFavoritesByIdAsync(fileIdsInt, folderIdsInt, filter, subjectGroup, subjectId, searchText, searchInContent);
-        var (filesString, foldersString) = await GetFavoritesByIdAsync(fileIdsString, folderIdsString, filter, subjectGroup, subjectId, searchText, searchInContent);
+        var (filesInt, foldersInt) = await GetFavoritesByIdAsync(fileIdsInt, folderIdsInt, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
+        var (filesString, foldersString) = await GetFavoritesByIdAsync(fileIdsString, folderIdsString, filter, subjectGroup, subjectId, searchText, extension, searchInContent);
 
         var files = new List<FileEntry>(filesInt);
         files.AddRange(filesString);
@@ -796,17 +783,18 @@ public class EntryManager
 
         return (files, folders);
 
-        async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesByIdAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, FilterType filter, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent)
+        async Task<(IEnumerable<FileEntry>, IEnumerable<FileEntry>)> GetFavoritesByIdAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, FilterType filter, bool subjectGroup, 
+            Guid subjectId, string searchText, string extension, bool searchInContent)
         {
             var folderDao = _daoFactory.GetFolderDao<T>();
             var fileDao = _daoFactory.GetFileDao<T>();
             var asyncFolders = folderDao.GetFoldersAsync(folderIds, filter, subjectGroup, subjectId, searchText, false, false);
-            var asyncFiles = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, searchInContent, true);
+            var asyncFiles = fileDao.GetFilesFilteredAsync(fileIds, filter, subjectGroup, subjectId, searchText, extension, searchInContent, true);
 
             List<FileEntry<T>> files = new();
             List<FileEntry<T>> folders = new();
 
-            if (filter == FilterType.None || filter == FilterType.FoldersOnly)
+            if (filter is FilterType.None or FilterType.FoldersOnly)
             {
                 var tmpFolders = asyncFolders.Where(folder => folder.RootFolderType != FolderType.TRASH);
 
@@ -1256,11 +1244,9 @@ public class EntryManager
     {
         try
         {
-            var linkDao = _daoFactory.GetLinkDao();
             var fileSourceDao = _daoFactory.GetFileDao<TSource>();
             var fileDraftDao = _daoFactory.GetFileDao<TDraft>();
             var folderSourceDao = _daoFactory.GetFolderDao<TSource>();
-            var folderDraftDao = _daoFactory.GetFolderDao<TDraft>();
 
             if (sourceId == null)
             {
@@ -1315,7 +1301,7 @@ public class EntryManager
 
                     await _socketManager.CreateFolderAsync(folder);
 
-                    _ = _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, MessageInitiator.DocsService, folder.Title);
+                    await _filesMessageService.SendAsync(MessageAction.FolderCreated, folder, MessageInitiator.DocsService, folder.Title);
                 }
 
                 folderId = folder.Id;
@@ -1340,7 +1326,7 @@ public class EntryManager
                 submitFile = await fileSourceDao.SaveFileAsync(submitFile, stream);
             }
 
-            _ = _filesMessageService.SendAsync(MessageAction.FileCreated, submitFile, MessageInitiator.DocsService, submitFile.Title);
+            await _filesMessageService.SendAsync(MessageAction.FileCreated, submitFile, MessageInitiator.DocsService, submitFile.Title);
 
             await _fileMarker.MarkAsNewAsync(submitFile);
 
@@ -1397,7 +1383,7 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_LockedFile);
         }
 
-        if (checkRight && (!forcesave.HasValue || forcesave.Value == ForcesaveType.None) && _fileTracker.IsEditing(file.Id))
+        if (checkRight && forcesave is null or ForcesaveType.None && _fileTracker.IsEditing(file.Id))
         {
             throw new Exception(FilesCommonResource.ErrorMassage_SecurityException_UpdateEditingFile);
         }
@@ -1664,14 +1650,14 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_NotSupportedFormat);
         }
 
-        var exists = _cache.Get<string>(_updateList + fileId.ToString()) != null;
+        var exists = _cache.Get<string>(_updateList + fileId) != null;
         if (exists)
         {
             throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
         }
         else
         {
-            _cache.Insert(_updateList + fileId.ToString(), fileId.ToString(), TimeSpan.FromMinutes(2));
+            _cache.Insert(_updateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
         }
 
         try
@@ -1704,21 +1690,19 @@ public class EntryManager
             {
                 var CopyThumbnailsAsync = async () =>
                 {
-                    await using (var scope = _serviceProvider.CreateAsyncScope())
+                    await using var scope = _serviceProvider.CreateAsyncScope();
+                    var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
+                    var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
+
+                    foreach (var size in _thumbnailSettings.Sizes)
                     {
-                        var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
-                        var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
-
-                        foreach (var size in _thumbnailSettings.Sizes)
-                        {
-                            await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
-                                                                    String.Empty,
-                                                                    _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
-                        }
-
-                        await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
+                        await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
+                            _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
+                            String.Empty,
+                            _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
                     }
+
+                    await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
                 };
 
                 _ = Task.Run(() => CopyThumbnailsAsync().GetAwaiter().GetResult());
@@ -1728,7 +1712,7 @@ public class EntryManager
             var linkDao = _daoFactory.GetLinkDao();
             await linkDao.DeleteAllLinkAsync(newFile.Id.ToString());
 
-            await _fileMarker.MarkAsNewAsync(newFile); ;
+            await _fileMarker.MarkAsNewAsync(newFile);
 
             await _entryStatusManager.SetFileStatusAsync(newFile);
 
@@ -1740,7 +1724,7 @@ public class EntryManager
                 var tagTemplate = Tag.Template(_authContext.CurrentAccount.ID, newFile);
                 var tagDao = _daoFactory.GetTagDao<T>();
 
-                await tagDao.RemoveTags(tagTemplate);
+                await tagDao.RemoveTagsAsync(tagTemplate);
 
                 newFile.IsTemplate = false;
             }
@@ -1802,13 +1786,9 @@ public class EntryManager
         }
         else
         {
-            if (!_fileTracker.IsEditing(lastVersionFile.Id))
+            if (!_fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
-                if (fileVersion.Version == lastVersionFile.Version)
-                {
-                    lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
-                }
-
+                lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
                 //lastVersionFile.VersionGroup++;
             }
@@ -1914,7 +1894,7 @@ public class EntryManager
         foreach (var entry in entries)
         {
             var fileEntry = (FileEntry<int>)entry;
-            var data = originsData.FirstOrDefault(data => data.Entries.Contains(new KeyValuePair<string, FileEntryType>(fileEntry.Id.ToString(), fileEntry.FileEntryType)));
+            var data = originsData.Find(data => data.Entries.Contains(new KeyValuePair<string, FileEntryType>(fileEntry.Id.ToString(), fileEntry.FileEntryType)));
 
             if (data?.OriginRoom != null && DocSpaceHelper.IsRoom(data.OriginRoom.FolderType))
             {
@@ -1945,7 +1925,7 @@ public class EntryManager
             await _socketManager.DeleteFolder(folder);
         }
 
-        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, true);
+        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true);
         await foreach (var file in files)
         {
             _logger.InformationDeletefile(file.Id.ToString(), parentId.ToString());
@@ -1975,7 +1955,7 @@ public class EntryManager
             }
         }
 
-        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, true)
+        var files = fileDao.GetFilesAsync(parentId, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true)
             .WhereAwait(async file => file.Shared &&
             (await _fileSecurity.GetSharesAsync(file)).Any(record => record.Subject != FileConstant.ShareLinkId && record.Share != FileShare.Restrict));
 
