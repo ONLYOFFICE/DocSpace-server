@@ -128,6 +128,11 @@ public class EmailValidationKeyModelHelper
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await _userManager.GetUserByEmailAsync(email);
+                if(userInfo == Constants.LostUser || userInfo.Id != uiD)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
                 var auditEvent = (await _auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: _messageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
                 var passwordStamp = await _authentication.GetUserPasswordStampAsync(userInfo.Id);
 
