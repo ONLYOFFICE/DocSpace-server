@@ -1294,7 +1294,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account and search for contacts..
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account..
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {

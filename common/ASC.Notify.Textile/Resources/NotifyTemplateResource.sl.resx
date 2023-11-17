@@ -210,9 +210,7 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>To email sporočilo je ustvarjeno samodejno in vam ni potrebno odgovoriti.&lt;br /&gt;To email sporočilo ste prejeli, ker ste registrirani uporabnik&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Kliknite tukaj, če se želite odjaviti od email obvestil DocSpace: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Odjavi se&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>Za vsa vprašanja v zvezi z nakupom nam pošljite email na &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; V primeru tehničnih težav kontaktirajte našo &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href=“https://www.onlyoffice.com/support-contact-form.aspx"&gt;ekipo za podporo&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target=“_blank"&gt;Kliknite tukaj za odjavo&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

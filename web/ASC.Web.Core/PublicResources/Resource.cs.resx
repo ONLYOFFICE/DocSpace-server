@@ -551,7 +551,7 @@
     <value>Telefonní číslo od společnosti Twilio (vyžadováno pro autorizaci SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí Twitteru a vyhledejte kontakty.</value>
+    <value>Připojte aplikaci k přihlášení do portálu pomocí Twitteru.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Povolte aplikaci importovat uživatele ze služby Yahoo.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="PersonalFreeSpaceException" xml:space="preserve">
     <value>Překročena kvóta místa na disku</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Id Zoom klienta</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Tajemství klienta Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Povolte aplikaci přihlášení k portálu pomocí účtu Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Povolením této aplikace umožníte uživatelům přihlásit se do ONLYOFFICE pomocí jejich účtů Zoom. {0}Přejděte na webové stránky Zoom Developers a vytvořte novou integraci aplikace ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Příliš mnoho pokusů o přihlášení. Zkuste to prosím později</value>
   </data>
 </root>

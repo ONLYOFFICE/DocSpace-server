@@ -416,4 +416,16 @@
   <data name="CommentAutosave" xml:space="preserve">
     <value>Automaticky ukladané</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Zdieľaný odkaz</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Odkaz na pozvánku</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maximálny počet odkazov nesmie presiahnuť {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Príliš veľa krát ste skúšali zadať svoje heslo. Prosím, skúste to znova neskôr</value>
+  </data>
 </root>

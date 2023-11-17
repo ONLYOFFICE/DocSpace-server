@@ -122,7 +122,7 @@
 
 Vitajte v ONLYOFFICE DocSpace! Váš používateľský profil bol úspešne pridaný do "${__VirtualRootPath}":"${__VirtualRootPath}". Teraz môžete:
 
-* Pracovať s ostatnými používateľmi v miestnosti, do ktorej ste pozvaní*: miestnosti na spoluprácu pre spoluautorstvo v reálnom čase alebo vlastné miestnosti s flexibilnými nastaveniami na akýkoľvek účel*.
+* Pracovať s ostatnými používateľmi v miestnosti, do ktorej ste pozvaní: *miestnosti na spoluprácu pre spoluautorstvo v reálnom čase alebo vlastné miestnosti s flexibilnými nastaveniami na akýkoľvek účel*.
 
 * *Pracovať so súbormi rôznych formátov*: textové dokumenty, tabuľky, prezentácie, digitálne formuláre, PDF, elektronické knihy, multimédiá.
 
@@ -132,11 +132,9 @@ Vitajte v ONLYOFFICE DocSpace! Váš používateľský profil bol úspešne prid
 
 $OrangeButton
 
-Ak potrebujete pomoc, prezrite si naše "Centrum pomoci":"https://helpcenter.onlyoffice.com/" alebo sa opýtajte nášho "tímu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
+Ak potrebujete pomoc, prezrite si naše "Centrum pomoci":"${__HelpLink}" alebo sa opýtajte nášho "tímu podpory":"${__SupportLink}".
 
-Skutočne Váš, 
-tím ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Chcete zmeniť heslo na svojom cloudovom účte? Kliknite na tlačidlo nižšie.
@@ -154,14 +152,13 @@ Potvrďte zrušenie účtu
 
 *Poznámka*: Po vymazaní bude váš účet a všetky údaje s ním spojené natrvalo vymazané v súlade s naším "Vyhlásením o ochrane osobných údajov":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Prečítajte si viac o zrušení účtu":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Prečítajte si viac o zrušení účtu":"${__HelpLink}/administration/configuration.aspx"
 
 Ak nechcete pokračovať, ignorujte tento e-mail. 
 
-Ak máte akékoľvek otázky, kontaktujte nás na adrese "support@onlyoffice.com":"mailto:support@onlyoffice.com".
+Ak máte akékoľvek otázky, kontaktujte nás na adrese "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-S úctou,
-Tím ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Chcete zmeniť e-mail pre svoj účet cloud office?
@@ -187,15 +184,15 @@ Nechcete meniť svoj e-mail? Jednoducho ignorujte túto správu.</value>
   </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Dobrý deň,
+
 práve ste si zaregistrovali účet ONLYOFFICE na osobné použitie. Kliknite "tu":"$InviteLink", aby ste potvrdili registráciu a vytvorili heslo.
 
 Ak sa vám nepodarí otvoriť odkaz, skopírujte nasledujúci odkaz "$InviteLink":"$InviteLink" a vložte ho do adresného riadka prehliadača.
 
-S úctou,
-Tím ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>h3. Bol zaregistrovaný nový portál
+    <value>h3.Bol zaregistrovaný nový portál
 
 # URL adresa portálu: "${__VirtualRootPath}":"${__VirtualRootPath}"
 # Meno: $UserName
@@ -205,41 +202,36 @@ Tím ONLYOFFICE</value>
 # Dátum vytvorenia: $Date</value>
   </data>
   <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1. Vitajte v ONLYOFFICE Personal
+    <value>h1.Vitajte v ONLYOFFICE Personal
 
-Práve ste si vytvorili svoju personálnu kanceláriu v cloude.
+Práve ste si vytvorili svoju osobnú kanceláriu v cloude.
 
-h3. Je to virtuálny pracovný priestor, kde môžete upravovať a ukladať dokumenty, pracovať s nimi odkiaľkoľvek a zabezpečiť k nim prístup svojim kamarátom alebo kolegom.
+h3.Je to virtuálny pracovný priestor, kde môžete upravovať a ukladať dokumenty, pracovať s nimi odkiaľkoľvek a umožniť k nim prístup svojim kamarátom alebo kolegom.
 
-h3. Pre rýchly začiatok vám ponúkame prehľad toho, čo môžete v ONLYOFFICE robiť:
+h3.Na rýchly začiatok vám ponúkame prehľad toho, čo môžete v ONLYOFFICE robiť:
 
 - Vytvárajte, prezerajte a upravujte textové dokumenty, tabuľky, prezentácie.
 
-- Pracujte so všetkými populárnymi formátmi. Ponúkame maximálnu kompatibilitu so súbormi MS Office.
+- Pracujte so všetkými populárnymi formátmi. Najvyššia kompatibilita so súbormi MS Office.
 
-- Vytvárajte "formuláre na vyplnenie":"https://www.onlyoffice.com/form-creator.aspx" a spolupracujte na ich úprave.
+- Vytvárajte a spoločne upravujte "formuláre pripravené na vyplnenie":"https://www.onlyoffice.com/form-creator.aspx".
 
 - Zdieľajte dokumenty a spolupracujte na nich online.
 
-- Používajte rôzne pluginy, aby ste mali viac možností.
+- Aplikujte rôzne rozšírenia na používanie ďalších funkcií.
 
 - Jednoduchý prístup k osobnému cloudu prostredníctvom "rozšírenia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
-Dokumenty môžete upravovať aj offline pomocou našich bezplatných "editorov pre počítače":"https://www.onlyoffice.com/download-desktop.aspx" alebo si zaobstarajte mobilný balík na úpravu pre svoje zariadenie so systémom "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" alebo "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+Dokumenty môžete upravovať aj offline pomocou nášho bezplatného "editora pre počítače":"https://www.onlyoffice.com/download-desktop.aspx" alebo si nainštalujte balík na úpravu dokumentov pre mobilné zariadenia so systémom "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" alebo "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-S úctou,
-Tím ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Vážený/Vážená $UserName,
 
 Proces vymazania údajov používateľa "$FromUserName":"$FromUserLink" bol úspešne dokončený.
 
-Vymazanie osobných údajov umožnilo uvoľniť:
-
-# Dokumenty - $DocsSpace
-# Mail - $MailSpace
-# Talk - $TalkSpace</value>
+Vymazanie osobných údajov umožnilo uvoľniť $DocsSpace</value>
   </data>
   <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
     <value>Urobte to isté ako používateľ|Pripojte Dropbox, Box a ďalšie účty v časti "Spoločné"|Nastavte prístupové práva k dokumentom a priečinkom v časti "Spoločné"</value>

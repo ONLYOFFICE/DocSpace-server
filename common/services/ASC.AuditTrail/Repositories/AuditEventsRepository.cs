@@ -117,12 +117,14 @@ public class AuditEventsRepository
             query = query.Where(r => r.Event.UserId != withoutUserId.Value);
         }
 
-        var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
-
-
         if (actions != null && actions.Any() && actions[0] != null && actions[0] != MessageAction.None)
         {
             query = query.Where(r => actions.Contains(r.Event.Action != null ? (MessageAction)r.Event.Action : MessageAction.None));
+
+            if (target != null)
+            {
+                query = query.Where(r => r.Event.Target == target);
+            }
         }
         else
         {
@@ -156,7 +158,7 @@ public class AuditEventsRepository
                         .SelectMany(r => r.Mappers)
                         .SelectMany(r => r.Actions);
             }
-
+            var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
             if (isFindActionType || isNeedFindEntry)
             {
                 actionsList = actionsList
@@ -166,7 +168,7 @@ public class AuditEventsRepository
 
             if (isNeedFindEntry)
             {
-                FindByEntry(query, entry.Value, target, actionsList);
+                query = FindByEntry(query, entry.Value, target, actionsList);
             }
             else
             {
@@ -206,27 +208,20 @@ public class AuditEventsRepository
             query = query.Take(limit);
         }
         var events = _mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await query.ToListAsync());
-
-        foreach(var e in events)
+        foreach (var e in events)
         {
             await _geolocationHelper.AddGeolocationAsync(e);
         }
         return events;
     }
 
-    private static void FindByEntry(IQueryable<AuditEventQuery> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)
+    private static IQueryable<AuditEventQuery> FindByEntry(IQueryable<AuditEventQuery> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)
     {
-        Expression<Func<AuditEventQuery, bool>> a = r => false;
+        var dict = actions.Where(d => d.Value.EntryType1 == entry || d.Value.EntryType2 == entry).ToDictionary(a => (int)a.Key, a => a.Value);
 
-        foreach (var action in actions)
-        {
-            if (action.Value.EntryType1 == entry || action.Value.EntryType2 == entry)
-            {
-                a = a.Or(r => r.Event.Action == (int)action.Key && r.Event.Target.Split(',', StringSplitOptions.TrimEntries).Contains(target));
-            }
-        }
-
-        q = q.Where(a);
+        q = q.Where(r => dict.Keys.Contains(r.Event.Action.Value)
+            && r.Event.Target.Contains(target));
+        return q;
     }
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)
