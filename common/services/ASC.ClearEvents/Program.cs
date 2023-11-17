@@ -71,7 +71,7 @@ try
     {
         Predicate = _ => true,
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    });
+    }).ShortCircuit();
 
     app.MapHealthChecks("/liveness", new HealthCheckOptions
     {

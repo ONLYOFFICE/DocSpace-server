@@ -430,7 +430,7 @@ public abstract class BaseStartup
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
 
             endpoints.MapHealthChecks("/ready", new HealthCheckOptions
             {
