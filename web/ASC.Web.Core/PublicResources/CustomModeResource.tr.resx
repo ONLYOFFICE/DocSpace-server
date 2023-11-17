@@ -164,7 +164,7 @@ Hızlı bir başlangıç için, ONLYOFFICE ile yapabilecekleriniz şunlardır:
 
 - Ekstra özellikler uygulamak için çeşitli eklentiler kullanma
 
-- "Chrome eklentisi ile":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" Personal bulutunuza kolay erişim
+- "Chrome eklentisi ile":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=tr" Personal bulutunuza kolay erişim
 
 Ayrıca, belgeleri ücretsiz "masaüstü düzenleyicilerimiz":"https://www.onlyoffice.com/download-desktop.aspx" ile çevrimdışı olarak da düzenleyebilir ya da "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" veya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" cihazınız için mobil düzenleme programını indirebilirsiniz.
 
@@ -195,7 +195,7 @@ $TrulyYours</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com adresindeki hesabınızın sonlandırılmasını talep ettiniz. İsteği tamamlamak için bağlantıya tıklayın (bağlantı 7 günlük bir süre boyunca etkindir):
 
-Hesap sonlandırmasını onaylayın
+$OrangeButton
 
 *Not*: Silme sonrasında, hesabınız ve tüm ilişkili veriler "Gizlilik Politikası":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca kalıcı olarak silinecektir.
 

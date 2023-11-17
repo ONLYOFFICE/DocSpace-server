@@ -157,7 +157,7 @@ h3.العنوان الفرعي. للاستخدام السريع، هذا ما ي
 
 - استخدم ميزات داخلية عديدة من خلال الخواص الإضافية.
 
-- إمكانية وصول أسهل لسحابتك من خلال "إضافات كروم":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- إمكانية وصول أسهل لسحابتك من خلال "إضافات كروم":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ar".
 
 - يمكنك أيضاً تعديل الملفات بدون اتصال من خلال "سطح مكتب المحررين المجاني":"https://www.onlyoffice.com/download-desktop.aspx" أو تحصل على حزمة "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" أو "أندرويد":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
@@ -216,7 +216,7 @@ $TrulyYours</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>لقد قمت بطلب إيقاف حسابك في personal.onlyoffice.com. اتبع الرابط التالي لاكمال الطلب (الرابط صالح لمدة 7 أيام)
 
-تأكيد إيقاف الحساب
+$OrangeButton
 
 *ملاحظة* بعد حذف الحساب سيتم مسح جميع بياناتك بشكل دائم وذلك وفقاً "سياسية الخصوصية":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 

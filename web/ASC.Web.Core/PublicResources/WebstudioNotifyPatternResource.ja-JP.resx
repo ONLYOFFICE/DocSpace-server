@@ -841,4 +841,30 @@ $OrangeButton
   <data name="ButtonVisitPaymentsSection" xml:space="preserve">
     <value>お支払い方法について</value>
   </data>
+  <data name="pattern_personal_after_registration1" xml:space="preserve">
+    <value>ｈ１．個人ONLYOFFICEへようこそ！
+
+個人オフィスを作成したところです。
+
+h3．こちらは文書を編集して保存したり、友達にアクセス権を提供したり、どこからでも文書を修理のを可能にする仮想作業空間です。
+
+ONLYOFFICEはMicrosoft Office™文書形式と互換性で、作成されたオブジェクト書式と品質の 損失が皆無であることを保証します。
+
+ｈ３．簡単に作業に取りかかるために、ONLYOFFICEの可能性は下記の通りです：
+
+－コンピューターからファイルをアップロードし、または新たの作成すること；
+
+－全ての共通の形式と修理すること；
+
+－オートシェイプ、グラフ、表及び数式などを編集すること；
+
+－編集機能を拡大するように、様々な追加機能を使用すること； 
+
+「Chromeの拡張機能」を介して、個人ONLYOFFICEクラウドに容易にアクセスできます："https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ja"。
+
+「デスクトップ編集者」:"https://www.onlyoffice.com/download-desktop.aspx"を使用して、無料で、オフラインに文書を編集し、またはiOSかAndroid デバイスに「モバイル編集スイート」:"https://www.onlyoffice.com/mobile.aspx"をダウンロードします。
+
+敬具、
+ONLYOFFICEチーム</value>
+  </data>
 </root>
