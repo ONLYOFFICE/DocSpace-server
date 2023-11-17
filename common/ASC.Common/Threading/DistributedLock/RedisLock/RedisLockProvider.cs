@@ -113,7 +113,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
                     break;
                 }
 
-                await Task.WhenAny(messageWaiter.Task, Task.Delay(delay, cancellationToken));
+                await messageWaiter.Task.WaitAsync(delay, cancellationToken);
 
                 messageWaiter = new TaskCompletionSource();
             }
