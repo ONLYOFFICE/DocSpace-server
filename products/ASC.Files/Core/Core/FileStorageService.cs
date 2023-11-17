@@ -2294,6 +2294,8 @@ public class FileStorageService //: IFileStorageService
         {
             await folderDao.DeleteFolderAsync(folderIdFromTrash);
         }
+
+        await _fileSecurity.RemoveSubjectAsync<T>(userFromId, true);
     }
 
     public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
