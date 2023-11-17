@@ -1289,12 +1289,13 @@ public class UserController : PeopleControllerBase
         }
 
         var error = await _userManagerWrapper.SendUserPasswordAsync(inDto.Email);
-        if (!string.IsNullOrEmpty(error))
+        if (string.IsNullOrEmpty(error))
         {
-            _logger.ErrorPasswordRecovery(inDto.Email, error);
+            return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
         }
 
-        return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+        _logger.ErrorPasswordRecovery(inDto.Email, error);
+        throw new InvalidOperationException(error);
     }
 
     /// <summary>
