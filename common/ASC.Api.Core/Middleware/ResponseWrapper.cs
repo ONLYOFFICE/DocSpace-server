@@ -79,6 +79,10 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
             case BillingNotFoundException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
+            case CustomHttpException:
+                status = (HttpStatusCode)((CustomHttpException)exception).StatusCode;
+                withStackTrace = false;
+                break;
         }
 
         _logger.LogCritical(exception,
