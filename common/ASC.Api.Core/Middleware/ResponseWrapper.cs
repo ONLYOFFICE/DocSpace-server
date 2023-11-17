@@ -99,6 +99,7 @@ public class CustomResponseFilterAttribute : ResultFilterAttribute
     {
         if (context.Result is ObjectResult result)
         {
+            result.DeclaredType = typeof(SuccessApiResponse);
             result.Value = new SuccessApiResponse(context.HttpContext, result.Value);
         }
 
