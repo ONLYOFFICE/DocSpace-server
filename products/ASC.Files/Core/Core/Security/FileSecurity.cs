@@ -123,13 +123,13 @@ public class FileSecurity : IFileSecurity
                 {
                     SubjectType.User, new HashSet<FileShare>
                     {
-                FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
-            }
-        },
-        {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.FillForms, FileShare.Read, FileShare.None
+                    }
+                },
+                {
                     SubjectType.InvitationLink, new HashSet<FileShare>
-            {
-                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
                     }
                 }
             }

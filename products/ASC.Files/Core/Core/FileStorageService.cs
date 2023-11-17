@@ -495,7 +495,7 @@ public class FileStorageService //: IFileStorageService
             RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
             RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
             RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
-            RoomType.FormRoom => await CreateFormRoomAsync(title, parentId, @private, indexing),
+            RoomType.FillingFormsRoom => await CreateFillingFormsRoomAsync(title, parentId, @private, indexing),
             _ => await CreateCustomRoomAsync(title, parentId, @private, indexing),
         };
 
@@ -553,7 +553,7 @@ public class FileStorageService //: IFileStorageService
             RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
             RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
             RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private, indexing), FolderType.PublicRoom),
-            RoomType.FormRoom => (await CreateFormRoomAsync(title, parentId, @private, indexing), FolderType.FormRoom),
+            RoomType.FillingFormsRoom => (await CreateFillingFormsRoomAsync(title, parentId, @private, indexing), FolderType.FillingFormsRoom),
             _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
         };
 
@@ -569,9 +569,9 @@ public class FileStorageService //: IFileStorageService
         return result.Item1;
     }
 
-    private async Task<Folder<T>> CreateFormRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
+    private async Task<Folder<T>> CreateFillingFormsRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        var result = await InternalCreateNewFolderAsync(parentId, title, FolderType.FormRoom, privacy, indexing);
+        var result = await InternalCreateNewFolderAsync(parentId, title, FolderType.FillingFormsRoom, privacy, indexing);
 
         await InternalCreateNewFolderAsync(result.Id, FilesUCResource.ReadyFormFolder, FolderType.ReadyFormFolder);
         await InternalCreateNewFolderAsync(result.Id, FilesUCResource.InProcessFormFolder, FolderType.InProcessFormFolder);
@@ -1232,7 +1232,7 @@ public class FileStorageService //: IFileStorageService
 
         var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
 
-        if(room.FolderType == FolderType.FormRoom)
+        if(room.FolderType == FolderType.FillingFormsRoom)
         {
             await SaveFormFillingResult(form, data);
         }

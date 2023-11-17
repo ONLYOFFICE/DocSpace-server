@@ -1137,7 +1137,7 @@ public class EntryManager
 
             linkedFile = _serviceProvider.GetService<File<T>>();
 
-            if (folderIfNew.FolderType == FolderType.FormRoom)
+            if (folderIfNew.FolderType == FolderType.FillingFormsRoom)
             {
                 var inProcessFormFolder = (await folderDao.GetFoldersAsync(FolderType.InProcessFormFolder, folderId).ToListAsync()).FirstOrDefault();
                 var readyFormFolder = (await folderDao.GetFoldersAsync(FolderType.ReadyFormFolder, folderId).ToListAsync()).FirstOrDefault();
@@ -1403,7 +1403,7 @@ public class EntryManager
             var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
             var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
 
-            if (room.FolderType == FolderType.FormRoom)
+            if (room.FolderType == FolderType.FillingFormsRoom)
             {
                 var linkDao = _daoFactory.GetLinkDao();
                 var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
