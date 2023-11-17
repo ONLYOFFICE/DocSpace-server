@@ -49,9 +49,6 @@ public class CreateClientDTO implements Serializable {
     @JsonProperty("redirect_uris")
     @URLCollection
     private Set<String> redirectUris;
-    @JsonProperty("allowed_origins")
-    @URLCollection
-    private Set<String> allowedOrigins;
     @JsonProperty("logout_redirect_uri")
     @Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
     message = "logout redirect uri is expected to be passed as url")

@@ -43,8 +43,6 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     private String tenantUrl;
     @JsonProperty("redirect_uris")
     private Set<String> redirectUris;
-    @JsonProperty("allowed_origins")
-    private Set<String> allowedOrigins;
     @JsonProperty("logout_redirect_uris")
     private Set<String> logoutRedirectUri;
     private boolean enabled;

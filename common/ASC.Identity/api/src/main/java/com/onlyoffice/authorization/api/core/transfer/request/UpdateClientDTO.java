@@ -33,8 +33,6 @@ public class UpdateClientDTO implements Serializable {
     private String policyUrl;
     @JsonProperty("redirect_uris")
     private Set<String> redirectUris;
-    @JsonProperty("allowed_origins")
-    private Set<String> allowedOrigins;
     @JsonProperty("logout_redirect_uri")
     private String logoutRedirectUri;
 }

@@ -49,10 +49,6 @@ public interface ClientMapper {
             @Mapping(
                     source = "websiteUrl",
                     target = "websiteUrl"
-            ),
-            @Mapping(
-                    source = "allowedOrigins",
-                    target = "allowedOrigins"
             )
     })
     Client fromMessageToEntity(ClientMessage message);

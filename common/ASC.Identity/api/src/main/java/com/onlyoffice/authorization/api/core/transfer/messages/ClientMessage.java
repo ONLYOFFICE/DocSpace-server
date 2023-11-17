@@ -28,7 +28,6 @@ public class ClientMessage implements Serializable {
     private String logo;
     private String authenticationMethod;
     private String redirectUris;
-    private String allowedOrigins;
     private String logoutRedirectUri;
     private Set<String> scopes;
     private int tenant;
