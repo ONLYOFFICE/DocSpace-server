@@ -59,15 +59,15 @@ public class WebPluginsController : BaseSettingsController
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, "No input file");
+            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
         }
 
         if (HttpContext.Request.Form.Files.Count > 1)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, "To many input files");
+            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginToManyInputFiles);
         }
 
-        var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, "Input file is null");
+        var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
