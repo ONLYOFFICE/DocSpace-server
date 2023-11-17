@@ -154,7 +154,7 @@ public class Startup
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
 
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
             {
