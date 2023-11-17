@@ -55,32 +55,27 @@ public class WebPluginsController : BaseSettingsController
     [HttpPost("webplugins")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var tenantId = system ? Tenant.DefaultTenant : tenant.Id;
-
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
-            throw new ArgumentException("No input file");
+            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
         }
 
         if (HttpContext.Request.Form.Files.Count > 1)
         {
-            throw new ArgumentException("To many input files");
+            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginToManyInputFiles);
         }
 
-        var file = HttpContext.Request.Form.Files[0] ?? throw new ArgumentException("Input file is null");
+        var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
 
-        var plugin = await _webPluginManager.AddWebPluginFromFileAsync(tenantId, file);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        await ChangeCspSettings(plugin, plugin.Enabled);
+        var webPlugin = await _webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, system);
 
-        var outDto = _mapper.Map<DbWebPlugin, WebPluginDto>(plugin);
+        await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
-        var urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(tenantId);
-
-        outDto.Url = string.Format(urlTemplate, outDto.Name);
+        var outDto = _mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
         return outDto;
     }
@@ -90,124 +85,55 @@ public class WebPluginsController : BaseSettingsController
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        var plugins = new List<DbWebPlugin>();
+        var webPlugins = await _webPluginManager.GetWebPluginsAsync(tenant.Id);
 
-        plugins.AddRange(await _webPluginManager.GetSystemWebPluginsAsync());
-
-        plugins.AddRange(await _webPluginManager.GetWebPluginsAsync(tenant.Id));
-
-        var outDto = _mapper.Map<List<DbWebPlugin>, List<WebPluginDto>>(plugins);
+        var outDto = _mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
 
         if (enabled.HasValue)
         {
             outDto = outDto.Where(i => i.Enabled == enabled).ToList();
         }
 
-        if (outDto.Any())
-        {
-            string urlTemplate = null;
-            string systemUrlTemplate = null;
-
-            foreach (var dto in outDto)
-            {
-                if (dto.System && systemUrlTemplate == null)
-                {
-                    systemUrlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(Tenant.DefaultTenant);
-                }
-
-                if (!dto.System && urlTemplate == null)
-                {
-                    urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(tenant.Id);
-                }
-
-                dto.Url = string.Format(dto.System ? systemUrlTemplate : urlTemplate, dto.Name);
-            }
-        }
-
         return outDto;
     }
 
-    [HttpGet("webplugins/{id}")]
-    public async Task<WebPluginDto> GetWebPluginByIdAsync(int id)
+    [HttpGet("webplugins/{name}")]
+    public async Task<WebPluginDto> GetWebPluginAsync(string name)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var plugin = await _webPluginManager.GetWebPluginByIdAsync(tenant.Id, id);
 
-        var outDto = _mapper.Map<DbWebPlugin, WebPluginDto>(plugin);
+        var webPlugin = await _webPluginManager.GetWebPluginByNameAsync(tenant.Id, name);
 
-        if (outDto != null)
-        {
-            var urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(tenant.Id);
-
-            outDto.Url = string.Format(urlTemplate, outDto.Name);
-        }
+        var outDto = _mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
         return outDto;
     }
 
-    [HttpPut("webplugins/{id}")]
-    public async Task UpdateWebPluginAsync(int id, WebPluginRequestsDto inDto)
+    [HttpPut("webplugins/{name}")]
+    public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        var plugin = await _webPluginManager.UpdateWebPluginAsync(tenant.Id, id, inDto.Enabled);
+        var webPlugin = await _webPluginManager.UpdateWebPluginAsync(tenant.Id, name, inDto.Enabled, inDto.Settings);
 
-        await ChangeCspSettings(plugin, inDto.Enabled);
+        await ChangeCspSettings(webPlugin, inDto.Enabled);
     }
 
-    [HttpDelete("webplugins/{id}")]
-    public async Task DeleteWebPluginAsync(int id)
+    [HttpDelete("webplugins/{name}")]
+    public async Task DeleteWebPluginAsync(string name)
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        var plugin = await _webPluginManager.DeleteWebPluginAsync(tenant.Id, id);
+        var webPlugin = await _webPluginManager.DeleteWebPluginAsync(tenant.Id, name);
 
-        await ChangeCspSettings(plugin, false);
+        await ChangeCspSettings(webPlugin, false);
     }
 
-
-    [HttpGet("webplugins/system/{name}")]
-    public async Task<WebPluginDto> GetSystemWebPluginByNameAsync(string name)
-    {
-        var plugin = await _webPluginManager.GetSystemWebPluginAsync(name);
-
-        var outDto = _mapper.Map<DbWebPlugin, WebPluginDto>(plugin);
-
-        if (outDto != null)
-        {
-            var urlTemplate = await _webPluginManager.GetPluginUrlTemplateAsync(Tenant.DefaultTenant);
-
-            outDto.Url = string.Format(urlTemplate, outDto.Name);
-        }
-
-        return outDto;
-    }
-
-    [HttpPut("webplugins/system/{name}")]
-    public async Task UpdateSystemWebPluginAsync(string name, WebPluginRequestsDto inDto)
-    {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var plugin = await _webPluginManager.UpdateSystemWebPluginAsync(name, inDto.Enabled);
-
-        await ChangeCspSettings(plugin, inDto.Enabled);
-    }
-
-    [HttpDelete("webplugins/system/{name}")]
-    public async Task DeleteSystemWebPluginAsync(string name)
-    {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var plugin = await _webPluginManager.DeleteSystemWebPluginAsync(name);
-
-        await ChangeCspSettings(plugin, false);
-    }
-
-    private async Task ChangeCspSettings(DbWebPlugin plugin, bool enabled)
+    private async Task ChangeCspSettings(WebPlugin plugin, bool enabled)
     {
         if (string.IsNullOrEmpty(plugin.CspDomains))
         {
