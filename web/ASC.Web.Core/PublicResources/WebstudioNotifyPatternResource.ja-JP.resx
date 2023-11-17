@@ -842,29 +842,40 @@ $OrangeButton
     <value>お支払い方法について</value>
   </data>
   <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>ｈ１．個人ONLYOFFICEへようこそ！
+    <value>h1.ONLYOFFICE Personalへようこそ
 
-個人オフィスを作成したところです。
+クラウド上にパーソナルオフィスが作成されました。
 
-h3．こちらは文書を編集して保存したり、友達にアクセス権を提供したり、どこからでも文書を修理のを可能にする仮想作業空間です。
+h3.バーチャルなワークスペースで、ドキュメントの編集や保存ができ、どこからでも作業でき、友人や同僚にもアクセスできます。
 
-ONLYOFFICEはMicrosoft Office™文書形式と互換性で、作成されたオブジェクト書式と品質の 損失が皆無であることを保証します。
+h3.まずはONLYOFFICEでできることをご紹介します：
 
-ｈ３．簡単に作業に取りかかるために、ONLYOFFICEの可能性は下記の通りです：
+- テキスト文書、スプレッドシート、プレゼンテーションの作成、閲覧、編集。
 
-－コンピューターからファイルをアップロードし、または新たの作成すること；
+- すべての一般的なフォーマットで作業できます。MS Officeファイルとの高い互換性。
 
-－全ての共通の形式と修理すること；
+- すぐに記入できるフォーム":"https://www.onlyoffice.com/ja/form-creator.aspx"の作成と共同編集。
 
-－オートシェイプ、グラフ、表及び数式などを編集すること；
+- オンラインで文書を共有し、共同作業。
 
-－編集機能を拡大するように、様々な追加機能を使用すること； 
+- さまざまなプラグインを使用して、追加機能を適用できます。
 
-「Chromeの拡張機能」を介して、個人ONLYOFFICEクラウドに容易にアクセスできます："https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ja"。
+- "Chrome拡張機能":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=JA" を使って、パーソナルクラウドに簡単にアクセスできます。
 
-「デスクトップ編集者」:"https://www.onlyoffice.com/download-desktop.aspx"を使用して、無料で、オフラインに文書を編集し、またはiOSかAndroid デバイスに「モバイル編集スイート」:"https://www.onlyoffice.com/mobile.aspx"をダウンロードします。
+無料の"デスクトップエディター":"https://www.onlyoffice.com/ja/download-desktop.aspx"を使ってオフラインでドキュメントを編集したり、"iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972"または"Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"デバイス用のモバイル編集スイートを入手することもできます。
 
-敬具、
-ONLYOFFICEチーム</value>
+$TrulyYours</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>何卒よろしくお願いいたします、ONLYOFFICEサポートチーム</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>フルプレイリストを見る</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>ONLYOFFICE チーム</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>ビデオガイドでONLYOFFICE DocSpaceをマスター</value>
   </data>
 </root>
