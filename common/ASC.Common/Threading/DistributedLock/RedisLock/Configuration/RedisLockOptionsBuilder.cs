@@ -57,14 +57,14 @@ public sealed class RedisLockOptionsBuilder
         return this;
     }
 
-    public RedisLockOptionsBuilder MinimalTimeout(TimeSpan minimalTimeout)
+    public RedisLockOptionsBuilder MinTimeout(TimeSpan minTimeout)
     {
-        if (minimalTimeout < _minimumTimeout || minimalTimeout == Timeout.InfiniteTimeSpan || minimalTimeout == TimeSpan.MaxValue)
+        if (minTimeout < _minimumTimeout || minTimeout == Timeout.InfiniteTimeSpan || minTimeout == TimeSpan.MaxValue)
         {
             return this;
         }
 
-        _timeout = minimalTimeout;
+        _timeout = minTimeout;
         return this;
     }
 

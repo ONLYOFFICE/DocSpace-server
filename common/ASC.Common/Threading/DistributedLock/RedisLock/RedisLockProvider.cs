@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using IDistributedLockProvider = Medallion.Threading.IDistributedLockProvider;
+
 namespace ASC.Common.Threading.DistributedLock.RedisLock;
 
 public class RedisLockProvider : Abstractions.IDistributedLockProvider
@@ -32,7 +34,8 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     private const string ChannelName = $"{KeyPrefix}:notify";
     private const string LockQueueName = $"{KeyPrefix}:queue";
     private const string LockQueueItemTimeoutName = $"{KeyPrefix}:timeout";
-    
+
+    private readonly IDistributedLockProvider _internalLockProvider;
     private readonly IRedisClient _redisClient;
     private readonly RedisLockOptions _options;
     private readonly ILogger<RedisLockProvider> _logger;
@@ -49,16 +52,18 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
 
     public RedisLockProvider(
         IRedisClient redisClient, 
-        ILogger<RedisLockProvider> logger, 
+        ILogger<RedisLockProvider> logger,
+        IDistributedLockProvider internalLockProvider,
         Action<RedisLockOptionsBuilder> optionBuilder)
     {
         _redisClient = redisClient;
         _logger = logger;
+        _internalLockProvider = internalLockProvider;
         _options = RedisLockOptionsBuilder.GetOptions(optionBuilder);
         _expiryInMilliseconds = (long)_options.Expiry.TotalMilliseconds;
     }
     
-    public async Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
     {
         if (timeout < _options.MinTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
         {
@@ -81,7 +86,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             
             _logger.DebugTryAcquireLock(resource, stopWatch.ElapsedMilliseconds);
             
-            return new RedisLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
+            return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
         }
 
         var messageWaiter = new TaskCompletionSource();
@@ -93,7 +98,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             return Task.CompletedTask;
         });
 
-        var delay = timeout / 2;
+        var messageWaitingTimeout = timeout / 2;
         
         try
         {
@@ -113,7 +118,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
                     break;
                 }
 
-                await messageWaiter.Task.WaitAsync(delay, cancellationToken);
+                await messageWaiter.Task.WaitAsync(messageWaitingTimeout, cancellationToken);
 
                 messageWaiter = new TaskCompletionSource();
             }
@@ -139,12 +144,30 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         
         timer = StartExtendLockLoop(database, resource, lockId, cancellationToken);
 
-        return new RedisLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
+        return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
     }
 
-    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout, bool throwIfNotAcquired = false,  CancellationToken cancellationToken = default)
+    public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout, bool throwIfNotAcquired = false,  CancellationToken cancellationToken = default)
     {
-        return TryAcquireLockAsync(resource, timeout, throwIfNotAcquired, cancellationToken).GetAwaiter().GetResult();
+        return TryAcquireFairLockAsync(resource, timeout, throwIfNotAcquired, cancellationToken).GetAwaiter().GetResult();
+    }
+
+    public async Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    {
+        var stopWatch = Stopwatch.StartNew();
+        
+        var internalHandle = await _internalLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);
+
+        return GetHandle(internalHandle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
+    }
+
+    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    {
+        var stopWatch = Stopwatch.StartNew();
+        
+        var internalHandle = _internalLockProvider.TryAcquireLock(resource, timeout, cancellationToken);
+
+        return GetHandle(internalHandle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
     }
 
     private async Task<LockStatus> TryAcquireLockInternalAsync(IRedisDatabase database, string resource, string lockId, string queueKey, string queueItemTimeoutKey, TimeSpan timeout)
@@ -172,6 +195,25 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         }), cancellationToken);
 
         return timer;
+    }
+    
+    private IDistributedLockHandle GetHandle(IDistributedSynchronizationHandle handle, string resource, long elapsedMilliseconds, bool throwIfNotAcquired)
+    {
+        if (handle != null)
+        {
+            _logger.DebugTryAcquireLock(resource, elapsedMilliseconds);
+
+            return new RedisLockHandle(handle);
+        }
+
+        if (throwIfNotAcquired)
+        {
+            throw new DistributedLockException(LockStatus.NotAcquired, resource, elapsedMilliseconds);
+        }
+        
+        _logger.ErrorTryAcquireLock(resource, elapsedMilliseconds);
+
+        return _defaultHandle;
     }
     
     private static string GetLockId()
