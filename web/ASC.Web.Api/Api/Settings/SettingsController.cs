@@ -28,8 +28,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class SettingsController : BaseSettingsController
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
-
     private readonly MessageService _messageService;
     private readonly ConsumerFactory _consumerFactory;
     private readonly TimeZoneConverter _timeZoneConverter;
@@ -62,6 +60,7 @@ public class SettingsController : BaseSettingsController
     private readonly ConfigurationExtension _configurationExtension;
     private readonly IMapper _mapper;
     private readonly UserFormatter _userFormatter;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public SettingsController(
         ILoggerProvider option,
@@ -100,7 +99,8 @@ public class SettingsController : BaseSettingsController
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
-        UserFormatter userFormatter) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        UserFormatter userFormatter, 
+        IDistributedLockProvider distributedLockProvider) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _consumerFactory = consumerFactory;
         _timeZoneConverter = timeZoneConverter;
@@ -134,6 +134,7 @@ public class SettingsController : BaseSettingsController
         _configurationExtension = configurationExtension;
         _mapper = mapper;
         _userFormatter = userFormatter;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     /// <summary>
@@ -564,9 +565,8 @@ public class SettingsController : BaseSettingsController
 
         if (inDto.Theme != null)
         {
-            try
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync("save_color_theme", TimeSpan.FromSeconds(30)))
             {
-                await _semaphore.WaitAsync();
                 var theme = inDto.Theme;
 
                 if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
@@ -608,12 +608,7 @@ public class SettingsController : BaseSettingsController
                     }
                 }
 
-
                 await _settingsManager.SaveAsync(settings);
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
 

@@ -29,7 +29,6 @@ namespace ASC.Web.Files.Services.WCFService;
 [Scope]
 public class FileStorageService //: IFileStorageService
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly CompressToArchive _compressToArchive;
     private readonly OFormRequestManager _oFormRequestManager;
     private readonly ThirdPartySelector _thirdPartySelector;
@@ -88,6 +87,7 @@ public class FileStorageService //: IFileStorageService
     private readonly ExternalShare _externalShare;
     private readonly TenantUtil _tenantUtil;
     private readonly RoomLogoManager _roomLogoManager;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public FileStorageService(
         Global global,
@@ -147,7 +147,8 @@ public class FileStorageService //: IFileStorageService
         QuotaSocketManager quotaSocketManager,
         ExternalShare externalShare,
         TenantUtil tenantUtil,
-        RoomLogoManager roomLogoManager)
+        RoomLogoManager roomLogoManager, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _global = global;
         _globalStore = globalStore;
@@ -207,6 +208,7 @@ public class FileStorageService //: IFileStorageService
         _externalShare = externalShare;
         _tenantUtil = tenantUtil;
         _roomLogoManager = roomLogoManager;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public async Task<Folder<T>> GetFolderAsync<T>(T folderId)
@@ -467,9 +469,10 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
-        try
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
         {
-            await _semaphore.WaitAsync();
             ArgumentNullException.ThrowIfNull(title);
 
             await _countRoomChecker.CheckAppend();
@@ -503,10 +506,6 @@ public class FileStorageService //: IFileStorageService
             }
 
             return room;
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 

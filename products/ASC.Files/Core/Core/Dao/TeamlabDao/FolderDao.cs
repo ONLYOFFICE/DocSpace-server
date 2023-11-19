@@ -48,8 +48,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     private readonly CrossDao _crossDao;
     private readonly IMapper _mapper;
     private readonly GlobalFolder _globalFolder;
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly GlobalStore _globalStore;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public FolderDao(
         FactoryIndexerFolder factoryIndexer,
@@ -71,7 +71,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         CrossDao crossDao,
         IMapper mapper,
         GlobalStore globalStore,
-        GlobalFolder globalFolder)
+        GlobalFolder globalFolder,
+        IDistributedLockProvider distributedLockProvider)
         : base(
               dbContextManager,
               userManager,
@@ -93,6 +94,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         _mapper = mapper;
         _globalStore = globalStore;
         _globalFolder = globalFolder;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -1034,14 +1036,19 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         }
 
         var newFolderId = 0;
-        if (createIfNotExists)
+        if (!createIfNotExists)
         {
-            await _semaphore.WaitAsync();
+            return newFolderId;
+        }
+        
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync($"{key}_{tenantId}", TimeSpan.FromSeconds(30)))
+        {
             folderId = await InternalGetFolderIDAsync(key);
 
             if (folderId != null)
             {
-                _semaphore.Release();
                 return Convert.ToInt32(folderId);
             }
 
@@ -1101,8 +1108,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                     folder.Title = key;
                     break;
             }
-            
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -1123,7 +1128,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
                 await tx.CommitAsync(); //Commit changes
             });
-            _semaphore.Release();
         }
 
         return newFolderId;

@@ -43,8 +43,7 @@ public class SsoHandler
 
 [Scope]
 public class SsoHandlerService
-{    
-    private static readonly SemaphoreSlim _semaphore = new(1);
+{
     private readonly ILogger<SsoHandlerService> _log;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly UserManager _userManager;
@@ -61,6 +60,7 @@ public class SsoHandlerService
     private readonly TenantUtil _tenantUtil;
     private readonly Action<string> _signatureResolver;
     private readonly CountPaidUserChecker _countPaidUserChecker;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private const string MOB_PHONE = "mobphone";
     private const string EXT_MOB_PHONE = "extmobphone";
 
@@ -82,7 +82,8 @@ public class SsoHandlerService
         MessageService messageService,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         TenantUtil tenantUtil,
-        CountPaidUserChecker countPaidUserChecker)
+        CountPaidUserChecker countPaidUserChecker, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _log = log;
         _coreBaseSettings = coreBaseSettings;
@@ -99,6 +100,7 @@ public class SsoHandlerService
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _tenantUtil = tenantUtil;
         _countPaidUserChecker = countPaidUserChecker;
+        _distributedLockProvider = distributedLockProvider;
         _signatureResolver = signature =>
         {
             int.TryParse(signature.Substring(signature.Length - 1), out var lastSignChar);
@@ -281,10 +283,10 @@ public class SsoHandlerService
             if (string.IsNullOrEmpty(newUserInfo.UserName))
             {
                 var type = EmployeeType.RoomAdmin;
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-                try
+                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
                 {
-                    await _semaphore.WaitAsync();
                     try
                     {
                         await _countPaidUserChecker.CheckAppend();
@@ -295,10 +297,6 @@ public class SsoHandlerService
                     }
 
                     newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);
-                }
-                finally
-                {
-                    _semaphore.Release();
                 }
             }
             else

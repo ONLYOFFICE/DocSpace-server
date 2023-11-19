@@ -81,8 +81,7 @@ public class WebItemSecurityCache
 
 [Scope]
 public class WebItemSecurity
-{    
-    private static readonly SemaphoreSlim _semaphore = new(1);
+{
     private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false, true);
 
     private readonly UserManager _userManager;
@@ -96,6 +95,7 @@ public class WebItemSecurity
     private readonly WebItemSecurityCache _webItemSecurityCache;
     private readonly SettingsManager _settingsManager;
     private readonly CountPaidUserChecker _countPaidUserChecker;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public WebItemSecurity(
         UserManager userManager,
@@ -108,7 +108,8 @@ public class WebItemSecurity
         CoreBaseSettings coreBaseSettings,
         WebItemSecurityCache webItemSecurityCache,
         SettingsManager settingsManager,
-        CountPaidUserChecker countPaidUserChecker)
+        CountPaidUserChecker countPaidUserChecker, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _userManager = userManager;
         _authContext = authContext;
@@ -121,6 +122,7 @@ public class WebItemSecurity
         _webItemSecurityCache = webItemSecurityCache;
         _settingsManager = settingsManager;
         _countPaidUserChecker = countPaidUserChecker;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     //
@@ -287,9 +289,10 @@ public class WebItemSecurity
 
         if (administrator)
         {
-            try
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
             {
-                await _semaphore.WaitAsync();
                 if (await _userManager.IsUserInGroupAsync(userid, Constants.GroupUser.ID))
                 {
                     await _countPaidUserChecker.CheckAppend();
@@ -305,10 +308,6 @@ public class WebItemSecurity
                 }
 
                 await _userManager.AddUserIntoGroupAsync(userid, productid);
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
         else

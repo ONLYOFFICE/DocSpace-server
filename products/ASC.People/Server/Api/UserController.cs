@@ -28,7 +28,6 @@ namespace ASC.People.Api;
 
 public class UserController : PeopleControllerBase
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly ICache _cache;
     private readonly TenantManager _tenantManager;
     private readonly CookiesManager _cookiesManager;
@@ -64,6 +63,7 @@ public class UserController : PeopleControllerBase
     private readonly UsersInRoomChecker _usersInRoomChecker;
     private readonly IUrlShortener _urlShortener;
     private readonly FileSecurityCommon _fileSecurityCommon;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public UserController(
         ICache cache,
@@ -106,7 +106,8 @@ public class UserController : PeopleControllerBase
         UsersInRoomChecker usersInRoomChecker,
         IQuotaService quotaService,
         IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon)
+        FileSecurityCommon fileSecurityCommon, 
+        IDistributedLockProvider distributedLockProvider)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _cache = cache;
@@ -144,6 +145,7 @@ public class UserController : PeopleControllerBase
         _usersQuotaSyncOperation = usersQuotaSyncOperation;
         _urlShortener = urlShortener;
         _fileSecurityCommon = fileSecurityCommon;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     /// <summary>
@@ -326,10 +328,10 @@ public class UserController : PeopleControllerBase
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-            try
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
             {
-                await _semaphore.WaitAsync();
                 if (success)
                 {
                     await _usersInRoomChecker.CheckAppend();
@@ -340,10 +342,6 @@ public class UserController : PeopleControllerBase
                     await _usersInRoomChecker.CheckAppend();
                     await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
                 }
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
 
@@ -1510,28 +1508,26 @@ public class UserController : PeopleControllerBase
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            try
+            
+            if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
             {
-                await _semaphore.WaitAsync();
-                if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
+                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id), TimeSpan.FromSeconds(30)))
                 {
                     await _countUserChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                     _webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-
-                if (!self && !isUser && await _userManager.IsUserAsync(user))
+            }
+            else if (!self && !isUser && await _userManager.IsUserAsync(user))
+            {
+                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id), TimeSpan.FromSeconds(30)))
                 {
                     await _countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     _webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
 
@@ -1586,15 +1582,22 @@ public class UserController : PeopleControllerBase
                 case EmployeeStatus.Active:
                     if (user.Status == EmployeeStatus.Terminated)
                     {
+                        IDistributedLockHandle lockHandle = null;
+                        
                         try
                         {
-                            await _semaphore.WaitAsync();
                             if (!await _userManager.IsUserAsync(user))
                             {
+                                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id), 
+                                    TimeSpan.FromSeconds(30));
+                                
                                 await _countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
+                                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id), 
+                                    TimeSpan.FromSeconds(30));
+                                
                                 await _countUserChecker.CheckAppend();
                             }
 
@@ -1604,7 +1607,10 @@ public class UserController : PeopleControllerBase
                         }
                         finally
                         {
-                            _semaphore.Release();
+                            if (lockHandle != null)
+                            {
+                                await lockHandle.ReleaseAsync();
+                            }
                         }
                     }
                     break;

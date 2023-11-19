@@ -104,6 +104,7 @@ public class FileMarkerHelper
 public class FileMarker
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
+    private const string LockKey = "file_marker";
 
     private readonly TenantManager _tenantManager;
     private readonly UserManager _userManager;
@@ -113,9 +114,9 @@ public class FileMarker
     private readonly AuthContext _authContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly FilesSettingsHelper _filesSettingsHelper;
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
     private readonly FileMarkerCache _fileMarkerCache;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public FileMarker(
         TenantManager tenantManager,
@@ -127,7 +128,8 @@ public class FileMarker
         IServiceProvider serviceProvider,
         FilesSettingsHelper filesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-        FileMarkerCache fileMarkerCache)
+        FileMarkerCache fileMarkerCache, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _tenantManager = tenantManager;
         _userManager = userManager;
@@ -139,6 +141,7 @@ public class FileMarker
         _filesSettingsHelper = filesSettingsHelper;
         _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
         _fileMarkerCache = fileMarkerCache;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
@@ -391,10 +394,10 @@ public class FileMarker
         var newTags = new List<Tag>();
         var updateTags = new List<Tag>();
 
-        try
-        {
-            await _semaphore.WaitAsync();
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(10)))
+        {
             foreach (var userId in userEntriesData.Keys)
             {
                 if (await tagDao.GetNewTagsAsync(userId, obj.FileEntry).AnyAsync())
@@ -417,10 +420,6 @@ public class FileMarker
             {
                 await tagDao.SaveTagsAsync(newTags, obj.CurrentAccountId);
             }
-        }
-        finally
-        {
-            _semaphore.Release();
         }
 
         await SendChangeNoticeAsync(updateTags.Concat(newTags).ToList(), socketManager);

@@ -45,7 +45,7 @@ public class TenantManager
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal CoreSettings CoreSettings { get; set; }
 
-    private static readonly SemaphoreSlim _semaphore = new(1);
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     static TenantManager()
     {
@@ -72,13 +72,15 @@ public class TenantManager
         IQuotaService quotaService,
         ITariffService tariffService,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings)
+        CoreSettings coreSettings, 
+        IDistributedLockProvider distributedLockProvider)
     {
         TenantService = tenantService;
         QuotaService = quotaService;
         TariffService = tariffService;
         CoreBaseSettings = coreBaseSettings;
         CoreSettings = coreSettings;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public TenantManager(
@@ -87,7 +89,8 @@ public class TenantManager
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings) : this(tenantService, quotaService, tariffService, coreBaseSettings, coreSettings)
+        CoreSettings coreSettings, 
+        IDistributedLockProvider distributedLockProvider) : this(tenantService, quotaService, tariffService, coreBaseSettings, coreSettings, distributedLockProvider)
     {
         HttpContextAccessor = httpContextAccessor;
     }
@@ -430,14 +433,10 @@ public class TenantManager
 
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
-        try
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(
+                         $"set_tenant_quota_row_{row.TenantId}_{row.UserId}", TimeSpan.FromSeconds(30)))
         {
-            await _semaphore.WaitAsync();
             await QuotaService.SetTenantQuotaRowAsync(row, exchange);
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 

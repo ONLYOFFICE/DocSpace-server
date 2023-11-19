@@ -28,7 +28,6 @@ namespace ASC.People.Api;
 
 public class ThirdpartyController : ApiControllerBase
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly AccountLinker _accountLinker;
     private readonly CookiesManager _cookiesManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -52,6 +51,7 @@ public class ThirdpartyController : ApiControllerBase
     private readonly InvitationLinkService _invitationLinkService;
     private readonly FileSecurity _fileSecurity;
     private readonly UsersInRoomChecker _usersInRoomChecker;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public ThirdpartyController(
         AccountLinker accountLinker,
@@ -76,7 +76,8 @@ public class ThirdpartyController : ApiControllerBase
         TenantManager tenantManager,
         InvitationLinkService invitationLinkService,
         FileSecurity fileSecurity,
-        UsersInRoomChecker usersInRoomChecker)
+        UsersInRoomChecker usersInRoomChecker, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _accountLinker = accountLinker;
         _cookiesManager = cookiesManager;
@@ -101,6 +102,7 @@ public class ThirdpartyController : ApiControllerBase
         _invitationLinkService = invitationLinkService;
         _fileSecurity = fileSecurity;
         _usersInRoomChecker = usersInRoomChecker;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     /// <summary>
@@ -287,11 +289,10 @@ public class ThirdpartyController : ApiControllerBase
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
+            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-
-            try
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
             {
-                await _semaphore.WaitAsync();
                 if (success)
                 {
                     await _usersInRoomChecker.CheckAppend();
@@ -302,10 +303,6 @@ public class ThirdpartyController : ApiControllerBase
                     await _usersInRoomChecker.CheckAppend();
                     await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
                 }
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
     }

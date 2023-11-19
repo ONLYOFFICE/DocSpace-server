@@ -32,6 +32,7 @@ global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
 global using ASC.Common.Log;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;

@@ -27,16 +27,16 @@
 namespace ASC.Notify;
 
 [Singleton]
-public class DbWorker : IDisposable
+public class DbWorker
 {
-    private readonly SemaphoreSlim _semaphore = new(1);
-
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly NotifyServiceCfg _notifyServiceCfg;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
-    public DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyServiceCfg> notifyServiceCfg)
+    public DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyServiceCfg> notifyServiceCfg, IDistributedLockProvider distributedLockProvider)
     {
         _serviceScopeFactory = serviceScopeFactory;
+        _distributedLockProvider = distributedLockProvider;
         _notifyServiceCfg = notifyServiceCfg.Value;
     }
 
@@ -44,7 +44,7 @@ public class DbWorker : IDisposable
     {
         using var scope = _serviceScopeFactory.CreateScope();
 
-        var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
         await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
@@ -53,7 +53,7 @@ public class DbWorker : IDisposable
         await strategy.ExecuteAsync(async () =>
         {
             await using var tx = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            var notifyQueue = _mapper.Map<NotifyMessage, NotifyQueue>(m);
+            var notifyQueue = mapper.Map<NotifyMessage, NotifyQueue>(m);
             notifyQueue.Attachments = JsonConvert.SerializeObject(m.Attachments);
 
             notifyQueue = (await dbContext.NotifyQueue.AddAsync(notifyQueue)).Entity;
@@ -79,12 +79,11 @@ public class DbWorker : IDisposable
 
     public async Task<IDictionary<int, NotifyMessage>> GetMessagesAsync(int count)
     {
-        try
+        await using(await _distributedLockProvider.TryAcquireLockAsync("get_notify_messages", TimeSpan.FromMinutes(1)))
         {
-            await _semaphore.WaitAsync();
             using var scope = _serviceScopeFactory.CreateScope();
 
-            var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
@@ -101,7 +100,7 @@ public class DbWorker : IDisposable
                     r => r.queue.NotifyId,
                     r =>
                     {
-                        var res = _mapper.Map<NotifyQueue, NotifyMessage>(r.queue);
+                        var res = mapper.Map<NotifyQueue, NotifyMessage>(r.queue);
 
                         try
                         {
@@ -109,20 +108,14 @@ public class DbWorker : IDisposable
                         }
                         catch (Exception)
                         {
-
                         }
 
                         return res;
                     });
 
-
             await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(q=> q.SetProperty(p => p.State, (int)MailSendingState.Sending));
 
             return messages;
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
@@ -159,11 +152,6 @@ public class DbWorker : IDisposable
 
             await Queries.UpdateNotifyInfoAsync(dbContext, id, (int)result);
         }
-    }
-
-    public void Dispose()
-    {
-        _semaphore.Dispose();
     }
 }
 

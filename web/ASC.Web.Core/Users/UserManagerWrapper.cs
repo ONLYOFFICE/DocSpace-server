@@ -35,7 +35,6 @@ namespace ASC.Web.Core.Users;
 [Scope]
 public sealed class UserManagerWrapper
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
     private Tenant Tenant => _tenantManager.GetCurrentTenant();
 
     private readonly StudioNotifyService _studioNotifyService;
@@ -51,6 +50,7 @@ public sealed class UserManagerWrapper
     private readonly WebItemSecurityCache _webItemSecurityCache;
     private readonly QuotaSocketManager _quotaSocketManager;
     private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public UserManagerWrapper(
         StudioNotifyService studioNotifyService,
@@ -65,7 +65,8 @@ public sealed class UserManagerWrapper
         TenantManager tenantManager,
         WebItemSecurityCache webItemSecurityCache,
         QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _studioNotifyService = studioNotifyService;
         _userManager = userManager;
@@ -80,6 +81,7 @@ public sealed class UserManagerWrapper
         _webItemSecurityCache = webItemSecurityCache;
         _quotaSocketManager = quotaSocketManager;
         _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
@@ -275,10 +277,10 @@ public sealed class UserManagerWrapper
         }
 
         var currentType = await _userManager.GetUserTypeAsync(user.Id);
+        IDistributedLockHandle lockHandle = null;
 
         try
         {
-            await _semaphore.WaitAsync();
             if (type is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(Tenant))
             {
                 if (currentType is EmployeeType.RoomAdmin)
@@ -296,6 +298,8 @@ public sealed class UserManagerWrapper
                 }
                 else if (currentType is EmployeeType.User)
                 {
+                    lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                    
                     await _countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
@@ -319,6 +323,8 @@ public sealed class UserManagerWrapper
                 }
                 else if (currentType is EmployeeType.User)
                 {
+                    lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                    
                     await _countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     _webItemSecurityCache.ClearCache(Tenant.Id);
@@ -327,6 +333,8 @@ public sealed class UserManagerWrapper
             }
             else if (type is EmployeeType.Collaborator && currentType is EmployeeType.User)
             {
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                
                 await _countPaidUserChecker.CheckAppend();
                 await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                 await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupCollaborator.ID);
@@ -336,7 +344,10 @@ public sealed class UserManagerWrapper
         }
         finally
         {
-            _semaphore.Release();
+            if (lockHandle != null)
+            {
+                await lockHandle.ReleaseAsync();
+            }
         }
 
         return changed;

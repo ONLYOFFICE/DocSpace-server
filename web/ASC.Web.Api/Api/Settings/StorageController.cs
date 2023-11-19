@@ -28,7 +28,7 @@ using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class StorageController : BaseSettingsController, IDisposable
+public class StorageController : BaseSettingsController
 {
     private readonly MessageService _messageService;
     private readonly StudioNotifyService _studioNotifyService;
@@ -48,7 +48,7 @@ public class StorageController : BaseSettingsController, IDisposable
     private readonly ILogger _log;
     private readonly IEventBus _eventBus;
     private readonly SecurityContext _securityContext;
-    private readonly SemaphoreSlim _semaphore = new(1);
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public StorageController(
         ILoggerProvider option,
@@ -72,7 +72,8 @@ public class StorageController : BaseSettingsController, IDisposable
         BackupAjaxHandler backupAjaxHandler,
         ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
         EncryptionWorker encryptionWorker,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor, 
+        IDistributedLockProvider distributedLockProvider) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _log = option.CreateLogger("ASC.Api");
         _eventBus = eventBus;
@@ -91,6 +92,7 @@ public class StorageController : BaseSettingsController, IDisposable
         _backupAjaxHandler = backupAjaxHandler;
         _cacheDeleteSchedule = cacheDeleteSchedule;
         _encryptionWorker = encryptionWorker;
+        _distributedLockProvider = distributedLockProvider;
         _securityContext = securityContext;
     }
 
@@ -158,10 +160,8 @@ public class StorageController : BaseSettingsController, IDisposable
             return false;
         }
 
-        try
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync("start_storage_encryption", TimeSpan.FromSeconds(30)))
         {
-            await _semaphore.WaitAsync();
-
             var activeTenants = await _tenantManager.GetTenantsAsync();
 
             if (activeTenants.Count > 0)
@@ -169,11 +169,7 @@ public class StorageController : BaseSettingsController, IDisposable
                 await StartEncryptionAsync(inDto.NotifyUsers);
             }
         }
-        finally
-        {
-            _semaphore.Release();
-        }
-
+        
         return true;
     }
 
@@ -574,10 +570,5 @@ public class StorageController : BaseSettingsController, IDisposable
     public object GetAmazonS3Regions()
     {
         return Amazon.RegionEndpoint.EnumerableAllRegions;
-    }
-
-    public void Dispose()
-    {
-        _semaphore.Dispose();
     }
 }

@@ -30,8 +30,6 @@ namespace ASC.Web.Files.Utils;
 [Scope]
 public class FileSharingAceHelper
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
-    
     private readonly FileSecurity _fileSecurity;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly FileUtility _fileUtility;
@@ -49,6 +47,8 @@ public class FileSharingAceHelper
     private readonly UserManagerWrapper _userManagerWrapper;
     private readonly CountPaidUserChecker _countPaidUserChecker;
     private readonly IUrlShortener _urlShortener;
+    private readonly IDistributedLockProvider _distributedLockProvider;
+    private readonly TenantManager _tenantManager;
     
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
@@ -71,7 +71,8 @@ public class FileSharingAceHelper
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         CountPaidUserChecker countPaidUserChecker,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener, 
+        IDistributedLockProvider distributedLockProvider, TenantManager tenantManager)
     {
         _fileSecurity = fileSecurity;
         _coreBaseSettings = coreBaseSettings;
@@ -90,6 +91,8 @@ public class FileSharingAceHelper
         _userManagerWrapper = userManagerWrapper;
         _countPaidUserChecker = countPaidUserChecker;
         _urlShortener = urlShortener;
+        _distributedLockProvider = distributedLockProvider;
+        _tenantManager = tenantManager;
     }
 
     public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
@@ -183,11 +186,15 @@ public class FileSharingAceHelper
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
+                IDistributedLockHandle lockHandle = null;
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
                 try
                 {
-                    await _semaphore.WaitAsync();
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
+                        lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId), TimeSpan.FromSeconds(30));
+                        
                         await _countPaidUserChecker.CheckAppend();
                     }
 
@@ -216,7 +223,10 @@ public class FileSharingAceHelper
                 }
                 finally
                 {
-                    _semaphore.Release();
+                    if (lockHandle != null)
+                    {
+                        await lockHandle.ReleaseAsync();
+                    }
                 }
                 
                 if (emailInvite)
