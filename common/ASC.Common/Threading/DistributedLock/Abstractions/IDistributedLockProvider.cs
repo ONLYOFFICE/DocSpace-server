@@ -38,7 +38,7 @@ public interface IDistributedLockProvider
     /// <param name="cancellationToken">token to observe</param>
     /// <exception cref="DistributedLockException">lock not acquired</exception>
     /// <returns>A task that will complete with distributed lock handle</returns>
-    Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default);
+    Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Synchronously waits for distributed blocking to be acquired. Observes the order for obtaining a lock.
@@ -50,7 +50,7 @@ public interface IDistributedLockProvider
     /// <param name="cancellationToken">token to observe</param>
     /// <exception cref="DistributedLockException">lock not acquired</exception>
     /// <returns>Distributed lock handle</returns>
-    IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default);
+    IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Asynchronously waits for distributed blocking to be acquired. Does not comply with the order for obtaining a blocking.
@@ -62,7 +62,7 @@ public interface IDistributedLockProvider
     /// <param name="cancellationToken">token to observe</param>
     /// <exception cref="DistributedLockException">lock not acquired</exception>
     /// <returns>A task that will complete with distributed lock handle</returns>
-    Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false,
+    Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true,
         CancellationToken cancellationToken = default);
     
     /// <summary>
@@ -75,6 +75,6 @@ public interface IDistributedLockProvider
     /// <param name="cancellationToken">token to observe</param>
     /// <exception cref="DistributedLockException">lock not acquired</exception>
     /// <returns>Distributed lock handle</returns>
-    IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false,
+    IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true,
         CancellationToken cancellationToken = default);
 }

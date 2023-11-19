@@ -40,7 +40,7 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
         _logger = logger;
     }
 
-    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, 
+    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, 
         CancellationToken cancellationToken = default)
     {
         var stopWatch = Stopwatch.StartNew();
@@ -50,7 +50,7 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
         return GetHandle(handle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
     }
 
-    public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         var stopWatch = Stopwatch.StartNew();
         
@@ -59,12 +59,12 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
         return GetHandle(handle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
     }
 
-    public Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         return TryAcquireFairLockAsync(resource, timeout, throwIfNotAcquired, cancellationToken);
     }
 
-    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         return TryAcquireFairLock(resource, timeout, throwIfNotAcquired, cancellationToken);
     }

@@ -63,7 +63,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         _expiryInMilliseconds = (long)_options.Expiry.TotalMilliseconds;
     }
     
-    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         if (timeout < _options.MinTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
         {
@@ -147,12 +147,12 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
     }
 
-    public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout, bool throwIfNotAcquired = false,  CancellationToken cancellationToken = default)
+    public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout, bool throwIfNotAcquired = true,  CancellationToken cancellationToken = default)
     {
         return TryAcquireFairLockAsync(resource, timeout, throwIfNotAcquired, cancellationToken).GetAwaiter().GetResult();
     }
 
-    public async Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public async Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         var stopWatch = Stopwatch.StartNew();
         
@@ -161,7 +161,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         return GetHandle(internalHandle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
     }
 
-    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = false, CancellationToken cancellationToken = default)
+    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         var stopWatch = Stopwatch.StartNew();
         
