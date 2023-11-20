@@ -434,7 +434,7 @@ public class TenantManager
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(
-                         $"set_tenant_quota_row_{row.TenantId}_{row.UserId}", TimeSpan.FromSeconds(30)))
+                         $"set_quota_{row.TenantId}_{row.Path}_{row.UserId}", TimeSpan.FromSeconds(30)))
         {
             await QuotaService.SetTenantQuotaRowAsync(row, exchange);
         }
