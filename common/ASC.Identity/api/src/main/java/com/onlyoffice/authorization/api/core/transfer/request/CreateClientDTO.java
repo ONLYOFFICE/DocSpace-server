@@ -26,7 +26,6 @@ public class CreateClientDTO implements Serializable {
     @NotEmpty
     @Size(min = 3, max = 256, message = "client name length is expected to be between 3 and 256 characters")
     private String name;
-    @Size(min = 10, max = 256, message = "client description length is expected to be between 10 and 256 characters")
     private String description;
     @JsonProperty("logo")
     @Pattern(regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",

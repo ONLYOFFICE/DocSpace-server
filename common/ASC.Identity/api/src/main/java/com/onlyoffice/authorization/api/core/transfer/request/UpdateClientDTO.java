@@ -23,16 +23,4 @@ public class UpdateClientDTO implements Serializable {
     private String description;
     @JsonProperty("logo")
     private String logo;
-    @JsonProperty("authentication_method")
-    private String authenticationMethod;
-    @JsonProperty("website_url")
-    private String websiteUrl;
-    @JsonProperty("terms_url")
-    private String termsUrl;
-    @JsonProperty("policy_url")
-    private String policyUrl;
-    @JsonProperty("redirect_uris")
-    private Set<String> redirectUris;
-    @JsonProperty("logout_redirect_uri")
-    private String logoutRedirectUri;
 }
