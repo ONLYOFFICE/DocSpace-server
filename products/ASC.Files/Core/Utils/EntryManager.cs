@@ -300,7 +300,7 @@ public class EntryManager
     private readonly SocketManager _socketManager;
     private readonly SecurityContext _securityContext;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ExportToCSV _exportToCSV;
+    private readonly FormFillingReportCreator _formFillingReportCreator;
     public EntryManager(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
@@ -333,7 +333,7 @@ public class EntryManager
         SocketManager socketManager,
         SecurityContext securityContext,
         IServiceScopeFactory serviceScopeFactory,
-        ExportToCSV exportToCSV)
+        FormFillingReportCreator formFillingReportCreator)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
@@ -366,7 +366,7 @@ public class EntryManager
         _socketManager = socketManager;
         _securityContext = securityContext;
         _serviceScopeFactory = serviceScopeFactory;
-        _exportToCSV = exportToCSV;
+        _formFillingReportCreator = formFillingReportCreator;
     }
 
     public async Task<(IEnumerable<FileEntry> Entries, int Total)> GetEntriesAsync<T>(Folder<T> parent, int from, int count, FilterType filterType, bool subjectGroup, Guid subjectId,
@@ -1405,53 +1405,10 @@ public class EntryManager
 
             if (room.FolderType == FolderType.FillingFormsRoom)
             {
-                var linkDao = _daoFactory.GetLinkDao();
-                var sourceId = await linkDao.GetSourceAsync(file.Id.ToString());
-                if (sourceId != null)
+                var properties = await _formFillingReportCreator.UpdateFormFillingReport(file, formsDataUrl);
+
+                if (properties != null)
                 {
-                    EntryProperties properties;
-
-                    if (int.TryParse(sourceId, out var sourceInt))
-                    {
-                        properties = _daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
-                    }
-                    else
-                    {
-                        properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
-                    }
-
-
-                    var request = new HttpRequestMessage
-                    {
-                        RequestUri = new Uri(formsDataUrl),
-                        Method = HttpMethod.Get
-                    };
-                    var httpClient = _clientFactory.CreateClient();
-                    using var response = await httpClient.SendAsync(request);
-                    var data = await response.Content.ReadAsStringAsync();
-
-                    var submitFormsData = JsonConvert.DeserializeObject<SubmitFormsData>(data);
-
-                    if (properties.FormFilling.ResultsFileID == null)
-                    {
-                        var dt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
-
-                        var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                        var resultsFileID = await _exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
-
-                        properties.FormFilling.ResultsFileID = resultsFileID.ToString();
-                        await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
-                    }
-                    else
-                    {
-                        var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
-
-                        var updateDt = _exportToCSV.CreateDataTable(submitFormsData.FormsData);
-                        await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
-                    }
-                    await _socketManager.DeleteFileAsync(file);
-                    await linkDao.DeleteLinkAsync(sourceId);
-
                     file.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
                 }
             }
