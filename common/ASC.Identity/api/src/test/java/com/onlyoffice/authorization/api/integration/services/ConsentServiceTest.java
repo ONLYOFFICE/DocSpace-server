@@ -4,10 +4,12 @@
 package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
+import com.onlyoffice.authorization.api.core.entities.Authorization;
 import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.entities.Consent;
 import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
 import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.ports.repositories.AuthorizationRepository;
 import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.ports.repositories.ConsentRepository;
 import com.onlyoffice.authorization.api.ports.services.ConsentService;
@@ -38,12 +40,20 @@ public class ConsentServiceTest extends ContainerBase {
     private ConsentRepository consentRepository;
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private AuthorizationRepository authorizationRepository;
 
     @BeforeEach
     void beforeEach() {
         clientRepository.save(Client
                 .builder()
                 .clientId("mock")
+                .build());
+        authorizationRepository.saveAuthorization(Authorization
+                .builder()
+                .id("mock")
+                .principalName("mock")
+                .registeredClientId("mock")
                 .build());
         consentService.saveConsent(ConsentMessage
                 .builder()

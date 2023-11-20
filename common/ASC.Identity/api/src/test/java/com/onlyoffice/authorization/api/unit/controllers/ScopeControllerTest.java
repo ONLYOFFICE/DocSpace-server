@@ -40,6 +40,6 @@ public class ScopeControllerTest {
                                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
     }
 }

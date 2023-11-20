@@ -215,7 +215,6 @@ public class ClientControllerTest {
                                                 .authenticationMethod("mock")
                                                 .redirectUris(Set.of("https://example.com"))
                                                 .logoutRedirectUri("https://example.com")
-                                                .allowedOrigins(Set.of("https://example.com"))
                                                 .scopes(Set.of("accounts:read"))
                                                 .build()).
                                         getJson())
