@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
+using File = System.IO.File;
 using ResumableUploadSession = ASC.Files.Thirdparty.GoogleDrive.ResumableUploadSession;
 using ResumableUploadSessionStatus = ASC.Files.Thirdparty.GoogleDrive.ResumableUploadSessionStatus;
 
@@ -166,7 +167,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         }
         else if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 
             return Task.CompletedTask;
         }

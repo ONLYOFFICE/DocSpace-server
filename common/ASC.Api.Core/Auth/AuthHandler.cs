@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
 using Role = ASC.Common.Security.Authorizing.Role;
 
 namespace ASC.Api.Core.Auth;
@@ -152,7 +153,7 @@ public class AuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 
     private void Authenticate()
     {
-        var account = ASC.Core.Configuration.Constants.SystemAccounts.FirstOrDefault(a => a.ID == ASC.Core.Configuration.Constants.CoreSystem.ID);
+        var account = Constants.SystemAccounts.FirstOrDefault(a => a.ID == Constants.CoreSystem.ID);
 
         if (account == null)
         {

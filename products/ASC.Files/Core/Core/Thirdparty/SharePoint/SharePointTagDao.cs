@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = Microsoft.SharePoint.Client.File;
+using Folder = Microsoft.SharePoint.Client.Folder;
+
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
@@ -38,7 +41,7 @@ internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
         FileUtility fileUtility,
         TempPath tempPath,
         AuthContext authContext,
-        RegexDaoSelectorBase<Microsoft.SharePoint.Client.File, Microsoft.SharePoint.Client.Folder, ClientObject> regexDaoSelectorBase)
+        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
         : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
     {
     }

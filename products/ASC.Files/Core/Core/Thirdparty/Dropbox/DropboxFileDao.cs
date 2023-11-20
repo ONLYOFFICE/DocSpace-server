@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = System.IO.File;
+
 namespace ASC.Files.Core.Core.Thirdparty.Dropbox;
 
 [Scope]
@@ -151,7 +153,7 @@ internal class DropboxFileDao : ThirdPartyFileDao<FileMetadata, FolderMetadata, 
     {
         if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
         }
 
         return Task.CompletedTask;

@@ -28,7 +28,6 @@ using SixLabors.ImageSharp.Processing;
 
 using Image = SixLabors.ImageSharp.Image;
 using JsonException = System.Text.Json.JsonException;
-using MimeMapping = ASC.Common.Web.MimeMapping;
 using Status = ASC.Files.Core.Security.Status;
 
 namespace ASC.Web.Files;

@@ -28,6 +28,8 @@
 using ASC.Data.Storage;
 using ASC.Data.Storage.DiscStorage;
 
+using FileShare = System.IO.FileShare;
+
 namespace ASC.Files.ThumbnailBuilder;
 
 [Scope]
@@ -185,14 +187,14 @@ public class Builder<T>
 
         try
         {
-            await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await streamFile.CopyToAsync(fileStream);
             }
 
             await _fFmpegService.CreateThumbnail(tempFilePath, thumbPath);
 
-            await using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            await using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await CropAsync(fileDao, file, streamThumb);
             }

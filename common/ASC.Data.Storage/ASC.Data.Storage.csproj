@@ -24,14 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="protos\encryption_stop.proto" />
-    <None Remove="protos\migration_cache.proto" />
-    <None Remove="protos\migration_progress.proto" />
-    <None Remove="protos\migration_upload_cdn.proto" />
-    <None Remove="protos\progress_encryption.proto" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Amazon.Extensions.S3.Encryption" Version="2.1.0" />
     <PackageReference Include="AWSSDK.CloudFront" Version="3.7.201.57" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.205.19" />
@@ -51,15 +43,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ASC.Core.Common\ASC.Core.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="protos\data_store_cache_item.proto" />
-    <Protobuf Include="protos\encryption_stop.proto" />
-    <Protobuf Include="protos\migration_cache.proto" />
-    <Protobuf Include="protos\migration_progress.proto" />
-    <Protobuf Include="protos\migration_upload_cdn.proto" />
-    <Protobuf Include="protos\progress_encryption.proto" />
   </ItemGroup>
   
 </Project>

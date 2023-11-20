@@ -25,8 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
+using ASC.Feed.Aggregator.Modules;
+
 using Constants = ASC.Feed.Constants;
-using FeedModule = ASC.Feed.Aggregator.Modules.FeedModule;
 
 namespace ASC.Files.Service.Core;
 

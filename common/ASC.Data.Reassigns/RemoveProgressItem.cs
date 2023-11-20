@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WebZones;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -143,7 +145,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         var usageSpaceWrapper = new UsageSpaceWrapper();
 
-        var webItems = webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
+        var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
         foreach (var item in webItems)
         {

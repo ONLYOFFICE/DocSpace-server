@@ -40,8 +40,4 @@
     <ProjectReference Include="..\ASC.Core.Common\ASC.Core.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="protos\linker_cache_item.proto" />
-  </ItemGroup>
-
 </Project>

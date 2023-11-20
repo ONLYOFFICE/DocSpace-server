@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
+
 namespace ASC.People.Api;
 
 public class PhotoController : PeopleControllerBase
@@ -35,7 +37,7 @@ public class PhotoController : PeopleControllerBase
     private readonly SettingsManager _settingsManager;
     private readonly FileSizeComment _fileSizeComment;
     private readonly SetupInfo _setupInfo;
-    private readonly Core.TenantManager _tenantManager;
+    private readonly TenantManager _tenantManager;
 
     public PhotoController(
         UserManager userManager,
@@ -51,7 +53,7 @@ public class PhotoController : PeopleControllerBase
         SetupInfo setupInfo,
         IHttpClientFactory httpClientFactory,
         IHttpContextAccessor httpContextAccessor,
-        Core.TenantManager tenantManager)
+        TenantManager tenantManager)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _messageService = messageService;
@@ -315,7 +317,7 @@ public class PhotoController : PeopleControllerBase
             }
 
         }
-        catch (Web.Core.Users.UnknownImageFormatException)
+        catch (UnknownImageFormatException)
         {
             result.Success = false;
             result.Message = PeopleResource.ErrorUnknownFileImageType;
@@ -353,12 +355,12 @@ public class PhotoController : PeopleControllerBase
         }
         catch (ArgumentException error)
         {
-            throw new Web.Core.Users.UnknownImageFormatException(error);
+            throw new UnknownImageFormatException(error);
         }
 
         if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
         {
-            throw new Web.Core.Users.UnknownImageFormatException();
+            throw new UnknownImageFormatException();
         }
     }
 }

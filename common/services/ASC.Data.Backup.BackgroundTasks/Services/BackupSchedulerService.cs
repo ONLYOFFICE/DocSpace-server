@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Configuration;
+
 namespace ASC.Data.Backup.Services;
 
 [Singleton]
@@ -122,7 +124,7 @@ public sealed class BackupSchedulerService : BackgroundService
                                                  storageBasePath: schedule.StorageBasePath,
                                                  storageParams: JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.StorageParams),
                                                  storageType: schedule.StorageType,
-                                                 createBy: ASC.Core.Configuration.Constants.CoreSystem.ID,
+                                                 createBy: Constants.CoreSystem.ID,
                                                  isScheduled: true,
                                                  backupsStored: schedule.BackupsStored
                                           ));

@@ -28,6 +28,8 @@ using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Api.Core;
 
 public abstract class BaseStartup
@@ -320,7 +322,7 @@ public abstract class BaseStartup
                     {
                         using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
-                        var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
+                        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
 
                         var claimUserId = ctx.Principal.FindFirstValue("userId");
 

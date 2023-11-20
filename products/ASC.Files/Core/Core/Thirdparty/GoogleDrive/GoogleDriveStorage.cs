@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
-using MimeMapping = ASC.Common.Web.MimeMapping;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
