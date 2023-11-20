@@ -86,7 +86,7 @@ Xin chào!
 
 Để bắt đầu tham gia vào cuộc sống trên cổng thông tin "${__VirtualRootPath}":"$InviteLink" bạn cần kích hoạt địa chỉ email của bạn. Điều này được thực hiện vì lý do an ninh.
 
-p=. "Nhấp vào đây để kích hoạt địa chỉ email của bạn":"$InviteLink"
+$OrangeButton
 
 Liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất kích hoạt email của bạn trong khoảng thời gian đó.</value>
   </data>
@@ -97,14 +97,12 @@ Thân gửi $OwnerName,
 
 Một file sao lưu chứa dữ liệu từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn đã được tạo.
 
-Để tìm hiểu thêm về quy trình sao lưu, vui lòng tham khảo hướng dẫn người dùng "Sao lưu dữ liệu":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" của chúng tôi.
+Để tìm hiểu thêm về quy trình sao lưu, vui lòng tham khảo hướng dẫn người dùng "Sao lưu dữ liệu":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" của chúng tôi.
 
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support.onlyoffice.com":"https://support.onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "${__SupportLink}":"${__SupportLink}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Yêu cầu thay đổi điện thoại di động
@@ -144,88 +142,92 @@ $OrangeButton
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình thay đổi địa chỉ cổng thông tin trong khoảng thời gian đó.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Xin chào, $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Xin chào, $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Xin chào, $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>Xin chào, $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời: * phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau *: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Tin nhắn từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -253,11 +255,9 @@ $OrangeButton
 Đã xảy ra lỗi khi di chuyển sang khu vực $RegionName. Vui lòng thử lại sau.
 Cổng của bạn hiện vẫn khả dụng ở địa chỉ cũ "$PortalUrl":"$PortalUrl"
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại  "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại  "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"
+$TrulyYours
 
 ^Để thay đổi hình thức thông báo, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -267,11 +267,9 @@ ONLYOFFICE™ Support Team
 Đã xảy ra lỗi khi di chuyển sang khu vực khác. Vui lòng thử lại sau.
 Cổng của bạn hiện vẫn khả dụng ở địa chỉ cũ "$PortalUrl":"$PortalUrl"
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại  "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"
+$TrulyYours
 
 ^Để thay đổi hình thức thông báo, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -282,11 +280,9 @@ ONLYOFFICE™ Support Team
 
 *Lưu ý*: cổng thông tin sẽ không khả dụng trong quá trình di chuyển. Sau khi quá trình di chuyển hoàn tất, URL cổng thông tin sẽ được thay đổi và sẽ không thể truy cập vào tất cả các liên kết tài liệu đã được chia sẻ.
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dừng hoạt động cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -302,11 +298,9 @@ $OrangeButton
 Bạn có thể kích hoạt lại cổng của mình bất kỳ lúc nào bằng cách nhấp vào liên kết sau:
 p=. "Kích hoạt lại cổng":"$ActivateUrl" (liên kết này không có giới hạn thời gian)
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1.Xoá cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -327,11 +321,9 @@ $OrangeButton
 
 *Lưu ý*: liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất quá trình xóa cổng thông tin trong khoảng thời gian đó.
 
-Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi tại "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Thay đổi địa chỉ cổng thông tin
@@ -408,11 +400,10 @@ h3.Địa chỉ cổng
 
 *Lưu ý*: cổng thông tin sẽ không khả dụng trong quá trình khôi phục.
 
-Nếu bạn có câu hỏi hoặc cần trợ giúp, vui lòng liên hệ với chúng tôi theo địa chỉ  "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có câu hỏi hoặc cần trợ giúp, vui lòng liên hệ với chúng tôi theo địa chỉ "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-ONLYOFFICE™ Support Team
-"www.onlyoffice.com":"https://onlyoffice.com/"
+$TrulyYours
+
 
 ^Để thay đổi loại thông báo này, vui lòng điều chỉnh trong "thiết lập đăng ký":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -438,8 +429,7 @@ $activity
 Tin nhắn này được tạo tự động để kiểm tra thiết lập SMTP của bạn. Nếu bạn đang xem nó, điều này có nghĩa là thiết lập đã chính xác và bạn có thể sử dụng chúng trên cổng thông tin của bạn.
 
 
-Trân trọng,
-Đội ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Người dùng mới được thêm vào cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -609,7 +599,10 @@ Liên kết có hiệu lực trong 7 ngày.
 Bạn không muốn thay đổi mật khẩu? Xin hãy bỏ qua tin nhắn này</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
 
@@ -617,14 +610,15 @@ Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 
 
 $OrangeButton
 
-Tận hưởng một cách cộng tác tài liệu mới!
+*Tận hưởng một cách cộng tác tài liệu mới!*
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
 
@@ -632,36 +626,34 @@ Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 
 
 $OrangeButton
 
-Tận hưởng một cách cộng tác tài liệu mới!
+*Tận hưởng một cách cộng tác tài liệu mới!*
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 7 ngày):
-
 $OrangeButton
 
 Gói dịch vụ hiện tại của bạn là STARTUP. Nó hoàn toàn miễn phí và bao gồm:
 
-* 1 quản trị viên, 2 người dùng cấp cao
-* Lên đến 12 phòng
-* Không giới hạn số lượng người dùng trong mỗi phòng
-* Dung lượng lưu trữ 2 GB
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 quản trị viên, 2 người dùng cấp cao&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Lên đến 12 phòng&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Không giới hạn số lượng người dùng trong mỗi phòng&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Dung lượng lưu trữ 2 GB&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
-Tận hưởng một cách cộng tác tài liệu mới!
+*Tận hưởng một cách cộng tác tài liệu mới!*
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Bạn vừa tạo ONLYOFFICE DocSpace, một trung tâm tài liệu nơi bạn có thể tăng cường hợp tác với nhóm, khách hàng, đối tác của mình và hơn thế nữa. Địa chỉ của nó là "${__VirtualRootPath}":"${__VirtualRootPath}".
 
@@ -669,312 +661,339 @@ Xin vui lòng xác nhận email của bạn (liên kết có hiệu lực trong 
 
 $OrangeButton
 
-Tận hưởng một cách cộng tác tài liệu mới!
+*Tận hưởng một cách cộng tác tài liệu mới!*
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Nhận ứng dụng ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;miễn phí&lt;/span&gt;
+
+
+Xin chào $UserName!
 
 Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
 
-# Để làm việc trên các tài liệu ngoại tuyến trên Windows, Linux và Mac, hãy tải "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để làm việc trên các tài liệu ngoại tuyến trên, hãy tải ONLYOFFICE Desktop Editors cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" hay "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 mẹo&lt;/span&gt; để làm việc hiệu quả trên tài liệu của bạn
+
+
+Xin chào $UserName!
 
 Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
 
-*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Chọn cách bạn làm việc.&lt;/b&gt; &lt;br/&gt;Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Làm việc với bất kỳ nội dung nào bạn có.&lt;/b&gt;Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Đồng làm việc một cách hiệu quả.&lt;/b&gt; &lt;br/&gt;Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Cộng tác an toàn.&lt;/b&gt; &lt;br/&gt;Tinh chỉnh quyền truy cập vào toàn bộ không gian hoặc các phòng riêng biệt với quyền và vai trò người dùng linh hoạt. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Tận dụng plugin trợ giúp AI.&lt;/b&gt;&lt;br/&gt;Tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com": "https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 mẹo&lt;/span&gt; để làm việc hiệu quả trên tài liệu của bạn
+
+
+Xin chào $UserName!
 
 Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
 
-*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Chọn cách bạn làm việc.&lt;/b&gt; &lt;br/&gt;Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Làm việc với bất kỳ nội dung nào bạn có.&lt;/b&gt;Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Đồng làm việc một cách hiệu quả.&lt;/b&gt; &lt;br/&gt;Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Cộng tác an toàn.&lt;/b&gt; &lt;br/&gt;Tinh chỉnh quyền truy cập vào toàn bộ không gian hoặc các phòng riêng biệt với quyền và vai trò người dùng linh hoạt. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Tận dụng plugin trợ giúp AI.&lt;/b&gt;&lt;br/&gt;Tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 mẹo&lt;/span&gt; để làm việc hiệu quả trên tài liệu của bạn
+
+
+Xin chào $UserName!
 
 Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
 
-*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Chọn cách bạn làm việc.&lt;/b&gt; &lt;br/&gt;Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Làm việc với bất kỳ nội dung nào bạn có.&lt;/b&gt;Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Đồng làm việc một cách hiệu quả.&lt;/b&gt; &lt;br/&gt;Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Cộng tác an toàn.&lt;/b&gt; &lt;br/&gt;Tinh chỉnh quyền truy cập vào toàn bộ không gian hoặc các phòng riêng biệt với quyền và vai trò người dùng linh hoạt. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Tận dụng plugin trợ giúp AI.&lt;/b&gt;&lt;br/&gt;Tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 mẹo&lt;/span&gt; để làm việc hiệu quả trên tài liệu của bạn
+
+
+Xin chào $UserName!
 
 Chúng tôi hy vọng bạn thích sử dụng ONLYOFFICE DocSpace của mình. Dưới đây là một số lời khuyên giúp làm việc trên các tài liệu hiệu quả hơn.
 
-*#1. Chọn cách bạn làm việc.* Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Chọn cách bạn làm việc.&lt;/b&gt; &lt;br/&gt;Sắp xếp quy trình làm việc theo yêu cầu của bạn bằng cách tạo các phòng cộng tác để cùng làm việc theo thời gian thực hoặc các phòng tùy chỉnh với các cài đặt linh hoạt cho bất kỳ mục đích nào.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Làm việc với bất kỳ nội dung nào bạn có.* Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Làm việc với bất kỳ nội dung nào bạn có.&lt;/b&gt;Lưu trữ và làm việc với các tập tin có định dạng khác nhau trong phòng của bạn: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Đồng làm việc một cách hiệu quả.*Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Đồng làm việc một cách hiệu quả.&lt;/b&gt; &lt;br/&gt;Cộng tác trên tài liệu với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. &lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. Kết nối các đám mây của bên thứ 3.*Kết nối với bất kỳ lưu trữ đám mây nào và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Cộng tác an toàn.&lt;/b&gt; &lt;br/&gt;Tinh chỉnh quyền truy cập vào toàn bộ không gian hoặc các phòng riêng biệt với quyền và vai trò người dùng linh hoạt. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Tận dụng plugin trợ giúp AI.&lt;/b&gt;&lt;br/&gt;Tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Khám phá gói dịch vụ trả phí của &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào $UserName!
 
 Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
 
-* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
 
 Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
 
-_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Khám phá gói dịch vụ trả phí của &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào $UserName!
 
 Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
 
-* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
 
 Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
 
-_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Khám phá gói dịch vụ trả phí của &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào $UserName!
 
 Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
 
-* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
 
 Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
 
-_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Khám phá gói dịch vụ trả phí của &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào $UserName!
 
 Dưới đây là ba câu hỏi đơn giản dành cho bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng của bạn tốt hơn nữa.
 
-* Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Có phải bạn có một nhóm lớn hoặc rất nhiều khách hàng và đối tác để cộng tác trong ONLYOFFICE DocSpace của mình? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn tạo bất kỳ số lượng phòng nào để làm việc với nhiều tài liệu không? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Bạn có muốn sử dụng ONLYOFFICE DocSpace dưới thương hiệu của riêng bạn không?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Nếu bạn có ít nhất một câu trả lời ‘có’, hãy chọn gói BUSINESS cho phép bạn thêm bất kỳ số lượng người quản lý mong muốn nào vào ONLYOFFICE DocSpace của bạn cũng như áp dụng các tùy chọn xây dựng thương hiệu.
 
 Để làm như vậy, xin vui lòng tham khảo "Phần Thanh toán":"$PricingPage" của ONLYOFFICE DocSpace của bạn. Ở đó, bạn sẽ thấy một liên kết riêng lẻ đến Cổng thông tin khách hàng Stripe nơi bạn có thể dễ dàng xử lý tất cả các chi tiết thanh toán. 
 
-_Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Xin lưu ý: Người trả tiền cho gói dịch vụ trở thành người trả tiền. Chỉ người trả tiền mới có thể thay đổi gói dịch vụ đăng ký (điều chỉnh số lượng người quản lý). Người dùng không có quyền truy cập vào chi tiết thanh toán. Chủ sở hữu tài khoản ONLYOFFICE DocSpace có thể chỉ định lại người trả tiền bất cứ lúc nào sau đó.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào!
 
 Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào!
 
 Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào!
 
 Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào!
 
 Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. bạn đến với &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Xin chào $UserName!
 
 Chào mừng bạn đến với ONLYOFFICE DocSpace! Hồ sơ người dùng của bạn đã được thêm thành công vào "${__VirtualRootPath}":"${__VirtualRootPath}". Giờ đây bạn đã có thể:
 
-* Làm việc với những người dùng khác trong phòng mà bạn được mời*: phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Làm việc với những người dùng khác trong phòng mà bạn được mời: &lt;b&gt;phòng cộng tác để cùng soạn thảo theo thời gian thực hoặc phòng tùy chỉnh với cài đặt linh hoạt cho mọi mục đích&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Làm việc với các tập tin có định dạng khác nhau*: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Làm việc với các tập tin có định dạng khác nhau&lt;/b&gt;: tài liệu văn bản, bảng tính, bản trình bày, biểu mẫu kỹ thuật số, PDF, sách điện tử, đa phương tiện.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Cộng tác trên tài liệu* với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn. Theo dõi các thay đổi, trao đổi trong thời gian thực bằng cách sử dụng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Cộng tác trên tài liệu&lt;/b&gt; với hai chế độ đồng chỉnh sửa: theo thời gian thực hoặc khóa đoạn văn bản. Theo dõi các thay đổi, trao đổi theo thời gian thực bằng cách sử dụng tính năng trò chuyện tích hợp hoặc thực hiện cuộc gọi âm thanh và video.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Kết nối với bất kỳ lưu trữ đám mây nào* và làm việc mà không cần chuyển đổi giữa các ứng dụng. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Tận dụng plugin trợ giúp AI:&lt;/b&gt; tóm tắt và dịch văn bản, tạo hình ảnh và từ khóa, phân tích từ, v.v.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Nếu bạn cần hỗ trợ, hãy xem qua "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
+Nếu bạn cần trợ giúp, hãy xem qua "Trung tâm trợ giúp":"${__HelpLink}" của chúng tôi hoặc hỏi "nhóm hỗ trợ":"${__SupportLink}".
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Tin nhắn từ cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -986,33 +1005,35 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Nhận ứng dụng ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;miễn phí&lt;/span&gt;
+
+
+Xin chào $UserName!
 
 Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
 
-# Để làm việc trên các tài liệu ngoại tuyến trên Windows, Linux và Mac, hãy tải "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để làm việc trên các tài liệu ngoại tuyến trên, hãy tải ONLYOFFICE Desktop Editors cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" hay "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Nhận ứng dụng ONLYOFFICE &lt;span style="color:#FF6F3D;"&gt;miễn phí&lt;/span&gt;
+
+
+Xin chào $UserName!
 
 Hãy nhận các ứng dụng ONLYOFFICE miễn phí để làm việc trên các tài liệu từ bất kỳ thiết bị nào của bạn.
 
-# Để làm việc trên các tài liệu ngoại tuyến trên Windows, Linux và Mac, hãy tải "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/download-desktop.aspx".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để làm việc trên các tài liệu ngoại tuyến trên, hãy tải ONLYOFFICE Desktop Editors cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" hay "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Để chỉnh sửa tài liệu trên thiết bị di động, hãy tải ứng dụng ONLYOFFICE Documents cho&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
-    <value>Xin chào! 
+    <value>Xin chào!
 Đã có người cố đăng ký tài khoản "ONLYOFFICE Personal":"$PortalUrl" mới bằng email này. Nếu đó là bạn, chúng tôi muốn thông báo cho bạn rằng tài khoản đã tồn tại — hãy chuyển sang ONLYOFFICE Personal và đăng nhập.
 Nếu bạn bị mất mật khẩu, bạn có thể khôi phục nó trên "trang khôi phục mật khẩu":"$LinkToRecovery".
 Nếu bạn không đăng ký một tài khoản mới, có lẽ người khác đã làm điều đó do nhầm lẫn. Trong trường hợp này, vui lòng bỏ qua email này.
@@ -1023,68 +1044,59 @@ Nhóm ONLYOFFICE</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Bạn muốn thay đổi mật khẩu cho tài khoản ONLYOFFICE Personal của mình? Hãy nhấp vào nút bên dưới để xác nhận.
 
-$OrangeButton 
+$OrangeButton
 
 Liên kết có hiệu lực trong 7 ngày.
 
 Bạn không muốn thay đổi mật khẩu? Xin hãy bỏ qua tin nhắn này.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace của bạn đã được hủy kích hoạt thành công. Xin lưu ý rằng tất cả dữ liệu của bạn sẽ bị xóa theo "Chính sách Bảo mật":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
+    <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;đã bị hủy kích hoạt&lt;/span&gt;
 
-Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng? Xin hãy chia sẻ trải nghiệm của bạn với chúng tôi.
- 
 
-Cảm ơn và chúc bạn may mắn!
+ONLYOFFICE DocSpace của bạn đã được hủy kích hoạt thành công. Xin lưu ý rằng tất cả dữ liệu của bạn sẽ bị xóa theo "Chính sách Bảo mật":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng? Xin hãy chia sẻ trải nghiệm của bạn với chúng tôi.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
+
+*Cảm ơn và chúc bạn may mắn!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Định cấu hình &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace của bạn
+
+
+Xin chào $UserName!
 
 Hãy điều chỉnh cài đặt bảo mật của ONLYOFFICE DocSpace của bạn để giúp nó an toàn hơn:
 
-* Tăng độ mạnh cho mật khẩu.
-
-* Cho phép xác thực hai yếu tố và Đăng nhập một lần.
-
-* Xác định tên miền thư đáng tin cậy và xác định thời gian cho phiên đăng nhập.
-
-* Hạn chế quyền truy cập từ các địa chỉ IP cụ thể. 
-
-* Cho phép hoặc hạn chế tin nhắn quản trị. 
-
-* Quản lý quyền truy cập của quản trị viên.
-
-* Thực hiện sao lưu dữ liệu.
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Tăng độ mạnh cho mật khẩu&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Cho phép xác thực hai yếu tố và Đăng nhập một lần&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Xác định tên miền thư đáng tin cậy và xác định thời gian cho phiên đăng nhập&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Hạn chế quyền truy cập từ các địa chỉ IP cụ thể&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Cho phép hoặc hạn chế tin nhắn quản trị&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Quản lý quyền truy cập của quản trị viên&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Thực hiện sao lưu dữ liệu&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
 $OrangeButton
 
-Xin hãy truy cập "Trung tâm Hỗ trợ":"https://helpcenter.onlyoffice.com/" của chúng tôi để tìm hiểu thêm về cách định cấu hình và quản lý ONLYOFFICE DocSpace của bạn. Bạn cũng có thể tham khảo nó khi có câu hỏi về tính năng.
+Xin hãy truy cập "Trung tâm Hỗ trợ":"${__HelpLink}" của chúng tôi để tìm hiểu thêm về cách định cấu hình và quản lý ONLYOFFICE DocSpace của bạn. Bạn cũng có thể tham khảo nó khi có câu hỏi về tính năng.
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Bạn chưa vào ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" trong hơn nửa năm. 
+    <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;của bạn sẽ bị xóa&lt;/span&gt;
+
+
+Bạn chưa vào ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" trong hơn nửa năm. 
 
 Vì bạn đã quyết định không sử dụng nó nữa, ONLYOFFICE DocSpace của bạn và tất cả dữ liệu sẽ bị xóa theo "Chính sách Bảo mật":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
 
-Chúng tôi mong nhận được phản hồi của bạn. Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng ONLYOFFICE DocSpace?
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Chúng tôi mong nhận được phản hồi của bạn. Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$OrangeButton
+Nếu bạn cho rằng đây chỉ là sai sót và muốn tiếp tục sử dụng ONLYOFFICE DocSpace, xin vui lòng liên hệ với "nhóm hỗ trợ":"${__SupportLink}" của chúng tôi.
 
-Nếu bạn cho rằng đây chỉ là sai sót và muốn tiếp tục sử dụng ONLYOFFICE DocSpace, xin vui lòng liên hệ với "nhóm hỗ trợ":"https://www.onlyoffice.com/support-contact-form.aspx" của chúng tôi.
-
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào!
 
 Bạn được mời tham gia ONLYOFFICE DocSpace tại "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
@@ -1092,9 +1104,7 @@ $OrangeButton
 
 Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới cho tài khoản của bạn.
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1105,9 +1115,7 @@ Hãy đảm bảo thanh toán cho gói đăng ký Business của bạn trước 
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1118,9 +1126,7 @@ Chúng tôi mong bạn thanh toán gói dịch vụ Business của bạn ngay v�
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1131,9 +1137,7 @@ Hãy đảm bảo thanh toán cho gói dịch vụ Business của bạn càng s�
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Xin chào $UserName!
@@ -1144,9 +1148,7 @@ Hãy đảm bảo thanh toán cho gói dịch vụ Business của bạn ngay hô
 
 $OrangeButton
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Xin chào! 
@@ -1157,9 +1159,7 @@ $OrangeButton
 
 Sau khi nhấp vào liên kết mời, xin vui lòng đặt mật khẩu mới cho tài khoản của bạn.
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Có gì mới trên cổng thông tin của bạn vào ngày $Date</value>
@@ -1225,16 +1225,16 @@ Nhóm ONLYOFFICE
     <value>Nhận ứng dụng ONLYOFFICE miễn phí</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+    <value>5 mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+    <value>5 mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
   </data>
   <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+    <value>5 mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
   </data>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Một số mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
+    <value>5 mẹo để làm việc hiệu quả trên tài liệu của bạn</value>
   </data>
   <data name="ButtonChangeEmail" xml:space="preserve">
     <value>Thay đổi địa chỉ email</value>
@@ -1386,38 +1386,38 @@ Nhóm ONLYOFFICE
   <data name="pattern_mailbox_created" xml:space="preserve">
     <value>Kính gửi $UserName,
 
-Quản trị viên đã tạo một hộp thư &lt;b&gt;$Address&lt;/b&gt; mới cho bạn tại cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}".
+      Quản trị viên đã tạo một hộp thư &lt;b&gt;$Address&lt;/b&gt; mới cho bạn tại cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Sử dụng các cài đặt sau cho các email khách khác:
-Đăng nhập: &lt;b&gt;$Login&lt;/b&gt;
-Mật khẩu: "&lt;b&gt;đặt mật khẩu&lt;/b&gt;":"$MyStaffLink"
+      Sử dụng các cài đặt sau cho các email khách khác:
+      Đăng nhập: &lt;b&gt;$Login&lt;/b&gt;
+      Mật khẩu: "&lt;b&gt;đặt mật khẩu&lt;/b&gt;":"$MyStaffLink"
 
-Thư Đến (IMAP): 
-Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
-Cổng thông tin: &lt;b&gt;$ImapPort&lt;/b&gt;
-SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      Thư Đến (IMAP): 
+      Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
+      Cổng thông tin: &lt;b&gt;$ImapPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-Thư Đi (SMTP): 
-Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
-Cổng thông tin: &lt;b&gt;$SmtpPort&lt;/b&gt;
-SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
-Yêu cầu xác thực: &lt;b&gt;Có&lt;/b&gt;
+      Thư Đi (SMTP): 
+      Máy chủ: &lt;b&gt;$Server&lt;/b&gt;
+      Cổng thông tin: &lt;b&gt;$SmtpPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      Yêu cầu xác thực: &lt;b&gt;Có&lt;/b&gt;
 
 Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
   </data>
   <data name="pattern_mailbox_password_changed" xml:space="preserve">
     <value>Kính gửi $UserName,
 
-Mật khẩu cho hộp thư &lt;b&gt;$Address&lt;/b&gt; đã được thay đổi.
+      Mật khẩu cho hộp thư &lt;b&gt;$Address&lt;/b&gt; đã được thay đổi.
 
-Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
+      Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
   </data>
   <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
     <value>Kính gửi $UserName,
 
-Quản trị viên đã tạo một hộp thư &lt;b&gt;$Address&lt;/b&gt; mới cho bạn tại cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}".
+      Quản trị viên đã tạo một hộp thư &lt;b&gt;$Address&lt;/b&gt; mới cho bạn tại cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}".
 
-Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
+      Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin của bạn để tìm hiểu thông tin.</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Di chuyển cổng thông tin
@@ -1433,9 +1433,12 @@ $OrangeButton
 Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin "$PortalUrl":"$PortalUrl" của bạn để tìm hiểu thông tin.</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
-Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}"  với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
+
+Xin chào!
+
+Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}" với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
 "$ActivateUrl":"$ActivateUrl"
 
@@ -1466,8 +1469,7 @@ h3.Để bắt đầu nhanh, đây là những gì bạn có thể làm trong ON
 
 Bạn cũng có thể chỉnh sửa tài liệu ngoại tuyến với "trình chỉnh sửa cho máy tính để bàn":"https://www.onlyoffice.com/download-desktop.aspx" miễn phí của chúng tôi hoặc nhận bộ chỉnh sửa cho thiết bị "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" hoặc "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" của bạn.
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_change_email_v115" xml:space="preserve">
     <value>Bạn muốn thay đổi email trên tài khoản ONLYOFFICE của mình?
@@ -1478,7 +1480,7 @@ $OrangeButton
 
 Liên kết có hiệu lực trong 7 ngày.
 
-*Nếu bạn không đăng nhập ONLYOFFICE trên trình duyệt này, bạn sẽ cần phải sử dụng email cũ của bạn để xác nhận. 
+*Nếu bạn không đăng nhập ONLYOFFICE trên trình duyệt này, bạn sẽ cần phải sử dụng email cũ của bạn để xác nhận.
 
 Bạn không muốn thay đổi email của mình? Xin hãy bỏ qua tin nhắn này.</value>
   </data>
@@ -1489,8 +1491,7 @@ Bạn vừa đăng ký một tài khoản tại giải pháp ONLYOFFICE để s�
 
 Nếu bạn không thể mở liên kết, vui lòng sao chép "$InviteLink":"$InviteLink" sau và dán nó vào thanh địa chỉ trình duyệt của bạn.
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Bạn đã yêu cầu chấm dứt tài khoản của mình tại personal.onlyoffice.com. Hãy làm theo liên kết để hoàn thành yêu cầu (liên kết hiệu lực trong 7 ngày): 
@@ -1499,14 +1500,13 @@ $OrangeButton
 
 *Lưu ý*: Sau khi xóa, tài khoản của bạn và tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn theo "Chính sách quyền riêng tư":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" của chúng tôi.
 
-"Đọc thêm về việc chấm dứt tài khoản":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Đọc thêm về việc chấm dứt tài khoản":"${__HelpLink}/administration/configuration.aspx"
 
 Bỏ qua email này nếu bạn không muốn tiếp tục. 
 
-Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi tại "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi tại "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Vô hiệu hóa cổng [${__VirtualRootPath}](${__VirtualRootPath})
@@ -1522,7 +1522,7 @@ _Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn 
 Bạn có thể kích hoạt lại cổng thông tin của mình bất cứ lúc nào bằng cách nhấp vào liên kết sau:
 [Kích hoạt lại cổng thông tin]($ ActivateUrl) (liên kết này không có giới hạn thời gian)
 
-Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại  [support@onlyoffice.com](mailto:support@onlyoffice.com)
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE™
@@ -1538,7 +1538,7 @@ Bạn đã yêu cầu xóa vĩnh viễn cổng thông tin [${__VirtualRootPath}]
 _Quan trọng! Tất cả dữ liệu được lưu trữ trên cổng thông tin của bạn, cũng như thông tin đăng ký của bạn sẽ bị mất và không thể được phục hồi._
 
 #if($AutoRenew == "True")
-Trước khi bạn xóa cổng thông tin, xin vui lòng đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong [tài khoản Avangate] của mình ](https://secure.avangate.com/myaccount/").
+Trước khi bạn xóa cổng thông tin, xin vui lòng đảm bảo rằng thanh toán tự động đã được tắt. Bạn có thể kiểm tra trạng thái thanh toán tự động trong [tài khoản Avangate của mình](https://secure.avangate.com/myaccount/").
 #end
 
 Nếu bạn vẫn muốn xóa cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) của mình, vui lòng nhấp vào liên kết bên dưới để xác nhận thao tác:
@@ -1547,7 +1547,7 @@ $OrangeButton
 
 _Lưu ý_: liên kết này chỉ có giá trị trong 7 ngày. Vui lòng hoàn tất quá trình xóa cổng thông tin trong khoảng thời gian đó.
 
-Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại  [support@onlyoffice.com](mailto:support@onlyoffice.com)
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SalesEmail}](mailto:${__SalesEmail})
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE™
@@ -1573,26 +1573,21 @@ Thông tin hồ sơ người dùng của bạn tại [${__VirtualRootPath}](${__
   <data name="pattern_reassigns_failed" xml:space="preserve">
     <value>Kính gửi $UserName,
 
-Quá trình phân lại dữ liệu từ người dùng "$FromUserName":"$ FromUserLink" cho người dùng "$ ToUserName":"$ ToUserLink" không thành công.
+Quá trình phân lại dữ liệu từ người dùng "$FromUserName":"$FromUserLink" cho người dùng "$ToUserName":"$ToUserLink" không thành công.
 
 Thông báo ngoại lệ: $Message</value>
   </data>
   <data name="pattern_remove_user_data_completed" xml:space="preserve">
     <value>Kính gửi $UserName,
 
-Quá trình xóa dữ liệu của người dùng "$FromUserName":"$ FromUserLink" đã được hoàn thành.
+Quá trình xóa dữ liệu của người dùng "$FromUserName":"$FromUserLink" đã được hoàn thành.
 
-Việc xóa dữ liệu cá nhân được phép cho các tính năng miễn phí:
-
-# Documents - $DocsSpace
-# CRM - $CrmSpace
-# Mail - $MailSpace
-# Talk - $TalkSpace</value>
+Việc xóa dữ liệu cá nhân được phép cho các tính năng miễn phí: $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Kính gửi $UserName,
 
-Quá trình xóa dữ liệu cho người dùng "$FromUserName":"$ FromUserLink" không thành công.
+Quá trình xóa dữ liệu cho người dùng "$FromUserName":"$FromUserLink" không thành công.
 
 Thông báo ngoại lệ: $Message</value>
   </data>
@@ -1639,7 +1634,10 @@ $OrangeButton
 Nếu bạn nhận được email này do nhầm lẫn, xin vui lòng bỏ qua hoặc liên hệ với quản trị viên cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}" của bạn để tìm hiểu thông tin.</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>Xin chào! 
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào!
 
 Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}"  với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
@@ -1647,9 +1645,7 @@ $OrangeButton
 
 Thỉnh thoảng chúng tôi cũng sẽ gửi cho bạn các mẹo hữu ích và tin tức ONLYOFFICE mới nhất. Bạn có thể hủy đăng ký trên trang Hồ sơ của mình cũng như bật lại bất kỳ lúc nào.
 
-Trân trọng, 
-Nhóm ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>Thông báo thay đổi hồ sơ cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) 
@@ -1700,7 +1696,7 @@ Cổng thông tin của bạn đã hoạt động trở lại.</value>
   </data>
   <data name="pattern_user_has_join_tg" xml:space="preserve">
     <value>Người dùng mới được thêm vào cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath})
-[$__ AuthorName]($__ AuthorUrl) đã tham gia cổng thông tin của bạn tại [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+[$__AuthorName]($__AuthorUrl) đã tham gia cổng thông tin của bạn tại [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="pattern_user_ldap_activation" xml:space="preserve">
     <value>Kính gửi $UserName,
@@ -1721,7 +1717,10 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào $UserName!
 
 $__AuthorName đã mời bạn làm người dùng khách của "${__VirtualRootPath}":"${__VirtualRootPath}". Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
@@ -1741,11 +1740,13 @@ Tìm hiểu thêm về ONLYOFFICE Cá nhân trên "blog của chúng tôi":"$Tag
 
 Chúng tôi rất vui được phục vụ bạn. Hãy theo dõi!
 
-Trân trọng,
-Nhóm ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Xin chào $UserName!
+    <value>h1. Tham gia &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Xin chào $UserName!
 
 Bạn được mời tham gia "${__VirtualRootPath}":"${__VirtualRootPath}" với tư cách là người dùng khách. Hãy chấp nhận lời mời bằng cách nhấp vào liên kết:
 
@@ -1778,7 +1779,7 @@ Liên kết có hiệu lực trong 7 ngày.
 Bạn không muốn thay đổi email của mình? Xin hãy bỏ qua tin nhắn này.</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
-    <value>Đã tạo bản sao lưu cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath}) 
+    <value>Đã tạo bản sao lưu cổng thông tin [${__VirtualRootPath}](${__VirtualRootPath})
 
 Kính gửi $OwnerName,
 
@@ -1786,7 +1787,7 @@ Tập tin sao lưu chứa dữ liệu từ cổng thông tin [${__VirtualRootPat
 
 Để tìm hiểu thêm về quy trình sao lưu, xin vui lòng tham khảo hướng dẫn sử dụng [Sao lưu dữ liệu](${__HelpLink}/tipstricks/data-backup-restore.aspx) của chúng tôi.
 
-Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [support.onlyoffice.com](https://support.onlyoffice.com)
+Nếu bạn có bất kỳ câu hỏi gì hoặc cần trợ giúp, xin vui lòng liên hệ với chúng tôi tại [${__SupportLink}](${__SupportLink})
 
 Trân trọng,
 Nhóm hỗ trợ ONLYOFFICE™
@@ -1806,5 +1807,25 @@ Nhóm hỗ trợ ONLYOFFICE™
   </data>
   <data name="ButtonWatchFullPlaylist" xml:space="preserve">
     <value>XEM TOÀN BỘ DANH SÁCH PHÁT</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. Thành thạo ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;với video hướng dẫn&lt;/span&gt;
+
+
+Xin chào $UserName!
+
+Để thuận tiện cho bạn, chúng tôi đã chuẩn bị các video hướng dẫn để bạn có thể dễ dàng thành thạo ONLYOFFICE DocSpace. Hãy xem hướng dẫn bằng video và đảm bảo công việc của bạn diễn ra suôn sẻ và hiệu quả.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;ONLYOFFICE DocSpace là gì&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;DocSpace: hướng dẫn thực tế&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Các hoạt động chính&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;Tạo phòng&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;Tạo và tải tập tin lên&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;Sao chép, di chuyển, đổi tên, xóa, tải tập tin xuống&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Sắp xếp và lọc tập tin&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;Khôi phục phiên bản tập tin&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;Sử dụng phím tắt&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;Sao lưu phòng&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Quản lý người dùng và hồ sơ&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;Mời người dùng&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;Quản lý vai trò người dùng&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;Manage your profile&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;Đăng xuất khỏi tất cả các phiên hoạt động&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Quản lý&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Quản lý cài đặt bảo mật&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Sao lưu và khôi phục&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

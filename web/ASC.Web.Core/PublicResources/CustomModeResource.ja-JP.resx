@@ -77,7 +77,7 @@ h3.まずはONLYOFFICEでできることをご紹介します：
 
 - さまざまなプラグインを使用して、追加機能を適用できます。
 
-- "Chrome拡張機能":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=JA" を使って、パーソナルクラウドに簡単にアクセスできます。
+- "Chrome拡張機能":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ja" を使って、パーソナルクラウドに簡単にアクセスできます。
 
 無料の"デスクトップエディター":"https://www.onlyoffice.com/ja/download-desktop.aspx"を使ってオフラインでドキュメントを編集したり、"iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972"または"Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"デバイス用のモバイル編集スイートを入手することもできます。
 
@@ -97,14 +97,15 @@ $TrulyYours</value>
 
 $OrangeButton
 
-＊ご注意ください＊：削除すると、「プライバシーポリシー」:"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"に従い、アカウントとそれに対応しているデータも消去されるようになります。
+*ご注意*：削除後、お客様のアカウントとそれに関連するすべてのデータは、当社の「"プライバシーステートメント":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"」に従って永久に消去されます。
+
+"退会についてもっと読む":"${__HelpLink}/administration/configuration.aspx"
 
 削除したくない場合に、このメッセージを無視して下さい。
 
-ご質問があったら、"support@onlyoffice.com":"mailto:support@onlyoffice.com"で連絡ください。
+ご質問があったら、"${__SupportEmail}":"mailto:${__SupportEmail}"
 
-敬具、
-ONLYOFFICEチーム</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>$UserNameさん、
