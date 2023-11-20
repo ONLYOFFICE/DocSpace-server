@@ -69,7 +69,7 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
 
             if (@event.IsScheduled)
             {
-                _backupWorker.StartScheduledBackup(new EF.Model.BackupSchedule
+                await _backupWorker.StartScheduledBackupAsync(new EF.Model.BackupSchedule
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,

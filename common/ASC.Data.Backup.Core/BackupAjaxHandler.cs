@@ -107,21 +107,21 @@ public class BackupAjaxHandler
 
         await _messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        _backupService.StartBackup(backupRequest);
+        await _backupService.StartBackupAsync(backupRequest);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
         await DemandPermissionsBackupAsync();
 
-        return _backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
+        return await _backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
 
-        return _backupService.GetBackupProgress(tenantId);
+        return await _backupService.GetBackupProgress(tenantId);
     }
 
     public async Task DeleteBackupAsync(Guid id)
@@ -312,7 +312,7 @@ public class BackupAjaxHandler
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var result = _backupService.GetRestoreProgress(tenant.Id);
+        var result = await _backupService.GetRestoreProgress(tenant.Id);
 
         return result;
     }
@@ -357,7 +357,7 @@ public class BackupAjaxHandler
         await DemandPermissionsTransferAsync();
 
         await _messageService.SendAsync(MessageAction.StartTransferSetting);
-        _backupService.StartTransfer(
+        await _backupService.StartTransferAsync(
             new StartTransferRequest
             {
                 TenantId = await GetCurrentTenantIdAsync(),
@@ -369,7 +369,7 @@ public class BackupAjaxHandler
 
     public async Task<BackupProgress> GetTransferProgressAsync()
     {
-        return _backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
+        return await _backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
     }
 
     private async Task DemandPermissionsTransferAsync()

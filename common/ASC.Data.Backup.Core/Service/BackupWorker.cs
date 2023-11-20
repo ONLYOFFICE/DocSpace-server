@@ -30,6 +30,7 @@ namespace ASC.Data.Backup.Services;
 public class BackupWorker
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "backup";
+    public const string LockKey = $"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}";
 
     public string TempFolder { get; }
 
@@ -37,13 +38,16 @@ public class BackupWorker
     private int _limit;
     private string _upgradesPath;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private readonly object _syncRoot = new();
 
     public BackupWorker(
         IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider,
         IServiceProvider serviceProvider,
         TempPath tempPath)
     {
+        _distributedLockProvider = distributedLockProvider;
         _serviceProvider = serviceProvider;
          _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
         TempFolder = Path.Combine(tempPath.GetTempPath(), "backup");
@@ -60,9 +64,9 @@ public class BackupWorker
         _upgradesPath = settings.UpgradesPath;
     }
 
-    public void Stop()
+    public async Task StopAsync()
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             if (_progressQueue == null)
             {
@@ -80,9 +84,9 @@ public class BackupWorker
         }
     }
 
-    public BackupProgress StartBackup(StartBackupRequest request)
+    public async Task<BackupProgress> StartBackupAsync(StartBackupRequest request)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
@@ -107,9 +111,9 @@ public class BackupWorker
         }
     }
 
-    public void StartScheduledBackup(BackupSchedule schedule)
+    public async Task StartScheduledBackupAsync(BackupSchedule schedule)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == schedule.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
@@ -129,33 +133,33 @@ public class BackupWorker
         }
     }
 
-    public BackupProgress GetBackupProgress(int tenantId)
+    public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             return ToBackupProgress(_progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup));
         }
     }
 
-    public BackupProgress GetTransferProgress(int tenantId)
+    public async Task<BackupProgress> GetTransferProgressAsync(int tenantId)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             return ToBackupProgress(_progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Transfer));
         }
     }
 
-    public BackupProgress GetRestoreProgress(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgressAsync(int tenantId)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             return ToBackupProgress(_progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
     }
 
-    public void ResetBackupError(int tenantId)
+    public async Task ResetBackupErrorAsync(int tenantId)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             var progress = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
@@ -165,9 +169,9 @@ public class BackupWorker
         }
     }
 
-    public void ResetRestoreError(int tenantId)
+    public async Task ResetRestoreErrorAsync(int tenantId)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             var progress = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
@@ -177,9 +181,9 @@ public class BackupWorker
         }
     }
 
-    public BackupProgress StartRestore(StartRestoreRequest request)
+    public async Task<BackupProgress> StartRestoreAsync(StartRestoreRequest request)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             var item = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId);
             if (item is { IsCompleted: true })
@@ -198,9 +202,9 @@ public class BackupWorker
         }
     }
 
-    public BackupProgress StartTransfer(int tenantId, string targetRegion, bool notify)
+    public async Task<BackupProgress> StartTransferAsync(int tenantId, string targetRegion, bool notify)
     {
-        lock (_syncRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
         {
             var item = _progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (item is { IsCompleted: true })

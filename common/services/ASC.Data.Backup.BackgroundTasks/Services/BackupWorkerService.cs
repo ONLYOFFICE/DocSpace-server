@@ -56,7 +56,7 @@ internal sealed class BackupWorkerService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _backupWorker.Stop();
+        _backupWorker.StopAsync();
 
         return Task.CompletedTask;
     }
