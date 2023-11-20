@@ -31,16 +31,17 @@ namespace ASC.Web.Files.Utils;
 [Singleton]
 public class FileConverterQueue
 {
-    private readonly object _locker = new();
     private readonly IDistributedCache _distributedCache;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private const string Cache_key_prefix = "asc_file_converter_queue_";
 
-    public FileConverterQueue(IDistributedCache distributedCache)
+    public FileConverterQueue(IDistributedCache distributedCache, IDistributedLockProvider distributedLockProvider)
     {
         _distributedCache = distributedCache;
+        _distributedLockProvider = distributedLockProvider;
     }
 
-    public void Add<T>(File<T> file,
+    public async Task AddAsync<T>(File<T> file,
                         string password,
                         int tenantId,
                         IAccount account,
@@ -49,9 +50,10 @@ public class FileConverterQueue
                         string serverRootPath,
                         ExternalShareData externalShareData = null)
     {
-        lock (_locker)
+        var cacheKey = GetCacheKey<T>();
+
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{cacheKey}", TimeSpan.FromMinutes(1)))
         {
-            var cacheKey = GetCacheKey<T>();
             var task = PeekTask(file, cacheKey);
 
             if (task != null)
@@ -533,7 +535,7 @@ public class FileConverter
 
         await _fileMarker.RemoveMarkAsNewAsync(file);
 
-        _fileConverterQueue.Add(file, password, (await _tenantManager.GetCurrentTenantAsync()).Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
+        await _fileConverterQueue.AddAsync(file, password, (await _tenantManager.GetCurrentTenantAsync()).Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
             _baseCommonLinkUtility.ServerRootPath, await _externalShare.GetLinkIdAsync() != Guid.Empty ? await _externalShare.GetCurrentShareDataAsync() : null);
     }
 
