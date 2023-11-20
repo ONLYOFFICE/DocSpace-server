@@ -180,9 +180,11 @@
     items.forEach(markAsNewFile);
   }
 
-  function markAsNewFolder({ folderId, count, room } = {}) {
-    logger.info(`markAsNewFolder ${folderId} in room ${room}:${count}`);
-    filesIO.to(room).emit("s:markasnew-folder", { folderId, count });
+  function markAsNewFolder({ folderId, userIds, room } = {}) {
+    logger.info(`markAsNewFolder ${folderId}`);
+    userIds.forEach(({count, owner}) =>{
+      filesIO.to(`${room}-${owner}`).emit("s:markasnew-folder", { folderId, count });
+    });
   }
 
   function markAsNewFolders(items = []) {

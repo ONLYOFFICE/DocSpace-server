@@ -114,47 +114,45 @@ public class SocketManager : SocketServiceClient
     {
         var result = new List<object>();
         
-        foreach (var g in tags.GroupBy(r=> r.EntryId))
+        foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = await GetFileRoomAsync(g.Key);
-            result.AddRange(g.DistinctBy(r=> r.EntryId).Select(f =>             
-            new {
-                room,
-                fileId = f.EntryId
-            }));
+            result.Add(new { room, fileId = g.Key });
         }
         
         SendNotAwaitableRequest("markasnew-file", result);
     }
 
     public async Task ExecMarkAsNewFoldersAsync(IEnumerable<Tag> tags)
-    {
-        var result = await tags.ToAsyncEnumerable()
-            .SelectAwait(async tag => new
-            {
-                room = await GetFolderRoomAsync(tag.EntryId, tag.Owner),
-                folderId = tag.EntryId,
-                count = tag.Count
-            })
-            .ToListAsync();
-
+    { 
+        var result = new List<object>();
+        
+        foreach (var g in tags.GroupBy(r => r.EntryId))
+        {
+            var room = await GetFolderRoomAsync(g.Key);
+            result.Add(             
+                new {
+                    room,
+                    folderId = g.Key,
+                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count}).ToList()
+                });
+        }
+        
         SendNotAwaitableRequest("markasnew-folder", result);
     }
 
-    private async Task<string> GetFileRoomAsync<T>(T fileId, Guid? owner = null)
+    private async Task<string> GetFileRoomAsync<T>(T fileId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var ownerData = owner.HasValue ? "-" + owner.Value : "";
 
-        return $"{tenantId}-FILE-{fileId}{ownerData}";
+        return $"{tenantId}-FILE-{fileId}";
     }
 
-    private async Task<string> GetFolderRoomAsync<T>(T folderId, Guid? owner = null)
+    private async Task<string> GetFolderRoomAsync<T>(T folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var ownerData = owner.HasValue ? "-" + owner.Value : "";
 
-        return $"{tenantId}-DIR-{folderId}{ownerData}";
+        return $"{tenantId}-DIR-{folderId}";
     }
 
     private async Task<string> SerializeFile<T>(File<T> file)
