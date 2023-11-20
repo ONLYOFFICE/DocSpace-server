@@ -209,13 +209,20 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         
         var q = await GetPureSharesQuery(entry, filterType, filesDbContext);
 
+        if (filterType != ShareFilterType.User)
+        {
+            return await q.CountAsync();
+        }
+
+        var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
+            (s, u) => new SecurityUserRecord { Security = s, User = u }).Where(r => !r.User.Removed);
+
         if (status.HasValue)
         {
-            q = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, 
-                    (s, u) => new SecurityUserRecord { Security = s, User = u })
-                .Where(s => s.User.ActivationStatus == status.Value)
-                .Select(r => r.Security);
+            q1 = q1.Where(s => s.User.ActivationStatus == status.Value);
         }
+
+        q = q1.Select(r => r.Security);
 
         return await q.CountAsync();
     }
@@ -236,7 +243,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             var predicate = ShareCompareHelper.GetCompareExpression<SecurityUserRecord>(s => s.Security.Share);
 
             var q1 = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id, 
-                (s, u) => new SecurityUserRecord { Security = s, User = u });
+                (s, u) => new SecurityUserRecord { Security = s, User = u }).Where(r => !r.User.Removed);
 
             if (status.HasValue)
             {
@@ -381,13 +388,20 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
     }
 
-    public async Task RemoveSubjectAsync(Guid subject)
+    public async Task RemoveBySubjectAsync(Guid subject, bool withoutOwner)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await Queries.RemoveSubjectAsync(filesDbContext, tenantId, subject);
+        if (withoutOwner)
+        {
+            await Queries.RemoveBySubjectWithoutOwnerAsync(filesDbContext, tenantId, subject);
+        }
+        else
+        {
+            await Queries.RemoveBySubjectAsync(filesDbContext, tenantId, subject);
+        }
 
         await filesDbContext.SaveChangesAsync();
     }
@@ -823,12 +837,19 @@ static file class Queries
                     (r.TenantId == tenantId && files.Contains(r.EntryId) && r.EntryType == FileEntryType.File)
                     || (r.TenantId == tenantId && folders.Contains(r.EntryId) && r.EntryType == FileEntryType.Folder)));
 
-    public static readonly Func<FilesDbContext, int, Guid, Task<int>> RemoveSubjectAsync =
+    public static readonly Func<FilesDbContext, int, Guid, Task<int>> RemoveBySubjectAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid subject) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId
                                 && (r.Subject == subject || r.Owner == subject))
+                    .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, Guid, Task<int>> RemoveBySubjectWithoutOwnerAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid subject) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId && r.Subject == subject)
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, FileEntryType, IEnumerable<Guid>, IAsyncEnumerable<DbFilesSecurity>> EntrySharesBySubjectsAsync =
