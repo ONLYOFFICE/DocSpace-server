@@ -114,14 +114,10 @@ public class SocketManager : SocketServiceClient
     {
         var result = new List<object>();
         
-        foreach (var g in tags.GroupBy(r=> r.EntryId))
+        foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = await GetFileRoomAsync(g.Key);
-            result.Add(             
-            new {
-                room,
-                fileId = g.Key
-            });
+            result.Add(new { room, fileId = g.Key });
         }
         
         SendNotAwaitableRequest("markasnew-file", result);
@@ -131,14 +127,14 @@ public class SocketManager : SocketServiceClient
     { 
         var result = new List<object>();
         
-        foreach (var g in tags.GroupBy(r=> r.EntryId))
+        foreach (var g in tags.GroupBy(r => r.EntryId))
         {
             var room = await GetFolderRoomAsync(g.Key);
             result.Add(             
                 new {
                     room,
                     folderId = g.Key,
-                    userIds = g.Select(r=> new {r.Owner, r.Count}).ToList()
+                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count}).ToList()
                 });
         }
         
