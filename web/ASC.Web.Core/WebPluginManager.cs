@@ -44,6 +44,11 @@ public class WebPlugin
     public bool System { get; set; }
     public string Url { get; set; }
     public string Settings { get; set; }
+
+    public WebPlugin Clone()
+    {
+        return (WebPlugin)MemberwiseClone();
+    }
 }
 
 [Singleton]
@@ -314,8 +319,8 @@ public class WebPluginManager
 
         var webPlugins = new List<WebPlugin>();
 
-        webPlugins.AddRange(await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant));
-        webPlugins.AddRange(await GetWebPluginsFromCacheAsync(tenantId));
+        webPlugins.AddRange((await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant)).Select(x => x.Clone()));
+        webPlugins.AddRange((await GetWebPluginsFromCacheAsync(tenantId)).Select(x => x.Clone()));
 
         var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
 
