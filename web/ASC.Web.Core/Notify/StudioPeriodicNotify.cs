@@ -373,10 +373,11 @@ public class StudioPeriodicNotify
 
                     await client.SendNoticeToAsync(
                         action,
-                            new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
+                        new[] { u },
                         new[] { senderName },
+                        new TagValue(CommonTags.Culture, culture.Name),
                         new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                            new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
+                        new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
@@ -518,10 +519,11 @@ public class StudioPeriodicNotify
 
                     await client.SendNoticeToAsync(
                         action,
-                            new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
+                        new[] { u },
                         new[] { senderName },
+                        new TagValue(CommonTags.Culture, culture.Name),
                         new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                            new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
+                        new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
@@ -597,10 +599,11 @@ public class StudioPeriodicNotify
                         Thread.CurrentThread.CurrentUICulture = culture;
 
                         await client.SendNoticeToAsync(
-                                await _userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
-                                new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
+                            await _userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
+                            new[] { u },
                             new[] { senderName },
-                                new TagValue(Tags.UserName, u.DisplayUserName(_displayUserSettingsHelper)),
+                            new TagValue(CommonTags.Culture, culture.Name),
+                            new TagValue(Tags.UserName, u.DisplayUserName(_displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
                             TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                             TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture)),
