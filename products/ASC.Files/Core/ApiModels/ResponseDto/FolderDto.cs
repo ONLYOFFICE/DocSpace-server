@@ -213,6 +213,11 @@ public class FolderDtoHelper : FileEntryDtoHelper
             }
         }
 
+        if (folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.ReadyFormFolder)
+        {
+            result.Type = folder.FolderType;
+        }
+
         return result;
     }
 
