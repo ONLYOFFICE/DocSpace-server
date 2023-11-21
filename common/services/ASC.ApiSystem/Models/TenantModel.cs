@@ -89,4 +89,6 @@ public class TenantModel : IModel
     public bool Calls { get; set; }
 
     public string AppKey { get; set; }
+
+    public bool LimitedAccessSpace { get; set; }
 }

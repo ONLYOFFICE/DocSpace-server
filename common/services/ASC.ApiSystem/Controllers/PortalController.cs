@@ -225,7 +225,8 @@ public class PortalController : ControllerBase
             Industry = (TenantIndustry)model.Industry,
             Spam = model.Spam,
             Calls = model.Calls,
-            HostedRegion = model.Region
+            HostedRegion = model.Region,
+            LimitedAccessSpace = model.LimitedAccessSpace
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
