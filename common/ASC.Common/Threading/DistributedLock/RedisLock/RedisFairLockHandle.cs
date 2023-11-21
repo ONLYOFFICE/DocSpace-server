@@ -60,9 +60,15 @@ public class RedisFairLockHandle : LockHandleBase
         _timer?.Dispose();
         _timer = null;
         
-        await _database.Database.ScriptEvaluateAsync(_lockReleaseScript, 
-            new RedisKey[] { _resource, _queueKey, _channelName, _queueItemTimeoutKey }, 
-            new RedisValue[] { _expiryInMilliseconds, _id, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
+        await _database.Database.ScriptEvaluateAsync(_lockReleaseScript, new
+        {
+            lockKey = _resource,
+            queue = _queueKey,
+            channel = _channelName,
+            queueTimeout = _queueItemTimeoutKey,
+            id = _id,
+            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        });
 
         _disposed = true;
     }
@@ -74,53 +80,59 @@ public class RedisFairLockHandle : LockHandleBase
         _timer?.Dispose();
         _timer = null;
         
-        _database.Database.ScriptEvaluate(_lockReleaseScript, 
-            new RedisKey[] { _resource, _queueKey, _channelName, _queueItemTimeoutKey }, 
-            new RedisValue[] { _expiryInMilliseconds, _id, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
+        _database.Database.ScriptEvaluate(_lockReleaseScript, new
+        {
+            lockKey = _resource,
+            queue = _queueKey,
+            channel = _channelName,
+            queueTimeout = _queueItemTimeoutKey,
+            id = _id,
+            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        });
         
         _disposed = true;
     }
 
-    private static readonly string _lockReleaseScript = RedisLockUtils.RemoveExtraneousWhitespace(
+    private static readonly LuaScript _lockReleaseScript = LuaScript.Prepare(RedisLockUtils.RemoveExtraneousWhitespace(
         """
         while true do
-            local firstLockId = redis.call('lindex', KEYS[2], 0);
+            local firstLockId = redis.call('lindex', @queue, 0);
             if firstLockId == false then
                 break;
             end;
         
-            local timeoutKey = KEYS[4] .. ':' .. firstLockId;
+            local timeoutKey = @queueTimeout .. ':' .. firstLockId;
             local timeout = redis.call('get', timeoutKey);
         
             if timeout ~= false then
-                if tonumber(timeout) <= tonumber(ARGV[3]) then
+                if tonumber(timeout) <= tonumber(@currentTime) then
                     redis.call('del', timeoutKey);
-                    redis.call('lpop', KEYS[2]);
+                    redis.call('lpop', @queue);
                 else
                     break;
                 end;
             elseif timeout == false then
-                redis.call('lpop', KEYS[2]);
+                redis.call('lpop', @queue);
             end;
         end;
         
-        if (redis.call('exists', KEYS[1]) == 0) then
-            local nextLockId = redis.call('lindex', KEYS[2], 0);
+        if (redis.call('exists', @lockKey) == 0) then
+            local nextLockId = redis.call('lindex', @queue, 0);
             if nextLockId ~= false then
-                redis.call('publish', KEYS[3] .. ':' .. nextLockId, 0);
+                redis.call('publish', @channel .. ':' .. nextLockId, 0);
             end;
             return 1;
         end;
         
-        if redis.call('get', KEYS[1]) == ARGV[2] then
-            redis.call('del', KEYS[1])
-            local nextLockId = redis.call('lindex', KEYS[2], 0);
+        if redis.call('get', @lockKey) == @id then
+            redis.call('del', @lockKey)
+            local nextLockId = redis.call('lindex', @queue, 0);
             if nextLockId ~= false then
-                redis.call('publish', KEYS[3] .. ':' .. nextLockId, 0);
+                redis.call('publish', @channel .. ':' .. nextLockId, 0);
             end;
             return 1;
         end
         
         return 0;
-        """);
+        """));
 }

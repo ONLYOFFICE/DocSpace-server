@@ -98,7 +98,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             return Task.CompletedTask;
         });
 
-        var messageWaitingTimeout = timeout / 2;
+        var messageWaitingTimeout = timeout / 3;
         
         try
         {
@@ -118,7 +118,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
                     break;
                 }
 
-                await messageWaiter.Task.WaitAsync(messageWaitingTimeout, cancellationToken);
+                await Task.WhenAny(messageWaiter.Task, Task.Delay(messageWaitingTimeout, cancellationToken));
 
                 messageWaiter = new TaskCompletionSource();
             }
@@ -173,10 +173,17 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
     private async Task<LockStatus> TryAcquireLockInternalAsync(IRedisDatabase database, string resource, string lockId, string queueKey, string queueItemTimeoutKey, TimeSpan timeout)
     {
         var timeoutInMilliseconds = (long)timeout.TotalMilliseconds;
-        
-        var code = (int)(await database.Database.ScriptEvaluateAsync(_lockTakeScript,
-            new RedisKey[] { resource, queueKey, queueItemTimeoutKey },
-            new RedisValue[] { _expiryInMilliseconds, lockId, timeoutInMilliseconds, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }));
+
+        var code = (int)(await database.Database.ScriptEvaluateAsync(_lockTakeScript, new
+        {
+            lockKey = resource,
+            queue = queueKey,
+            queueTimeout = queueItemTimeoutKey,
+            expiry = _expiryInMilliseconds,
+            id = lockId,
+            lockTimeout = timeoutInMilliseconds,
+            currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        }));
 
         return (LockStatus)code;
     }
@@ -190,7 +197,12 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
                 await database.Database.ScriptEvaluateAsync(_lockExtendScript,
-                    new RedisKey[] { resource }, new RedisValue[] { _expiryInMilliseconds, lockId });
+                    new
+                    {
+                        id = lockId,
+                        lockKey = resource,
+                        expiry = _expiryInMilliseconds
+                    });
             }
         }), cancellationToken);
 
@@ -221,64 +233,64 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         return $"{_lockIdPrefix}_{Guid.NewGuid():n}";
     }
 
-    private static readonly string _lockTakeScript = RedisLockUtils.RemoveExtraneousWhitespace(
+    private static readonly LuaScript _lockTakeScript = LuaScript.Prepare(RedisLockUtils.RemoveExtraneousWhitespace(
         """
         while true do
-            local firstLockId = redis.call('lindex', KEYS[2], 0);
+            local firstLockId = redis.call('lindex', @queue, 0);
             if firstLockId == false then
                 break;
             end;
         
-            local timeoutKey = KEYS[3] .. ':' .. firstLockId;
-            local timeout = redis.call('get', timeoutKey);
+            local expiryTimeKey = @queueTimeout .. ':' .. firstLockId;
+            local expiryTime = redis.call('get', expiryTimeKey);
         
-            if timeout ~= false then
-                if tonumber(timeout) <= tonumber(ARGV[4]) then
-                    redis.call('del', timeoutKey);
-                    redis.call('lpop', KEYS[2]);
+            if expiryTime ~= false then
+                if tonumber(expiryTime) <= tonumber(@currentTime) then
+                    redis.call('del', expiryTimeKey);
+                    redis.call('lpop', @queue);
                 else
                     break;
                 end;
-            elseif timeout == false then
-                redis.call('lpop', KEYS[2]);
+            elseif expiryTime == false then
+                redis.call('lpop', @queue);
             end;
         end;
         
-        local timeoutKey1 = KEYS[3] .. ':' .. ARGV[2];
+        local expiryTimeKey1 = @queueTimeout .. ':' .. @id;
         
-        if (redis.call('exists', KEYS[1]) == 0)
-            and ((redis.call('exists', KEYS[2]) == 0)
-                or (redis.call('lindex', KEYS[2], 0) == ARGV[2])) then
-            redis.call('lpop', KEYS[2]);
-            redis.call('del', timeoutKey1);
-            redis.call('set', KEYS[1], ARGV[2], 'px', ARGV[1]);
+        if (redis.call('exists', @lockKey) == 0)
+            and ((redis.call('exists', @queue) == 0)
+                or (redis.call('lindex', @queue, 0) == @id)) then
+            redis.call('lpop', @queue);
+            redis.call('del', expiryTimeKey1);
+            redis.call('set', @lockKey, @id, 'px', @expiry);
             return 0;
         end;
         
-        local timeout1 = redis.call('get', timeoutKey1);
+        local expiryTime1 = redis.call('get', expiryTimeKey1);
         
-        if timeout1 ~= false then
-            if tonumber(timeout1) <= tonumber(ARGV[4]) then
-                redis.call('del', timeoutKey1);
+        if expiryTime1 ~= false then
+            if tonumber(expiryTime1) <= tonumber(@currentTime) then
+                redis.call('del', expiryTimeKey1);
                 return 2;
             end;
         else
-            redis.call('rpush', KEYS[2], ARGV[2]);
-            redis.call('set', timeoutKey1, tonumber(ARGV[4]) + tonumber(ARGV[3]));
+            redis.call('rpush', @queue, @id);
+            redis.call('set', expiryTimeKey1, tonumber(@currentTime) + tonumber(@lockTimeout));
         end;
         
         return 1;
-        """);
+        """));
     
-    private static readonly string _lockExtendScript = RedisLockUtils.RemoveExtraneousWhitespace(
+    private static readonly LuaScript _lockExtendScript = LuaScript.Prepare(RedisLockUtils.RemoveExtraneousWhitespace(
         """
-            local currentLockId = redis.call('get', KEYS[1]);
+            local currentLockId = redis.call('get', @lockKey);
             if currentLockId == false then
-                return redis.call('set', KEYS[1], ARGV[2], 'px', ARGV[1]);
-            elseif currentLockId == ARGV[2] then
-                return redis.call('pexpire', KEYS[1], ARGV[2]);
+                return redis.call('set', @lockKey, @id, 'px', @expiry);
+            elseif currentLockId == @id then
+                return redis.call('pexpire', @lockKey, @expiry);
             end;
             
             return -1;
-        """);
+        """));
 }
