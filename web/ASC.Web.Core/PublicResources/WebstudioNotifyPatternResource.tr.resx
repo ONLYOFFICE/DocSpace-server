@@ -193,7 +193,7 @@ $OrangeButton
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal adresi değişikliğini bu sürede tamamlayın.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -215,7 +215,7 @@ Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın v
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -237,7 +237,7 @@ Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın v
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -259,7 +259,7 @@ Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın v
 $TrulyYours</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -628,7 +628,7 @@ Bağlantı 7 gün boyunca geçerlidir.
 Şifrenizi değiştirmek istemiyorsanız bu mesajı yoksayın</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -644,7 +644,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -660,7 +660,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -679,7 +679,7 @@ Mevcut tarife planınız STARTUP. Tamamen ücretsizdir ve şunları içerir:
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -938,7 +938,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -960,7 +960,7 @@ Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın v
 $TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -982,7 +982,7 @@ Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın v
 $TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
@@ -1004,7 +1004,7 @@ Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın v
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
 
 
 Merhaba, $UserName!
