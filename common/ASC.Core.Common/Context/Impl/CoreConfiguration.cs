@@ -86,7 +86,7 @@ public class CoreBaseSettings
 /// <summary>
 /// </summary>
 [Scope]
-public class CoreSettings : IDisposable
+public class CoreSettings
 {
     /// <summary>Base domain</summary>
     /// <type>System.String, System</type>
@@ -115,22 +115,25 @@ public class CoreSettings : IDisposable
         }
     }
 
+    private const string LockKey = "core_settings";
+
     internal ITenantService TenantService { get; set; }
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal IConfiguration Configuration { get; set; }
-    internal SemaphoreSlim Semaphore { get; set; }
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public CoreSettings() { }
 
     public CoreSettings(
         ITenantService tenantService,
         CoreBaseSettings coreBaseSettings,
-        IConfiguration configuration)
+        IConfiguration configuration, 
+        IDistributedLockProvider distributedLockProvider)
     {
         TenantService = tenantService;
         CoreBaseSettings = coreBaseSettings;
         Configuration = configuration;
-        Semaphore = new SemaphoreSlim(1);
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public string GetBaseDomain(string hostedRegion)
@@ -200,23 +203,21 @@ public class CoreSettings : IDisposable
         if (CoreBaseSettings.Standalone)
         {
             var key = await GetSettingAsync("PortalId");
-            if (string.IsNullOrEmpty(key))
+            if (!string.IsNullOrEmpty(key))
             {
-                try
+                return key;
+            }
+
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey, TimeSpan.FromSeconds(30)))
+            {
+                key = await GetSettingAsync("PortalId");
+                if (!string.IsNullOrEmpty(key))
                 {
-                    await Semaphore.WaitAsync();
-                    // thread safe
-                    key = await GetSettingAsync("PortalId");
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        key = Guid.NewGuid().ToString();
-                        await SaveSettingAsync("PortalId", key);
-                    }
+                    return key;
                 }
-                finally
-                {
-                    Semaphore.Release();
-                }
+
+                key = Guid.NewGuid().ToString();
+                await SaveSettingAsync("PortalId", key);
             }
 
             return key;
@@ -236,23 +237,21 @@ public class CoreSettings : IDisposable
         if (CoreBaseSettings.Standalone)
         {
             var key = GetSetting("PortalId");
-            if (string.IsNullOrEmpty(key))
+            if (!string.IsNullOrEmpty(key))
             {
-                try
+                return key;
+            }
+
+            using (_distributedLockProvider.TryAcquireFairLock(LockKey, TimeSpan.FromSeconds(30)))
+            {
+                key = GetSetting("PortalId");
+                if (!string.IsNullOrEmpty(key))
                 {
-                    Semaphore.Wait();
-                    // thread safe
-                    key = GetSetting("PortalId");
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        key = Guid.NewGuid().ToString();
-                        SaveSetting("PortalId", key);
-                    }
+                    return key;
                 }
-                finally
-                {
-                    Semaphore.Release();
-                }
+
+                key = Guid.NewGuid().ToString();
+                SaveSetting("PortalId", key);
             }
 
             return key;
@@ -265,11 +264,6 @@ public class CoreSettings : IDisposable
         }
 
         return Configuration["core:payment:region"] + tenant;
-    }
-
-    public void Dispose()
-    {
-        Semaphore.Dispose();
     }
 }
 
