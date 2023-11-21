@@ -690,13 +690,13 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+        string searchText, string extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
     public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool searchInContent, bool excludeSubject)
+        string searchText, string extension, bool searchInContent, bool excludeSubject)
     {
         return default;
     }

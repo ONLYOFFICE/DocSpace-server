@@ -431,8 +431,8 @@ public class EntryManager
                 var fileDao = _daoFactory.GetFileDao<T>();
                 var userId = _authContext.CurrentAccount.ID;
 
-                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject);
-                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
+                var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+                var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
                 
                 entries.AddRange(files);
 
@@ -1917,7 +1917,7 @@ public class EntryManager
         {
             var toRemove = tags.Values.Where(t => t.Name != linkIdString);
 
-            await tagDao.RemoveTags(toRemove);
+            await tagDao.RemoveTagsAsync(toRemove);
         }
 
         if (!tags.ContainsKey(linkIdString))

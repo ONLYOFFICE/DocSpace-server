@@ -144,7 +144,7 @@ public abstract class FoldersController<T> : ApiControllerBase
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject,
         ApplyFilterOption? applyFilterOption, string extension)
     {
-        var folder = await _foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, extension);
+        var folder = await _foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, null, extension);
 
         return folder.NotFoundIfNull();
     }
@@ -375,15 +375,16 @@ public class FoldersControllerCommon : ApiControllerBase
     /// <param type="System.Nullable{System.Boolean}, System" name="excludeSubject">Exclude a subject from the search</param>
     /// <param type="System.Nullable{ASC.Files.Core.Core.ApplyFilterOption}, ASC.Files.Core" name="applyFilterOption" optional="true" remark="Allowed values: All (0), Files (1), Folders (2)">Scope of filters</param>
     /// <param type="System.Nullable{ASC.Files.Core.VirtualRooms.SearchArea}, ASC.Files.Core" name="searchArea" optional="true" remark="Allowed values: Any (2), RecentByLinks (3)">Search area</param>
+    /// <param type="System.String, System" name="extension">Specifies whether to search for a specific file extension</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderContentDto, ASC.Files.Core">The "Recent" section contents</returns>
     /// <path>api/2.0/files/@recent</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolderAsync(Guid? userIdOrGroupId, FilterType? filterType, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
-        ApplyFilterOption? applyFilterOption, SearchArea? searchArea)
+        ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string extension)
     {
         return await _foldersControllerHelper.GetFolderAsync(await _globalFolderHelper.FolderRecentAsync, userIdOrGroupId, filterType, default, searchInContent, withsubfolders,
-            excludeSubject, applyFilterOption, searchArea);
+            excludeSubject, applyFilterOption, searchArea, extension);
     }
 
     /// <summary>

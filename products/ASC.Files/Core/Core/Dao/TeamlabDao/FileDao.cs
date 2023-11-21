@@ -840,8 +840,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 if (deleteLinks)
                 {
-                    await Queries.DeleteTagLinksByTypeAsync(filesDbContext, TenantID, fileId.ToString(), TagType.RecentByLink);
-                    await Queries.DeleteTagsAsync(filesDbContext, TenantID);
+                    await Queries.DeleteTagLinksByTypeAsync(filesDbContext, tenantId, fileId.ToString(), TagType.RecentByLink);
+                    await Queries.DeleteTagsAsync(filesDbContext, tenantId);
                 }
 
                 await foreach (var f in fromFolders)
@@ -1394,7 +1394,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+        string searchText, string extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -1403,9 +1403,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
         
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
         
-        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
 
-        q = await GetFilesQueryWithFilters(q, orderBy, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject);
+        q = await GetFilesQueryWithFilters(q, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
         
         if (offset > 0)
         {
@@ -1424,7 +1424,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     }
 
     public async Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool searchInContent, bool excludeSubject)
+        string searchText, string extension, bool searchInContent, bool excludeSubject)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -1433,9 +1433,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
         
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
         
-        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
         
-        q = await GetFilesQueryWithFilters(q, null, filterType, subjectGroup, subjectId, searchText, searchInContent, excludeSubject);
+        q = await GetFilesQueryWithFilters(q, null, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
         return await q.CountAsync();
     }
@@ -1638,8 +1638,6 @@ internal class FileDao : AbstractDao, IFileDao<int>
     
     protected IQueryable<DbFileQuery> FromQueryWithShared(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
     {
-        var tenantId = TenantID;
-        
         return dbFiles
             .Select(r => new DbFileQuery
             {
@@ -1655,7 +1653,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                         select f
                     ).FirstOrDefault(),
                 Shared = filesDbContext.Security.Any(s => 
-                    s.TenantId == tenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
+                    s.TenantId == r.TenantId && s.EntryId == r.Id.ToString() && s.EntryType == FileEntryType.File && 
                     (s.SubjectType == SubjectType.PrimaryExternalLink || s.SubjectType == SubjectType.ExternalLink))
             });
     }
@@ -1827,20 +1825,36 @@ internal class FileDao : AbstractDao, IFileDao<int>
     }
     
     private async Task<IQueryable<T>> GetFilesQueryWithFilters<T>(IQueryable<T> q, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, 
-        bool searchInContent, bool excludeSubject) 
+        string extension, bool searchInContent, bool excludeSubject) 
         where T: IQueryResult<DbFile>
     {
-        if (!string.IsNullOrEmpty(searchText))
+        var searchByText = !string.IsNullOrEmpty(searchText);
+        var searchByExtension = !string.IsNullOrEmpty(extension);
+        
+        if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(null, orderBy, filterType, subjectGroup, subjectId, searchText, searchInContent);
+            var func = GetFuncForSearch(null, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent);
 
             Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
             var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(expression);
             
-            q = success 
-                ? q.Where(r => searchIds.Contains(r.Entry.Id)) 
-                : BuildSearch<T, DbFile>(q, searchText, SearhTypeEnum.Any);
+            if (success)
+            {
+                q = q.Where(r => searchIds.Contains(r.Entry.Id));
+            }
+            else
+            {
+                if (searchByText)
+                {
+                    q = BuildSearch<T, DbFile>(q, searchText, SearchType.Any);
+                }
+
+                if (searchByExtension)
+                {
+                    q = BuildSearch<T, DbFile>(q, extension, SearchType.End);
+                }
+            }
         }
         
         q = orderBy == null
@@ -1884,9 +1898,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 q = q.Where(r => r.Entry.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
-                if (!string.IsNullOrEmpty(searchText))
+                if (!string.IsNullOrEmpty(extension))
                 {
-                    q = BuildSearch<T, DbFile>(q, searchText, SearhTypeEnum.Any);
+                    q = BuildSearch<T, DbFile>(q, extension, SearchType.End);
                 }
                 break;
         }
@@ -1894,11 +1908,11 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return q;
     }
     
-    private IQueryable<FileByTagQuery> GetFilesByTagQuery(Guid? tagOwner, TagType tagType, FilesDbContext filesDbContext)
+    private async Task<IQueryable<FileByTagQuery>> GetFilesByTagQuery(Guid? tagOwner, TagType tagType, FilesDbContext filesDbContext)
     {
         IQueryable<FileByTagQuery> query;
         
-        var initQuery = GetFileQuery(filesDbContext, r => r.CurrentVersion)
+        var initQuery = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
             .Join(filesDbContext.TagLink, f => f.Id.ToString(), l => l.EntryId,
                 (file, tagLink) => new { file, tagLink.EntryType, tagLink.TagId })
             .Where(r => r.EntryType == FileEntryType.File)
