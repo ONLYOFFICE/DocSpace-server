@@ -101,7 +101,7 @@ public class ExportToCSV
         var i = 0;
         foreach (var entity in list)
         {
-            dataTable.Columns.Add(new DataColumn(entity.Tag));
+            dataTable.Columns.Add(new DataColumn(entity.Key));
 
             values[i] = entity.Value; i++;
         }
