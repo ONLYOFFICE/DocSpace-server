@@ -506,7 +506,18 @@ public class TariffService : ITariffService
         }
 
         var hasQuantity = quantity != null && quantity.Any();
-        var key = "shopingurl_" + (hasQuantity ? string.Join('_', quantity.Keys.ToArray()) : "all") + (!string.IsNullOrEmpty(affiliateId) ? "_" + affiliateId : "");
+        var keyBuilder = new StringBuilder("shopingurl_");
+        keyBuilder.Append(hasQuantity ? string.Join('_', quantity.Keys.ToArray()) : "all");
+        if (!string.IsNullOrEmpty(affiliateId))
+        {
+            keyBuilder.Append($"_{affiliateId}");
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            keyBuilder.Append($"_{partnerId}");
+        }
+        
+        var key = keyBuilder.ToString();
         var url = _cache.Get<string>(key);
         if (url == null)
         {
