@@ -187,7 +187,7 @@ public class LogoColor
     public byte B { get; set; }
 }
 
-public enum Accessability
+public enum Accessibility
 {
     ImageView,
     MediaView,
@@ -208,11 +208,13 @@ public class FileUtility
     public FileUtility(
         FileUtilityConfiguration fileUtilityConfiguration,
         FilesLinkUtility filesLinkUtility,
-        IDbContextFactory<FilesDbContext> dbContextFactory)
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        SetupInfo setupInfo)
     {
         _fileUtilityConfiguration = fileUtilityConfiguration;
         _filesLinkUtility = filesLinkUtility;
         _dbContextFactory = dbContextFactory;
+        _setupInfo = setupInfo;
         CanForcesave = GetCanForcesave();
     }
 
@@ -329,45 +331,47 @@ public class FileUtility
         return FileType.Unknown;
     }
 
-    public IDictionary<Accessability, bool> GetAccessability(string fileName)
+    public IDictionary<Accessibility, bool> GetAccessibility<T>(File<T> file)
     {
-        var result = new Dictionary<Accessability, bool>();
+        var fileName = file.Title;
+        
+        var result = new Dictionary<Accessibility, bool>();
 
-        foreach (var r in Enum.GetValues<Accessability>())
+        foreach (var r in Enum.GetValues<Accessibility>())
         {
             var val = false;
 
             switch (r)
             {
-                case Accessability.ImageView:
+                case Accessibility.ImageView:
                     val = CanImageView(fileName);
                     break;
-                case Accessability.MediaView:
+                case Accessibility.MediaView:
                     val = CanMediaView(fileName);
                     break;
-                case Accessability.WebView:
+                case Accessibility.WebView:
                     val = CanWebView(fileName);
                     break;
-                case Accessability.WebEdit:
+                case Accessibility.WebEdit:
                     val = CanWebEdit(fileName);
                     break;
-                case Accessability.WebReview:
+                case Accessibility.WebReview:
                     val = CanWebReview(fileName);
                     break;
-                case Accessability.WebCustomFilterEditing:
+                case Accessibility.WebCustomFilterEditing:
                     val = CanWebCustomFilterEditing(fileName);
                     break;
-                case Accessability.WebRestrictedEditing:
+                case Accessibility.WebRestrictedEditing:
                     val = CanWebRestrictedEditing(fileName);
                     break;
-                case Accessability.WebComment:
+                case Accessibility.WebComment:
                     val = CanWebComment(fileName);
                     break;
-                case Accessability.CoAuhtoring:
-                    val = CanCoAuhtoring(fileName);
+                case Accessibility.CoAuhtoring:
+                    val = CanCoAuthoring(fileName);
                     break;
-                case Accessability.Convert:
-                    val = CanConvert(fileName);
+                case Accessibility.Convert:
+                    val = CanConvert(fileName) && file.ContentLength <= _setupInfo.AvailableFileSize;
                     break;
             }
 
@@ -425,7 +429,7 @@ public class FileUtility
         return ExtsWebCommented.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
-    public bool CanCoAuhtoring(string fileName)
+    public bool CanCoAuthoring(string fileName)
     {
         var ext = GetFileExtension(fileName);
         return ExtsCoAuthoring.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
@@ -650,6 +654,8 @@ public class FileUtility
     private readonly FileUtilityConfiguration _fileUtilityConfiguration;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
+    private readonly SetupInfo _setupInfo;
+
     public static readonly ImmutableList<string> ExtsArchive =  new List<string>()
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",

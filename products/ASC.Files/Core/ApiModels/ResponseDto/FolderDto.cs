@@ -80,8 +80,6 @@ public class FolderDto<T> : FileEntryDto<T>
 
     public bool? InRoom { get; set; }
 
-    protected internal override FileEntryType EntryType { get => FileEntryType.Folder; }
-
     public static FolderDto<int> GetSample()
     {
         return new FolderDto<int>

@@ -255,7 +255,7 @@ public class DocumentServiceHelper
             bool coauth;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoauth
-                && (!(coauth = _fileUtility.CanCoAuhtoring(file.Title)) || _fileTracker.IsEditingAlone(file.Id)))
+                && (!(coauth = _fileUtility.CanCoAuthoring(file.Title)) || _fileTracker.IsEditingAlone(file.Id)))
             {
                 if (tryEdit)
                 {

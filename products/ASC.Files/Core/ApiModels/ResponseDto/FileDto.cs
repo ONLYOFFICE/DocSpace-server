@@ -108,10 +108,8 @@ public class FileDto<T> : FileEntryDto<T>
     public bool DenySharing { get; set; }
 
     /// <summary>File accessibility</summary>
-    /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessability, System.Boolean}, System.Collections</type>
-    public IDictionary<Accessability, bool> ViewAccessability { get; set; }
-
-    protected internal override FileEntryType EntryType { get => FileEntryType.File; }
+    /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
+    public IDictionary<Accessibility, bool> ViewAccessability { get; set; }
 
     public static FileDto<int> GetSample()
     {
@@ -203,7 +201,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
         }
 
-        result.ViewAccessability = _fileUtility.GetAccessability(file.Title);
+        result.ViewAccessability = _fileUtility.GetAccessibility(file);
 
         return result;
     }
