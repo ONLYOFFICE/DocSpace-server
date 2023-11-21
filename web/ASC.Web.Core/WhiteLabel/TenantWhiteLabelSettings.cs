@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SKSvg = SkiaSharp.Extended.Svg.SKSvg;
+
 namespace ASC.Web.Core.WhiteLabel;
 
 public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
@@ -536,7 +538,7 @@ public class TenantWhiteLabelSettingsHelper
             var size = GetSize(WhiteLabelLogoType.Notification);
             var skSize = new SKSize(size.Width, size.Height);
 
-            var svg = new SkiaSharp.Extended.Svg.SKSvg(skSize);
+            var svg = new SKSvg(skSize);
 
             using (var stream = new MemoryStream(logoData))
             {

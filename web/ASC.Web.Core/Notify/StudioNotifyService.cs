@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using Constants = ASC.Core.Users.Constants;
+using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
@@ -34,7 +34,7 @@ public class StudioNotifyService
 {
     private readonly StudioNotifyServiceHelper _client;
 
-    public static string EMailSenderName { get { return ASC.Core.Configuration.Constants.NotifyEMailSenderSysName; } }
+    public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
     private readonly UserManager _userManager;
     private readonly StudioNotifyHelper _studioNotifyHelper;
@@ -119,7 +119,7 @@ public class StudioNotifyService
             0,
             DateTimeKind.Utc);
 
-        var hash = auditEventDate.ToString("s");
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -783,7 +783,7 @@ public class StudioNotifyService
 
         var portalUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s");
+        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s", CultureInfo.InvariantCulture);
 
         var linkToRecovery = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -945,7 +945,7 @@ public class StudioNotifyService
     private async Task SendStorageEncryptionNotifyAsync(INotifyAction action, bool notifyAdminsOnly, string serverRootPath)
     {
         var users = notifyAdminsOnly
-                    ? await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID)
+                    ? await _userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)
                     : (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)

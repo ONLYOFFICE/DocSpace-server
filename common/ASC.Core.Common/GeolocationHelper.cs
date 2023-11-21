@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Net.Sockets;
+
 namespace ASC.Geolocation;
 
 // hack for EF Core
@@ -93,7 +95,7 @@ public class GeolocationHelper
 
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            var addrType = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? "ipv4" : "ipv6";
+            var addrType = address.AddressFamily == AddressFamily.InterNetwork ? "ipv4" : "ipv6";
 
             var result = await Queries.IpGeolocationInfoAsync(dbContext, addrType, address.GetAddressBytes());
 

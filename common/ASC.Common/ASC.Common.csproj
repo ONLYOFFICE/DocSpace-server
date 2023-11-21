@@ -32,7 +32,6 @@
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AWS.Logger.NLog" Version="3.2.1" />
     <PackageReference Include="Confluent.Kafka" Version="2.2.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.24.0" />
     <PackageReference Include="Grpc.Tools" Version="2.57.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -65,9 +64,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ASC.EventBus\ASC.EventBus.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="protos\asc_cache_item.proto" />
-    <Protobuf Include="protos\distributed_task_cancelation.proto" />
   </ItemGroup>
 </Project>

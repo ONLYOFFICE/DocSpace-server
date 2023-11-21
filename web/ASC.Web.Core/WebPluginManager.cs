@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Core;
 
 [Singleton]
@@ -209,7 +211,7 @@ public class WebPluginManager
                 PropertyNameCaseInsensitive = true
             };
 
-            webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+            webPlugin = JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
 
             if (webPlugin == null)
             {
@@ -338,7 +340,7 @@ public class WebPluginManager
     {
         var systemPlugins = new List<DbWebPlugin>();
 
-        var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
+        var systemWebPluginSettings = await _settingsManager.LoadAsync<SystemWebPluginSettings>();
 
         var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
@@ -361,7 +363,7 @@ public class WebPluginManager
                     PropertyNameCaseInsensitive = true
                 };
 
-                var webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+                var webPlugin = JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
 
                 webPlugin.TenantId = Tenant.DefaultTenant;
                 webPlugin.System = true;
@@ -380,7 +382,7 @@ public class WebPluginManager
 
     public async Task<DbWebPlugin> GetSystemWebPluginAsync(string name)
     {
-        var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
+        var systemWebPluginSettings = await _settingsManager.LoadAsync<SystemWebPluginSettings>();
 
         var enabledPlugins = systemWebPluginSettings?.EnabledPlugins ?? new List<string>();
 
@@ -404,7 +406,7 @@ public class WebPluginManager
             PropertyNameCaseInsensitive = true
         };
 
-        var webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+        var webPlugin = JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
 
         webPlugin.TenantId = Tenant.DefaultTenant;
         webPlugin.System = true;
@@ -419,7 +421,7 @@ public class WebPluginManager
 
         var plugin = await GetSystemWebPluginAsync(name) ?? throw new ItemNotFoundException("Plugin not found");
 
-        var systemWebPluginSettings = await _settingsManager.LoadForDefaultTenantAsync<SystemWebPluginSettings>();
+        var systemWebPluginSettings = await _settingsManager.LoadAsync<SystemWebPluginSettings>();
 
         var enabledPlugins = systemWebPluginSettings.EnabledPlugins ?? new List<string>();
 
@@ -434,7 +436,7 @@ public class WebPluginManager
 
         systemWebPluginSettings.EnabledPlugins = enabledPlugins.Any() ? enabledPlugins : null;
 
-        await _settingsManager.SaveForDefaultTenantAsync(systemWebPluginSettings);
+        await _settingsManager.SaveAsync(systemWebPluginSettings);
 
         plugin.Enabled = enabled;
 

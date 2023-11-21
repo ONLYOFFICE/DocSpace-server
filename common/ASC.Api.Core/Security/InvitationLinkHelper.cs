@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Core.Users.Constants;
-using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;
-
 namespace ASC.Api.Core.Security;
 
 [Scope]
@@ -70,11 +67,11 @@ public class InvitationLinkHelper
 
     public async Task<LinkValidationResult> ValidateAsync(string key, string email, EmployeeType employeeType)
     {
-        var validationResult = new LinkValidationResult { Result = ValidationResult.Invalid };
+        var validationResult = new LinkValidationResult { Result = EmailValidationKeyProvider.ValidationResult.Invalid };
 
         var (commonWithRoomLinkResult, linkId) = ValidateCommonWithRoomLink(key);
 
-        if (commonWithRoomLinkResult != ValidationResult.Invalid)
+        if (commonWithRoomLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             validationResult.Result = commonWithRoomLinkResult;
             validationResult.LinkType = InvitationLinkType.CommonWithRoom;
@@ -86,13 +83,13 @@ public class InvitationLinkHelper
         var commonLinkResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
             key, _emailValidationKeyProvider.ValidEmailKeyInterval);
 
-        if (commonLinkResult == ValidationResult.Invalid)
+        if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             commonLinkResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
                 key, _emailValidationKeyProvider.ValidEmailKeyInterval);
         }
 
-        if (commonLinkResult != ValidationResult.Invalid)
+        if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
         {
             validationResult.Result = commonLinkResult;
             validationResult.LinkType = InvitationLinkType.Common;
@@ -113,12 +110,12 @@ public class InvitationLinkHelper
         return validationResult;
     }
 
-    private async Task<ValidationResult> ValidateIndividualLinkAsync(string email, string key, EmployeeType employeeType)
+    private async Task<EmailValidationKeyProvider.ValidationResult> ValidateIndividualLinkAsync(string email, string key, EmployeeType employeeType)
     {
         var result = await _emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.LinkInvite.ToStringFast() + employeeType.ToStringFast(),
             key, IndividualLinkExpirationInterval);
 
-        if (result != ValidationResult.Ok)
+        if (result != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             return result;
         }
@@ -127,7 +124,7 @@ public class InvitationLinkHelper
 
         if (user.Equals(Constants.LostUser) || await _authManager.GetUserPasswordStampAsync(user.Id) != DateTime.MinValue)
         {
-            return ValidationResult.Invalid;
+            return EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
         var visitMessage = await GetLinkVisitMessageAsync(email, key);
@@ -138,17 +135,17 @@ public class InvitationLinkHelper
         }
         else if (visitMessage.Date + _emailValidationKeyProvider.ValidVisitLinkInterval < DateTime.UtcNow)
         {
-            return ValidationResult.Expired;
+            return EmailValidationKeyProvider.ValidationResult.Expired;
         }
 
         return result;
     }
 
-    private (ValidationResult, Guid) ValidateCommonWithRoomLink(string key)
+    private (EmailValidationKeyProvider.ValidationResult, Guid) ValidateCommonWithRoomLink(string key)
     {
         var linkId = _signature.Read<Guid>(key);
 
-        return linkId == default ? (ValidationResult.Invalid, default) : (ValidationResult.Ok, linkId);
+        return linkId == default ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
     private async Task<DbAuditEvent> GetLinkVisitMessageAsync(string email, string key)
@@ -181,7 +178,7 @@ public enum InvitationLinkType
 
 public class LinkValidationResult
 {
-    public ValidationResult Result { get; set; }
+    public EmailValidationKeyProvider.ValidationResult Result { get; set; }
     public InvitationLinkType LinkType { get; set; }
     public Guid LinkId { get; set; }
 }

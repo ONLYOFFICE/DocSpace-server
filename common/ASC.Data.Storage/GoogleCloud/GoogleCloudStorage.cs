@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Object = Google.Apis.Storage.v1.Data.Object;
+
 namespace ASC.Data.Storage.GoogleCloud;
 
 [Scope]
@@ -223,7 +225,7 @@ public class GoogleCloudStorage : BaseStorage
             uploaded.Metadata = new Dictionary<string, string>();
         }
 
-        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R");
+        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
 
         if (!string.IsNullOrEmpty(contentDisposition))
         {
@@ -259,7 +261,7 @@ public class GoogleCloudStorage : BaseStorage
     {
         using var storage = await GetStorageAsync();
 
-        IAsyncEnumerable<Google.Apis.Storage.v1.Data.Object> objToDel;
+        IAsyncEnumerable<Object> objToDel;
 
         if (recursive)
         {
@@ -269,7 +271,7 @@ public class GoogleCloudStorage : BaseStorage
         }
         else
         {
-            objToDel = AsyncEnumerable.Empty<Google.Apis.Storage.v1.Data.Object>();
+            objToDel = AsyncEnumerable.Empty<Object>();
         }
 
         await foreach (var obj in objToDel)
@@ -396,7 +398,7 @@ public class GoogleCloudStorage : BaseStorage
                .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length));
     }
 
-    private IEnumerable<Google.Apis.Storage.v1.Data.Object> GetObjects(string domain, string path, bool recursive)
+    private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
     {
         using var storage = GetStorage();
 
@@ -410,7 +412,7 @@ public class GoogleCloudStorage : BaseStorage
         return items.Where(x => x.Name.IndexOf('/', MakePath(domain, path + "/").Length) == -1);
     }
 
-    private IAsyncEnumerable<Google.Apis.Storage.v1.Data.Object> GetObjectsAsync(string domain, string path, bool recursive)
+    private IAsyncEnumerable<Object> GetObjectsAsync(string domain, string path, bool recursive)
     {
         using var storage = GetStorage();
 
@@ -605,7 +607,7 @@ public class GoogleCloudStorage : BaseStorage
             uploaded.Metadata = new Dictionary<string, string>();
         }
 
-        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R");
+        uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
         uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
         await storage.UpdateObjectAsync(uploaded);

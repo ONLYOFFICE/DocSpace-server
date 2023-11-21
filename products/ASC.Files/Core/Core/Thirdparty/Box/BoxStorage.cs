@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Box.V2.Exceptions;
+
 using BoxSDK = Box.V2;
 
 namespace ASC.Files.Thirdparty.Box;
@@ -72,7 +74,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         }
         catch (Exception ex)
         {
-            if (ex.InnerException is BoxSDK.Exceptions.BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            if (ex.InnerException is BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
             {
                 return null;
             }
@@ -102,7 +104,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         }
         catch (Exception ex)
         {
-            if (ex.InnerException is BoxSDK.Exceptions.BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            if (ex.InnerException is BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
             {
                 return Task.FromResult<BoxFile>(null);
             }

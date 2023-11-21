@@ -169,7 +169,7 @@ public class FormFillingProperties
         var title = mask
             .Replace("{0}", Path.GetFileNameWithoutExtension(sourceFileName))
             .Replace("{1}", userName)
-            .Replace("{2}", _tenantUtil.DateTimeNow().ToString("g"));
+            .Replace("{2}", _tenantUtil.DateTimeNow().ToString("g", CultureInfo.InvariantCulture));
 
         if (FileUtility.GetFileExtension(title) != "docx")
         {

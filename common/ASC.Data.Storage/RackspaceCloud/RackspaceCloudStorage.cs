@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using HttpMethod = JSIStudios.SimpleRESTServices.Client.HttpMethod;
+
 namespace ASC.Data.Storage.RackspaceCloud;
 
 [Scope]
@@ -153,7 +155,7 @@ public class RackspaceCloudStorage : BaseStorage
         }
 
         return Task.FromResult(client.CreateTemporaryPublicUri(
-                                                JSIStudios.SimpleRESTServices.Client.HttpMethod.GET,
+                                                HttpMethod.GET,
                                                 _private_container,
                                                 MakePath(domain, path),
                                                 secretKey,

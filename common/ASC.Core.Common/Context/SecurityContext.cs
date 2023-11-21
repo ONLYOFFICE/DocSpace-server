@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.Core;
 
 [Scope]
@@ -218,14 +220,14 @@ public class SecurityContext
 
     public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null)
     {
-        if (account == null || account.Equals(Configuration.Constants.Guest))
+        if (account == null || account.Equals(Constants.Guest))
         {
             throw new InvalidCredentialException("account");
         }
 
         var roles = new List<string> { Role.Everyone };
 
-        if (account is ISystemAccount && account.ID == Configuration.Constants.CoreSystem.ID)
+        if (account is ISystemAccount && account.ID == Constants.CoreSystem.ID)
         {
             roles.Add(Role.System);
         }
@@ -372,7 +374,7 @@ public class AuthContext
         HttpContextAccessor = httpContextAccessor;
     }
 
-    public IAccount CurrentAccount => Principal?.Identity is IAccount ? (IAccount)Principal.Identity : Configuration.Constants.Guest;
+    public IAccount CurrentAccount => Principal?.Identity is IAccount ? (IAccount)Principal.Identity : Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;
 

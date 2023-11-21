@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Newtonsoft.Json.Linq;
+
 namespace ASC.Core.ChunkedUploader;
 
 public class CommonChunkedUploadSession : ICloneable
@@ -85,7 +87,7 @@ public class CommonChunkedUploadSession : ICloneable
                 return (T)Items[key];
             }
 
-            var jToken = Items[key] as Newtonsoft.Json.Linq.JToken;
+            var jToken = Items[key] as JToken;
             if (jToken != null)
             {
                 var item = jToken.ToObject<T>();

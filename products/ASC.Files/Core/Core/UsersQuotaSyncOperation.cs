@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WebZones;
+
 namespace ASC.Web.Files;
 
 [Singleton(Additional = typeof(UsersQuotaOperationExtension))]
@@ -135,7 +137,7 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
             await tenantManager.SetCurrentTenantAsync(TenantId);
 
             var users = await userManager.GetUsersAsync();
-            var webItems = webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
+            var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
             foreach (var user in users)
             {

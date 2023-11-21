@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = System.IO.File;
 using ResumableUploadSession = ASC.Files.Thirdparty.OneDrive.ResumableUploadSession;
 using ResumableUploadSessionStatus = ASC.Files.Thirdparty.OneDrive.ResumableUploadSessionStatus;
 
@@ -165,7 +166,7 @@ internal class OneDriveFileDao : ThirdPartyFileDao<Item, Item, Item>
         }
         else if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
         }
     }
 }

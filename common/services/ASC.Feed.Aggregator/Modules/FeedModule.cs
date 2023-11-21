@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
 namespace ASC.Feed.Aggregator.Modules;
 
 public abstract class FeedModule : IFeedModule
@@ -82,7 +84,7 @@ public abstract class FeedModule : IFeedModule
 
     protected string GetGroupId(string item, Guid author, DateTime date, string rootId = null, int action = -1)
     {
-        var time = date.ToString("g");
+        var time = date.ToString("g", CultureInfo.InvariantCulture);
 
         if (rootId == null)
         {

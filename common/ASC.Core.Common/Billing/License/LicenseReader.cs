@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -43,7 +45,7 @@ public class LicenseReader
     private readonly ITariffService _tariffService;
     private readonly CoreSettings _coreSettings;
     private readonly ILogger<LicenseReader> _logger;
-    private readonly Users.Constants _constants;
+    private readonly Constants _constants;
     public readonly string LicensePath;
     private readonly string _licensePathTemp;
 
@@ -55,7 +57,7 @@ public class LicenseReader
         CoreSettings coreSettings,
         LicenseReaderConfig licenseReaderConfig,
         ILogger<LicenseReader> logger,
-        Users.Constants constants)
+        Constants constants)
     {
         _tenantManager = tenantManager;
         _tariffService = tariffService;

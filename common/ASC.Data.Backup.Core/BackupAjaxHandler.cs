@@ -24,7 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security;
+
 using ASC.Files.Core.Security;
+
+using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Data.Backup;
 
@@ -158,7 +162,7 @@ public class BackupAjaxHandler
 
         if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await _fileSecurity.CanCreateAsync(folder))
         {
-            throw new System.Security.SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
+            throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
         }
     }
 

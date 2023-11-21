@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Core.Users.Constants;
+using Constants = ASC.Core.Configuration.Constants;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.ActiveDirectory.ComplexOperations;
@@ -140,7 +140,7 @@ public class LdapOperationJob : DistributedTaskProgress
     {
         try
         {
-            await _securityContext.AuthenticateMeAsync(Core.Configuration.Constants.CoreSystem);
+            await _securityContext.AuthenticateMeAsync(Constants.CoreSystem);
 
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(_culture);
@@ -602,7 +602,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
                 foreach (var user in users)
                 {
-                    if (!user.Equals(Constants.LostUser) && !await _userManager.IsUserAsync(user))
+                    if (!user.Equals(Core.Users.Constants.LostUser) && !await _userManager.IsUserAsync(user))
                     {
                         if (!usersWithRightsFlat.Contains(user.Id.ToString()))
                         {
@@ -759,7 +759,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
             var dbLdapGroup = await _userManager.GetGroupInfoBySidAsync(ldapGroup.Sid);
 
-            if (Equals(dbLdapGroup, Constants.LostGroupInfo))
+            if (Equals(dbLdapGroup, Core.Users.Constants.LostGroupInfo))
             {
                 await AddNewGroupAsync(ldapGroup, ldapGroupUsers, gIndex, gCount);
             }
@@ -785,7 +785,7 @@ public class LdapOperationJob : DistributedTaskProgress
         }
 
         var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().SelectAwait(async ldapGroupUser => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
-                .Where(userBySid => !Equals(userBySid, Constants.LostUser))
+                .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
                 .ToListAsync();
 
         if (groupMembersToAdd.Any())
@@ -855,7 +855,7 @@ public class LdapOperationJob : DistributedTaskProgress
                 dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
 
         var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().Where(q => dbGroupMembers.FirstOrDefault(u => u.Sid.Equals(q.Sid)) == null)
-            .SelectAwait(async q => await SearchDbUserBySidAsync(q.Sid)).Where(q => !Equals(q, Constants.LostUser)).ToListAsync();
+            .SelectAwait(async q => await SearchDbUserBySidAsync(q.Sid)).Where(q => !Equals(q, Core.Users.Constants.LostUser)).ToListAsync();
 
 
         switch (OperationType)
@@ -945,7 +945,7 @@ public class LdapOperationJob : DistributedTaskProgress
     {
         if (string.IsNullOrEmpty(sid))
         {
-            return Constants.LostUser;
+            return Core.Users.Constants.LostUser;
         }
 
         var foundUser = await _userManager.GetUserBySidAsync(sid);
@@ -1145,7 +1145,7 @@ public class LdapOperationJob : DistributedTaskProgress
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
                     user = await _lDAPUserManager.SyncLDAPUserAsync(ldapGroupUser, uniqueLdapGroupUsers);
-                    if (!Equals(user, Constants.LostUser))
+                    if (!Equals(user, Core.Users.Constants.LostUser))
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }
@@ -1155,7 +1155,7 @@ public class LdapOperationJob : DistributedTaskProgress
                     var wrapper = await _lDAPUserManager.GetLDAPSyncUserChangeAsync(ldapGroupUser, uniqueLdapGroupUsers);
                     user = wrapper.UserInfo;
                     var changes = wrapper.LdapChangeCollection;
-                    if (!Equals(user, Constants.LostUser))
+                    if (!Equals(user, Core.Users.Constants.LostUser))
                     {
                         newUniqueLdapGroupUsers.Add(user);
                     }

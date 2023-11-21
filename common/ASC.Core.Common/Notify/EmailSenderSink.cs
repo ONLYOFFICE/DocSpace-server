@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.Core.Notify;
 
 public class EmailSenderSink : Sink
 {
-    private static readonly string _senderName = Configuration.Constants.NotifyEMailSenderSysName;
+    private static readonly string _senderName = Constants.NotifyEMailSenderSysName;
     private readonly INotifySender _sender;
 
     public EmailSenderSink(INotifySender sender)
