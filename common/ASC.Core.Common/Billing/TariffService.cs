@@ -722,7 +722,7 @@ public class TariffService : ITariffService
         const int tenant = Tenant.DefaultTenant;
 
         await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await Queries.UpdateTariffs(coreDbContext, tenant);
+        await Queries.DeleteTariffs(coreDbContext, tenant);
 
         ClearCache(tenant);
     }
@@ -966,10 +966,6 @@ static file class Queries
                     .Where(r => r.TariffId == id && r.TenantId == tenantId)
                     .Select(r => new Quota(r.Quota, r.Quantity)));
 
-    public static readonly Func<CoreDbContext, int, Task<int>> UpdateTariffs =
-        EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId) =>
-                ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteUpdate(t =>
-                    t.SetProperty(p => p.TenantId, -2)
-                        .SetProperty(p => p.CreateOn, DateTime.UtcNow)));
+    public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
+        EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
 }
