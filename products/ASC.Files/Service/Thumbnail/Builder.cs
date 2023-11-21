@@ -28,6 +28,8 @@
 using ASC.Data.Storage;
 using ASC.Data.Storage.DiscStorage;
 
+using FileShare = System.IO.FileShare;
+
 namespace ASC.Files.ThumbnailBuilder;
 
 [Scope]
@@ -49,8 +51,8 @@ public class Builder<T>
     private readonly StorageFactory _storageFactory;
     private IDataStore _dataStore;
 
-    private readonly List<string> _imageFormatsCanBeCrop = new List<string>
-            {
+    private readonly List<string> _imageFormatsCanBeCrop = new()
+    {
                 ".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp",
             };
 
@@ -185,14 +187,14 @@ public class Builder<T>
 
         try
         {
-            await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await streamFile.CopyToAsync(fileStream);
             }
 
             await _fFmpegService.CreateThumbnail(tempFilePath, thumbPath);
 
-            await using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            await using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await CropAsync(fileDao, file, streamThumb);
             }
@@ -306,9 +308,7 @@ public class Builder<T>
                 Bottom = "0mm",
                 Left = "0mm"
             },
-            PageSize = new SpreadsheetLayout.LayoutPageSize
-            {
-            }
+            PageSize = new SpreadsheetLayout.LayoutPageSize()
         };
 
         var (operationResultProgress, url, _) = await _documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false);
@@ -325,7 +325,7 @@ public class Builder<T>
         request.RequestUri = new Uri(thumbnailUrl);
 
         var httpClient = _clientFactory.CreateClient();
-        using var response = httpClient.Send(request);
+        using var response = await httpClient.SendAsync(request);
         await using (var stream = await response.Content.ReadAsStreamAsync())
         {
             using (var sourceImg = await Image.LoadAsync(stream))
@@ -388,7 +388,7 @@ public class Builder<T>
         }
         else
         {
-            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, t) =>
+            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, _) =>
             {
                 await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
             });

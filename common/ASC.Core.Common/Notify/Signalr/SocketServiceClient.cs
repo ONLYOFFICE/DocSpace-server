@@ -65,12 +65,10 @@ public class SocketServiceClient
             var httpClient = _clientFactory.CreateClient();
 
             //async
-            using (var response = await httpClient.SendAsync(request))
-            await using (var stream = await response.Content.ReadAsStreamAsync())
-            using (var streamReader = new StreamReader(stream))
-            {
-                return await streamReader.ReadToEndAsync();
-            }
+            using var response = await httpClient.SendAsync(request);
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            using var streamReader = new StreamReader(stream);
+            return await streamReader.ReadToEndAsync();
         }
         catch (Exception e)
         {
@@ -127,7 +125,7 @@ public class SocketServiceClient
     private string CreateAuthToken(string pkey = "socketio")
     {
         using var hasher = new HMACSHA1(_sKey);
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
         var hash = Convert.ToBase64String(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
         return $"ASC {pkey}:{now}:{hash}";

@@ -31,7 +31,7 @@ public class PeopleProduct : Product
     internal const string ProductPath = "/products/people/";
 
     private ProductContext _context;
-    public static Guid ID => new Guid("{F4D98AFD-D336-4332-8778-3C6945C81EA0}");
+    public static Guid ID => new("{F4D98AFD-D336-4332-8778-3C6945C81EA0}");
     public override bool Visible => true;
     public override ProductContext Context => _context;
     public override string Name => PeopleResource.ProductName;

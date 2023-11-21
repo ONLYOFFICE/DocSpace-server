@@ -26,6 +26,9 @@
 
 using ASC.Core.Tenants;
 
+using Constants = ASC.Core.Configuration.Constants;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
@@ -78,7 +81,7 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
         {
             result.UserName = result.Login;
         }
-        else if (result.UserId == Core.Configuration.Constants.Guest.ID)
+        else if (result.UserId == Constants.Guest.ID)
         {
             result.UserName = AuditReportResource.GuestAccount;
         }
@@ -113,11 +116,11 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
                });
         }
 
-        if (result.UserId == Core.Configuration.Constants.CoreSystem.ID)
+        if (result.UserId == Constants.CoreSystem.ID)
         {
             result.UserName = AuditReportResource.SystemAccount;
         }
-        else if (result.UserId == Core.Configuration.Constants.Guest.ID)
+        else if (result.UserId == Constants.Guest.ID)
         {
             result.UserName = AuditReportResource.GuestAccount;
         }
@@ -164,7 +167,7 @@ internal class EventTypeConverter : ITypeConverter<LoginEventQuery, LoginEvent>,
 
             if (!string.IsNullOrEmpty(rawNotificationInfo) && rawNotificationInfo.StartsWith('{') && rawNotificationInfo.EndsWith('}'))
             {
-                var notificationInfo = System.Text.Json.JsonSerializer.Deserialize<AdditionalNotificationInfo>(rawNotificationInfo);
+                var notificationInfo = JsonSerializer.Deserialize<AdditionalNotificationInfo>(rawNotificationInfo);
 
                 result.Context = result.Action == (int)MessageAction.RoomRenamed ? notificationInfo.RoomOldTitle :
                     !string.IsNullOrEmpty(notificationInfo.RoomTitle) ? notificationInfo.RoomTitle : notificationInfo.RootFolderTitle;

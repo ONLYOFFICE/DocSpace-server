@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Feed.Aggregator.Modules;
+
 using Constants = ASC.Feed.Constants;
-using FeedModule = ASC.Feed.Aggregator.Modules.FeedModule;
 
 namespace ASC.Files.Service.Core;
 
@@ -84,7 +85,7 @@ public class UsersModule : FeedModule
             AdditionalInfo3 = u.Status.ToString(),
             AdditionalInfo4 = u.ActivationStatus.ToString(),
             Keywords = fullName,
-            Action = u.LastModified > u.CreateDate ? FeedAction.Updated : FeedAction.Created,
+            Actions = u.LastModified > u.CreateDate ? FeedActions.Updated : FeedActions.Created,
         };
 
         return feed;

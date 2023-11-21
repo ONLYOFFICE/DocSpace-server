@@ -74,21 +74,21 @@ internal class FileMoveCopyOperationData<T> : FileOperationData<T>
 
 class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 {
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly int _daoFolderId;
-    private readonly string _thirdpartyFolderId;
+    private readonly string _thirdPartyFolderId;
     private readonly bool _copy;
     private readonly FileConflictResolveType _resolveType;
     private readonly IDictionary<string, StringValues> _headers;
     private readonly ThumbnailSettings _thumbnailSettings;
-    private readonly Dictionary<T, Folder<T>> _parentRooms = new Dictionary<T, Folder<T>>();
+    private readonly Dictionary<T, Folder<T>> _parentRooms = new();
 
     public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<T> data, ThumbnailSettings thumbnailSettings)
         : base(serviceProvider, data)
     {
         _daoFolderId = data.DaoFolderId;
-        _thirdpartyFolderId = data.ThirdPartyFolderId;
+        _thirdPartyFolderId = data.ThirdPartyFolderId;
         _copy = data.Copy;
         _resolveType = data.ResolveType;
 
@@ -97,16 +97,16 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         this[OpType] = (int)(_copy ? FileOperationType.Copy : FileOperationType.Move);
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
         if (_daoFolderId != 0)
         {
-            await DoAsync(scope, _daoFolderId);
+            await DoAsync(serviceScope, _daoFolderId);
         }
 
-        if (!string.IsNullOrEmpty(_thirdpartyFolderId))
+        if (!string.IsNullOrEmpty(_thirdPartyFolderId))
         {
-            await DoAsync(scope, _thirdpartyFolderId);
+            await DoAsync(serviceScope, _thirdPartyFolderId);
         }
     }
 
@@ -117,25 +117,22 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
 
-        this[Res] += string.Format("folder_{0}{1}", _daoFolderId, SplitChar);
-
         //TODO: check on each iteration?
         var toFolder = await folderDao.GetFolderAsync(tto);
         if (toFolder == null)
         {
             return;
         }
-
-        if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
+        
+        if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await FilesSecurity.CanCreateAsync(toFolder))
         {
-            if (!await FilesSecurity.CanCreateAsync(toFolder))
-            {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
             }
-        }
 
+        this[Res] += $"folder_{tto}{SplitChar}";
+        
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
-        if (parentFolders.Any(parent => Folders.Any(r => r.ToString() == parent.Id.ToString())))
+        if (parentFolders.Exists(parent => Folders.Exists(r => r.ToString() == parent.Id.ToString())))
         {
             this[Err] = FilesCommonResource.ErrorMassage_FolderCopyError;
 
@@ -197,9 +194,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         }
         if (!_copy && !await fileSecurity.CanMoveToAsync(toFolder))
         {
-            this[Err] = toFolder.FolderType == FolderType.VirtualRooms ? FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom :
-                toFolder.FolderType == FolderType.Archive ? FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom :
-                FilesCommonResource.ErrorMessage_SecurityException_MoveToFolder;
+            this[Err] = toFolder.FolderType switch
+            {
+                FolderType.VirtualRooms => FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom,
+                FolderType.Archive => FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom,
+                _ => FilesCommonResource.ErrorMessage_SecurityException_MoveToFolder
+            };
 
             return;
         }
@@ -227,13 +227,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var ntm = needToMark.Distinct();
         foreach (var n in ntm)
         {
-            if (n is FileEntry<T> entry1)
+            switch (n)
             {
-                await fileMarker.MarkAsNewAsync(entry1);
-            }
-            else if (n is FileEntry<TTo> entry2)
-            {
-                await fileMarker.MarkAsNewAsync(entry2);
+                case FileEntry<T> entry1:
+                    await fileMarker.MarkAsNewAsync(entry1);
+                    break;
+                case FileEntry<TTo> entry2:
+                    await fileMarker.MarkAsNewAsync(entry2);
+                    break;
             }
         }
     }
@@ -242,7 +243,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
 
-        var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, false, withSubfolders: true).ToListAsync();
+        var files = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, string.Empty, false, withSubfolders: true).ToListAsync();
 
         return files;
     }
@@ -325,7 +326,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {
-                var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, false, withSubfolders: true).ToListAsync();
+                var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, string.Empty, false, withSubfolders: true).ToListAsync();
                 var (isError, message) = await WithErrorAsync(scope, files, checkPermissions);
 
                 try
@@ -350,7 +351,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         else
                         {
                             newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
-                            _ = filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
+                            await filesMessageService.SendAsync(MessageAction.FolderCopied, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
 
                             if (isToFolder)
                             {
@@ -397,7 +398,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     newFolder = await FolderDao.CopyFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolderId = newFolder.Id;
-                                    _ = filesMessageService.SendAsync(MessageAction.FolderCopiedWithOverwriting, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.FolderCopiedWithOverwriting, newFolder, toFolder, _headers, newFolder.Title, toFolder.Title);
 
                                     if (isToFolder)
                                     {
@@ -423,7 +424,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
-                                    _ = filesMessageService.SendAsync(MessageAction.FolderMovedWithOverwriting, folder, toFolder, _headers, folder.Title, toFolder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.FolderMovedWithOverwriting, folder, toFolder, _headers, folder.Title, toFolder.Title);
 
                                     if (isToFolder)
                                     {
@@ -487,10 +488,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     }
                                 }
-                                catch (Exception)
-                                {
-                                    throw;
-                                }
                                 finally
                                 {
                                     _semaphore.Release();
@@ -504,19 +501,19 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var pins = await TagDao.GetTagsAsync(Guid.Empty, TagType.Pin, new List<FileEntry<T>> { folder }).ToListAsync();
                                     if (pins.Count > 0)
                                     {
-                                        await TagDao.RemoveTags(pins);
+                                        await TagDao.RemoveTagsAsync(pins);
                                     }
 
-                                    _ = filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.RoomArchived, folder, _headers, folder.Title);
                                 }
                                 else
                                 {
-                                    _ = filesMessageService.SendAsync(MessageAction.RoomUnarchived, folder, _headers, folder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.RoomUnarchived, folder, _headers, folder.Title);
                                 }
                             }
                             else
                             {
-                                _ = filesMessageService.SendAsync(MessageAction.FolderMoved, folder, toFolder, _headers, folder.Title, parentFolder.Title, toFolder.Title);
+                                await filesMessageService.SendAsync(MessageAction.FolderMoved, folder, toFolder, _headers, folder.Title, parentFolder.Title, toFolder.Title);
                             }
 
 
@@ -628,7 +625,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             try
                             {
                                 newFile = await FileDao.CopyFileAsync(file.Id, toFolderId); //Stream copy will occur inside dao
-                                _ = filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title);
+                                await filesMessageService.SendAsync(MessageAction.FileCopied, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title);
 
                                 needToMark.Add(newFile);
 
@@ -662,7 +659,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 var newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks);
                                 newFile = await fileDao.GetFileAsync(newFileId);
 
-                                _ = filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
+                                await filesMessageService.SendAsync(MessageAction.FileMoved, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
 
                                 if (file.RootFolderType == FolderType.TRASH && newFile.ThumbnailStatus == Thumbnail.NotRequired)
                                 {
@@ -750,7 +747,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                 if (copy)
                                 {
-                                    _ = filesMessageService.SendAsync(MessageAction.FileCopiedWithOverwriting, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title);
+                                    await filesMessageService.SendAsync(MessageAction.FileCopiedWithOverwriting, newFile, toFolder, _headers, newFile.Title, parentFolder.Title, toFolder.Title);
                                     if (ProcessedFile(fileId))
                                     {
                                         sb.Append($"file_{newFile.Id}{SplitChar}");
@@ -777,7 +774,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                             await LinkDao.DeleteAllLinkAsync(file.Id.ToString());
 
-                                            _ = filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
+                                            await filesMessageService.SendAsync(MessageAction.FileMovedWithOverwriting, file, toFolder, _headers, file.Title, parentFolder.Title, toFolder.Title);
 
                                             await socketManager.DeleteFileAsync(file);
 
@@ -860,7 +857,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         if (entryParentRoom == null)
         {
-            return toFolderParentRoom == null;
+            if(toFolderParentRoom == null)
+            {
+                return true;
+        }
+
+            return false;
         }
 
         if(toFolderParentRoom == null)

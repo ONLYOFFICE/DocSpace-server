@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Newtonsoft.Json.Linq;
+
 namespace ASC.Core.ChunkedUploader;
 
 public class CommonChunkedUploadSession : ICloneable
 {
-    public string Id { get; set; }
+    public string Id { get; init; }
     public DateTime Created { get; set; }
     public DateTime Expired { get; set; }
     public string Location { get; set; }
@@ -39,7 +41,7 @@ public class CommonChunkedUploadSession : ICloneable
     public Guid UserId { get; set; }
     public bool UseChunks { get; set; }
     public string CultureName { get; set; }
-    public Dictionary<string, object> Items { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object> Items { get; set; } = new();
 
     [JsonIgnore]
     public string TempPath
@@ -85,7 +87,7 @@ public class CommonChunkedUploadSession : ICloneable
                 return (T)Items[key];
             }
 
-            var jToken = Items[key] as Newtonsoft.Json.Linq.JToken;
+            var jToken = Items[key] as JToken;
             if (jToken != null)
             {
                 var item = jToken.ToObject<T>();

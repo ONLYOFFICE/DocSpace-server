@@ -127,7 +127,7 @@ public class CardDavAddressbook : RadicaleEntity
         var builder = new StringBuilder();
 
         builder.AppendLine("BEGIN:VCARD");
-        builder.AppendLine("UID:" + user.ID.ToString());
+        builder.AppendLine("UID:" + user.ID);
         builder.AppendLine("N:" + user.LastName + ";" + user.FirstName);
         builder.AppendLine("FN:" + user.FirstName + " " + user.LastName);
         builder.AppendLine("EMAIL:" + user.Email);

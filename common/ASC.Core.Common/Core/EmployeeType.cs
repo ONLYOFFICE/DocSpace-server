@@ -24,15 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using JsonConverter = System.Text.Json.Serialization.JsonConverter;
-using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
-
 namespace ASC.Core.Users;
 
 /// <summary>
 /// </summary>
 [Flags]
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
 [EnumExtensions]
 public enum EmployeeType
 {

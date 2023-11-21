@@ -29,6 +29,7 @@ namespace ASC.Core.Common.EF.Context;
 public class AccountLinkContext : DbContext
 {
     public DbSet<AccountLinks> AccountLinks { get; set; }
+    public DbSet<User> Users { get; set; }
 
     public AccountLinkContext(DbContextOptions<AccountLinkContext> options) : base(options) { }
 
@@ -36,6 +37,8 @@ public class AccountLinkContext : DbContext
     {
         ModelBuilderWrapper
            .From(modelBuilder, Database)
-           .AddAccountLinks();
+           .AddAccountLinks()
+           .AddUser()
+           .AddDbTenant();
     }
 }

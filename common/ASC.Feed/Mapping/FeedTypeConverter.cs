@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Feed.Mapping;
 
 [Scope]
@@ -44,7 +46,7 @@ public class FeedMappingAction : IMappingAction<FeedAggregate, FeedResultItem>
         destination.ModifiedDate = _tenantUtil.DateTimeFromUtc(source.ModifiedDate);
         destination.AggregatedDate = _tenantUtil.DateTimeFromUtc(source.AggregateDate);
 
-        var feed = System.Text.Json.JsonSerializer.Deserialize<Aggregator.Feed>(source.Json);
+        var feed = JsonSerializer.Deserialize<Aggregator.Feed>(source.Json);
 
         destination.TargetId = feed.Target;
 

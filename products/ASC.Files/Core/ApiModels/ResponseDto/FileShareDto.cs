@@ -30,8 +30,6 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// </summary>
 public class FileShareDto
 {
-    public FileShareDto() { }
-
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
@@ -76,8 +74,11 @@ public class FileShareLink
     public bool? IsExpired { get; set; }
     public bool Primary { get; set; }
     public bool? Internal { get; set; }
+    public string RequestToken { get; set; }
 }
 
+/// <summary>
+/// </summary>
 public enum LinkType
 {
     Invitation,
@@ -134,7 +135,8 @@ public class FileShareDtoHelper
                     },
                     IsExpired = expired,
                     Primary = aceWrapper.SubjectType == SubjectType.PrimaryExternalLink,
-                    Internal = aceWrapper.FileShareOptions?.Internal
+                    Internal = aceWrapper.FileShareOptions?.Internal,
+                    RequestToken = aceWrapper.RequestToken,
                 };
             }
             else

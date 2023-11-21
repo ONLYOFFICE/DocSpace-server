@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
-using MimeMapping = ASC.Common.Web.MimeMapping;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
@@ -423,12 +422,21 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         }
         else
         {
-            var bytesToTransfer = lastChunk ? (googleDriveSession.BytesTransfered + chunkLength).ToString() : "*";
+            if (lastChunk) 
+            {
+                var bytesToTransfer = googleDriveSession.BytesTransfered + chunkLength;
 
-            request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
-                                           googleDriveSession.BytesTransfered,
-                                           googleDriveSession.BytesTransfered + chunkLength - 1,
-                                           Convert.ToInt64(bytesToTransfer));
+                request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
+                                               googleDriveSession.BytesTransfered,
+                                               googleDriveSession.BytesTransfered + chunkLength - 1,
+                                               bytesToTransfer);
+            }
+            else
+            {
+                request.Content.Headers.ContentRange = new ContentRangeHeaderValue(
+                                               googleDriveSession.BytesTransfered,
+                                               googleDriveSession.BytesTransfered + chunkLength - 1);
+            }
         }
         var httpClient = _clientFactory.CreateClient();
         HttpResponseMessage response;

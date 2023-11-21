@@ -26,8 +26,6 @@
 
 using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Api.Core.Security;
 
 [Transient]
@@ -131,11 +129,11 @@ public class EmailValidationKeyModelHelper
                 {
                     var auditEventDate = _tenantUtil.DateTimeToUtc(auditEvent.Date);
 
-                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s");
+                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s", CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    hash = passwordStamp.ToString("s");
+                    hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
                 checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + hash, key, _provider.ValidEmailKeyInterval);

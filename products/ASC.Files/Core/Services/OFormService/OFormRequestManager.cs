@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Services.OFormService;
 
-[Singletone]
+[Singleton]
 public class OFormRequestManager
 {
     private readonly OFormSettings _configuration;
@@ -57,12 +57,11 @@ public class OFormRequestManager
         try
         {
             using var httpClient = _httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync($"{_configuration.Url}{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={_configuration.Ext}");
+            using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={_configuration.Ext}");
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
+            
             var file = data.Data.Attributes.File.Data.FirstOrDefault(f => f.Attributes.Ext == _configuration.Ext);
-            var filePath = Path.Combine(_tempPath.GetTempPath(), file.Attributes.Name);
-
-            var streamResponse = await httpClient.GetAsync(file.Attributes.Url);
+            var streamResponse = await httpClient.GetAsync(file?.Attributes.Url);
             return await streamResponse.Content.ReadAsStreamAsync();
         }
         catch (Exception e)

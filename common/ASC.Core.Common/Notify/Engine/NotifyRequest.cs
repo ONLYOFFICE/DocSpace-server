@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Notify.Engine;
 
 public class NotifyRequest
@@ -32,7 +34,7 @@ public class NotifyRequest
     public INotifyAction NotifyAction { get; internal set; }
     public string ObjectID { get; internal set; }
     public IRecipient Recipient { get; internal set; }
-    public List<ITagValue> Arguments { get; internal set; }
+    public List<ITagValue> Arguments { get; internal init; }
     public string CurrentSender { get; internal set; }
     public INoticeMessage CurrentMessage { get; internal set; }
     public Hashtable Properties { get; private set; }
@@ -159,7 +161,7 @@ public class NotifyRequest
 
         var user = await userManager.SearchUserAsync(Recipient.ID);
 
-        if (!Core.Users.Constants.LostUser.Equals(user) && !string.IsNullOrEmpty(user.CultureName))
+        if (!Constants.LostUser.Equals(user) && !string.IsNullOrEmpty(user.CultureName))
         {
             culture = user.GetCulture();
         }

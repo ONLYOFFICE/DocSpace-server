@@ -50,7 +50,7 @@ public class AuthorizingException : Exception
         Actions = actions;
         var sactions = "";
 
-        Array.ForEach(actions, action => { sactions += action.ToString() + ", "; });
+        Array.ForEach(actions, action => { sactions += action + ", "; });
 
         _message = string.Format(
             "\"{0}\" access denied \"{1}\"",
@@ -125,7 +125,7 @@ public class AuthorizingException : Exception
         }
         var reasons = sb.ToString();
         var sactions = "";
-        Array.ForEach(actions, action => { sactions += action.ToString() + ", "; });
+        Array.ForEach(actions, action => { sactions += action + ", "; });
 
         var message = $"\"{(subject is IRole ? "role:" : "") + subject.Name}\" access denied \"{sactions}\". Cause: {reasons}.";
         return message;

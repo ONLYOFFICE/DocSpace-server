@@ -24,11 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.Core.Notify;
 
 public class EmailSenderSink : Sink
 {
-    private static readonly string _senderName = Configuration.Constants.NotifyEMailSenderSysName;
+    private static readonly string _senderName = Constants.NotifyEMailSenderSysName;
     private readonly INotifySender _sender;
 
     public EmailSenderSink(INotifySender sender)
@@ -36,20 +38,20 @@ public class EmailSenderSink : Sink
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
     }
 
-    public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope scope)
+    public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope)
     {
         if (message.Recipient.Addresses == null || message.Recipient.Addresses.Length == 0)
         {
             return new SendResponse(message, _senderName, SendResult.IncorrectRecipient);
         }
 
-        var responce = new SendResponse(message, _senderName, default(SendResult));
+        var response = new SendResponse(message, _senderName, default(SendResult));
         try
         {
-            var m = await scope.ServiceProvider.GetRequiredService<EmailSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
+            var m = await serviceScope.ServiceProvider.GetRequiredService<EmailSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
             var result = await _sender.SendAsync(m);
 
-            responce.Result = result switch
+            response.Result = result switch
             {
                 NoticeSendResult.TryOnceAgain => SendResult.Inprogress,
                 NoticeSendResult.MessageIncorrect => SendResult.IncorrectRecipient,
@@ -57,7 +59,7 @@ public class EmailSenderSink : Sink
                 _ => SendResult.OK,
             };
 
-            return responce;
+            return response;
         }
         catch (Exception e)
         {
@@ -92,13 +94,13 @@ public class EmailSenderSinkMessageCreator : SinkMessageCreator
         };
 
         var tenant = await _tenantManager.GetCurrentTenantAsync(false);
-        m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
         var settings = await _coreConfiguration.GetDefaultSmtpSettingsAsync();
         var from = MailAddressUtils.Create(settings.SenderAddress, settings.SenderDisplayName);
         var fromTag = message.Arguments.FirstOrDefault(x => x.Tag.Equals("MessageFrom"));
         if ((settings.IsDefaultSettings || string.IsNullOrEmpty(settings.SenderDisplayName)) &&
-            fromTag != null && fromTag.Value != null)
+            fromTag is { Value: not null })
         {
             try
             {
@@ -117,7 +119,7 @@ public class EmailSenderSinkMessageCreator : SinkMessageCreator
         m.Reciever = string.Join("|", to.ToArray());
 
         var replyTag = message.Arguments.FirstOrDefault(x => x.Tag == "replyto");
-        if (replyTag != null && replyTag.Value is string value)
+        if (replyTag is { Value: string value })
         {
             try
             {
@@ -136,13 +138,13 @@ public class EmailSenderSinkMessageCreator : SinkMessageCreator
         }
 
         var attachmentTag = message.Arguments.FirstOrDefault(x => x.Tag == "EmbeddedAttachments");
-        if (attachmentTag != null && attachmentTag.Value != null)
+        if (attachmentTag is { Value: not null })
         {
             m.Attachments = attachmentTag.Value as NotifyMessageAttachment[];
         }
 
         var autoSubmittedTag = message.Arguments.FirstOrDefault(x => x.Tag == "AutoSubmitted");
-        if (autoSubmittedTag != null && autoSubmittedTag.Value is string)
+        if (autoSubmittedTag is { Value: string })
         {
             try
             {

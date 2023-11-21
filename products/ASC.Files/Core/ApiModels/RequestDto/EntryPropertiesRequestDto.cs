@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// </summary>
@@ -33,7 +35,7 @@ public class EntryPropertiesRequestDto : IMapFrom<EntryProperties>
     /// <type>ASC.Files.Core.ApiModels.RequestDto.FormFillingPropertiesRequestDto, ASC.Files.Core</type>
     public FormFillingPropertiesRequestDto FormFilling { get; set; }
 
-    public void Mapping(AutoMapper.Profile profile)
+    public void Mapping(Profile profile)
     {
         profile.CreateMap(typeof(EntryProperties), GetType());
         profile.CreateMap(GetType(), typeof(EntryProperties));
@@ -64,7 +66,7 @@ public class FormFillingPropertiesRequestDto : IMapFrom<FormFillingProperties>
     /// <type>System.String, System</type>
     public string CreateFileMask { get; set; }
 
-    public void Mapping(AutoMapper.Profile profile)
+    public void Mapping(Profile profile)
     {
         profile.CreateMap(typeof(FormFillingProperties), GetType());
         profile.CreateMap(GetType(), typeof(FormFillingProperties));

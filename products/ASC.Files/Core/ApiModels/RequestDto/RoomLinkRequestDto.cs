@@ -46,7 +46,7 @@ public class RoomLinkRequestDto : LinkRequestDtoBase
     /// <type>System.String, System</type>
     public string Password { get; set; }
     
-    /// <summary>Disable downloading</summary>
+    /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>
     /// <type>System.Boolean, System</type>
     public bool DenyDownload { get; set; }
 }

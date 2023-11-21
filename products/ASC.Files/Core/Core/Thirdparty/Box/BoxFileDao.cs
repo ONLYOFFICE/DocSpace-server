@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = System.IO.File;
+
 namespace ASC.Files.Core.Core.Thirdparty.Box;
 
 [Scope]
@@ -85,8 +87,9 @@ internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
 
         uploadSession.BytesUploaded += chunkLength;
 
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
+        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             await using var fs = new FileStream(uploadSession.GetItemOrDefault<string>("TempPath"),
                                            FileMode.Open, FileAccess.Read, System.IO.FileShare.None, 4096, FileOptions.DeleteOnClose);
             uploadSession.File = await SaveFileAsync(uploadSession.File, fs);
@@ -103,7 +106,7 @@ internal class BoxFileDao : ThirdPartyFileDao<BoxFile, BoxFolder, BoxItem>
     {
         if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
         }
 
         return Task.CompletedTask;

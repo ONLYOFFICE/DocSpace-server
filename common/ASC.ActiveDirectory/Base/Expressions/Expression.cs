@@ -88,7 +88,7 @@ public class Expression : ICloneable
     /// <param name="attrbuteValue">Attribute value</param>
     public Expression(string attrbuteName, Op op, string attrbuteValue)
     {
-        if (op == Op.Exists || op == Op.NotExists)
+        if (op is Op.Exists or Op.NotExists)
         {
             throw new ArgumentException("op");
         }

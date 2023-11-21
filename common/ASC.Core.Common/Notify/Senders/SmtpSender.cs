@@ -24,15 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MailKit.Net.Smtp;
+
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class SmtpSender : INotifySender
 {
     protected ILogger _logger;
     private IDictionary<string, string> _initProperties;
     protected readonly IConfiguration _configuration;
-    protected IServiceProvider _serviceProvider;
+    protected readonly IServiceProvider _serviceProvider;
 
     private string _host;
     private int _port;
@@ -78,19 +80,19 @@ public class SmtpSender : INotifySender
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 
-                smtpClient.Connect(_host, _port,
+                await smtpClient.ConnectAsync(_host, _port,
                     _ssl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
                 if (_credentials != null)
                 {
-                    smtpClient.Authenticate(_credentials);
+                    await smtpClient.AuthenticateAsync(_credentials);
                 }
                 else if (_saslMechanism != null)
                 {
-                    smtpClient.Authenticate(_saslMechanism);
+                    await smtpClient.AuthenticateAsync(_saslMechanism);
                 }
 
-                smtpClient.Send(mail);
+                await smtpClient.SendAsync(mail);
                 result = NoticeSendResult.OK;
             }
             catch (Exception e)
@@ -114,26 +116,26 @@ public class SmtpSender : INotifySender
         {
             result = NoticeSendResult.TryOnceAgain;
         }
-        catch (MailKit.Net.Smtp.SmtpProtocolException)
+        catch (SmtpProtocolException)
         {
             result = NoticeSendResult.SendingImpossible;
         }
-        catch (MailKit.Net.Smtp.SmtpCommandException e)
+        catch (SmtpCommandException e)
         {
             switch (e.StatusCode)
             {
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxBusy:
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxUnavailable:
-                case MailKit.Net.Smtp.SmtpStatusCode.ExceededStorageAllocation:
+                case SmtpStatusCode.MailboxBusy:
+                case SmtpStatusCode.MailboxUnavailable:
+                case SmtpStatusCode.ExceededStorageAllocation:
                     result = NoticeSendResult.TryOnceAgain;
                     break;
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxNameNotAllowed:
-                case MailKit.Net.Smtp.SmtpStatusCode.UserNotLocalWillForward:
-                case MailKit.Net.Smtp.SmtpStatusCode.UserNotLocalTryAlternatePath:
+                case SmtpStatusCode.MailboxNameNotAllowed:
+                case SmtpStatusCode.UserNotLocalWillForward:
+                case SmtpStatusCode.UserNotLocalTryAlternatePath:
                     result = NoticeSendResult.MessageIncorrect;
                     break;
                 default:
-                    if (e.StatusCode != MailKit.Net.Smtp.SmtpStatusCode.Ok)
+                    if (e.StatusCode != SmtpStatusCode.Ok)
                     {
                         result = NoticeSendResult.TryOnceAgain;
                     }
@@ -148,7 +150,7 @@ public class SmtpSender : INotifySender
         {
             if (smtpClient.IsConnected)
             {
-                smtpClient.Disconnect(true);
+                await smtpClient.DisconnectAsync(true);
             }
 
             smtpClient.Dispose();
@@ -235,7 +237,7 @@ public class SmtpSender : INotifySender
                 ContentTransferEncoding = ContentEncoding.QuotedPrintable
             };
 
-            if (m.Attachments != null && m.Attachments.Length > 0)
+            if (m.Attachments is { Length: > 0 })
             {
                 var multipartRelated = new MultipartRelated
                 {
@@ -281,18 +283,33 @@ public class SmtpSender : INotifySender
 
     protected string GetHtmlView(string body)
     {
+        body = body.StartsWith("<body")
+            ? body
+            : $@"<body style=""background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff;"">{body}</body>";
+
         return $@"<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">
                       <html>
                         <head>
                             <meta content=""text/html;charset=UTF-8"" http-equiv=""Content-Type"">
+                            <meta name=""color-scheme"" content=""light"">
+                            <meta name=""supported-color-schemes"" content=""light only"">
+                            <style type=""text/css"">
+                              :root {{
+                                color-scheme: light;
+                                supported-color-schemes: light;
+                              }}
+                              [data-ogsc] body {{ 
+                                background-color: #ffffff !important;
+                              }}
+                            </style>
                         </head>
-                        <body>{body}</body>
+                        {body}
                       </html>";
     }
 
-    private MailKit.Net.Smtp.SmtpClient GetSmtpClient()
+    private SmtpClient GetSmtpClient()
     {
-        var smtpClient = new MailKit.Net.Smtp.SmtpClient
+        var smtpClient = new SmtpClient
         {
             Timeout = NetworkTimeout
         };

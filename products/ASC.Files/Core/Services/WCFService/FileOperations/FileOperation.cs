@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using IAccount = ASC.Common.Security.Authentication.IAccount;
-
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 public abstract class FileOperation : DistributedTaskProgress
@@ -83,10 +81,10 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
     where T1 : FileOperationData<string>
     where T2 : FileOperationData<int>
 {
-    public FileOperation<T1, string> ThirdPartyOperation { get; set; }
-    public FileOperation<T2, int> DaoOperation { get; set; }
+    protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
+    protected FileOperation<T2, int> DaoOperation { get; set; }
 
-    public ComposeFileOperation(
+    protected ComposeFileOperation(
         IServiceProvider serviceProvider,
         FileOperation<T1, string> thirdPartyOperation,
         FileOperation<T2, int> daoOperation)
@@ -97,12 +95,12 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
         this[Hold] = ThirdPartyOperation[Hold] || DaoOperation[Hold];
     }
 
-    public override async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
+    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         if (ThirdPartyOperation.Files.Any() || ThirdPartyOperation.Folders.Any())
         {
             ThirdPartyOperation.Publication = PublishChanges;
-            await ThirdPartyOperation.RunJob(_, cancellationToken);
+            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
         }
         else
         {
@@ -112,7 +110,7 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
         if (DaoOperation.Files.Any() || DaoOperation.Folders.Any())
         {
             DaoOperation.Publication = PublishChanges;
-            await DaoOperation.RunJob(_, cancellationToken);
+            await DaoOperation.RunJob(distributedTask, cancellationToken);
         }
         else
         {
@@ -218,7 +216,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
     protected internal List<TId> Files { get; private set; }
     protected ExternalShareData CurrentShareData { get; private set; }
 
-    protected IServiceProvider _serviceProvider;
+    protected readonly IServiceProvider _serviceProvider;
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
     {
@@ -243,7 +241,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         this[Src] = string.Join(SplitChar, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray());
     }
 
-    public override async Task RunJob(DistributedTask _, CancellationToken cancellationToken)
+    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
         try
         {
@@ -279,7 +277,7 @@ abstract class FileOperation<T, TId> : FileOperation where T : FileOperationData
         }
         catch (AggregateException ae)
         {
-            ae.Flatten().Handle(e => e is TaskCanceledException || e is OperationCanceledException);
+            ae.Flatten().Handle(e => e is TaskCanceledException or OperationCanceledException);
         }
         catch (Exception error)
         {

@@ -28,10 +28,10 @@ namespace ASC.Core.Tenants;
 
 public class TenantQuotaRow : IMapFrom<DbQuotaRow>
 {
-    public int TenantId { get; set; }
-    public string Path { get; set; }
-    public long Counter { get; set; }
-    public string Tag { get; set; }
-    public Guid UserId { get; set; }
+    public int TenantId { get; init; }
+    public string Path { get; init; }
+    public long Counter { get; init; }
+    public string Tag { get; init; }
+    public Guid UserId { get; init; }
     public DateTime LastModified { get; set; }
 }

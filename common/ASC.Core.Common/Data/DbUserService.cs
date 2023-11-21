@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Core.Data;
 
 [Scope]
@@ -35,8 +37,8 @@ public class EFUserService : IUserService
 
     private static readonly Expression<Func<UserWithGroup, int>> _orderByUserType = u => 
         u.Group == null ? 2 : 
-        u.Group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 : 
-        u.Group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4;
+        u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
+        u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
 
     public EFUserService(
         IDbContextFactory<UserDbContext> dbContextFactory,
@@ -50,7 +52,7 @@ public class EFUserService : IUserService
 
     public async Task<Group> GetGroupAsync(int tenant, Guid id)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await GetGroupQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
             .ProjectTo<Group>(_mapper.ConfigurationProvider)
@@ -59,7 +61,7 @@ public class EFUserService : IUserService
 
     public async Task<IEnumerable<Group>> GetGroupsAsync(int tenant)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await GetGroupQuery(userDbContext, tenant)
             .ProjectTo<Group>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -67,7 +69,7 @@ public class EFUserService : IUserService
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await GetUserQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
             .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
@@ -85,7 +87,7 @@ public class EFUserService : IUserService
 
     public async Task<UserInfo> GetUserAsync(int tenant, string email)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await GetUserQuery(userDbContext, tenant)
             .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(r => r.Email == email && !r.Removed);
@@ -93,7 +95,7 @@ public class EFUserService : IUserService
 
     public async Task<UserInfo> GetUserByUserName(int tenant, string userName)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await GetUserQuery(userDbContext, tenant)
             .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(r => r.UserName == userName && !r.Removed);
@@ -101,9 +103,9 @@ public class EFUserService : IUserService
 
     public async Task<UserInfo> GetUserByPasswordHashAsync(int tenant, string login, string passwordHash)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(login);
+        ArgumentException.ThrowIfNullOrEmpty(login);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         if (Guid.TryParse(login, out var userId))
         {
             var pwdHash = GetPasswordHash(userId, passwordHash);
@@ -153,7 +155,7 @@ public class EFUserService : IUserService
 
     public async Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = userDbContext.Users
             .Where(r => userIds.Contains(r.Id))
             .Where(r => !r.Removed);
@@ -186,7 +188,7 @@ public class EFUserService : IUserService
 
     public async Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         IQueryable<UserGroup> q = userDbContext.UserGroups;
 
         if (tenant != Tenant.DefaultTenant)
@@ -213,7 +215,7 @@ public class EFUserService : IUserService
 
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var stamp = await Queries.LastModifiedAsync(userDbContext, tenant, id);
 
@@ -222,7 +224,7 @@ public class EFUserService : IUserService
 
     public async Task<byte[]> GetUserPhotoAsync(int tenant, Guid id)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var photo = await Queries.PhotoAsync(userDbContext, tenant, id);
 
@@ -231,7 +233,7 @@ public class EFUserService : IUserService
 
     public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await GetUserQuery(userDbContext, tenant)
             .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -248,7 +250,7 @@ public class EFUserService : IUserService
         AccountLoginType? accountLoginType,
         string text)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
@@ -277,7 +279,7 @@ public class EFUserService : IUserService
             yield break;
         }
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
@@ -292,8 +294,8 @@ public class EFUserService : IUserService
             {
                 var q1 = (from user in q
                     join userGroup in userDbContext.UserGroups.Where(g =>
-                        !g.Removed && (g.UserGroupId == Users.Constants.GroupAdmin.ID || g.UserGroupId == Users.Constants.GroupUser.ID ||
-                                       g.UserGroupId == Users.Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                        !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
+                                       g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
                     from @group in joinedGroup.DefaultIfEmpty()
                     select new UserWithGroup { User = user, Group = @group }).OrderBy(r => r.User.ActivationStatus);
 
@@ -329,7 +331,7 @@ public class EFUserService : IUserService
 
     public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.TenantIdsAsync(userDbContext, from).ToListAsync();
     }
@@ -341,7 +343,7 @@ public class EFUserService : IUserService
 
     public async Task RemoveGroupAsync(int tenant, Guid id, bool immediate)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         var ids = await CollectGroupChildsAsync(userDbContext, tenant, id);
         var stringIds = ids.Select(r => r.ToString()).ToList();
 
@@ -349,7 +351,7 @@ public class EFUserService : IUserService
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = _dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
             await Queries.DeleteAclsByIdsAsync(userDbContext, tenant, ids);
@@ -378,14 +380,14 @@ public class EFUserService : IUserService
 
     public async Task RemoveUserAsync(int tenant, Guid id, bool immediate)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var strategy = userDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await userDbContext.Database.BeginTransactionAsync();
 
             await Queries.DeleteAclsAsync(userDbContext, tenant, id);
             await Queries.DeleteSubscriptionsAsync(userDbContext, tenant, id.ToString());
@@ -414,13 +416,13 @@ public class EFUserService : IUserService
 
     public async Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType, bool immediate)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext(); 
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync(); 
         var strategy = userDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await userDbContext.Database.BeginTransactionAsync();
             if (immediate)
             {
                 await Queries.DeleteUserGroupsByGroupIdAsync(userDbContext, tenant, userId, groupId, refType);
@@ -443,7 +445,7 @@ public class EFUserService : IUserService
     {
         ArgumentNullException.ThrowIfNull(group);
 
-        if (group.Id == default)
+        if (group.Id == Guid.Empty)
         {
             group.Id = Guid.NewGuid();
         }
@@ -453,7 +455,7 @@ public class EFUserService : IUserService
 
         var dbGroup = _mapper.Map<Group, DbGroup>(group);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Groups, dbGroup);
         await userDbContext.SaveChangesAsync();
 
@@ -469,7 +471,7 @@ public class EFUserService : IUserService
             throw new ArgumentOutOfRangeException("Empty username.");
         }
 
-        if (user.Id == default)
+        if (user.Id == Guid.Empty)
         {
             user.Id = Guid.NewGuid();
         }
@@ -484,7 +486,7 @@ public class EFUserService : IUserService
         user.UserName = user.UserName.Trim();
         user.Email = user.Email.Trim();
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var any = await Queries.AnyUsersAsync(userDbContext, tenant, user.UserName, user.Id);
 
@@ -513,7 +515,7 @@ public class EFUserService : IUserService
         userGroupRef.LastModified = DateTime.UtcNow;
         userGroupRef.TenantId = tenant;
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var user = await Queries.FirstOrDefaultUserAsync(userDbContext, tenant, userGroupRef.UserId);
         if (user != null)
@@ -538,14 +540,14 @@ public class EFUserService : IUserService
             LastModified = DateTime.UtcNow
         };
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.UserSecurity, us);
         await userDbContext.SaveChangesAsync();
     }
 
     public async Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var userPhoto = await Queries.UserPhotoAsync(userDbContext, tenant, id);
         if (photo != null && photo.Length != 0)
@@ -629,9 +631,9 @@ public class EFUserService : IUserService
     {
         q = q.Where(r => !r.Removed);
 
-        if (includeGroups != null && includeGroups.Count > 0 || excludeGroups != null && excludeGroups.Count > 0)
+        if (includeGroups is { Count: > 0 } || excludeGroups is { Count: > 0 })
         {
-            if (includeGroups != null && includeGroups.Count > 0)
+            if (includeGroups is { Count: > 0 })
             {
                 foreach (var ig in includeGroups)
                 {
@@ -639,7 +641,7 @@ public class EFUserService : IUserService
                 }
             }
 
-            if (excludeGroups != null && excludeGroups.Count > 0)
+            if (excludeGroups is { Count: > 0 })
             {
                 foreach (var eg in excludeGroups)
                 {
@@ -657,7 +659,7 @@ public class EFUserService : IUserService
 
                 var cgIncludeGroups = cg.Item1;
                 var cgExcludeGroups = cg.Item2;
-                if (cgIncludeGroups != null && cgIncludeGroups.Count > 0)
+                if (cgIncludeGroups is { Count: > 0 })
                 {
                     foreach (var ig in cgIncludeGroups)
                     {
@@ -665,7 +667,7 @@ public class EFUserService : IUserService
                     }
                 }
 
-                if (cgExcludeGroups != null && cgExcludeGroups.Count > 0)
+                if (cgExcludeGroups is { Count: > 0 })
                 {
                     foreach (var eg in cgExcludeGroups)
                     {
@@ -763,7 +765,7 @@ public class EFUserService : IUserService
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = GetUserQuery(userDbContext, tenant).Where(r => r.Id == id);
 
         if (exp != null)
@@ -778,7 +780,7 @@ public class EFUserService : IUserService
 
     public async Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant)
     {
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await _dbContextFactory.CreateDbContextAsync();
         return await Queries.EmailsAsync(userDbContext, tenant).ToListAsync();
     }
 
@@ -790,14 +792,14 @@ public class EFUserService : IUserService
 
 public class DbUserSecurity
 {
-    public User User { get; set; }
-    public UserSecurity UserSecurity { get; set; }
+    public User User { get; init; }
+    public UserSecurity UserSecurity { get; init; }
 }
 
 public class UserWithGroup
 {
-    public User User { get; set; }
-    public UserGroup Group { get; set; }
+    public User User { get; init; }
+    public UserGroup Group { get; init; }
 }
 
 static file class Queries

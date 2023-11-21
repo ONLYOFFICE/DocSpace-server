@@ -31,16 +31,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ASC.Core.Common\ASC.Core.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="protos\linker_cache_item.proto" />
   </ItemGroup>
 
 </Project>

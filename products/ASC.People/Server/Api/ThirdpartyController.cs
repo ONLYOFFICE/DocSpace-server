@@ -24,10 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.People.Api;
 
 public class ThirdpartyController : ApiControllerBase
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly AccountLinker _accountLinker;
     private readonly CookiesManager _cookiesManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -137,7 +140,7 @@ public class ThirdpartyController : ApiControllerBase
                 continue;
             }
             var loginProvider = _providerManager.GetLoginProvider(provider);
-            if (loginProvider != null && loginProvider.IsEnabled)
+            if (loginProvider is { IsEnabled: true })
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";
@@ -243,32 +246,32 @@ public class ThirdpartyController : ApiControllerBase
 
         var employeeType = linkData.EmployeeType;
 
-        var userID = Guid.Empty;
+        Guid userId;
         try
         {
-            await _securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
+            await _securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
             var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
             await _messageService.SendAsync(MessageInitiator.System, messageAction, _messageTarget.Create(newUser.Id), newUser.DisplayUserName(false, _displayUserSettingsHelper));
-            userID = newUser.Id;
+            userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
-                await SaveContactImage(userID, thirdPartyProfile.Avatar);
+                await SaveContactImage(userId, thirdPartyProfile.Avatar);
             }
 
-            await _accountLinker.AddLinkAsync(userID.ToString(), thirdPartyProfile);
+            await _accountLinker.AddLinkAsync(userId.ToString(), thirdPartyProfile);
         }
         finally
         {
             _securityContext.Logout();
         }
 
-        var user = await _userManager.GetUsersAsync(userID);
+        var user = await _userManager.GetUsersAsync(userId);
 
-        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.TenantId, user.Id);
+        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
 
         await _studioNotifyService.UserHasJoinAsync();
 
@@ -287,15 +290,24 @@ public class ThirdpartyController : ApiControllerBase
         {
             var success = int.TryParse(linkData.RoomId, out var id);
 
-            if (success)
+
+            try
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                await _semaphore.WaitAsync();
+                if (success)
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                }
+                else
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
-            else
+            finally
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                _semaphore.Release();
             }
         }
     }
@@ -332,7 +344,7 @@ public class ThirdpartyController : ApiControllerBase
         {
             user = await _userManager.GetUserByEmailAsync(email);
 
-            if (user.Equals(Constants.LostUser) || user.ActivationStatus != EmployeeActivationStatus.Pending)
+            if (user.Equals(Core.Users.Constants.LostUser) || user.ActivationStatus != EmployeeActivationStatus.Pending)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }
@@ -353,29 +365,25 @@ public class ThirdpartyController : ApiControllerBase
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        using (var memstream = new MemoryStream())
+        using var memstream = new MemoryStream();
+        var request = new HttpRequestMessage
         {
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url)
-            };
+            RequestUri = new Uri(url)
+        };
 
-            var httpClient = _httpClientFactory.CreateClient();
-            using (var response = httpClient.Send(request))
-            await using (var stream = response.Content.ReadAsStream())
-            {
-                var buffer = new byte[512];
-                int bytesRead;
-                while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    memstream.Write(buffer, 0, bytesRead);
-                }
-
-                var bytes = memstream.ToArray();
-
-                await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-            }
+        var httpClient = _httpClientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var buffer = new byte[512];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            memstream.Write(buffer, 0, bytesRead);
         }
+
+        var bytes = memstream.ToArray();
+
+        await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
     }
 
     private string GetEmailAddress(SignupAccountRequestDto inDto)

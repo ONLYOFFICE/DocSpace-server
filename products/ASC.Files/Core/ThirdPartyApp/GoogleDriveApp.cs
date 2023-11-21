@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using MimeMapping = ASC.Common.Web.MimeMapping;
-
 namespace ASC.Web.Files.ThirdPartyApp;
 
 [Scope]
@@ -317,7 +315,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         catch (HttpRequestException e)
         {
             _logger.ErrorGoogleDriveAppSaveFileStream(e);
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
             }
@@ -372,7 +370,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
                 throw new Exception("Profile is null");
             }
 
-            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.TenantId, userInfo.Id, MessageAction.LoginSuccessViaSocialApp);
+            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSocialApp);
 
             if (isNew)
             {
@@ -781,7 +779,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             _logger.ErrorGoogleDriveAppCreateFile(e);
 
-            if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+            if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
             }
@@ -855,7 +853,7 @@ public class GoogleDriveApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 _logger.ErrorGoogleDriveAppDownLoadExportLink(e);
 
-                if (e.StatusCode == HttpStatusCode.Forbidden || e.StatusCode == HttpStatusCode.Unauthorized)
+                if (e.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException, e);
                 }

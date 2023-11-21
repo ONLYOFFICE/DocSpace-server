@@ -26,8 +26,8 @@
 
 namespace ASC.Common.Caching;
 
-[Singletone]
-public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
+[Singleton]
+public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 {
     private IConnection _connection;
     private readonly ConnectionFactory _factory;
@@ -40,7 +40,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
 
-    private readonly object _lock = new object();
+    private readonly object _lock = new();
     private bool _disposed;
 
     public RabbitMQCache(IConfiguration configuration, ILogger<RabbitMQCache<T>> logger)
@@ -78,7 +78,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
 
         channel.QueueBind(_queueName, _exchangeName, string.Empty, null);
 
-        channel.CallbackException += (sender, ea) =>
+        channel.CallbackException += (_, ea) =>
         {
             _logger.WarningRecreatingRabbitMQ(ea.Exception);
 
@@ -120,24 +120,22 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
             }
 
             _connection = _factory.CreateConnection();
-            _connection.ConnectionShutdown += (s, e) => TryConnect();
-            _connection.CallbackException += (s, e) => TryConnect();
-            _connection.ConnectionBlocked += (s, e) => TryConnect();
+            _connection.ConnectionShutdown += (_, _) => TryConnect();
+            _connection.CallbackException += (_, _) => TryConnect();
+            _connection.ConnectionBlocked += (_, _) => TryConnect();
         }
     }
 
 
-    public bool IsConnected => _connection != null && _connection.IsOpen && !_disposed;
+    public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
     private void OnMessageReceived(object sender, BasicDeliverEventArgs e)
     {
         var body = e.Body.Span.ToArray();
 
-        var parser = new MessageParser<T>(() => new T());
-
         var data = body.Take(body.Length - 1);
 
-        var obj = parser.ParseFrom(data.ToArray());
+        var obj = BaseProtobufSerializer.Deserialize<T>(data.ToArray());
 
         var action = (CacheNotifyAction)body[body.Length - 1];
 
@@ -149,7 +147,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : IMessage<
 
     public void Publish(T obj, CacheNotifyAction action)
     {
-        var objAsByteArray = obj.ToByteArray();
+        var objAsByteArray = BaseProtobufSerializer.Serialize(obj);
 
         var body = new byte[objAsByteArray.Length + 1];
 

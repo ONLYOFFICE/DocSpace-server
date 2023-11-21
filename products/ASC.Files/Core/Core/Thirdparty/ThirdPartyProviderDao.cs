@@ -35,7 +35,8 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+        bool searchInContent)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -63,7 +64,7 @@ internal abstract class ThirdPartyProviderDao
 
     public Task<Stream> GetDifferenceStreamAsync(File<string> file)
     {
-        return null;
+        return Task.FromResult<Stream>(null);
     }
 
     public Task<bool> ContainChangesAsync(string fileId, int fileVersion)
@@ -99,12 +100,12 @@ internal abstract class ThirdPartyProviderDao
 
     public Task SaveProperties(string fileId, EntryProperties entryProperties)
     {
-        return null;
+        return Task.CompletedTask;
     }
 
     public virtual Task<Stream> GetFileStreamAsync(File<string> file)
     {
-        return null;
+        return Task.FromResult<Stream>(null);
     }
 
     public string GetUniqFilePath(File<string> file, string fileTitle)
@@ -138,7 +139,7 @@ internal abstract class ThirdPartyProviderDao
 
     public Task<string> GetFolderIDAsync(string module, string bunch, string data, bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public IAsyncEnumerable<string> GetFolderIDsAsync(string module, string bunch, IEnumerable<string> data, bool createIfNotExists)
@@ -148,75 +149,69 @@ internal abstract class ThirdPartyProviderDao
 
     public Task<string> GetFolderIDCommonAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
 
     public Task<string> GetFolderIDUserAsync(bool createIfNotExists, Guid? userId)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDShareAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
 
     public Task<string> GetFolderIDRecentAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDFavoritesAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDTemplatesAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDTrashAsync(bool createIfNotExists, Guid? userId)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
-
-    public string GetFolderIDPhotos(bool createIfNotExists)
-    {
-        return null;
-    }
-
 
     public Task<string> GetFolderIDProjectsAsync(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDVirtualRooms(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetFolderIDArchive(bool createIfNotExists)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<string> GetBunchObjectIDAsync(string folderID)
     {
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<Dictionary<string, string>> GetBunchObjectIDsAsync(List<string> folderIDs)
     {
-        return null;
+        return Task.FromResult<Dictionary<string, string>>(null);
     }
 
     public IAsyncEnumerable<FolderWithShare> GetFeedsForRoomsAsync(int tenant, DateTime from, DateTime to)
@@ -253,7 +248,7 @@ internal abstract class ThirdPartyProviderDao
         throw new NotImplementedException();
     }
     
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool searchInContent, bool withSubfolders = false,
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
@@ -313,7 +308,7 @@ internal abstract class ThirdPartyProviderDao
     {
         if (withoutTags)
         {
-            return rooms.Join(Queries.AllThirdpartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
+            return rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
                 .WhereAwait(async r => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
                 .Select(r => r.folder);
         }
@@ -323,7 +318,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var filtered = rooms.Join(Queries.AllThirdpartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
+        var filtered = rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
             .Join(Queries.AllTagLinksAsync(filesDbContext), r => r.HashId, t => t.EntryId, (result, tag) => new { result.folder, tag.TagId })
             .Join(Queries.AllTagsAsync(filesDbContext), r => r.TagId, t => t.Id, (result, tagInfo) => new { result.folder, tagInfo.Name })
             .Where(r => tags.Contains(r.Name))
@@ -423,7 +418,6 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
     protected readonly SetupInfo _setupInfo;
     protected readonly FileUtility _fileUtility;
     protected readonly TempPath _tempPath;
-    protected readonly AuthContext _authContext;
     internal RegexDaoSelectorBase<TFile, TFolder, TItem> DaoSelector { get; set; }
     protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
     protected string PathPrefix { get; set; }
@@ -439,7 +433,6 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         SetupInfo setupInfo,
         FileUtility fileUtility,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<TFile, TFolder, TItem> regexDaoSelectorBase)
     {
         _serviceProvider = serviceProvider;
@@ -450,7 +443,6 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         _fileUtility = fileUtility;
         _tempPath = tempPath;
         _tenantId = tenantManager.GetCurrentTenant().Id;
-        _authContext = authContext;
         DaoSelector = regexDaoSelectorBase;
     }
 
@@ -461,7 +453,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
             return null;
         }
 
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         string result;
         if (id.StartsWith(Id))
@@ -534,7 +526,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         return file;
     }
 
-    protected void InitFileEntry(FileEntry<string> fileEntry)
+    private void InitFileEntry(FileEntry<string> fileEntry)
     {
         fileEntry.CreateBy = ProviderInfo.Owner;
         fileEntry.ModifiedBy = ProviderInfo.Owner;
@@ -545,7 +537,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
         fileEntry.RootId = MakeId();
     }
 
-    protected void InitFileEntryError(FileEntry<string> fileEntry, ErrorEntry entry)
+    private void InitFileEntryError(FileEntry<string> fileEntry, ErrorEntry entry)
     {
         fileEntry.Id = MakeId(entry.ErrorId);
         fileEntry.CreateOn = _tenantUtil.DateTimeNow();
@@ -555,8 +547,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
 
     protected void SetFolderType(Folder<string> folder, bool isRoot)
     {
-        if (isRoot && (ProviderInfo.RootFolderType == FolderType.VirtualRooms ||
-            ProviderInfo.RootFolderType == FolderType.Archive))
+        if (isRoot && ProviderInfo.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             folder.FolderType = ProviderInfo.RootFolderType;
         }
@@ -607,29 +598,10 @@ internal class ErrorEntry
     }
 }
 
-public class TagLink
-{
-    public int TenantId { get; set; }
-    public int Id { get; set; }
-}
-
-public class TagLinkComparer : IEqualityComparer<TagLink>
-{
-    public bool Equals([AllowNull] TagLink x, [AllowNull] TagLink y)
-    {
-        return x.Id == y.Id && x.TenantId == y.TenantId;
-    }
-
-    public int GetHashCode([DisallowNull] TagLink obj)
-    {
-        return obj.Id.GetHashCode() + obj.TenantId.GetHashCode();
-    }
-}
-
 static file class Queries
 {
     public static readonly Func<FilesDbContext, IAsyncEnumerable<DbFilesThirdpartyIdMapping>>
-        AllThirdpartyIdMappingsAsync = EF.CompileAsyncQuery(
+        AllThirdPartyIdMappingsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 ctx.ThirdpartyIdMapping.AsQueryable());
 

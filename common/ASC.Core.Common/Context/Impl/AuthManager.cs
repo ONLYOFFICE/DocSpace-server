@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.Core;
 
 [Scope]
@@ -60,7 +62,7 @@ public class AuthManager
 
     public async Task<IAccount> GetAccountByIDAsync(int tenantId, Guid id)
     {
-        var s = Configuration.Constants.SystemAccounts.FirstOrDefault(a => a.ID == id);
+        var s = Array.Find(Constants.SystemAccounts, a => a.ID == id);
         if (s != null)
         {
             return s;
@@ -68,7 +70,7 @@ public class AuthManager
 
         var u = await _userManager.GetUsersAsync(id);
 
-        return !Users.Constants.LostUser.Equals(u) && u.Status == EmployeeStatus.Active ? ToAccount(tenantId, u) : Configuration.Constants.Guest;
+        return !Users.Constants.LostUser.Equals(u) && u.Status == EmployeeStatus.Active ? ToAccount(tenantId, u) : Constants.Guest;
     }
 
     private IUserAccount ToAccount(int tenantId, UserInfo u)

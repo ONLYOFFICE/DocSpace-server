@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Core.Compress;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Archives the data stream into the format .zip
@@ -50,7 +49,7 @@ public class CompressToZip : ICompress
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
-    public void CreateEntry(string title, DateTime? lastModification)
+    public void CreateEntry(string title, DateTime? lastModification = null)
     {
         _zipEntry = new ZipEntry(title) { IsUnicodeText = true };
 

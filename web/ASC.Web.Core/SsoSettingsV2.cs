@@ -137,23 +137,23 @@ public class SsoIdpSettings
 {
     /// <summary>Entity ID</summary>
     /// <type>System.String, System</type>
-    public string EntityId { get; set; }
+    public string EntityId { get; init; }
 
     /// <summary>SSO URL</summary>
     /// <type>System.String, System</type>
-    public string SsoUrl { get; set; }
+    public string SsoUrl { get; init; }
 
     /// <summary>SSO binding</summary>
     /// <type>System.String, System</type>
-    public string SsoBinding { get; set; }
+    public string SsoBinding { get; init; }
 
     /// <summary>SLO URL</summary>
     /// <type>System.String, System</type>
-    public string SloUrl { get; set; }
+    public string SloUrl { get; init; }
 
     /// <summary>SLO binding</summary>
     /// <type>System.String, System</type>
-    public string SloBinding { get; set; }
+    public string SloBinding { get; init; }
 
     /// <summary>Name ID format</summary>
     /// <type>System.String, System</type>
@@ -167,11 +167,11 @@ public class SsoIdpSettings
 
 public class SsoFieldMapping
 {
-    public string FirstName { get; set; }
+    public string FirstName { get; init; }
 
-    public string LastName { get; set; }
+    public string LastName { get; init; }
 
-    public string Email { get; set; }
+    public string Email { get; init; }
 
     public string Title { get; set; }
 

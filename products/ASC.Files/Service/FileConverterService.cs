@@ -24,9 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security;
+
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Files.ThumbnailBuilder;
 
-[Singletone(Additional = typeof(FileConverterQueueExtension))]
+[Singleton(Additional = typeof(FileConverterQueueExtension))]
 internal class FileConverterService<T> : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -144,7 +148,7 @@ internal class FileConverterService<T> : BackgroundService
                     if (!await fileSecurity.CanReadAsync(file) && file.RootFolderType != FolderType.BUNCH)
                     {
                         //No rights in CRM after upload before attach
-                        throw new System.Security.SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
+                        throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
                     }
 
                     if (file.ContentLength > setupInfo.AvailableFileSize)
@@ -163,8 +167,7 @@ internal class FileConverterService<T> : BackgroundService
                 }
                 catch (Exception exception)
                 {
-                    var password1 = exception.InnerException is DocumentServiceException documentServiceException
-                                          && documentServiceException.Code == DocumentServiceException.ErrorCode.ConvertPassword;
+                    var password1 = exception.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword };
 
                     logger.ErrorConvertFileWithUrl(file.Id.ToString(), fileUri, exception);
 

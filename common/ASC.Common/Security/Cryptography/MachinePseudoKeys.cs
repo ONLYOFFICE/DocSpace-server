@@ -26,7 +26,7 @@
 
 namespace ASC.Security.Cryptography;
 
-[Singletone]
+[Singleton]
 public class MachinePseudoKeys
 {
     private readonly byte[] _confKey;

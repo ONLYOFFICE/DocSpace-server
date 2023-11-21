@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
@@ -81,7 +82,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
 
         var claims = new List<Claim>()
         {
-                new Claim(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
+                new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };
 
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)
@@ -95,11 +96,9 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
                 }
                 else
                 {
-                    if (emailValidationKeyModel.Type == ConfirmType.EmailActivation
-                        || emailValidationKeyModel.Type == ConfirmType.EmpInvite
-                        || emailValidationKeyModel.Type == ConfirmType.LinkInvite)
+                    if (emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite)
                     {
-                        userId = ASC.Core.Configuration.Constants.CoreSystem.ID;
+                        userId = Constants.CoreSystem.ID;
                     }
                     else
                     {

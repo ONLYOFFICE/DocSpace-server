@@ -59,25 +59,31 @@ public class ExternalShare
         _fileUtility = fileUtility;
     }
     
-    public async Task<string> GetLinkAsync<T>(FileEntry<T> entry, Guid linkId)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
-
+        string url = null;
+        
         switch (entry)
         {
             case File<T> file:
-                var url = _fileUtility.CanWebView(file.Title)
+                url = _fileUtility.CanWebView(file.Title)
                     ? _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id)
                     : file.DownloadUrl;
 
                 url += $"&{FilesLinkUtility.ShareKey}={key}";
-                
-                return _commonLinkUtility.GetFullAbsolutePath(url);
+                break;
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
-                return _commonLinkUtility.GetFullAbsolutePath($"rooms/share?key={key}");
-            default:
-                return null;
+                url = $"rooms/share?key={key}";
+                break;
         }
+        
+        return new LinkData
+        {
+            Url = _commonLinkUtility.GetFullAbsolutePath(url),
+            Token = key
+        };
+        
     }
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
@@ -138,7 +144,7 @@ public class ExternalShare
     
     public async Task<string> CreatePasswordKeyAsync(string password)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(password);
+        ArgumentException.ThrowIfNullOrEmpty(password);
 
         return Signature.Create(password, await GetDbKeyAsync());
     }
@@ -169,7 +175,7 @@ public class ExternalShare
 
     public async Task<Guid> GetLinkIdAsync()
     {
-        if (_linkId != default)
+        if (_linkId != Guid.Empty)
         {
             return _linkId;
         }
@@ -178,14 +184,14 @@ public class ExternalShare
         
         if (string.IsNullOrEmpty(key))
         {
-            return default;
+            return Guid.Empty;
         }
         
         var linkId = await ParseShareKeyAsync(key);
         
-        if (linkId == default)
+        if (linkId == Guid.Empty)
         {
-            return default;
+            return Guid.Empty;
         }
         
         _linkId = linkId;
@@ -200,7 +206,7 @@ public class ExternalShare
 
     public async Task<Guid> GetSessionIdAsync()
     {
-        if (_sessionId != default)
+        if (_sessionId != Guid.Empty)
         {
             return _sessionId;
         }
@@ -209,14 +215,14 @@ public class ExternalShare
         
         if (string.IsNullOrEmpty(sessionKey))
         {
-            return default;
+            return Guid.Empty;
         }
         
         var id = Signature.Read<Guid>(sessionKey, await GetDbKeyAsync());
         
-        if (id == default)
+        if (id == Guid.Empty)
         {
-            return default;
+            return Guid.Empty;
         }
 
         _sessionId = id;
@@ -237,12 +243,12 @@ public class ExternalShare
     {
         ArgumentNullException.ThrowIfNull(data);
         
-        if (_linkId == default)
+        if (_linkId == Guid.Empty)
         {
             _linkId = data.LinkId;
         }
 
-        if (_sessionId == default)
+        if (_sessionId == Guid.Empty)
         {
             _sessionId = data.SessionId;
         }
@@ -315,15 +321,46 @@ public class ExternalShare
     }
 }
 
+public class LinkData
+{
+    public string Url { get; init; }
+    public string Token { get; init; }
+}
+
+/// <summary>
+/// </summary>
 public class ValidationInfo
 {
+    /// <summary>External data status</summary>
+    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
     public Status Status { get; set; }
+   
+    /// <summary>External data ID</summary>
+    /// <type>System.String, System</type>
     public string Id { get; set; }
+   
+    /// <summary>External data title</summary>
+    /// <type>System.String, System</type>
     public string Title { get; set; }
+
+    /// <summary>Sharing rights</summary>
+    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
+
+    /// <summary>Type of a folder where the external data is located</summary>
+    /// <type>ASC.Files.Core.FolderType, ASC.Files.Core</type>
     public FolderType FolderType { get; set; }
+
+    /// <summary>Room logo</summary>
+    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
     public Logo Logo { get; set; }
+
+    /// <summary>Tenant ID</summary>
+    /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
+
+    /// <summary>Specifies whether to share the external data or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
 }
 
@@ -343,10 +380,12 @@ public class ExternalShareData
 
 public class DownloadSession
 {
-    public Guid Id { get; set; }
-    public Guid LinkId { get; set; }
+    public Guid Id { get; init; }
+    public Guid LinkId { get; init; }
 }
 
+/// <summary>
+/// </summary>
 public enum Status
 {
     Ok,

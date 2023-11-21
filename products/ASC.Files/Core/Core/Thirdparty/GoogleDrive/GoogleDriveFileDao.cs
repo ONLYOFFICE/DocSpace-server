@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
+using File = System.IO.File;
 using ResumableUploadSession = ASC.Files.Thirdparty.GoogleDrive.ResumableUploadSession;
 using ResumableUploadSessionStatus = ASC.Files.Thirdparty.GoogleDrive.ResumableUploadSessionStatus;
 
@@ -104,7 +105,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
 
         if (uploadSession.Items.ContainsKey("GoogleDriveSession"))
         {
-            var googleDriveSession = uploadSession.GetItemOrDefault<Files.Thirdparty.GoogleDrive.ResumableUploadSession>("GoogleDriveSession");
+            var googleDriveSession = uploadSession.GetItemOrDefault<ResumableUploadSession>("GoogleDriveSession");
             var storage = (GoogleDriveStorage)await ProviderInfo.StorageAsync;
             await storage.TransferAsync(googleDriveSession, stream, chunkLength, uploadSession.LastChunk);
         }
@@ -117,8 +118,9 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
 
         uploadSession.BytesUploaded += chunkLength;
 
-        if (uploadSession.BytesUploaded == uploadSession.BytesTotal)
+        if (uploadSession.BytesUploaded == uploadSession.BytesTotal || uploadSession.LastChunk)
         {
+            uploadSession.BytesTotal = uploadSession.BytesUploaded;
             uploadSession.File = await FinalizeUploadSessionAsync(uploadSession);
         }
         else
@@ -165,7 +167,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         }
         else if (uploadSession.Items.ContainsKey("TempPath"))
         {
-            System.IO.File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
+            File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 
             return Task.CompletedTask;
         }

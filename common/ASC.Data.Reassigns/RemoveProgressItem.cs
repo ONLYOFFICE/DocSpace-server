@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WebZones;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -76,7 +78,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, coreBaseSettings, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, messageTarget, webItemManagerSecurity, storageFactory, userFormatter, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, messageTarget, webItemManagerSecurity,  userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User, DisplayUserNameFormat.Default);
@@ -143,7 +145,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         var usageSpaceWrapper = new UsageSpaceWrapper();
 
-        var webItems = webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
+        var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
         foreach (var item in webItems)
         {
@@ -183,28 +185,6 @@ public class RemoveProgressItem : DistributedTaskProgress
             }
         }
         return usageSpaceWrapper;
-    }
-
-    private async Task DeleteTalkStorage(StorageFactory storageFactory)
-    {
-        using var md5 = MD5.Create();
-        var data = md5.ComputeHash(Encoding.Default.GetBytes(FromUser.ToString()));
-
-        var sBuilder = new StringBuilder();
-
-        for (int i = 0, n = data.Length; i < n; i++)
-        {
-            sBuilder.Append(data[i].ToString("x2"));
-        }
-
-        var md5Hash = sBuilder.ToString();
-
-        var storage = await storageFactory.GetStorageAsync(_tenantId, "talk");
-
-        if (storage != null && await storage.IsDirectoryAsync(md5Hash))
-        {
-            await storage.DeleteDirectoryAsync(md5Hash);
-        }
     }
 
     private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, MessageTarget messageTarget, string userName)
@@ -254,7 +234,6 @@ public class RemoveProgressItem : DistributedTaskProgress
 public class RemoveProgressItemScope
 {
     private readonly TenantManager _tenantManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly MessageService _messageService;
     private readonly FileStorageService _fileStorageService;
     private readonly StudioNotifyService _studioNotifyService;
@@ -263,12 +242,11 @@ public class RemoveProgressItemScope
     private readonly UserPhotoManager _userPhotoManager;
     private readonly MessageTarget _messageTarget;
     private readonly WebItemManagerSecurity _webItemManagerSecurity;
-    private readonly StorageFactory _storageFactory;
     private readonly UserFormatter _userFormatter;
     private readonly ILoggerProvider _options;
 
-    public RemoveProgressItemScope(TenantManager tenantManager,
-        CoreBaseSettings coreBaseSettings,
+    public RemoveProgressItemScope(
+        TenantManager tenantManager,
         MessageService messageService,
         FileStorageService fileStorageService,
         StudioNotifyService studioNotifyService,
@@ -277,12 +255,10 @@ public class RemoveProgressItemScope
         UserPhotoManager userPhotoManager,
         MessageTarget messageTarget,
         WebItemManagerSecurity webItemManagerSecurity,
-        StorageFactory storageFactory,
         UserFormatter userFormatter,
         ILoggerProvider options)
     {
         _tenantManager = tenantManager;
-        _coreBaseSettings = coreBaseSettings;
         _messageService = messageService;
         _fileStorageService = fileStorageService;
         _studioNotifyService = studioNotifyService;
@@ -291,13 +267,11 @@ public class RemoveProgressItemScope
         _userPhotoManager = userPhotoManager;
         _messageTarget = messageTarget;
         _webItemManagerSecurity = webItemManagerSecurity;
-        _storageFactory = storageFactory;
         _userFormatter = userFormatter;
         _options = options;
     }
 
     public void Deconstruct(out TenantManager tenantManager,
-        out CoreBaseSettings coreBaseSettings,
         out MessageService messageService,
         out FileStorageService fileStorageService,
         out StudioNotifyService studioNotifyService,
@@ -306,12 +280,10 @@ public class RemoveProgressItemScope
         out UserPhotoManager userPhotoManager,
         out MessageTarget messageTarget,
         out WebItemManagerSecurity webItemManagerSecurity,
-        out StorageFactory storageFactory,
         out UserFormatter userFormatter,
         out ILoggerProvider optionsMonitor)
     {
         tenantManager = _tenantManager;
-        coreBaseSettings = _coreBaseSettings;
         messageService = _messageService;
         fileStorageService = _fileStorageService;
         studioNotifyService = _studioNotifyService;
@@ -320,7 +292,6 @@ public class RemoveProgressItemScope
         userPhotoManager = _userPhotoManager;
         messageTarget = _messageTarget;
         webItemManagerSecurity = _webItemManagerSecurity;
-        storageFactory = _storageFactory;
         userFormatter = _userFormatter;
         optionsMonitor = _options;
     }

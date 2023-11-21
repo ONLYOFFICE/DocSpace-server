@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Studio.UserControls.CustomNavigation;
 
 public class LogoUploader
@@ -42,7 +44,7 @@ public class LogoUploader
         var result = new FileUploadResult();
         try
         {
-            await permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
             var width = Convert.ToInt32(context.Request.Form["width"]);
             var height = Convert.ToInt32(context.Request.Form["height"]);
@@ -77,7 +79,7 @@ public class LogoUploader
                 else
                 {
                     using (var stream = new MemoryStream(data))
-                    using (var image = Image.Load(stream))
+                    using (var image = await Image.LoadAsync(stream))
                     {
                         var actualSize = image.Size;
                         if (actualSize.Height != size.Height && actualSize.Width != size.Width)
@@ -110,7 +112,7 @@ public class LogoUploader
             result.Success = false;
             result.Message = ex.Message.HtmlEncode();
         }
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(result));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result));
     }
 }
 

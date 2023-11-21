@@ -26,7 +26,7 @@
 
 namespace ASC.ActiveDirectory.Novell.Extensions;
 
-[Singletone]
+[Singleton]
 public class NovellLdapEntryExtension
 {
     private readonly ILogger<NovellLdapEntryExtension> _logger;
@@ -133,7 +133,7 @@ public class NovellLdapEntryExtension
     {
         if (ldapEntry == null)
         {
-            throw new ArgumentNullException("ldapEntry");
+            throw new ArgumentNullException(nameof(ldapEntry));
         }
 
         var novellLdapObject = new NovellLdapObject(_logger, this);

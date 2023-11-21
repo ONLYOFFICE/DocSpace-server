@@ -26,7 +26,7 @@
 
 namespace ASC.Common;
 
-[Singletone]
+[Singleton]
 public class TempStream
 {
     private readonly TempPath _tempPath;

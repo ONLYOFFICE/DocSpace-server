@@ -97,6 +97,6 @@ public class Module
     public bool Count { get; set; } = true;
     public bool DisabledEncryption { get; set; }
     public IEnumerable<Module> Domain { get; set; }
-    public bool Cache { get; set; }
+    public string ValidatorType { get; set; }
 }
 

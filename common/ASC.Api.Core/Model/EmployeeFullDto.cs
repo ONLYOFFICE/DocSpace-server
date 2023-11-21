@@ -106,7 +106,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.Boolean, System</type>
     public bool IsAdmin { get; set; }
 
-    /// <summary>Is room admin or not</summary>
+    /// <summary>Specifies if the user is a room administrator or not</summary>
     /// <type>System.Boolean, System</type>
     public bool IsRoomAdmin { get; set; }
 
@@ -147,8 +147,8 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsSSO { get; set; }
 
     /// <summary>Theme</summary>
-    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsEnum}, System</type>
-    public DarkThemeSettingsEnum? Theme { get; set; }
+    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsType}, System</type>
+    public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>Quota limit</summary>
     /// <type>System.Int64, System</type>
@@ -213,8 +213,9 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         WebItemManager webItemManager,
         SettingsManager settingsManager,
         IQuotaService quotaService,
+        TenantManager tenantManager,
         ILogger<EmployeeDtoHelper> logger)
-    : base(context, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
+    : base(context, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, tenantManager, logger)
     {
         _context = context;
         _webItemSecurity = webItemSecurity;
@@ -284,7 +285,8 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
     public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
         var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
-
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         var result = new EmployeeFullDto
         {
             UserName = userInfo.UserName,
@@ -299,7 +301,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
             IsVisitor = await _userManager.IsUserAsync(userInfo),
             IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
             IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
-            IsOwner = userInfo.IsOwner(_context.Tenant),
+            IsOwner = userInfo.IsOwner(tenant),
             IsCollaborator = currentType is EmployeeType.Collaborator,
             IsLDAP = userInfo.IsLDAP(),
             IsSSO = userInfo.IsSSO(),
@@ -312,9 +314,9 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         if (quotaSettings.EnableUserQuota)
         {
-            result.UsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(_context.Tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+            result.UsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
             var userQuotaSettings = await _settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
-            result.QuotaLimit = userQuotaSettings != null ? userQuotaSettings.UserQuota : quotaSettings.DefaultUserQuota;
+            result.QuotaLimit = userQuotaSettings?.UserQuota ?? quotaSettings.DefaultUserQuota;
         }
 
         if (userInfo.Sex.HasValue)

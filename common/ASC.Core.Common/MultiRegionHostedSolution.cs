@@ -28,7 +28,7 @@ namespace ASC.Core;
 
 public class MultiRegionHostedSolution
 {
-    private readonly Dictionary<string, HostedSolution> _regions = new Dictionary<string, HostedSolution>();
+    private readonly Dictionary<string, HostedSolution> _regions = new();
     private readonly string _dbid;
 
     private readonly IConfiguration _configuraion;

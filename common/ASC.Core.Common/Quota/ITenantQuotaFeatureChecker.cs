@@ -34,9 +34,8 @@ public interface ITenantQuotaFeatureChecker
 
 public abstract class TenantQuotaFeatureChecker<T, T1> : ITenantQuotaFeatureChecker where T : TenantQuotaFeature<T1> where T1 : IComparable<T1>
 {
-    private static readonly object _lock = new object();
     protected readonly ITenantQuotaFeatureStat<T, T1> _tenantQuotaFeatureStatistic;
-    protected readonly TenantManager _tenantManager;
+    private readonly TenantManager _tenantManager;
 
     public abstract string Exception { get; }
 
@@ -46,45 +45,42 @@ public abstract class TenantQuotaFeatureChecker<T, T1> : ITenantQuotaFeatureChec
         _tenantManager = tenantManager;
     }
 
-    public virtual async Task CheckUsed(TenantQuota quota)
+    public async Task CheckUsed(TenantQuota quota)
     {
         var used = await _tenantQuotaFeatureStatistic.GetValueAsync();
         Check(quota, used);
     }
-
-    public async Task CheckAddAsync(T1 newValue)
-    {
-        await CheckAddAsync(await _tenantManager.GetCurrentTenantIdAsync(), newValue);
-    }
-
+    
     public virtual async Task CheckAddAsync(int tenantId, T1 newValue)
-    {
+    {        
         var quota = await _tenantManager.GetTenantQuotaAsync(tenantId);
         Check(quota, newValue);
     }
 
-    protected void Check(TenantQuota quota, T1 newValue)
+    protected async Task CheckAddAsync(T1 newValue)
     {
-        lock (_lock)
-        {
-            var val = quota.GetFeature<T>().Value;
+        await CheckAddAsync(await _tenantManager.GetCurrentTenantIdAsync(), newValue);
+    }
+    
+    private void Check(TenantQuota quota, T1 newValue)
+    {
+        var val = quota.GetFeature<T>().Value;
 
-            if (newValue.CompareTo(val) > 0)
-            {
-                throw new TenantQuotaException(string.Format(Exception, val));
-            }
+        if (newValue.CompareTo(val) > 0)
+        {
+            throw new TenantQuotaException(string.Format(Exception, val));
         }
     }
 }
 
 public abstract class TenantQuotaFeatureCheckerCount<T> : TenantQuotaFeatureChecker<T, int> where T : TenantQuotaFeature<int>
-{
+{    
     protected TenantQuotaFeatureCheckerCount(ITenantQuotaFeatureStat<T, int> tenantQuotaFeatureStatistic, TenantManager tenantManager) : base(tenantQuotaFeatureStatistic, tenantManager)
     {
     }
 
     public async Task CheckAppend()
-    {
-        await CheckAddAsync((await _tenantQuotaFeatureStatistic.GetValueAsync()) + 1);
+    {        
+        await CheckAddAsync(await _tenantQuotaFeatureStatistic.GetValueAsync() + 1);
     }
 }

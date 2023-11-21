@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using JsonConverter = System.Text.Json.Serialization.JsonConverter;
-using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
-
 namespace ASC.Web.Studio.Utility;
 
 /// <summary>
@@ -36,7 +33,7 @@ namespace ASC.Web.Studio.Utility;
 //  portal-continue - confirm portal continuation  - Tenant.SetStatus(TenantStatus.Active)
 //  portal-remove - confirm portal deletation - Tenant.SetStatus(TenantStatus.RemovePending)
 //  DnsChange - change Portal Address and/or Custom domain name
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
 [EnumExtensions]
 public enum ConfirmType
 {

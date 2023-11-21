@@ -26,6 +26,8 @@
 
 using Flurl.Util;
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Api.Core;
 
 public abstract class BaseStartup
@@ -44,9 +46,9 @@ public abstract class BaseStartup
     protected DIHelper DIHelper { get; }
     protected bool LoadProducts { get; set; } = true;
     protected bool LoadConsumers { get; } = true;
-    protected bool WebhooksEnabled { get; set; }
+    protected bool WebhooksEnabled { get; init; }
 
-    public BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
@@ -78,7 +80,7 @@ public abstract class BaseStartup
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
             var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
 
-            if (knownProxies != null && knownProxies.Count > 0)
+            if (knownProxies is { Count: > 0 })
             {
                 foreach (var knownProxy in knownProxies)
                 {
@@ -87,7 +89,7 @@ public abstract class BaseStartup
             }
 
 
-            if (knownNetworks != null && knownNetworks.Count > 0)
+            if (knownNetworks is { Count: > 0 })
             {
                 foreach (var knownNetwork in knownNetworks)
                 {
@@ -107,7 +109,7 @@ public abstract class BaseStartup
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
-                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
 
                 if (userId == null)
                 {
@@ -116,11 +118,9 @@ public abstract class BaseStartup
 
                 var permitLimit = 1500;
 
-                string partitionKey;
+                var partitionKey = $"sw_{userId}";
 
-                partitionKey = $"sw_{userId}";
-
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, key => new RedisSlidingWindowRateLimiterOptions
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
                     PermitLimit = permitLimit,
                     Window = TimeSpan.FromMinutes(1),
@@ -138,7 +138,7 @@ public abstract class BaseStartup
                         userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
                     }
 
-                    if (String.Compare(httpContext.Request.Method, "GET", true) == 0)
+                    if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         permitLimit = 50;
                         partitionKey = $"cr_read_{userId}";
@@ -150,7 +150,7 @@ public abstract class BaseStartup
                         partitionKey = $"cr_write_{userId}";
                     }
 
-                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, key => new RedisConcurrencyRateLimiterOptions
+                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, _ => new RedisConcurrencyRateLimiterOptions
                     {
                         PermitLimit = permitLimit,
                         QueueLimit = 0,
@@ -169,13 +169,13 @@ public abstract class BaseStartup
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;
 
-                       if (!(String.Compare(httpContext.Request.Method, "POST", true) == 0 ||
-                            String.Compare(httpContext.Request.Method, "PUT", true) == 0))
+                       if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
+                             String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
                        {
                            return RateLimitPartition.GetNoLimiter("no_limiter");
                        }
 
-                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, key => new RedisFixedWindowRateLimiterOptions
+                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions
                        {
                            PermitLimit = permitLimit,
                            Window = TimeSpan.FromDays(1),
@@ -190,7 +190,7 @@ public abstract class BaseStartup
                 var permitLimit = 5;
                 var partitionKey = $"sensitive_api_{userId}";
 
-                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, key => new RedisSlidingWindowRateLimiterOptions
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
                 {
                     PermitLimit = permitLimit,
                     Window = TimeSpan.FromMinutes(1),
@@ -297,13 +297,13 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
-        var authBuilder = services.AddAuthentication(options =>
+        services.AddAuthentication(options =>
         {
             options.DefaultScheme = MultiAuthSchemes;
             options.DefaultChallengeScheme = MultiAuthSchemes;
-        }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, a => { })
-          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, a => { })
-          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", a => { })
+        }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
+          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
+          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
           .AddJwtBearer("Bearer", options =>
             {
                 options.Authority = _configuration["core:oidc:authority"];
@@ -320,7 +320,7 @@ public abstract class BaseStartup
                     {
                         using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
-                        var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
+                        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
 
                         var claimUserId = ctx.Principal.FindFirstValue("userId");
 
@@ -412,6 +412,9 @@ public abstract class BaseStartup
         app.UseSynchronizationContextMiddleware();
 
         app.UseAuthentication();
+
+        // TODO: if some client requests very slow, this line will need to remove
+        app.UseRateLimiter();
 
         app.UseAuthorization();
 

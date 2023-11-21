@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.EF.Model;
+
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
@@ -59,12 +61,9 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered)
+            if (!@event.Redelivered && _backupWorker.IsInstanceTooBusy())
             {
-                if (_backupWorker.IsInstanceTooBusy())
-                {
-                    throw new IntegrationEventRejectExeption(@event.Id);
-                }
+                throw new IntegrationEventRejectExeption(@event.Id);
             }
 
             await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
@@ -72,7 +71,7 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
 
             if (@event.IsScheduled)
             {
-                _backupWorker.StartScheduledBackup(new EF.Model.BackupSchedule
+                _backupWorker.StartScheduledBackup(new BackupSchedule
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,
