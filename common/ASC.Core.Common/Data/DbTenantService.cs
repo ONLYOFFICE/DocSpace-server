@@ -216,7 +216,7 @@ public class DbTenantService : ITenantService
 
         return tenantDbContext.Tenants
             .OrderBy(a => a.Status)
-            .ThenByDescending(a => a.Id)
+            .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(_mapper.ConfigurationProvider)
             .FirstOrDefault();
     }
@@ -227,7 +227,7 @@ public class DbTenantService : ITenantService
 
         return await tenantDbContext.Tenants
             .OrderBy(a => a.Status)
-            .ThenByDescending(a => a.Id)
+            .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
