@@ -32,6 +32,7 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
     private readonly ILogger _logger;
     private readonly ChannelWriter<FileData<int>> _channelWriter;
     private readonly ITariffService _tariffService;
+    private readonly TenantManager _tenantManager;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
 
     private ThumbnailRequestedIntegrationEventHandler()
@@ -43,11 +44,13 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         ILogger<ThumbnailRequestedIntegrationEventHandler> logger,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ITariffService tariffService,
+        TenantManager tenantManager,
         ChannelWriter<FileData<int>> channelWriter)
     {
         _logger = logger;
         _channelWriter = channelWriter;
         _tariffService = tariffService;
+        _tenantManager = tenantManager;
         _dbContextFactory = dbContextFactory;
     }
 
@@ -72,6 +75,7 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
 
         return await files.ToAsyncEnumerable().SelectAwait(async r =>
         {
+            _ = await _tenantManager.SetCurrentTenantAsync(r.TenantId);
             var tariff = await _tariffService.GetTariffAsync(r.TenantId);
             var fileData = new FileData<int>(r.TenantId, r.Id, "", tariff.State);
 
@@ -87,8 +91,11 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
             var freezingThumbnails = await GetFreezingThumbnailsAsync();
+
+            _ = await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
+
             var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, Convert.ToInt32(fileId), @event.BaseUrl, tariff.State))
                           .Union(freezingThumbnails);
 
