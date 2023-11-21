@@ -51,6 +51,7 @@ global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
 global using ASC.Common.Threading;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.ChunkedUploader;

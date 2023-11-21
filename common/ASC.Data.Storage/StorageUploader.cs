@@ -30,35 +30,31 @@ namespace ASC.Data.Storage;
 public class StorageUploader
 {
     protected readonly DistributedTaskQueue _queue;
-
-    private static readonly object _locker;
     private readonly IServiceProvider _serviceProvider;
     private readonly TempStream _tempStream;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
     private readonly ILogger<StorageUploader> _logger;
-
-    static StorageUploader()
-    {
-        _locker = new object();
-    }
+    private IDistributedLockProvider _distributedLockProvider;
 
     public StorageUploader(
         IServiceProvider serviceProvider,
         TempStream tempStream,
         ICacheNotify<MigrationProgress> cacheMigrationNotify,
         IDistributedTaskQueueFactory queueFactory,
-        ILogger<StorageUploader> logger)
+        ILogger<StorageUploader> logger, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _serviceProvider = serviceProvider;
         _tempStream = tempStream;
         _cacheMigrationNotify = cacheMigrationNotify;
         _logger = logger;
+        _distributedLockProvider = distributedLockProvider;
         _queue = queueFactory.CreateQueue();
     }
 
-    public void Start(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
+    public async Task StartAsync(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
     {
-        lock (_locker)
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}", TimeSpan.FromMinutes(1)))
         {
             var id = GetCacheKey(tenantId);
 
@@ -72,9 +68,9 @@ public class StorageUploader
         }
     }
 
-    public MigrateOperation GetProgress(int tenantId)
+    public async Task<MigrateOperation> GetProgressAsync(int tenantId)
     {
-        lock (_locker)
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}", TimeSpan.FromMinutes(1)))
         {
             return _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
         }

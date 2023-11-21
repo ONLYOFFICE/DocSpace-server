@@ -31,13 +31,15 @@ public class StaticUploader
 {
     protected readonly DistributedTaskQueue _queue;
     private readonly ICache _cache;
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "static_upload"; private static readonly CancellationTokenSource _tokenSource;
+    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "static_upload"; 
+    private static readonly CancellationTokenSource _tokenSource;
     private static readonly object _locker;
     private readonly IServiceProvider _serviceProvider;
     private readonly TenantManager _tenantManager;
     private readonly SettingsManager _settingsManager;
     private readonly StorageSettingsHelper _storageSettingsHelper;
     private readonly UploadOperation _uploadOperation;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     static StaticUploader()
     {
@@ -52,9 +54,11 @@ public class StaticUploader
         StorageSettingsHelper storageSettingsHelper,
         UploadOperation uploadOperation,
         ICache cache,
-        IDistributedTaskQueueFactory queueFactory)
+        IDistributedTaskQueueFactory queueFactory, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _cache = cache;
+        _distributedLockProvider = distributedLockProvider;
         _serviceProvider = serviceProvider;
         _tenantManager = tenantManager;
         _settingsManager = settingsManager;
@@ -118,7 +122,7 @@ public class StaticUploader
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var key = typeof(UploadOperationProgress).FullName + tenant.Id;
 
-        lock (_locker)
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
         {
             if (_queue.GetAllTasks().Any(x => x.Id != key))
             {
@@ -147,9 +151,9 @@ public class StaticUploader
         _tokenSource.Cancel();
     }
 
-    public UploadOperationProgress GetProgress(int tenantId)
+    public async Task<UploadOperationProgress> GetProgressAsync(int tenantId)
     {
-        lock (_locker)
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
         {
             var key = typeof(UploadOperationProgress).FullName + tenantId;
 
