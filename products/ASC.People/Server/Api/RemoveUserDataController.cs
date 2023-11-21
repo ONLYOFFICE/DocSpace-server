@@ -131,7 +131,7 @@ public class RemoveUserDataController : ApiControllerBase
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
         }
 
-        var progressItem = _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, true, true);
+        var progressItem = await _queueWorkerRemove.StartAsync(tenant.Id, user, _securityContext.CurrentAccount.ID, true, true);
 
         return TaskProgressResponseDto.Get(progressItem);
     }

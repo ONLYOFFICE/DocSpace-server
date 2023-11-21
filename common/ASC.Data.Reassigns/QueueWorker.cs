@@ -28,19 +28,20 @@ namespace ASC.Data.Reassigns;
 
 public class QueueWorker<T> where T : DistributedTaskProgress
 {
-    private readonly object _synchRoot = new();
-
     protected readonly IServiceProvider _serviceProvider;
     private readonly DistributedTaskQueue _queue;
     protected readonly IDictionary<string, StringValues> _httpHeaders;
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     public QueueWorker(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory,
-            string queueName)
+        IHttpContextAccessor httpContextAccessor, 
+        IServiceProvider serviceProvider, 
+        IDistributedTaskQueueFactory queueFactory, 
+        string queueName,
+        IDistributedLockProvider distributedLockProvider)
     {
         _serviceProvider = serviceProvider;
+        _distributedLockProvider = distributedLockProvider;
         _queue = queueFactory.CreateQueue(queueName);
         _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
     }
@@ -67,9 +68,9 @@ public class QueueWorker<T> where T : DistributedTaskProgress
         }
     }
 
-    protected T Start(int tenantId, Guid userId, T newTask)
+    protected async Task<T> StartAsync(int tenantId, Guid userId, T newTask)
     {
-        lock (_synchRoot)
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}", TimeSpan.FromMinutes(1)))
         {
             var task = GetProgressItemStatus(tenantId, userId);
 
@@ -97,19 +98,24 @@ public class QueueWorkerReassign : QueueWorker<ReassignProgressItem>
 
     public QueueWorkerReassign(
         IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory) :
-            base(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider) :
+        base(httpContextAccessor,
+            serviceProvider,
+            queueFactory,
+            CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME,
+            distributedLockProvider)
     {
     }
 
-    public ReassignProgressItem Start(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
+    public async Task<ReassignProgressItem> StartAsync(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
         var result = _serviceProvider.GetService<ReassignProgressItem>();
 
         result.Init(_httpHeaders, tenantId, fromUserId, toUserId, currentUserId, notify, deleteProfile);
 
-        return Start(tenantId, fromUserId, result);
+        return await StartAsync(tenantId, fromUserId, result);
     }
 }
 
@@ -120,18 +126,23 @@ public class QueueWorkerRemove : QueueWorker<RemoveProgressItem>
 
     public QueueWorkerRemove(
         IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory) :
-            base(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider) :
+        base(httpContextAccessor,
+            serviceProvider,
+            queueFactory,
+            CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME,
+            distributedLockProvider)
     {
     }
 
-    public RemoveProgressItem Start(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
+    public async Task<RemoveProgressItem> StartAsync(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
     {
         var result = _serviceProvider.GetService<RemoveProgressItem>();
 
         result.Init(_httpHeaders, tenantId, user, currentUserId, notify, deleteProfile);
 
-        return Start(tenantId, user.Id, result);
+        return await StartAsync(tenantId, user.Id, result);
     }
 }

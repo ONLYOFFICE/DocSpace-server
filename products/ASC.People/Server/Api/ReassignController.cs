@@ -106,7 +106,7 @@ public class ReassignController : ApiControllerBase
             throw new ArgumentException("Can not reassign data from user with id = " + fromUser.Id);
         }
 
-        var progressItem = _queueWorkerReassign.Start(tenant.Id, fromUser.Id, toUser.Id, _securityContext.CurrentAccount.ID, true, inDto.DeleteProfile);
+        var progressItem = await _queueWorkerReassign.StartAsync(tenant.Id, fromUser.Id, toUser.Id, _securityContext.CurrentAccount.ID, true, inDto.DeleteProfile);
 
         return TaskProgressResponseDto.Get(progressItem);
     }

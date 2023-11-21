@@ -507,7 +507,7 @@ public class UserController : PeopleControllerBase
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
+        await _queueWorkerRemove.StartAsync(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
 
         await _messageService.SendAsync(MessageAction.UserDeleted, _messageTarget.Create(user.Id), userName);
 
@@ -1007,7 +1007,7 @@ public class UserController : PeopleControllerBase
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
+            _queueWorkerRemove.StartAsync(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
         }
 
         await _messageService.SendAsync(MessageAction.UsersDeleted, _messageTarget.Create(users.Select(x => x.Id)), userNames);
