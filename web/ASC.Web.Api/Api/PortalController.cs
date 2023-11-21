@@ -622,10 +622,8 @@ public class PortalController : ControllerBase
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+
+        await DemandPermissionToDeleteTenantAsync(tenant);
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
         var suspendUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
@@ -651,11 +649,8 @@ public class PortalController : ControllerBase
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        
-        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+
+        await DemandPermissionToDeleteTenantAsync(tenant);
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
 
@@ -699,6 +694,9 @@ public class PortalController : ControllerBase
     public async Task SuspendPortalAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
+
+        await DemandPermissionToDeleteTenantAsync(tenant);
+
         tenant.SetStatus(TenantStatus.Suspended);
         await _tenantManager.SaveTenantAsync(tenant);
         await _messageService.SendAsync(MessageAction.PortalDeactivated);
@@ -718,10 +716,8 @@ public class PortalController : ControllerBase
     public async Task<object> DeletePortalAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
-        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new Exception(Resource.ErrorAccessDenied);
-        }
+
+        await DemandPermissionToDeleteTenantAsync(tenant);
 
         await _tenantManager.RemoveTenantAsync(tenant.Id);
 
@@ -805,5 +801,30 @@ public class PortalController : ControllerBase
             default:
                 throw new SecurityException("Access Denied.");
         }
+    }
+
+    private async Task DemandPermissionToDeleteTenantAsync(Tenant tenant)
+    {
+        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        if (!_coreBaseSettings.Standalone)
+        {
+            return;
+        }
+
+        var activeTenants = await _tenantManager.GetTenantsAsync();
+        foreach (var t in activeTenants.Where(t => t.Id != tenant.Id))
+        {
+            var settings = await _settingsManager.LoadAsync<TenantAccessSpaceSettings>(t.Id);
+            if (!settings.LimitedAccessSpace)
+            {
+                return;
+            }
+        }
+
+        throw new Exception(Resource.ErrorCannotDeleteLastSpace);
     }
 }
