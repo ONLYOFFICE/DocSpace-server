@@ -396,7 +396,7 @@ public class FileMarker
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await _distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(10)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync($"${LockKey}_{tenantId}", TimeSpan.FromMinutes(5)))
         {
             foreach (var userId in userEntriesData.Keys)
             {
