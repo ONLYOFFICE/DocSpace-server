@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class HttpUtils {
     private static final String[] IP_HEADERS = {
+            "X-Forwarded-Host",
             "X-Forwarded-For",
             "Proxy-Client-IP",
             "WL-Proxy-Client-IP",
