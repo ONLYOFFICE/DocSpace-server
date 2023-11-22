@@ -77,12 +77,5 @@ public interface ClientMapper {
             @Mapping(source = "enabled", target = "enabled"),
     })
     Client fromQueryToEntity(ClientDTO client);
-    @Mappings({
-            @Mapping(
-                    source = "authenticationMethod",
-                    target = "authenticationMethod",
-                    defaultValue = "client_secret_post"
-            )
-    })
     void update(@MappingTarget Client entity, UpdateClientDTO clientDTO);
 }
