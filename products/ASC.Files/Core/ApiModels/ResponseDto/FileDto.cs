@@ -109,7 +109,7 @@ public class FileDto<T> : FileEntryDto<T>
 
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
-    public IDictionary<Accessibility, bool> ViewAccessability { get; set; }
+    public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     public static FileDto<int> GetSample()
     {
@@ -201,7 +201,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
         }
 
-        result.ViewAccessability = _fileUtility.GetAccessibility(file);
+        result.ViewAccessibility = await _fileUtility.GetAccessibility(file);
 
         return result;
     }

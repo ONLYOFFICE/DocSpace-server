@@ -155,7 +155,7 @@ public class FilesSettingsHelper
     public List<string> ExtsWebTemplate => _fileUtility.ExtsWebTemplate;
     public List<string> ExtsCoAuthoring => _fileUtility.ExtsCoAuthoring;
     public List<string> ExtsMustConvert => _fileUtility.ExtsMustConvert;
-    public Dictionary<string, List<string>> ExtsConvertible => _fileUtility.GetExtsConvertible();
+    public IDictionary<string, List<string>> ExtsConvertible => _fileUtility.GetExtsConvertibleAsync().Result;
     public List<string> ExtsUploadable => _fileUtility.ExtsUploadable;
     public ImmutableList<string> ExtsArchive => FileUtility.ExtsArchive;
     public ImmutableList<string> ExtsVideo => FileUtility.ExtsVideo;
