@@ -139,13 +139,18 @@ public class StudioWhatsNewNotify
             var tenant = await _tenantManager.GetTenantAsync(tenantid);
             if (tenant == null ||
                 tenant.Status != TenantStatus.Active ||
-                !TimeToSendWhatsNew(_tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType) || //ToDo
-                TariffState.NotPaid <= (await _tariffService.GetTariffAsync(tenantid)).State)
+                !TimeToSendWhatsNew(_tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType)) //ToDo
             {
                 return;
             }
 
             _tenantManager.SetCurrentTenant(tenant);
+
+            if (TariffState.NotPaid <= (await _tariffService.GetTariffAsync(tenantid)).State)
+            {
+                return;
+            }
+
             var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
 
             _log.InformationStartSendWhatsNewIn(tenant.GetTenantDomain(_coreSettings), tenantid);
