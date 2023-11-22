@@ -50,6 +50,8 @@ public class FileSharingAceHelper
     private readonly CountPaidUserChecker _countPaidUserChecker;
     private readonly IUrlShortener _urlShortener;
     
+    private readonly TimeSpan _defaultLinkLifetime;
+    
     private const int MaxInvitationLinks = 1;
     private const int MaxAdditionalExternalLinks = 5;
     private const int MaxPrimaryExternalLinks = 1;
@@ -71,7 +73,8 @@ public class FileSharingAceHelper
         StudioNotifyService studioNotifyService,
         UserManagerWrapper userManagerWrapper,
         CountPaidUserChecker countPaidUserChecker,
-        IUrlShortener urlShortener)
+        IUrlShortener urlShortener,
+        IConfiguration configuration)
     {
         _fileSecurity = fileSecurity;
         _coreBaseSettings = coreBaseSettings;
@@ -90,6 +93,13 @@ public class FileSharingAceHelper
         _userManagerWrapper = userManagerWrapper;
         _countPaidUserChecker = countPaidUserChecker;
         _urlShortener = urlShortener;
+
+        if (!TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime))
+        {
+            defaultLifetime = TimeSpan.FromDays(7);
+        }
+
+        _defaultLinkLifetime = defaultLifetime;
     }
 
     public async Task<AceProcessingResult> SetAceObjectAsync<T>(List<AceWrapper> aceWrappers, FileEntry<T> entry, bool notify, string message, AceAdvancedSettingsWrapper advancedSettings, string culture = null)
@@ -152,8 +162,12 @@ public class FileSharingAceHelper
                 if (w.FileShareOptions != null && w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                 {
                     w.FileShareOptions.Password = null;
-                    w.FileShareOptions.ExpirationDate = default;
                     w.FileShareOptions.DenyDownload = false;
+                }
+
+                if (eventType == EventType.Create && w.FileShareOptions.ExpirationDate == DateTime.MinValue)
+                {
+                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(_defaultLinkLifetime);
                 }
             }
             
@@ -165,9 +179,17 @@ public class FileSharingAceHelper
                     continue;
                 }
 
-                if (w.FileShareOptions != null && w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+                if (w.FileShareOptions != null)
                 {
-                    w.FileShareOptions.Internal = false;
+                    if (w.SubjectType == SubjectType.PrimaryExternalLink)
+                    {
+                        w.FileShareOptions.ExpirationDate = default;
+                    }
+
+                    if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+                    {
+                        w.FileShareOptions.Internal = false;
+                    }
                 }
             }
 
@@ -257,11 +279,6 @@ public class FileSharingAceHelper
                         continue;
                     }
                 }
-            }
-            
-            if (w.SubjectType == SubjectType.PrimaryExternalLink && w.FileShareOptions != null)
-            {
-                w.FileShareOptions.ExpirationDate = default;
             }
 
             var subjects = await _fileSecurity.GetUserSubjectsAsync(w.Id);

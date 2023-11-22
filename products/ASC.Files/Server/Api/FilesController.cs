@@ -527,7 +527,8 @@ public abstract class FilesController<T> : ApiControllerBase
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetExternalLinkAsync(T id, FileLinkRequestDto inDto)
     {
-        var linkAce = await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal);
+        var linkAce = await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
+            primary: inDto.Primary, expirationDate: inDto.ExpirationDate ?? default);
         
         return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
     }

@@ -35,4 +35,8 @@ public abstract class LinkRequestDtoBase
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
+    
+    /// <summary>Link expiration date</summary>
+    /// <type>System.DateTime, System</type>
+    public DateTime? ExpirationDate { get; set; }
 }
