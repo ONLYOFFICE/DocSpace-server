@@ -355,8 +355,7 @@ public class StudioPeriodicNotify
 
                 if (topayer)
                 {
-                    var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-                    var payer = await _userManager.GetUserByEmailAsync(payerId);
+                    var payer = await _userManager.GetUserByEmailAsync(tariff.CustomerId);
 
                     if (payer.Id != ASC.Core.Users.Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
