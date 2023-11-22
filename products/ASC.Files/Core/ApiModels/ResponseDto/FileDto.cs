@@ -201,7 +201,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
         }
 
-        result.ViewAccessability = _fileUtility.GetAccessibility(file);
+        result.ViewAccessability = await _fileUtility.GetAccessibility(file);
 
         return result;
     }

@@ -198,7 +198,8 @@ public enum Accessibility
     WebRestrictedEditing,
     WebComment,
     CoAuhtoring,
-    Convert
+    CanConvert,
+    MustConvert,
 }
 
 [Scope]
@@ -331,7 +332,7 @@ public class FileUtility
         return FileType.Unknown;
     }
 
-    public IDictionary<Accessibility, bool> GetAccessibility<T>(File<T> file)
+    public async Task<IDictionary<Accessibility, bool>> GetAccessibility<T>(File<T> file)
     {
         var fileName = file.Title;
         
@@ -370,8 +371,11 @@ public class FileUtility
                 case Accessibility.CoAuhtoring:
                     val = CanCoAuthoring(fileName);
                     break;
-                case Accessibility.Convert:
-                    val = CanConvert(fileName) && file.ContentLength <= _setupInfo.AvailableFileSize;
+                case Accessibility.CanConvert:
+                    val = await CanConvert(file);
+                    break;
+                case Accessibility.MustConvert:
+                    val = MustConvert(fileName);
                     break;
             }
 
@@ -434,9 +438,14 @@ public class FileUtility
         var ext = GetFileExtension(fileName);
         return ExtsCoAuthoring.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
+    
+    public async Task<bool> CanConvert<T>(File<T> file)
+    {
+        var ext = GetFileExtension(file.Title);
+        return (await GetExtsConvertibleAsync()).ContainsKey(ext) && file.ContentLength <= _setupInfo.AvailableFileSize;
+    }
 
-
-    public bool CanConvert(string fileName)
+    public bool MustConvert(string fileName)
     {
         var ext = GetFileExtension(fileName);
         return ExtsMustConvert.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
@@ -452,75 +461,47 @@ public class FileUtility
 
     #region member
 
-    private Dictionary<string, List<string>> _extsConvertible;
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1);
+    private static ConcurrentDictionary<string, List<string>> _extsConvertible;
 
-    public Dictionary<string, List<string>> GetExtsConvertible()
+    public async Task<IDictionary<string, List<string>>> GetExtsConvertibleAsync()
     {
-        if (_extsConvertible == null)
+        if (_extsConvertible != null)
         {
-            _extsConvertible = new Dictionary<string, List<string>>();
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
-            {
-                return _extsConvertible;
-            }
-
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-            var list = Queries.Folders(filesDbContext);
-
-            foreach (var item in list)
-            {
-                var input = item.Input;
-                var output = item.Output;
-                if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
-                {
-                    continue;
-                }
-
-                input = input.ToLower().Trim();
-                output = output.ToLower().Trim();
-                if (!_extsConvertible.ContainsKey(input))
-                {
-                    _extsConvertible[input] = new List<string>();
-                }
-
-                _extsConvertible[input].Add(output);
-            }
+            return _extsConvertible;
         }
-        return _extsConvertible;
-    }
 
-    public async Task<Dictionary<string, List<string>>> GetExtsConvertibleAsync()
-    {
-        if (_extsConvertible == null)
+        await _semaphoreSlim.WaitAsync();
+        
+        _extsConvertible = new ConcurrentDictionary<string, List<string>>();
+        if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
         {
-            _extsConvertible = new Dictionary<string, List<string>>();
-            if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
-            {
-                return _extsConvertible;
-            }
-
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
-
-            foreach (var item in list)
-            {
-                var input = item.Input;
-                var output = item.Output;
-                if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
-                {
-                    continue;
-                }
-
-                input = input.ToLower().Trim();
-                output = output.ToLower().Trim();
-                if (!_extsConvertible.ContainsKey(input))
-                {
-                    _extsConvertible[input] = new List<string>();
-                }
-
-                _extsConvertible[input].Add(output);
-            }
+            return _extsConvertible;
         }
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
+
+        foreach (var item in list)
+        {
+            var input = item.Input;
+            var output = item.Output;
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
+            {
+                continue;
+            }
+
+            input = input.ToLower().Trim();
+            output = output.ToLower().Trim();
+            if (!_extsConvertible.ContainsKey(input))
+            {
+                _extsConvertible[input] = new List<string>();
+            }
+
+            _extsConvertible[input].Add(output);
+        }
+
+        _semaphoreSlim.Release();
         return _extsConvertible;
     }
 
@@ -770,12 +751,8 @@ public class FileUtility
 static file class Queries
 {
     public static readonly Func<FilesDbContext, IEnumerable<FilesConverts>> Folders =
-        Microsoft.EntityFrameworkCore.EF.CompileQuery(
-            (FilesDbContext ctx) =>
-                ctx.FilesConverts);
+        Microsoft.EntityFrameworkCore.EF.CompileQuery((FilesDbContext ctx) => ctx.FilesConverts);
 
     public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx) =>
-                ctx.FilesConverts);
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }
