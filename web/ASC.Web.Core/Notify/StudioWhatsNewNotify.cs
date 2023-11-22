@@ -139,7 +139,7 @@ public class StudioWhatsNewNotify
             var tenant = await _tenantManager.GetTenantAsync(tenantid);
             if (tenant == null ||
                 tenant.Status != TenantStatus.Active ||
-                !TimeToSendWhatsNew(_tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType)) //ToDo
+                !TimeToSendWhatsNew(_tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
             {
                 return;
             }
