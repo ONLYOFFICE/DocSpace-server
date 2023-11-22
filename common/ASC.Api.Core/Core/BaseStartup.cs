@@ -413,7 +413,7 @@ public abstract class BaseStartup
         app.UseAuthentication();
 
         // TODO: if some client requests very slow, this line will need to remove
-        //app.UseRateLimiter();
+        app.UseRateLimiter();
 
         app.UseAuthorization();
 
