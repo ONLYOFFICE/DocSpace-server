@@ -1924,9 +1924,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
         {
             query = initQuery .Join(filesDbContext.Security, r => r.tag.Name, s => s.Subject.ToString(), 
                     (fileWithTag, security) => new { fileWithTag, security, 
-                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate")})
-                .Where(r => r.security.Share != FileShare.Restrict && 
-                            !(r.expirationDate != DateTime.MinValue && r.expirationDate < DateTime.UtcNow))
+                        expirationDate = (DateTime)(object)DbFunctionsExtension.JsonValue(nameof(security.Options), "ExpirationDate").Trim('"')})
+                .Where(r => r.security.Share != FileShare.Restrict && (r.expirationDate == DateTime.MinValue || r.expirationDate > DateTime.UtcNow))
                 .Select(r => new FileByTagQuery { Entry = r.fileWithTag.file, Tag = r.fileWithTag.tag, Security = r.security});
         }
         else
