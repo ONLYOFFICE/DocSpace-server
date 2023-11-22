@@ -86,7 +86,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
             
             _logger.DebugTryAcquireLock(resource, stopWatch.ElapsedMilliseconds);
             
-            return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
+            return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer);
         }
 
         var messageWaiter = new TaskCompletionSource();
@@ -144,7 +144,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         
         timer = StartExtendLockLoop(database, resource, lockId, cancellationToken);
 
-        return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer, _expiryInMilliseconds);
+        return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer);
     }
 
     public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout, bool throwIfNotAcquired = true,  CancellationToken cancellationToken = default)

@@ -29,7 +29,6 @@ namespace ASC.Common.Threading.DistributedLock.RedisLock;
 public class RedisFairLockHandle : LockHandleBase
 {
     private readonly string _id, _resource, _channelName, _queueKey, _queueItemTimeoutKey;
-    private readonly long _expiryInMilliseconds;
     private readonly IRedisDatabase _database;
     private PeriodicTimer _timer;
     
@@ -40,8 +39,7 @@ public class RedisFairLockHandle : LockHandleBase
         string channelName, 
         string queueKey, 
         string queueItemTimeoutKey,
-        PeriodicTimer timer, 
-        long expiryInMilliseconds)
+        PeriodicTimer timer)
     {
         _database = database;
         _resource = resource;
@@ -49,7 +47,6 @@ public class RedisFairLockHandle : LockHandleBase
         _channelName = channelName;
         _queueKey = queueKey;
         _timer = timer;
-        _expiryInMilliseconds = expiryInMilliseconds;
         _queueItemTimeoutKey = queueItemTimeoutKey;
     }
 
