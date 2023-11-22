@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.external.controllers;
 
+import com.onlyoffice.authorization.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 /**
  *
@@ -28,7 +28,7 @@ public class FallbackController extends AbstractErrorController {
     public void handleError(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         response.sendRedirect(String.format("%s://%s/login/?type=oauth2&clientId=error",
-                request.getScheme(), request.getRemoteAddr()));
+                request.getScheme(), HttpUtils.getRequestIP(request)));
     }
 
     public String getErrorPath() {
