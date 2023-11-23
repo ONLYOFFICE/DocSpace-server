@@ -534,10 +534,8 @@ public class FileSharing
         {
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
-        
-        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
-        if (!await CheckAccessAsync(entry, filterType, canEditAccess))
+        if (!await CheckAccessAsync(entry, filterType))
         {
             _logger.ErrorUserCanTGetSharedInfo(_authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
 
@@ -556,6 +554,8 @@ public class FileSharing
         {
             yield return record;
         }
+        
+        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
         await foreach (var record in records)
         {
@@ -569,10 +569,8 @@ public class FileSharing
         {
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
-        
-        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
-        if (!await CheckAccessAsync(entry, filterType, canEditAccess))
+        if (!await CheckAccessAsync(entry, filterType))
         {
             _logger.ErrorUserCanTGetSharedInfo(_authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
 
@@ -605,6 +603,7 @@ public class FileSharing
         var shares = await _fileSecurity.GetSharesAsync(entry);
         var isRoom = entry is Folder<T> { Private: false } room && DocSpaceHelper.IsRoom(room.FolderType);
         var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
+        var canReadLinks = await _fileSecurity.CanReadLinksAsync(entry);
 
         var records = shares
             .GroupBy(r => r.Subject)
@@ -614,7 +613,7 @@ public class FileSharing
 
         foreach (var r in records)
         {
-            if (r.IsLink && !canEditAccess)
+            if (r.IsLink && !canReadLinks)
             {
                 continue;
             }
@@ -906,14 +905,19 @@ public class FileSharing
             .Select(aceWrapper => new AceShortWrapper(aceWrapper)));
     }
     
-    private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType, bool canEdit)
+    private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {
         if (!await _fileSecurity.CanReadAsync(entry))
         {
             return false;
         }
 
-        return filterType == ShareFilterType.User || canEdit;
+        if (filterType == ShareFilterType.User)
+        {
+            return true;
+        }
+
+        return await _fileSecurity.CanReadLinksAsync(entry);
     }
     
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
