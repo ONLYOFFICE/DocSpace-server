@@ -1142,8 +1142,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                     folder.Title = key;
                     break;
             }
-
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+            
             await using var filesDbContext = _dbContextFactory.CreateDbContext();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
