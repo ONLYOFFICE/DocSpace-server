@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1. Բարի գալուստ ONLYOFFICE Personal
+    <value>h1.Բարի գալուստ ONLYOFFICE Personal
 
 Դուք հենց նոր եք ստեղծել ձեր անձնական գրասենյակը ամպի մեջ.
 
-h3. Դա վիրտուալ աշխատանքային տարածք է, որտեղ դուք կարող եք խմբագրել և պահել փաստաթղթերը, աշխատել դրանց հետ ցանկացած վայրից՝ ապահովելով ձեր ընկերներին կամ գործընկերներին հասանելիություն:
+h3.Դա վիրտուալ աշխատանքային տարածք է, որտեղ դուք կարող եք խմբագրել և պահել փաստաթղթերը, աշխատել դրանց հետ ցանկացած վայրից՝ ապահովելով ձեր ընկերներին կամ գործընկերներին հասանելիություն:
 
-h3. Արագ սկսելու համար ահա թե ինչ կարող եք անել ONLYOFFICE-ում:
+h3.Արագ սկսելու համար ահա թե ինչ կարող եք անել ONLYOFFICE-ում:
 
 - Ստեղծեք, դիտեք և խմբագրեք տեքստային փաստաթղթեր, աղյուսակներ, ներկայացումներ.
 
@@ -140,8 +140,7 @@ h3. Արագ սկսելու համար ահա թե ինչ կարող եք անե
 
 Դուք կարող եք նաև փաստաթղթեր խմբագրել անցանց մեր անվճար միջոցով միջոցով "սեղանի խմբագրի":"https://www.onlyoffice.com/download-desktop.aspx " կամ ստացեք բջջային խմբագրման փաթեթ ձեզ համար "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" կամ "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-Սիրով՝
-ONLYOFFICE թիմ</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել նամակը ձեր ամպային գրասենյակի հաշվին:
@@ -170,10 +169,9 @@ $OrangeButton
 
 դուք հենց նոր հաշիվ եք գրանցել ONLYOFFICE լուծումում՝ անձնական օգտագործման համար: Սեղմել "այստեղ":"$InviteLink" գրանցումը հաստատելու և գաղտնաբառ ստեղծելու համար:
 
-Եթե չեք կարող բացել հղումը, խնդրում ենք պատճենեք հետևյալ "$InviteLink":"$InviteLink" և տեղադրեք այն ձեր դիտարկիչի հասցեագոտում:.
+Եթե չեք կարող բացել հղումը, խնդրում ենք պատճենեք հետևյալ "$InviteLink":"$InviteLink" և տեղադրեք այն ձեր դիտարկիչի հասցեագոտում:
 
-Սիրով՝
-ONLYOFFICE թիմ</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Դուք խնդրել եք դադարեցնել ձեր հաշիվը personal.onlyoffice.com. Հարցումը լրացնելու համար հետևեք հղմանը (հղումը ակտիվ է 7-օրյա ժամկետով)։ 
@@ -182,25 +180,20 @@ ONLYOFFICE թիմ</value>
 
 *Նշում*. Ջնջումից հետո ձեր հաշիվը և դրա հետ կապված բոլոր տվյալները ընդմիշտ կջնջվեն՝ համաձայն մեր "Գաղտնիության քաղաքականությունը":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Կարդացեք ավելին հաշվի դադարեցման մասին":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Կարդացեք ավելին հաշվի դադարեցման մասին":"${__HelpLink}/administration/configuration.aspx"
 
 Անտեսեք այս նամակը, եթե չեք ցանկանում շարունակել. 
 
-Եթե ունեք հարցեր, խնդրում ենք կապվել մեզ հետ "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Եթե ունեք հարցեր, խնդրում ենք կապվել մեզ հետ "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Սիրով՝
-ONLYOFFICE թիմ</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Հարգելի $UserName,
 
 Օգտագործողից տվյալների հեռացման գործընթացը "$FromUserName":"$FromUserLink" հաջողությամբ ավարտվել է.
 
-Անձնական տվյալների ջնջումը թույլատրվում է անվճար:
-
-# Փաստաթղթեր - $DocsSpace
-# Էլ․փոստ - $MailSpace
-# Խոսելու համար - $TalkSpace</value>
+Անձնական տվյալների ջնջումը թույլատրվում է անվճար: $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3. Գրանցվել է նոր պորտալ
@@ -248,10 +241,8 @@ ONLYOFFICE թիմ</value>
 
 $OrangeButton
 
-Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոնը":"https://helpcenter.onlyoffice.com/" կամ հարցրեք մեր "աջակցող թիմ":"https://www.onlyoffice.com/support-contact-form.aspx".
+Եթե օգնության կարիք ունեք, այցելեք մեր "Օգնության կենտրոնը":"${__HelpLink}" կամ հարցրեք մեր "աջակցող թիմ":"${__SupportLink}".
 
-Սիրով Ձեր՝
-ONLYOFFICE թիմ
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
 </root>

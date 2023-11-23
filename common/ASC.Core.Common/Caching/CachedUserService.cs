@@ -205,12 +205,14 @@ public class CachedUserService : IUserService, ICachedService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
         long limit,
         long offset)
     {
-        return Service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, sortBy, sortOrderAsc, limit, offset);
+        return Service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, ownerId, sortBy, 
+            sortOrderAsc, limit, offset);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)

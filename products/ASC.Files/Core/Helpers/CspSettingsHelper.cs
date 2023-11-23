@@ -169,6 +169,7 @@ public class CspSettingsHelper
             {
                 defaultOptions.Img.Add(internalUrl);
                 defaultOptions.Media.Add(internalUrl);
+                defaultOptions.Connect.Add(internalUrl);
             }
 
             if (!string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))

@@ -2284,11 +2284,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "userid", "LastModified", "pwdhash", "tenant" },
                 values: new object[] { "66faa6e4-f133-11ea-b126-00ffeec8b4ef", new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=", 1 });
 
-            migrationBuilder.InsertData(
-                table: "webstudio_settings",
-                columns: new[] { "ID", "TenantID", "UserID", "Data" },
-                values: new object[] { "9a925891-1f92-4ed7-b277-d6f649739f06", 1, "00000000-0000-0000-0000-000000000000", "{\"Completed\":false}" });
-
             migrationBuilder.CreateIndex(
                 name: "uid",
                 table: "account_links",

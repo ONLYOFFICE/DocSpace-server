@@ -60,3 +60,10 @@ public class HttpException : Exception
         StatusCode = (int)httpStatusCode;
     }
 }
+
+public class CustomHttpException : HttpException
+{
+    public CustomHttpException(HttpStatusCode httpStatusCode, string message) : base(httpStatusCode, message)
+    {
+    }
+}

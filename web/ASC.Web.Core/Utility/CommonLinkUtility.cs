@@ -401,6 +401,15 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     #region confirm links
 
+    public async Task<(string, string)> GetConfirmationUrlAndKeyAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    {
+        var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
+
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var key = _emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        return (url, key);
+    }
+
     public async Task<string> GetConfirmationEmailUrlAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
         return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId));
@@ -424,6 +433,23 @@ public class CommonLinkUtility : BaseCommonLinkUtility
     public string GetConfirmationUrlRelative(string key, ConfirmType confirmType, Guid userId = default)
     {
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
+    }
+
+    public string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
+    {
+        var link = $"type={confirmType}";
+
+        if (!string.IsNullOrEmpty(email))
+        {
+            link += $"&email={HttpUtility.UrlEncode(email)}";
+        }
+
+        if (userId != Guid.Empty)
+        {
+            link += $"&uid={userId}";
+        }
+
+        return link;
     }
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)

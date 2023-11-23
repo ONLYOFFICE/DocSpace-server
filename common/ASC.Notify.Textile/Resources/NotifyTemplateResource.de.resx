@@ -180,9 +180,7 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Diese E-Mail wird automatisch generiert, und Sie brauchen sie nicht zu beantworten.&lt;br /&gt;Sie haben diese E-Mail erhalten, weil Sie ein registrierter Benutzer sind von&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Klicken Sie hier, um sich von den E-Mails mit den DocSpace-Benachrichtigungen abzumelden: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Abmelden&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>Wenn Sie Fragen zum Kauf haben, schicken Sie uns eine E-Mail an &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Bei technischen Problemen wenden Sie sich bitte an unser &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;Support-Team&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Zum Abmelden hier klicken&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

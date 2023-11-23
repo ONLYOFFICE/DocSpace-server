@@ -26,9 +26,8 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class WebPluginDto: IMapFrom<DbWebPlugin>
+public class WebPluginDto: IMapFrom<WebPlugin>
 {
-    public int Id { get; set; }
     public string Name { get; set; }
     public string Version { get; set; }
     public string Description { get; set; }
@@ -43,10 +42,11 @@ public class WebPluginDto: IMapFrom<DbWebPlugin>
     public bool Enabled { get; set; }
     public bool System { get; set; }
     public string Url { get; set; }
+    public string Settings { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Guid, EmployeeDto>().ConvertUsing<WebPluginMappingConverter>();
-        profile.CreateMap<DbWebPlugin, WebPluginDto>();
+        profile.CreateMap<WebPlugin, WebPluginDto>();
     }
 }

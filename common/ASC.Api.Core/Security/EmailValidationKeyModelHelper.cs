@@ -40,6 +40,7 @@ public class EmailValidationKeyModelHelper
     private readonly AuditEventsRepository _auditEventsRepository;
     private readonly TenantUtil _tenantUtil;
     private readonly MessageTarget _messageTarget;
+    private readonly CookiesManager _cookiesManager;
 
     public EmailValidationKeyModelHelper(
         IHttpContextAccessor httpContextAccessor,
@@ -50,7 +51,8 @@ public class EmailValidationKeyModelHelper
         InvitationLinkHelper invitationLinkHelper,
         AuditEventsRepository auditEventsRepository,
         TenantUtil tenantUtil,
-        MessageTarget messageTarget)
+        MessageTarget messageTarget,
+        CookiesManager cookiesManager)
     {
         _httpContextAccessor = httpContextAccessor;
         _provider = provider;
@@ -61,6 +63,7 @@ public class EmailValidationKeyModelHelper
         _auditEventsRepository = auditEventsRepository;
         _tenantUtil = tenantUtil;
         _messageTarget = messageTarget;
+        _cookiesManager = cookiesManager;
     }
 
     public EmailValidationKeyModel GetModel()
@@ -74,8 +77,11 @@ public class EmailValidationKeyModelHelper
         {
             cType = confirmType;
         }
-
-        request.TryGetValue("key", out var key);
+        
+        if (!request.TryGetValue("key", out var key))
+        {
+            key = _httpContextAccessor.HttpContext.Request.Cookies[_cookiesManager.GetConfirmCookiesName() + $"_{type}"];
+        }
 
         request.TryGetValue("emplType", out var emplType);
         EmployeeTypeExtensions.TryParse(emplType, out var employeeType);
@@ -120,6 +126,11 @@ public class EmailValidationKeyModelHelper
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await _userManager.GetUserByEmailAsync(email);
+                if(userInfo == Constants.LostUser || userInfo.Id != uiD)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
                 var auditEvent = (await _auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: _messageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
                 var passwordStamp = await _authentication.GetUserPasswordStampAsync(userInfo.Id);
 

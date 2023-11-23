@@ -368,7 +368,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account Twitter e cercare contatti.</value>
+    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account Twitter.</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integrazioni di terze parti</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID del client Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Segreto del client Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Abilita l'applicazione ad accedere al portale utilizzando un account Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a ONLYOFFICE utilizzando i loro account Zoom. {0}Vai al sito web Zoom Developers e crea una nuova integrazione dell'app ONLYOFFICE. Inserisci i dati che hai ricevuto qui sotto:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Troppi tentativi di accesso. Ti preghiamo di riprovare più tardi</value>
   </data>
 </root>

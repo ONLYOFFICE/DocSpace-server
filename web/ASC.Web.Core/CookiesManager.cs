@@ -36,7 +36,8 @@ public enum CookiesType
     AuthKey,
     SocketIO,
     ShareLink,
-    AnonymousSessionKey
+    AnonymousSessionKey,
+    ConfirmKey
 }
 
 [Scope]
@@ -46,6 +47,7 @@ public class CookiesManager
     private const string SocketIOCookiesName = "socketio.sid";
     private const string ShareLinkCookiesName = "sharelink";
     private const string AnonymousSessionKeyCookiesName = "anonymous_session_key";
+    private const string ConfirmCookiesName = "asc_confirm_key";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager _userManager;
@@ -98,7 +100,7 @@ public class CookiesManager
             Expires = await GetExpiresDateAsync(session)
         };
 
-        if (type == CookiesType.AuthKey)
+        if (type == CookiesType.AuthKey || type == CookiesType.ConfirmKey)
         {
             options.HttpOnly = true;
 
@@ -239,17 +241,17 @@ public class CookiesManager
 
     public async Task ResetUserCookieAsync(Guid? userId = null)
     {
-        var currentUserId = _securityContext.CurrentAccount.ID;
+        var targetUserId = userId ?? _securityContext.CurrentAccount.ID;
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(userId ?? currentUserId);
+        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(targetUserId);
         settings.Index += 1;
-        await _tenantCookieSettingsHelper.SetForUserAsync(userId ?? currentUserId, settings);
+        await _tenantCookieSettingsHelper.SetForUserAsync(targetUserId, settings);
 
-        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, userId ?? currentUserId);
+        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, targetUserId);
 
-        if (!userId.HasValue)
+        if (targetUserId == _securityContext.CurrentAccount.ID)
         {
-            await AuthenticateMeAndSetCookiesAsync(currentUserId);
+            await AuthenticateMeAndSetCookiesAsync(targetUserId);
         }
     }
 
@@ -313,6 +315,11 @@ public class CookiesManager
         return GetCookiesName(CookiesType.AuthKey);
     }
 
+    public string GetConfirmCookiesName()
+    {
+        return GetCookiesName(CookiesType.ConfirmKey);
+    }
+
     private string GetCookiesName(CookiesType type)
     {
         var result = type switch
@@ -321,6 +328,7 @@ public class CookiesManager
             CookiesType.SocketIO => SocketIOCookiesName,
             CookiesType.ShareLink => ShareLinkCookiesName,
             CookiesType.AnonymousSessionKey => AnonymousSessionKeyCookiesName,
+            CookiesType.ConfirmKey => ConfirmCookiesName,
             _ => string.Empty,
         };
 

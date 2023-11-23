@@ -140,6 +140,7 @@ public class OAuth20TokenHelper
             token.ClientID = clientID;
             token.ClientSecret = clientSecret;
             token.RedirectUri = redirectUri;
+            token.OriginJson = json;
 
             return token;
         }

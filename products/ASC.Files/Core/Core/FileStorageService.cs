@@ -2313,6 +2313,8 @@ public class FileStorageService //: IFileStorageService
         {
             await folderDao.DeleteFolderAsync(folderIdFromTrash);
         }
+
+        await _fileSecurity.RemoveSubjectAsync<T>(userFromId, true);
     }
 
     public async Task ReassignProvidersAsync(Guid userFromId, Guid userToId, bool checkPermission = false)
@@ -2534,7 +2536,7 @@ public class FileStorageService //: IFileStorageService
     {
         var room = (await GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
 
-        return await _fileSharing.GetRoomSharesCountAsync(room, filterType);
+        return await _fileSharing.GetPureSharesCountAsync(room, filterType);
     }
 
     public async IAsyncEnumerable<AceWrapper> GetRoomSharedInfoAsync<T>(T roomId, IEnumerable<Guid> subjects)

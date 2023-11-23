@@ -233,7 +233,7 @@ public class UserManager
         long limit,
         long offset)
     {
-        return _userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, sortBy, sortOrderAsc, limit, offset);
+        return _userService.GetUsers(Tenant.Id, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, Tenant.OwnerId, sortBy, sortOrderAsc, limit, offset);
     }
 
     public UserInfo GetUsers(Guid id)

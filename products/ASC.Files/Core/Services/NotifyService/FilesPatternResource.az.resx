@@ -76,14 +76,16 @@ Bu e-poçt bildirişi $MailsCount mesajlarını poçtla göndərmək istəyiniz 
 Uğurla göndərilmiş e-poçt mesajlarına E-poçt modulunda "Göndərilmiş":"$__VirtualRootPath/addons/mail/#sent" qovluğundan daxil ola bilərsiniz.</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1.$__DateTime, "$__AuthorName":"$__AuthorUrl" istifadəçisi "$DocumentTitle":"$DocumentURL" sənədinə girişinizə bu giriş hüquqları ilə: "$AccessRights" icazə verdi.
+    <value>h1. Sənədə giriş icazəsi verildi: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime, "$__AuthorName":"$__AuthorUrl" istifadəçisi "$DocumentTitle":"$DocumentURL" sənədinə girişinizə bu giriş hüquqları ilə: "$AccessRights" icazə verdi.
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1.$__DateTime, "$__AuthorName":"$__AuthorUrl" istifadəçisi
+    <value>h1. Qovluğa girişicazəsi verildi: "$DocumentTitle":"$DocumentURL"
 
-"$DocumentTitle":"$DocumentURL" qovluğuna girişinizə bu giriş hüququları ilə icazə verdi: "$AccessRights".
+$__DateTime, "$__AuthorName":"$__AuthorUrl" istifadəçisi "$DocumentTitle":"$DocumentURL" qovluğuna girişinizə bu giriş hüququları ilə icazə verdi: "$AccessRights".
 
 $Message</value>
   </data>
@@ -109,12 +111,12 @@ $Message</value>
     <value>Sənədlər. $DocumentTitle 'a Giriş Verildi</value>
   </data>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>Sənədlər. Qovluğa girişicazəsi verildi:[$DocumentTitle]($DocumentURL)</value>
+    <value>Sənədlər. Qovluğa girişicazəsi verildi: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName sənədin şərh bölməsində sizi qeyd etdi
 
-$__AuthorName "$DocumentTitle":"$DocumentURL" otağında "$RoomTitle ":"$RoomURL" sənədinə şərhdə sizi qeyd etdi:
+$__AuthorName "$DocumentTitle":"$DocumentURL" otağında "$RoomTitle":"$RoomURL" sənədinə şərhdə sizi qeyd etdi:
 
 $Message</value>
   </data>
