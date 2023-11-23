@@ -48,45 +48,41 @@ public class RegionHelper
 
     public async Task<RegionInfo> GetCurrentRegionInfoAsync(IDictionary<string, Dictionary<string, decimal>> priceInfo = null)
     {
-        var defaultRegion = GetDefaultRegionInfo();
-        var geoinfo = await _geolocationHelper.GetIPGeolocationFromHttpContextAsync();
-
+        var geoInfo = await _geolocationHelper.GetIPGeolocationFromHttpContextAsync();
         var countryCode = _httpContextAccessor.HttpContext?.Request.Query["country"];
-
         var currentRegion = GetRegionInfo(countryCode);
 
+        if (currentRegion == null && geoInfo != null)
+        {
+            currentRegion = GetRegionInfo(geoInfo.Key);
+        }
+        
         if (currentRegion == null)
         {
-            if (geoinfo != null)
+            var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+            if (tenant != null)
             {
-                currentRegion = GetRegionInfo(geoinfo.Key);
-            }
-
-            if (currentRegion == null)
-            {
-                var tenant = await _tenantManager.GetCurrentTenantAsync(false);
-                if (tenant != null)
-                {
-                    var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
-                    var culture = string.IsNullOrEmpty(owner.CultureName) ? tenant.GetCulture() : owner.GetCulture();
-                    currentRegion = GetRegionInfo(culture.Name);
-                }
+                var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
+                var culture = string.IsNullOrEmpty(owner.CultureName) ? tenant.GetCulture() : owner.GetCulture();
+                currentRegion = GetRegionInfo(culture.Name);
             }
         }
-
-        if (currentRegion != null && !currentRegion.Name.Equals(defaultRegion.Name))
+        
+        var defaultRegion = GetDefaultRegionInfo();
+        if (currentRegion == null || currentRegion.Name.Equals(defaultRegion.Name))
         {
-            priceInfo ??= await _tenantManager.GetProductPriceInfoAsync();
-
-            if (priceInfo.Values.Any(value => value.ContainsKey(currentRegion.ISOCurrencySymbol)))
-            {
-                return currentRegion;
-            }
-
-            if (geoinfo != null && !string.IsNullOrEmpty(geoinfo.Continent) && geoinfo.Continent == "EU")
-            {
-                return GetRegionInfo("ES");
-            }
+            return defaultRegion;
+        }
+        
+        if (geoInfo != null && !string.IsNullOrEmpty(geoInfo.Continent) && geoInfo.Continent == "EU")
+        {
+            currentRegion = GetRegionInfo("ES");
+        }
+        
+        priceInfo ??= await _tenantManager.GetProductPriceInfoAsync();
+        if (priceInfo.Values.Any(value => value.ContainsKey(currentRegion.ISOCurrencySymbol)))
+        {
+            return currentRegion;
         }
 
         return defaultRegion;

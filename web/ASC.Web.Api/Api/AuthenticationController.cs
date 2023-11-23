@@ -292,18 +292,22 @@ public class AuthenticationController : ControllerBase
         {
             if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
             {
+                (var urlActivation, var keyActivation) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+                await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
                     Tfa = true,
                     TfaKey = (await _tfaManager.GenerateSetupCodeAsync(user)).ManualEntryKey,
-                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation)
+                    ConfirmUrl = urlActivation
                 };
             }
 
+            (var urlAuth, var keyAuth) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaAuth);
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
                 Tfa = true,
-                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaAuth)
+                ConfirmUrl = urlAuth
             };
         }
 
@@ -400,6 +404,11 @@ public class AuthenticationController : ControllerBase
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {
+        if (string.IsNullOrEmpty(inDto.Key))
+        {
+            inDto.Key = _cookiesManager.GetCookies(CookiesType.ConfirmKey, $"_{inDto.Type}");
+        }
+
         if (inDto.Type != ConfirmType.LinkInvite)
         {
             return new ConfirmDto { Result = await _emailValidationKeyModelHelper.ValidateAsync(inDto)};

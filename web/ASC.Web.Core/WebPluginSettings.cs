@@ -27,9 +27,9 @@
 namespace ASC.Web.Core;
 
 [Singleton]
-public class WebPluginSettings
+public class WebPluginConfigSettings
 {
-    public WebPluginSettings(ConfigurationExtension configuration)
+    public WebPluginConfigSettings(ConfigurationExtension configuration)
     {
         configuration.GetSetting("plugins", this);
     }
@@ -66,18 +66,30 @@ public class WebPluginSettings
     }
 }
 
-public class SystemWebPluginSettings : ISettings<SystemWebPluginSettings>
+public class WebPluginSettings : ISettings<WebPluginSettings>
 {
-    public List<string> EnabledPlugins { get; set; }
+    public Dictionary<string, WebPluginState> EnabledPlugins { get; set; }
 
     [JsonIgnore]
     public Guid ID
     {
-        get { return new Guid("{056113AD-E08D-4407-BAAD-7C9BE4EE73E9}"); }
+        get { return new Guid("{B33CB1F2-1FE6-4BD5-83D0-0D9C217490F5}"); }
     }
 
-    public SystemWebPluginSettings GetDefault()
+    public WebPluginSettings GetDefault()
     {
-        return new SystemWebPluginSettings();
+        return new WebPluginSettings();
+    }
+}
+
+public class WebPluginState
+{
+    public bool Enabled { get; set; }
+    public string Settings { get; set; }
+
+    public WebPluginState(bool enabled, string settings)
+    {
+        Enabled = enabled;
+        Settings = settings;
     }
 }

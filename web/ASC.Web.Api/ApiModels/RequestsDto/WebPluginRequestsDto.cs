@@ -29,4 +29,5 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class WebPluginRequestsDto
 {
     public bool Enabled { get; set; }
+    public string Settings { get; set; }
 }

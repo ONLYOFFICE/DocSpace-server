@@ -55,5 +55,5 @@ public interface IDistributedTaskQueueFactory
 {
     DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask;
     DistributedTaskQueue CreateQueue(Type type, int timeUntilUnregisterInSeconds = 60);
-    DistributedTaskQueue CreateQueue(string name = default(string), int timeUntilUnregisterInSeconds = 60);
+    DistributedTaskQueue CreateQueue(string name = default, int timeUntilUnregisterInSeconds = 60);
 }

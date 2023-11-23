@@ -1740,9 +1740,9 @@ public class FileSecurity : IFileSecurity
     }
 
 
-    public async Task RemoveSubjectAsync<T>(Guid subject)
+    public async Task RemoveSubjectAsync<T>(Guid subject, bool withoutOwner)
     {
-        await _daoFactory.GetSecurityDao<T>().RemoveSubjectAsync(subject);
+        await _daoFactory.GetSecurityDao<T>().RemoveBySubjectAsync(subject, withoutOwner);
     }
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId)

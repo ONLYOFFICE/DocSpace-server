@@ -44,8 +44,6 @@ public partial class FileEntryDtoContext : JsonSerializerContext { }
 [JsonDerivedType(typeof(FolderDto<string>))]
 public abstract class FileEntryDto
 {
-    protected internal abstract FileEntryType EntryType { get; }
-
     /// <summary>Title</summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }

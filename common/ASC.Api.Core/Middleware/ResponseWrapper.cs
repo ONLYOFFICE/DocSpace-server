@@ -79,6 +79,10 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
             case BillingNotFoundException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
+            case CustomHttpException:
+                status = (HttpStatusCode)((CustomHttpException)exception).StatusCode;
+                withStackTrace = false;
+                break;
         }
 
         _logger.LogCritical(exception,
@@ -99,6 +103,7 @@ public class CustomResponseFilterAttribute : ResultFilterAttribute
     {
         if (context.Result is ObjectResult result)
         {
+            result.DeclaredType = typeof(SuccessApiResponse);
             result.Value = new SuccessApiResponse(context.HttpContext, result.Value);
         }
 

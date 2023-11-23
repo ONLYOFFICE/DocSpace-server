@@ -42,7 +42,7 @@ public enum FileStatus
 
 [Transient]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
-public class File<T> : FileEntry<T>, IFileEntry
+public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
 
@@ -55,10 +55,7 @@ public class File<T> : FileEntry<T>, IFileEntry
 
     public File(
         FileHelper fileHelper,
-        Global global,
-        GlobalFolderHelper globalFolderHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global)
+        Global global) : base(fileHelper, global)
     {
         Version = 1;
         VersionGroup = 1;

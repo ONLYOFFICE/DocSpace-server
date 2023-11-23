@@ -59,7 +59,6 @@ public class BaseWorkerStartup
         services.AddBaseDbContextPool<FeedDbContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
-        services.AddBaseDbContextPool<WebPluginDbContext>();
 
         services.RegisterFeature();
 

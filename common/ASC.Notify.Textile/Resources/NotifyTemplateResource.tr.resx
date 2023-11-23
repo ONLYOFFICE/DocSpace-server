@@ -151,9 +151,7 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Bu e-posta otomatik olarak oluşturulmuştur, lütfen yanıtlamayın.&lt;br /&gt;Bu e-postayı almanızın sebebi &lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt; kayıtlı kullanıcısı olmanızdır.
-&lt;br /&gt;DocSpace bildirim e-postaları aboneliğinden çıkmak için tıklayın: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Abonelikten Çık&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>Satın alma ile ilgili sorularınız için bize şu adresten ulaşabilirsiniz &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Teknik sorunlar olması halinde ise lütfen &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;destek ekibi&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Abonelikten çıkmak için buraya tıklayın&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

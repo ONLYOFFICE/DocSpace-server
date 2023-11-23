@@ -50,6 +50,7 @@ public interface IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
         long limit,
