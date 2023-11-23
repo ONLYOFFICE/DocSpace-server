@@ -147,6 +147,82 @@ public class UserController : PeopleControllerBase
     }
 
     /// <summary>
+    /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Add an activated user
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
+    /// <path>api/2.0/people/active</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
+    [HttpPost("active")]
+    public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
+    {
+        await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
+
+        var user = new UserInfo();
+
+        inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
+        if (string.IsNullOrEmpty(inDto.PasswordHash))
+        {
+            inDto.Password = (inDto.Password ?? "").Trim();
+
+            if (string.IsNullOrEmpty(inDto.Password))
+            {
+                inDto.Password = UserManagerWrapper.GeneratePassword();
+            }
+            else
+            {
+                await _userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
+            }
+
+            inDto.PasswordHash = _passwordHasher.GetClientPassword(inDto.Password);
+        }
+
+        //Validate email
+        var address = new MailAddress(inDto.Email);
+        user.Email = address.Address;
+        //Set common fields
+        user.FirstName = inDto.Firstname;
+        user.LastName = inDto.Lastname;
+        user.Title = inDto.Title;
+        user.Location = inDto.Location;
+        user.Notes = inDto.Comment;
+
+        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex = true;
+        }
+        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex =  false;
+        }
+        
+        user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
+        user.WorkFromDate = inDto.Worksfrom != null ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
+
+        await UpdateContactsAsync(inDto.Contacts, user);
+
+        _cache.Insert("REWRITE_URL" + await _tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
+        user = await _userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, true, false, inDto.Type,
+            false, true, true);
+
+        user.ActivationStatus = EmployeeActivationStatus.Activated;
+
+        await UpdateDepartmentsAsync(inDto.Department, user);
+
+        if (inDto.Files != _userPhotoManager.GetDefaultPhotoAbsoluteWebPath())
+        {
+            await UpdatePhotoUrlAsync(inDto.Files, user);
+        }
+
+        return await _employeeFullDtoHelper.GetFullAsync(user);
+    }
+
+    /// <summary>
     /// Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.
     /// </summary>
     /// <short>
