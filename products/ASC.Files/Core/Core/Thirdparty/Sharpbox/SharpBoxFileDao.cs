@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using File = System.IO.File;
+using ResumableUploadSession = AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession;
 
 namespace ASC.Files.Thirdparty.Sharpbox;
 
@@ -160,7 +161,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
+
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension.Trim().ToLower();
@@ -180,7 +181,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         string extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -245,7 +246,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
+
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension.Trim().ToLower();
@@ -397,11 +398,11 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
-            await Queries.DeleteTagsAsync(filesDbContext);
-            await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
-            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
-            await tx.CommitAsync();
+                await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
+                await Queries.DeleteTagsAsync(filesDbContext);
+                await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
+                await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+                await tx.CommitAsync();
         });
 
         if (file is not ErrorEntry)
@@ -623,7 +624,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         if (uploadSession.Items.ContainsKey("SharpboxSession"))
         {
             var sharpboxSession =
-                uploadSession.GetItemOrDefault<AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession>("SharpboxSession");
+                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
 
             var isNewFile = uploadSession.Items.ContainsKey("IsNewFile") && uploadSession.GetItemOrDefault<bool>("IsNewFile");
             var sharpboxFile =
@@ -660,7 +661,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         if (uploadSession.Items.ContainsKey("SharpboxSession"))
         {
             var sharpboxSession =
-                uploadSession.GetItemOrDefault<AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession>("SharpboxSession");
+                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
 
             return ToFile(GetFileById(sharpboxSession.FileId));
         }
@@ -675,7 +676,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         if (uploadSession.Items.ContainsKey("SharpboxSession"))
         {
             var sharpboxSession =
-                uploadSession.GetItemOrDefault<AppLimit.CloudComputing.SharpBox.StorageProvider.BaseObjects.ResumableUploadSession>("SharpboxSession");
+                uploadSession.GetItemOrDefault<ResumableUploadSession>("SharpboxSession");
 
             var isNewFile = uploadSession.Items.ContainsKey("IsNewFile") && uploadSession.GetItemOrDefault<bool>("IsNewFile");
             var sharpboxFile =
@@ -710,6 +711,17 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         return file;
     }
+
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
+
     #endregion
 }
 
@@ -731,12 +743,12 @@ static file class Queries
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
-                {
+                 {
                     ftl.TenantId,
-                    Id = ftl.TagId
-                }
-                where ftl == null
-                select ft)
+                     Id = ftl.TagId
+                 }
+                 where ftl == null
+                 select ft)
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteSecuritiesAsync =

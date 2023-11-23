@@ -165,6 +165,6 @@ public class TextFileUserImporter : IUserImporter
     private static object ConvertFromString(string value, Type type)
     {
         var converter = TypeDescriptor.GetConverter(type);
-        return converter != null && converter.CanConvertFrom(typeof(string)) ? converter.ConvertFromString(value) : null;
+        return converter.CanConvertFrom(typeof(string)) ? converter.ConvertFromString(value) : null;
     }
 }

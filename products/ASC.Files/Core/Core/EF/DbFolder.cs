@@ -43,10 +43,7 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int TenantId { get; set; }
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
-    public bool Private { get; set; }
-    public bool HasLogo { get; set; }
-    public string Color { get; set; }
-
+    public DbRoomSettings Settings { get; set; }
     public DbTenant Tenant { get; set; }
 
     [Ignore]
@@ -140,18 +137,6 @@ public static class DbFolderExtension
                 .HasColumnType("varchar(400)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.Private)
-                .HasColumnName("private")
-                .HasDefaultValueSql("'0'");
-
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
-
-            entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasColumnType("char(6)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
         });
     }
     public static void PgSqlAddDbFolder(this ModelBuilder modelBuilder)
@@ -204,10 +189,6 @@ public static class DbFolderExtension
                 .IsRequired()
                 .HasColumnName("title")
                 .HasMaxLength(400);
-
-            entity.Property(e => e.Private).HasColumnName("private");
-
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
         });
     }
 }

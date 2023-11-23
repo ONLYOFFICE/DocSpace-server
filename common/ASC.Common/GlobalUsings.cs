@@ -69,8 +69,6 @@ global using AutoMapper;
 global using Confluent.Kafka;
 global using Confluent.Kafka.Admin;
 
-global using Google.Protobuf;
-
 global using JWT;
 global using JWT.Algorithms;
 

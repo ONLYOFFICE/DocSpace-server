@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Configuration.Constants;
+
 namespace ASC.People.Api;
 
 public class ThirdpartyController : ApiControllerBase
@@ -249,7 +251,7 @@ public class ThirdpartyController : ApiControllerBase
         Guid userId;
         try
         {
-            await _securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
+            await _securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
 
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
 
@@ -339,7 +341,7 @@ public class ThirdpartyController : ApiControllerBase
         {
             user = await _userManager.GetUserByEmailAsync(email);
 
-            if (user.Equals(Constants.LostUser) || user.ActivationStatus != EmployeeActivationStatus.Pending)
+            if (user.Equals(Core.Users.Constants.LostUser) || user.ActivationStatus != EmployeeActivationStatus.Pending)
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
             }

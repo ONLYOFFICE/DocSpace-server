@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -373,7 +375,7 @@ public abstract class FilesController<T> : ApiControllerBase
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [HttpPut("file/{fileId}/checkconversion")]
-    public IAsyncEnumerable<ConversationResultDto> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
+    public IAsyncEnumerable<ConversationResultDto> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
     {
         if (inDto == null)
         {
@@ -463,6 +465,12 @@ public abstract class FilesController<T> : ApiControllerBase
     public Task<EntryProperties> SetProperties(T fileId, EntryPropertiesRequestDto inDto)
     {
         return _fileStorageService.SetFileProperties(fileId, _mapper.Map<EntryPropertiesRequestDto, EntryProperties>(inDto));
+    }
+
+    [HttpPut("{fileId}/order")]
+    public async Task SetOrder(T fileId, OrderRequestDto inDto)
+    {
+        await _fileStorageService.SetFileOrder(fileId, inDto.Order);
     }
 }
 

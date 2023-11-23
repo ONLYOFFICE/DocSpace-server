@@ -127,7 +127,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task<File<int>> GetFileAsync(int fileId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await Queries.DbFileQueryAsync(filesDbContext, tenantId, fileId);
@@ -138,7 +138,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task<File<int>> GetFileAsync(int fileId, int fileVersion)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await Queries.DbFileQueryByFileVersionAsync(filesDbContext, tenantId, fileId, fileVersion);
@@ -151,7 +151,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         ArgumentException.ThrowIfNullOrEmpty(title);
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await Queries.DbFileQueryByTitleAsync(filesDbContext, tenantId, title, parentId);
@@ -162,7 +162,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task<File<int>> GetFileStableAsync(int fileId, int fileVersion = -1)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var dbFile = await Queries.DbFileQueryFileStableAsync(filesDbContext, tenantId, fileId, fileVersion);
@@ -173,7 +173,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async IAsyncEnumerable<File<int>> GetFileHistoryAsync(int fileId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await foreach (var e in Queries.DbFileQueriesAsync(filesDbContext, tenantId, fileId))
@@ -190,7 +190,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await foreach (var e in Queries.DbFileQueriesByFileIdsAsync(filesDbContext, tenantId, fileIds))
@@ -279,7 +279,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async IAsyncEnumerable<int> GetFilesAsync(int parentId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await foreach (var e in Queries.FileIdsAsync(filesDbContext, tenantId, parentId))
@@ -484,6 +484,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
             if (isNew)
             {
                 await RecalculateFilesCountAsync(file.ParentId);
+                await SetCustomOrder(filesDbContext, file.Id, file.ParentId);
             }
         }
 
@@ -730,6 +731,8 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
             await Queries.DeleteSecurityAsync(context, tenantId, fileId.ToString());
 
+            await DeleteCustomOrder(filesDbContext, fileId);
+
             await context.SaveChangesAsync();
             await tx.CommitAsync();
 
@@ -809,18 +812,22 @@ internal class FileDao : AbstractDao, IFileDao<int>
             {
                 var trashId = await trashIdTask;
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
-
+                
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
                     .SetProperty(p => p.ParentId, toFolderId)
                     .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
                     .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
+                    await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
                     await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                    await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
+
+
 
                 var tagDao = _daoFactory.GetTagDao<int>();
 
@@ -972,7 +979,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task CompleteVersionAsync(int fileId, int fileVersion)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.UpdateDbFilesVersionGroupAsync(filesDbContext, tenantId, fileId, fileVersion);
@@ -981,7 +988,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task ContinueVersionAsync(int fileId, int fileVersion)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var versionGroup = await Queries.VersionGroupAsync(filesDbContext, tenantId, fileId, fileVersion);
@@ -1118,7 +1125,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task ReassignFilesAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         if (exceptFolderIds == null || !exceptFolderIds.Any())
@@ -1220,7 +1227,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async IAsyncEnumerable<File<int>> SearchAsync(string searchText, bool bunch = false)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var (success, ids) = await _factoryIndexer.TrySelectIdsAsync(s => s.MatchAll(searchText));
@@ -1267,7 +1274,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         ArgumentNullException.ThrowIfNull(differenceStream);
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.UpdateChangesAsync(filesDbContext, tenantId, file.Id, file.Version, changes.Trim());
@@ -1278,7 +1285,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async IAsyncEnumerable<EditHistory> GetEditHistoryAsync(DocumentServiceHelper documentServiceHelper, int fileId, int fileVersion = 0)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await foreach (var r in Queries.DbFilesByVersionAndWithoutForcesaveAsync(filesDbContext, tenantId, fileId, fileVersion))
@@ -1305,7 +1312,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task<bool> ContainChangesAsync(int fileId, int fileVersion)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Queries.DbFileAnyAsync(filesDbContext, tenantId, fileId, fileVersion);
@@ -1398,9 +1405,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
     public async Task SaveProperties(int fileId, EntryProperties entryProperties)
     {
         string data;
-        
+
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         if (entryProperties == null || string.IsNullOrEmpty(data = EntryProperties.Serialize(entryProperties, _logger)))
@@ -1412,6 +1419,28 @@ internal class FileDao : AbstractDao, IFileDao<int>
         await filesDbContext.AddOrUpdateAsync(r => r.FilesProperties, new DbFilesProperties { TenantId = tenantId, EntryId = fileId.ToString(), Data = data });
         await filesDbContext.SaveChangesAsync();
     }
+
+    public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)
+    {
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
+    }
+    
+    public async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId)
+    {
+        await InitCustomOrder(fileIds, parentFolderId, FileEntryType.File);
+    }
+    
+    private async Task SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, int order = 0)
+    {
+        await SetCustomOrder(filesDbContext, fileId, parentFolderId, FileEntryType.File, order);
+    }
+
+    private async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId)
+    {
+        await DeleteCustomOrder(filesDbContext, fileId, FileEntryType.File);
+    }
+
     #endregion
 
     private Func<Selector<DbFile>, Selector<DbFile>> GetFuncForSearch(int? parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
@@ -1520,7 +1549,20 @@ internal class FileDao : AbstractDao, IFileDao<int>
                          ).FirstOrDefault()
                         where f.TenantId == r.TenantId
                         select f
-                          ).FirstOrDefault()
+                          ).FirstOrDefault(),
+                Order = (
+                    from f in filesDbContext.FileOrder
+                    where (
+                        from rs in filesDbContext.RoomSettings 
+                        where rs.TenantId == f.TenantId && rs.RoomId ==
+                            (from t in filesDbContext.Tree
+                                where t.FolderId == r.ParentId
+                                orderby t.Level descending
+                                select t.ParentId
+                            ).Skip(1).FirstOrDefault()
+                        select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.File
+                    select f.Order
+                ).FirstOrDefault()
             });
     }
 
@@ -1560,11 +1602,11 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
 
         using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
-        dbFile.Document = new Document
-        {
-            Data = Convert.ToBase64String(ms.GetBuffer())
-        };
+            await stream.CopyToAsync(ms);
+            dbFile.Document = new Document
+            {
+                Data = Convert.ToBase64String(ms.GetBuffer())
+            };
 
         return dbFile;
     }
@@ -1582,7 +1624,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 .Where(r => r.tree.ParentId == parentId)
                 .Select(r => r.file);
         }
-        
+
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !string.IsNullOrEmpty(extension);
 
@@ -1624,6 +1666,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 SortedByType.Type => orderBy.IsAsc
                     ? q.OrderBy(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1))
                     : q.OrderByDescending(r => DbFunctionsExtension.SubstringIndex(r.Title, '.', -1)),
+                SortedByType.CustomOrder => q.Join(filesDbContext.FileOrder, a => a.Id, b => b.EntryId, (file, order) => new { file, order })
+                    .Where(r => r.order.EntryType == FileEntryType.File && r.order.TenantId == r.file.TenantId)
+                    .OrderBy(r => r.order.Order)
+                    .Select(r => r.file),
                 _ => q.OrderBy(r => r.Title)
             };
 
@@ -1665,13 +1711,13 @@ internal class FileDao : AbstractDao, IFileDao<int>
         if (roomId != default)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
-                {
-                    t.TenantId,
-                    t.Type,
-                    t.Name,
-                    l.EntryId,
-                    l.EntryType
-                }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
+            {
+                t.TenantId,
+                t.Type,
+                t.Name,
+                l.EntryId,
+                l.EntryType
+            }), f => f.Id.ToString(), t => t.EntryId, (file, tag) => new { file, tag })
                 .Where(r => r.tag.Type == TagType.Origin && r.tag.EntryType == FileEntryType.File && filesDbContext.Folders.Where(f =>
                         f.TenantId == tenantId && f.Id == filesDbContext.Tree.Where(t => t.FolderId == Convert.ToInt32(r.tag.Name))
                             .OrderByDescending(t => t.Level)
@@ -1692,6 +1738,7 @@ public class DbFileQuery
     public DbFile File { get; init; }
     public DbFolder Root { get; set; }
     public bool Shared { get; set; }
+    public int Order { get; set; }
 }
 
 public class DbFileDeny
@@ -1714,7 +1761,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.CurrentVersion)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -1737,7 +1784,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Version == fileVersion)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -1762,7 +1809,7 @@ static file class Queries
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
                     .Where(r => fileVersion < 0 || r.Version <= fileVersion)
                     .OrderByDescending(r => r.Version)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -1785,7 +1832,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Title == title && r.CurrentVersion && r.ParentId == parentId)
-                    
+
                     .OrderBy(r => r.CreateOn)
                     .Select(r => new DbFileQuery
                     {
@@ -1810,7 +1857,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId && r.Forcesave == ForcesaveType.None)
                     .Where(r => fileVersion >= 0 && r.Version <= fileVersion)
-                    
+
                     .OrderByDescending(r => r.Version)
                     .Select(r => new DbFileQuery
                     {
@@ -1835,7 +1882,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId)
                     .OrderByDescending(r => r.Version)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -1857,7 +1904,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => fileIds.Contains(r.Id) && r.CurrentVersion)
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -1879,7 +1926,7 @@ static file class Queries
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.ParentId == parentId && r.CurrentVersion)
-                    
+
                     .Select(r => r.Id));
 
     public static readonly Func<FilesDbContext, Task<bool>> FileAnyAsync =
@@ -2030,7 +2077,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int fileId, int fileVersion) =>
                 ctx.Files
-                    
+
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == fileId)
                     .Where(r => r.Version == fileVersion)
@@ -2075,7 +2122,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.CurrentVersion)
                     .Where(r => r.Title.ToLower().Contains(text))
-                    
+
                     .Select(r => new DbFileQuery
                     {
                         File = r,
@@ -2207,5 +2254,46 @@ static file class Queries
                 ctx.FilesProperties
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId)
-                    .ExecuteDelete());
+            .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbFileOrder>> GetFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int entryId) =>
+                ctx.FileOrder
+                    .AsTracking()
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.EntryId == entryId)
+                    .Where(r => r.EntryType == FileEntryType.File)
+                    .FirstOrDefault());
+
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> GetLastFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId) =>
+                ctx.FileOrder
+                    .AsTracking()
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.EntryType == FileEntryType.File)
+                    .OrderBy(r => r.Order)
+                    .Select(r => r.Order)
+                    .LastOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.Order >= newOrder && r.Order < currentOrder)
+                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order + 1)));
+
+    public static readonly Func<FilesDbContext, int, int, int, int, Task> DecreaseFileOrderAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+                ctx.FileOrder
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentFolderId == parentFolderId)
+                    .Where(r => r.Order <= newOrder && r.Order > currentOrder)
+                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
 }

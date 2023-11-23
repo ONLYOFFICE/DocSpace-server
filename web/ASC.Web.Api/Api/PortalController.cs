@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Web.Api.Controllers;
 
 ///<summary>
@@ -188,7 +190,7 @@ public class PortalController : ControllerBase
         var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
 
         if ((employeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
-            || !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, employeeType), ASC.Core.Users.Constants.Action_AddRemoveUser))
+            || !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, employeeType), Constants.Action_AddRemoveUser))
         {
             return string.Empty;
         }

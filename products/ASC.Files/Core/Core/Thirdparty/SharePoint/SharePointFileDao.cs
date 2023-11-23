@@ -167,7 +167,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
+
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension.Trim().ToLower();
@@ -187,7 +187,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         string extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -253,7 +253,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
+
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension.Trim().ToLower();
@@ -504,5 +504,15 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         }
 
         return file;
+    }
+
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
     }
 }

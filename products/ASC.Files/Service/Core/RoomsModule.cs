@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Feed.Aggregator.Modules;
+
 using Constants = ASC.Feed.Constants;
-using FeedModule = ASC.Feed.Aggregator.Modules.FeedModule;
 
 namespace ASC.Files.Service.Core;
 
@@ -127,7 +128,7 @@ public class RoomsModule : FeedModule
                 ExtraLocation = room.ParentId.ToString(),
                 Keywords = room.Title,
                 AdditionalInfo = ((int)room.FolderType).ToString(),
-                AdditionalInfo4 = room.Private ? "private" : null,
+                AdditionalInfo4 = room.SettingsPrivate ? "private" : null,
                 GroupId = GetGroupId(RoomItem, room.CreateBy, roomCreatedUtc, room.ParentId.ToString())
             };
         }
@@ -145,7 +146,7 @@ public class RoomsModule : FeedModule
             AdditionalInfo = ((int)room.FolderType).ToString(),
             AdditionalInfo2 = ((int)shareRecord.Share).ToString(),
             AdditionalInfo3 = ((int)shareRecord.SubjectType).ToString(),
-            AdditionalInfo4 = room.Private ? "private" : null,
+            AdditionalInfo4 = room.SettingsPrivate ? "private" : null,
             Target = shareRecord.Subject,
             GroupId = GetGroupId(SharedRoomItem, shareRecord.Owner, shareRecord.TimeStamp, room.ParentId.ToString()),
             ContextId = $"{RoomItem}_{room.Id}"

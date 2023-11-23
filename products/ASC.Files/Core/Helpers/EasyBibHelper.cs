@@ -134,7 +134,6 @@ public class EasyBibHelper : Consumer
         catch (Exception)
         {
             return null;
-            throw;
         }
 
     }

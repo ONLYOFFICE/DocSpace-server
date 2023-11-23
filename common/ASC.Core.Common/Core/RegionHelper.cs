@@ -108,7 +108,7 @@ public class RegionHelper
             {
                 var currentRegion = new RegionInfo(geoinfo.Key);
 
-                if (currentRegion != null && !currentRegion.Name.Equals(defaultRegion.Name))
+                if (!currentRegion.Name.Equals(defaultRegion.Name))
                 {
                     var priceInfo = await _tenantManager.GetProductPriceInfoAsync();
 

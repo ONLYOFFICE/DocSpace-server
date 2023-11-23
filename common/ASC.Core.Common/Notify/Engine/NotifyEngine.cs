@@ -294,16 +294,16 @@ public class NotifyEngine
         var noticeMessage = request.CreateMessage(recipient);
 
         addresses = recipient.Addresses;
-        if (addresses == null || !addresses.Any(a => !string.IsNullOrEmpty(a)))
+        if (addresses == null || addresses.All(string.IsNullOrEmpty))
         {
             //checking addresses
-            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException(string.Format("For recipient {0} by sender {1} no one addresses getted.", recipient, sender))), noticeMessage);
+            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException($"For recipient {recipient} by sender {sender} no one addresses getted.")), noticeMessage);
         }
 
         var pattern = request.GetSenderPattern(sender);
         if (pattern == null)
         {
-            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException(string.Format("For action \"{0}\" by sender \"{1}\" no one patterns getted.", request.NotifyAction, sender))), noticeMessage);
+            return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException($"For action \"{request.NotifyAction}\" by sender \"{sender}\" no one patterns getted.")), noticeMessage);
         }
 
         noticeMessage.Pattern = pattern;

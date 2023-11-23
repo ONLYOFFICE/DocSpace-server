@@ -312,8 +312,8 @@ public class DocumentServiceTrackerHelper
 
         if (usersDrop.Count > 0 && !await _documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
-            _logger.ErrorDocServiceDropFailed(usersDrop);
-        }
+                _logger.ErrorDocServiceDropFailed(usersDrop);
+            }
 
         foreach (var removeUserId in users)
         {
@@ -550,11 +550,8 @@ public class DocumentServiceTrackerHelper
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))
                     await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
                     {
-                        if (stream != null)
-                        {
                             using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
                             message = await reader.ReadToEndAsync();
-                        }
                     }
 
                     break;

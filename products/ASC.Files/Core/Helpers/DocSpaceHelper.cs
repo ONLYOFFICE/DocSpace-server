@@ -58,6 +58,6 @@ public static class DocSpaceHelper
         var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
         var room = parents.Find(f => IsRoom(f.FolderType));
 
-        return room is { Private: true };
+        return room is { SettingsPrivate: true };
     }
 }

@@ -163,7 +163,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
 
         if (boxFile == null)
         {
-            return (null, editable);
+            return (null, true);
         }
 
         var jsonFile = JObject.Parse(boxFile);
@@ -315,13 +315,8 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         {
             using var response = await httpClient.SendAsync(request);
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            string result = null;
-            if (responseStream != null)
-            {
-                using var readStream = new StreamReader(responseStream);
-                result = await readStream.ReadToEndAsync();
-            }
-
+            using var readStream = new StreamReader(responseStream);
+            var result = await readStream.ReadToEndAsync();
             _logger.DebugBoxAppSaveFileResponse(result);
         }
         catch (HttpRequestException e)
@@ -497,13 +492,6 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
         }
 
         var boxUserInfo = JObject.Parse(resultResponse);
-        if (boxUserInfo == null)
-        {
-            _logger.ErrorInUserInfoRequest();
-
-            return null;
-        }
-
         var email = boxUserInfo.Value<string>("login");
         var userInfo = await _userManager.GetUserByEmailAsync(email);
         if (Equals(userInfo, Constants.LostUser))

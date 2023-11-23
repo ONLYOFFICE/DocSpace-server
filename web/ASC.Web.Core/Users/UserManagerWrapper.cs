@@ -198,7 +198,7 @@ public sealed class UserManagerWrapper
         }
         else
         {
-            newUserInfo = await _userManager.SaveUserInfo(userInfo, type, isCardDav, !updateExising);
+            newUserInfo = await _userManager.SaveUserInfo(userInfo, type, isCardDav);
         }
 
         await _securityContext.SetUserPasswordHashAsync(newUserInfo.Id, passwordHash);

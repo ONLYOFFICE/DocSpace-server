@@ -82,7 +82,7 @@ public class OAuth20TokenHelper
             var stateQuery = "";
             stateQuery = additionalStateArgs.Keys
                 .Where(a => a != null)
-                .Aggregate(stateQuery, (current, a) => a != null ? $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}" : null);
+                .Aggregate(stateQuery, (current, a) => $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}");
 
             stateUriBuilder.Query = stateQuery.Substring(1);
         }
@@ -94,9 +94,9 @@ public class OAuth20TokenHelper
         {
             query = additionalArgs.Keys.Where(additionalArg => additionalArg != null)
                                   .Aggregate(query, (current, additionalArg) =>
-                                                    additionalArg != null ? current
-                                                                            + "&" + HttpUtility.UrlEncode(additionalArg.Trim())
-                                                                               + "=" + HttpUtility.UrlEncode((additionalArgs[additionalArg] ?? "").Trim()) : null);
+                                                    current
+                                                    + "&" + HttpUtility.UrlEncode(additionalArg.Trim())
+                                                    + "=" + HttpUtility.UrlEncode((additionalArgs[additionalArg] ?? "").Trim()));
         }
 
         return uriBuilder.Uri + "?" + query;

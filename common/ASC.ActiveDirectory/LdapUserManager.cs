@@ -292,7 +292,7 @@ public class LdapUserManager
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
                         null,
-                        new[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
+                        new IRecipient[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
                         new[] { Core.Configuration.Constants.NotifyEMailSenderSysName },
                         null,
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(_displayUserSettingsHelper)),

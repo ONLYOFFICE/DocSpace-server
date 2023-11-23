@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace ASC.Web.Core;
 
 [Singleton]
@@ -209,7 +211,7 @@ public class WebPluginManager
                 PropertyNameCaseInsensitive = true
             };
 
-            webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+            webPlugin = JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
 
             if (webPlugin == null)
             {
@@ -361,7 +363,7 @@ public class WebPluginManager
                     PropertyNameCaseInsensitive = true
                 };
 
-                var webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+                var webPlugin = JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
 
                 webPlugin.TenantId = Tenant.DefaultTenant;
                 webPlugin.System = true;
@@ -404,7 +406,7 @@ public class WebPluginManager
             PropertyNameCaseInsensitive = true
         };
 
-        var webPlugin = System.Text.Json.JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
+        var webPlugin = JsonSerializer.Deserialize<DbWebPlugin>(configContent, options);
 
         webPlugin.TenantId = Tenant.DefaultTenant;
         webPlugin.System = true;

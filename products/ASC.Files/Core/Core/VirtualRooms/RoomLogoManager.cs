@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Image = SixLabors.ImageSharp.Image;
+using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.Files.Core.VirtualRooms;
 
@@ -111,7 +112,7 @@ public class RoomLogoManager
         await SaveWithProcessAsync(store, stringId, data, -1, new Point(x, y), new Size(width, height));
         await RemoveTempAsync(store, fileName);
 
-        room.HasLogo = true;
+        room.SettingsHasLogo = true;
 
         if (room.ProviderEntry)
         {
@@ -146,7 +147,7 @@ public class RoomLogoManager
         {
             var store = await GetDataStoreAsync(); 
             await store.DeleteFilesAsync(string.Empty, $"{ProcessFolderId(stringId)}*.*", false);
-            room.HasLogo = false;
+            room.SettingsHasLogo = false;
 
             if (room.ProviderEntry)
             {
@@ -172,11 +173,11 @@ public class RoomLogoManager
 
     public async ValueTask<Logo> GetLogoAsync<T>(Folder<T> room)
     {
-        if (!room.HasLogo)
+        if (!room.SettingsHasLogo)
         {
-            if (string.IsNullOrEmpty(room.Color))
+            if (string.IsNullOrEmpty(room.SettingsColor))
             {
-                room.Color = GetRandomColour();
+                room.SettingsColor = GetRandomColour();
 
                 var folderDao = _daoFactory.GetFolderDao<T>();
                 await folderDao.SaveFolderAsync(room);
@@ -188,7 +189,7 @@ public class RoomLogoManager
                 Large = string.Empty,
                 Medium = string.Empty,
                 Small = string.Empty,
-                Color = room.Color
+                Color = room.SettingsColor
             };
         }
 
@@ -271,7 +272,7 @@ public class RoomLogoManager
 
         if (imageData is not { Length: > 0 })
     {
-            throw new Web.Core.Users.UnknownImageFormatException();
+            throw new UnknownImageFormatException();
         }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
         {
@@ -302,7 +303,7 @@ public class RoomLogoManager
         }
         catch (ArgumentException error)
         {
-            throw new Web.Core.Users.UnknownImageFormatException(error);
+            throw new UnknownImageFormatException(error);
         }
     }
 

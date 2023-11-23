@@ -157,7 +157,7 @@ public class SecurityController : BaseSettingsController
     public object GetEnabledModules()
     {
         var EnabledModules = _webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.Normal)
-            .Where(item => !item.IsSubItem() && item.Visible)
+                                    .Where(item => !item.IsSubItem() && item.Visible)
             .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
 
         return EnabledModules;

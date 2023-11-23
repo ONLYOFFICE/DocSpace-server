@@ -35,23 +35,6 @@
     <Compile Remove="Notify\Jabber\IReverseJabberService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="protos\az_record_cache.proto" />
-    <None Remove="protos\consumer_cache_item.proto" />
-    <None Remove="protos\create_client_proto.proto" />
-    <None Remove="protos\disable_client_proto.proto" />
-    <None Remove="protos\group_cache_item.proto" />
-    <None Remove="protos\quota_cache_item.proto" />
-    <None Remove="protos\register_user_proto.proto" />
-    <None Remove="protos\settings_cache_item.proto" />
-    <None Remove="protos\subscription_method_cache.proto" />
-    <None Remove="protos\subscription_record.proto" />
-    <None Remove="protos\tenant_cache_item.proto" />
-    <None Remove="protos\tenant_setting.proto" />
-    <None Remove="protos\user_group_ref_cache_item.proto" />
-    <None Remove="protos\user_info_cache_item.proto" />
-    <None Remove="protos\user_photo_cache_item.proto" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.7.204.10" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.200.63" />
     <PackageReference Include="FirebaseAdmin" Version="2.4.0" />
@@ -67,23 +50,5 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="protos\create_client_proto.proto" />
-    <Protobuf Include="protos\disable_client_proto.proto" />
-    <Protobuf Include="protos\register_user_proto.proto" />
-    <Protobuf Include="protos\settings_cache_item.proto" />
-    <Protobuf Include="protos\consumer_cache_item.proto" />
-    <Protobuf Include="protos\tenant_cache_item.proto" />
-    <Protobuf Include="protos\group_cache_item.proto" />
-    <Protobuf Include="protos\user_group_ref_cache_item.proto" />
-    <Protobuf Include="protos\user_info_cache_item.proto" />
-    <Protobuf Include="protos\user_photo_cache_item.proto" />
-    <Protobuf Include="protos\tenant_setting.proto" />
-    <Protobuf Include="protos\subscription_method_cache.proto" />
-    <Protobuf Include="protos\subscription_record.proto" />
-    <Protobuf Include="protos\tariff_cache_item.proto" />
-    <Protobuf Include="protos\az_record_cache.proto" />
-    <Protobuf Include="protos\quota_cache_item.proto" />
   </ItemGroup>
 </Project>

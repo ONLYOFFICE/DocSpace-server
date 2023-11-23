@@ -343,15 +343,15 @@ public class FileStorageService //: IFileStorageService
         var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
         if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
         {
-            if (prevVisible is Folder<string> f1)
-            {
-                parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
+                if (prevVisible is Folder<string> f1)
+                {
+                    parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
+                }
+                else if (prevVisible is Folder<int> f2)
+                {
+                    parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
+                }
             }
-            else if (prevVisible is Folder<int> f2)
-            {
-                parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
-            }
-        }
 
         parent.Shareable =
             parent.FolderType == FolderType.SHARE ||
@@ -467,7 +467,7 @@ public class FileStorageService //: IFileStorageService
         return await InternalCreateNewFolderAsync(parentId, title);
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
@@ -475,50 +475,50 @@ public class FileStorageService //: IFileStorageService
         {
             ArgumentNullException.ThrowIfNull(title);
 
-            await _countRoomChecker.CheckAppend();
+        await _countRoomChecker.CheckAppend();
 
-            if (@private && (share == null || !share.Any()))
-            {
-                throw new ArgumentNullException(nameof(share));
-            }
-
-            List<AceWrapper> aces = null;
-
-            if (@private)
-            {
-                aces = await GetFullAceWrappersAsync(share);
-                await CheckEncryptionKeysAsync(aces);
-            }
-
-            var parentId = await _globalFolderHelper.GetFolderVirtualRooms();
-
-            var room = roomType switch
-            {
-                RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private),
-                RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private),
-                RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private),
-                _ => await CreateCustomRoomAsync(title, parentId, @private),
-            };
-
-            if (@private)
-            {
-                await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
-            }
-
-            return room;
+        if (@private && (share == null || !share.Any()))
+        {
+            throw new ArgumentNullException(nameof(share));
         }
-    }
 
-    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private)
-    {
-        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private);
+        List<AceWrapper> aces = null;
 
-        _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        if (@private)
+        {
+            aces = await GetFullAceWrappersAsync(share);
+            await CheckEncryptionKeysAsync(aces);
+        }
+
+        var parentId = await _globalFolderHelper.GetFolderVirtualRooms();
+
+        var room = roomType switch
+        {
+            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
+            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
+            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
+            _ => await CreateCustomRoomAsync(title, parentId, @private, indexing),
+        };
+
+        if (@private)
+        {
+            await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
+        }
 
         return room;
     }
+    }
 
-    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
+    {
+        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private, indexing);
+
+        _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        
+        return room;
+    }
+
+    public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
         ArgumentNullException.ThrowIfNull(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -547,10 +547,10 @@ public class FileStorageService //: IFileStorageService
 
         var result = roomType switch
         {
-            RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private), FolderType.CustomRoom),
-            RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private), FolderType.EditingRoom),
-            RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private), FolderType.PublicRoom),
-            _ => (await CreateCustomRoomAsync(title, parentId, @private), FolderType.CustomRoom),
+            RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
+            RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
+            RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private, indexing), FolderType.PublicRoom),
+            _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
         };
 
         ErrorIf(result.Item1.Id.Equals(result.Item1.RootId), FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
@@ -565,17 +565,17 @@ public class FileStorageService //: IFileStorageService
         return result.Item1;
     }
 
-    private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy)
+    private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.CustomRoom, privacy);
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.CustomRoom, privacy, indexing);
     }
 
-    private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy)
+    private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
-        return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy);
+        return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy, indexing);
     }
 
-    private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false)
+    private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false)
     {
         var folderDao = GetFolderDao<T>();
 
@@ -594,8 +594,9 @@ public class FileStorageService //: IFileStorageService
             newFolder.Title = title;
             newFolder.ParentId = parent.Id;
             newFolder.FolderType = folderType;
-            newFolder.Private = parent.Private ? parent.Private : privacy;
-            newFolder.Color = _roomLogoManager.GetRandomColour();
+            newFolder.SettingsPrivate = parent.SettingsPrivate ? parent.SettingsPrivate : privacy;
+            newFolder.SettingsColor = _roomLogoManager.GetRandomColour();
+            newFolder.SettingsIndexing = indexing;
             var folderId = await folderDao.SaveFolderAsync(newFolder);
             var folder = await folderDao.GetFolderAsync(folderId);
 
@@ -839,9 +840,9 @@ public class FileStorageService //: IFileStorageService
         if (fileWrapper.FormId != 0)
         {
             await using var stream = await _oFormRequestManager.Get(fileWrapper.FormId);
-            file.ContentLength = stream.Length;
-            file = await fileDao.SaveFileAsync(file, stream);
-        }
+                file.ContentLength = stream.Length;
+                file = await fileDao.SaveFileAsync(file, stream);
+            }
         else if (EqualityComparer<TTemplate>.Default.Equals(fileWrapper.TemplateId, default(TTemplate)))
         {
             var culture = (await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID)).GetCulture();
@@ -862,9 +863,9 @@ public class FileStorageService //: IFileStorageService
                 {
                     var pathNew = path + "new" + fileExt;
                     await using var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0);
-                    file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
-                    file = await fileDao.SaveFileAsync(file, stream);
-                }
+                        file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
+                        file = await fileDao.SaveFileAsync(file, stream);
+                    }
                 else
                 {
                     file = await fileDao.SaveFileAsync(file, null);
@@ -1592,6 +1593,24 @@ public class FileStorageService //: IFileStorageService
 
             return folder.Id.ToString();
         }
+    }
+
+    public async Task SetFileOrder<T>(T fileId, int order)
+    {
+        var fileDao = _daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+        file.NotFoundIfNull();
+        ErrorIf(!await _fileSecurity.CanEditAsync(file), FilesCommonResource.ErrorMassage_SecurityException);
+        await fileDao.SetCustomOrder(fileId, file.ParentId, order);
+    }
+
+    public async Task SetFolderOrder<T>(T folderId, int order)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+        folder.NotFoundIfNull();
+        ErrorIf(!await _fileSecurity.CanEditAsync(folder), FilesCommonResource.ErrorMassage_SecurityException);
+        await folderDao.SetCustomOrder(folderId, folder.ParentId, order);
     }
 
     public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
@@ -2529,7 +2548,7 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(T entryId, FileEntryType entryType)
     {
-        FileEntry<T> entry = entryType == FileEntryType.File
+        FileEntry<T> entry = entryType == FileEntryType.File 
             ? await GetFileDao<T>().GetFileAsync(entryId)
             : await GetFolderDao<T>().GetFolderAsync(entryId);
 
@@ -2586,7 +2605,7 @@ public class FileStorageService //: IFileStorageService
                     var user = !string.IsNullOrEmpty(ace.Email)
                         ? await _userManager.GetUserByEmailAsync(ace.Email)
                         : await _userManager.GetUsersAsync(ace.Id);
-
+                    
                     var name = user.DisplayUserName(false, _displayUserSettingsHelper);
 
                     if (entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType))
@@ -2611,7 +2630,7 @@ public class FileStorageService //: IFileStorageService
                     {
 
                         await _filesMessageService.SendAsync(
-                            entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor, entry,
+                            entry.FileEntryType == FileEntryType.Folder ? MessageAction.FolderUpdatedAccessFor : MessageAction.FileUpdatedAccessFor,entry,
                             entry.Title, name, FileShareExtensions.GetAccessString(ace.Access));
                     }
                 }
@@ -2668,7 +2687,7 @@ public class FileStorageService //: IFileStorageService
     public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share)
     {
         var room = (await GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
-
+        
         var options = new FileShareOptions
         {
             Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultInvitationLinkTitle,
@@ -2681,14 +2700,14 @@ public class FileStorageService //: IFileStorageService
         {
             linkId = result.Item2.Id;
         }
-
+        
         return (await _fileSharing.GetPureSharesAsync(room, new[] { linkId }).FirstOrDefaultAsync());
     }
 
     public async Task<AceWrapper> SetExternalLinkAsync<T>(T entryId, FileEntryType entryType, Guid linkId, string title, FileShare share, DateTime expirationDate = default,
         string password = null, bool denyDownload = false)
     {
-        FileEntry<T> entry = entryType == FileEntryType.File
+        FileEntry<T> entry = entryType == FileEntryType.File 
             ? await GetFileDao<T>().GetFileAsync(entryId)
             : await GetFolderDao<T>().GetFolderAsync(entryId);
 
@@ -2867,6 +2886,59 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
+    public async Task<Folder<T>> SetRoomSettingsAsync<T>(T folderId, bool indexing)
+    {
+        var folderDao = GetFolderDao<T>();
+        var room = await folderDao.GetFolderAsync(folderId);
+
+        ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+        ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
+
+        if (DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            if (room.SettingsIndexing != indexing)
+            {
+                if (indexing)
+                {
+                    await ReOrder(room.Id, true);
+                }
+                
+                room.SettingsIndexing = indexing;
+                await folderDao.SaveFolderAsync(room);
+            }
+        }
+
+        return room;
+    }
+    
+    
+    public async Task<Folder<T>> ReOrder<T>(T folderId, bool subfolders = false)
+    {        
+        var folderDao = GetFolderDao<T>();
+        var fileDao = GetFileDao<T>();
+
+        var room = await folderDao.GetFolderAsync(folderId);
+
+        ErrorIf(room == null, FilesCommonResource.ErrorMassage_FolderNotFound);
+        ErrorIf(!await _fileSecurity.CanEditAsync(room), FilesCommonResource.ErrorMassage_SecurityException);
+        
+        var folders = await folderDao.GetFoldersAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null).Select(r => r.Id).ToListAsync();
+        await folderDao.InitCustomOrder(folders, folderId);
+        
+        var files = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.None, false, Guid.Empty, null, null, false).Select(r=> r.Id).ToListAsync();
+        await fileDao.InitCustomOrder(files, folderId);
+
+        if (subfolders)
+        {
+            foreach (var t in folders)
+            {
+                await ReOrder(t, true);
+            }
+        }
+
+        return room;
+    }
+    
     public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
     {
         ErrorIf(!_authContext.IsAuthenticated, FilesCommonResource.ErrorMassage_SecurityException);
@@ -3291,11 +3363,11 @@ public class FileStorageService //: IFileStorageService
             await foreach (var ace in _fileSharing.GetPureSharesAsync(room, usersIds))
             {
                 var user = await _userManager.GetUsersAsync(ace.Id);
-
+                
                 var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, ace.Access, _authContext.CurrentAccount.ID, room.Id.ToString());
                 await _studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, link);
             }
-
+            
             return;
         }
 
@@ -3311,15 +3383,15 @@ public class FileStorageService //: IFileStorageService
             await foreach (var ace in _fileSharing.GetPureSharesAsync(room, ShareFilterType.User, EmployeeActivationStatus.Pending, offset, packSize + margin))
             {
                 counter++;
-
+                
                 if (counter > packSize)
                 {
                     offset += packSize;
                     break;
                 }
-
+                
                 var user = await _userManager.GetUsersAsync(ace.Id);
-
+                
                 var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, ace.Access, _authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
@@ -3441,7 +3513,7 @@ public class FileStorageService //: IFileStorageService
     {
         return _httpContextAccessor?.HttpContext?.Request?.Headers?.ToDictionary(k => k.Key, v => v.Value);
     }
-
+    
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
         string password = null, bool denyDownload = false, bool primary = false)
     {
@@ -3450,7 +3522,7 @@ public class FileStorageService //: IFileStorageService
             Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultExternalLinkTitle,
             DenyDownload = denyDownload
         };
-
+        
         var expirationDateUtc = _tenantUtil.DateTimeToUtc(expirationDate);
 
         if (expirationDateUtc != DateTime.MinValue && expirationDateUtc > DateTime.UtcNow)
@@ -3476,8 +3548,8 @@ public class FileStorageService //: IFileStorageService
         if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink && entry is Folder<T> { FolderType: FolderType.PublicRoom })
         {
             linkId = Guid.NewGuid();
-
-            await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle },
+            
+            await SetAceLinkAsync(entry, SubjectType.PrimaryExternalLink, linkId, FileShare.Read, new FileShareOptions { Title = FilesCommonResource.DefaultExternalLinkTitle }, 
                 _actions[SubjectType.ExternalLink]);
         }
 
@@ -3516,7 +3588,7 @@ public class FileStorageService //: IFileStorageService
             {
                 var (eventType, ace) = result.HandledAces[0];
                 var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
-
+                
                 await _filesMessageService.SendAsync(messageActions[eventType], entry, ace.Id, ace.FileShareOptions?.Title, 
                     FileShareExtensions.GetAccessString(ace.Access, isRoom));
             }

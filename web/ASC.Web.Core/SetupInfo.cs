@@ -239,7 +239,7 @@ public class SetupInfo
         {
             configSetting = configSetting.Trim();
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter != null && converter.CanConvertFrom(typeof(string)))
+            if (converter.CanConvertFrom(typeof(string)))
             {
                 return (T)converter.ConvertFromString(configSetting);
             }

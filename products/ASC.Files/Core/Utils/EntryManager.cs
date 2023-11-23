@@ -83,6 +83,22 @@ public class BreadCrumbsManager
         _authContext = authContext;
     }
 
+    public async Task<string> GetBreadCrumbsOrderAsync<T>(T folderId)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+
+        var breadcrumbs = (await GetBreadCrumbsAsync(folderId, folderDao));
+
+        var result = breadcrumbs.Skip(2).Select(r => r.Order.ToString()).ToList();
+
+        if (result.Any())
+        {
+            return result.Aggregate((first, second) => $"{first}.{second}");
+        }
+
+        return null;
+    }
+
     public async Task<List<FileEntry>> GetBreadCrumbsAsync<T>(T folderId)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -243,15 +259,15 @@ public class EntryStatusManager
 
         foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
-            folder.IsFavorite = true;
+                folder.IsFavorite = true;
+            }
         }
     }
-}
 
 [Scope]
 public class EntryManager
 {
-    private const string _updateList = "filesUpdateList";
+    private const string UpdateList = "filesUpdateList";
     private readonly ThirdPartySelector _thirdPartySelector;
     private readonly ThumbnailSettings _thumbnailSettings;
 
@@ -1650,14 +1666,14 @@ public class EntryManager
             throw new Exception(FilesCommonResource.ErrorMassage_NotSupportedFormat);
         }
 
-        var exists = _cache.Get<string>(_updateList + fileId) != null;
+        var exists = _cache.Get<string>(UpdateList + fileId) != null;
         if (exists)
         {
             throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
         }
         else
         {
-            _cache.Insert(_updateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
+            _cache.Insert(UpdateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
         }
 
         try
@@ -1691,18 +1707,18 @@ public class EntryManager
                 var CopyThumbnailsAsync = async () =>
                 {
                     await using var scope = _serviceProvider.CreateAsyncScope();
-                    var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
-                    var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
+                        var _fileDao = scope.ServiceProvider.GetService<IDaoFactory>().GetFileDao<T>();
+                        var _globalStoreLocal = scope.ServiceProvider.GetService<GlobalStore>();
 
-                    foreach (var size in _thumbnailSettings.Sizes)
-                    {
-                        await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
-                            _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
-                            String.Empty,
-                            _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
-                    }
+                        foreach (var size in _thumbnailSettings.Sizes)
+                        {
+                            await (await _globalStoreLocal.GetStoreAsync()).CopyAsync(String.Empty,
+                                                                    _fileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
+                                                                    String.Empty,
+                                                                    _fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
+                        }
 
-                    await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
+                        await _fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
                 };
 
                 _ = Task.Run(() => CopyThumbnailsAsync().GetAwaiter().GetResult());
@@ -1739,7 +1755,7 @@ public class EntryManager
         }
         finally
         {
-            _cache.Remove(_updateList + fromFile.Id);
+            _cache.Remove(UpdateList + fromFile.Id);
         }
     }
 
@@ -1788,7 +1804,7 @@ public class EntryManager
         {
             if (!_fileTracker.IsEditing(lastVersionFile.Id) && fileVersion.Version == lastVersionFile.Version)
             {
-                lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
+                    lastVersionFile = await UpdateToVersionFileAsync(fileVersion.Id, fileVersion.Version, null, checkRight, true);
                 //await fileDao.CompleteVersionAsync(fileVersion.Id, fileVersion.Version);
                 //lastVersionFile.VersionGroup++;
             }

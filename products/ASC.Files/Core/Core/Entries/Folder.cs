@@ -75,9 +75,10 @@ public class Folder<T> : FileEntry<T>, IFolder
     public int NewForMe { get; set; }
     public string FolderUrl { get; set; }
     public bool Pinned { get; set; }
-    public bool Private { get; set; }
-    public bool HasLogo { get; set; }
-    public string Color { get; set; }
+    public bool SettingsPrivate { get; set; }
+    public bool SettingsHasLogo { get; set; }
+    public string SettingsColor { get; set; }
+    public bool SettingsIndexing { get; set; }
     public override bool IsNew
     {
         get => Convert.ToBoolean(NewForMe);

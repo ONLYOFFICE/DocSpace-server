@@ -104,10 +104,10 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
-    {
+        {
             yield return room;
         }
-        }
+    }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
@@ -119,7 +119,7 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (CheckInvalidFilter(filterType))
@@ -437,6 +437,16 @@ internal class SharePointFolderDao : SharePointDaoBase, IFolderDao<string>
     public Task<string> GetBackupExtensionAsync(string folderId)
     {
         return Task.FromResult("tar.gz");
+    }
+
+    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
     }
 }
 

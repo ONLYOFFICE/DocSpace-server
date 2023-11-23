@@ -71,7 +71,7 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
     {
         ErrorIfNotDocSpace();
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Notify, inDto.SharingMessage);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -122,7 +122,7 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
     {
         ErrorIfNotDocSpace();
 
-        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var room = await _fileStorageService.CreateThirdPartyRoomAsync(inDto.Title, inDto.RoomType, id, inDto.Private, inDto.Indexing, inDto.Share, inDto.Notify, inDto.SharingMessage);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -152,7 +152,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
         IMapper mapper,
-        SocketManager socketManager, 
+        SocketManager socketManager,
         ApiContext apiContext) : base(folderDtoHelper, fileDtoHelper)
     {
         _globalFolderHelper = globalFolderHelper;
@@ -362,8 +362,8 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         var linkAce = inDto.LinkType switch
         {
             LinkType.Invitation => await _fileStorageService.SetInvitationLinkAsync(id, inDto.LinkId, inDto.Title, inDto.Access),
-            LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title, 
-                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access , inDto.ExpirationDate ?? default, inDto.Password, inDto.DenyDownload),
+            LinkType.External => await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.Folder, inDto.LinkId, inDto.Title,
+                inDto.Access is not (FileShare.Read or FileShare.None) ? FileShare.Read : inDto.Access, inDto.ExpirationDate ?? default, inDto.Password, inDto.DenyDownload),
             _ => throw new InvalidOperationException()
         };
 
@@ -384,20 +384,20 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     [HttpGet("rooms/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T id, LinkType? type)
     {
-        var filterType = type.HasValue ? type.Value switch 
-            {
-                LinkType.Invitation => ShareFilterType.InvitationLink,
-                LinkType.External => ShareFilterType.ExternalLink,
-                _ => ShareFilterType.Link
-            } 
+        var filterType = type.HasValue ? type.Value switch
+        {
+            LinkType.Invitation => ShareFilterType.InvitationLink,
+            LinkType.External => ShareFilterType.ExternalLink,
+            _ => ShareFilterType.Link
+        }
             : ShareFilterType.Link;
 
         var counter = 0;
-        
-        await foreach (var ace in  _fileStorageService.GetRoomSharedInfoAsync(id, filterType, 0, 100))
+
+        await foreach (var ace in _fileStorageService.GetRoomSharedInfoAsync(id, filterType, 0, 100))
         {
             counter++;
-            
+
             yield return await _fileShareDtoHelper.Get(ace);
         }
 
@@ -417,7 +417,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {
         var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.Folder);
-        
+
         return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
     }
 
@@ -558,6 +558,26 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         await _fileStorageService.ResendEmailInvitationsAsync(id, inDto.UsersIds, inDto.ResendAll);
     }
 
+    [HttpPut("rooms/{id}/settings")]
+    public async Task<FolderDto<T>> UpdateSettingsAsync(T id, SettingsRoomRequestDto inDto)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _fileStorageService.SetRoomSettingsAsync(id, inDto.Indexing);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+    
+    [HttpPut("rooms/{id}/reorder")]
+    public async Task<FolderDto<T>> ReorderAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _fileStorageService.ReOrder(id);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+    
     protected void ErrorIfNotDocSpace()
     {
         if (_coreBaseSettings.DisableDocSpace)
@@ -663,7 +683,7 @@ public class VirtualRoomsCommonController : ApiControllerBase
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 
-        var dto = await _folderContentDtoHelper.GetAsync(content, startIndex);
+        var dto = await _folderContentDtoHelper.GetAsync(parentId, content, startIndex);
 
         return dto.NotFoundIfNull();
     }

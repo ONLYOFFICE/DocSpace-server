@@ -26,6 +26,8 @@
 
 using Microsoft.AspNetCore.Http.Extensions;
 
+using Serializer = ProtoBuf.Serializer;
+
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
@@ -222,7 +224,7 @@ public class FileConverterQueue
 
         using var ms = new MemoryStream();
 
-        ProtoBuf.Serializer.Serialize(ms, queueTasks);
+        Serializer.Serialize(ms, queueTasks);
 
         _distributedCache.Set(cacheKey, ms.ToArray(), new DistributedCacheEntryOptions
         {
@@ -246,7 +248,7 @@ public class FileConverterQueue
 
         using var ms = new MemoryStream(serializedObject);
 
-        return ProtoBuf.Serializer.Deserialize<List<FileConverterOperationResult>>(ms);
+        return Serializer.Deserialize<List<FileConverterOperationResult>>(ms);
     }
 }
 
@@ -650,8 +652,8 @@ public class FileConverter
 
             if (e.StatusCode != HttpStatusCode.NotFound)
             {
-                errorString += $" Error {e.Message}";
-            }
+                    errorString += $" Error {e.Message}";
+                }
 
             throw new Exception(errorString);
         }

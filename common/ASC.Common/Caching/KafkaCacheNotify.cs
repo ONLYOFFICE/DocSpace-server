@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
+public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
 {
     private IProducer<AscCacheItem, T> _producer;
 

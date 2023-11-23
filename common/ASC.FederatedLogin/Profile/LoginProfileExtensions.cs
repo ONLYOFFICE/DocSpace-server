@@ -42,7 +42,7 @@ public static class LoginProfileExtensions
     {
         var profile = new LoginProfile(signature, instanceCrypto);
         var queryString = HttpUtility.ParseQueryString(uri.Query);
-        if (!string.IsNullOrEmpty(queryString[LoginProfile.QuerySessionParamName]) && context is { Session: not null })
+        if (!string.IsNullOrEmpty(queryString[LoginProfile.QuerySessionParamName]) && context != null)
         {
             return JsonConvert.DeserializeObject<LoginProfile>(context.Session.GetString(queryString[LoginProfile.QuerySessionParamName]));
         }

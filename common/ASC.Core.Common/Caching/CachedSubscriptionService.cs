@@ -228,16 +228,10 @@ internal class SubsciptionsStore
 
     public IEnumerable<SubscriptionRecord> GetSubscriptions(string recipientId, string objectId)
     {
-        var oId = objectId ?? string.Empty;
-
-        if (recipientId != null)
-        {
-            return _recordsByRec.TryGetValue(recipientId, out var value1)
-                ? value1.ToList()
-                : new List<SubscriptionRecord>();
-        }
-        
-        return _recordsByObj.TryGetValue(oId, out var value) ? value.ToList() : new List<SubscriptionRecord>();
+        var objId = objectId ?? string.Empty;
+        return recipientId != null ?
+            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionRecord>() :
+            _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : new List<SubscriptionRecord>();
     }
 
     public SubscriptionRecord GetSubscription(string recipientId, string objectId)

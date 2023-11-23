@@ -613,7 +613,7 @@ public class FileSharing
         var linkAccess = FileShare.Restrict;
         var result = new List<AceWrapper>();
         var shares = await _fileSecurity.GetSharesAsync(entry);
-        var isRoom = entry is Folder<T> { Private: false } room && DocSpaceHelper.IsRoom(room.FolderType);
+        var isRoom = entry is Folder<T> { SettingsPrivate: false } room && DocSpaceHelper.IsRoom(room.FolderType);
         var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
         var records = shares

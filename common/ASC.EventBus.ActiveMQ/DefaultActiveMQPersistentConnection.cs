@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Apache.NMS.AMQP;
+
 namespace ASC.EventBus.ActiveMQ;
 
 public class DefaultActiveMQPersistentConnection
@@ -141,9 +143,9 @@ public class DefaultActiveMQPersistentConnection
                 _connection.ConnectionInterruptedListener += OnConnectionInterruptedListener;
                 _connection.ConnectionResumedListener += OnConnectionResumedListener;
 
-                if (_connection is Apache.NMS.AMQP.NmsConnection)
+                if (_connection is NmsConnection)
                 {
-                    var hostname = ((Apache.NMS.AMQP.NmsConnection)_connection).ConnectionInfo.ConfiguredUri.Host;
+                    var hostname = ((NmsConnection)_connection).ConnectionInfo.ConfiguredUri.Host;
 
                     _logger.InformationActiveMQAcquiredPersistentConnection(hostname);
 

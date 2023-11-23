@@ -182,7 +182,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
+
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension.Trim().ToLower();
@@ -268,7 +268,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
+
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension.Trim().ToLower();
@@ -677,6 +677,16 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();
+    }
+
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
     }
 }
 

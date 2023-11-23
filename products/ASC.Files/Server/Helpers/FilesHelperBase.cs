@@ -84,7 +84,7 @@ public abstract class FilesHelperBase
     public IFormFile GetFileFromRequest(IModelWithFile model)
     {
         IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext.Request.Form.Files;
-        if (files != null && files.Any())
+        if (files.Any())
         {
             return files.First();
         }

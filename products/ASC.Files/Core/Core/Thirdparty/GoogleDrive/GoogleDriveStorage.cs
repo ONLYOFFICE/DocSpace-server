@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using DriveFile = Google.Apis.Drive.v3.Data.File;
-using MimeMapping = ASC.Common.Web.MimeMapping;
 
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
@@ -241,12 +240,9 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
 
         var tempBuffer = _tempStream.Create();
         await using var str = await response.Content.ReadAsStreamAsync();
-        if (str != null)
-        {
-            await str.CopyToAsync(tempBuffer);
-            await tempBuffer.FlushAsync();
-            tempBuffer.Seek(offset, SeekOrigin.Begin);
-        }
+        await str.CopyToAsync(tempBuffer);
+        await tempBuffer.FlushAsync();
+        tempBuffer.Seek(offset, SeekOrigin.Begin);
 
         return tempBuffer;
     }

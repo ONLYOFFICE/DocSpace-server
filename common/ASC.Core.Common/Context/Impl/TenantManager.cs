@@ -266,13 +266,13 @@ public class TenantManager
         if (context != null)
         {
             tenant = context.Items[CurrentTenant] as Tenant;
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 tenant = GetTenant(context.Request.Url().Host);
                 context.Items[CurrentTenant] = tenant;
             }
 
-            if (tenant == null && context.Request != null)
+            if (tenant == null)
             {
                 var origin = context.Request.Headers[HeaderNames.Origin].FirstOrDefault();
 

@@ -88,6 +88,7 @@ public abstract class FileEntry : ICloneable
     public string OriginTitle { get; set; }
     public string OriginRoomTitle { get; set; }
     public FileShareRecord ShareRecord { get; set; }
+    public int Order { get; set; }
 
     private string _modifiedByString;
     private string _createByString;

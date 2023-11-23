@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Apache.NMS;
+
+using ASC.EventBus.Serializers;
+
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
@@ -215,7 +219,7 @@ public static class ServiceCollectionExtension
                 var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
                 var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
-                var serializer = new EventBus.Serializers.ProtobufSerializer();
+                var serializer = new ProtobufSerializer();
 
                 var subscriptionClientName = "asc_event_bus_default_queue";
 
@@ -242,7 +246,7 @@ public static class ServiceCollectionExtension
 
                 var logger = sp.GetRequiredService<ILogger<DefaultActiveMQPersistentConnection>>();
 
-                var factory = new Apache.NMS.NMSConnectionFactory(activeMQConfiguration.Uri);
+                var factory = new NMSConnectionFactory(activeMQConfiguration.Uri);
 
                 var retryCount = 5;
 
@@ -263,7 +267,7 @@ public static class ServiceCollectionExtension
                 var logger = sp.GetRequiredService<ILogger<EventBusActiveMQ>>();
                 var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
-                var serializer = new EventBus.Serializers.ProtobufSerializer();
+                var serializer = new ProtobufSerializer();
 
                 var subscriptionClientName = "asc_event_bus_default_queue";
 
