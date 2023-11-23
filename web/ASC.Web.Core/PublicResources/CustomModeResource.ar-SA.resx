@@ -233,11 +233,7 @@ $TrulyYours</value>
 
 عملية مسح البيانات من المستخدم "$FromUserName":"$FromUserLink" قد تمت بنجاح
 
-يسمح بعملية الحذف للبيانات الشخصية بشكل مجاني لـ:
-
-# المستندات- $DocsSpace
-# البريد- $MailSpace
-# الحوار- $TalkSpace</value>
+يسمح بعملية الحذف للبيانات الشخصية بشكل مجاني لـ: $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.العنوان الفرعي. تم تسجيل بوابة جديدة
