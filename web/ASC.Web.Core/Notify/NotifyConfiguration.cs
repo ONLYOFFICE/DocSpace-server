@@ -336,7 +336,8 @@ public class NotifyTransferRequest : INotifyEngineAction
         request.Arguments.Add(new TagValue(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name));
         request.Arguments.Add(new TagValue(CommonTags.ImagePath, _studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/')));
 
-        if (request.Arguments.TrueForAll(x => x.Tag != CommonTags.TopGif))
+        var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
+        if (topGifTag == null || string.IsNullOrEmpty((string)topGifTag.Value))
         {
             await AddLetterLogoAsync(request);
         }
