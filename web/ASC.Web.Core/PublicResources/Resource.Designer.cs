@@ -1294,7 +1294,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account and search for contacts..
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account..
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {
@@ -1920,6 +1920,87 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorUserNotFoundByEmail {
             get {
                 return ResourceManager.GetString("ErrorUserNotFoundByEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong plugin archive.
+        /// </summary>
+        public static string ErrorWebPluginArchive {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin already exist.
+        /// </summary>
+        public static string ErrorWebPluginExist {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong file extension.
+        /// </summary>
+        public static string ErrorWebPluginFileExtension {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginFileExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File size exceeds limit.
+        /// </summary>
+        public static string ErrorWebPluginFileSize {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginFileSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Сhanges to system plugins are prohibited.
+        /// </summary>
+        public static string ErrorWebPluginForbiddenSystem {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginForbiddenSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong plugin name.
+        /// </summary>
+        public static string ErrorWebPluginName {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No input file.
+        /// </summary>
+        public static string ErrorWebPluginNoInputFile {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginNoInputFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plugin not found.
+        /// </summary>
+        public static string ErrorWebPluginNotFound {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To many input files.
+        /// </summary>
+        public static string ErrorWebPluginToManyInputFiles {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginToManyInputFiles", resourceCulture);
             }
         }
         

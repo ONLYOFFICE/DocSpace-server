@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Krajina</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Externý odkaz vytvorený: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Externý odkaz odstránený: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Externý odkaz aktualizovaný: {0}. Rola: {1}</value>
+  </data>
 </root>

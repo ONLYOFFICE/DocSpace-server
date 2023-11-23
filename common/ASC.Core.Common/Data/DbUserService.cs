@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,11 +34,6 @@ public class EFUserService : IUserService
     private readonly IDbContextFactory<UserDbContext> _dbContextFactory;
     private readonly MachinePseudoKeys _machinePseudoKeys;
     private readonly IMapper _mapper;
-
-    private static readonly Expression<Func<UserWithGroup, int>> _orderByUserType = u => 
-        u.Group == null ? 2 : 
-        u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
-        u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
 
     public EFUserService(
         IDbContextFactory<UserDbContext> dbContextFactory,
@@ -269,6 +264,7 @@ public class EFUserService : IUserService
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
         long limit,
@@ -286,7 +282,6 @@ public class EFUserService : IUserService
         q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
 
         var orderedQuery = q.OrderBy(r => r.ActivationStatus);
-        q = orderedQuery;
 
         if (!string.IsNullOrEmpty(sortBy))
         {
@@ -297,9 +292,15 @@ public class EFUserService : IUserService
                         !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
                                        g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
                     from @group in joinedGroup.DefaultIfEmpty()
-                    select new UserWithGroup { User = user, Group = @group }).OrderBy(r => r.User.ActivationStatus);
+                    select new UserWithGroup { User = user, Group = @group });
 
-                q = (sortOrderAsc ? q1.ThenBy(_orderByUserType) : q1.ThenByDescending(_orderByUserType)).Select(r => r.User);
+                Expression<Func<UserWithGroup, int>> orderByUserType = u => 
+                    u.User.Id == ownerId ? 0 :
+                    u.Group == null ? 2 : 
+                    u.Group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 : 
+                    u.Group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4;
+                
+                q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
             }
             else
             {

@@ -132,11 +132,9 @@ Vítejte v ONLYOFFICE DocSpace! Váš uživatelský profil byl úspěšně přid
 
 $OrangeButton
 
-Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"https://helpcenter.onlyoffice.com/" nebo se zeptejte našeho "týmu podpory":"https://www.onlyoffice.com/support-contact-form.aspx".
+Pokud potřebujete pomoc, projděte si naše "Centrum nápovědy":"${__HelpLink}" nebo se zeptejte našeho "týmu podpory":"${__SupportLink}".
 
-S přátelským pozdravem, 
-Tým ONLYOFFICE
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Chcete změnit heslo ke svému účtu cloud office? Klikněte na tlačítko níže pro potvrzení.
@@ -170,8 +168,7 @@ h3.Nejprve se podívejte, co můžete v ONLYOFFICE dělat:
 
 Dokumenty můžete také upravovat offline pomocí našich bezplatných "desktopových editorů":"https://www.onlyoffice.com/download-desktop.aspx" nebo si pořiďte mobilní editační sadu pro zařízení se systémem "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" nebo "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-S pozdravem,
-tým ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Chcete změnit e-mail na svém účtu pro cloudovou kancelář?
@@ -203,25 +200,20 @@ Potvrdit ukončení účtu
 
 *Poznámka*: Po smazání bude váš účet a všechny údaje s ním spojené trvale vymazány v souladu s naším "Prohlášením o ochraně osobních údajů":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Více informací o ukončení účtu":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Více informací o ukončení účtu":"${__HelpLink}/administration/configuration.aspx "
 
 Pokud nechcete pokračovat, ignorujte tento e-mail. 
 
-V případě dotazů nás prosím kontaktujte na adrese "support@onlyoffice.com":"mailto:support@onlyoffice.com".
+V případě dotazů nás prosím kontaktujte na adrese "${__SupportEmail}":"mailto:${__SupportEmail}".
 
-S pozdravem,
-tým ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Vážený/vážená $UserName,
 
 Proces odebrání dat uživatele "$FromUserName":"$FromUserLink" byl úspěšně dokončen.
 
-Výmaz osobních údajů povolen:
-
-# Dokumenty - $DocsSpace
-# Mail - $MailSpace
-# Talk - $TalkSpace</value>
+Výmaz osobních údajů umožnilo uvolnit $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Nový portál byl zaregistrován

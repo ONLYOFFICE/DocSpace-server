@@ -395,13 +395,13 @@
     <value>Twitter</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
+    <value>ID клиента</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Секрет клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Twitter и поиска контактов.</value>
+    <value>Подключите приложение для входа на портал по учетной записи Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в ONLYOFFICE, используя Twitter, и привязывать Twitter-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков Twitter и создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
@@ -446,10 +446,10 @@
     <value>Yahoo</value>
   </data>
   <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>Client ID</value>
+    <value>ID клиента</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Секрет клиента</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Подключите приложение для импорта контактов Yahoo.</value>
@@ -993,5 +993,20 @@
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Слишком много попыток входа. Пожалуйста, попробуйте позже</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID клиента Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Секрет клиента Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли входить в ONLYOFFICE, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
   </data>
 </root>

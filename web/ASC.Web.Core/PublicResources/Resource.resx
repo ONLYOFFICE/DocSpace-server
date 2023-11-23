@@ -529,7 +529,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Twitter account and search for contacts.</value>
+    <value>Enable the application to sign in to the portal using a Twitter account.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
@@ -1067,6 +1067,33 @@
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Zoom accounts. {0}Go to the Zoom Developers website and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Wrong plugin archive</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin already exist</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Wrong file extension</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>File size exceeds limit</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Сhanges to system plugins are prohibited</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Wrong plugin name</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>No input file</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin not found</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>To many input files</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
     <value>The last full access space cannot be deleted</value>

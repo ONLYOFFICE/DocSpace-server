@@ -102,8 +102,7 @@ Siz indicə şəxsi istifadə üçün ONLYOFFICE həllində hesabı qeydiyyatdan
 
 Əgər linki aça bilmirsinizsə, lütfən, aşağıdakı "$InviteLink":"$InviteLink" i kopyalayın və onu brauzerinizin ünvan çubuğuna yapışdırın.
 
-Hörmətlə,
-ONLYOFFICE komandası</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com saytında hesabınıza xitam verilməsini xahiş etmisiniz. Sorğunu tamamlamaq üçün linkə daxil olun (link 7 gün ərzində aktivdir):
@@ -179,11 +178,10 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin.
 
-$ GreenButton
+$OrangeButton
 
-Köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" baxın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
-Hörmətlə,
-ONLYOFFICE Komandası
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+Köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"${__HelpLink}" baxın və ya "dəstək komandamızdan":"${__SupportLink}" soruşun.
+
+$TrulyYours</value>
   </data>
 </root>

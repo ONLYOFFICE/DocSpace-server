@@ -527,7 +527,7 @@
     <value>Numer telefonu z Twilio (wymagany do autoryzacji SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Twitter i wyszukaj kontakty.</value>
+    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Włącz aplikację dla importu kontaktów Yahoo.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TfaAppNotAvailable" xml:space="preserve">
     <value>Ustawienia aplikacji 2FA są niedostępne</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Identyfikator klienta Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Sekret klienta Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w ONLYOFFICE za pośrednictwem konta Zoom. {0}Przejdź na stronę Zoom dla programistów i utwórz nową aplikację dla integracji z ONLYOFFICE. Wprowadź otrzymane dane poniżej:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Za dużo prób logowania. Spróbuj ponownie później</value>
   </data>
 </root>
