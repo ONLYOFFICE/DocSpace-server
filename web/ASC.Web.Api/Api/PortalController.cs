@@ -237,7 +237,7 @@ public class PortalController : ControllerBase
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
         var docServiceQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
         
