@@ -48,6 +48,10 @@ application:
       name: files:write
       group: files
       type: write
+    -
+      name: openid
+      group: openid
+      type: openid
 
 messaging:
   rabbitmq:

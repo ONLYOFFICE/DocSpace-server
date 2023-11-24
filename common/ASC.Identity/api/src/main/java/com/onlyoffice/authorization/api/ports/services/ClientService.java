@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClientService implements ClientCleanupUsecases, ClientCreationUsecases,
         ClientMutationUsecases, ClientRetrieveUsecases {
-    private final String SCOPE_OPENID = "openid";
     private final RabbitMQConfiguration configuration;
 
     private final ClientPersistenceMutationUsecases mutationUsecases;
@@ -109,7 +108,6 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         log.info("Trying to create a new client");
         message.setClientId(UUID.randomUUID().toString());
         message.setClientSecret(cipher.encrypt(UUID.randomUUID().toString()));
-        message.getScopes().add(SCOPE_OPENID);
         MDC.put("clientId", message.getClientId());
         log.info("Credentials have been generated for a new client");
         MDC.clear();
@@ -125,7 +123,6 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         for (ClientMessage message : messages) {
             try {
                 MDC.put("clientId", message.getClientId());
-                message.getScopes().add(SCOPE_OPENID);
                 log.debug("Trying to save a new client", message);
                 mutationUsecases.saveClient(ClientMapper.INSTANCE.fromMessageToEntity(message));
                 log.debug("Client has been saved", message);
@@ -167,7 +164,6 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                     ClientMapper.INSTANCE.fromQueryToMessage(client));
 
             client.setClientSecret(secret);
-            client.getScopes().add(SCOPE_OPENID);
             return client;
         } catch (Exception e) {
             log.error("Could not create a new client creation task", e);
