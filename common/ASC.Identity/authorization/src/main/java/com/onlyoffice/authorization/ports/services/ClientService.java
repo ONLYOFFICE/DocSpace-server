@@ -84,7 +84,7 @@ public class ClientService implements ClientRetrieveUsecases {
                 )
                 .clientSettings(ClientSettings
                         .builder()
-                        .requireProofKey(true)
+                        .requireProofKey(false)
                         .requireAuthorizationConsent(true)
                         .build()
                 )
