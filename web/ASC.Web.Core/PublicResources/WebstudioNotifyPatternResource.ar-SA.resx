@@ -325,16 +325,16 @@
     <value>احصل على تطبيقات ONLYOFFICE المجانية</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>عدة نصائح للعمل الفعال على مستنداتك</value>
+    <value>5 نصائح للعمل بفعالية على مستنداتك</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>عدة نصائح للعمل الفعال على مستنداتك</value>
+    <value>5 نصائح للعمل بفعالية على مستنداتك</value>
   </data>
   <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>عدة نصائح للعمل الفعال على مستنداتك</value>
+    <value>5 نصائح للعمل بفعالية على مستنداتك</value>
   </data>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>عدة نصائح للعمل الفعال على مستنداتك</value>
+    <value>5 نصائح للعمل بفعالية على مستنداتك</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>اكتشف اشتراك الأعمال في ONLYOFFICE DocSpace</value>
@@ -1574,7 +1574,7 @@ $OrangeButton
 
 *ملاحظة*: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية إلغاء تنشيط البوابة خلال تلك الفترة.
 
-يمكنك إعادة تنشيط البوابة الإلكترونية في أي وقت بالنقر فوق الرابط التالي: p=."Reactivate Portal":"$ActivateUrl" (هذا الرابط ليس له حد زمني)
+يمكنك إعادة تنشيط البوابة الإلكترونية في أي وقت بالنقر فوق الرابط التالي: p=."إعادة تفعيل البوابة":"$ActivateUrl" (هذا الرابط ليس له حد زمني)
 
 إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على "${__SalesEmail}":"mailto:${__SalesEmail}"
 
@@ -1592,7 +1592,7 @@ $OrangeButton
 _ملاحظة_: هذا الرابط صالح لمدة 7 أيام فقط. يرجى إكمال عملية إلغاء تنشيط البوابة خلال تلك الفترة.
 
 يمكنك إعادة تنشيط البوابة الإلكترونية في أي وقت بالنقر فوق الارتباط التالي:
-[Reactivate Portal]($ActivateUrl) (هذا الرابط ليس له حد زمني)
+[إعادة تفعيل البوابة]($ActivateUrl) (هذا الرابط ليس له حد زمني)
 
 إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة فلا تتردد في الاتصال بنا على [${__SalesEmail}](mailto:${__SalesEmail})
 
@@ -2325,7 +2325,7 @@ $OrangeButton
 $TrulyYours</comment>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
-    <value>إتقانONLYOFFICE DocSpace  مع الفيديو التوضيحي</value>
+    <value>إتقانONLYOFFICE DocSpace مع الفيديو التوضيحي</value>
   </data>
   <data name="BestRegardsText" xml:space="preserve">
     <value>مع أطيب التحيات، فريق دعم ONLYOFFICE</value>

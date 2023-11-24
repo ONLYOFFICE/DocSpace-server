@@ -792,16 +792,16 @@ $TrulyYours</value>
     <value>${__VirtualRootPath}의 프로필이 변경되었습니다</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>효과적인 문서 작업을 위한 5 가지 팁</value>
+    <value>효과적인 문서 작업을 위한 5가지 팁</value>
   </data>
   <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>효과적인 문서 작업을 위한 5 가지 팁</value>
+    <value>효과적인 문서 작업을 위한 5가지 팁</value>
   </data>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>효과적인 문서 작업을 위한 5 가지 팁</value>
+    <value>효과적인 문서 작업을 위한 5가지 팁</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>효과적인 문서 작업을 위한 5 가지 팁</value>
+    <value>효과적인 문서 작업을 위한 5가지 팁</value>
   </data>
   <data name="subject_smtp_test" xml:space="preserve">
     <value>SMTP 테스트 메시지</value>
