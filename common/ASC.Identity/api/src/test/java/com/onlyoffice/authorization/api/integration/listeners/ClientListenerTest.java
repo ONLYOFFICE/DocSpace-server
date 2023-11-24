@@ -66,6 +66,7 @@ public class ClientListenerTest extends ContainerBase {
                 .name("mock")
                 .scopes(Set.of("mock"))
                 .redirectUris(Set.of("http://example.com"))
+                .allowedOrigins(Set.of("http://example.com"))
                 .logoutRedirectUri("http://example.com")
                 .description("mock")
                 .termsUrl("mock")
@@ -83,6 +84,7 @@ public class ClientListenerTest extends ContainerBase {
                 .scopes(Set.of("mock"))
                 .redirectUris(Set.of("http://example.com"))
                 .logoutRedirectUri("http://example.com")
+                .allowedOrigins(Set.of("http://example.com"))
                 .description("mock")
                 .termsUrl("mock")
                 .build(), 1, "http://127.0.0.1");
