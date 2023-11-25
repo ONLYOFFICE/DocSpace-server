@@ -26,12 +26,7 @@
 
 namespace ASC.Core.Common.Security;
 
-public class CustomClaimsPrincipal : ClaimsPrincipal
+public class CustomClaimsPrincipal(ClaimsIdentity claimsIdentity, IIdentity identity) : ClaimsPrincipal(claimsIdentity)
 {
-    public override IIdentity Identity { get; }
-
-    public CustomClaimsPrincipal(ClaimsIdentity claimsIdentity, IIdentity identity) : base(claimsIdentity)
-    {
-        Identity = identity;
-    }
+    public override IIdentity Identity { get; } = identity;
 }

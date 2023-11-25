@@ -179,7 +179,14 @@ public class UserPhotoManagerCache
 }
 
 [Scope(Additional = typeof(ResizeWorkerItemExtension))]
-public class UserPhotoManager
+public class UserPhotoManager(UserManager userManager,
+    WebImageSupplier webImageSupplier,
+    TenantManager tenantManager,
+    StorageFactory storageFactory,
+    UserPhotoManagerCache userPhotoManagerCache,
+    ILogger<UserPhotoManager> logger,
+    IDistributedTaskQueueFactory queueFactory,
+    SettingsManager settingsManager)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_photo_manager";
 
@@ -189,41 +196,13 @@ public class UserPhotoManager
                 @"(?'user'\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1}){1}" +
                 @"_(?'kind'orig|size){1}_(?'size'(?'width'[0-9]{1,5})-{1}(?'height'[0-9]{1,5})){0,1}\..*", RegexOptions.Compiled);
 
-    private readonly UserManager _userManager;
-    private readonly WebImageSupplier _webImageSupplier;
-    private readonly TenantManager _tenantManager;
-    private readonly StorageFactory _storageFactory;
-    private readonly UserPhotoManagerCache _userPhotoManagerCache;
-    private readonly SettingsManager _settingsManager;
-    private readonly ILogger<UserPhotoManager> _log;
-
     //note: using auto stop queue
-    private readonly DistributedTaskQueue _resizeQueue;//TODO: configure
-
-    public UserPhotoManager(
-        UserManager userManager,
-        WebImageSupplier webImageSupplier,
-        TenantManager tenantManager,
-        StorageFactory storageFactory,
-        UserPhotoManagerCache userPhotoManagerCache,
-        ILogger<UserPhotoManager> logger,
-        IDistributedTaskQueueFactory queueFactory,
-        SettingsManager settingsManager)
-    {
-        _resizeQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-        _userManager = userManager;
-        _webImageSupplier = webImageSupplier;
-        _tenantManager = tenantManager;
-        _storageFactory = storageFactory;
-        _userPhotoManagerCache = userPhotoManagerCache;
-        _settingsManager = settingsManager;
-        _log = logger;
-    }
+    private readonly DistributedTaskQueue _resizeQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);//TODO: configure
 
     private string _defaultAbsoluteWebPath;
     public string GetDefaultPhotoAbsoluteWebPath()
     {
-        return _defaultAbsoluteWebPath ??= _webImageSupplier.GetAbsoluteWebPath(_defaultAvatar);
+        return _defaultAbsoluteWebPath ??= webImageSupplier.GetAbsoluteWebPath(_defaultAvatar);
     }
 
     public async Task<string> GetRetinaPhotoURL(Guid userID)
@@ -325,7 +304,7 @@ public class UserPhotoManager
 
         try
         {
-            var data = await _userManager.GetUserPhotoAsync(userID);
+            var data = await userManager.GetUserPhotoAsync(userID);
             string photoUrl;
             string fileName;
             if (data == null || data.Length == 0)
@@ -338,7 +317,7 @@ public class UserPhotoManager
                 (photoUrl, fileName) = await SaveOrUpdatePhotoAsync(userID, data, -1, new Size(-1, -1), false);
             }
 
-            _userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, (await _tenantManager.GetCurrentTenantAsync()).Id);
+            userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, (await tenantManager.GetCurrentTenantAsync()).Id);
 
             return photoUrl;
         }
@@ -379,14 +358,14 @@ public class UserPhotoManager
 
         try
         {
-            var data = await _userManager.GetUserPhotoAsync(userID);
+            var data = await userManager.GetUserPhotoAsync(userID);
 
             if (data == null || data.Length == 0)
             {
                 //empty photo. cache default
                 var photoUrl = GetDefaultPhotoAbsoluteWebPath(size);
 
-                _userPhotoManagerCache.AddToCache(userID, size, "default", (await _tenantManager.GetCurrentTenantAsync()).Id);
+                userPhotoManagerCache.AddToCache(userID, size, "default", (await tenantManager.GetCurrentTenantAsync()).Id);
 
                 return photoUrl;
             }
@@ -403,11 +382,11 @@ public class UserPhotoManager
     {
         return (size) switch
         {
-            _ when size.Width == RetinaFotoSize.Width && size.Height == RetinaFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultRetinaAvatar),
-            _ when size.Width == MaxFotoSize.Width && size.Height == MaxFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultAvatar),
-            _ when size.Width == BigFotoSize.Width && size.Height == BigFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultBigAvatar),
-            _ when size.Width == SmallFotoSize.Width && size.Height == SmallFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultSmallAvatar),
-            _ when size.Width == MediumFotoSize.Width && size.Height == MediumFotoSize.Height => _webImageSupplier.GetAbsoluteWebPath(_defaultMediumAvatar),
+            _ when size.Width == RetinaFotoSize.Width && size.Height == RetinaFotoSize.Height => webImageSupplier.GetAbsoluteWebPath(_defaultRetinaAvatar),
+            _ when size.Width == MaxFotoSize.Width && size.Height == MaxFotoSize.Height => webImageSupplier.GetAbsoluteWebPath(_defaultAvatar),
+            _ when size.Width == BigFotoSize.Width && size.Height == BigFotoSize.Height => webImageSupplier.GetAbsoluteWebPath(_defaultBigAvatar),
+            _ when size.Width == SmallFotoSize.Width && size.Height == SmallFotoSize.Height => webImageSupplier.GetAbsoluteWebPath(_defaultSmallAvatar),
+            _ when size.Width == MediumFotoSize.Width && size.Height == MediumFotoSize.Height => webImageSupplier.GetAbsoluteWebPath(_defaultMediumAvatar),
             _ => GetDefaultPhotoAbsoluteWebPath()
         };
     }
@@ -417,12 +396,12 @@ public class UserPhotoManager
 
     private async Task<string> SearchInCache(Guid userId, Size size)
     {
-        if (!_userPhotoManagerCache.IsCacheLoadedForTenant((await _tenantManager.GetCurrentTenantAsync()).Id))
+        if (!userPhotoManagerCache.IsCacheLoadedForTenant((await tenantManager.GetCurrentTenantAsync()).Id))
         {
             await LoadDiskCache();
         }
 
-        var fileName = _userPhotoManagerCache.SearchInCache(userId, size);
+        var fileName = userPhotoManagerCache.SearchInCache(userId, size);
 
         if (fileName != null && fileName.StartsWith("default"))
         {
@@ -443,8 +422,8 @@ public class UserPhotoManager
     private async Task LoadDiskCache()
     {
         await _semaphore.WaitAsync();
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        if (!_userPhotoManagerCache.IsCacheLoadedForTenant(tenantId))
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        if (!userPhotoManagerCache.IsCacheLoadedForTenant(tenantId))
         {
             try
             {
@@ -464,23 +443,23 @@ public class UserPhotoManager
                                 //Parse size
                                 size = new Size(int.Parse(match.Groups["width"].Value), int.Parse(match.Groups["height"].Value));
                             }
-                            _userPhotoManagerCache.AddToCache(parsedUserId, size, fileName,tenantId);
+                            userPhotoManagerCache.AddToCache(parsedUserId, size, fileName,tenantId);
                         }
                     }
                 }
-                _userPhotoManagerCache.SetCacheLoadedForTenant(true,tenantId);
+                userPhotoManagerCache.SetCacheLoadedForTenant(true,tenantId);
             }
             catch (Exception err)
             {
-                _log.ErrorLoadDiskCache(err);
+                logger.ErrorLoadDiskCache(err);
             }
         }
         _semaphore.Release();
     }
     public async Task ResetThumbnailSettingsAsync(Guid userId)
     {
-        var thumbSettings = _settingsManager.GetDefault<UserPhotoThumbnailSettings>();
-        await _settingsManager.SaveAsync(thumbSettings, userId);
+        var thumbSettings = settingsManager.GetDefault<UserPhotoThumbnailSettings>();
+        await settingsManager.SaveAsync(thumbSettings, userId);
     }
 
     public async Task<(string, string)> SaveOrUpdatePhoto(Guid userID, byte[] data)
@@ -490,7 +469,7 @@ public class UserPhotoManager
 
     public async Task RemovePhotoAsync(Guid idUser)
     {
-        await _userManager.SaveUserPhotoAsync(idUser, null);
+        await userManager.SaveUserPhotoAsync(idUser, null);
         try
         {
             var storage = await GetDataStoreAsync();
@@ -500,7 +479,7 @@ public class UserPhotoManager
         {
             if (e.InnerException is DirectoryNotFoundException exc)
             {
-                _log.ErrorRemovePhoto(exc);
+                logger.ErrorRemovePhoto(exc);
             }
             else
             {
@@ -509,17 +488,17 @@ public class UserPhotoManager
         }
         catch (DirectoryNotFoundException e)
         {
-            _log.ErrorRemovePhoto(e);
+            logger.ErrorRemovePhoto(e);
         }
 
-        await _userManager.SaveUserPhotoAsync(idUser, null);
-        _userPhotoManagerCache.ClearCache(idUser, await _tenantManager.GetCurrentTenantIdAsync());
+        await userManager.SaveUserPhotoAsync(idUser, null);
+        userPhotoManagerCache.ClearCache(idUser, await tenantManager.GetCurrentTenantIdAsync());
     }
 
     public async Task SyncPhotoAsync(Guid userID, byte[] data)
     {
         data = TryParseImage(data, -1, OriginalFotoSize, out _, out var width, out var height);
-        await _userManager.SaveUserPhotoAsync(userID, data);
+        await userManager.SaveUserPhotoAsync(userID, data);
         await SetUserPhotoThumbnailSettingsAsync(userID, width, height);
         //   _userPhotoManagerCache.ClearCache(userID, _tenantManager.GetCurrentTenant().Id);
     }
@@ -534,7 +513,7 @@ public class UserPhotoManager
 
         if (saveInCoreContext)
         {
-            await _userManager.SaveUserPhotoAsync(userID, data);
+            await userManager.SaveUserPhotoAsync(userID, data);
             await SetUserPhotoThumbnailSettingsAsync(userID, width, height);
             // _userPhotoManagerCache.ClearCache(userID, _tenantManager.GetCurrentTenant().Id);
         }
@@ -558,14 +537,14 @@ public class UserPhotoManager
             await Task.WhenAll(t1, t2, t3, t4, t5);
         }
         
-        _userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, await _tenantManager.GetCurrentTenantIdAsync());
+        userPhotoManagerCache.AddToCache(userID, Size.Empty, fileName, await tenantManager.GetCurrentTenantIdAsync());
         
         return (photoUrl, fileName);
     }
 
     private async Task SetUserPhotoThumbnailSettingsAsync(Guid userId, int width, int height)
     {
-        var settings = await _settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userId);
+        var settings = await settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userId);
 
         if (!settings.IsDefault)
         {
@@ -581,7 +560,7 @@ public class UserPhotoManager
             width >= height ? new Point(pos, 0) : new Point(0, pos),
             new Size(min, min));
 
-        await _settingsManager.SaveAsync(settings, userId);
+        await settingsManager.SaveAsync(settings, userId);
     }
 
     private byte[] TryParseImage(byte[] data, long maxFileSize, Size maxsize, out IImageFormat imgFormat, out int width, out int height)
@@ -679,7 +658,7 @@ public class UserPhotoManager
             throw new ImageWeightLimitException();
         }
 
-        var resizeTask = new ResizeWorkerItem(await _tenantManager.GetCurrentTenantIdAsync(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await _settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
+        var resizeTask = new ResizeWorkerItem(await tenantManager.GetCurrentTenantIdAsync(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
         var key = $"{userID}{size}";
         resizeTask["key"] = key;
 
@@ -705,7 +684,7 @@ public class UserPhotoManager
     {
         try
         {
-            await _tenantManager.SetCurrentTenantAsync(item.TenantId);
+            await tenantManager.SetCurrentTenantAsync(item.TenantId);
 
             var data = item.Data;
             using var stream = new MemoryStream(data);
@@ -730,7 +709,7 @@ public class UserPhotoManager
             using var stream2 = new MemoryStream(data);
             await item.DataStore.SaveAsync(fileName, stream2);
 
-            _userPhotoManagerCache.AddToCache(item.UserId, item.Size, fileName, item.TenantId);
+            userPhotoManagerCache.AddToCache(item.UserId, item.Size, fileName, item.TenantId);
         }
         catch (ArgumentException error)
         {
@@ -800,7 +779,7 @@ public class UserPhotoManager
         IImageFormat format;
         try
         {
-            var data = await _userManager.GetUserPhotoAsync(userID);
+            var data = await userManager.GetUserPhotoAsync(userID);
             if (data != null)
             {
                 var img = Image.Load(data);
@@ -830,7 +809,7 @@ public class UserPhotoManager
             photoUrl = (await store.SaveAsync(fileName, s)).ToString();
         }
 
-        _userPhotoManagerCache.AddToCache(userID, size, fileName, (await _tenantManager.GetCurrentTenantAsync()).Id);
+        userPhotoManagerCache.AddToCache(userID, size, fileName, (await tenantManager.GetCurrentTenantAsync()).Id);
         return photoUrl;
     }
 
@@ -864,7 +843,7 @@ public class UserPhotoManager
         }
         catch (Exception err)
         {
-            _log.ErrorGetUserPhotoData(err);
+            logger.ErrorGetUserPhotoData(err);
             return null;
         }
     }
@@ -872,7 +851,7 @@ public class UserPhotoManager
     private IDataStore _dataStore;
     private async ValueTask<IDataStore> GetDataStoreAsync()
     {
-        return _dataStore ??= await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), "userPhotos");
+        return _dataStore ??= await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "userPhotos");
     }
 
     public static CacheSize ToCache(Size size)
@@ -898,15 +877,9 @@ public class UnknownImageFormatException : Exception
     public UnknownImageFormatException(Exception inner) : base("unknown image file type", inner) { }
 }
 
-public class ImageWeightLimitException : Exception
-{
-    public ImageWeightLimitException() : base("image width is too large") { }
-}
+public class ImageWeightLimitException() : Exception("image width is too large");
 
-public class ImageSizeLimitException : Exception
-{
-    public ImageSizeLimitException() : base("image size is too large") { }
-}
+public class ImageSizeLimitException() : Exception("image size is too large");
 
 #endregion
 

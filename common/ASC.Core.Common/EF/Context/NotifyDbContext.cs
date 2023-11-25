@@ -26,15 +26,10 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class NotifyDbContext : DbContext
+public class NotifyDbContext(DbContextOptions<NotifyDbContext> options) : DbContext(options)
 {
     public DbSet<NotifyInfo> NotifyInfo { get; set; }
     public DbSet<NotifyQueue> NotifyQueue { get; set; }
-
-    public NotifyDbContext(DbContextOptions<NotifyDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

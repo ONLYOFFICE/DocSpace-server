@@ -28,19 +28,13 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class PeopleActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; }
-    public ProductType Product { get; }
-
-    public PeopleActionMapper()
+    public List<IModuleActionMapper> Mappers { get; } = new()
     {
-        Product = ProductType.People;
+        new UsersActionMapper(),
+        new GroupsActionMapper()
+    };
 
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new UsersActionMapper(),
-            new GroupsActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.People;
 }
 
 internal class UsersActionMapper : IModuleActionMapper

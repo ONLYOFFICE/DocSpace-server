@@ -27,28 +27,12 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class BackupStorageFactory
+public class BackupStorageFactory(ConsumerBackupStorage consumerBackupStorage,
+    LocalBackupStorage localBackupStorage,
+    DocumentsBackupStorage documentsBackupStorage,
+    TenantManager tenantManager,
+    ILogger<BackupStorageFactory> logger)
 {
-    private readonly DocumentsBackupStorage _documentsBackupStorage;
-    private readonly ILogger<BackupStorageFactory> _logger;
-    private readonly LocalBackupStorage _localBackupStorage;
-    private readonly ConsumerBackupStorage _consumerBackupStorage;
-    private readonly TenantManager _tenantManager;
-
-    public BackupStorageFactory(
-        ConsumerBackupStorage consumerBackupStorage,
-        LocalBackupStorage localBackupStorage,
-        DocumentsBackupStorage documentsBackupStorage,
-        TenantManager tenantManager,
-        ILogger<BackupStorageFactory> logger)
-    {
-        _documentsBackupStorage = documentsBackupStorage;
-        _logger = logger;
-        _localBackupStorage = localBackupStorage;
-        _consumerBackupStorage = consumerBackupStorage;
-        _tenantManager = tenantManager;
-    }
-
     public async Task<IBackupStorage> GetBackupStorageAsync(BackupRecord record)
     {
         try
@@ -57,7 +41,7 @@ public class BackupStorageFactory
         }
         catch (Exception error)
         {
-            _logger.ErrorCantGetBackupStorage(record.Id, error);
+            logger.ErrorCantGetBackupStorage(record.Id, error);
 
             return null;
         }
@@ -70,18 +54,18 @@ public class BackupStorageFactory
             case BackupStorageType.Documents:
             case BackupStorageType.ThridpartyDocuments:
                 {
-                    await _documentsBackupStorage.InitAsync(tenantId);
+                    await documentsBackupStorage.InitAsync(tenantId);
 
-                    return _documentsBackupStorage;
+                    return documentsBackupStorage;
                 }
             case BackupStorageType.DataStore:
                 {
-                    await _consumerBackupStorage.InitAsync(tenantId);
+                    await consumerBackupStorage.InitAsync(tenantId);
 
-                    return _consumerBackupStorage;
+                    return consumerBackupStorage;
                 }
             case BackupStorageType.Local:
-                return _localBackupStorage;
+                return localBackupStorage;
             case BackupStorageType.ThirdPartyConsumer:
                 {
                     if (storageParams == null)
@@ -89,10 +73,10 @@ public class BackupStorageFactory
                         return null;
                     }
 
-                    await _tenantManager.SetCurrentTenantAsync(tenantId);
-                    await _consumerBackupStorage.InitAsync(storageParams);
+                    await tenantManager.SetCurrentTenantAsync(tenantId);
+                    await consumerBackupStorage.InitAsync(storageParams);
 
-                    return _consumerBackupStorage;
+                    return consumerBackupStorage;
                 }
             default:
                 throw new InvalidOperationException("Unknown storage type.");

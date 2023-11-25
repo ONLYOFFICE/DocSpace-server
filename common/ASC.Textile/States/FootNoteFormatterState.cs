@@ -27,14 +27,9 @@
 namespace Textile.States;
 
 [FormatterState(PatternBegin + @"fn[0-9]+" + PatternEnd)]
-public class FootNoteFormatterState : SimpleBlockFormatterState
+public class FootNoteFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
     private int _noteID;
-
-    public FootNoteFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override void Enter()
     {

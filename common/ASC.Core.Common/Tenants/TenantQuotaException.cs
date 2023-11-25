@@ -26,8 +26,4 @@
 
 namespace ASC.Core.Tenants;
 
-public class TenantQuotaException : Exception
-{
-    public TenantQuotaException(string message)
-        : base(message) { }
-}
+public class TenantQuotaException(string message) : Exception(message);

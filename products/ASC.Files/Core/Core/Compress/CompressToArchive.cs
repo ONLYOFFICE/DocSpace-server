@@ -30,12 +30,10 @@ namespace ASC.Web.Files.Core.Compress;
 /// Archives the data stream in the format selected in the settings
 /// </summary>
 [Scope]
-public class CompressToArchive : ICompress
+public class CompressToArchive(FilesSettingsHelper filesSettings, CompressToTarGz compressToTarGz,
+        CompressToZip compressToZip)
+    : ICompress
 {
-    private readonly FilesSettingsHelper _settings;
-    private readonly CompressToTarGz _compressToTarGz;
-    private readonly CompressToZip _compressToZip;
-
     internal static readonly string TarExt = ".tar.gz";
     internal static readonly string ZipExt = ".zip";
     private static readonly List<string> _exts = new(2) { TarExt, ZipExt };
@@ -45,19 +43,12 @@ public class CompressToArchive : ICompress
     {
         get
         {
-            _compress ??= _settings.DownloadTarGz
-                    ? _compressToTarGz
-                    : _compressToZip;
+            _compress ??= filesSettings.DownloadTarGz
+                    ? compressToTarGz
+                    : compressToZip;
 
             return _compress;
         }
-    }
-
-    public CompressToArchive(FilesSettingsHelper filesSettings, CompressToTarGz compressToTarGz, CompressToZip compressToZip)
-    {
-        _settings = filesSettings;
-        _compressToTarGz = compressToTarGz;
-        _compressToZip = compressToZip;
     }
 
     public string GetExt(string ext)

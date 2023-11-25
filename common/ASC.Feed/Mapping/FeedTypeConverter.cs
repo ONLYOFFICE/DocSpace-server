@@ -29,29 +29,22 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.Feed.Mapping;
 
 [Scope]
-public class FeedMappingAction : IMappingAction<FeedAggregate, FeedResultItem>
+public class FeedMappingAction(TenantUtil tenantUtil) : IMappingAction<FeedAggregate, FeedResultItem>
 {
-    private readonly TenantUtil _tenantUtil;
-
-    public FeedMappingAction(TenantUtil tenantUtil)
-    {
-        _tenantUtil = tenantUtil;
-    }
-
     public void Process(FeedAggregate source, FeedResultItem destination, ResolutionContext context)
     {
-        var now = _tenantUtil.DateTimeFromUtc(DateTime.UtcNow);
+        var now = tenantUtil.DateTimeFromUtc(DateTime.UtcNow);
 
-        destination.CreatedDate = _tenantUtil.DateTimeFromUtc(source.CreatedDate);
-        destination.ModifiedDate = _tenantUtil.DateTimeFromUtc(source.ModifiedDate);
-        destination.AggregatedDate = _tenantUtil.DateTimeFromUtc(source.AggregateDate);
+        destination.CreatedDate = tenantUtil.DateTimeFromUtc(source.CreatedDate);
+        destination.ModifiedDate = tenantUtil.DateTimeFromUtc(source.ModifiedDate);
+        destination.AggregatedDate = tenantUtil.DateTimeFromUtc(source.AggregateDate);
 
         var feed = JsonSerializer.Deserialize<Aggregator.Feed>(source.Json);
 
         destination.TargetId = feed.Target;
 
         var compareDate = feed.IsAllDayEvent
-                ? _tenantUtil.DateTimeToUtc(source.CreatedDate).Date
+                ? tenantUtil.DateTimeToUtc(source.CreatedDate).Date
                 : destination.CreatedDate.Date;
 
         if (now.Date == compareDate.AddDays(-1))
@@ -70,19 +63,12 @@ public class FeedMappingAction : IMappingAction<FeedAggregate, FeedResultItem>
 }
 
 [Scope]
-public class FeedTypeConverter : ITypeConverter<FeedResultItem, FeedMin>
+public class FeedTypeConverter(UserManager userManager) : ITypeConverter<FeedResultItem, FeedMin>
 {
-    private readonly UserManager _userManager;
-
-    public FeedTypeConverter(UserManager userManager)
-    {
-        _userManager = userManager;
-    }
-
     public FeedMin Convert(FeedResultItem source, FeedMin destination, ResolutionContext context)
     {
         var feedMin = JsonConvert.DeserializeObject<FeedMin>(source.Json);
-        feedMin.Author = new FeedMinUser { UserInfo = _userManager.GetUsers(feedMin.AuthorId) };
+        feedMin.Author = new FeedMinUser { UserInfo = userManager.GetUsers(feedMin.AuthorId) };
         feedMin.CreatedDate = source.CreatedDate;
 
         if (feedMin.Comments == null)
@@ -94,7 +80,7 @@ public class FeedTypeConverter : ITypeConverter<FeedResultItem, FeedMin>
         {
             comment.Author = new FeedMinUser
             {
-                UserInfo = _userManager.GetUsers(comment.AuthorId)
+                UserInfo = userManager.GetUsers(comment.AuthorId)
             };
         }
 

@@ -26,15 +26,15 @@
 
 namespace ASC.Core.Common.Configuration;
 
-public class Consumer : IDictionary<string, string>
+public class Consumer() : IDictionary<string, string>
 {
     public bool CanSet { get; private set; }
     public int Order { get; private set; }
     public string Name { get; private set; }
-    protected readonly Dictionary<string, string> _props;
+    protected readonly Dictionary<string, string> _props = new();
     public IEnumerable<string> ManagedKeys => _props.Select(r => r.Key);
 
-    protected readonly Dictionary<string, string> _additional;
+    protected readonly Dictionary<string, string> _additional = new();
     public virtual IEnumerable<string> AdditionalKeys => _additional.Select(r => r.Key);
 
     public ICollection<string> Keys => AllProps.Keys;
@@ -65,12 +65,6 @@ public class Consumer : IDictionary<string, string>
     protected internal readonly ICacheNotify<ConsumerCacheItem> Cache;
 
     public bool IsSet => _props.Count > 0 && !_props.All(r => string.IsNullOrEmpty(this[r.Key]));
-
-    public Consumer()
-    {
-        _props = new Dictionary<string, string>();
-        _additional = new Dictionary<string, string>();
-    }
 
     public Consumer(
         TenantManager tenantManager,

@@ -162,19 +162,14 @@ class TenantServiceCache
 }
 
 [Scope]
-class CachedTenantService : ITenantService
+class CachedTenantService() : ITenantService
 {
     private readonly ITenantService _service;
     private readonly ICacheNotify<TenantSetting> _cacheNotifySettings;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;
-    private readonly TimeSpan _settingsExpiration;
+    private readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
     private readonly ICache _cache;
-
-    public CachedTenantService()
-    {
-        _settingsExpiration = TimeSpan.FromMinutes(2);
-    }
 
     public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache) : this()
     {

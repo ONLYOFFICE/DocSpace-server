@@ -28,15 +28,10 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Notify;
 
-class TelegramSenderSink : Sink
+class TelegramSenderSink(INotifySender sender) : Sink
 {
     private readonly string _senderName = Constants.NotifyTelegramSenderSysName;
-    private readonly INotifySender _sender;
-
-    public TelegramSenderSink(INotifySender sender)
-    {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-    }
+    private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
 
     public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope)
@@ -58,15 +53,8 @@ class TelegramSenderSink : Sink
 }
 
 [Scope]
-public class TelegramSenderSinkMessageCreator : SinkMessageCreator
+public class TelegramSenderSinkMessageCreator(TenantManager tenantManager) : SinkMessageCreator
 {
-    private readonly TenantManager _tenantManager;
-
-    public TelegramSenderSinkMessageCreator(TenantManager tenantManager)
-    {
-        _tenantManager = tenantManager;
-    }
-
     public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
         var m = new NotifyMessage
@@ -79,7 +67,7 @@ public class TelegramSenderSinkMessageCreator : SinkMessageCreator
             CreationDate = DateTime.UtcNow,
         };
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
         m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
 
         return m;

@@ -29,26 +29,14 @@ using System.Threading.Channels;
 namespace ASC.Notify.Model;
 
 [Transient]
-class NotifyClientImpl : INotifyClient
-{
-    private readonly InterceptorStorage _interceptors = new();
-    private readonly ILoggerProvider _loggerFactory;
-    private INotifySource _notifySource;
-    private readonly NotifyEngine _notifyEngine;
-    private readonly ChannelWriter<NotifyRequest> _channelWriter;
-    private readonly IServiceProvider _serviceProvider;
-
-    public NotifyClientImpl(
-        ILoggerProvider loggerFactory,
+class NotifyClientImpl(ILoggerProvider loggerFactory,
         NotifyEngine notifyEngine,
         IServiceProvider serviceProvider,
         ChannelWriter<NotifyRequest> channelWriter)
-    {
-        _loggerFactory = loggerFactory;
-        _notifyEngine = notifyEngine;
-        _serviceProvider = serviceProvider;
-        _channelWriter = channelWriter;
-    }
+    : INotifyClient
+{
+    private readonly InterceptorStorage _interceptors = new();
+    private INotifySource _notifySource;
 
     public void Init(INotifySource notifySource)
     {
@@ -100,12 +88,12 @@ class NotifyClientImpl : INotifyClient
         {
             var r = CreateRequest(action, objectID, recipient, args, senderNames, checkSubsciption);
             r._interceptors = _interceptors.GetAll();
-            foreach (var a in _notifyEngine.Actions)
+            foreach (var a in notifyEngine.Actions)
             {
-                await ((INotifyEngineAction)_serviceProvider.GetRequiredService(a)).BeforeTransferRequestAsync(r);
+                await ((INotifyEngineAction)serviceProvider.GetRequiredService(a)).BeforeTransferRequestAsync(r);
             }
 
-            await _channelWriter.WriteAsync(r);
+            await channelWriter.WriteAsync(r);
         }
     }
 
@@ -114,7 +102,7 @@ class NotifyClientImpl : INotifyClient
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
 
-        var request = new NotifyRequest(_loggerFactory, _notifySource, action, objectID, recipient)
+        var request = new NotifyRequest(loggerFactory, _notifySource, action, objectID, recipient)
         {
             _senderNames = senders,
             _isNeedCheckSubscriptions = checkSubsciption

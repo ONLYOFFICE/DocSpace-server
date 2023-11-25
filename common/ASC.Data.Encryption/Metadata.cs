@@ -53,7 +53,7 @@
 namespace ASC.Data.Encryption;
 
 [Transient]
-public class Metadata
+public class Metadata(IConfiguration configuration)
 {
     private const string prefixString = "AscEncrypted";
 
@@ -76,12 +76,7 @@ public class Metadata
 
     private static int? iterations; // Rfc2898DeriveBytes: The minimum recommended number of iterations is 1000.
 
-    private IConfiguration Configuration { get; set; }
-
-    public Metadata(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
+    private IConfiguration Configuration { get; set; } = configuration;
 
     private int Iterations
     {

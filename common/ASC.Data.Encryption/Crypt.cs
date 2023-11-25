@@ -53,26 +53,20 @@
 namespace ASC.Data.Encryption;
 
 [Transient]
-public class Crypt : ICrypt
+public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 {
     private string Storage { get; set; }
     private EncryptionSettings Settings { get; set; }
     private string TempDir { get; set; }
 
-    private IConfiguration Configuration { get; set; }
-    public TempPath TempPath { get; }
+    private IConfiguration Configuration { get; set; } = configuration;
+    public TempPath TempPath { get; } = tempPath;
 
     public void Init(string storageName, EncryptionSettings encryptionSettings)
     {
         Storage = storageName;
         Settings = encryptionSettings;
         TempDir = TempPath.GetTempPath();
-    }
-
-    public Crypt(IConfiguration configuration, TempPath tempPath)
-    {
-        Configuration = configuration;
-        TempPath = tempPath;
     }
 
     public byte Version { get { return 1; } }

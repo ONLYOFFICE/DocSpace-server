@@ -26,35 +26,22 @@
 
 namespace ASC.Web.Core.Users.Import;
 
-public class TextFileUserImporter : IUserImporter
+public class TextFileUserImporter(Stream stream) : IUserImporter
 {
-    private readonly Stream _stream;
-
     protected Dictionary<string, string> NameMapping { get; init; }
 
-    protected IList<string> ExcludeList { get; private set; }
+    protected IList<string> ExcludeList { get; private set; } = new List<string> { "ID", "Status" };
 
 
-    public Encoding Encoding { get; set; }
+    public Encoding Encoding { get; set; } = Encoding.UTF8;
 
-    public char Separator { get; set; }
+    public char Separator { get; set; } = ';';
 
     public bool HasHeader { get; set; }
 
-    public string TextDelmiter { get; set; }
+    public string TextDelmiter { get; set; } = "\"";
 
     public string DefaultHeader { get; set; }
-
-
-    public TextFileUserImporter(Stream stream)
-    {
-        this._stream = stream;
-        Encoding = Encoding.UTF8;
-        Separator = ';';
-        HasHeader = false;
-        TextDelmiter = "\"";
-        ExcludeList = new List<string> { "ID", "Status" };
-    }
 
 
     public virtual IEnumerable<UserInfo> GetDiscoveredUsers()
@@ -62,7 +49,7 @@ public class TextFileUserImporter : IUserImporter
         var users = new List<UserInfo>();
 
         var fileLines = new List<string>();
-        using (var reader = new StreamReader(_stream, Encoding, true))
+        using (var reader = new StreamReader(stream, Encoding, true))
         {
             fileLines.AddRange(reader.ReadToEnd().Split(new[] { Environment.NewLine, "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
         }

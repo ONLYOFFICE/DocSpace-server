@@ -519,9 +519,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 }
 
 [Scope]
-internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
-{
-    public SecurityDao(UserManager userManager,
+internal class SecurityDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -533,10 +531,10 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
         AuthContext authContext,
         IServiceProvider serviceProvider,
         ICache cache,
-        IMapper mapper) : base(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper)
-    {
-    }
-
+        IMapper mapper)
+    : SecurityBaseDao<int>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic,
+        coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper), ISecurityDao<int>
+{
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
         if (entry == null)
@@ -636,11 +634,7 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
 }
 
 [Scope]
-internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<string>
-{
-    private readonly SelectorFactory _selectorFactory;
-
-    public ThirdPartySecurityDao(UserManager userManager,
+internal class ThirdPartySecurityDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -653,11 +647,11 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
         IServiceProvider serviceProvider,
         ICache cache,
         IMapper mapper,
-        SelectorFactory selectorFactory) : base(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper)
-    {
-        _selectorFactory = selectorFactory;
-    }
-
+        SelectorFactory selectorFactory)
+    : SecurityBaseDao<string>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo,
+        maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider,
+        cache, mapper), ISecurityDao<string>
+{
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
     {
         var result = new List<FileShareRecord>();
@@ -697,7 +691,7 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
 
     private async ValueTask GetFoldersForShareAsync(string folderId, ICollection<FileEntry<string>> folders)
     {
-        var selector = _selectorFactory.GetSelector(folderId);
+        var selector = selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
         if (folderDao == null)
         {
@@ -716,7 +710,7 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
     {
         foreach (var folder in folders)
         {
-            var selector = _selectorFactory.GetSelector(folder.Id);
+            var selector = selectorFactory.GetSelector(folder.Id);
             var folderDao = selector.GetFolderDao(folder.Id);
             if (folderDao == null)
             {

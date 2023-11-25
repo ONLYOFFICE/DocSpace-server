@@ -29,18 +29,12 @@ using StackExchange.Redis;
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class RedisCacheNotify<T> : ICacheNotify<T> where T : new()
+public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T>
+    where T : new()
 {
-    private readonly IRedisDatabase _redis;
-    private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invoctionList;
-    private readonly Guid _instanceId;
-
-    public RedisCacheNotify(IRedisClient redisCacheClient)
-    {
-        _redis = redisCacheClient.GetDefaultDatabase();
-        _instanceId = Guid.NewGuid();
-        _invoctionList = new ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>>();
-    }
+    private readonly IRedisDatabase _redis = redisCacheClient.GetDefaultDatabase();
+    private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invoctionList = new();
+    private readonly Guid _instanceId = Guid.NewGuid();
 
 
     public void Publish(T obj, CacheNotifyAction action)

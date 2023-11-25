@@ -26,31 +26,14 @@
 
 namespace ASC.People.Api;
 
-public class NotificationController : ApiControllerBase
-{
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly AuthContext _authContext;
-    private readonly PermissionContext _permissionContext;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly StudioNotifyService _studioNotifyService;
-
-    public NotificationController(
-        UserManager userManager,
+public class NotificationController(UserManager userManager,
         SecurityContext securityContext,
         AuthContext authContext,
         PermissionContext permissionContext,
         CommonLinkUtility commonLinkUtility,
         StudioNotifyService studioNotifyService)
-    {
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _authContext = authContext;
-        _permissionContext = permissionContext;
-        _commonLinkUtility = commonLinkUtility;
-        _studioNotifyService = studioNotifyService;
-    }
-
+    : ApiControllerBase
+{
     /// <summary>
     /// Sends a notification to the user with the ID specified in the request to change their phone number.
     /// </summary>
@@ -65,10 +48,10 @@ public class NotificationController : ApiControllerBase
     [HttpPost("phone")]
     public async Task<object> SendNotificationToChangeAsync(UpdateMemberRequestDto inDto)
     {
-        var user = await _userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
-            ? _securityContext.CurrentAccount.ID : new Guid(inDto.UserId));
+        var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
+            ? securityContext.CurrentAccount.ID : new Guid(inDto.UserId));
 
-        var canChange = user.IsMe(_authContext) || await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
+        var canChange = user.IsMe(authContext) || await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
         if (!canChange)
         {
@@ -77,14 +60,14 @@ public class NotificationController : ApiControllerBase
 
         user.MobilePhoneActivationStatus = MobilePhoneActivationStatus.NotActivated;
 
-        await _userManager.UpdateUserInfoAsync(user);
+        await userManager.UpdateUserInfoAsync(user);
 
-        if (user.IsMe(_authContext))
+        if (user.IsMe(authContext))
         {
-            return await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
+            return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
         }
 
-        await _studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
+        await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
 
         return string.Empty;
     }

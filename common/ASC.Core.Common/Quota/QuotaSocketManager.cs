@@ -25,21 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.Quota;
-public class QuotaSocketManager : SocketServiceClient
-{
-    private readonly TenantManager _tenantManager;
-
-    public override string Hub => "files";
-
-    public QuotaSocketManager(
-        ILogger<SocketServiceClient> logger, 
-        IHttpClientFactory clientFactory, 
+public class QuotaSocketManager(ILogger<SocketServiceClient> logger,
+        IHttpClientFactory clientFactory,
         MachinePseudoKeys mashinePseudoKeys,
         TenantManager tenantManager,
-        IConfiguration configuration) : base(logger, clientFactory, mashinePseudoKeys, configuration)
-    {
-        _tenantManager = tenantManager;
-    }
+        IConfiguration configuration)
+    : SocketServiceClient(logger, clientFactory, mashinePseudoKeys, configuration)
+{
+    public override string Hub => "files";
 
     public async Task ChangeQuotaUsedValueAsync(string featureId, object value)
     {
@@ -57,7 +50,7 @@ public class QuotaSocketManager : SocketServiceClient
 
     private string GetQuotaRoom()
     {
-        var tenantId = _tenantManager.GetCurrentTenant().Id;
+        var tenantId = tenantManager.GetCurrentTenant().Id;
 
         return $"{tenantId}-quota";
     }

@@ -26,24 +26,17 @@
 
 namespace ASC.Data.Reassigns;
 
-public class QueueWorker<T> where T : DistributedTaskProgress
+public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
+    IServiceProvider serviceProvider,
+    IDistributedTaskQueueFactory queueFactory,
+    string queueName)
+    where T : DistributedTaskProgress
 {
     private readonly object _synchRoot = new();
 
-    protected readonly IServiceProvider _serviceProvider;
-    private readonly DistributedTaskQueue _queue;
-    protected readonly IDictionary<string, StringValues> _httpHeaders;
-
-    public QueueWorker(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory,
-            string queueName)
-    {
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(queueName);
-        _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
-    }
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(queueName);
+    protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
 
     public static string GetProgressItemId(int tenantId, Guid userId)
     {
@@ -91,17 +84,12 @@ public class QueueWorker<T> where T : DistributedTaskProgress
 }
 
 [Scope(Additional = typeof(ReassignProgressItemExtension))]
-public class QueueWorkerReassign : QueueWorker<ReassignProgressItem>
+public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory)
+    : QueueWorker<ReassignProgressItem>(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_data_reassign";
-
-    public QueueWorkerReassign(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory) :
-            base(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
-    {
-    }
 
     public ReassignProgressItem Start(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -114,17 +102,12 @@ public class QueueWorkerReassign : QueueWorker<ReassignProgressItem>
 }
 
 [Scope(Additional = typeof(RemoveProgressItemExtension))]
-public class QueueWorkerRemove : QueueWorker<RemoveProgressItem>
+public class QueueWorkerRemove(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory)
+    : QueueWorker<RemoveProgressItem>(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "user_data_remove";
-
-    public QueueWorkerRemove(
-        IHttpContextAccessor httpContextAccessor,
-            IServiceProvider serviceProvider,
-            IDistributedTaskQueueFactory queueFactory) :
-            base(httpContextAccessor, serviceProvider, queueFactory, CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME)
-    {
-    }
 
     public RemoveProgressItem Start(int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
     {

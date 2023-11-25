@@ -65,7 +65,7 @@ class QuotaServiceCache
 }
 
 [Scope]
-class CachedQuotaService : IQuotaService
+class CachedQuotaService() : IQuotaService
 {
     private readonly IQuotaService Service;
     private readonly ICache Cache;
@@ -74,12 +74,7 @@ class CachedQuotaService : IQuotaService
 
     private readonly GeolocationHelper _geolocationHelper;
 
-    private readonly TimeSpan _cacheExpiration;
-
-    public CachedQuotaService()
-    {
-        _cacheExpiration = TimeSpan.FromMinutes(10);
-    }
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
     public CachedQuotaService(DbQuotaService service, QuotaServiceCache quotaServiceCache, GeolocationHelper geolocationHelper) : this()
     {

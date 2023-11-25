@@ -27,18 +27,11 @@
 namespace ASC.Notify.Config;
 
 [Singleton]
-public class ConfigureNotifyServiceCfg : IConfigureOptions<NotifyServiceCfg>
+public class ConfigureNotifyServiceCfg(IServiceProvider serviceProvider) : IConfigureOptions<NotifyServiceCfg>
 {
-    public ConfigureNotifyServiceCfg(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
-    private readonly IServiceProvider _serviceProvider;
-
     public void Configure(NotifyServiceCfg options)
     {
-        options.Init(_serviceProvider);
+        options.Init(serviceProvider);
     }
 }
 

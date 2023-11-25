@@ -27,20 +27,11 @@
 namespace ASC.Web.Studio.Core;
 
 [Scope]
-public class FileSizeComment
+public class FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
 {
-    private readonly TenantExtra _tenantExtra;
-    private readonly SetupInfo _setupInfo;
-
-    public FileSizeComment(TenantExtra tenantExtra, SetupInfo setupInfo)
-    {
-        _tenantExtra = tenantExtra;
-        _setupInfo = setupInfo;
-    }
-
     public string FileImageSizeExceptionString
     {
-        get { return GetFileSizeExceptionString(_setupInfo.MaxImageUploadSize); }
+        get { return GetFileSizeExceptionString(setupInfo.MaxImageUploadSize); }
     }
 
     public static string GetFileSizeExceptionString(long size)
@@ -81,7 +72,7 @@ public class FileSizeComment
 
     public async Task<string> GetFileSizeExceptionStringAsync()
     {
-        return GetFileSizeExceptionString(await _tenantExtra.GetMaxUploadSizeAsync());
+        return GetFileSizeExceptionString(await tenantExtra.GetMaxUploadSizeAsync());
     }
 
     /// <summary>
@@ -113,7 +104,7 @@ public class FileSizeComment
     {
         return
             string.Format(note,
-                          FilesSizeToString(await _tenantExtra.GetMaxUploadSizeAsync()),
+                          FilesSizeToString(await tenantExtra.GetMaxUploadSizeAsync()),
                           withHtmlStrong ? "<strong>" : string.Empty,
                           withHtmlStrong ? "</strong>" : string.Empty);
     }
@@ -128,7 +119,7 @@ public class FileSizeComment
     {
         return
             string.Format(note,
-                          FilesSizeToString(_setupInfo.MaxImageUploadSize),
+                          FilesSizeToString(setupInfo.MaxImageUploadSize),
                           withHtmlStrong ? "<strong>" : string.Empty,
                           withHtmlStrong ? "</strong>" : string.Empty);
     }

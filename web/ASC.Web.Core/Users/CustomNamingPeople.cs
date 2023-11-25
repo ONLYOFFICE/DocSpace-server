@@ -152,24 +152,18 @@ public class PeopleNamesItem
 }
 
 [Scope]
-public class CustomNamingPeople
+public class CustomNamingPeople(SettingsManager settingsManager)
 {
     private static readonly object _locked = new();
     private static bool _loaded;
 
     private static readonly List<PeopleNamesItem> _items = new();
-    private readonly SettingsManager _settingsManager;
-
-    public CustomNamingPeople(SettingsManager settingsManager)
-    {
-        _settingsManager = settingsManager;
-    }
 
     public PeopleNamesItem Current
     {
         get
         {
-            var settings = _settingsManager.Load<PeopleNamesSettings>();
+            var settings = settingsManager.Load<PeopleNamesSettings>();
             return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ?
                 settings.Item :
                 GetPeopleNames(settings.ItemId);
@@ -205,7 +199,7 @@ public class CustomNamingPeople
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+            var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
             var result = settings.Item;
             if (result == null)
             {
@@ -238,7 +232,7 @@ public class CustomNamingPeople
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = _settingsManager.Load<PeopleNamesSettings>();
+            var settings = settingsManager.Load<PeopleNamesSettings>();
             var result = settings.Item;
             if (result == null)
             {
@@ -269,18 +263,18 @@ public class CustomNamingPeople
 
     public async Task SetPeopleNamesAsync(string schemaId)
     {
-        var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
         settings.ItemId = schemaId;
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
     public async Task SetPeopleNamesAsync(PeopleNamesItem custom)
     {
-        var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
         custom.Id = PeopleNamesItem.CustomID;
         settings.ItemId = PeopleNamesItem.CustomID;
         settings.Item = custom;
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
 

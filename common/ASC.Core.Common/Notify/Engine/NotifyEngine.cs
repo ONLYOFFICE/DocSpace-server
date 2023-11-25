@@ -33,23 +33,15 @@ public interface INotifyEngineAction
 }
 
 [Singleton]
-public class NotifyEngine
+public class NotifyEngine(Context context,
+    ILoggerProvider options)
 {
-    private readonly ILogger _logger;
-    private readonly Context _context;
+    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
+    private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
     internal readonly List<SendMethodWrapper> SendMethods = new();
     private readonly Dictionary<string, IPatternStyler> _stylers = new();
     private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
-    internal readonly ICollection<Type> Actions;
-
-    public NotifyEngine(
-        Context context,
-        ILoggerProvider options)
-    {
-        Actions = new List<Type>();
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _logger = options.CreateLogger("ASC.Notify");
-    }
+    internal readonly ICollection<Type> Actions = new List<Type>();
 
     public void AddAction<T>() where T : INotifyEngineAction
     {

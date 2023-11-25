@@ -26,27 +26,16 @@
 
 namespace ASC.Web.Files.Utils;
 
-public class SocketManager : SocketServiceClient
-{
-    private readonly FileDtoHelper _filesWrapperHelper;
-    private readonly FolderDtoHelper _folderDtoHelper;
-    private readonly TenantManager _tenantManager;
-
-    public override string Hub => "files";
-
-    public SocketManager(
-        ILogger<SocketServiceClient> logger,
+public class SocketManager(ILogger<SocketServiceClient> logger,
         IHttpClientFactory clientFactory,
         MachinePseudoKeys mashinePseudoKeys,
         IConfiguration configuration,
         FileDtoHelper filesWrapperHelper,
         TenantManager tenantManager,
-        FolderDtoHelper folderDtoHelper) : base(logger, clientFactory, mashinePseudoKeys, configuration)
+        FolderDtoHelper folderDtoHelper)
+    : SocketServiceClient(logger, clientFactory, mashinePseudoKeys, configuration)
     {
-        _filesWrapperHelper = filesWrapperHelper;
-        _tenantManager = tenantManager;
-        _folderDtoHelper = folderDtoHelper;
-    }
+    public override string Hub => "files";
 
     public async Task StartEditAsync<T>(T fileId)
     {
@@ -143,25 +132,25 @@ public class SocketManager : SocketServiceClient
 
     private async Task<string> GetFileRoomAsync<T>(T fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-FILE-{fileId}";
     }
 
     private async Task<string> GetFolderRoomAsync<T>(T folderId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
         return $"{tenantId}-DIR-{folderId}";
     }
 
     private async Task<string> SerializeFile<T>(File<T> file)
     {
-        return JsonSerializer.Serialize(await _filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default);
+        return JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default);
     }
 
     private async Task<string> SerializeFolder<T>(Folder<T> folder)
     {
-        return JsonSerializer.Serialize(await _folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default);
+        return JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default);
     }
 }

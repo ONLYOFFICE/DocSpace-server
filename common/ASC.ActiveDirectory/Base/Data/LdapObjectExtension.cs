@@ -31,18 +31,8 @@ namespace ASC.ActiveDirectory.Base.Data;
 /// LDAP object extensions class
 /// </summary>
 [Scope]
-public class LdapObjectExtension
+public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settingsManager, ILogger<LdapObjectExtension> logger)
 {
-    private readonly TenantUtil _tenantUtil;
-    private readonly SettingsManager _settingsManager;
-    private readonly ILogger<LdapObjectExtension> _logger;
-
-    public LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settingsManager, ILogger<LdapObjectExtension> logger)
-    {
-        _tenantUtil = tenantUtil;
-        _settingsManager = settingsManager;
-        _logger = logger;
-    }
     public string GetAttribute(LdapObject ldapObject, string attribute)
     {
         if (string.IsNullOrEmpty(attribute))
@@ -56,7 +46,7 @@ public class LdapObjectExtension
         }
         catch (Exception e)
         {
-            _logger.ErrorCanNotGetAttribute(attribute, ldapObject.DistinguishedName, e);
+            logger.ErrorCanNotGetAttribute(attribute, ldapObject.DistinguishedName, e);
 
             return string.Empty;
         }
@@ -78,7 +68,7 @@ public class LdapObjectExtension
         catch (Exception e)
         {
 
-            _logger.ErrorCanNotGetAttributes(attribute, ldapObject.DistinguishedName, e);
+            logger.ErrorCanNotGetAttributes(attribute, ldapObject.DistinguishedName, e);
 
             return list;
         }
@@ -148,7 +138,7 @@ public class LdapObjectExtension
         var emails = GetContacts(ldapUser, Mapping.AdditionalMail, settings);
         var skype = GetContacts(ldapUser, Mapping.Skype, settings);
 
-        var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         var quota = settings.LdapMapping.TryGetValue(Mapping.UserQuotaLimit, out var value8) ? ByteConverter.ConvertSizeToBytes(GetAttribute(ldapUser, value8)) : quotaSettings.DefaultUserQuota;
 
         if (string.IsNullOrEmpty(userName))
@@ -172,7 +162,7 @@ public class LdapObjectExtension
             Status = ldapUser.IsDisabled ? EmployeeStatus.Terminated : EmployeeStatus.Active,
             Title = !string.IsNullOrEmpty(title) ? title : string.Empty,
             Location = !string.IsNullOrEmpty(location) ? location : string.Empty,
-            WorkFromDate = _tenantUtil.DateTimeNow(),
+            WorkFromDate = tenantUtil.DateTimeNow(),
             ContactsList = contacts,
             LdapQouta = quota
         };

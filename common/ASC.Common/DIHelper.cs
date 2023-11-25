@@ -125,25 +125,17 @@ public abstract class DIAttribute : Attribute
     public abstract void TryAdd(IServiceCollection services, Type service, Type implementation = null);
 }
 
-public class DIHelper
+public class DIHelper()
 {
-    private readonly Dictionary<DIAttributeType, List<string>> _services;
-    private readonly List<string> _added;
-    private readonly List<string> _configured;
-    public IServiceCollection ServiceCollection { get; private set; }
-
-    public DIHelper()
+    private readonly Dictionary<DIAttributeType, List<string>> _services = new()
     {
-        _services = new Dictionary<DIAttributeType, List<string>>()
-            {
-                { DIAttributeType.Singleton, new List<string>() },
-                { DIAttributeType.Scope, new List<string>() },
-                { DIAttributeType.Transient, new List<string>() }
-            };
-
-        _added = new List<string>();
-        _configured = new List<string>();
-    }
+        { DIAttributeType.Singleton, new List<string>() },
+        { DIAttributeType.Scope, new List<string>() },
+        { DIAttributeType.Transient, new List<string>() }
+    };
+    private readonly List<string> _added = new();
+    private readonly List<string> _configured = new();
+    public IServiceCollection ServiceCollection { get; private set; }
 
     public DIHelper(IServiceCollection serviceCollection) : this()
     {

@@ -29,10 +29,21 @@ using HttpMethod = JSIStudios.SimpleRESTServices.Client.HttpMethod;
 namespace ASC.Data.Storage.RackspaceCloud;
 
 [Scope]
-public class RackspaceCloudStorage : BaseStorage
+public class RackspaceCloudStorage(TempPath tempPath,
+        TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider options,
+        ILogger<RackspaceCloudStorage> logger,
+        IHttpClientFactory httpClient,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportChunking => true;
-    public TempPath TempPath { get; }
+    public TempPath TempPath { get; } = tempPath;
 
     private string _region;
     private string _private_container;
@@ -46,25 +57,6 @@ public class RackspaceCloudStorage : BaseStorage
     private Uri _cname;
     private Uri _cnameSSL;
     private readonly List<string> _domains = new();
-    private readonly ILogger<RackspaceCloudStorage> _logger;
-
-    public RackspaceCloudStorage(
-        TempPath tempPath,
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<RackspaceCloudStorage> logger,
-        IHttpClientFactory httpClient,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-        _logger = logger;
-        TempPath = tempPath;
-    }
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -272,7 +264,7 @@ public class RackspaceCloudStorage : BaseStorage
             }
             catch (Exception exp)
             {
-                _logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
+                logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
             }
         }
 

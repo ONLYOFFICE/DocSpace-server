@@ -26,22 +26,10 @@
 
 namespace ASC.Core.Billing;
 
-public class LicenseException : BillingException
-{
-    public LicenseException(string message, object debugInfo = null) : base(message, debugInfo) { }
-}
+public class LicenseException(string message, object debugInfo = null) : BillingException(message, debugInfo);
 
-public class LicenseExpiredException : LicenseException
-{
-    public LicenseExpiredException(string message, object debugInfo = null) : base(message, debugInfo) { }
-}
+public class LicenseExpiredException(string message, object debugInfo = null) : LicenseException(message, debugInfo);
 
-public class LicenseQuotaException : LicenseException
-{
-    public LicenseQuotaException(string message, object debugInfo = null) : base(message, debugInfo) { }
-}
+public class LicenseQuotaException(string message, object debugInfo = null) : LicenseException(message, debugInfo);
 
-public class LicensePortalException : LicenseException
-{
-    public LicensePortalException(string message, object debugInfo = null) : base(message, debugInfo) { }
-}
+public class LicensePortalException(string message, object debugInfo = null) : LicenseException(message, debugInfo);

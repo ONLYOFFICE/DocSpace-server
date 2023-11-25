@@ -27,15 +27,9 @@
 namespace ASC.Web.Files.ThirdPartyApp;
 
 [DebuggerDisplay("{App} - {AccessToken}")]
-public class Token : OAuth20Token
+public class Token(OAuth20Token oAuth20Token, string app) : OAuth20Token(oAuth20Token)
 {
-    public string App { get; private set; }
-
-    public Token(OAuth20Token oAuth20Token, string app)
-        : base(oAuth20Token)
-    {
-        App = app;
-    }
+    public string App { get; private set; } = app;
 
     public async Task<string> GetRefreshedTokenAsync(TokenHelper tokenHelper, OAuth20TokenHelper oAuth20TokenHelper, ThirdPartySelector thirdPartySelector)
     {
@@ -71,27 +65,13 @@ public class Token : OAuth20Token
 }
 
 [Scope]
-public class TokenHelper
+public class TokenHelper(IDbContextFactory<FilesDbContext> dbContextFactory,
+    ILogger<TokenHelper> logger,
+    InstanceCrypto instanceCrypto,
+    AuthContext authContext,
+    TenantManager tenantManager)
 {
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    public readonly ILogger<TokenHelper> Logger;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-
-    public TokenHelper(
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        ILogger<TokenHelper> logger,
-        InstanceCrypto instanceCrypto,
-        AuthContext authContext,
-        TenantManager tenantManager)
-    {
-        _dbContextFactory = dbContextFactory;
-        Logger = logger;
-        _instanceCrypto = instanceCrypto;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-    }
+    public readonly ILogger<TokenHelper> Logger = logger;
 
     public async Task SaveTokenAsync(Token token)
     {
@@ -99,25 +79,25 @@ public class TokenHelper
         {
             App = token.App,
             Token = EncryptToken(token),
-            UserId = _authContext.CurrentAccount.ID,
-            TenantId = await _tenantManager.GetCurrentTenantIdAsync(),
+            UserId = authContext.CurrentAccount.ID,
+            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
             ModifiedOn = DateTime.UtcNow
         };
 
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         await filesDbContext.AddOrUpdateAsync(q => q.ThirdpartyApp, dbFilesThirdpartyApp);
         await filesDbContext.SaveChangesAsync();
     }
 
     public async Task<Token> GetTokenAsync(string app)
     {
-        return await GetTokenAsync(app, _authContext.CurrentAccount.ID);
+        return await GetTokenAsync(app, authContext.CurrentAccount.ID);
     }
 
     public async Task<Token> GetTokenAsync(string app, Guid userId)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var oAuth20Token = await Queries.TokenAsync(filesDbContext, tenant.Id, userId, app);
 
         if (oAuth20Token == null)
@@ -130,21 +110,21 @@ public class TokenHelper
 
     public async Task DeleteTokenAsync(string app, Guid? userId = null)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await Queries.DeleteTokenAsync(filesDbContext, tenant.Id, userId ?? _authContext.CurrentAccount.ID, app);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await Queries.DeleteTokenAsync(filesDbContext, tenant.Id, userId ?? authContext.CurrentAccount.ID, app);
     }
 
     private string EncryptToken(OAuth20Token token)
     {
         var t = token.ToJson();
 
-        return string.IsNullOrEmpty(t) ? string.Empty : _instanceCrypto.Encrypt(t);
+        return string.IsNullOrEmpty(t) ? string.Empty : instanceCrypto.Encrypt(t);
     }
 
     private OAuth20Token DecryptToken(string token)
     {
-        return string.IsNullOrEmpty(token) ? null : OAuth20Token.FromJson(_instanceCrypto.Decrypt(token));
+        return string.IsNullOrEmpty(token) ? null : OAuth20Token.FromJson(instanceCrypto.Decrypt(token));
     }
 }
 

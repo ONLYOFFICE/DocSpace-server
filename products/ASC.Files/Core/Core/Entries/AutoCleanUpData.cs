@@ -52,15 +52,8 @@ public class AutoCleanUpData
 }
 
 [Scope]
-public class FileDateTime
+public class FileDateTime(TenantUtil tenantUtil)
 {
-    private readonly TenantUtil _tenantUtil;
-
-    public FileDateTime(TenantUtil tenantUtil)
-    {
-        _tenantUtil = tenantUtil;
-    }
-
     public DateTime GetModifiedOnWithAutoCleanUp(DateTime modifiedOn, DateToAutoCleanUp date, bool utc = false)
     {
         var dateTime = modifiedOn;
@@ -86,6 +79,6 @@ public class FileDateTime
                 break;
         }
         
-        return utc ? _tenantUtil.DateTimeToUtc(dateTime) : dateTime;
+        return utc ? tenantUtil.DateTimeToUtc(dateTime) : dateTime;
     }
 }

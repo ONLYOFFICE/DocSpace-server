@@ -27,34 +27,20 @@
 namespace ASC.Web.Api.Mapping;
 
 [Scope]
-public class DateTimeMappingConverter : ITypeConverter<DateTime, ApiDateTime>
+public class DateTimeMappingConverter(ApiDateTimeHelper apiDateTimeHelper) : ITypeConverter<DateTime, ApiDateTime>
 {
-    private readonly ApiDateTimeHelper _apiDateTimeHelper;
-
-    public DateTimeMappingConverter(ApiDateTimeHelper apiDateTimeHelper)
-    {
-        _apiDateTimeHelper = apiDateTimeHelper;
-    }
-
     public ApiDateTime Convert(DateTime source, ApiDateTime destination, ResolutionContext context)
     {
-        return _apiDateTimeHelper.Get(source);
+        return apiDateTimeHelper.Get(source);
     }
 }
 
 [Scope]
-public class FeedDtoMappingAction : IMappingAction<FeedResultItem, FeedDto>
+public class FeedDtoMappingAction(EmployeeDtoHelper employeeDtoHelper) : IMappingAction<FeedResultItem, FeedDto>
 {
-    private readonly EmployeeDtoHelper _employeeDtoHelper;
-
-    public FeedDtoMappingAction(EmployeeDtoHelper employeeDtoHelper)
-    {
-        _employeeDtoHelper = employeeDtoHelper;
-    }
-
     public void Process(FeedResultItem source, FeedDto destination, ResolutionContext context)
     {
-        destination.Initiator = _employeeDtoHelper.GetAsync(source.ModifiedBy).Result;
-        destination.Target = source.TargetId is JsonElement doc && doc.TryGetGuid(out var id) ? _employeeDtoHelper.GetAsync(id).Result : null;
+        destination.Initiator = employeeDtoHelper.GetAsync(source.ModifiedBy).Result;
+        destination.Target = source.TargetId is JsonElement doc && doc.TryGetGuid(out var id) ? employeeDtoHelper.GetAsync(id).Result : null;
     }
 }

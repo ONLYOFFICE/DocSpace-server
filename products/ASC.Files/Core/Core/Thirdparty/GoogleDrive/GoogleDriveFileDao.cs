@@ -32,12 +32,7 @@ using ResumableUploadSessionStatus = ASC.Files.Thirdparty.GoogleDrive.ResumableU
 namespace ASC.Files.Core.Core.Thirdparty.GoogleDrive;
 
 [Scope]
-internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>
-{
-    private readonly TempPath _tempPath;
-    private readonly SetupInfo _setupInfo;
-
-    public GoogleDriveFileDao(UserManager userManager,
+internal class GoogleDriveFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> daoSelector,
         CrossDao crossDao,
@@ -45,15 +40,12 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         IDaoBase<DriveFile, DriveFile, DriveFile> dao,
         TempPath tempPath,
         SetupInfo setupInfo,
-        TenantManager tenantManager) : base(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
-    {
-        _tempPath = tempPath;
-        _setupInfo = setupInfo;
-    }
-
+        TenantManager tenantManager)
+    : ThirdPartyFileDao<DriveFile, DriveFile, DriveFile>(userManager, dbContextFactory, daoSelector, crossDao, fileDao, dao, tenantManager)
+{
     public override async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
     {
-        if (_setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
+        if (setupInfo.ChunkUploadSize > contentLength && contentLength != -1)
         {
             return new ChunkedUploadSession<string>(RestoreIds(file), contentLength) { UseChunks = false };
         }
@@ -80,7 +72,7 @@ internal class GoogleDriveFileDao : ThirdPartyFileDao<DriveFile, DriveFile, Driv
         }
         else
         {
-            uploadSession.Items["TempPath"] = _tempPath.GetTempFileName();
+            uploadSession.Items["TempPath"] = tempPath.GetTempFileName();
         }
 
         uploadSession.File = RestoreIds(uploadSession.File);

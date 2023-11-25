@@ -26,36 +26,28 @@
 
 namespace ASC.Core.Caching;
 
-class UserGroupRefStore : IDictionary<string, UserGroupRef>
+class UserGroupRefStore(IDictionary<string, UserGroupRef> refs) : IDictionary<string, UserGroupRef>
 {
-    private readonly IDictionary<string, UserGroupRef> _refs;
     private ILookup<Guid, UserGroupRef> _index;
-    private bool _changed;
-
-
-    public UserGroupRefStore(IDictionary<string, UserGroupRef> refs)
-    {
-        _refs = refs;
-        _changed = true;
-    }
+    private bool _changed = true;
 
 
     public void Add(string key, UserGroupRef value)
     {
-        _refs.Add(key, value);
+        refs.Add(key, value);
         RebuildIndex();
     }
 
     public bool ContainsKey(string key)
     {
-        return _refs.ContainsKey(key);
+        return refs.ContainsKey(key);
     }
 
-    public ICollection<string> Keys => _refs.Keys;
+    public ICollection<string> Keys => refs.Keys;
 
     public bool Remove(string key)
     {
-        var result = _refs.Remove(key);
+        var result = refs.Remove(key);
         RebuildIndex();
 
         return result;
@@ -63,50 +55,50 @@ class UserGroupRefStore : IDictionary<string, UserGroupRef>
 
     public bool TryGetValue(string key, out UserGroupRef value)
     {
-        return _refs.TryGetValue(key, out value);
+        return refs.TryGetValue(key, out value);
     }
 
-    public ICollection<UserGroupRef> Values => _refs.Values;
+    public ICollection<UserGroupRef> Values => refs.Values;
 
     public UserGroupRef this[string key]
     {
-        get => _refs[key];
+        get => refs[key];
         set
         {
-            _refs[key] = value;
+            refs[key] = value;
             RebuildIndex();
         }
     }
 
     public void Add(KeyValuePair<string, UserGroupRef> item)
     {
-        _refs.Add(item);
+        refs.Add(item);
         RebuildIndex();
     }
 
     public void Clear()
     {
-        _refs.Clear();
+        refs.Clear();
         RebuildIndex();
     }
 
     public bool Contains(KeyValuePair<string, UserGroupRef> item)
     {
-        return _refs.Contains(item);
+        return refs.Contains(item);
     }
 
     public void CopyTo(KeyValuePair<string, UserGroupRef>[] array, int arrayIndex)
     {
-        _refs.CopyTo(array, arrayIndex);
+        refs.CopyTo(array, arrayIndex);
     }
 
-    public int Count => _refs.Count;
+    public int Count => refs.Count;
 
-    public bool IsReadOnly => _refs.IsReadOnly;
+    public bool IsReadOnly => refs.IsReadOnly;
 
     public bool Remove(KeyValuePair<string, UserGroupRef> item)
     {
-        var result = _refs.Remove(item);
+        var result = refs.Remove(item);
         RebuildIndex();
 
         return result;
@@ -114,19 +106,19 @@ class UserGroupRefStore : IDictionary<string, UserGroupRef>
 
     public IEnumerator<KeyValuePair<string, UserGroupRef>> GetEnumerator()
     {
-        return _refs.GetEnumerator();
+        return refs.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return _refs.GetEnumerator();
+        return refs.GetEnumerator();
     }
 
     public IEnumerable<UserGroupRef> GetRefsByUser(Guid userId)
     {
         if (_changed)
         {
-            _index = _refs.Values.ToLookup(r => r.UserId);
+            _index = refs.Values.ToLookup(r => r.UserId);
             _changed = false;
         }
 

@@ -42,19 +42,9 @@ public class TenantTooShortException : Exception
     }
 }
 
-public class TenantIncorrectCharsException : Exception
-{
-    public TenantIncorrectCharsException(string message)
-        : base(message) { }
-}
+public class TenantIncorrectCharsException(string message) : Exception(message);
 
-public class TenantAlreadyExistsException : Exception
+public class TenantAlreadyExistsException(string message, IEnumerable<string> existsTenants) : Exception(message)
 {
-    public IEnumerable<string> ExistsTenants { get; private set; }
-
-    public TenantAlreadyExistsException(string message, IEnumerable<string> existsTenants)
-        : base(message)
-    {
-        ExistsTenants = existsTenants ?? Enumerable.Empty<string>();
-    }
+    public IEnumerable<string> ExistsTenants { get; private set; } = existsTenants ?? Enumerable.Empty<string>();
 }

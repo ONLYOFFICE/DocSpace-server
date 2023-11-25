@@ -27,40 +27,23 @@
 namespace ASC.Web.Files.Helpers;
 
 [Singleton]
-public class ThirdpartyConfigurationData
+public class ThirdpartyConfigurationData(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
     private List<string> _thirdPartyProviders;
-    public List<string> ThirdPartyProviders => _thirdPartyProviders ??= _configuration.GetSection("files:thirdparty:enable").Get<List<string>>() ?? new List<string>();
-    public ThirdpartyConfigurationData(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+    public List<string> ThirdPartyProviders => _thirdPartyProviders ??= configuration.GetSection("files:thirdparty:enable").Get<List<string>>() ?? new List<string>();
 }
 
 [Scope(Additional = typeof(BaseLoginProviderExtension))]
-public class ThirdpartyConfiguration
+public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration,
+    ConsumerFactory consumerFactory)
 {
-    private readonly ThirdpartyConfigurationData _configuration;
-    private readonly Lazy<BoxLoginProvider> _boxLoginProvider;
-    private readonly Lazy<DropboxLoginProvider> _dropboxLoginProvider;
-    private readonly Lazy<OneDriveLoginProvider> _oneDriveLoginProvider;
-    private readonly Lazy<DocuSignLoginProvider> _docuSignLoginProvider;
-    private readonly Lazy<GoogleLoginProvider> _googleLoginProvider;
+    private readonly Lazy<BoxLoginProvider> _boxLoginProvider = new(() => consumerFactory.Get<BoxLoginProvider>());
+    private readonly Lazy<DropboxLoginProvider> _dropboxLoginProvider = new(() => consumerFactory.Get<DropboxLoginProvider>());
+    private readonly Lazy<OneDriveLoginProvider> _oneDriveLoginProvider = new(() => consumerFactory.Get<OneDriveLoginProvider>());
+    private readonly Lazy<DocuSignLoginProvider> _docuSignLoginProvider = new(() => consumerFactory.Get<DocuSignLoginProvider>());
+    private readonly Lazy<GoogleLoginProvider> _googleLoginProvider = new(() => consumerFactory.Get<GoogleLoginProvider>());
 
-    public ThirdpartyConfiguration(
-        ThirdpartyConfigurationData configuration,
-        ConsumerFactory consumerFactory)
-    {
-        _configuration = configuration;
-        _boxLoginProvider = new Lazy<BoxLoginProvider>(() => consumerFactory.Get<BoxLoginProvider>());
-        _dropboxLoginProvider = new Lazy<DropboxLoginProvider>(() => consumerFactory.Get<DropboxLoginProvider>());
-        _oneDriveLoginProvider = new Lazy<OneDriveLoginProvider>(() => consumerFactory.Get<OneDriveLoginProvider>());
-        _docuSignLoginProvider = new Lazy<DocuSignLoginProvider>(() => consumerFactory.Get<DocuSignLoginProvider>());
-        _googleLoginProvider = new Lazy<GoogleLoginProvider>(() => consumerFactory.Get<GoogleLoginProvider>());
-    }
-
-    public List<string> ThirdPartyProviders => _configuration.ThirdPartyProviders;
+    public List<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
     public bool SupportInclusion(IDaoFactory daoFactory)
     {

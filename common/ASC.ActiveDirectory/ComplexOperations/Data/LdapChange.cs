@@ -25,35 +25,25 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.ComplexOperations.Data;
-public class LdapChange
+public class LdapChange(string sid, string name, string email, LdapChangeType type, LdapChangeAction action, List<LdapItemChange> changes = null)
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public LdapChangeAction Action { get; private set; }
+    public LdapChangeAction Action { get; private set; } = action;
 
-    public string Sid { get; private set; }
+    public string Sid { get; private set; } = sid;
 
-    public string Name { get; private set; }
+    public string Name { get; private set; } = name;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string Email { get; private set; }
+    public string Email { get; private set; } = email;
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public LdapChangeType Type { get; private set; }
+    public LdapChangeType Type { get; private set; } = type;
 
-    public List<LdapItemChange> Changes { get; private set; }
+    public List<LdapItemChange> Changes { get; private set; } = changes ?? new List<LdapItemChange>();
 
     public LdapChange(string sid, string name, LdapChangeType type, LdapChangeAction action,
         List<LdapItemChange> changes = null) : this(sid, name, null, type, action, changes)
     {
-    }
-
-    public LdapChange(string sid, string name, string email, LdapChangeType type, LdapChangeAction action, List<LdapItemChange> changes = null)
-    {
-        Sid = sid;
-        Name = name;
-        Type = type;
-        Action = action;
-        Changes = changes ?? new List<LdapItemChange>();
-        Email = email;
     }
 }

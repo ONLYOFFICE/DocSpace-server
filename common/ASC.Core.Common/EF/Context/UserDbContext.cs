@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public class UserDbContext : DbContext
+public class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : DbContext(dbContextOptions)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<UserSecurity> UserSecurity { get; set; }
@@ -37,11 +37,6 @@ public class UserDbContext : DbContext
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<DbSubscriptionMethod> SubscriptionMethods { get; set; }
     public DbSet<UserDav> UsersDav { get; set; }
-
-    public UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : base(dbContextOptions)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -27,18 +27,13 @@
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope]
-internal class ProviderTagDao : ProviderDaoBase, IThirdPartyTagDao
-{
-    public ProviderTagDao(
-        IServiceProvider serviceProvider,
+internal class ProviderTagDao(IServiceProvider serviceProvider,
         TenantManager tenantManager,
         CrossDao crossDao,
         SelectorFactory selectorFactory,
         ISecurityDao<string> securityDao)
-        : base(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao)
-    {
-    }
-
+    : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IThirdPartyTagDao
+{
     public IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         return _selectorFactory.GetSelector(parentFolder.Id)

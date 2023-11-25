@@ -30,38 +30,25 @@ namespace ASC.Core;
 
 
 [Scope]
-public class HostedSolution
+public class HostedSolution(ITenantService tenantService,
+    IUserService userService,
+    IQuotaService quotaService,
+    ITariffService tariffService,
+    UserFormatter userFormatter,
+    TenantManager clientTenantManager,
+    TenantUtil tenantUtil,
+    SettingsManager settingsManager,
+    CoreSettings coreSettings)
 {
-    internal ITenantService TenantService { get; set; }
-    internal IUserService UserService { get; set; }
-    internal IQuotaService QuotaService { get; set; }
-    internal ITariffService TariffService { get; set; }
-    internal UserFormatter UserFormatter { get; set; }
-    internal TenantManager ClientTenantManager { get; set; }
-    internal TenantUtil TenantUtil { get; set; }
-    internal SettingsManager SettingsManager { get; set; }
-    internal CoreSettings CoreSettings { get; set; }
-
-    public HostedSolution(ITenantService tenantService,
-        IUserService userService,
-        IQuotaService quotaService,
-        ITariffService tariffService,
-        UserFormatter userFormatter,
-        TenantManager clientTenantManager,
-        TenantUtil tenantUtil,
-        SettingsManager settingsManager,
-        CoreSettings coreSettings)
-    {
-        TenantService = tenantService;
-        UserService = userService;
-        QuotaService = quotaService;
-        TariffService = tariffService;
-        UserFormatter = userFormatter;
-        ClientTenantManager = clientTenantManager;
-        TenantUtil = tenantUtil;
-        SettingsManager = settingsManager;
-        CoreSettings = coreSettings;
-    }
+    internal ITenantService TenantService { get; set; } = tenantService;
+    internal IUserService UserService { get; set; } = userService;
+    internal IQuotaService QuotaService { get; set; } = quotaService;
+    internal ITariffService TariffService { get; set; } = tariffService;
+    internal UserFormatter UserFormatter { get; set; } = userFormatter;
+    internal TenantManager ClientTenantManager { get; set; } = clientTenantManager;
+    internal TenantUtil TenantUtil { get; set; } = tenantUtil;
+    internal SettingsManager SettingsManager { get; set; } = settingsManager;
+    internal CoreSettings CoreSettings { get; set; } = coreSettings;
 
     public async Task<List<Tenant>> GetTenantsAsync(DateTime from)
     {

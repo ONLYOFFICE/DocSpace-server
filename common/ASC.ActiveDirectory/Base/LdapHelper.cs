@@ -27,21 +27,15 @@
 namespace ASC.ActiveDirectory.Base;
 
 [Scope]
-public abstract class LdapHelper : IDisposable
+public abstract class LdapHelper(ILogger<LdapHelper> logger,
+        InstanceCrypto instanceCrypto)
+    : IDisposable
 {
     public LdapSettings Settings { get; private set; }
     public abstract bool IsConnected { get; }
 
-    protected readonly ILogger<LdapHelper> _logger;
-    protected readonly InstanceCrypto _instanceCrypto;
-
-    protected LdapHelper(
-        ILogger<LdapHelper> logger,
-        InstanceCrypto instanceCrypto)
-    {
-        _logger = logger;
-        _instanceCrypto = instanceCrypto;
-    }
+    protected readonly ILogger<LdapHelper> _logger = logger;
+    protected readonly InstanceCrypto _instanceCrypto = instanceCrypto;
 
     public void Init(LdapSettings settings)
     {

@@ -29,20 +29,14 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Scope]
-public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class BasicAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private readonly UserManager _userManager;
     private readonly SecurityContext _securityContext;
     private readonly PasswordHasher _passwordHasher;
-
-    public BasicAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder
-        ) : base(options, logger, encoder)
-    {
-
-    }
 
     public BasicAuthHandler(
       IOptionsMonitor<AuthenticationSchemeOptions> options,

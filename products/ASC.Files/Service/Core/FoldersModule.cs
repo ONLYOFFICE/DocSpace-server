@@ -30,7 +30,13 @@ using Constants = ASC.Feed.Constants;
 
 namespace ASC.Files.Service.Core;
 
-public class FoldersModule : FeedModule
+public class FoldersModule(TenantManager tenantManager,
+        UserManager userManager,
+        WebItemSecurity webItemSecurity,
+        FileSecurity fileSecurity,
+        IDaoFactory daoFactory,
+        TenantUtil tenantUtil)
+    : FeedModule(tenantManager, webItemSecurity)
 {
     public override Guid ProductID => WebItemManager.DocumentsProductID;
     public override string Name => Constants.FoldersModule;
@@ -40,25 +46,7 @@ public class FoldersModule : FeedModule
     private const string FolderItem = Constants.FolderItem;
     private const string SharedFolderItem = Constants.SharedFolderItem;
 
-    private readonly FileSecurity _fileSecurity;
-    private readonly IFolderDao<int> _folderDao;
-    private readonly UserManager _userManager;
-    private readonly TenantUtil _tenantUtil;
-
-    public FoldersModule(
-        TenantManager tenantManager,
-        UserManager userManager,
-        WebItemSecurity webItemSecurity,
-        FileSecurity fileSecurity,
-        IDaoFactory daoFactory,
-        TenantUtil tenantUtil)
-        : base(tenantManager, webItemSecurity)
-    {
-        _userManager = userManager;
-        _fileSecurity = fileSecurity;
-        _folderDao = daoFactory.GetFolderDao<int>();
-        _tenantUtil = tenantUtil;
-    }
+    private readonly IFolderDao<int> _folderDao = daoFactory.GetFolderDao<int>();
 
     public override async Task<bool> VisibleForAsync(Feed.Aggregator.Feed feed, object data, Guid userId)
     {
@@ -80,7 +68,7 @@ public class FoldersModule : FeedModule
             }
 
             var owner = (Guid)feed.Target;
-            var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
+            var groupUsers = (await userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
             if (groupUsers.Count == 0)
             {
                 groupUsers.Add(owner);
@@ -93,7 +81,7 @@ public class FoldersModule : FeedModule
             targetCond = true;
         }
 
-        return targetCond && await _fileSecurity.CanReadAsync(folder, userId);
+        return targetCond && await fileSecurity.CanReadAsync(folder, userId);
     }
 
     public override async Task<IEnumerable<int>> GetTenantsWithFeeds(DateTime fromTime)
@@ -141,7 +129,7 @@ public class FoldersModule : FeedModule
             return feed;
         }
 
-        var folderCreatedUtc = _tenantUtil.DateTimeToUtc(folder.CreateOn);
+        var folderCreatedUtc = tenantUtil.DateTimeToUtc(folder.CreateOn);
 
         return new Feed.Aggregator.Feed(folder.CreateBy, folderCreatedUtc)
         {

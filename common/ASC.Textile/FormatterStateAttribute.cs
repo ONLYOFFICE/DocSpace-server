@@ -27,14 +27,9 @@
 namespace Textile;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class FormatterStateAttribute : Attribute
+public sealed class FormatterStateAttribute(string pattern) : Attribute
 {
-    public string Pattern { get; }
-
-    public FormatterStateAttribute(string pattern)
-    {
-        Pattern = pattern;
-    }
+    public string Pattern { get; } = pattern;
 
     public static FormatterStateAttribute Get(Type type)
     {

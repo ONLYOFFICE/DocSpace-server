@@ -374,12 +374,7 @@ public class BillingException : Exception
     }
 }
 
-public class BillingNotFoundException : BillingException
-{
-    public BillingNotFoundException(string message, object debugInfo = null) : base(message, debugInfo)
-    {
-    }
-}
+public class BillingNotFoundException(string message, object debugInfo = null) : BillingException(message, debugInfo);
 
 public class BillingNotConfiguredException : BillingException
 {

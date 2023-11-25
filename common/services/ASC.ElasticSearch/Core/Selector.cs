@@ -27,18 +27,14 @@
 namespace ASC.ElasticSearch;
 
 [Scope]
-public class Selector<T> where T : class, ISearchItem
+public class Selector<T>(IServiceProvider serviceProvider)
+    where T : class, ISearchItem
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new();
     private SortDescriptor<T> _sortContainerDescriptor = new();
     private QueryContainer _queryContainer = new();
     private int _limit = 1000, _offset;
-
-    public Selector(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
 
     public Selector<T> Where<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value)
     {

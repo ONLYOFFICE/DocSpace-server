@@ -30,7 +30,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.Web.Core.HttpHandlers;
 public class SsoHandler
 {
-    public SsoHandler(RequestDelegate next)
+    public SsoHandler(RequestDelegate _)
     {
     }
 
@@ -481,14 +481,9 @@ public enum MessageKey
     SsoAttributesNotFound,
 }
 
-public class SSOException : Exception
+public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
-    public MessageKey MessageKey { get; }
-
-    public SSOException(string message, MessageKey messageKey) : base(message)
-    {
-        MessageKey = messageKey;
-    }
+    public MessageKey MessageKey { get; } = messageKey;
 }
 
 public static class SsoHandlerExtensions

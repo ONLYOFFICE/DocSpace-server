@@ -26,15 +26,8 @@
 
 namespace ASC.Api.Core.Middleware;
 
-public class CultureMiddleware
+public class CultureMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public CultureMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(HttpContext context, UserManager userManager, TenantManager tenantManager, AuthContext authContext)
     {
         CultureInfo culture = null;
@@ -60,7 +53,7 @@ public class CultureMiddleware
             CultureInfo.CurrentUICulture = culture;
         }
 
-        await _next.Invoke(context);
+        await next.Invoke(context);
     }
 }
 

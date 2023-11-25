@@ -66,14 +66,13 @@ public class EntryProperties
 /// <summary>
 /// </summary>
 [Transient]
-public class FormFillingProperties
+public class FormFillingProperties(UserManager userManager,
+    SecurityContext securityContext,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    TenantUtil tenantUtil,
+    CustomNamingPeople customNamingPeople)
 {
     public static readonly string DefaultTitleMask = "{0} - {1} ({2})";
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly TenantUtil _tenantUtil;
-    private readonly CustomNamingPeople _customNamingPeople;
 
     /// <summary>Specifies whether to collect the data from the filled forms or not</summary>
     /// <type>System.Boolean, System</type>
@@ -94,20 +93,6 @@ public class FormFillingProperties
     /// <summary>File name mask</summary>
     /// <type>System.String, System</type>
     public string CreateFileMask { get; set; }
-
-    public FormFillingProperties(
-        UserManager userManager,
-        SecurityContext securityContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        TenantUtil tenantUtil,
-        CustomNamingPeople customNamingPeople)
-    {
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _tenantUtil = tenantUtil;
-        _customNamingPeople = customNamingPeople;
-    }
 
     public void FixFileMask()
     {
@@ -156,20 +141,20 @@ public class FormFillingProperties
         }
 
         string userName;
-        var userInfo = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var userInfo = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         if (userInfo.Equals(Constants.LostUser))
         {
-            userName = _customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
+            userName = customNamingPeople.Substitute<FilesCommonResource>("ProfileRemoved");
         }
         else
         {
-            userName = userInfo.DisplayUserName(false, _displayUserSettingsHelper);
+            userName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
         }
 
         var title = mask
             .Replace("{0}", Path.GetFileNameWithoutExtension(sourceFileName))
             .Replace("{1}", userName)
-            .Replace("{2}", _tenantUtil.DateTimeNow().ToString("g", CultureInfo.InvariantCulture));
+            .Replace("{2}", tenantUtil.DateTimeNow().ToString("g", CultureInfo.InvariantCulture));
 
         if (FileUtility.GetFileExtension(title) != "docx")
         {

@@ -25,16 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Base.Data;
-public class LdapLogin
+public class LdapLogin(string username, string domain)
 {
-    public string Username { get; private set; }
-    public string Domain { get; private set; }
-
-    public LdapLogin(string username, string domain)
-    {
-        Username = username;
-        Domain = domain;
-    }
+    public string Username { get; private set; } = username;
+    public string Domain { get; private set; } = domain;
 
     public override string ToString()
     {

@@ -27,37 +27,19 @@
 namespace ASC.Web.Files.Classes;
 
 [Scope]
-public class PathProvider
+public class PathProvider(WebImageSupplier webImageSupplier,
+    IDaoFactory daoFactory,
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    GlobalStore globalStore)
 {
     public static readonly string ProjectVirtualPath = "~/Products/Projects/TMDocs.aspx";
     public static readonly string StartURL = FilesLinkUtility.FilesBaseVirtualPath;
 
-    private readonly WebImageSupplier _webImageSupplier;
-    private readonly IDaoFactory _daoFactory;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    private readonly GlobalStore _globalStore;
-
-    public PathProvider(
-        WebImageSupplier webImageSupplier,
-        IDaoFactory daoFactory,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        GlobalStore globalStore)
-    {
-        _webImageSupplier = webImageSupplier;
-        _daoFactory = daoFactory;
-        _commonLinkUtility = commonLinkUtility;
-        _filesLinkUtility = filesLinkUtility;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _globalStore = globalStore;
-    }
-
     public string GetImagePath(string imgFileName)
     {
-        return _webImageSupplier.GetAbsoluteWebPath(imgFileName, ProductEntryPoint.ID);
+        return webImageSupplier.GetAbsoluteWebPath(imgFileName, ProductEntryPoint.ID);
     }
 
     public string RoomUrlString
@@ -67,12 +49,12 @@ public class PathProvider
 
     public string GetRoomsUrl(int roomId)
     {
-        return _commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId));//ToDo
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId));//ToDo
     }
 
     public string GetRoomsUrl(string roomId)
     {
-        return _commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId));//ToDo
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId));//ToDo
     }
 
     public async Task<string> GetFolderUrlAsync<T>(Folder<T> folder, int projectID = 0)
@@ -82,7 +64,7 @@ public class PathProvider
             throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMassage_FolderNotFound);
         }
 
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         switch (folder.RootFolderType)
         {
@@ -101,15 +83,15 @@ public class PathProvider
                     projectID = Convert.ToInt32(projectIDFromDao);
                 }
 
-                return _commonLinkUtility.GetFullAbsolutePath(string.Format("{0}?prjid={1}#{2}", ProjectVirtualPath, projectID, folder.Id));
+                return commonLinkUtility.GetFullAbsolutePath(string.Format("{0}?prjid={1}#{2}", ProjectVirtualPath, projectID, folder.Id));
             default:
-                return _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FilesBaseAbsolutePath + "#" + HttpUtility.UrlPathEncode(folder.Id.ToString()));
+                return commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + "#" + HttpUtility.UrlPathEncode(folder.Id.ToString()));
         }
     }
 
     public async Task<string> GetFolderUrlByIdAsync<T>(T folderId)
     {
-        var folder = await _daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
         return await GetFolderUrlAsync(folder);
     }
@@ -122,7 +104,7 @@ public class PathProvider
         }
 
         //NOTE: Always build path to handler!
-        var uriBuilder = new UriBuilder(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
         var query = uriBuilder.Query;
         query += FilesLinkUtility.Action + "=stream&";
         query += FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(file.Id.ToString()) + "&";
@@ -133,7 +115,7 @@ public class PathProvider
             query += FilesLinkUtility.Version + "=" + file.Version + "&";
         }
 
-        query += FilesLinkUtility.AuthKey + "=" + await _emailValidationKeyProvider.GetEmailKeyAsync(file.Id.ToString() + version);
+        query += FilesLinkUtility.AuthKey + "=" + await emailValidationKeyProvider.GetEmailKeyAsync(file.Id.ToString() + version);
         if (!string.IsNullOrEmpty(doc))
         {
             query += "&" + FilesLinkUtility.DocShareKey + "=" + HttpUtility.UrlEncode(doc);
@@ -150,7 +132,7 @@ public class PathProvider
         }
 
         //NOTE: Always build path to handler!
-        var uriBuilder = new UriBuilder(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
         var query = uriBuilder.Query;
         query += FilesLinkUtility.Action + "=stream&";
         query += FilesLinkUtility.FileId + "=" + HttpUtility.UrlEncode(file.Id.ToString()) + "&";
@@ -161,7 +143,7 @@ public class PathProvider
             query += FilesLinkUtility.Version + "=" + file.Version + "&";
         }
 
-        query += FilesLinkUtility.AuthKey + "=" + _emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
+        query += FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
 
         query += GetExternalShareKey(keyName, key);
 
@@ -175,12 +157,12 @@ public class PathProvider
             throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
         }
 
-        var uriBuilder = new UriBuilder(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
         var query = uriBuilder.Query;
         query += $"{FilesLinkUtility.Action}=diff&";
         query += $"{FilesLinkUtility.FileId}={HttpUtility.UrlEncode(file.Id.ToString())}&";
         query += $"{FilesLinkUtility.Version}={file.Version}&";
-        query += $"{FilesLinkUtility.AuthKey}={await _emailValidationKeyProvider.GetEmailKeyAsync(file.Id + file.Version.ToString(CultureInfo.InvariantCulture))}";
+        query += $"{FilesLinkUtility.AuthKey}={await emailValidationKeyProvider.GetEmailKeyAsync(file.Id + file.Version.ToString(CultureInfo.InvariantCulture))}";
         
         query += GetExternalShareKey(keyName, key);
 
@@ -191,7 +173,7 @@ public class PathProvider
     {
         ArgumentNullException.ThrowIfNull(stream);
 
-        var store = await _globalStore.GetStoreAsync();
+        var store = await globalStore.GetStoreAsync();
         var fileName = string.Format("{0}{1}", Guid.NewGuid(), ext);
         var path = CrossPlatform.PathCombine("temp_stream", fileName);
 
@@ -207,18 +189,18 @@ public class PathProvider
             MimeMapping.GetMimeMapping(ext),
             "attachment; filename=\"" + fileName + "\"");
 
-        var uriBuilder = new UriBuilder(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
         var query = uriBuilder.Query;
         query += $"{FilesLinkUtility.Action}=tmp&";
         query += $"{FilesLinkUtility.FileTitle}={HttpUtility.UrlEncode(fileName)}&";
-        query += $"{FilesLinkUtility.AuthKey}={await _emailValidationKeyProvider.GetEmailKeyAsync(fileName)}";
+        query += $"{FilesLinkUtility.AuthKey}={await emailValidationKeyProvider.GetEmailKeyAsync(fileName)}";
 
         return $"{uriBuilder.Uri}?{query}";
     }
 
     public string GetEmptyFileUrl(string extension)
     {
-        var uriBuilder = new UriBuilder(_commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.FileHandlerPath));
+        var uriBuilder = new UriBuilder(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath));
         var query = uriBuilder.Query;
         query += $"{FilesLinkUtility.Action}=empty&";
         query += $"{FilesLinkUtility.FileTitle}={HttpUtility.UrlEncode(extension)}";
