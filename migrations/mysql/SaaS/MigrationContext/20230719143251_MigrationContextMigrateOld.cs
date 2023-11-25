@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,22 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common.EF.Context;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-public class WebPluginDbContext : DbContext
+#nullable disable
+
+namespace ASC.Migrations.MySql.SaaS.Migrations
 {
-    public DbSet<DbWebPlugin> WebPlugins { get; set; }
-
-    public WebPluginDbContext(DbContextOptions<WebPluginDbContext> options) : base(options)
+    /// <inheritdoc />
+    public partial class MigrationContextMigrateOld : Migration
     {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.InsertData(
+                table: "webstudio_settings",
+                columns: new[] { "ID", "TenantID", "UserID", "Data" },
+                values: new object[] { "9a925891-1f92-4ed7-b277-d6f649739f06", 1, "00000000-0000-0000-0000-000000000000", "{\"Completed\":false}" });
+        }
 
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbWebPlugins()
-            .AddDbTenant();
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+        }
     }
 }

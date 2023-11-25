@@ -1034,7 +1034,6 @@ Bạn không muốn thay đổi mật khẩu? Xin hãy bỏ qua tin nhắn này.
 
 Bạn có thể cho biết vì sao bạn lại quyết định ngừng sử dụng? Xin hãy chia sẻ trải nghiệm của bạn với chúng tôi.
  
-$OrangeButton
 
 Cảm ơn và chúc bạn may mắn!
 
@@ -1795,5 +1794,17 @@ Nhóm hỗ trợ ONLYOFFICE™
   </data>
   <data name="ButtonChangeTfa" xml:space="preserve">
     <value>Định cấu hình ứng dụng xác thực</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Thành thạo ONLYOFFICE DocSpace với video hướng dẫn</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Trân trọng, Nhóm ONLYOFFICE</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Trân trọng, Nhóm Hỗ trợ ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>XEM TOÀN BỘ DANH SÁCH PHÁT</value>
   </data>
 </root>

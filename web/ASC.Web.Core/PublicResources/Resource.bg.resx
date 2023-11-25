@@ -632,7 +632,7 @@
     <value>Телефонен номер от Twilio (изисква се за SMS разрешение)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Свържете приложението, за да влезете в портала, като използвате профил в Twitter и потърсете контакти.</value>
+    <value>Свържете приложението, за да влезете в портала, като използвате профил в Twitter.</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Свържете приложението за публикуване на документи в WordPress.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Интеграции на трети страни</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom идентификацията на клиента</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom тайна на клиента</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Разрешете приложението да влезе в портала с помощта на Zoom акаунт.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Активирайте това приложение, за да позволите на потребителите Ви да влизат в ONLYOFFICE, използвайки своите Zoom профили. {0}Отидете в уебсайта на Zoom Developers и създайте нова интеграция на приложението ONLYOFFICE. Въведете данните, получени по-долу:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Твърде много опити за списване. Моля, опитайте отново по-късно</value>
   </data>
 </root>
