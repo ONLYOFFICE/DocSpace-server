@@ -4,6 +4,7 @@
 package com.onlyoffice.authorization.api.core.transfer.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.onlyoffice.authorization.api.external.validation.annotations.EqualsAnySupportedAuthenticationMethod;
 import com.onlyoffice.authorization.api.external.validation.annotations.URLCollection;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -32,6 +33,7 @@ public class CreateClientDTO implements Serializable {
     message = "client logo is expected to be passed as base64")
     private String logo;
     @JsonProperty("authentication_method")
+    @EqualsAnySupportedAuthenticationMethod
     private String authenticationMethod;
     @JsonProperty("website_url")
     @Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",

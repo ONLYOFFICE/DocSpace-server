@@ -60,8 +60,7 @@ public interface ClientMapper {
     @Mappings({
             @Mapping(
                     source = "authenticationMethod",
-                    target = "authenticationMethod",
-                    defaultValue = "client_secret_post"
+                    target = "authenticationMethod"
             )
     })
     ClientMessage fromQueryToMessage(ClientDTO client);
