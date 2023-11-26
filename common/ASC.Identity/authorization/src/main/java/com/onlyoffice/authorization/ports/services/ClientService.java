@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ClientService implements ClientRetrieveUsecases {
-    private final String DEFAULT_CLIENT_AUTHENTICATION_METHOD = "client_secret_post";
-
     private final RegisteredClientConfiguration configuration;
     private final ClientPersistenceQueryUsecases clientUsecases;
 
@@ -68,11 +66,7 @@ public class ClientService implements ClientRetrieveUsecases {
                 .clientIdIssuedAt(client.getClientIssuedAt().toInstant())
                 .clientSecret(client.getClientSecret())
                 .clientName(client.getName())
-                .clientAuthenticationMethod(client.getAuthenticationMethod()
-                        .equals(DEFAULT_CLIENT_AUTHENTICATION_METHOD) ?
-                        ClientAuthenticationMethod.CLIENT_SECRET_POST :
-                        ClientAuthenticationMethod.CLIENT_SECRET_JWT
-                )
+                .clientAuthenticationMethod(new ClientAuthenticationMethod(client.getAuthenticationMethod()))
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUris((uris) -> uris.addAll(Arrays.stream(client
