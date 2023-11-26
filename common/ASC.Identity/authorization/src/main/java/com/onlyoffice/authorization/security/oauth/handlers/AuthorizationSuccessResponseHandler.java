@@ -21,10 +21,13 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
         log.info("Authorization success");
         if (authentication instanceof OAuth2AuthorizationCodeRequestAuthenticationToken token) {
             log.info("Redirecting to redirect uri with authorization code");
+            String state = token.getState();
+            StringBuilder redirectUrl = new StringBuilder(String.format("%s?code=%s",
+                    token.getRedirectUri(), token.getAuthorizationCode().getTokenValue()));
+            if (!state.isBlank())
+                redirectUrl.append(String.format("&state=%s", state));
             response.setStatus(HttpStatus.OK.value());
-            response.setHeader(REDIRECT_HEADER, String
-                    .format("%s?code=%s", token.getRedirectUri(),
-                            token.getAuthorizationCode().getTokenValue()));
+            response.setHeader(REDIRECT_HEADER, redirectUrl.toString());
         }
     }
 }
