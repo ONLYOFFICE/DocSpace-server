@@ -87,7 +87,7 @@ public class AuthorizationServerConfiguration {
     public ClientSettings clientSettings() {
         return ClientSettings.builder()
                 .requireAuthorizationConsent(true)
-                .requireProofKey(true)
+                .requireProofKey(false)
                 .build();
     }
 
