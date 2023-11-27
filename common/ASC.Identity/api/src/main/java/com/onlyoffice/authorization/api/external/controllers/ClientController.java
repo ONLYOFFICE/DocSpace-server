@@ -146,9 +146,6 @@ public class ClientController {
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new get client info request");
         log.debug("Trying to retrieve a client");

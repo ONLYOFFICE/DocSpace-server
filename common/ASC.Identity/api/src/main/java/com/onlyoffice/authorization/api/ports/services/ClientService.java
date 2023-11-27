@@ -230,8 +230,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @Transactional(readOnly = true, rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO getClient(String clientId) {
         var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        if (context != null) {
+            MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
+            MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        }
         MDC.put("clientId", clientId);
         log.info("Trying to get a client", clientId);
         MDC.clear();
@@ -244,9 +246,11 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                         query.setClientSecret(cipher.decrypt(query.getClientSecret()));
                         return query;
                     } catch (Exception e) {
-                        MDC.put("tenantId", String.valueOf(context
-                                .getResponse().getTenantId()));
-                        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+                        if (context != null) {
+                            MDC.put("tenantId", String.valueOf(context
+                                    .getResponse().getTenantId()));
+                            MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+                        }
                         MDC.put("clientId", clientId);
                         log.error("Could not map a client", e);
                         MDC.clear();
