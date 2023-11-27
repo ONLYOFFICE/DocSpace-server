@@ -300,6 +300,18 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(!await _fileSecurity.CanReadAsync(parent), FilesCommonResource.ErrorMassage_SecurityException_ViewFolder);
         ErrorIf(parent.RootFolderType == FolderType.TRASH && !Equals(parent.Id, await _globalFolderHelper.FolderTrashAsync), FilesCommonResource.ErrorMassage_ViewTrashItem);
 
+        if (parent.FolderType == FolderType.FormFillingFolder)
+        {
+            var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
+            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
+            var ace = await _fileSharing.GetPureSharesAsync(room, new List<Guid> { _authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+
+            if (ace != null && ace.Access == FileShare.FillForms)
+            {
+                subjectId = _authContext.CurrentAccount.ID;
+            }
+        }
+
         if (orderBy != null)
         {
             _filesSettingsHelper.DefaultOrder = orderBy;
