@@ -282,7 +282,7 @@ public class FileUtility
 
     public static bool IsBackupType(string extension)
     {
-        return ExtsBackup.Contains(extension);
+        return ExtsBackup.Contains(GetFileExtension(extension));
     }
 
     public static FileType GetFileTypeByExtention(string extension)
