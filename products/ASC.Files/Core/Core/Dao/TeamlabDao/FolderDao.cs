@@ -1538,6 +1538,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FilterType.PresentationsOnly or
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
+            FilterType.BackupOnly or
             FilterType.MediaOnly;
     }
 

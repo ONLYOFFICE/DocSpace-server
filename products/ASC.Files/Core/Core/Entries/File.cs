@@ -96,6 +96,8 @@ public class File<T> : FileEntry<T>
                     return FilterType.SpreadsheetsOnly;
                 case FileType.Archive:
                     return FilterType.ArchiveOnly;
+                case FileType.Backup:
+                    return FilterType.BackupOnly;
                 case FileType.Audio:
                 case FileType.Video:
                     return FilterType.MediaOnly;

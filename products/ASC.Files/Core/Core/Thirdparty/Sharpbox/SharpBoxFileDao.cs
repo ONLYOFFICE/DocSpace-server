@@ -139,6 +139,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             case FilterType.ArchiveOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Archive);
                 break;
+            case FilterType.BackupOnly:
+                files = files.Where(x => FileUtility.IsBackupType(x.Title));
+                break;
             case FilterType.MediaOnly:
                 files = files.Where(x =>
                 {
@@ -223,6 +226,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
                 break;
             case FilterType.ArchiveOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Archive);
+                break;
+            case FilterType.BackupOnly:
+                files = files.Where(x => FileUtility.IsBackupType(x.Title));
                 break;
             case FilterType.MediaOnly:
                 files = files.Where(x =>

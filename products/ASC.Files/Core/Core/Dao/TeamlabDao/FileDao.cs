@@ -264,6 +264,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
                     query = BuildSearch(query, searchText, SearchType.End);
                 }
                 break;
+
+            case FilterType.BackupOnly:
+                query = query.Where(r => r.Category == (int)FilterType.ArchiveOnly);
+                break;
         }
 
         await foreach (var e in FromQuery(filesDbContext, query).AsAsyncEnumerable())
@@ -1204,6 +1208,10 @@ internal class FileDao : AbstractDao, IFileDao<int>
                     q = BuildSearch(q, searchText, SearchType.End);
                 }
                 break;
+
+            case FilterType.BackupOnly:
+                q = q.Where(r => r.Category == (int)FilterType.ArchiveOnly);
+                break;
         }
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
@@ -1494,6 +1502,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 case FilterType.MediaOnly:
                     result.Where(r => r.Category, (int)filterType);
                     break;
+                case FilterType.BackupOnly:
+                    result.Where(r => r.Category, (int)FilterType.ArchiveOnly);
+                    break;
             }
 
             return result;
@@ -1654,6 +1665,9 @@ internal class FileDao : AbstractDao, IFileDao<int>
                     q = BuildSearch(q, searchText, SearchType.End);
                 }
 
+                break;
+            case FilterType.BackupOnly:
+                q = q.Where(r => r.Category == (int)FilterType.ArchiveOnly);
                 break;
         }
 

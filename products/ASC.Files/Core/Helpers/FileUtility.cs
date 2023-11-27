@@ -280,6 +280,11 @@ public class FileUtility
         return GetFileTypeByExtention(GetFileExtension(fileName));
     }
 
+    public static bool IsBackupType(string extension)
+    {
+        return ExtsBackup.Contains(extension);
+    }
+
     public static FileType GetFileTypeByExtention(string extension)
     {
         extension = extension.ToLower();
@@ -644,6 +649,11 @@ public class FileUtility
                 ".jar", ".lha", ".lzh", ".pak", ".pk3",
                 ".tar", ".tgz", ".gz", ".uu", ".uue", ".xxe",
                 ".z", ".zoo"
+            }.ToImmutableList();
+
+    public static readonly ImmutableList<string> ExtsBackup = new List<string>()
+    {
+                ".tar", ".gz"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsVideo =  new List<string>()

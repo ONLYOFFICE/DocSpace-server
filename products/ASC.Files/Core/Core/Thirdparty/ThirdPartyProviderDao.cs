@@ -557,6 +557,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
             FilterType.PresentationsOnly or
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
+            FilterType.BackupOnly or
             FilterType.MediaOnly;
     }
 

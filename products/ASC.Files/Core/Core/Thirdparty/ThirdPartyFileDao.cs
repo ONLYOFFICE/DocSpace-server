@@ -162,6 +162,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
             case FilterType.ArchiveOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Archive);
                 break;
+            case FilterType.BackupOnly:
+                files = files.Where(x => FileUtility.IsBackupType(x.Title));
+                break;
             case FilterType.MediaOnly:
                 files = files.Where(x =>
                 {
@@ -246,6 +249,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
                 break;
             case FilterType.ArchiveOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Archive);
+                break;
+            case FilterType.BackupOnly:
+                files = files.Where(x => FileUtility.IsBackupType(x.Title));
                 break;
             case FilterType.MediaOnly:
                 files = files.Where(x =>

@@ -854,6 +854,9 @@ public class EntryManager
                 var filterExt = (searchText ?? string.Empty).ToLower().Trim();
                 where = f => !string.IsNullOrEmpty(filterExt) && f.FileEntryType == FileEntryType.File && FileUtility.GetFileExtension(f.Title).Equals(filterExt);
                 break;
+            case FilterType.BackupOnly:
+                where = f => f.FileEntryType == FileEntryType.File && (((File<T>)f).FilterType == FilterType.ArchiveOnly || filter == FilterType.FilesOnly);
+                break;
         }
 
         if (where != null)
