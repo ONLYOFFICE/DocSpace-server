@@ -36,7 +36,6 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         StudioNotifyHelper studioNotifyHelper,
         ITariffService tariffService,
         TenantExtra tenantExtra,
-        AuthContext authContext,
         CommonLinkUtility commonLinkUtility,
         ApiSystemHelper apiSystemHelper,
         SetupInfo setupInfo,
@@ -45,6 +44,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         AuthManager authManager,
         SecurityContext securityContext,
+        CoreSettings coreSettings,
         IServiceProvider serviceProvider)
     {
     private readonly AuthContext _authContext = authContext;
@@ -210,7 +210,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                         {
-                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
                     }
 
@@ -299,7 +299,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                         {
-                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                         }
                     }
 

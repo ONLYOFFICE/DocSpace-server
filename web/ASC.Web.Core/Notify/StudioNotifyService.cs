@@ -143,22 +143,20 @@ public class StudioNotifyService(UserManager userManager,
 
     public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
     {
-        var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
-        var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
+        var cultureInfo = string.IsNullOrEmpty(culture) ? CultureInfo.CurrentUICulture : new CultureInfo(culture);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>
         { 
             new TagValue(Tags.Message, roomTitle),
             new TagValue(Tags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours) 
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
 
-        if (!string.IsNullOrEmpty(culture))
-        {
-            tags.Add(new TagValue(CommonTags.Culture, culture));
-        }
-        
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.SaasRoomInvite,
                 await studioNotifyHelper.RecipientFromEmailAsync(email, false),
@@ -168,21 +166,19 @@ public class StudioNotifyService(UserManager userManager,
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
     {
-        var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
-        var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
+        var cultureInfo = string.IsNullOrEmpty(culture) ? CultureInfo.CurrentUICulture : new CultureInfo(culture);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>() 
         {
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
-                new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif"))
+                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
+                new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
-
-        if (!string.IsNullOrEmpty(culture))
-        {
-            tags.Add(new TagValue(CommonTags.Culture, culture));
-        }
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.SaasDocSpaceInvite,

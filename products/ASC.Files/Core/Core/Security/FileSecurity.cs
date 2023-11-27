@@ -471,6 +471,11 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.EditHistory);
     }
 
+    public async Task<bool> CanReadLinksAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, _authContext.CurrentAccount.ID, FilesSecurityActions.ReadLinks);
+    }
+    
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry)
     {
         return await WhoCanAsync(entry, FilesSecurityActions.Read);
@@ -945,7 +950,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     action != FilesSecurityActions.ReadHistory &&
                     action != FilesSecurityActions.Copy &&
                     action != FilesSecurityActions.Move &&
-                    action != FilesSecurityActions.Download
+                    action != FilesSecurityActions.Download &&
+                    action != FilesSecurityActions.ReadLinks
                     )
                 {
                     return false;
@@ -1148,6 +1154,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FilesSecurityActions.EditAccess:
+            case FilesSecurityActions.ReadLinks:
                 if (e.Access == FileShare.RoomAdmin)
                 {
                     return true;
@@ -1868,6 +1875,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         SubmitToFormGallery,
         Download,
         Convert,
-        CopySharedLink
+        CopySharedLink,
+        ReadLinks
     }
 }

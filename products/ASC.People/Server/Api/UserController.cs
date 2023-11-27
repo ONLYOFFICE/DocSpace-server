@@ -132,10 +132,8 @@ public class UserController(ICache cache,
         await UpdateContactsAsync(inDto.Contacts, user);
 
         cache.Insert("REWRITE_URL" + await tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
-        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, true, false, inDto.Type,
+        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
-
-        user.ActivationStatus = EmployeeActivationStatus.Activated;
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
