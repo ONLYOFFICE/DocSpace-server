@@ -35,8 +35,7 @@ public interface ClientMapper {
     @Mappings({
             @Mapping(
                     source = "authenticationMethod",
-                    target = "authenticationMethod",
-                    defaultValue = "client_secret_post"
+                    target = "authenticationMethod"
             ),
             @Mapping(
                     source = "createdOn",
@@ -67,8 +66,7 @@ public interface ClientMapper {
     @Mappings({
             @Mapping(
                     source = "authenticationMethod",
-                    target = "authenticationMethod",
-                    defaultValue = "client_secret_post"
+                    target = "authenticationMethod"
             )
     })
     ClientDTO fromCommandToQuery(CreateClientDTO client);
