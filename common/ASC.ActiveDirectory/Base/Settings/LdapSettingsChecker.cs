@@ -25,20 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Base.Settings;
-public abstract class LdapSettingsChecker
+public abstract class LdapSettingsChecker(ILogger<LdapSettingsChecker> logger)
 {
-    protected readonly ILogger<LdapSettingsChecker> _logger;
+    protected readonly ILogger<LdapSettingsChecker> _logger = logger;
 
     public LdapUserImporter LdapImporter { get; private set; }
 
     public LdapSettings Settings
     {
         get { return LdapImporter.Settings; }
-    }
-
-    protected LdapSettingsChecker(ILogger<LdapSettingsChecker> logger)
-    {
-        _logger = logger;
     }
 
     public void Init(LdapUserImporter importer)

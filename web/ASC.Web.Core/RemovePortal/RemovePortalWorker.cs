@@ -27,21 +27,13 @@
 namespace ASC.Web.Core.RemovePortal;
 
 [Singleton(Additional = typeof(RemovePortalWorkerExtension))]
-public class RemovePortalWorker
+public class RemovePortalWorker(IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly object _locker = new();
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "removePortal";
-
-    public RemovePortalWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider)
-    {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
 
     public void Start(int tenantId)
     {
@@ -57,7 +49,7 @@ public class RemovePortalWorker
             if (item == null)
             {
 
-                item = _serviceProvider.GetService<RemovePortalOperation>();
+                item = serviceProvider.GetService<RemovePortalOperation>();
 
                 item.Init(tenantId);
 

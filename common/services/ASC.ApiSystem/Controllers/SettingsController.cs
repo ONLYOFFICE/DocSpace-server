@@ -29,21 +29,14 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class SettingsController : ControllerBase
-{
-    private CommonMethods CommonMethods { get; }
-    private CoreSettings CoreSettings { get; }
-    private ILogger<SettingsController> Log { get; }
-
-    public SettingsController(
-        CommonMethods commonMethods,
+public class SettingsController(CommonMethods commonMethods,
         CoreSettings coreSettings,
         ILogger<SettingsController> option)
-    {
-        CommonMethods = commonMethods;
-        CoreSettings = coreSettings;
-        Log = option;
-    }
+    : ControllerBase
+{
+    private CommonMethods CommonMethods { get; } = commonMethods;
+    private CoreSettings CoreSettings { get; } = coreSettings;
+    private ILogger<SettingsController> Log { get; } = option;
 
     #region For TEST api
 

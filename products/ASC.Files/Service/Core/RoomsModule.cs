@@ -30,30 +30,18 @@ using Constants = ASC.Feed.Constants;
 
 namespace ASC.Files.Service.Core;
 
-public class RoomsModule : FeedModule
-{
-    public const string RoomItem = Constants.RoomItem;
-    public const string SharedRoomItem = Constants.SharedRoomItem;
-
-    private readonly IFolderDao<int> _folderDao;
-    private readonly UserManager _userManager;
-    private readonly FileSecurity _fileSecurity;
-    private readonly TenantUtil _tenantUtil;
-
-    public RoomsModule(
-        TenantManager tenantManager,
+public class RoomsModule(TenantManager tenantManager,
         UserManager userManager,
         WebItemSecurity webItemSecurity,
         FileSecurity fileSecurity,
         IDaoFactory daoFactory,
         TenantUtil tenantUtil)
-        : base(tenantManager, webItemSecurity)
-    {
-        _userManager = userManager;
-        _fileSecurity = fileSecurity;
-        _folderDao = daoFactory.GetFolderDao<int>();
-        _tenantUtil = tenantUtil;
-    }
+    : FeedModule(tenantManager, webItemSecurity)
+{
+    public const string RoomItem = Constants.RoomItem;
+    public const string SharedRoomItem = Constants.SharedRoomItem;
+
+    private readonly IFolderDao<int> _folderDao = daoFactory.GetFolderDao<int>();
 
     public override string Name => Constants.RoomsModule;
     public override string Product => Constants.Documents;
@@ -80,7 +68,7 @@ public class RoomsModule : FeedModule
             }
 
             var owner = (Guid)feed.Target;
-            var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
+            var groupUsers = (await userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
             if (groupUsers.Count == 0)
             {
                 groupUsers.Add(owner);
@@ -93,7 +81,7 @@ public class RoomsModule : FeedModule
             targetCond = true;
         }
 
-        return targetCond && await _fileSecurity.CanReadAsync(folder, userId);
+        return targetCond && await fileSecurity.CanReadAsync(folder, userId);
     }
 
     public override async Task<IEnumerable<Tuple<Feed.Aggregator.Feed, object>>> GetFeeds(FeedFilter filter)
@@ -115,7 +103,7 @@ public class RoomsModule : FeedModule
 
         if (shareRecord == null)
         {
-            var roomCreatedUtc = _tenantUtil.DateTimeToUtc(room.CreateOn);
+            var roomCreatedUtc = tenantUtil.DateTimeToUtc(room.CreateOn);
 
             return new Feed.Aggregator.Feed(room.CreateBy, roomCreatedUtc)
             {

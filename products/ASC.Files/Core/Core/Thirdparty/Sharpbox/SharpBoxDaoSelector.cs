@@ -27,13 +27,8 @@
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Scope(Additional = typeof(SharpBoxDaoSelectorExtension))]
-internal class SharpBoxDaoSelector : RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
+internal class SharpBoxDaoSelector(IServiceProvider serviceProvider, IDaoFactory daoFactory) : RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>(serviceProvider, daoFactory)
 {
-    public SharpBoxDaoSelector(IServiceProvider serviceProvider, IDaoFactory daoFactory)
-        : base(serviceProvider, daoFactory)
-    {
-    }
-
     public override IFileDao<string> GetFileDao(string id)
     {
         var fileDao = _serviceProvider.GetService<SharpBoxFileDao>();

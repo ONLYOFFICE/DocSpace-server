@@ -38,14 +38,9 @@ public enum WebZoneType
 }
 
 [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public class WebZoneAttribute : Attribute
+public class WebZoneAttribute(WebZoneType type) : Attribute
 {
-    public WebZoneType Type { get; private set; }
-
-    public WebZoneAttribute(WebZoneType type)
-    {
-        Type = type;
-    }
+    public WebZoneType Type { get; private set; } = type;
 }
 
 public interface IRenderWebItem

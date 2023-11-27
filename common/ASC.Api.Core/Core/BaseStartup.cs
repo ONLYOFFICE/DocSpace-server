@@ -26,6 +26,8 @@
 
 using Flurl.Util;
 
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
+
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
@@ -429,7 +431,7 @@ public abstract class BaseStartup
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
 
             endpoints.MapHealthChecks("/ready", new HealthCheckOptions
             {

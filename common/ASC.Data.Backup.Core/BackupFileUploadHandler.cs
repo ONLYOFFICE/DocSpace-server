@@ -32,9 +32,8 @@ namespace ASC.Web.Studio.Core.Backup;
 
 public class BackupFileUploadHandler
 {
-    public BackupFileUploadHandler(RequestDelegate next)
+    public BackupFileUploadHandler(RequestDelegate _)
     {
-
     }
 
     public async Task Invoke(HttpContext context,

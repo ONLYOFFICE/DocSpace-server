@@ -27,7 +27,18 @@
 namespace ASC.Data.Storage.S3;
 
 [Scope]
-public class S3Storage : BaseStorage
+public class S3Storage(TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider factory,
+        ILogger<S3Storage> options,
+        IHttpClientFactory clientFactory,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager,
+        CoreBaseSettings coreBaseSettings)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportCdnUri => true;
     public static long ChunkSize => 1000 * 1024 * 1024;
@@ -57,24 +68,6 @@ public class S3Storage : BaseStorage
 
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public S3Storage(
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider factory,
-        ILogger<S3Storage> options,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager,
-        CoreBaseSettings coreBaseSettings)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-        _coreBaseSettings = coreBaseSettings;
-    }
 
     public Uri GetUriInternal(string path)
     {
@@ -460,7 +453,7 @@ public class S3Storage : BaseStorage
     public override IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession,
             CommonChunkedUploadSessionHolder sessionHolder, bool isConsumerStorage = false)
     {
-        if (_coreBaseSettings.Standalone || isConsumerStorage)
+        if (coreBaseSettings.Standalone || isConsumerStorage)
         {
             return new S3ZipWriteOperator(_tempStream, chunkedUploadSession, sessionHolder);
         }
@@ -472,7 +465,7 @@ public class S3Storage : BaseStorage
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
     {
-        if (_coreBaseSettings.Standalone || isConsumerStorage)
+        if (coreBaseSettings.Standalone || isConsumerStorage)
         {
             return "tar.gz";
         }
@@ -1664,7 +1657,7 @@ public class S3Storage : BaseStorage
         return new AmazonS3Client(_accessKeyId, _secretAccessKeyId, cfg);
     }
 
-    private class ResponseStreamWrapper : Stream
+    private class ResponseStreamWrapper(GetObjectResponse response) : Stream
     {
         public override bool CanRead => _response.ResponseStream.CanRead;
         public override bool CanSeek => _response.ResponseStream.CanSeek;
@@ -1676,12 +1669,7 @@ public class S3Storage : BaseStorage
             set => _response.ResponseStream.Position = value;
         }
 
-        private readonly GetObjectResponse _response;
-
-        public ResponseStreamWrapper(GetObjectResponse response)
-        {
-            _response = response ?? throw new ArgumentNullException(nameof(response));
-        }
+        private readonly GetObjectResponse _response = response ?? throw new ArgumentNullException(nameof(response));
 
         public override int Read(byte[] buffer, int offset, int count)
         {

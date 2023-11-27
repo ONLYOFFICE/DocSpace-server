@@ -88,6 +88,6 @@ finally
 
 public partial class Program
 {
-    private static readonly string Namespace = typeof(Startup).Namespace;
-    public static readonly string AppName = Namespace.Substring(Namespace.LastIndexOf('.', Namespace.LastIndexOf('.') - 1) + 1).Replace(".", "");
+    private static readonly string _namespace = typeof(Startup).Namespace;
+    public static readonly string AppName = _namespace.Substring(_namespace.LastIndexOf('.', _namespace.LastIndexOf('.') - 1) + 1).Replace(".", "");
 }

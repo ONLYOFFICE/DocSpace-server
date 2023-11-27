@@ -27,14 +27,9 @@
 namespace ASC.Web.Core.Utility.Settings;
 
 [Singleton]
-public class CustomColorThemesSettingsHelper
+public class CustomColorThemesSettingsHelper(IConfiguration configuration)
 {
-    public int Limit { get; set; }
-
-    public CustomColorThemesSettingsHelper(IConfiguration configuration)
-    {
-        Limit = configuration.GetSection("core:themelimit").Get<int>();
-    }
+    public int Limit { get; set; } = ConfigurationBinder.Get<int>(configuration.GetSection("core:themelimit"));
 }
 
 public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>

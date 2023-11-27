@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
-public class FilesModuleSpecifics : ModuleSpecificsBase
+public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     public override ModuleName ModuleName => ModuleName.Files;
     public override IEnumerable<TableInfo> Tables => _tables;
@@ -39,66 +39,57 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
     private const string _bunchRightNodeStartPrivacy = "files/privacy/";
 
     private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
-    private readonly Helpers _helpers;
-    private readonly ILogger<ModuleProvider> _logger;
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("files_file", "tenant_id", "id", IdType.Integer)
+
+    private readonly TableInfo[] _tables = {
+            new("files_file", "tenant_id", "id", IdType.Integer)
             {
                 UserIDColumns = new[] {"create_by", "modified_by"},
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}, {"modified_on", false}}
             },
-            new TableInfo("files_folder", "tenant_id", "id")
+            new("files_folder", "tenant_id", "id")
             {
                 UserIDColumns = new[] {"create_by", "modified_by"},
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}, {"modified_on", false}}
             },
-            new TableInfo("files_bunch_objects", "tenant_id"),
-            new TableInfo("files_folder_tree"),
-            new TableInfo("files_security", "tenant_id") {UserIDColumns = new[] {"owner"}},
-            new TableInfo("files_thirdparty_account", "tenant_id", "id")
+            new("files_bunch_objects", "tenant_id"),
+            new("files_folder_tree"),
+            new("files_security", "tenant_id") {UserIDColumns = new[] {"owner"}},
+            new("files_thirdparty_account", "tenant_id", "id")
             {
                 UserIDColumns = new[] {"user_id"},
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
             },
-            new TableInfo("files_thirdparty_id_mapping", "tenant_id")
+            new("files_thirdparty_id_mapping", "tenant_id")
         };
 
-    private readonly RelationInfo[] _tableRelations = new[]
-    {
-            new RelationInfo("core_user", "id", "files_bunch_objects", "right_node", typeof(TenantsModuleSpecifics),
+    private readonly RelationInfo[] _tableRelations = {
+            new("core_user", "id", "files_bunch_objects", "right_node", typeof(TenantsModuleSpecifics),
                 x =>
                 {
                     var rightNode = Convert.ToString(x["right_node"]);
 
                     return rightNode.StartsWith(_bunchRightNodeStartMy) || rightNode.StartsWith(_bunchRightNodeStartTrash) || rightNode.StartsWith(_bunchRightNodeStartPrivacy);
                 }),
-            new RelationInfo("core_user", "id", "files_security", "subject", typeof(TenantsModuleSpecifics)),
-            new RelationInfo("core_group", "id", "files_security", "subject", typeof(TenantsModuleSpecifics)),
+            new("core_user", "id", "files_security", "subject", typeof(TenantsModuleSpecifics)),
+            new("core_group", "id", "files_security", "subject", typeof(TenantsModuleSpecifics)),
 
-            new RelationInfo("files_folder", "id", "files_bunch_objects", "left_node"),
-            new RelationInfo("files_folder", "id", "files_file", "folder_id"),
-            new RelationInfo("files_folder", "id", "files_folder", "parent_id"),
-            new RelationInfo("files_folder", "id", "files_folder_tree", "folder_id"),
-            new RelationInfo("files_folder", "id", "files_folder_tree", "parent_id"),
-            new RelationInfo("files_file", "id", "files_security", "entry_id",
+            new("files_folder", "id", "files_bunch_objects", "left_node"),
+            new("files_folder", "id", "files_file", "folder_id"),
+            new("files_folder", "id", "files_folder", "parent_id"),
+            new("files_folder", "id", "files_folder_tree", "folder_id"),
+            new("files_folder", "id", "files_folder_tree", "parent_id"),
+            new("files_file", "id", "files_security", "entry_id",
                 x => Convert.ToInt32(x["entry_type"]) == 2 && _regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
-            new RelationInfo("files_folder", "id", "files_security", "entry_id",
+            new("files_folder", "id", "files_security", "entry_id",
                 x => Convert.ToInt32(x["entry_type"]) == 1 && _regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
-            new RelationInfo("files_thirdparty_id_mapping", "hash_id", "files_security", "entry_id",
+            new("files_thirdparty_id_mapping", "hash_id", "files_security", "entry_id",
                 x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
-            new RelationInfo("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "id"),
-            new RelationInfo("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "hash_id")
+            new("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "id"),
+            new("files_thirdparty_account", "id", "files_thirdparty_id_mapping", "hash_id")
         };
-
-    public FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helpers) : base(helpers)
-    {
-        _logger = logger;
-        _helpers = helpers;
-    }
 
     public override bool TryAdjustFilePath(bool dump, ColumnMapper columnMapper, ref string filePath)
     {
@@ -136,12 +127,12 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
                 var row = data.Rows[i];
                 try
                 {
-                    row[pwdColumn] = _helpers.CreateHash2(row[pwdColumn] as string);
-                    row[tokenColumn] = _helpers.CreateHash2(row[tokenColumn] as string);
+                    row[pwdColumn] = Helpers.CreateHash2(row[pwdColumn] as string);
+                    row[tokenColumn] = Helpers.CreateHash2(row[tokenColumn] as string);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ErrorCanNotPrepareData(row[providerColumn] as string, ex);
+                    logger.ErrorCanNotPrepareData(row[providerColumn] as string, ex);
                     data.Rows.Remove(row);
                     i--;
                 }
@@ -207,7 +198,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
         {
             //note: value could be ShareForEveryoneID and in that case result should be always false
             var strVal = Convert.ToString(value);
-            if (_helpers.IsEmptyOrSystemUser(strVal) || _helpers.IsEmptyOrSystemGroup(strVal))
+            if (Helpers.IsEmptyOrSystemUser(strVal) || Helpers.IsEmptyOrSystemGroup(strVal))
             {
                 return true;
             }
@@ -261,11 +252,11 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
         {
             try
             {
-                value = _helpers.CreateHash(value as string); // save original hash
+                value = Helpers.CreateHash(value as string); // save original hash
             }
             catch (Exception err)
             {
-                _logger.ErrorCanNotPrepareValue(value, err);
+                logger.ErrorCanNotPrepareValue(value, err);
                 value = null;
             }
             return true;
@@ -290,7 +281,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
 
 
 
-public class FilesModuleSpecifics2 : ModuleSpecificsBase
+public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     public override ModuleName ModuleName => ModuleName.Files2;
     public override IEnumerable<TableInfo> Tables => _tables;
@@ -302,31 +293,27 @@ public class FilesModuleSpecifics2 : ModuleSpecificsBase
     private const string _tagStartProject = "Project";
     private const string _tagStartRelationshipEvent = "RelationshipEvent_";
 
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("files_tag", "tenant_id", "id") {UserIDColumns = new[] {"owner"}},
-            new TableInfo("files_tag_link", "tenant_id")
+    private readonly TableInfo[] _tables = {
+            new("files_tag", "tenant_id", "id") {UserIDColumns = new[] {"owner"}},
+            new("files_tag_link", "tenant_id")
             {
                 UserIDColumns = new[] {"create_by"},
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
             },
         };
 
-    private readonly RelationInfo[] _rels = new[]
-    {
-            new RelationInfo("files_tag", "id", "files_tag_link", "tag_id", typeof(FilesModuleSpecifics)),
+    private readonly RelationInfo[] _rels = {
+            new("files_tag", "id", "files_tag_link", "tag_id", typeof(FilesModuleSpecifics)),
 
-            new RelationInfo("files_file", "id", "files_tag_link", "entry_id", typeof(FilesModuleSpecifics),
+            new("files_file", "id", "files_tag_link", "entry_id", typeof(FilesModuleSpecifics),
                 x => Convert.ToInt32(x["entry_type"]) == 2 && _regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
-            new RelationInfo("files_folder", "id", "files_tag_link", "entry_id",typeof(FilesModuleSpecifics),
+            new("files_folder", "id", "files_tag_link", "entry_id",typeof(FilesModuleSpecifics),
                 x => Convert.ToInt32(x["entry_type"]) == 1 && _regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
-            new RelationInfo("files_thirdparty_id_mapping", "hash_id", "files_tag_link", "entry_id", typeof(FilesModuleSpecifics),
+            new("files_thirdparty_id_mapping", "hash_id", "files_tag_link", "entry_id", typeof(FilesModuleSpecifics),
                 x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
         };
-
-    public FilesModuleSpecifics2(Helpers helpers) : base(helpers) { }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {

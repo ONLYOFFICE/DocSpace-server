@@ -27,44 +27,20 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class CspSettingsHelper
+public class CspSettingsHelper(SettingsManager settingsManager,
+    FilesLinkUtility filesLinkUtility,
+    TenantManager tenantManager,
+    CoreSettings coreSettings,
+    GlobalStore globalStore,
+    CoreBaseSettings coreBaseSettings,
+    IDistributedCache distributedCache,
+    IHttpContextAccessor httpContextAccessor,
+    IConfiguration configuration)
 {
-    private readonly SettingsManager _settingsManager;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly TenantManager _tenantManager;
-    private readonly CoreSettings _coreSettings;
-    private readonly GlobalStore _globalStore;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IDistributedCache _distributedCache;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IConfiguration _configuration;
-
-    public CspSettingsHelper(
-        SettingsManager settingsManager,
-        FilesLinkUtility filesLinkUtility,
-        TenantManager tenantManager,
-        CoreSettings coreSettings,
-        GlobalStore globalStore,
-        CoreBaseSettings coreBaseSettings,
-        IDistributedCache distributedCache,
-        IHttpContextAccessor httpContextAccessor,
-        IConfiguration configuration)
-    {
-        _settingsManager = settingsManager;
-        _filesLinkUtility = filesLinkUtility;
-        _tenantManager = tenantManager;
-        _coreSettings = coreSettings;
-        _globalStore = globalStore;
-        _coreBaseSettings = coreBaseSettings;
-        _distributedCache = distributedCache;
-        _httpContextAccessor = httpContextAccessor;
-        _configuration = configuration;
-    }
-
     public async Task<string> SaveAsync(IEnumerable<string> domains, bool setDefaultIfEmpty)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var domain = tenant.GetTenantDomain(_coreSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var domain = tenant.GetTenantDomain(coreSettings);
         List<string> headerKeys = new()
         {
             GetKey(domain)
@@ -73,7 +49,7 @@ public class CspSettingsHelper
         if (domain == Tenant.LocalHost && tenant.Alias == Tenant.LocalHost)
         {
             var domainsKey = $"{GetKey(domain)}:keys";
-            if (_httpContextAccessor.HttpContext != null)
+            if (httpContextAccessor.HttpContext != null)
             {
                 var keys = new List<string>
                 {
@@ -84,17 +60,17 @@ public class CspSettingsHelper
 
                 keys.AddRange(ips.Select(ip => GetKey(ip.ToString())));
 
-                if (_httpContextAccessor.HttpContext.Connection.RemoteIpAddress != null)
+                if (httpContextAccessor.HttpContext.Connection.RemoteIpAddress != null)
                 {
-                    keys.Add(GetKey(_httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()));
+                    keys.Add(GetKey(httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()));
                 }
 
-                await _distributedCache.SetStringAsync(domainsKey, string.Join(';', keys));
+                await distributedCache.SetStringAsync(domainsKey, string.Join(';', keys));
                 headerKeys.AddRange(keys);
             }
             else
             {
-                var domainsValue = await _distributedCache.GetStringAsync(domainsKey);
+                var domainsValue = await distributedCache.GetStringAsync(domainsKey);
 
                 if (!string.IsNullOrEmpty(domainsValue))
                 {
@@ -107,14 +83,14 @@ public class CspSettingsHelper
 
         if (!string.IsNullOrEmpty(headerValue))
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await _distributedCache.SetStringAsync(headerKey, headerValue, cs));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.SetStringAsync(headerKey, headerValue, cs));
         }
         else
         {
-            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await _distributedCache.RemoveAsync(headerKey, cs));
+            await Parallel.ForEachAsync(headerKeys, async (headerKey, cs) => await distributedCache.RemoveAsync(headerKey, cs));
         }
 
-        await _settingsManager.ManageAsync<CspSettings>(current =>
+        await settingsManager.ManageAsync<CspSettings>(current =>
         {
             current.Domains = domains;
             current.SetDefaultIfEmpty = setDefaultIfEmpty;
@@ -125,17 +101,17 @@ public class CspSettingsHelper
 
     public async Task<CspSettings> LoadAsync()
     {
-        return await _settingsManager.LoadAsync<CspSettings>();
+        return await settingsManager.LoadAsync<CspSettings>();
     }
 
     public async Task RenameDomain(string oldDomain, string newDomain)
     {
         var oldKey = GetKey(oldDomain);
-        var val = await _distributedCache.GetStringAsync(oldKey);
+        var val = await distributedCache.GetStringAsync(oldKey);
         if (!string.IsNullOrEmpty(val))
         {
-            await _distributedCache.RemoveAsync(oldKey);
-            await _distributedCache.SetStringAsync(GetKey(newDomain), val);
+            await distributedCache.RemoveAsync(oldKey);
+            await distributedCache.SetStringAsync(GetKey(newDomain), val);
         }
     }
 
@@ -155,13 +131,13 @@ public class CspSettingsHelper
 
         var options = domains.Select(r => new CspOptions(r)).ToList();
 
-        var defaultOptions = _configuration.GetSection("csp:default").Get<CspOptions>();
-        if (!_coreBaseSettings.Standalone && !string.IsNullOrEmpty(_coreBaseSettings.Basedomain))
+        var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
+        if (!coreBaseSettings.Standalone && !string.IsNullOrEmpty(coreBaseSettings.Basedomain))
         {
-            defaultOptions.Def.Add($"*.{_coreBaseSettings.Basedomain}");
+            defaultOptions.Def.Add($"*.{coreBaseSettings.Basedomain}");
         }
 
-        if (await _globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage)
+        if (await globalStore.GetStoreAsync(currentTenant) is S3Storage s3Storage)
         {
             var internalUrl = s3Storage.GetUriInternal(null).ToString();
 
@@ -182,38 +158,38 @@ public class CspSettingsHelper
 
         options.Add(defaultOptions);
 
-        if (Uri.IsWellFormedUriString(_filesLinkUtility.DocServiceUrl, UriKind.Absolute))
+        if (Uri.IsWellFormedUriString(filesLinkUtility.DocServiceUrl, UriKind.Absolute))
         {
             options.Add(new CspOptions
             {
-                Script = new List<string> { _filesLinkUtility.DocServiceUrl },
-                Frame = new List<string> { _filesLinkUtility.DocServiceUrl },
-                Connect = new List<string> { _filesLinkUtility.DocServiceUrl }
+                Script = new List<string> { filesLinkUtility.DocServiceUrl },
+                Frame = new List<string> { filesLinkUtility.DocServiceUrl },
+                Connect = new List<string> { filesLinkUtility.DocServiceUrl }
             });
         }
 
-        var firebaseDomain = _configuration["firebase:authDomain"];
+        var firebaseDomain = configuration["firebase:authDomain"];
         if (!string.IsNullOrEmpty(firebaseDomain))
         {
-            var firebaseOptions = _configuration.GetSection("csp:firebase").Get<CspOptions>();
+            var firebaseOptions = configuration.GetSection("csp:firebase").Get<CspOptions>();
             if (firebaseOptions != null)
             {
                 options.Add(firebaseOptions);
             }
         }
 
-        if (!string.IsNullOrEmpty(_configuration["web:zendesk-key"]))
+        if (!string.IsNullOrEmpty(configuration["web:zendesk-key"]))
         {
-            var zenDeskOptions = _configuration.GetSection("csp:zendesk").Get<CspOptions>();
+            var zenDeskOptions = configuration.GetSection("csp:zendesk").Get<CspOptions>();
             if (zenDeskOptions != null)
             {
                 options.Add(zenDeskOptions);
             }
         }
 
-        if (!string.IsNullOrEmpty(_configuration["files:oform:domain"]))
+        if (!string.IsNullOrEmpty(configuration["files:oform:domain"]))
         {
-            var oformOptions = _configuration.GetSection("csp:oform").Get<CspOptions>();
+            var oformOptions = configuration.GetSection("csp:oform").Get<CspOptions>();
             if (oformOptions != null)
             {
                 options.Add(oformOptions);

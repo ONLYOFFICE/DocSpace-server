@@ -59,53 +59,37 @@ public class BaseIndexerHelper
 }
 
 [Scope]
-public class BaseIndexer<T> where T : class, ISearchItem
+public class BaseIndexer<T>(Client client,
+    ILogger<BaseIndexer<T>> logger,
+    IDbContextFactory<WebstudioDbContext> dbContextFactory,
+    TenantManager tenantManager,
+    BaseIndexerHelper baseIndexerHelper,
+    Settings settings,
+    IServiceProvider serviceProvider)
+    where T : class, ISearchItem
 {
     public const int QueryLimit = 10000;
 
-    protected internal T Wrapper => _serviceProvider.GetService<T>();
+    protected internal T Wrapper => serviceProvider.GetService<T>();
     internal string IndexName => Wrapper.IndexName;
 
     private bool _isExist;
-    private readonly Client _client;
-    private readonly ILogger _logger;
-    private readonly IDbContextFactory<WebstudioDbContext> _dbContextFactory;
-    protected readonly TenantManager _tenantManager;
-    private readonly BaseIndexerHelper _baseIndexerHelper;
-    private readonly Settings _settings;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _logger = logger;
+    protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly object _locker = new();
-
-    public BaseIndexer(
-        Client client,
-        ILogger<BaseIndexer<T>> logger,
-        IDbContextFactory<WebstudioDbContext> dbContextFactory,
-        TenantManager tenantManager,
-        BaseIndexerHelper baseIndexerHelper,
-        Settings settings,
-        IServiceProvider serviceProvider)
-    {
-        _client = client;
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-        _tenantManager = tenantManager;
-        _baseIndexerHelper = baseIndexerHelper;
-        _settings = settings;
-        _serviceProvider = serviceProvider;
-    }
 
     public async Task<IEnumerable<List<T>>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {
-        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         var now = DateTime.UtcNow;
         var lastIndexed = await Queries.LastIndexedAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (lastIndexed.Equals(DateTime.MinValue))
         {
-            CreateIfNotExist(_serviceProvider.GetService<T>());
+            CreateIfNotExist(serviceProvider.GetService<T>());
         }
 
         var (count, max, min) = getCount(lastIndexed);
@@ -177,7 +161,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                     return b;
                 }
 
-                _client.Instance.Indices.Create(data.IndexName,
+                client.Instance.Indices.Create(data.IndexName,
                     c =>
                     c.Map<T>(m => m.AutoMap())
                     .Settings(r => r.Analysis(a =>
@@ -196,12 +180,12 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     public void Flush()
     {
-        _client.Instance.Indices.Flush(new FlushRequest(IndexName));
+        client.Instance.Indices.Flush(new FlushRequest(IndexName));
     }
 
     public void Refresh()
     {
-        _client.Instance.Indices.Refresh(new RefreshRequest(IndexName));
+        client.Instance.Indices.Refresh(new RefreshRequest(IndexName));
     }
 
     internal async Task IndexAsync(T data, bool immediately = true)
@@ -211,7 +195,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
             return;
         }
 
-        await _client.Instance.IndexAsync(data, idx => GetMeta(idx, data, immediately));
+        await client.Instance.IndexAsync(data, idx => GetMeta(idx, data, immediately));
     }
 
     internal async Task IndexAsync(List<T> data, bool immediately = true)
@@ -246,7 +230,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 else
                 {
                     var dLength = wwd.Document.Data.Length;
-                    if (dLength >= _settings.MaxContentLength)
+                    if (dLength >= settings.MaxContentLength)
                     {
                         try
                         {
@@ -275,7 +259,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                         continue;
                     }
 
-                    if (currentLength + dLength < _settings.MaxContentLength)
+                    if (currentLength + dLength < settings.MaxContentLength)
                     {
                         portion.Add(t);
                         currentLength += dLength;
@@ -290,7 +274,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 if (runBulk)
                 {
                     var portion1 = portion.ToList();
-                    await _client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                    await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
                     for (var j = portionStart; j < i; j++)
                     {
                         if (data[j] is ISearchItemDocument { Document: not null } doc)
@@ -315,7 +299,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 await BeforeIndexAsync(item);
             }
 
-            await _client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
+            await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
         }
     }
 
@@ -326,7 +310,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
             return;
         }
 
-        _client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
+        client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
     }
 
     internal void Update(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
@@ -336,7 +320,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
             return;
         }
 
-        _client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
+        client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
     }
 
     internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
@@ -346,7 +330,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
             return;
         }
 
-        _client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
+        client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
     }
 
     internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
@@ -356,24 +340,24 @@ public class BaseIndexer<T> where T : class, ISearchItem
             return;
         }
 
-        _client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, action, fields, immediately));
+        client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, action, fields, immediately));
     }
 
     internal void Delete(T data, bool immediately = true)
     {
-        _client.Instance.Delete<T>(data, r => GetMetaForDelete(r, immediately));
+        client.Instance.Delete<T>(data, r => GetMetaForDelete(r, immediately));
     }
 
     internal void Delete(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)
     {
-        _client.Instance.DeleteByQuery(GetDescriptorForDelete(expression, tenantId, immediately));
+        client.Instance.DeleteByQuery(GetDescriptorForDelete(expression, tenantId, immediately));
     }
 
     internal bool CheckExist(T data)
     {
         try
         {
-            var isExist = _baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, (k) => _client.Instance.Indices.Exists(k).Exists);
+            var isExist = baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, (k) => client.Instance.Indices.Exists(k).Exists);
             if (isExist)
             {
                 return true;
@@ -381,9 +365,9 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
             lock (_locker)
             {
-                isExist = _client.Instance.Indices.Exists(data.IndexName).Exists;
+                isExist = client.Instance.Indices.Exists(data.IndexName).Exists;
 
-                _baseIndexerHelper.IsExist.TryUpdate(data.IndexName, _isExist, false);
+                baseIndexerHelper.IsExist.TryUpdate(data.IndexName, _isExist, false);
 
                 if (isExist)
                 {
@@ -402,20 +386,20 @@ public class BaseIndexer<T> where T : class, ISearchItem
     internal async Task<IReadOnlyCollection<T>> SelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId = false)
     {
         var func = expression.Compile();
-        var selector = new Selector<T>(_serviceProvider);
+        var selector = new Selector<T>(serviceProvider);
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
-        return _client.Instance.Search(descriptor.GetDescriptor(this, onlyId)).Documents;
+        return client.Instance.Search(descriptor.GetDescriptor(this, onlyId)).Documents;
     }
 
     internal async Task<(IReadOnlyCollection<T>, long)> SelectWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
     {
         var func = expression.Compile();
-        var selector = new Selector<T>(_serviceProvider);
+        var selector = new Selector<T>(serviceProvider);
         var tenant = await _tenantManager.GetCurrentTenantAsync();
         var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
-        var result = _client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
+        var result = client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
         var total = result.Total;
 
         return (result.Documents, total);
@@ -428,7 +412,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     private async Task ClearAsync()
     {
-        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (index != null)
@@ -438,8 +422,8 @@ public class BaseIndexer<T> where T : class, ISearchItem
         }
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
-        await _client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
-        _baseIndexerHelper.Clear(Wrapper);
+        await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+        baseIndexerHelper.Clear(Wrapper);
         CreateIfNotExist(Wrapper);
     }
 
@@ -630,7 +614,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private Func<DeleteByQueryDescriptor<T>, IDeleteByQueryRequest> GetDescriptorForDelete(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)
     {
         var func = expression.Compile();
-        var selector = new Selector<T>(_serviceProvider);
+        var selector = new Selector<T>(serviceProvider);
         var descriptor = func(selector).Where(r => r.TenantId, tenantId);
 
         return descriptor.GetDescriptorForDelete(this, immediately);
@@ -639,7 +623,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private Func<UpdateByQueryDescriptor<T>, IUpdateByQueryRequest> GetDescriptorForUpdate(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         var func = expression.Compile();
-        var selector = new Selector<T>(_serviceProvider);
+        var selector = new Selector<T>(serviceProvider);
         var descriptor = func(selector).Where(r => r.TenantId, tenantId);
 
         return descriptor.GetDescriptorForUpdate(this, GetScriptUpdateByQuery(data, fields), immediately);
@@ -648,7 +632,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private Func<UpdateByQueryDescriptor<T>, IUpdateByQueryRequest> GetDescriptorForUpdate(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
     {
         var func = expression.Compile();
-        var selector = new Selector<T>(_serviceProvider);
+        var selector = new Selector<T>(serviceProvider);
         var descriptor = func(selector).Where(r => r.TenantId, tenantId);
 
         return descriptor.GetDescriptorForUpdate(this, GetScriptForUpdate(data, action, fields), immediately);

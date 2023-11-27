@@ -26,24 +26,17 @@
 
 namespace ASC.Notify.Sinks;
 
-class DispatchSink : Sink
+class DispatchSink(string senderName, DispatchEngine dispatcher) : Sink
 {
-    private readonly string _senderName;
-    private readonly DispatchEngine _dispatcher;
-
-    public DispatchSink(string senderName, DispatchEngine dispatcher)
-    {
-        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
-        _senderName = senderName;
-    }
+    private readonly DispatchEngine _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
 
     public override Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope)
     {
-        return _dispatcher.Dispatch(message, _senderName, serviceScope);
+        return _dispatcher.Dispatch(message, senderName, serviceScope);
     }
 
     public override async Task ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope)
     {
-        await _dispatcher.Dispatch(message, _senderName, serviceScope);
+        await _dispatcher.Dispatch(message, senderName, serviceScope);
     }
 }

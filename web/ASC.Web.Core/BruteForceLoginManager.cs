@@ -27,30 +27,14 @@
 namespace ASC.Web.Core;
 
 [Scope]
-public class BruteForceLoginManager
+public class BruteForceLoginManager(SettingsManager settingsManager,
+    UserManager userManager,
+    TenantManager tenantManager,
+    IDistributedCache distributedCache,
+    SetupInfo setupInfo,
+    Recaptcha recaptcha)
 {
-    private readonly SettingsManager _settingsManager;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly IDistributedCache _distributedCache;
-    private readonly SetupInfo _setupInfo;
-    private readonly Recaptcha _recaptcha;
     private static readonly SemaphoreSlim _semaphore = new(1);
-
-    public BruteForceLoginManager(SettingsManager settingsManager,
-        UserManager userManager,
-        TenantManager tenantManager,
-        IDistributedCache distributedCache,
-        SetupInfo setupInfo,
-        Recaptcha recaptcha)
-    {
-        _settingsManager = settingsManager;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _distributedCache = distributedCache;
-        _setupInfo = setupInfo;
-        _recaptcha = recaptcha;
-    }
 
     public async Task<(bool, bool)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
     {
@@ -76,7 +60,7 @@ public class BruteForceLoginManager
             }
 
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
-            var settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
+            var settings = new LoginSettingsWrapper(settingsManager.Load<LoginSettings>());
             var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
             var now = DateTime.UtcNow;
@@ -90,7 +74,7 @@ public class BruteForceLoginManager
             if (history.Count > settings.AttemptCount)
             {
                 SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
-                await _distributedCache.RemoveAsync(historyCacheKey);
+                await distributedCache.RemoveAsync(historyCacheKey);
 
                 if (throwException)
                 {
@@ -116,7 +100,7 @@ public class BruteForceLoginManager
         {
             await _semaphore.WaitAsync();
 
-            var settings = new LoginSettingsWrapper(_settingsManager.Load<LoginSettings>());
+            var settings = new LoginSettingsWrapper(settingsManager.Load<LoginSettings>());
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
             var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
 
@@ -165,7 +149,7 @@ public class BruteForceLoginManager
             {
                 historyCacheKey = GetHistoryCacheKey(login, requestIp);
 
-                settings = new LoginSettingsWrapper(await _settingsManager.LoadAsync<LoginSettings>());
+                settings = new LoginSettingsWrapper(await settingsManager.LoadAsync<LoginSettings>());
                 var checkTime = now.Subtract(settings.CheckPeriod);
 
                 history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
@@ -175,19 +159,19 @@ public class BruteForceLoginManager
                 if (history.Count > settings.AttemptCount)
                 {
                     SetToCache(blockCacheKey, "block", now.Add(settings.BlockTime));
-                    await _distributedCache.RemoveAsync(historyCacheKey);
+                    await distributedCache.RemoveAsync(historyCacheKey);
                     throw new BruteForceCredentialException();
                 }
 
                 SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
             }
 
-            user = await _userManager.GetUsersByPasswordHashAsync(
-                   await _tenantManager.GetCurrentTenantIdAsync(),
+            user = await userManager.GetUsersByPasswordHashAsync(
+                   await tenantManager.GetCurrentTenantIdAsync(),
                    login,
                    passwordHash);
 
-            if (user == null || !_userManager.UserExists(user))
+            if (user == null || !userManager.UserExists(user))
             {
                 throw new Exception("user not found");
             }
@@ -211,11 +195,11 @@ public class BruteForceLoginManager
     {
         var recaptchaPassed = false;
 
-        if (!string.IsNullOrEmpty(_setupInfo.RecaptchaPublicKey) &&
-            !string.IsNullOrEmpty(_setupInfo.RecaptchaPrivateKey) &&
+        if (!string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey) &&
+            !string.IsNullOrEmpty(setupInfo.RecaptchaPrivateKey) &&
             !string.IsNullOrEmpty(recaptchaResponse))
         {
-            recaptchaPassed = await _recaptcha.ValidateRecaptchaAsync(recaptchaResponse, requestIp);
+            recaptchaPassed = await recaptcha.ValidateRecaptchaAsync(recaptchaResponse, requestIp);
 
             if (!recaptchaPassed)
             {
@@ -228,7 +212,7 @@ public class BruteForceLoginManager
 
     private T GetFromCache<T>(string key)
     {
-        var serializedObject = _distributedCache.Get(key);
+        var serializedObject = distributedCache.Get(key);
 
         if (serializedObject == null)
         {
@@ -246,7 +230,7 @@ public class BruteForceLoginManager
 
         Serializer.Serialize(ms, value);
 
-        _distributedCache.Set(key, ms.ToArray(), new DistributedCacheEntryOptions
+        distributedCache.Set(key, ms.ToArray(), new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = ExpirationPeriod
         });

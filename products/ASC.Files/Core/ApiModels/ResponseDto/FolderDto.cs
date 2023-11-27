@@ -103,17 +103,7 @@ public class FolderDto<T> : FileEntryDto<T>
 }
 
 [Scope]
-public class FolderDtoHelper : FileEntryDtoHelper
-{
-    private readonly AuthContext _authContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly RoomLogoManager _roomLogoManager;
-    private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
-    private readonly BadgesSettingsHelper _badgesSettingsHelper;
-
-    public FolderDtoHelper(
-        ApiDateTimeHelper apiDateTimeHelper,
+public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         EmployeeDtoHelper employeeWrapperHelper,
         AuthContext authContext,
         IDaoFactory daoFactory,
@@ -125,16 +115,8 @@ public class FolderDtoHelper : FileEntryDtoHelper
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
-    {
-        _authContext = authContext;
-        _daoFactory = daoFactory;
-        _globalFolderHelper = globalFolderHelper;
-        _roomLogoManager = roomLogoManager;
-        _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
-        _badgesSettingsHelper = badgesSettingsHelper;
-    }
-
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+{
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, string order = null)
     {
         var result = await GetFolderWrapperAsync(folder);
@@ -145,7 +127,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
         {
             if (folder.Tags == null)
             {
-                var tagDao = _daoFactory.GetTagDao<T>();
+                var tagDao = daoFactory.GetTagDao<T>();
 
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, new[] { folder }).Select(t => t.Name).ToListAsync();
             }
@@ -154,7 +136,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
                 result.Tags = folder.Tags.Select(t => t.Name);
             }
 
-            result.Logo = await _roomLogoManager.GetLogoAsync(folder);
+            result.Logo = await roomLogoManager.GetLogoAsync(folder);
             result.RoomType = DocSpaceHelper.GetRoomType(folder.FolderType);
 
             if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
@@ -164,15 +146,15 @@ public class FolderDtoHelper : FileEntryDtoHelper
 
             if (DocSpaceHelper.IsRoom(folder.FolderType))
             {
-                result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+                result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             }
         }
 
-        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID))
+        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.SHARE;
 
-            var folderDao = _daoFactory.GetFolderDao<T>();
+            var folderDao = daoFactory.GetFolderDao<T>();
 
             if (folders != null)
             {
@@ -214,7 +196,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
 
         if (folder.RootFolderType == FolderType.VirtualRooms)
         {
-            var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+            var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
             if (!isEnabledBadges)
             {

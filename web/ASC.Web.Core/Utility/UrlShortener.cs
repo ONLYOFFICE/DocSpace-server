@@ -33,29 +33,20 @@ public interface IUrlShortener
 }
 
 [Scope]
-public class BaseUrlShortener: IUrlShortener
-{
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly IServiceProvider _serviceProvider;
-
-    public BaseUrlShortener(
-        ConsumerFactory consumerFactory,
+public class BaseUrlShortener(ConsumerFactory consumerFactory,
         IServiceProvider serviceProvider)
-    {
-        _consumerFactory = consumerFactory;
-        _serviceProvider = serviceProvider;
-    }
-
+    : IUrlShortener
+{
     public Task<string> GetShortenLinkAsync(string shareLink)
     {
         IUrlShortener shortener;
-        if (_consumerFactory.Get<BitlyLoginProvider>().Enabled)
+        if (consumerFactory.Get<BitlyLoginProvider>().Enabled)
         {
-            shortener = _serviceProvider.GetRequiredService<BitLyShortener>();
+            shortener = serviceProvider.GetRequiredService<BitLyShortener>();
         }
         else
         {
-            shortener = _serviceProvider.GetRequiredService<OnlyoShortener>();
+            shortener = serviceProvider.GetRequiredService<OnlyoShortener>();
         }
 
         return shortener.GetShortenLinkAsync(shareLink);
@@ -63,14 +54,9 @@ public class BaseUrlShortener: IUrlShortener
 }
 
 [Scope]
-public class BitLyShortener : IUrlShortener
+public class BitLyShortener(ConsumerFactory consumerFactory) : IUrlShortener
 {
-    public BitLyShortener(ConsumerFactory consumerFactory)
-    {
-        ConsumerFactory = consumerFactory;
-    }
-
-    private ConsumerFactory ConsumerFactory { get; }
+    private ConsumerFactory ConsumerFactory { get; } = consumerFactory;
 
     public Task<string> GetShortenLinkAsync(string shareLink)
     {
@@ -79,29 +65,20 @@ public class BitLyShortener : IUrlShortener
 }
 
 [Scope]
-public class OnlyoShortener : IUrlShortener
-{
-    private readonly IDbContextFactory<UrlShortenerDbContext> _contextFactory;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly TenantManager _tenantManager;
-    public OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFactory,
+public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFactory,
         CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager)
-    {
-        _contextFactory = contextFactory;
-        _commonLinkUtility = commonLinkUtility;
-        _tenantManager = tenantManager;
-    }
-
+    : IUrlShortener
+{
     public async Task<string> GetShortenLinkAsync(string shareLink)
     {
         if (Uri.IsWellFormedUriString(shareLink, UriKind.Absolute))
         {
-            var context = await _contextFactory.CreateDbContextAsync();
+            var context = await contextFactory.CreateDbContextAsync();
             var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.Link == shareLink);
             if (link != null)
             {
-                return _commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + link.Short);
+                return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + link.Short);
             }
             else
             {
@@ -117,11 +94,11 @@ public class OnlyoShortener : IUrlShortener
                             Id = id,
                             Link = shareLink,
                             Short = key,
-                            TenantId = (await _tenantManager.GetCurrentTenantAsync()).Id
+                            TenantId = (await tenantManager.GetCurrentTenantAsync()).Id
                         };
                         await context.ShortLinks.AddAsync(newShortLink);
                         await context.SaveChangesAsync();
-                        return _commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + key);
+                        return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + key);
                     }
                 }
             }

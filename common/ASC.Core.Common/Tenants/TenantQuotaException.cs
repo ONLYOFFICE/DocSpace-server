@@ -26,11 +26,4 @@
 
 namespace ASC.Core.Tenants;
 
-public class TenantQuotaException : Exception
-{
-    public TenantQuotaException(string message)
-        : base(message) { }
-
-    protected TenantQuotaException(SerializationInfo info, StreamingContext context)
-        : base(info, context) { }
-}
+public class TenantQuotaException(string message) : Exception(message);

@@ -39,31 +39,22 @@ public class RecaptchaException : InvalidCredentialException
 }
 
 [Scope]
-public class Recaptcha
+public class Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
 {
-    private readonly SetupInfo _setupInfo;
-    private readonly IHttpClientFactory _clientFactory;
-
-    public Recaptcha(SetupInfo setupInfo, IHttpClientFactory clientFactory)
-    {
-        _setupInfo = setupInfo;
-        _clientFactory = clientFactory;
-    }
-
     public async Task<bool> ValidateRecaptchaAsync(string response, string ip)
     {
         try
         {
-            var data = $"secret={_setupInfo.RecaptchaPrivateKey}&remoteip={ip}&response={response}";
+            var data = $"secret={setupInfo.RecaptchaPrivateKey}&remoteip={ip}&response={response}";
 
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(_setupInfo.RecaptchaVerifyUrl),
+                RequestUri = new Uri(setupInfo.RecaptchaVerifyUrl),
                 Method = HttpMethod.Post,
                 Content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded")
             };
 
-            var httpClient = _clientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var httpClientResponse = await httpClient.SendAsync(request);
             using var reader = new StreamReader(await httpClientResponse.Content.ReadAsStreamAsync());
             var resp = await reader.ReadToEndAsync();

@@ -27,27 +27,15 @@
 namespace ASC.Notify.Services;
 
 [Singleton]
-public class NotifySenderService : BackgroundService
-{
-    private readonly DbWorker _db;
-    private readonly ILogger _logger;
-    private readonly NotifyServiceCfg _notifyServiceCfg;
-    private readonly NotifyConfiguration _notifyConfiguration;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public NotifySenderService(
-        IOptions<NotifyServiceCfg> notifyServiceCfg,
+public class NotifySenderService(IOptions<NotifyServiceCfg> notifyServiceCfg,
         NotifyConfiguration notifyConfiguration,
         DbWorker dbWorker,
         IServiceScopeFactory scopeFactory,
         ILoggerProvider options)
-    {
-        _logger = options.CreateLogger("ASC.NotifySender");
-        _notifyServiceCfg = notifyServiceCfg.Value;
-        _notifyConfiguration = notifyConfiguration;
-        _db = dbWorker;
-        _scopeFactory = scopeFactory;
-    }
+    : BackgroundService
+{
+    private readonly ILogger _logger = options.CreateLogger("ASC.NotifySender");
+    private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -62,7 +50,7 @@ public class NotifySenderService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await using var serviceScope = _scopeFactory.CreateAsyncScope();
+            await using var serviceScope = scopeFactory.CreateAsyncScope();
 
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<NotifySenderService>>();
 
@@ -83,7 +71,7 @@ public class NotifySenderService : BackgroundService
 
     private void InitializeNotifySchedulers()
     {
-        _notifyConfiguration.Configure();
+        notifyConfiguration.Configure();
 
         foreach (var pair in _notifyServiceCfg.Schedulers.Where(r => r.MethodInfo != null))
         {
@@ -100,7 +88,7 @@ public class NotifySenderService : BackgroundService
         {
             if (tasks.Count < _notifyServiceCfg.Process.MaxThreads)
             {
-                var messages = await _db.GetMessagesAsync(_notifyServiceCfg.Process.BufferSize);
+                var messages = await dbWorker.GetMessagesAsync(_notifyServiceCfg.Process.BufferSize);
                 if (messages.Count > 0)
                 {
                     var t = new Task(async () => await SendMessagesAsync(messages, stoppingToken), stoppingToken, TaskCreationOptions.LongRunning);
@@ -158,7 +146,7 @@ public class NotifySenderService : BackgroundService
                     _logger.ErrorWithException(e);
                 }
 
-                await _db.SetStateAsync(m.Key, result);
+                await dbWorker.SetStateAsync(m.Key, result);
             }
         }
         catch (ThreadAbortException)

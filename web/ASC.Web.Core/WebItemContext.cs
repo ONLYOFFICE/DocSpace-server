@@ -30,7 +30,7 @@ public class WebItemContext
 {
     public SpaceUsageStatManager SpaceUsageStatManager { get; init; }
 
-    public Func<string> GetCreateContentPageAbsoluteUrl { get; set; }
+    public Func<string> GetCreateContentPageAbsoluteUrl { get; set; } = () => string.Empty;
 
     public ISubscriptionManager SubscriptionManager { get; set; }
 
@@ -51,9 +51,4 @@ public class WebItemContext
     public bool HasComplexHierarchyOfAccessRights { get; set; }
 
     public bool CanNotBeDisabled { get; set; }
-
-    public WebItemContext()
-    {
-        GetCreateContentPageAbsoluteUrl = () => string.Empty;
-    }
 }

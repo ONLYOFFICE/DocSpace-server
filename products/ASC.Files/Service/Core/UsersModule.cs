@@ -30,26 +30,14 @@ using Constants = ASC.Feed.Constants;
 
 namespace ASC.Files.Service.Core;
 
-public class UsersModule : FeedModule
-{
-    private readonly UserManager _userManager;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly TenantUtil _tenantUtil;
-
-    private const string UserItem = Constants.UserItem;
-
-    public UsersModule(
-        TenantManager tenantManager,
+public class UsersModule(TenantManager tenantManager,
         WebItemSecurity webItemSecurity,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        TenantUtil tenantUtil) 
-        : base(tenantManager, webItemSecurity)
-    {
-        _userManager = userManager;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _tenantUtil = tenantUtil;
-    }
+        TenantUtil tenantUtil)
+    : FeedModule(tenantManager, webItemSecurity)
+{
+    private const string UserItem = Constants.UserItem;
 
     public override string Name => Constants.UsersModule;
     public override string Product => Constants.People;
@@ -58,21 +46,21 @@ public class UsersModule : FeedModule
 
     public override async Task<IEnumerable<Tuple<Feed.Aggregator.Feed, object>>> GetFeeds(FeedFilter filter)
     {
-        var users = (await _userManager.GetUsersAsync()).Where(u => u.LastModified >= filter.Time.From && u.LastModified <= filter.Time.To).ToAsyncEnumerable();
+        var users = (await userManager.GetUsersAsync()).Where(u => u.LastModified >= filter.Time.From && u.LastModified <= filter.Time.To).ToAsyncEnumerable();
 
         return await users.SelectAwait(async u => new Tuple<Feed.Aggregator.Feed, object>(await ToFeedAsync(u), u)).ToListAsync();
     }
 
     public override async Task<IEnumerable<int>> GetTenantsWithFeeds(DateTime fromTime)
     {
-        return await _userManager.GetTenantsWithFeedsAsync(fromTime);
+        return await userManager.GetTenantsWithFeedsAsync(fromTime);
     }
 
     private async Task<Feed.Aggregator.Feed> ToFeedAsync(UserInfo u)
     {
-        var fullName = _displayUserSettingsHelper.GetFullUserName(u);
+        var fullName = displayUserSettingsHelper.GetFullUserName(u);
 
-        var feed = new Feed.Aggregator.Feed(u.Id, _tenantUtil.DateTimeToUtc(u.LastModified), true)
+        var feed = new Feed.Aggregator.Feed(u.Id, tenantUtil.DateTimeToUtc(u.LastModified), true)
         {
             Item = UserItem,
             ItemId = u.Id.ToString(),
@@ -81,7 +69,7 @@ public class UsersModule : FeedModule
             Title = fullName,
             ExtraLocation = u.Id.ToString(),
             AdditionalInfo = u.Email,
-            AdditionalInfo2 = (await _userManager.GetUserTypeAsync(u.Id)).ToString(),
+            AdditionalInfo2 = (await userManager.GetUserTypeAsync(u.Id)).ToString(),
             AdditionalInfo3 = u.Status.ToString(),
             AdditionalInfo4 = u.ActivationStatus.ToString(),
             Keywords = fullName,
@@ -95,12 +83,12 @@ public class UsersModule : FeedModule
     {
         var user = data as UserInfo;
 
-        return user.Id != userId && !await _userManager.IsUserAsync(userId);
+        return user.Id != userId && !await userManager.IsUserAsync(userId);
     }
 
     public override async Task VisibleForAsync(List<Tuple<FeedRow, object>> feed, Guid userId)
     {
-        if (await _userManager.IsUserAsync(userId))
+        if (await userManager.IsUserAsync(userId))
         {
             return;
         }

@@ -27,15 +27,8 @@
 namespace ASC.Common.Radicale;
 
 [Singleton]
-public class RadicaleClient
+public class RadicaleClient(ILogger<RadicaleClient> logger)
 {
-    private readonly ILogger<RadicaleClient> _logger;
-
-    public RadicaleClient(ILogger<RadicaleClient> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task<DavResponse> CreateAsync(DavRequest davRequest)
     {
         davRequest.Method = "MKCOL";
@@ -115,7 +108,7 @@ public class RadicaleClient
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
             throw new RadicaleException(ex.Message);
         }
     }

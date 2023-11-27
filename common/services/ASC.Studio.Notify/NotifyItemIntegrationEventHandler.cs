@@ -32,16 +32,11 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 namespace ASC.Web.Studio.IntegrationEvents;
 
 [Scope]
-public class NotifyItemIntegrationEventHandler : IIntegrationEventHandler<NotifyItemIntegrationEvent>
+public class NotifyItemIntegrationEventHandler(StudioNotifyWorker studioNotifyWorker,
+        ILogger<NotifyItemIntegrationEventHandler> logger)
+    : IIntegrationEventHandler<NotifyItemIntegrationEvent>
 {
-    private readonly StudioNotifyWorker _studioNotifyWorker;
-    private readonly ILogger _logger;
-
-    public NotifyItemIntegrationEventHandler(StudioNotifyWorker studioNotifyWorker, ILogger<NotifyItemIntegrationEventHandler> logger)
-    {
-        _studioNotifyWorker = studioNotifyWorker;
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public async Task Handle(NotifyItemIntegrationEvent @event)
     {
@@ -51,7 +46,7 @@ public class NotifyItemIntegrationEventHandler : IIntegrationEventHandler<Notify
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            await _studioNotifyWorker.OnMessageAsync(@event);
+            await studioNotifyWorker.OnMessageAsync(@event);
         }
     }
 }

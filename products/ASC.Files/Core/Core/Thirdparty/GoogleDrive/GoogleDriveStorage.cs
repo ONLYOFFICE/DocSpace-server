@@ -29,7 +29,13 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Transient]
-internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, IGoogleDriveItemStorage<DriveFile>, IDisposable
+internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
+        FileUtility fileUtility,
+        ILoggerProvider monitor,
+        TempStream tempStream,
+        OAuth20TokenHelper oAuth20TokenHelper,
+        IHttpClientFactory clientFactory)
+    : IThirdPartyStorage<DriveFile, DriveFile, DriveFile>, IGoogleDriveItemStorage<DriveFile>, IDisposable
 {
     private OAuth20Token _token;
 
@@ -44,40 +50,19 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
 
             if (_token.IsExpired)
             {
-                _token = _oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(_consumerFactory, _token);
+                _token = oAuth20TokenHelper.RefreshToken<GoogleLoginProvider>(consumerFactory, _token);
             }
 
             return _token.AccessToken;
         }
     }
 
-    private readonly ILogger _logger;
+    private readonly ILogger _logger = monitor.CreateLogger("ASC.Files");
     public bool IsOpened { get; private set; }
 
     private DriveService _driveService;
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly FileUtility _fileUtility;
-    private readonly TempStream _tempStream;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
 
     public const long MaxChunkedUploadFileSize = 2L * 1024L * 1024L * 1024L;
-
-    public GoogleDriveStorage(
-        ConsumerFactory consumerFactory,
-        FileUtility fileUtility,
-        ILoggerProvider monitor,
-        TempStream tempStream,
-        OAuth20TokenHelper oAuth20TokenHelper,
-        IHttpClientFactory clientFactory)
-    {
-        _consumerFactory = consumerFactory;
-        _fileUtility = fileUtility;
-        _logger = monitor.CreateLogger("ASC.Files");
-        _tempStream = tempStream;
-        _clientFactory = clientFactory;
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -217,7 +202,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         var ext = MimeMapping.GetExtention(file.MimeType);
         if (GoogleLoginProvider.GoogleDriveExt.Contains(ext))
         {
-            var internalExt = _fileUtility.GetGoogleDownloadableExtension(ext);
+            var internalExt = fileUtility.GetGoogleDownloadableExtension(ext);
             var requiredMimeType = MimeMapping.GetMimeMapping(internalExt);
 
             downloadArg = $"{file.Id}/export?mimeType={HttpUtility.UrlEncode(requiredMimeType)}";
@@ -230,7 +215,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         };
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         var response = await httpClient.SendAsync(request);
 
         if (offset == 0 && file.Size is > 0)
@@ -238,7 +223,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
             return new ResponseStream(await response.Content.ReadAsStreamAsync(), file.Size.Value);
         }
 
-        var tempBuffer = _tempStream.Create();
+        var tempBuffer = tempStream.Create();
         await using var str = await response.Content.ReadAsStreamAsync();
         await str.CopyToAsync(tempBuffer);
         await tempBuffer.FlushAsync();
@@ -385,7 +370,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
         request.Headers.Add("Authorization", "Bearer " + AccessToken);
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
 
         var uploadSession = new ResumableUploadSession(driveFile.Id, folderId, contentLength)
@@ -438,7 +423,7 @@ internal class GoogleDriveStorage : IThirdPartyStorage<DriveFile, DriveFile, Dri
                                                googleDriveSession.BytesTransfered + chunkLength - 1);
             }
         }
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         HttpResponseMessage response;
 
         try
@@ -599,20 +584,12 @@ public enum ResumableUploadSessionStatus
     Aborted
 }
 
-internal class ResumableUploadSession
+internal class ResumableUploadSession(string fileId, string folderId, long bytesToTransfer)
 {
-    public long BytesToTransfer { get; set; }
+    public long BytesToTransfer { get; set; } = bytesToTransfer;
     public long BytesTransfered { get; set; }
-    public string FileId { get; set; }
-    public string FolderId { get; set; }
-    public ResumableUploadSessionStatus Status { get; set; }
+    public string FileId { get; set; } = fileId;
+    public string FolderId { get; set; } = folderId;
+    public ResumableUploadSessionStatus Status { get; set; } = ResumableUploadSessionStatus.None;
     public string Location { get; set; }
-
-    public ResumableUploadSession(string fileId, string folderId, long bytesToTransfer)
-    {
-        FileId = fileId;
-        FolderId = folderId;
-        BytesToTransfer = bytesToTransfer;
-        Status = ResumableUploadSessionStatus.None;
-    }
 }

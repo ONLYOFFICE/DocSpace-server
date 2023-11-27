@@ -27,15 +27,10 @@
 namespace Textile.States;
 
 [FormatterState(@"^\s*<pre" + Globals.HtmlAttributesPattern + ">")]
-public class PreFormatterState : FormatterState
+public class PreFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private bool _shouldExitNextTime;
     private int _fakeNestingDepth;
-
-    public PreFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

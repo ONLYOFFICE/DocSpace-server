@@ -26,16 +26,11 @@
 
 namespace ASC.Common.Utils;
 
-public class ConnectionStringCollection : IEnumerable<ConnectionStringSettings>
+public class ConnectionStringCollection(IEnumerable<ConnectionStringSettings> data) : IEnumerable<ConnectionStringSettings>
 {
-    private readonly List<ConnectionStringSettings> _data;
+    private readonly List<ConnectionStringSettings> _data = Enumerable.ToList<ConnectionStringSettings>(data);
 
     public ConnectionStringSettings this[string name] => _data.Find(r => r.Name == name);
-
-    public ConnectionStringCollection(IEnumerable<ConnectionStringSettings> data)
-    {
-        _data = data.ToList();
-    }
 
     public IEnumerator<ConnectionStringSettings> GetEnumerator()
     {

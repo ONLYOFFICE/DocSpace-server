@@ -159,18 +159,11 @@ public static class AutofacExtension
     }
 }
 
-class Resolver
+class Resolver(string assemblyPath)
 {
-    private readonly string _resolvePath;
-
-    public Resolver(string assemblyPath)
-    {
-        _resolvePath = assemblyPath;
-    }
-
     public Assembly Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        var path = CrossPlatform.PathCombine(Path.GetDirectoryName(_resolvePath), $"{assemblyName.Name}.dll");
+        var path = CrossPlatform.PathCombine(Path.GetDirectoryName(assemblyPath), $"{assemblyName.Name}.dll");
 
         if (!File.Exists(path))
         {

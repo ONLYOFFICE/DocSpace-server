@@ -26,18 +26,11 @@
 
 namespace ASC.IPSecurity;
 
-internal class IPAddressRange
+internal class IPAddressRange(IPAddress lower, IPAddress upper)
 {
-    private readonly AddressFamily _addressFamily;
-    private readonly byte[] _lowerBytes;
-    private readonly byte[] _upperBytes;
-
-    public IPAddressRange(IPAddress lower, IPAddress upper)
-    {
-        _addressFamily = lower.AddressFamily;
-        _lowerBytes = lower.GetAddressBytes();
-        _upperBytes = upper.GetAddressBytes();
-    }
+    private readonly AddressFamily _addressFamily = lower.AddressFamily;
+    private readonly byte[] _lowerBytes = lower.GetAddressBytes();
+    private readonly byte[] _upperBytes = upper.GetAddressBytes();
 
     public bool IsInRange(IPAddress address)
     {

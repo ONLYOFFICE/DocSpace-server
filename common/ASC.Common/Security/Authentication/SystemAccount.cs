@@ -26,8 +26,4 @@
 
 namespace ASC.Common.Security.Authentication;
 
-public class SystemAccount : Account, ISystemAccount
-{
-    public SystemAccount(Guid id, string name, bool authenticated)
-        : base(id, name, authenticated) { }
-}
+public class SystemAccount(Guid id, string name, bool authenticated) : Account(id, name, authenticated), ISystemAccount;

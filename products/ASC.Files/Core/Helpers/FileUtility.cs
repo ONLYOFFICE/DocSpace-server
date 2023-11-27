@@ -27,30 +27,23 @@
 namespace ASC.Files.Core.Helpers;
 
 [Singleton]
-public class FileUtilityConfiguration
+public class FileUtilityConfiguration(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public FileUtilityConfiguration(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     private List<string> _extsIndexing;
-    public List<string> ExtsIndexing { get => _extsIndexing ??= _configuration.GetSection("files:index").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsIndexing { get => _extsIndexing ??= configuration.GetSection("files:index").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsImagePreviewed;
-    public List<string> ExtsImagePreviewed { get => _extsImagePreviewed ??= _configuration.GetSection("files:viewed-images").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsImagePreviewed { get => _extsImagePreviewed ??= configuration.GetSection("files:viewed-images").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsMediaPreviewed;
-    public List<string> ExtsMediaPreviewed { get => _extsMediaPreviewed ??= _configuration.GetSection("files:viewed-media").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsMediaPreviewed { get => _extsMediaPreviewed ??= configuration.GetSection("files:viewed-media").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsWebPreviewed;
     public List<string> ExtsWebPreviewed
     {
         get
         {
-            return _extsWebPreviewed ??= _configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebPreviewed ??= configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -59,19 +52,19 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebEdited ??= _configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebEdited ??= configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
     private List<string> _extsWebEncrypt;
-    public List<string> ExtsWebEncrypt { get => _extsWebEncrypt ??= _configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsWebEncrypt { get => _extsWebEncrypt ??= configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsWebReviewed;
     public List<string> ExtsWebReviewed
     {
         get
         {
-            return _extsWebReviewed ??= _configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebReviewed ??= configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -80,7 +73,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebCustomFilterEditing ??= _configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebCustomFilterEditing ??= configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -89,7 +82,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebRestrictedEditing ??= _configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebRestrictedEditing ??= configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -98,7 +91,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebCommented ??= _configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebCommented ??= configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -107,7 +100,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebTemplate ??= _configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebTemplate ??= configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -116,41 +109,41 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsMustConvert ??= _configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? new List<string>();
+            return _extsMustConvert ??= configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
     private List<string> _extsCoAuthoring;
     public List<string> ExtsCoAuthoring
     {
-        get => _extsCoAuthoring ??= _configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? new List<string>();
+        get => _extsCoAuthoring ??= configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? new List<string>();
     }
 
     private string _masterFormExtension;
     public string MasterFormExtension
     {
-        get => _masterFormExtension ??= _configuration["files:docservice:internal-form"] ?? ".docxf";
+        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".docxf";
     }
 
     private List<LogoColor> _logoColors;
     public List<LogoColor> LogoColors
     {
-        get => _logoColors ??= _configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
+        get => _logoColors ??= configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
     }
 
     public Dictionary<FileType, string> InternalExtension
     {
         get => new()
         {
-                { FileType.Document, _configuration["files:docservice:internal-doc"] ?? ".docx" },
-                { FileType.Spreadsheet, _configuration["files:docservice:internal-xls"] ?? ".xlsx" },
-                { FileType.Presentation, _configuration["files:docservice:internal-ppt"] ?? ".pptx" }
+                { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
+                { FileType.Spreadsheet, configuration["files:docservice:internal-xls"] ?? ".xlsx" },
+                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" }
             };
     }
 
     internal string GetSignatureSecret()
     {
-        var result = _configuration["files:docservice:secret:value"] ?? "";
+        var result = configuration["files:docservice:secret:value"] ?? "";
 
         var regex = new Regex(@"^\s+$");
 
@@ -164,7 +157,7 @@ public class FileUtilityConfiguration
 
     internal string GetSignatureHeader()
     {
-        var result = (_configuration["files:docservice:secret:header"] ?? "").Trim();
+        var result = (configuration["files:docservice:secret:header"] ?? "").Trim();
         if (string.IsNullOrEmpty(result))
         {
             result = "Authorization";
@@ -176,7 +169,7 @@ public class FileUtilityConfiguration
 
     internal bool GetCanForcesave()
     {
-        return !bool.TryParse(_configuration["files:docservice:forcesave"] ?? "", out var canForcesave) || canForcesave;
+        return !bool.TryParse(configuration["files:docservice:forcesave"] ?? "", out var canForcesave) || canForcesave;
     }
 }
 

@@ -26,11 +26,8 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class CountPaidUserFeature : TenantQuotaFeatureCount
+public class CountPaidUserFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota)
 {
     public override bool Paid { get => true; }
     public override string Name { get => "manager"; }
-    public CountPaidUserFeature(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
 }

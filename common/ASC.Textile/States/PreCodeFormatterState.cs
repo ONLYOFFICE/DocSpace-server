@@ -27,13 +27,8 @@
 namespace Textile.States;
 
 [FormatterState(PatternBegin + @"bc" + PatternEnd)]
-public class PreCodeFormatterState : SimpleBlockFormatterState
+public class PreCodeFormatterState(TextileFormatter formatter) : SimpleBlockFormatterState(formatter)
 {
-    public PreCodeFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     public override void Enter()
     {
         Formatter.Output.Write("<pre><code>");

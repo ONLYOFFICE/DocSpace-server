@@ -27,27 +27,14 @@
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class WebhooksGlobalFilterAttribute : ResultFilterAttribute, IDisposable
-{
-    private readonly MemoryStream _stream;
-    private Stream _bodyStream;
-    private readonly IWebhookPublisher _webhookPublisher;
-    private readonly ILogger<WebhooksGlobalFilterAttribute> _logger;
-    private readonly SettingsManager _settingsManager;
-    private readonly DbWorker _dbWorker;
-
-    public WebhooksGlobalFilterAttribute(
-        IWebhookPublisher webhookPublisher,
+public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
         ILogger<WebhooksGlobalFilterAttribute> logger,
         SettingsManager settingsManager,
         DbWorker dbWorker)
-    {
-        _stream = new MemoryStream();
-        _webhookPublisher = webhookPublisher;
-        _logger = logger;
-        _settingsManager = settingsManager;
-        _dbWorker = dbWorker;
-    }
+    : ResultFilterAttribute, IDisposable
+{
+    private readonly MemoryStream _stream = new();
+    private Stream _bodyStream;
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
@@ -78,13 +65,13 @@ public class WebhooksGlobalFilterAttribute : ResultFilterAttribute, IDisposable
 
                 var resultContent = Encoding.UTF8.GetString(_stream.ToArray());
 
-                var webhook = await _dbWorker.GetWebhookAsync(method, routePattern);
+                var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
 
-                await _webhookPublisher.PublishAsync(webhook.Id, resultContent);
+                await webhookPublisher.PublishAsync(webhook.Id, resultContent);
             }
             catch (Exception e)
             {
-                _logger.ErrorWithException(e);
+                logger.ErrorWithException(e);
             }
         }
     }
@@ -120,8 +107,8 @@ public class WebhooksGlobalFilterAttribute : ResultFilterAttribute, IDisposable
             return true;
         }
 
-        var webhook = await _dbWorker.GetWebhookAsync(method, routePattern);
-        if (webhook == null || (await _settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
+        var webhook = await dbWorker.GetWebhookAsync(method, routePattern);
+        if (webhook == null || (await settingsManager.LoadAsync<WebHooksSettings>()).Ids.Contains(webhook.Id))
         {
             return true;
         }

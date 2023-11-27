@@ -29,35 +29,21 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Core;
 
 [Scope]
-public class AuthManager
+public class AuthManager(IUserService service, UserManager userManager, UserFormatter userFormatter, TenantManager tenantManager)
 {
-    private readonly IUserService _userService;
-    private readonly UserManager _userManager;
-    private readonly UserFormatter _userFormatter;
-    private readonly TenantManager _tenantManager;
-
-    public AuthManager(IUserService service, UserManager userManager, UserFormatter userFormatter, TenantManager tenantManager)
-    {
-        _userService = service;
-        _userManager = userManager;
-        _userFormatter = userFormatter;
-        _tenantManager = tenantManager;
-    }
-
-
     public async Task<IUserAccount[]> GetUserAccountsAsync(Tenant tenant)
     {
-        return (await _userManager.GetUsersAsync(EmployeeStatus.Active)).Select(u => ToAccount(tenant.Id, u)).ToArray();
+        return (await userManager.GetUsersAsync(EmployeeStatus.Active)).Select(u => ToAccount(tenant.Id, u)).ToArray();
     }
 
     public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
-        await _userService.SetUserPasswordHashAsync(await _tenantManager.GetCurrentTenantIdAsync(), userID, passwordHash);
+        await service.SetUserPasswordHashAsync(await tenantManager.GetCurrentTenantIdAsync(), userID, passwordHash);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(Guid userID)
     {
-        return await _userService.GetUserPasswordStampAsync(await _tenantManager.GetCurrentTenantIdAsync(), userID);
+        return await service.GetUserPasswordStampAsync(await tenantManager.GetCurrentTenantIdAsync(), userID);
     }
 
     public async Task<IAccount> GetAccountByIDAsync(int tenantId, Guid id)
@@ -68,13 +54,13 @@ public class AuthManager
             return s;
         }
 
-        var u = await _userManager.GetUsersAsync(id);
+        var u = await userManager.GetUsersAsync(id);
 
         return !Users.Constants.LostUser.Equals(u) && u.Status == EmployeeStatus.Active ? ToAccount(tenantId, u) : Constants.Guest;
     }
 
     private IUserAccount ToAccount(int tenantId, UserInfo u)
     {
-        return new UserAccount(u, tenantId, _userFormatter);
+        return new UserAccount(u, tenantId, userFormatter);
     }
 }

@@ -29,13 +29,9 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class LicenseReaderConfig
+public class LicenseReaderConfig(IConfiguration configuration)
 {
-    public readonly string LicensePath;
-    public LicenseReaderConfig(IConfiguration configuration)
-    {
-        LicensePath = configuration["license:file:path"] ?? "";
-    }
+    public readonly string LicensePath = configuration["license:file:path"] ?? "";
 }
 
 [Scope]

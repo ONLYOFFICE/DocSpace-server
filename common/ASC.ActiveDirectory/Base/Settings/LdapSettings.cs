@@ -39,12 +39,6 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         get { return new Guid("{197149b3-fbc9-44c2-b42a-232f7e729c16}"); }
     }
 
-    public LdapSettings()
-    {
-        LdapMapping = new Dictionary<MappingFields, string>();
-        AccessRights = new Dictionary<AccessRight, string>();
-    }
-
     /// <summary>LDAP settings mapping</summary>
     public enum MappingFields
     {
@@ -249,12 +243,12 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 
     /// <summary>Correspondence between the user data fields on the portal and the attributes in the LDAP server user record</summary>
     /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.MappingFields, System.String}, System.Collections.Generic</type>
-    public Dictionary<MappingFields, string> LdapMapping { get; set; }
+    public Dictionary<MappingFields, string> LdapMapping { get; set; } = new();
 
     /// <summary>Group access rights</summary>
     /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.AccessRight, System.String}, System.Collections.Generic</type>
     //ToDo: use SId instead of group name
-    public Dictionary<AccessRight, string> AccessRights { get; set; }
+    public Dictionary<AccessRight, string> AccessRights { get; set; } = new();
 
     /// <summary>Attribute in a user record that corresponds to the user's first name</summary>
     /// <type>System.String, System</type>
@@ -475,12 +469,7 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
         return new LdapCurrentAcccessSettings() { CurrentAccessRights = null };
     }
 
-    public LdapCurrentAcccessSettings()
-    {
-        CurrentAccessRights = new Dictionary<LdapSettings.AccessRight, List<string>>();
-    }
-
-    public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; }
+    public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
 }
 
 public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
@@ -496,12 +485,7 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
         return new LdapCurrentUserPhotos() { CurrentPhotos = null };
     }
 
-    public LdapCurrentUserPhotos()
-    {
-        CurrentPhotos = new Dictionary<Guid, string>();
-    }
-
-    public Dictionary<Guid, string> CurrentPhotos { get; set; }
+    public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
 }
 
 public class LdapCurrentDomain : ISettings<LdapCurrentDomain>

@@ -27,21 +27,16 @@
 namespace ASC.Files.Core;
 
 [DebuggerDisplay("{Id} into {FolderId}")]
-public class ChunkedUploadSession<T> : CommonChunkedUploadSession
+public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChunkedUploadSession(bytesTotal)
 {
     public T FolderId { get; set; }
-    public File<T> File { get; set; }
+    public File<T> File { get; set; } = file;
     public bool Encrypted { get; set; }
     public bool KeepVersion { get; set; }
 
     //hack for Backup bug 48873
     [NonSerialized]
     public bool CheckQuota = true;
-
-    public ChunkedUploadSession(File<T> file, long bytesTotal) : base(bytesTotal)
-    {
-        File = file;
-    }
 
     public override object Clone()
     {
@@ -70,26 +65,17 @@ public class ChunkedUploadSession<T> : CommonChunkedUploadSession
 }
 
 [Scope]
-public class ChunkedUploadSessionHelper
+public class ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logger, EntryManager entryManager)
 {
-    private readonly ILogger<ChunkedUploadSessionHelper> _logger;
-    private readonly EntryManager _entryManager;
-
-    public ChunkedUploadSessionHelper(ILogger<ChunkedUploadSessionHelper> logger, EntryManager entryManager)
-    {
-        _entryManager = entryManager;
-        _logger = logger;
-    }
-
     public async Task<object> ToResponseObjectAsync<T>(ChunkedUploadSession<T> session, bool appendBreadCrumbs = false)
     {
-        var breadCrumbs = await _entryManager.GetBreadCrumbsAsync(session.FolderId); //todo: check how?
+        var breadCrumbs = await entryManager.GetBreadCrumbsAsync(session.FolderId); //todo: check how?
         var pathFolder = appendBreadCrumbs
             ? breadCrumbs.Select(f =>
             {
                 if (f == null)
                 {
-                    _logger.ErrorInUserInfoRequest(session.FolderId.ToString());
+                    logger.ErrorInUserInfoRequest(session.FolderId.ToString());
 
                     return default;
                 }

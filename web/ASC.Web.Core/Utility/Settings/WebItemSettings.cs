@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
-public class WebItemSettings : ISettings<WebItemSettings>
+public class WebItemSettings() : ISettings<WebItemSettings>
 {
     private readonly WebItemManager _webItemManager;
 
@@ -37,15 +37,11 @@ public class WebItemSettings : ISettings<WebItemSettings>
     }
 
     [JsonPropertyName("Settings")]
-    public List<WebItemOption> SettingsCollection { get; set; }
+    public List<WebItemOption> SettingsCollection { get; set; } = new();
 
     public WebItemSettings(WebItemManager webItemManager) : this()
     {
         _webItemManager = webItemManager;
-    }
-    public WebItemSettings()
-    {
-        SettingsCollection = new List<WebItemOption>();
     }
 
     public WebItemSettings GetDefault()

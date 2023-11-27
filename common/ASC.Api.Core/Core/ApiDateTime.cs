@@ -35,8 +35,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     public DateTime UtcTime { get; private set; }
     public TimeSpan TimeZoneOffset { get; private set; }
 
-    internal static readonly string[] Formats = new[]
-    {
+    internal static readonly string[] Formats = {
         "o",
         "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffffffK",
         "yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'.'fffK",
@@ -400,19 +399,10 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
 }
 
 [Scope]
-public class ApiDateTimeHelper
+public class ApiDateTimeHelper(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly TimeZoneConverter _timeZoneConverter;
-
-    public ApiDateTimeHelper(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
-    {
-        _tenantManager = tenantManager;
-        _timeZoneConverter = timeZoneConverter;
-    }
-
     public ApiDateTime Get(DateTime? from)
     {
-        return ApiDateTime.FromDate(_tenantManager, _timeZoneConverter, from);
+        return ApiDateTime.FromDate(tenantManager, timeZoneConverter, from);
     }
 }

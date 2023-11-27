@@ -27,15 +27,10 @@
 namespace Textile.States;
 
 [FormatterState(@"^\s*<code" + Globals.HtmlAttributesPattern + ">")]
-public class CodeFormatterState : FormatterState
+public class CodeFormatterState(TextileFormatter f) : FormatterState(f)
 {
     private bool _shouldExitNextTime;
     private bool _shouldFixHtmlEntities;
-
-    public CodeFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
 
     public override string Consume(string input, Match m)
     {

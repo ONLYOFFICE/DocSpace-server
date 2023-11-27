@@ -30,13 +30,8 @@ namespace Textile.States;
 /// Formatting state for a numbered list.
 /// </summary>
 [FormatterState(PatternBegin + @"#+" + PatternEnd)]
-public class OrderedListFormatterState : ListFormatterState
+public class OrderedListFormatterState(TextileFormatter formatter) : ListFormatterState(formatter)
 {
-    public OrderedListFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     protected override void WriteIndent()
     {
         Formatter.Output.WriteLine("<ol" + FormattedStylesAndAlignment("ol") + ">");

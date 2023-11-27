@@ -661,10 +661,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
 
 [Scope]
-internal class TagDao : BaseTagDao<int>
-{
-    public TagDao(
-        UserManager userManager,
+internal class TagDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -677,22 +674,20 @@ internal class TagDao : BaseTagDao<int>
         IServiceProvider serviceProvider,
         ICache cache,
         IMapper mapper)
-        : base(userManager,
-              dbContextManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider,
-              cache,
-              mapper)
-    {
-    }
-
+    : BaseTagDao<int>(userManager,
+    dbContextManager,
+    tenantManager,
+    tenantUtil,
+    setupInfo,
+    maxTotalSizeStatistic,
+    coreBaseSettings,
+    coreConfiguration,
+    settingsManager,
+    authContext,
+    serviceProvider,
+    cache,
+    mapper)
+{
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
         if (parentFolder == null || EqualityComparer<int>.Default.Equals(parentFolder.Id, 0))
@@ -798,11 +793,7 @@ internal class TagDao : BaseTagDao<int>
 }
 
 [Scope]
-internal class ThirdPartyTagDao : BaseTagDao<string>
-{
-    private readonly IThirdPartyTagDao _thirdPartyTagDao;
-    public ThirdPartyTagDao(
-        UserManager userManager,
+internal class ThirdPartyTagDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -816,26 +807,23 @@ internal class ThirdPartyTagDao : BaseTagDao<string>
         ICache cache,
         IMapper mapper,
         IThirdPartyTagDao thirdPartyTagDao)
-        : base(userManager,
-              dbContextManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider,
-              cache,
-              mapper)
-    {
-        _thirdPartyTagDao = thirdPartyTagDao;
-    }
-
+    : BaseTagDao<string>(userManager,
+    dbContextManager,
+    tenantManager,
+    tenantUtil,
+    setupInfo,
+    maxTotalSizeStatistic,
+    coreBaseSettings,
+    coreConfiguration,
+    settingsManager,
+    authContext,
+    serviceProvider,
+    cache,
+    mapper)
+{
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
-        return _thirdPartyTagDao.GetNewTagsAsync(subject, parentFolder, deepSearch);
+        return thirdPartyTagDao.GetNewTagsAsync(subject, parentFolder, deepSearch);
     }
 }
 

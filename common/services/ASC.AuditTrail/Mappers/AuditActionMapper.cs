@@ -27,30 +27,22 @@
 namespace ASC.AuditTrail.Mappers;
 
 [Singleton]
-public class AuditActionMapper
+public class AuditActionMapper(ILogger<AuditActionMapper> logger)
 {
-    public List<IProductActionMapper> Mappers { get; }
-    private readonly ILogger<AuditActionMapper> _logger;
-
-    public AuditActionMapper(ILogger<AuditActionMapper> logger)
+    public List<IProductActionMapper> Mappers { get; } = new()
     {
-        _logger = logger;
-
-        Mappers = new List<IProductActionMapper>()
-            {
-                new DocumentsActionMapper(),
-                new LoginActionsMapper(),
-                new OthersActionsMapper(),
-                new PeopleActionMapper(),
-                new SettingsActionsMapper()
-            };
-    }
+        new DocumentsActionMapper(),
+        new LoginActionsMapper(),
+        new OthersActionsMapper(),
+        new PeopleActionMapper(),
+        new SettingsActionsMapper()
+    };
 
     public string GetActionText(MessageMaps action, AuditEvent evt)
     {
         if (action == null)
         {
-            _logger.ErrorThereIsNoActionText(action);
+            logger.ErrorThereIsNoActionText(action);
 
             return string.Empty;
         }

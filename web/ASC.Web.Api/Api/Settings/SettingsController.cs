@@ -64,7 +64,6 @@ public class SettingsController : BaseSettingsController
     private readonly UserFormatter _userFormatter;
 
     public SettingsController(
-        ILoggerProvider option,
         MessageService messageService,
         ApiContext apiContext,
         UserManager userManager,

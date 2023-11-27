@@ -372,22 +372,9 @@ public class BillingException : Exception
     public BillingException(string message, Exception inner) : base(message, inner)
     {
     }
-
-    protected BillingException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
 }
 
-public class BillingNotFoundException : BillingException
-{
-    public BillingNotFoundException(string message, object debugInfo = null) : base(message, debugInfo)
-    {
-    }
-
-    protected BillingNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
-}
+public class BillingNotFoundException(string message, object debugInfo = null) : BillingException(message, debugInfo);
 
 public class BillingNotConfiguredException : BillingException
 {
@@ -396,10 +383,6 @@ public class BillingNotConfiguredException : BillingException
     }
 
     public BillingNotConfiguredException(string message, Exception inner) : base(message, inner)
-    {
-    }
-
-    protected BillingNotConfiguredException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

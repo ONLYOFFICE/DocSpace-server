@@ -813,33 +813,10 @@ public static class DocumentService
         public string Url { get; set; }
     }
 
-    public class DocumentServiceException : Exception
+    public class DocumentServiceException(DocumentServiceException.ErrorCode errorCode, string message)
+        : Exception(message)
     {
-        public ErrorCode Code { get; set; }
-
-        public DocumentServiceException(ErrorCode errorCode, string message)
-            : base(message)
-        {
-            Code = errorCode;
-        }
-
-        protected DocumentServiceException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            if (info != null)
-            {
-                Code = (ErrorCode)info.GetValue("Code", typeof(ErrorCode));
-            }
-        }
-
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-
-            if (info != null)
-            {
-                info.AddValue("Code", Code);
-            }
-        }
+        public ErrorCode Code { get; set; } = errorCode;
 
         public static void ProcessResponseError(string errorCode)
         {

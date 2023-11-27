@@ -27,17 +27,11 @@
 namespace ASC.MessagingSystem.EF.Model;
 
 [Singleton]
-public class MessagePolicy
+public class MessagePolicy(IConfiguration configuration)
 {
-    private readonly IEnumerable<string> _secretIps;
-
-    public MessagePolicy(IConfiguration configuration)
-    {
-        _secretIps =
-            configuration["messaging.secret-ips"] == null
-            ? Array.Empty<string>()
-            : configuration["messaging.secret-ips"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-    }
+    private readonly IEnumerable<string> _secretIps = configuration["messaging.secret-ips"] == null
+        ? Array.Empty<string>()
+        : configuration["messaging.secret-ips"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
     public bool Check(EventMessage message)
     {

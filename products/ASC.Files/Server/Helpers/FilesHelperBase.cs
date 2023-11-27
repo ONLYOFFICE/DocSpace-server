@@ -27,39 +27,25 @@
 namespace ASC.Files.Helpers;
 
 [Scope]
-public abstract class FilesHelperBase
+public abstract class FilesHelperBase(FilesSettingsHelper filesSettingsHelper,
+    FileUploader fileUploader,
+    SocketManager socketManager,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileStorageService fileStorageService,
+    FolderContentDtoHelper folderContentDtoHelper,
+    IHttpContextAccessor httpContextAccessor,
+    FolderDtoHelper folderDtoHelper)
 {
-    protected readonly FilesSettingsHelper _filesSettingsHelper;
-    protected readonly FileUploader _fileUploader;
-    protected readonly SocketManager _socketManager;
-    protected readonly FileDtoHelper _fileDtoHelper;
-    protected readonly ApiContext _apiContext;
-    protected readonly FileStorageService _fileStorageService;
-    protected readonly FolderContentDtoHelper _folderContentDtoHelper;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
-    protected readonly FolderDtoHelper _folderDtoHelper;
-
-    protected FilesHelperBase(
-        FilesSettingsHelper filesSettingsHelper,
-        FileUploader fileUploader,
-        SocketManager socketManager,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
-        IHttpContextAccessor httpContextAccessor,
-        FolderDtoHelper folderDtoHelper)
-    {
-        _filesSettingsHelper = filesSettingsHelper;
-        _fileUploader = fileUploader;
-        _socketManager = socketManager;
-        _fileDtoHelper = fileDtoHelper;
-        _apiContext = apiContext;
-        _fileStorageService = fileStorageService;
-        _folderContentDtoHelper = folderContentDtoHelper;
-        _httpContextAccessor = httpContextAccessor;
-        _folderDtoHelper = folderDtoHelper;
-    }
+    protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
+    protected readonly FileUploader _fileUploader = fileUploader;
+    protected readonly SocketManager _socketManager = socketManager;
+    protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
+    protected readonly ApiContext _apiContext = apiContext;
+    protected readonly FileStorageService _fileStorageService = fileStorageService;
+    protected readonly FolderContentDtoHelper _folderContentDtoHelper = folderContentDtoHelper;
+    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    protected readonly FolderDtoHelper _folderDtoHelper = folderDtoHelper;
 
     public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool? createNewIfExist, bool keepConvertStatus = false)
     {

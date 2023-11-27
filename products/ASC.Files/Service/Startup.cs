@@ -25,27 +25,18 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Service;
-public class Startup : BaseWorkerStartup
+public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    : BaseWorkerStartup(configuration, hostEnvironment)
 {
-    private readonly IConfiguration _configuration;
-    private readonly IHostEnvironment _hostEnvironment;
-
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-        _configuration = configuration;
-        _hostEnvironment = hostEnvironment;
-    }
-
     public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
 
         services.AddHttpClient();
 
-        DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
+        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
 
-        if (!bool.TryParse(_configuration["disable_elastic"], out var disableElastic))
+        if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
         {
             disableElastic = false;
         }

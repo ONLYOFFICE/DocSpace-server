@@ -29,11 +29,9 @@ using Constants = ASC.Common.Security.Authorizing.Constants;
 namespace ASC.Core;
 
 [Scope]
-public class SubscriptionManager
+public class SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
 {
-    private readonly ISubscriptionService _service;
-    private readonly TenantManager _tenantManager;
-    private readonly ICache _cache;
+    private readonly ISubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
     private static readonly SemaphoreSlim _semaphore = new(1);
     public static readonly List<Guid> Groups = Groups = new List<Guid>
     {
@@ -42,13 +40,6 @@ public class SubscriptionManager
         Constants.RoomAdmin.ID,
         Constants.Collaborator.ID,
     };
-
-    public SubscriptionManager(CachedSubscriptionService service, TenantManager tenantManager, ICache cache)
-    {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        _tenantManager = tenantManager;
-        _cache = cache;
-    }
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
     {
@@ -203,11 +194,11 @@ public class SubscriptionManager
         {
             await _semaphore.WaitAsync();
             var key = $"subs|-1{sourceID}{actionID}{recepient}";
-            var result = _cache.Get<IEnumerable<SubscriptionMethod>>(key);
+            var result = cache.Get<IEnumerable<SubscriptionMethod>>(key);
             if (result == null)
             {
                 result = await _service.GetSubscriptionMethodsAsync(-1, sourceID, actionID, recepient);
-                _cache.Insert(key, result, DateTime.UtcNow.AddDays(1));
+                cache.Insert(key, result, DateTime.UtcNow.AddDays(1));
             }
 
             return result;
@@ -220,6 +211,6 @@ public class SubscriptionManager
 
     private async Task<int> GetTenantAsync()
     {
-        return await _tenantManager.GetCurrentTenantIdAsync();
+        return await tenantManager.GetCurrentTenantIdAsync();
     }
 }

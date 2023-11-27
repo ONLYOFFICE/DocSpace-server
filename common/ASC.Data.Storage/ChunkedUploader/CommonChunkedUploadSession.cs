@@ -28,18 +28,18 @@ using Newtonsoft.Json.Linq;
 
 namespace ASC.Core.ChunkedUploader;
 
-public class CommonChunkedUploadSession : ICloneable
+public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
 {
-    public string Id { get; init; }
-    public DateTime Created { get; set; }
+    public string Id { get; init; } = Guid.NewGuid().ToString("N");
+    public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime Expired { get; set; }
     public string Location { get; set; }
     public long BytesUploaded { get; set; }
-    public long BytesTotal { get; set; }
+    public long BytesTotal { get; set; } = bytesTotal;
     public bool LastChunk { get; set; }
     public int TenantId { get; set; }
     public Guid UserId { get; set; }
-    public bool UseChunks { get; set; }
+    public bool UseChunks { get; set; } = true;
     public string CultureName { get; set; }
     public Dictionary<string, object> Items { get; set; } = new();
 
@@ -67,16 +67,6 @@ public class CommonChunkedUploadSession : ICloneable
     private const string TempPathKey = "TempPath";
     private const string UploadIdKey = "UploadId";
     private const string ChunksBufferKey = "ChunksBuffer";
-
-    public CommonChunkedUploadSession(long bytesTotal)
-    {
-        Id = Guid.NewGuid().ToString("N");
-        Created = DateTime.UtcNow;
-        BytesUploaded = 0;
-        BytesTotal = bytesTotal;
-        UseChunks = true;
-        LastChunk = false;
-    }
 
     public T GetItemOrDefault<T>(string key)
     {

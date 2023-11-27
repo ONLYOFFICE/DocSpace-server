@@ -27,29 +27,12 @@
 namespace ASC.Web.Studio.Core;
 
 [Scope]
-public class EncryptionLoginProvider
+public class EncryptionLoginProvider(ILogger<EncryptionLoginProvider> logger,
+    SecurityContext securityContext,
+    Signature signature,
+    InstanceCrypto instanceCrypto,
+    AccountLinker accountLinker)
 {
-    private readonly ILogger<EncryptionLoginProvider> _logger;
-    private readonly SecurityContext _securityContext;
-    private readonly Signature _signature;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly AccountLinker _accountLinker;
-
-    public EncryptionLoginProvider(
-        ILogger<EncryptionLoginProvider> logger,
-        SecurityContext securityContext,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-        AccountLinker accountLinker)
-    {
-        _logger = logger;
-        _securityContext = securityContext;
-        _signature = signature;
-        _instanceCrypto = instanceCrypto;
-        _accountLinker = accountLinker;
-    }
-
-
     public async Task SetKeysAsync(Guid userId, string keys)
     {
         if (string.IsNullOrEmpty(keys))
@@ -57,23 +40,23 @@ public class EncryptionLoginProvider
             return;
         }
 
-        var loginProfile = new LoginProfile(_signature, _instanceCrypto)
+        var loginProfile = new LoginProfile(signature, instanceCrypto)
         {
             Provider = ProviderConstants.Encryption,
-            Name = _instanceCrypto.Encrypt(keys)
+            Name = instanceCrypto.Encrypt(keys)
         };
 
-        await _accountLinker.AddLinkAsync(userId.ToString(), loginProfile);
+        await accountLinker.AddLinkAsync(userId.ToString(), loginProfile);
     }
 
     public async Task<string> GetKeysAsync()
     {
-        return await GetKeysAsync(_securityContext.CurrentAccount.ID);
+        return await GetKeysAsync(securityContext.CurrentAccount.ID);
     }
 
     public async Task<string> GetKeysAsync(Guid userId)
     {
-        var profile = (await _accountLinker.GetLinkedProfilesAsync(userId.ToString(), ProviderConstants.Encryption)).FirstOrDefault();
+        var profile = (await accountLinker.GetLinkedProfilesAsync(userId.ToString(), ProviderConstants.Encryption)).FirstOrDefault();
         if (profile == null)
         {
             return null;
@@ -81,19 +64,19 @@ public class EncryptionLoginProvider
 
         try
         {
-            return _instanceCrypto.Decrypt(profile.Name);
+            return instanceCrypto.Decrypt(profile.Name);
         }
         catch (Exception ex)
         {
             var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId);
-            _logger.ErrorWithException(message, ex);
+            logger.ErrorWithException(message, ex);
             return null;
         }
     }
 
     public async Task<IDictionary<Guid, string>> GetKeysAsync(IEnumerable<Guid> usrsIds)
     {
-        var profiles = await _accountLinker.GetLinkedProfilesAsync(usrsIds.Select(id => id.ToString()), ProviderConstants.Encryption);
+        var profiles = await accountLinker.GetLinkedProfilesAsync(usrsIds.Select(id => id.ToString()), ProviderConstants.Encryption);
         var keys = new Dictionary<Guid, string>(profiles.Count);
 
         foreach (var profilePair in profiles)
@@ -102,13 +85,13 @@ public class EncryptionLoginProvider
 
             try
             {
-                var key = _instanceCrypto.Decrypt(profilePair.Value.Name);
+                var key = instanceCrypto.Decrypt(profilePair.Value.Name);
                 keys.Add(new Guid(profilePair.Key), key);
             }
             catch (Exception ex)
             {
                 var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId);
-                _logger.ErrorWithException(message, ex);
+                logger.ErrorWithException(message, ex);
             }
         }
 

@@ -28,15 +28,8 @@ using Amazon.Runtime.Internal.Transform;
 
 namespace ASC.Api.Core.Middleware;
 
-public class LoggerMiddleware
+public class LoggerMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public LoggerMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(HttpContext context,
                              TenantManager tenantManager,
                              CoreSettings coreSettings,
@@ -46,7 +39,7 @@ public class LoggerMiddleware
 
         if (tenant == null)
         {
-            await _next.Invoke(context);
+            await next.Invoke(context);
 
             return;
         }
@@ -64,7 +57,7 @@ public class LoggerMiddleware
 
         using (logger.BeginScope(state))
         {
-            await _next.Invoke(context);
+            await next.Invoke(context);
         }
     }
 }

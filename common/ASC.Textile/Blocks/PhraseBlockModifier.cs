@@ -68,15 +68,8 @@ public abstract class PhraseBlockModifier : BlockModifier
         return res;
     }
 
-    private sealed class PhraseModifierMatchEvaluator
+    private sealed class PhraseModifierMatchEvaluator(string tag)
     {
-        private readonly string _tag;
-
-        public PhraseModifierMatchEvaluator(string tag)
-        {
-            _tag = tag;
-        }
-
         public string MatchEvaluator(Match m)
         {
             if (m.Groups["content"].Length == 0)
@@ -89,18 +82,18 @@ public abstract class PhraseBlockModifier : BlockModifier
                     return m.ToString();
                 }
 
-                return "<" + _tag + ">" + m.Groups["atts"].Value + m.Groups["end"].Value + "</" + _tag + ">";
+                return "<" + tag + ">" + m.Groups["atts"].Value + m.Groups["end"].Value + "</" + tag + ">";
             }
 
-            var atts = BlockAttributesParser.ParseBlockAttributes(m.Groups["atts"].Value, _tag);
+            var atts = BlockAttributesParser.ParseBlockAttributes(m.Groups["atts"].Value, tag);
             if (m.Groups["cite"].Length > 0)
             {
                 atts += " cite=\"" + m.Groups["cite"] + "\"";
             }
 
-            var res = "<" + _tag + atts + ">" +
+            var res = "<" + tag + atts + ">" +
                             m.Groups["content"].Value + m.Groups["end"].Value +
-                            "</" + _tag + ">";
+                            "</" + tag + ">";
             return res;
         }
     }

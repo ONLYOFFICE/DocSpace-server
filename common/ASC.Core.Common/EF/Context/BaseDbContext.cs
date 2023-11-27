@@ -32,22 +32,13 @@ public enum Provider
     MySql
 }
 
-public class InstallerOptionsAction
+public class InstallerOptionsAction(string region, string nameConnectionString)
 {
-    private readonly string _region;
-    private readonly string _nameConnectionString;
-
-    public InstallerOptionsAction(string region, string nameConnectionString)
-    {
-        _region = region;
-        _nameConnectionString = nameConnectionString;
-    }
-
     public void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationExtension(sp.GetRequiredService<IConfiguration>());
         var migrateAssembly = configuration["testAssembly"];
-        var connectionString = configuration.GetConnectionStrings(_nameConnectionString, _region);
+        var connectionString = configuration.GetConnectionStrings(nameConnectionString, region);
         var loggerFactory = sp.GetRequiredService<EFLoggerFactory>();
 
         optionsBuilder.UseLoggerFactory(loggerFactory);

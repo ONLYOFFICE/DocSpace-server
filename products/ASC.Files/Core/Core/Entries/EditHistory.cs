@@ -28,25 +28,11 @@ namespace ASC.Files.Core;
 
 [Transient]
 [DebuggerDisplay("{ID} v{Version}")]
-public class EditHistory
+public class EditHistory(ILogger<EditHistory> logger,
+    TenantUtil tenantUtil,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
-    private readonly ILogger<EditHistory> _logger;
-    private readonly TenantUtil _tenantUtil;
-    private readonly UserManager _userManager;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-
-    public EditHistory(
-        ILogger<EditHistory> logger,
-        TenantUtil tenantUtil,
-        UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper)
-    {
-        _logger = logger;
-        _tenantUtil = tenantUtil;
-        _userManager = userManager;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-    }
-
     public int ID { get; set; }
     public string Key { get; set; }
     public int Version { get; set; }
@@ -86,7 +72,7 @@ public class EditHistory
                 {
                     var result = new EditHistoryChanges()
                     {
-                        Author = new EditHistoryAuthor(_userManager, _displayUserSettingsHelper)
+                        Author = new EditHistoryAuthor(userManager, displayUserSettingsHelper)
                         {
                             Id = r.User.Id ?? "",
                             Name = r.User.Name,
@@ -96,7 +82,7 @@ public class EditHistory
 
                     if (DateTime.TryParse(r.Created, out var _date))
                     {
-                        _date = _tenantUtil.DateTimeFromUtc(_date);
+                        _date = tenantUtil.DateTimeFromUtc(_date);
                     }
                     result.Date = _date;
 
@@ -108,7 +94,7 @@ public class EditHistory
             }
             catch (Exception ex)
             {
-                _logger.ErrorDeSerializeOldScheme(ex);
+                logger.ErrorDeSerializeOldScheme(ex);
             }
 
             return changes;
@@ -137,19 +123,9 @@ class ChangesUserData
 
 [Transient]
 [DebuggerDisplay("{Id} {Name}")]
-public class EditHistoryAuthor
+public class EditHistoryAuthor(UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
-    private readonly UserManager _userManager;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-
-    public EditHistoryAuthor(
-        UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper)
-    {
-        _userManager = userManager;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-    }
-
     public string Id { get; init; }
 
     private string _name;
@@ -166,11 +142,11 @@ public class EditHistoryAuthor
             return
                 idInternal.Equals(Guid.Empty)
                       || idInternal.Equals(ASC.Core.Configuration.Constants.Guest.ID)
-                      || (user = _userManager.GetUsers(idInternal)).Equals(Constants.LostUser)
+                      || (user = userManager.GetUsers(idInternal)).Equals(Constants.LostUser)
                           ? string.IsNullOrEmpty(_name)
                                 ? FilesCommonResource.Guest
                                 : _name
-                          : user.DisplayUserName(false, _displayUserSettingsHelper);
+                          : user.DisplayUserName(false, displayUserSettingsHelper);
         }
         init => _name = value;
     }

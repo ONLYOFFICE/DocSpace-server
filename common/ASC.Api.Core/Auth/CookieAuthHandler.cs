@@ -29,7 +29,10 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Scope]
-public class CookieAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class CookieAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private readonly SecurityContext _securityContext;
     private readonly CookiesManager _cookiesManager;
@@ -39,18 +42,10 @@ public class CookieAuthHandler : AuthenticationHandler<AuthenticationSchemeOptio
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock)
-        : base(options, logger, encoder, clock) { }
-
-    public CookieAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock,
         SecurityContext securityContext,
         CookiesManager cookiesManager,
         IHttpContextAccessor httpContextAccessor)
-        : this(options, logger, encoder, clock)
+        : this(options, logger, encoder)
     {
         _securityContext = securityContext;
         _cookiesManager = cookiesManager;

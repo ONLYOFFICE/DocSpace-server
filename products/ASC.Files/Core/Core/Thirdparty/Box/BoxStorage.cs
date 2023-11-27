@@ -31,21 +31,15 @@ using BoxSDK = Box.V2;
 namespace ASC.Files.Thirdparty.Box;
 
 [Transient]
-internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
+internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 {
     private BoxClient _boxClient;
 
     private readonly List<string> _boxFields = new() { "created_at", "modified_at", "name", "parent", "size" };
 
     public bool IsOpened { get; private set; }
-    private readonly TempStream _tempStream;
 
     private readonly long _maxChunkedUploadFileSize = 250L * 1024L * 1024L;
-
-    public BoxStorage(TempStream tempStream)
-    {
-        _tempStream = tempStream;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -134,7 +128,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
             return str;
         }
 
-        var tempBuffer = _tempStream.Create();
+        var tempBuffer = tempStream.Create();
         if (str != null)
         {
             await str.CopyToAsync(tempBuffer);

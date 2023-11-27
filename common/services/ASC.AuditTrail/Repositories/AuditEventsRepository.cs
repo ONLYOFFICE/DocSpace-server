@@ -27,28 +27,12 @@
 namespace ASC.AuditTrail.Repositories;
 
 [Scope(Additional = typeof(AuditEventsRepositoryExtensions))]
-public class AuditEventsRepository
-{
-    private readonly AuditActionMapper _auditActionMapper;
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
-    private readonly IMapper _mapper;
-    private readonly GeolocationHelper _geolocationHelper;
-
-    public AuditEventsRepository(
-        AuditActionMapper auditActionMapper,
+public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         TenantManager tenantManager,
         IDbContextFactory<MessagesContext> dbContextFactory,
         IMapper mapper,
         GeolocationHelper geolocationHelper)
     {
-        _auditActionMapper = auditActionMapper;
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _mapper = mapper;
-        _geolocationHelper = geolocationHelper;
-    }
-
     public async Task<IEnumerable<AuditEvent>> GetByFilterAsync(
         Guid? userId = null,
         ProductType? productType = null,
@@ -92,8 +76,8 @@ public class AuditEventsRepository
         int limit = 0,
         Guid? withoutUserId = null)
     {
-        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var auditTrailContext = await _dbContextFactory.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
         var query =
            from q in auditTrailContext.AuditEvents
@@ -134,7 +118,7 @@ public class AuditEventsRepository
 
             if (productType.HasValue && productType.Value != ProductType.None)
             {
-                var productMapper = _auditActionMapper.Mappers.Find(m => m.Product == productType.Value);
+                var productMapper = auditActionMapper.Mappers.Find(m => m.Product == productType.Value);
 
                 if (productMapper != null)
                 {
@@ -154,7 +138,7 @@ public class AuditEventsRepository
             }
             else
             {
-                actionsList = _auditActionMapper.Mappers
+                actionsList = auditActionMapper.Mappers
                         .SelectMany(r => r.Mappers)
                         .SelectMany(r => r.Actions);
             }
@@ -207,10 +191,10 @@ public class AuditEventsRepository
         {
             query = query.Take(limit);
         }
-        var events = _mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await query.ToListAsync());
+        var events = mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await query.ToListAsync());
         foreach (var e in events)
         {
-            await _geolocationHelper.AddGeolocationAsync(e);
+            await geolocationHelper.AddGeolocationAsync(e);
         }
         return events;
     }
@@ -226,7 +210,7 @@ public class AuditEventsRepository
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)
     {
-        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var feedDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await Queries.TenantsAsync(feedDbContext, from, to).ToListAsync();
     }

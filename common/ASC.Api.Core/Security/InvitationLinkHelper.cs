@@ -27,42 +27,20 @@
 namespace ASC.Api.Core.Security;
 
 [Scope]
-public class InvitationLinkHelper
+public class InvitationLinkHelper(IHttpContextAccessor httpContextAccessor,
+    MessageTarget messageTarget,
+    MessageService messageService,
+    Signature signature,
+    IDbContextFactory<MessagesContext> dbContextFactory,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    UserManager userManager,
+    AuthManager authManager)
 {
-    private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly MessageService _messageService;
-    private readonly MessageTarget _messageTarget;
-    private readonly Signature _signature;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    private readonly UserManager _userManager;
-    private readonly AuthManager _authManager;
-
-    public TimeSpan IndividualLinkExpirationInterval => _emailValidationKeyProvider.ValidEmailKeyInterval;
-
-    public InvitationLinkHelper(
-        IHttpContextAccessor httpContextAccessor,
-        MessageTarget messageTarget,
-        MessageService messageService,
-        Signature signature,
-        IDbContextFactory<MessagesContext> dbContextFactory,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        UserManager userManager,
-        AuthManager authManager)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _messageTarget = messageTarget;
-        _messageService = messageService;
-        _dbContextFactory = dbContextFactory;
-        _signature = signature;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _userManager = userManager;
-        _authManager = authManager;
-    }
+    public TimeSpan IndividualLinkExpirationInterval => emailValidationKeyProvider.ValidEmailKeyInterval;
 
     public string MakeIndividualLinkKey(Guid linkId)
     {
-        return _signature.Create(linkId);
+        return signature.Create(linkId);
     }
 
     public async Task<LinkValidationResult> ValidateAsync(string key, string email, EmployeeType employeeType)
@@ -80,13 +58,13 @@ public class InvitationLinkHelper
             return validationResult;
         }
 
-        var commonLinkResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
-            key, _emailValidationKeyProvider.ValidEmailKeyInterval);
+        var commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType,
+            key, emailValidationKeyProvider.ValidEmailKeyInterval);
 
         if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
         {
-            commonLinkResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
-                key, _emailValidationKeyProvider.ValidEmailKeyInterval);
+            commonLinkResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.EmpInvite.ToStringFast() + (int)employeeType,
+                key, emailValidationKeyProvider.ValidEmailKeyInterval);
         }
 
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
@@ -112,7 +90,7 @@ public class InvitationLinkHelper
 
     private async Task<EmailValidationKeyProvider.ValidationResult> ValidateIndividualLinkAsync(string email, string key, EmployeeType employeeType)
     {
-        var result = await _emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.LinkInvite.ToStringFast() + employeeType.ToStringFast(),
+        var result = await emailValidationKeyProvider.ValidateEmailKeyAsync(email + ConfirmType.LinkInvite.ToStringFast() + employeeType.ToStringFast(),
             key, IndividualLinkExpirationInterval);
 
         if (result != EmailValidationKeyProvider.ValidationResult.Ok)
@@ -120,9 +98,9 @@ public class InvitationLinkHelper
             return result;
         }
 
-        var user = await _userManager.GetUserByEmailAsync(email);
+        var user = await userManager.GetUserByEmailAsync(email);
 
-        if (user.Equals(Constants.LostUser) || await _authManager.GetUserPasswordStampAsync(user.Id) != DateTime.MinValue)
+        if (user.Equals(Constants.LostUser) || await authManager.GetUserPasswordStampAsync(user.Id) != DateTime.MinValue)
         {
             return EmailValidationKeyProvider.ValidationResult.Invalid;
         }
@@ -133,7 +111,7 @@ public class InvitationLinkHelper
         {
             await SaveLinkVisitMessageAsync(email, key);
         }
-        else if (visitMessage.Date + _emailValidationKeyProvider.ValidVisitLinkInterval < DateTime.UtcNow)
+        else if (visitMessage.Date + emailValidationKeyProvider.ValidVisitLinkInterval < DateTime.UtcNow)
         {
             return EmailValidationKeyProvider.ValidationResult.Expired;
         }
@@ -143,16 +121,16 @@ public class InvitationLinkHelper
 
     private (EmailValidationKeyProvider.ValidationResult, Guid) ValidateCommonWithRoomLink(string key)
     {
-        var linkId = _signature.Read<Guid>(key);
+        var linkId = signature.Read<Guid>(key);
 
         return linkId == default ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
     private async Task<DbAuditEvent> GetLinkVisitMessageAsync(string email, string key)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var target = _messageTarget.Create(email);
+        var target = messageTarget.Create(email);
         var description = JsonSerializer.Serialize(new[] { key });
 
         var message = await Queries.AuditEventsAsync(context, target.ToString(), description);
@@ -162,10 +140,10 @@ public class InvitationLinkHelper
 
     private async Task SaveLinkVisitMessageAsync(string email, string key)
     {
-        var headers = _httpContextAccessor?.HttpContext?.Request.Headers;
-        var target = _messageTarget.Create(email);
+        var headers = httpContextAccessor?.HttpContext?.Request.Headers;
+        var target = messageTarget.Create(email);
 
-        await _messageService.SendHeadersMessageAsync(MessageAction.RoomInviteLinkUsed, target, headers, key);
+        await messageService.SendHeadersMessageAsync(MessageAction.RoomInviteLinkUsed, target, headers, key);
     }
 }
 

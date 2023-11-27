@@ -28,20 +28,15 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class DocumentsActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; }
-    public ProductType Product { get; }
-    public DocumentsActionMapper()
+    public List<IModuleActionMapper> Mappers { get; } = new()
     {
-        Product = ProductType.Documents;
+        new FilesActionMapper(),
+        new FoldersActionMapper(),
+        new RoomsActionMapper(),
+        new SettingsActionMapper()
+    };
 
-        Mappers = new List<IModuleActionMapper>()
-        {
-            new FilesActionMapper(),
-            new FoldersActionMapper(),
-            new RoomsActionMapper(),
-            new SettingsActionMapper()
-        };
-    }
+    public ProductType Product { get; } = ProductType.Documents;
 }
 internal class FilesActionMapper : IModuleActionMapper
 {

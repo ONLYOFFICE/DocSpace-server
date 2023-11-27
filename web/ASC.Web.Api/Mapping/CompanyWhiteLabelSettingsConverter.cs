@@ -27,13 +27,9 @@
 namespace ASC.Web.Api.Mapping;
 
 [Scope]
-public class CompanyWhiteLabelSettingsConverter : ITypeConverter<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>
+public class CompanyWhiteLabelSettingsConverter(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
+    : ITypeConverter<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>
 {
-    private readonly CompanyWhiteLabelSettingsHelper _companyWhiteLabelSettingsHelper;
-    public CompanyWhiteLabelSettingsConverter(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
-    {
-        _companyWhiteLabelSettingsHelper = companyWhiteLabelSettingsHelper;
-    }
     public CompanyWhiteLabelSettingsDto Convert(CompanyWhiteLabelSettings source, CompanyWhiteLabelSettingsDto destination, ResolutionContext context)
     {
         var result = new CompanyWhiteLabelSettingsDto()
@@ -41,7 +37,7 @@ public class CompanyWhiteLabelSettingsConverter : ITypeConverter<CompanyWhiteLab
             Address = source.Address,
             CompanyName = source.CompanyName,
             Email = source.Email,
-            IsDefault = _companyWhiteLabelSettingsHelper.IsDefault(source),
+            IsDefault = companyWhiteLabelSettingsHelper.IsDefault(source),
             IsLicensor = source.IsLicensor,
             Phone = source.Phone,
             Site = source.Site

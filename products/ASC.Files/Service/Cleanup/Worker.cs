@@ -29,17 +29,8 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Files.AutoCleanUp;
 
 [Singleton]
-public class Worker
+public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
 {
-    private readonly ILogger<Worker> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
-    {
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
     public async Task DeleteExpiredFilesInTrash(CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
@@ -49,7 +40,7 @@ public class Worker
 
         List<TenantUserSettings> activeTenantsUsers;
 
-        await using (var scope = _serviceScopeFactory.CreateAsyncScope())
+        await using (var scope = serviceScopeFactory.CreateAsyncScope())
         {
             await using var dbContext = scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContext();
             activeTenantsUsers = await GetTenantsUsersAsync(dbContext);
@@ -60,7 +51,7 @@ public class Worker
             return;
         }
 
-        _logger.InfoFoundUsers(activeTenantsUsers.Count);
+        logger.InfoFoundUsers(activeTenantsUsers.Count);
 
         await Parallel.ForEachAsync(activeTenantsUsers,
                                     new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = cancellationToken }, //System.Environment.ProcessorCount
@@ -76,7 +67,7 @@ public class Worker
 
         try
         {
-            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
 
@@ -116,11 +107,11 @@ public class Worker
                 return;
             }
 
-            _logger.InfoCleanUp(tenantUser.TenantId, trashId);
+            logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
             await fileStorageService.DeleteItemsAsync("delete", filesList, foldersList, true, false, true);
 
-            _logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
+            logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 
             while (true)
             {
@@ -134,11 +125,11 @@ public class Worker
                 await Task.Delay(100, cancellationToken);
             }
 
-            _logger.InfoCleanUpFinish(tenantUser.TenantId, trashId);
+            logger.InfoCleanUpFinish(tenantUser.TenantId, trashId);
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
     }
 

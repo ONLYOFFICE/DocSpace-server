@@ -27,30 +27,21 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class TenantExtraConfig
+public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReaderConfig _licenseReaderConfig;
-
-    public TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReaderConfig = licenseReaderConfig;
-    }
-
     public bool Saas
     {
-        get { return !_coreBaseSettings.Standalone; }
+        get { return !coreBaseSettings.Standalone; }
     }
 
     public bool Enterprise
     {
-        get { return _coreBaseSettings.Standalone && !string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
     public bool Opensource
     {
-        get { return _coreBaseSettings.Standalone && string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 }
 

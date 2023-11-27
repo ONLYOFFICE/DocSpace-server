@@ -43,17 +43,11 @@ public enum SortedByType
 }
 
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
-public class OrderBy
+public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
     [JsonPropertyName("is_asc")]
-    public bool IsAsc { get; init; }
+    public bool IsAsc { get; init; } = isAsc;
 
     [JsonPropertyName("property")]
-    public SortedByType SortedBy { get; set; }
-
-    public OrderBy(SortedByType sortedByType, bool isAsc)
-    {
-        SortedBy = sortedByType;
-        IsAsc = isAsc;
-    }
+    public SortedByType SortedBy { get; set; } = sortedByType;
 }
