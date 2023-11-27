@@ -1409,6 +1409,7 @@ public class EntryManager
 
                 if (properties != null)
                 {
+                    await _fileMarker.RemoveMarkAsNewForAllAsync(file);
                     file.ParentId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
                 }
             }

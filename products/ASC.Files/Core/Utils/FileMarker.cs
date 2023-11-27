@@ -196,8 +196,25 @@ public class FileMarker
 
             if (userIDs.Count == 0)
             {
+                var parentFolder = parentFolders.FirstOrDefault();
                 var guids = await filesSecurity.WhoCanReadAsync(obj.FileEntry);
-                userIDs = guids.Where(x => x != obj.CurrentAccountId).ToList();
+                if (parentFolder.FolderType != FolderType.FormFillingFolder)
+                {
+                    userIDs = guids.Where(x => x != obj.CurrentAccountId).ToList();
+                }
+                else
+                {
+                    var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parentFolder);
+                    var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
+
+                    await foreach (var ace in filesSecurity.GetPureSharesAsync(room, guids))
+                    {
+                        if (ace.Share != FileShare.FillForms && ace.Subject != obj.CurrentAccountId)
+                        {
+                            userIDs.Add(ace.Subject);
+                        }
+                    }
+                }
             }
 
             if (obj.FileEntry.ProviderEntry)
