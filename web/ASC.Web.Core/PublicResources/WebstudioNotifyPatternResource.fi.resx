@@ -1675,7 +1675,7 @@ Poikkeusviesti: $Message</value>
 
 Käyttäjän "$FromUserName":"$FromUserLink" poistaminen onnistui.
 
-Henkilökohtaisten tietojen poisto on sallittu ilmaiseksi $DocsSpace</value>
+Henkilötietojen poistaminen salli $DocsSpace:n vapauttamisen</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Hyvä $UserName,
