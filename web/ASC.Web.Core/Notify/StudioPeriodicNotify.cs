@@ -46,8 +46,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         SecurityContext securityContext,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider)
-    {
-    private readonly AuthContext _authContext = authContext;
+{
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
     public async ValueTask SendSaasLettersAsync(string senderName, DateTime scheduleDate)

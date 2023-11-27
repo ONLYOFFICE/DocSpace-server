@@ -464,7 +464,7 @@ public class FileSharing(Global global,
             yield return record;
         }
 
-        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
+        var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
 
         await foreach (var record in records)
         {
@@ -512,7 +512,7 @@ public class FileSharing(Global global,
         var shares = await fileSecurity.GetSharesAsync(entry);
         var isRoom = entry is Folder<T> { SettingsPrivate: false } room && DocSpaceHelper.IsRoom(room.FolderType);
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
-        var canReadLinks = await _fileSecurity.CanReadLinksAsync(entry);
+        var canReadLinks = await fileSecurity.CanReadLinksAsync(entry);
 
         var records = shares
             .GroupBy(r => r.Subject)
@@ -824,9 +824,9 @@ public class FileSharing(Global global,
         if (filterType == ShareFilterType.User)
         {
             return true;
-    }
+        }
     
-        return await _fileSecurity.CanReadLinksAsync(entry);
+        return await fileSecurity.CanReadLinksAsync(entry);
     }
     
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)

@@ -473,7 +473,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<bool> CanReadLinksAsync<T>(FileEntry<T> entry)
     {
-        return await CanAsync(entry, _authContext.CurrentAccount.ID, FilesSecurityActions.ReadLinks);
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.ReadLinks);
     }
     
     public async Task<IEnumerable<Guid>> WhoCanReadAsync<T>(FileEntry<T> entry)

@@ -44,7 +44,7 @@ public class StudioNotifyService(UserManager userManager,
         MessageService messageService,
         MessageTarget messageTarget,
         ILoggerProvider option)
-    {
+{
     public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
     private readonly ILogger _log = option.CreateLogger("ASC.Notify");
@@ -176,7 +176,7 @@ public class StudioNotifyService(UserManager userManager,
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
-                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
+                new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
                 new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
 
