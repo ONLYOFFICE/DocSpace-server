@@ -1,35 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.Core.Thirdparty;
 [Scope]
-internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<string>
+internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<string>
     where TFile : class, TItem
     where TFolder : class, TItem
-    where TItem: class
+    where TItem : class
 {
     internal IDaoBase<TFile, TFolder, TItem> Dao { get; }
     internal IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; private set; }
@@ -39,13 +39,15 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
     private readonly IDaoSelector<TFile, TFolder, TItem> _daoSelector;
     private readonly CrossDao _crossDao;
     private readonly IFileDao<int> _fileDao;
+    private readonly int _tenantId;
 
-    public ThirdPartyFileDao(UserManager userManager,
+    protected ThirdPartyFileDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<TFile, TFolder, TItem> daoSelector,
         CrossDao crossDao,
         IFileDao<int> fileDao,
-        IDaoBase<TFile, TFolder, TItem> dao)
+        IDaoBase<TFile, TFolder, TItem> dao,
+        TenantManager tenantManager)
     {
         _userManager = userManager;
         _dbContextFactory = dbContextFactory;
@@ -53,6 +55,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
         _crossDao = crossDao;
         _fileDao = fileDao;
         Dao = dao;
+        _tenantId = tenantManager.GetCurrentTenant().Id;
     }
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
@@ -89,7 +92,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
     {
         var items = await Dao.GetItemsAsync(parentId, false);
 
-        return Dao.ToFile(items.FirstOrDefault(item => Dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase)) as TFile);
+        return Dao.ToFile(items.Find(item => Dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase)) as TFile);
     }
 
     public async Task<File<string>> GetFileStableAsync(string fileId, int fileVersion = -1)
@@ -116,7 +119,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool checkShared = false)
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+        bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -162,7 +166,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
                 files = files.Where(x =>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -179,6 +183,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+        if (!string.IsNullOrEmpty(extension))
+        {
+            extension = extension.Trim().ToLower();
+            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+        }
+
         return files;
     }
 
@@ -192,7 +202,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false)
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+        string extension ,bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -241,7 +252,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -258,10 +269,13 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (orderBy == null)
+        if (!string.IsNullOrEmpty(extension))
         {
-            orderBy = new OrderBy(SortedByType.DateAndTime, false);
+            extension = extension.Trim().ToLower();
+            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
         }
+
+        orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         files = orderBy.SortedBy switch
         {
@@ -351,7 +365,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
     {
         var item = await Dao.GetItemsAsync(folderId.ToString(), false);
 
-        return item.Any(item => Dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
+        return item.Exists(item => Dao.GetName(item).Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
     public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
@@ -369,46 +383,19 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
         var id = Dao.MakeId(Dao.GetId(file));
 
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
-            using (var tx = await filesDbContext.Database.BeginTransactionAsync())
-            {
-                var hashIDs = Dao.Query(filesDbContext.ThirdpartyIdMapping)
-                .Where(r => r.Id.StartsWith(id))
-                .Select(r => r.HashId);
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+            await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteTagsAsync(filesDbContext);
+            await Queries.DeleteFilesSecuritiesAsync(filesDbContext, _tenantId, id);
+            await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
 
-                var link = await Dao.Query(filesDbContext.TagLink)
-                .Where(r => hashIDs.Any(h => h == r.EntryId))
-                .ToListAsync();
-
-                filesDbContext.TagLink.RemoveRange(link);
-                await filesDbContext.SaveChangesAsync();
-
-                var tagsToRemove = from ft in filesDbContext.Tag
-                                   join ftl in filesDbContext.TagLink.DefaultIfEmpty() on new { TenantId = ft.TenantId, Id = ft.Id } equals new { TenantId = ftl.TenantId, Id = ftl.TagId }
-                                   where ftl == null
-                                   select ft;
-
-                filesDbContext.Tag.RemoveRange(await tagsToRemove.ToListAsync());
-
-                var securityToDelete = Dao.Query(filesDbContext.Security)
-                .Where(r => hashIDs.Any(h => h == r.EntryId));
-
-                filesDbContext.Security.RemoveRange(await securityToDelete.ToListAsync());
-                await filesDbContext.SaveChangesAsync();
-
-                var mappingToDelete = Dao.Query(filesDbContext.ThirdpartyIdMapping)
-                .Where(r => hashIDs.Any(h => h == r.HashId));
-
-                filesDbContext.ThirdpartyIdMapping.RemoveRange(await mappingToDelete.ToListAsync());
-                await filesDbContext.SaveChangesAsync();
-
-                await tx.CommitAsync();
-            }
+            await tx.CommitAsync();
         });
 
         if (file is not IErrorItem)
@@ -463,8 +450,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
         {
             throw new Exception(errorFolder.Error);
         }
-
-        var fromFolderId = Dao.GetParentFolderId(file);
 
         var newTitle = await Dao.GetAvailableTitleAsync(Dao.GetName(file), Dao.GetId(toFolder), IsExistAsync);
         var storage = await ProviderInfo.StorageAsync;
@@ -585,7 +570,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
         var storage = await ProviderInfo.StorageAsync;
         return await storage.GetThumbnailAsync(thirdFileId, width, height);
     }
-    
+
     internal File<string> RestoreIds(File<string> file)
     {
         if (file == null)
@@ -614,12 +599,13 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
     public abstract Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession);
 
-    public Task ReassignFilesAsync(string[] fileIds, Guid newOwnerId)
+    public Task ReassignFilesAsync(Guid oldOwner, Guid newOwnerId, IEnumerable<string> exceptFolderIds)
     {
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent)
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+        bool searchInContent)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
@@ -647,7 +633,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
     public Task<Stream> GetDifferenceStreamAsync(File<string> file)
     {
-        return null;
+        return Task.FromResult<Stream>(null);
     }
 
     public Task<bool> ContainChangesAsync(string fileId, int fileVersion)
@@ -678,9 +664,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
 
     public Task SaveProperties(string fileId, EntryProperties entryProperties)
     {
-        return null;
+        return Task.CompletedTask;
     }
-    
+
     public string GetUniqFilePath(File<string> file, string fileTitle)
     {
         throw new NotImplementedException();
@@ -700,4 +686,67 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>: IFileDao<strin
     {
         throw new NotImplementedException();
     }
+
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, bool withSubfolders = false, 
+        bool excludeSubject = false, string roomId = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
+    }
+}
+
+static file class Queries
+{
+    public static readonly Func<FilesDbContext, Task<int>> DeleteTagsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx) =>
+                (from ft in ctx.Tag
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
+                 {
+                     ftl.TenantId,
+                     Id = ftl.TagId
+                 }
+                 where ftl == null
+                 select ft)
+                .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteTagLinksAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string idStart) =>
+                ctx.TagLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => ctx.ThirdpartyIdMapping
+                        .Where(t => t.TenantId == tenantId)
+                        .Where(t => t.Id.StartsWith(idStart))
+                        .Select(t => t.HashId).Any(h => h == r.EntryId))
+                        .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteFilesSecuritiesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string idStart) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => ctx.ThirdpartyIdMapping
+                        .Where(t => t.TenantId == tenantId)
+                        .Where(t => t.Id.StartsWith(idStart))
+                        .Select(t => t.HashId).Any(h => h == r.EntryId))
+                        .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, string, Task<int>>
+        DeleteThirdpartyIdMappingsAsync =
+            Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string idStart) =>
+                    ctx.ThirdpartyIdMapping
+                        .Where(r => r.TenantId == tenantId)
+                        .Where(t => t.Id.StartsWith(idStart))
+                        .ExecuteDelete());
 }

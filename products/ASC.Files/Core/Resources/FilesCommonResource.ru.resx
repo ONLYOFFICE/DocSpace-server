@@ -314,7 +314,8 @@
     <value>Создавайте и редактируйте офисные документы, предоставляйте к ним доступ. Работайте над ними совместно в режиме реального времени. Гарантируется высочайшая совместимость с форматами docx, xlsx, pptx.</value>
   </data>
   <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>Редактируйте офисные документы, предоставляйте к ним доступ и работайте над ними совместно в режиме реального времени. Создавайте общие документы, доступные для всей команды, и управляйте ими. Высочайшая совместимость с форматами docx, xlsx, pptx.</value>
+    <value>Редактируйте офисные документы, предоставляйте к ним доступ и работайте над ними совместно в режиме реального времени. Создавайте общие документы, доступные для всей команды, и управляйте ими.
+Высочайшая совместимость с форматами docx, xlsx, pptx.</value>
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>Просматривайте и скачивайте документы, к которым предоставлен доступ. Загружайте файлы в общие папки. Гарантируется высочайшая совместимость с форматами docx, xlsx, pptx.</value>
@@ -414,5 +415,17 @@
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Вы не можете закрепить комнату</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Максимальное количество ссылок не должно превышать {0}</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Пригласительная ссылка</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Ссылка для доступа</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
   </data>
 </root>

@@ -76,16 +76,16 @@ To jest powiadomienie e-mail, aby poinformować, że poprosiłeś o przesłanie 
 Pomyślnie wysłany mail można znaleźć w "Wysłane":"$__VirtualRootPath/addons/mail/#sent" folderze modułu Poczta.</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1. Udzielono dostępu do dokumentu: "$DocumentTitle":"$DocumentURL" 
+    <value>h1. Udzielono dostępu do dokumentu: "$DocumentTitle":"$DocumentURL"
 
 $__DateTime: Użytkownik "$__AuthorName":"$__AuthorUrl" udzielił ci dostępu do dokumentu: "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1. Udzielono dostępu do folderu: "$DocumentTitle":"$DocumentURL" 
+    <value>h1. Udzielono dostępu do folderu: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime: Użytkownik "$__AuthorName":"$__AuthorUrl" udzielił ci dostępu do folderu  "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights". 
+$__DateTime: Użytkownik "$__AuthorName":"$__AuthorUrl" udzielił ci dostępu do folderu "$DocumentTitle":"$DocumentURL" z następującymi prawami dostępu: "$AccessRights". 
 
 $Message</value>
   </data>
@@ -107,12 +107,12 @@ $Message</value>
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName wspomniał o Tobie w komentarzu do dokumentu
 
-$__AuthorName wspomniał o Tobie w komentarzu do dokumentu „$DocumentTitle”:”$ DocumentURL” w pokoju „$RoomTitle”:”$RoomURL”:
+$__AuthorName wspomniał o Tobie w komentarzu do dokumentu "$DocumentTitle":"$ DocumentURL" w pokoju "$RoomTitle":"$RoomURL":
 
-$Wiadomość</value>
+$Message</value>
   </data>
   <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__ AuthorName usunął pokój
+    <value>h1. $__AuthorName usunął pokój
 
 $__AuthorName usunął pokój: $RoomTitle</value>
   </data>
@@ -132,7 +132,7 @@ $__AuthorName usunął pokój: $RoomTitle</value>
     <value>Wspomniano w dokumencie</value>
   </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>Wysłano.</value>
+    <value>Wiadomości zostały wysłane.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
     <value>Powiadomienie DocSpace. Pokój został usunięty</value>

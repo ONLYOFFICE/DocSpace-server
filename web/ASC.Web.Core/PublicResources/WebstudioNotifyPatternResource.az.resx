@@ -140,7 +140,7 @@ Sabahınız xeyir!
 
 Siz "${__VirtualRootPath}":"$InviteLink" portalına qoşulmağa dəvət olundunuz. Təhlükəsizlik məqsədilə aşağıdakı linkə klikləməklə hesabınızı aktivləşdirməlisiniz.
 
-$GreenButton
+$OrangeButton
 
 Nəzərə alın ki, bu link yalnız 7 gün ərzində etibarlıdır.</value>
   </data>
@@ -153,11 +153,11 @@ Hörmətli $OwnerName,
 
 Yedəkləmə proseduru haqqında daha çox öyrənmək üçün "Məlumatların Yedəklənməsi": "https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" istifadəçi təlimatımıza baxın
 
-Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "support.onlyoffice.com": "http://support.onlyoffice.com"
+Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "support.onlyoffice.com": "https://support.onlyoffice.com"
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək komandası
-"www.onlyoffice.com":"http://onlyoffice.com</value>
+"www.onlyoffice.com":"https://onlyoffice.com</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>Portal ehtiyat nüsxəsi [${__VirtualRootPath}](${__VirtualRootPath}) yaradıldı
@@ -168,18 +168,18 @@ Portal məlumatlarınızı ehtiva edən ehtiyat faylı [${__VirtualRootPath}](${
 
 Yedəkləmə prosesi haqqında ətraflı məlumat üçün bu İstifadəçi Təlimatına baxın [Məlumatların ehtiyat nüsxəsi](${__HelpLink} /tipstricks/data-backup-restore.aspx).
 
-Hər hansı bir sualınız varsa və ya köməyə ehtiyacınız varsa, [support.onlyoffice.com](http://support.onlyoffice.com) ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin.
+Hər hansı bir sualınız varsa və ya köməyə ehtiyacınız varsa, [support.onlyoffice.com](https://support.onlyoffice.com) ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin.
 
 Sizin,
 ONLYOFFICE ™ komandası
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} hesabınızdakı e-poçtu dəyişmək istəyirsiniz?
 
 Aşağıdakı düyməni basın və buludunuza daxil olun*.
 
-$GreenButton
+$OrangeButton
 
 Link 7 gün ərzində etibarlıdır.
 
@@ -194,7 +194,7 @@ E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyi
 
 Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 *Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində parol dəyişdirmə prosesini tamamlayın.
 
@@ -207,7 +207,7 @@ Siz ${LetterLogoText} portalına daxil olmaq üçün istifadə olunan mobil tele
 
 Mobil telefonunuzu dəyişmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 Mobil telefonunuzu dəyişmək istəmirsinizsə və ya bu mesajı səhvən alırsınızsa, zəhmət olmasa, ona məhəl qoymayın və ya ətraflı məlumat tapmaq üçün portal administratorunuzla əlaqə saxlayın.</value>
   </data>
@@ -218,7 +218,7 @@ ${LetterLogoText} portalına daxil olmaq üçün istifadə etdiyiniz autentifika
 
 Portala giriş səhifəsinə keçmək və autentifikasiya proqramını konfiqurasiya etmək üçün bu linkə klikləyin:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1. "${__VirtualRootPath}":"${__VirtualRootPath}" portalının sahibinin dəyişdirilməsi
@@ -229,7 +229,7 @@ Salam, $OwnerName,
 
 Əməliyyatı təsdiqləmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 * Qeyd *: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portal sahibinin dəyişdirilməsi prosesini tamamlayın.</value>
   </data>
@@ -242,7 +242,7 @@ Salam, $OwnerName,
 
 Əməliyyatı təsdiqləmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 * Qeyd *: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portal ünvanının dəyişdirilməsi prosesini tamamlayın.</value>
   </data>
@@ -251,7 +251,7 @@ $GreenButton
 
 $__AuthorName sizi "${__VirtualRootPath}":"${__VirtualRootPath}" üçün qonaq istifadəçi kimi dəvət etdi. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Link yalnız 7 gün ərzində etibarlıdır.
 
@@ -270,20 +270,20 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin. 
 
-$GreenButton
+$OrangeButton
 
 Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onlyoffice.com/" nəzər salın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
     <value>Salam, $UserName!
 
 $__AuthorName sizi "${__VirtualRootPath}":"${__VirtualRootPath}" üçün qonaq istifadəçi kimi dəvət etdi. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Link yalnız 7 gün ərzində etibarlıdır.
 
@@ -302,13 +302,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin. 
 
-$GreenButton
+$OrangeButton
 
 Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onlyoffice.com/" nəzər salın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalından mesaj:
@@ -333,7 +333,7 @@ Siz "${__VirtualRootPath}":"$InviteLink" portalına qoşulmaq üçün müraciət
 
 Dəvəti qəbul etmək üçün bu linkə daxil olaraq ad və şifrənizi daxil edin:
 
-$GreenButton
+$OrangeButton
 
 * Qeyd *: bu link yalnız 48 saat etibarlıdır. Bu müddət ərzində əməliyyatı tamamlayın.</value>
   </data>
@@ -382,7 +382,7 @@ Portalınız indi köhnə "$PortalUrl":"$PortalUrl" ünvanında mövcuddur:
 Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa,  ünvanında bizimlə əlaqə saxlamaqdan çəkinməyin "support@onlyoffice.com":"mailto:support@onlyoffice.com"
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Bildiriş növünü dəyişdirmək üçün "abunəlik parametrlərinizi idarə edin":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -397,7 +397,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bi
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"
+"www.onlyoffice.com":"https://onlyoffice.com/"
 
 ^Bildiriş növünü dəyişdirmək üçün "abunəlik parametrlərinizi idarə edin":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -412,7 +412,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, ünvanında bi
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Qrupu
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1. Portal miqrasiyası
@@ -421,7 +421,7 @@ h1."$PortalUrl":"$PortalUrl"
 Portalınız yeni domenə köçürüldü. Zəhmət olmasa, əlaqə zamanı istifadə olunacaq parolu daxil etməklə girişinizi bərpa edin.
 
 Hesab parolunuzu qurmaq üçün aşağıdakı linki izləyin:
-$GreenButton
+$OrangeButton
 
 * Qeyd *: bu link yalnız 7 gün ərzində etibarlıdır. Zəhmət olmasa bu müddət ərzində bərpa prosesini tamamlayın.
 
@@ -451,13 +451,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin. 
 
-$GreenButton
+$OrangeButton
 
 Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onlyoffice.com/" nəzər salın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
  </data>
   <data name="pattern_personal_activate" xml:space="preserve">
     <value>Salam, $UserName
@@ -503,7 +503,7 @@ ONLYOFFICE komandası</value>
 
 Aşağıdakı düyməni basın və buludunuza daxil olun*.
 
-$GreenButton
+$OrangeButton
 
 Link 7 gün ərzində etibarlıdır.
 
@@ -516,7 +516,7 @@ E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyi
 
 Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 *Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Zəhmət olmasa, həmin müddət ərzində parol dəyişmə prosesini tamamlayın.
 
@@ -538,7 +538,7 @@ ONLYOFFICE komandası</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com saytında hesabınıza xitam verilməsini xahiş etmisiniz. Sorğunu tamamlamaq üçün linkə daxil olun (link 7 gün ərzində aktivdir):
 
-$GreenButton
+$OrangeButton
 
 *Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/Products/Files/doceditor.aspx?fileid= 5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
 
@@ -556,7 +556,7 @@ Salam $OwnerName,
 
 Siz "${__VirtualRootPath}":"${__VirtualRootPath}" portalınızın müvəqqəti deaktiv edilməsini tələb etdiniz. Əməliyyatı təsdiqləmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 * Qeyd *: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portalın deaktivasiya prosesini tamamlayın.
 
@@ -567,7 +567,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, ünvanında biz
 
 Hörmətlə,
 ONLYOFFICE dəstək komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Portalın deaktiv edilməsi: [${__VirtualRootPath}](${__VirtualRootPath})
@@ -576,7 +576,7 @@ Hörmətli $OwnerName,
 
 Siz [${__VirtualRootPath}](${__VirtualRootPath}) portalınızı müvəqqəti olaraq deaktiv etmək üçün sorğu göndərmisiniz. Əməliyyatı təsdiqləmək üçün aşağıdakı linkə daxil olun:
 
-$GreenButton
+$OrangeButton
 
 _Qeyd_: Bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portalın deaktivasiya prosesini tamamlayın.
 
@@ -588,7 +588,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, [support@onlyof
 
 
 ONLYOFFICE ™ komandası
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalının silinməsi: 
@@ -605,7 +605,7 @@ Portalı silməzdən əvvəl təkrar ödəniş seçiminin deaktiv edilib-edilmə
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portalınızı silmək istəyirsinizsə, əməliyyatı təsdiqləmək üçün aşağıdakı linki izləyin:
 
-$GreenButton
+$OrangeButton
 
 * Qeyd *: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portalın silinməsi prosesini tamamlayın.
 
@@ -613,7 +613,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, ünvanında biz
 
 Hörmətlə,
 ONLYOFFICE ™ Dəstək Qrupu
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portalının silinməsi
@@ -630,7 +630,7 @@ Portalı silməzdən əvvəl avtomatik ödənişləri deaktiv etdiyinizə əmin 
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalını silmək istəyirsinizsə, əməliyyatı təsdiqləmək üçün bu linki izləyin:
 
-$GreenButton
+$OrangeButton
 
 _Qeyd_: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində portalın silinməsi prosesini tamamlayın.
 
@@ -638,7 +638,7 @@ Hər hansı bir sualınız və ya köməyə ehtiyacınız varsa, [support@onlyof
 
 
 ONLYOFFICE ™ Dəstək Komandası
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1. Portal ünvanının dəyişdirilməsi
@@ -656,7 +656,7 @@ Siz "${__VirtualRootPath}":"${__VirtualRootPath}" portalından profilinizi həmi
 
 Profilinizi silmək istəyirsinizsə, aşağıdakı linki izləyin:
 
-$GreenButton
+$OrangeButton
 
 *Qeyd*: bu link 7 gün ərzində etibarlı olacaq. Bu müddət ərzində profilin silinməsini tamamlayın.</value>
   </data>
@@ -704,12 +704,7 @@ Məlumatın "$FromUserName":"$FromUserLink" istifadəçisindən "$ToUserName":"$
 
 "$FromUserName":"$FromUserLink" adlı istifadəçi üçün məlumatların silinməsi prosesi uğurla tamamlandı.
 
-Şəxsi məlumatların silinməsinə icazə verildi:
-
-# Sənədlər - $DocsSpace
-# CRM - $CrmSpace
-# Poçt - $MailSpace
-# Söhbət - $TalkSpace</value>
+Şəxsi məlumatların silinməsinə icazə verildi $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Hörmətli $UserName,
@@ -787,7 +782,7 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Portalınız bərpa edildi. Ona daxil olmaq üçün yeni parol təyin etməlisiniz:
 
-$GreenButton
+$OrangeButton
 
 *Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır.
 
@@ -804,20 +799,20 @@ Portalın bərpası başladı. Məlumatın miqdarından asılı olaraq bir az va
 
 Hörmətlə,
 ONLYOFFICE™ Dəstək Qrupu
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
     <value>Salam!
 
 Siz qonaq istifadəçi kimi "${__VirtualRootPath}":"${__VirtualRootPath}" proqramına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Biz həmçinin vaxtaşırı sizə faydalı məsləhətlər və ən son ONLYOFFICE xəbərləri göndərəcəyik. İstənilən vaxt Profil səhifənizdə abunəlikləri ləğv edə və onları yenidən aktivləşdirə bilərsiniz.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -832,13 +827,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin. 
 
-$GreenButton
+$OrangeButton
 
 Köməyə ehtiyacınız varsa, "Dəstək Mərkəzimizə":"https://helpcenter.onlyoffice.com/" nəzər salın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə, 
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" Portal profilinin dəyişdirilməsi barədə bildiriş:
@@ -931,7 +926,7 @@ Siz şirkət daxilində əməkdaşlığı yaxşılaşdırmaq üçün təhlükəs
 
 Dəvəti qəbul etmək üçün aşağıdakı linkə klikləyin və peşəkar hesabınızın istifadəçi adı və parolunu daxil edin.
 
-$GreenButton
+$OrangeButton
 
 Link yalnız 7 gün üçün keçərli olacaq.</value>
   </data>
@@ -1133,7 +1128,7 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE Şəxsi hesabınızdakı parolu dəyişmək istəyirsiniz? Təsdiqləmək üçün aşağıdakı düyməni basın.
 
-$GreenButton
+$OrangeButton
 
 Link 7 gün ərzində etibarlıdır.
 
@@ -1142,7 +1137,7 @@ Parolunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE hesabınızın şifrəsini dəyişmək istəyirsiniz? Təsdiq etmək üçün aşağıdakı düyməyə klikləyin.
 
-$GreenButton
+$OrangeButton
 
 Link 7 gün ərzində etibarlıdır.
 
@@ -1155,19 +1150,12 @@ Komandanız, müştəriləriniz, tərəfdaşlarınız və s. ilə əməkdaşlı�
 
 E-poçtunuzu təsdiqləyin (link 7 gün ərzində etibarlıdır):
 
-$GreenButton
-
-Cari tarif planınız START-dır. Tamamilə pulsuzdur və buraya daxildir:
-
-* 1 admin, 2 ekspert istifadəçi
-* 12 otağa qədər
-* Hər otaqda limitsiz sayda istifadəçi
-* 2 GB disk sahəsi
+$OrangeButton
 
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1176,19 +1164,12 @@ Komandanız, müştəriləriniz, tərəfdaşlarınız və s. ilə əməkdaşlı�
 
 E-poçtunuzu təsdiqləyin (link 7 gün ərzində etibarlıdır):
 
-$GreenButton
-
-Cari tarif planınız START-dır. Tamamilə pulsuzdur və buraya daxildir:
-
-* 1 admin, 2 ekspert istifadəçi
-* 12 otağa qədər
-* Hər otaqda limitsiz sayda istifadəçi
-* 2 GB disk sahəsi
+$OrangeButton
 
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1197,19 +1178,12 @@ Komandanız, müştəriləriniz, tərəfdaşlarınız və s. ilə əməkdaşlı�
 
 E-poçtunuzu təsdiqləyin (link 7 gün ərzində etibarlıdır):
 
-$GreenButton
-
-Cari tarif planınız START-dır. Tamamilə pulsuzdur və buraya daxildir:
-
-* 1 admin, 2 ekspert istifadəçi
-* 12 otağa qədər
-* Hər otaqda limitsiz sayda istifadəçi
-* 2 GB disk sahəsi
+$OrangeButton
 
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1218,7 +1192,7 @@ Komandanız, müştəriləriniz, tərəfdaşlarınız və s. ilə əməkdaşlı�
 
 E-poçtunuzu təsdiqləyin (link 7 gün ərzində etibarlıdır):
 
-$GreenButton
+$OrangeButton
 
 Cari tarif planınız START-dır. Tamamilə pulsuzdur və buraya daxildir:
 
@@ -1230,7 +1204,7 @@ Cari tarif planınız START-dır. Tamamilə pulsuzdur və buraya daxildir:
 Sənəd əməkdaşlığının yeni üsulundan həzz alın!
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1243,7 +1217,7 @@ ONLYOFFICE Komandası
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1258,11 +1232,11 @@ ONLYOFFICE Komandası
 
 *#4. 3-cü tərəf buludlarını birləşdirin.* İstənilən bulud yaddaşını birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1276,11 +1250,11 @@ ONLYOFFICE Komandası
 *#3. Səmərəli həmmüəllif.* İki birgə redaktə rejimi ilə sənədlər üzərində əməkdaşlıq edin: real vaxt və ya paraqrafın kilidlənməsi. Dəyişiklikləri izləyin, daxili söhbətdən istifadə edərək real vaxtda ünsiyyət qurun və ya audio və video zənglər edin.
 *#4. 3-cü tərəf buludlarını birləşdirin.* İstənilən bulud yaddaşını birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1294,11 +1268,11 @@ ONLYOFFICE Komandası
 *#3. Səmərəli həmmüəllif.* İki birgə redaktə rejimi ilə sənədlər üzərində əməkdaşlıq edin: real vaxt və ya paraqrafın kilidlənməsi. Dəyişiklikləri izləyin, daxili söhbətdən istifadə edərək real vaxtda ünsiyyət qurun və ya audio və video zənglər edin.
 *#4. 3-cü tərəf buludlarını birləşdirin.* İstənilən bulud yaddaşını birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1312,11 +1286,11 @@ ONLYOFFICE Komandası
 *#3. Səmərəli həmmüəllif.* İki birgə redaktə rejimi ilə sənədlər üzərində əməkdaşlıq edin: real vaxt və ya paraqrafın kilidlənməsi. Dəyişiklikləri izləyin, daxili söhbətdən istifadə edərək real vaxtda ünsiyyət qurun və ya audio və video zənglər edin.
 *#4. 3-cü tərəf buludlarını birləşdirin.* İstənilən bulud yaddaşını birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1337,7 +1311,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1358,7 +1332,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1379,7 +1353,7 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1400,51 +1374,51 @@ _Lütfən, qeyd edin: Abunə haqqını ödəyən şəxs ödəyici olur. Yalnız 
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
     <value>Salam!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında ONLYOFFICE DocSpace-ə qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
     <value>Salam!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında ONLYOFFICE DocSpace-ə qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
     <value>Salam!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında ONLYOFFICE DocSpace-ə qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
     <value>Salam!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında ONLYOFFICE DocSpace-ə qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1459,13 +1433,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Əgər köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" baxın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1480,13 +1454,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Əgər köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" baxın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1501,13 +1475,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Əgər köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" baxın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1522,13 +1496,13 @@ ONLYOFFICE DocSpace-ə xoş gəlmisiniz! İstifadəçi profiliniz uğurla "${__V
 
 * *İstənilən bulud yaddaşını* birləşdirin və proqramları dəyişmədən işləyin.
 
-$GreenButton
+$OrangeButton
 
 Əgər köməyə ehtiyacınız varsa, "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" baxın və ya "dəstək komandamızdan":"https://www.onlyoffice.com/support-contact-form.aspx" soruşun.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalından mesaj
@@ -1551,7 +1525,7 @@ $Body</value>
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1564,7 +1538,7 @@ ONLYOFFICE Komandası
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Salam!
@@ -1579,15 +1553,15 @@ ONLYOFFICE komandası</value>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>ONLYOFFICE Sizin DocSpace uğurla deaktiv edildi. Nəzərə alın ki, bütün məlumatlarınız "Məxfilik Siyasətimizə":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyğun olaraq silinəcək.
 
+
 Niyə ayrılmaq qərarına gəldiniz? Təcrübənizi bizimlə paylaşın.
 
-$GreenButton
 
 Təşəkkürlər və uğurlar!
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1606,13 +1580,13 @@ ONLYOFFICE DocSpace-inizi daha təhlükəsiz etmək üçün təhlükəsizlik par
 
 * Məlumatların ehtiyat nüsxəsini çıxarın.
 
-$GreenButton
+$OrangeButton
 
 ONLYOFFICE DocSpace-in konfiqurasiyası və idarə edilməsi haqqında daha çox öyrənmək üçün "Yardım Mərkəzimizə":"https://helpcenter.onlyoffice.com/" daxil olun. Funksionallıqla bağlı suallarınız olduqda da ona müraciət edə bilərsiniz.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" Yarım ildən artıqdır daxil olmamısınız.
@@ -1621,26 +1595,26 @@ ONLYOFFICE DocSpace-iniz və bütün məlumatlarınız "Məxfilik Siyasətimizə
 
 Rəyiniz üçün təşəkkür edirik. Niyə ONLYOFFICE DocSpace istifadəsini dayandırmaq qərarına gəldiniz?
 
-$GreenButton
+$OrangeButton
 
 Bunun səhv olduğunu düşünürsünüzsə və ONLYOFFICE DocSpace-dən istifadə etməyə davam etmək istəyirsinizsə, lütfən, "dəstək komandamız":"https://www.onlyoffice.com/support-contact-form.aspx" la əlaqə saxlayın.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
     <value>Salam!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında ONLYOFFICE DocSpace-ə qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Dəvət linkinə kliklədikdən sonra hesabınız üçün yeni şifrə təyin edin.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Salam, $UserName!
@@ -1649,7 +1623,7 @@ Nəzərə alın ki, $PaymentDelay gündəlik güzəşt müddəti ONLYOFFICE DocS
 
 Güzəşt müddəti bitməzdən əvvəl Biznes abunəliyiniz üçün ödəniş etdiyinizə əmin olun. Beləliklə, siz ONLYOFFICE DocSpace-in bütün üstünlüklərindən daha çox yararlana biləcəksiniz.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
@@ -1662,7 +1636,7 @@ Nəzərə alın ki, ONLYOFFICE DocSpace abunəliyiniz üç gün ərzində başa 
 
 Biznes abunəliyiniz üçün ödəniş etməyi və ONLYOFFICE DocSpace-in bütün üstünlüklərindən istifadə etməyə davam etməyi tövsiyə edirik.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
@@ -1674,7 +1648,8 @@ ONLYOFFICE Komandası
 Nəzərə alın ki, ONLYOFFICE DocSpace üçün $PaymentDelay gündəlik güzəşt müddəti başa çatıb.
 
 Biznes abunəliyiniz üçün mümkün qədər tez ödədiyinizə əmin olun. Beləliklə, ONLYOFFICE DocSpace-in bütün üstünlüklərindən əvvəlki kimi istifadə edə biləcəksiniz.
-$GreenButton
+
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
@@ -1687,7 +1662,7 @@ Nəzərə alın ki, ONLYOFFICE DocSpace üçün $PaymentDelay gündəlik güzə�
 
 Biznes abunəliyiniz üçün bu gün ödədiyinizə əmin olun. Beləliklə, ONLYOFFICE DocSpace-in bütün üstünlüklərindən daha çox yararlana biləcəksiniz.
 
-$GreenButton
+$OrangeButton
 
 Hörmətlə,
 ONLYOFFICE Komandası
@@ -1698,13 +1673,13 @@ ONLYOFFICE Komandası
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" ünvanında $Mesaj otağına qoşulmağa dəvət olunursunuz. Linkə klikləməklə dəvəti qəbul edin:
 
-$GreenButton
+$OrangeButton
 
 Dəvət linkinə kliklədikdən sonra hesabınız üçün yeni şifrə təyin edin.
 
 Hörmətlə,
 ONLYOFFICE Komandası
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+"www.onlyoffice.com":"https://onlyoffice.com/"</value>
   </data>
   <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace-ə xoş gəlmisiniz!</value>
@@ -1834,5 +1809,17 @@ ONLYOFFICE Komandası
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>ONLYOFFICE DocSpace-niz üçün güzəşt müddəti aktivləşdirilib</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Hörmətlə, ONLYOFFICE Komandası</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Video bələdçilərlə ONLYOFFICE DocSpace-i təkmilləşdirin</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>TAM PLEYLİSTƏ BAXIN</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Hörmətlə, ONLYOFFICE Dəstək Qrupu</value>
   </data>
 </root>

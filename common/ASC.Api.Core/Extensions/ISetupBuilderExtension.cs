@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Amazon.Runtime;
 
 namespace ASC.Api.Core.Extensions;
 
@@ -63,7 +65,7 @@ public static class ISetupBuilderExtension
 
             if (!string.IsNullOrEmpty(awsAccessKeyId))
             {
-                awsTarget.Credentials = new Amazon.Runtime.BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
+                awsTarget.Credentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey);
             }
             else
             {

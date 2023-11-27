@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -142,7 +142,7 @@ public class PathProvider
         return uriBuilder.Uri + "?" + query;
     }
 
-    public string GetFileStreamUrl<T>(File<T> file, string doc = null, bool lastVersion = false)
+    public string GetFileStreamUrl<T>(File<T> file, string key = null, string keyName = null, bool lastVersion = false)
     {
         if (file == null)
         {
@@ -162,15 +162,13 @@ public class PathProvider
         }
 
         query += FilesLinkUtility.AuthKey + "=" + _emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
-        if (!string.IsNullOrEmpty(doc))
-        {
-            query += "&" + FilesLinkUtility.DocShareKey + "=" + HttpUtility.UrlEncode(doc);
-        }
+
+        query += GetExternalShareKey(keyName, key);
 
         return uriBuilder.Uri + "?" + query;
     }
 
-    public async Task<string> GetFileChangesUrlAsync<T>(File<T> file, string doc = null)
+    public async Task<string> GetFileChangesUrlAsync<T>(File<T> file, string key = null, string keyName = null)
     {
         if (file == null)
         {
@@ -183,10 +181,8 @@ public class PathProvider
         query += $"{FilesLinkUtility.FileId}={HttpUtility.UrlEncode(file.Id.ToString())}&";
         query += $"{FilesLinkUtility.Version}={file.Version}&";
         query += $"{FilesLinkUtility.AuthKey}={await _emailValidationKeyProvider.GetEmailKeyAsync(file.Id + file.Version.ToString(CultureInfo.InvariantCulture))}";
-        if (!string.IsNullOrEmpty(doc))
-        {
-            query += $"&{FilesLinkUtility.DocShareKey}={HttpUtility.UrlEncode(doc)}";
-        }
+        
+        query += GetExternalShareKey(keyName, key);
 
         return $"{uriBuilder.Uri}?{query}";
     }
@@ -228,5 +224,20 @@ public class PathProvider
         query += $"{FilesLinkUtility.FileTitle}={HttpUtility.UrlEncode(extension)}";
 
         return $"{uriBuilder.Uri}?{query}";
+    }
+    
+    private static string GetExternalShareKey(string keyName, string keyValue)
+    {
+        if (string.IsNullOrEmpty(keyValue))
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(keyName))
+        {
+            return "&" + keyName + '=' + HttpUtility.UrlEncode(keyValue);
+        }
+
+        return "&" + FilesLinkUtility.DocShareKey + '=' + HttpUtility.UrlEncode(keyValue);
     }
 }

@@ -395,13 +395,13 @@
     <value>Twitter</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
+    <value>ID клиента</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Секрет клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Twitter и поиска контактов.</value>
+    <value>Подключите приложение для входа на портал по учетной записи Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в ONLYOFFICE, используя Twitter, и привязывать Twitter-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков Twitter и создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
@@ -446,10 +446,10 @@
     <value>Yahoo</value>
   </data>
   <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>Client ID</value>
+    <value>ID клиента</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
+    <value>Секрет клиента</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Подключите приложение для импорта контактов Yahoo.</value>
@@ -966,5 +966,47 @@
   </data>
   <data name="ConsumersmicrosoftClientId" xml:space="preserve">
     <value>ID клиента приложения</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Подключите сервис Google Cloud Storage для резервного копирования и хранения данных портала. {0}Перейдите в консоль Google Cloud Platform и создайте новый сервисный аккаунт для ONLYOFFICE. Вставьте полученные данные ниже:</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли получать оповещения об отправленных им сообщениях даже офлайн. {0}Перейдите в консоль Firebase и добавьте новый проект для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы создавать библиографические списки в редакторах ONLYOFFICE. {0}Перейдите на страницу регистрации EasyBib и заполните форму, чтобы добавить интеграцию ONLYOFFICE. После получения ключа приложения вставьте его ниже:</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Подключите сервис Rackspace Cloud Storage для резервного копирования и хранения данных портала. {0}В настройках безопасности панели управления Rackspace Cloud, нажмите на ссылку Show рядом с Rackspace API Key. Вставьте полученные данные ниже:</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Подключите Amazon AWS S3 для резервного копирования и хранения данных портала. {0}Перейдите в AWS Management Console и создайте ключи доступа для ONLYOFFICE. Вставьте полученные данные ниже:</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Подключите сервис Selectel Cloud Storage для резервного копирования и хранения данных портала. {0}Получите имя и пароль пользователя с доступом "Чтение и запись" к контейнерам, которые будут использоваться для хранения резервных копий, и вставьте эти данные ниже:</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы легко публиковать документы на сайте WordPress. {0}На странице Wordpress Developers создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Сторонние интеграции</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Слишком много попыток входа. Пожалуйста, попробуйте позже</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID клиента Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Секрет клиента Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли входить в ONLYOFFICE, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции ONLYOFFICE. Вставьте полученные данные ниже:</value>
   </data>
 </root>

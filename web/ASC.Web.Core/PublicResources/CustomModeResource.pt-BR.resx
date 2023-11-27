@@ -63,53 +63,38 @@
 
 Você acabou de criar seu escritório pessoal na nuvem.
 
-h3. É um espaço de trabalho virtual onde você pode editar e armazenar documentos, trabalhar com eles de qualquer lugar dando acesso a seus amigos ou colegas.
-
-ONLYOFFICE é compatível com os formatos de documentos da Microsoft Office™ e garante que não haja perda de formatação ou qualidade dos objetos criados. Prometemos aliviar-lhe a dor de cabeça da fidelidade à formatação e dar em suas mãos um conjunto completo de ferramentas de edição profissional.
+h3.É um espaço de trabalho virtual onde você pode editar e armazenar documentos, trabalhar com eles de qualquer lugar dando acesso a seus amigos ou colegas.
 
 h3.Para um começo rápido, eis o que você pode fazer em ONLYOFFICE:
 
-- Carregar arquivos de seu computador ou criar novos;
+- Criar, visualizar e editar documentos de texto, planilhas, apresentações.
 
-- Trabalhar com todos os formatos de arquivos populares;
+- Trabalhar com todos os formatos populares. Maior compatibilidade com arquivos do MS Office.
 
-- Editar autoshapes, gráficos, tabelas, equações e outros objetos;
+- Criar e coeditar "formulários prontos para preenchimento":"https://www.onlyoffice.com/pt/form-creator.aspx".
 
-- Usar vários addons para recursos de edição estendida;
+- Compartilhe e colabore em documentos online.
 
-- Acesse facilmente sua nuvem pessoal via "Chrome extension": "https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US". 
+- Usar vários addons para recursos de edição estendida.
 
-Você também pode editar documentos offline com nossos "editores desktop" gratuitos: "https://www.onlyoffice.com/download-desktop.aspx" ou obter uma "suite de edição móvel": "https://www.onlyoffice.com/mobile.aspx" para seu dispositivo iOS ou Android.
+- Acesse facilmente sua nuvem pessoal via "Chrome extension":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
 
-Atenciosamente,
-Equipe ONLYOFFICE</value>
+Você também pode editar documentos offline com nossos "editores desktop":"https://www.onlyoffice.com/download-desktop.aspx" gratuitos ou obter uma suite de edição móvel para seu dispositivo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Deseja alterar o e-mail em sua conta de escritório na nuvem?
 
 Clique no botão abaixo e faça o login* em sua nuvem.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
 *Se você não estiver conectado ao seu escritório na nuvem neste navegador, você precisará usar seu e-mail antigo para confirmação.
 
 Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
-  </data>
-  <data name="pattern_personal_custom_mode_change_password" xml:space="preserve">
-    <value>Houve um pedido para alterar sua senha utilizada para entrar no portal "${__VirtualRootPath}": "${__VirtualRootPath}".
-
-Por favor, siga o link abaixo para alterar sua senha:
-
-$GreenButton
-
-*Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
-
-Se você não deseja alterar sua senha ou recebeu este e-mail por engano, por favor, ignore-a.
-
-Atenciosamente,
-Equipe ONLYOFFICE</value>
   </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Olá,
@@ -118,38 +103,34 @@ você acabou de registrar uma conta na solução ONLYOFFICE para uso pessoal. Cl
 
 Se você não conseguir abrir o link, copie o seguinte "$InviteLink":"$InviteLink" e cole-o na barra de endereço do seu navegador.
 
-Atenciosamente,
-Equipe ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Você solicitou o encerramento de sua conta em personal.onlyoffice.com. Siga o link para completar a solicitação (o link está ativo por um período de 7 dias): 
 
-$GreenButton
+Confirme o encerramento da conta
 
-*Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente de acordo com nossa "Declaração de privacidade": "https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+*Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente de acordo com nossa "Declaração de privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+
+"Leia mais sobre encerramento de conta":"${__HelpLink}/administration/configuration.aspx"
 
 Ignore este e-mail se você não quiser prosseguir. 
 
-Se você tiver alguma dúvida, entre em contato conosco em "support@onlyoffice.com": "mailto:support@onlyoffice.com".
+Se você tiver alguma dúvida, entre em contato conosco em "${__SupportEmail}":"mailto:${__SupportEmail}".
 
-Sinceramente,
-Equipe ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Prezado $UserName,
 
-O processo de remoção de dados do usuário "$FromUserName": "$FromUserLink" foi concluído com sucesso.
+O processo de remoção de dados do usuário "$FromUserName":"$FromUserLink" foi concluído com sucesso.
 
-A exclusão de dados pessoais permitida para liberar:
-
-# Documentos - $DocsSpace
-# Correio - $MailSpace
-# Fale - $TalkSpace</value>
+A exclusão de dados pessoais permitida para liberar $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Novo portal foi registrado
 
-# Portal url: "${__VirtualRootPath}":"${__VirtualRootPath}":"${__VirtualRootPath}":"${__VirtualRootPath
+# Portal url: "${__VirtualRootPath}":"${__VirtualRootPath}"
 # Nome: $UserName
 # Sobrenome: $UserLastName
 # Email: $UserEmail
@@ -164,9 +145,6 @@ A exclusão de dados pessoais permitida para liberar:
   </data>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>Bem vindo ao ONLYOFFICE Pessoal</value>
-  </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>Assistência de senha pessoal ONLYOFFICE</value>
   </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Pessoal. Por favor, ative seu email</value>
@@ -183,7 +161,7 @@ A exclusão de dados pessoais permitida para liberar:
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Quer mudar a senha em sua conta de escritório na nuvem? Clique no botão abaixo para confirmar.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -191,23 +169,21 @@ Não deseja alterar sua senha? Simplesmente ignore esta mensagem.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Olá, $UserName!
- 
+
 Bem vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
- 
+
 * Trabalhe com outros usuários na sala para a qual você foi convidado*: salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
- 
+
 * *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
- 
+
 * *Colabore em documentos* com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo. 
- 
+
 * *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
- 
-$GreenButton
- 
-Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
 </root>

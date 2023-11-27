@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ElasticSearch;
 
-[Singletone]
+[Singleton]
 public class FactoryIndexerHelper
 {
     public DateTime LastIndexed { get; set; }
@@ -90,9 +90,9 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<(bool, IReadOnlyCollection<T>)> TrySelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
-        IReadOnlyCollection<T> result = null;
+        IReadOnlyCollection<T> result;
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<T>();
 
@@ -116,9 +116,9 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<(bool, List<int>)> TrySelectIdsAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
-        List<int> result = null;
+        List<int> result;
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<int>();
 
@@ -142,10 +142,10 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<(bool, List<int>, long)> TrySelectIdsWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression)
     {
-        List<int> result = null;
+        List<int> result;
         long total;
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || !_indexer.CheckExist(t))
+        if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
             result = new List<int>();
             total = 0;
@@ -172,13 +172,13 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
 
     public async Task<bool> CanIndexByContentAsync(T t)
     {
-        return Support(t) && await _searchSettingsHelper.CanIndexByContentAsync<T>(await _tenantManager.GetCurrentTenantIdAsync());
+        return await SupportAsync(t) && await _searchSettingsHelper.CanIndexByContentAsync<T>();
     }
 
     public async Task<bool> Index(T data, bool immediately = true)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
             return false;
         }
@@ -200,7 +200,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task Index(List<T> data, bool immediately = true, int retry = 0)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || data.Count == 0)
+        if (!await SupportAsync(t) || data.Count == 0)
         {
             return;
         }
@@ -217,7 +217,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.Error(e.Response.HttpStatusCode.ToString());
 
-                if (e.Response.HttpStatusCode == 413 || e.Response.HttpStatusCode == 403 || e.Response.HttpStatusCode == 408)
+                if (e.Response.HttpStatusCode is 413 or 403 or 408)
                 {
                     foreach (var r in data.Where(r => r != null))
                     {
@@ -251,7 +251,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.ErrorInner(inner);
 
-                if (inner.Response.HttpStatusCode == 413 || inner.Response.HttpStatusCode == 403)
+                if (inner.Response.HttpStatusCode is 413 or 403)
                 {
                     Logger.Error(inner.Response.HttpStatusCode.ToString());
                     foreach (var r in data.Where(r => r != null))
@@ -278,10 +278,10 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         }
     }
 
-    public async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
+    protected async Task IndexAsync(List<T> data, bool immediately = true, int retry = 0)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t) || data.Count == 0)
+        if (!await SupportAsync(t) || data.Count == 0)
         {
             return;
         }
@@ -298,7 +298,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.Error(e.Response.HttpStatusCode.ToString());
 
-                if (e.Response.HttpStatusCode == 413 || e.Response.HttpStatusCode == 403 || e.Response.HttpStatusCode == 408)
+                if (e.Response.HttpStatusCode is 413 or 403 or 408)
                 {
                     foreach (var r in data.Where(r => r != null))
                     {
@@ -332,7 +332,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
             {
                 Logger.ErrorIndexAsync(inner);
 
-                if (inner.Response.HttpStatusCode == 413 || inner.Response.HttpStatusCode == 403)
+                if (inner.Response.HttpStatusCode is 413 or 403)
                 {
                     Logger.Error(inner.Response.HttpStatusCode.ToString());
                     foreach (var r in data.Where(r => r != null))
@@ -395,10 +395,20 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         }
     }
 
+    public Task<bool> UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> field, bool immediately = true)
+    {
+        var t = _serviceProvider.GetService<T>();
+
+        return !Support(t)
+            ? Task.FromResult(false)
+            : QueueAsync(() => _indexer.Update(data, action, field, immediately));
+    }
+
+
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
             return;
         }
@@ -417,7 +427,7 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
     public async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
     {
         var t = _serviceProvider.GetService<T>();
-        if (!Support(t))
+        if (!await SupportAsync(t))
         {
             return;
         }
@@ -451,32 +461,34 @@ public class FactoryIndexer<T> : IFactoryIndexer where T : class, ISearchItem
         }
     }
 
-    public async Task IndexAsync(T data, bool immediately = true)
+    public Task IndexAsync(T data, bool immediately = true)
     {
         var t = _serviceProvider.GetService<T>();
 
         if (Support(t))
         {
-            await QueueAsync(() => _indexer.IndexAsync(data, immediately));
+            return QueueAsync(() => _indexer.IndexAsync(data, immediately));
         }
+
+        return Task.CompletedTask;
     }
 
-    public async Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    public Task<bool> UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         var t = _serviceProvider.GetService<T>();
 
         return !Support(t)
-            ? false
-            : await QueueAsync(() => _indexer.Update(data, immediately, fields));
+            ? Task.FromResult(false)
+            : QueueAsync(() => _indexer.Update(data, immediately, fields));
     }
 
-    public async Task<bool> DeleteAsync(T data, bool immediately = true)
+    public Task<bool> DeleteAsync(T data, bool immediately = true)
     {
         var t = _serviceProvider.GetService<T>();
 
         return !Support(t)
-            ? false
-            : await QueueAsync(() => _indexer.Delete(data, immediately));
+            ? Task.FromResult(false)
+            : QueueAsync(() => _indexer.Delete(data, immediately));
     }
 
     public async Task<bool> DeleteAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool immediately = true)
@@ -703,6 +715,18 @@ public class FactoryIndexer
 
         try
         {
+            if (_client.Instance == null)
+            {
+                if (cacheState)
+                {
+                    _cache.Insert(key, "false", cacheTime);
+                }
+
+                Log.DebugCheckStatePing("Client instance is null");
+
+                return false;
+            }
+
             var result = await _client.Instance.PingAsync(new PingRequest());
 
             var isValid = result.IsValid;

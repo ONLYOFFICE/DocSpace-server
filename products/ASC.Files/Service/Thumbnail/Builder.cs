@@ -1,32 +1,33 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 using ASC.Data.Storage;
 using ASC.Data.Storage.DiscStorage;
+
+using FileShare = System.IO.FileShare;
 
 namespace ASC.Files.ThumbnailBuilder;
 
@@ -49,8 +50,8 @@ public class Builder<T>
     private readonly StorageFactory _storageFactory;
     private IDataStore _dataStore;
 
-    private readonly List<string> _imageFormatsCanBeCrop = new List<string>
-            {
+    private readonly List<string> _imageFormatsCanBeCrop = new()
+    {
                 ".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp",
             };
 
@@ -185,14 +186,14 @@ public class Builder<T>
 
         try
         {
-            using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            await using (var fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await streamFile.CopyToAsync(fileStream);
             }
 
             await _fFmpegService.CreateThumbnail(tempFilePath, thumbPath);
 
-            using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, System.IO.FileShare.Read))
+            await using (var streamThumb = new FileStream(thumbPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
             {
                 await CropAsync(fileDao, file, streamThumb);
             }
@@ -306,9 +307,7 @@ public class Builder<T>
                 Bottom = "0mm",
                 Left = "0mm"
             },
-            PageSize = new SpreadsheetLayout.LayoutPageSize
-            {
-            }
+            PageSize = new SpreadsheetLayout.LayoutPageSize()
         };
 
         var (operationResultProgress, url, _) = await _documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentCulture.Name, thumbnail, spreadsheetLayout, false);
@@ -325,8 +324,8 @@ public class Builder<T>
         request.RequestUri = new Uri(thumbnailUrl);
 
         var httpClient = _clientFactory.CreateClient();
-        using var response = httpClient.Send(request);
-        using (var stream = await response.Content.ReadAsStreamAsync())
+        using var response = await httpClient.SendAsync(request);
+        await using (var stream = await response.Content.ReadAsStreamAsync())
         {
             using (var sourceImg = await Image.LoadAsync(stream))
             {
@@ -367,7 +366,7 @@ public class Builder<T>
     {
         _logger.DebugCropImage(file.Id.ToString());
 
-        using (var stream = await fileDao.GetFileStreamAsync(file))
+        await using (var stream = await fileDao.GetFileStreamAsync(file))
         {
             await CropAsync(fileDao, file, stream);
         }
@@ -388,7 +387,7 @@ public class Builder<T>
         }
         else
         {
-            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, t) =>
+            await Parallel.ForEachAsync(_config.Sizes, new ParallelOptions { MaxDegreeOfParallelism = 3 }, async (w, _) =>
             {
                 await CropAsync(sourceImg, fileDao, file, w.Width, w.Height, w.ResizeMode);
             });
@@ -406,7 +405,7 @@ public class Builder<T>
                                       AnchorPositionMode anchorPositionMode = AnchorPositionMode.Center)
     {
         using var targetImg = GetImageThumbnail(sourceImg, width, height, resizeMode, anchorPositionMode);
-        using var targetStream = _tempStream.Create();
+        await using var targetStream = _tempStream.Create();
 
         switch (_global.ThumbnailExtension)
         {

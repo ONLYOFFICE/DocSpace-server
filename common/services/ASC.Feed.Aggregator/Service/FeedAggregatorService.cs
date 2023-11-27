@@ -1,35 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Feed.Aggregator.Service;
 
-[Singletone]
+[Singleton]
 public class FeedAggregatorService : FeedBaseService
 {
-    protected override string LoggerName { get; set; } = "ASC.Feed.Aggregator";
+    protected override string LoggerName { get; } = "ASC.Feed.Aggregator";
 
     public FeedAggregatorService(
         FeedSettings feedSettings,
@@ -130,7 +130,6 @@ public class FeedAggregatorService : FeedBaseService
                     // clearing the cache to get the correct acl
                     cache.Remove("acl" + tenant);
                     cache.Remove("/webitemsecurity/" + tenant);
-                    //cache.Remove(string.Format("sub/{0}/{1}/{2}", tenant, "6045b68c-2c2e-42db-9e53-c272e814c4ad", NotifyConstants.Event_NewCommentForMessage.ID));
 
                     try
                     {
@@ -150,19 +149,17 @@ public class FeedAggregatorService : FeedBaseService
                         var feedsRow = feeds
                             .Select(tuple => new Tuple<FeedRow, object>(new FeedRow(tuple.Item1)
                             {
-                                Tenant = tenant1,
+                                TenantId = tenant1,
                                 Product = module1.Product
                             }, tuple.Item2))
                             .ToList();
 
-                        foreach (var u in users)
+                        foreach (var uId in users.Select(r=> r.Id))
                         {
-                            if (!await TryAuthenticateAsync(securityContext, authManager, tenant1, u.Id))
+                            if (await TryAuthenticateAsync(securityContext, authManager, tenant1, uId))
                             {
-                                continue;
+                                await module.VisibleForAsync(feedsRow, uId);
                             }
-
-                            await module.VisibleForAsync(feedsRow, u.Id);
                         }
 
                         result.AddRange(feedsRow.Select(r => r.Item1));
@@ -179,7 +176,7 @@ public class FeedAggregatorService : FeedBaseService
                 {
                     foreach (var userGuid in res.Users.Where(userGuid => !userGuid.Equals(res.ModifiedBy)))
                     {
-                        if (!unreadUsers.TryGetValue(res.Tenant, out var dictionary))
+                        if (!unreadUsers.TryGetValue(res.TenantId, out var dictionary))
                         {
                             dictionary = new Dictionary<Guid, int>();
                         }
@@ -192,7 +189,7 @@ public class FeedAggregatorService : FeedBaseService
                             dictionary.Add(userGuid, 1);
                         }
 
-                        unreadUsers[res.Tenant] = dictionary;
+                        unreadUsers[res.TenantId] = dictionary;
                     }
                 }
             }

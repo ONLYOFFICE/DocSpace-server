@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 public class UserServiceCache
 {
     public const string Users = "users";
@@ -93,7 +93,7 @@ public class UserServiceCache
 
     private void UpdateUserGroupRefCache(UserGroupRef r)
     {
-        var key = GetRefCacheKey(r.Tenant);
+        var key = GetRefCacheKey(r.TenantId);
         var refs = Cache.Get<UserGroupRefStore>(key);
         if (refs != null)
         {
@@ -106,22 +106,22 @@ public class UserServiceCache
 
     public static string GetUserPhotoCacheKey(int tenant, Guid userId)
     {
-        return tenant.ToString() + "userphoto" + userId.ToString();
+        return tenant + "userphoto" + userId;
     }
 
     public static string GetGroupCacheKey(int tenant)
     {
-        return tenant.ToString() + Groups;
+        return tenant + Groups;
     }
 
     public static string GetGroupCacheKey(int tenant, Guid groupId)
     {
-        return tenant.ToString() + Groups + groupId;
+        return tenant + Groups + groupId;
     }
 
     public static string GetRefCacheKey(int tenant)
     {
-        return tenant.ToString() + Refs;
+        return tenant + Refs;
     }
     public static string GetRefCacheKey(int tenant, Guid groupId, UserGroupRefType refType)
     {
@@ -130,12 +130,12 @@ public class UserServiceCache
 
     public static string GetUserCacheKey(int tenant)
     {
-        return tenant.ToString() + Users;
+        return tenant + Users;
     }
 
     public static string GetUserCacheKey(int tenant, Guid userId)
     {
-        return tenant.ToString() + Users + userId;
+        return tenant + Users + userId;
     }
 }
 
@@ -181,23 +181,38 @@ public class CachedUserService : IUserService, ICachedService
         CacheUserGroupRefItem = userServiceCache.CacheUserGroupRefItem;
     }
 
-    public IQueryable<UserInfo> GetUsers(
+    public Task<int> GetUsersCountAsync(
         int tenant,
         bool isDocSpaceAdmin,
         EmployeeStatus? employeeStatus,
         List<List<Guid>> includeGroups,
         List<Guid> excludeGroups,
+        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
+        EmployeeActivationStatus? activationStatus,
+        AccountLoginType? accountLoginType,
+        string text)
+    {
+        return Service.GetUsersCountAsync(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+    }
+
+    public IAsyncEnumerable<UserInfo> GetUsers(
+        int tenant,
+        bool isDocSpaceAdmin,
+        EmployeeStatus? employeeStatus,
+        List<List<Guid>> includeGroups,
+        List<Guid> excludeGroups,
+        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text,
+        Guid ownerId,
         string sortBy,
         bool sortOrderAsc,
         long limit,
-        long offset,
-        out int total,
-        out int count)
+        long offset)
     {
-        return Service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, activationStatus, accountLoginType, text, sortBy, sortOrderAsc, limit, offset, out total, out count);
+        return Service.GetUsers(tenant, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text, ownerId, sortBy, 
+            sortOrderAsc, limit, offset);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
@@ -258,7 +273,7 @@ public class CachedUserService : IUserService, ICachedService
     public async Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
     {
         user = await Service.SaveUserAsync(tenant, user);
-        CacheUserInfoItem.Publish(new UserInfoCacheItem { Id = user.Id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+        await CacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Id = user.Id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
 
         return user;
     }
@@ -271,7 +286,7 @@ public class CachedUserService : IUserService, ICachedService
     public async Task RemoveUserAsync(int tenant, Guid id)
     {
         await Service.RemoveUserAsync(tenant, id);
-        CacheUserInfoItem.Publish(new UserInfoCacheItem { Tenant = tenant, Id = id.ToString() }, CacheNotifyAction.Any);
+        await CacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Tenant = tenant, Id = id.ToString() }, CacheNotifyAction.Any);
     }
 
     public async Task<byte[]> GetUserPhotoAsync(int tenant, Guid id)
@@ -289,8 +304,8 @@ public class CachedUserService : IUserService, ICachedService
     public async Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo)
     {
         await Service.SetUserPhotoAsync(tenant, id, photo);
-        CacheUserPhotoItem.Publish(new UserPhotoCacheItem { Key = UserServiceCache.GetUserPhotoCacheKey(tenant, id) }, CacheNotifyAction.Remove);
-        CacheUserInfoItem.Publish(new UserInfoCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+        await CacheUserPhotoItem.PublishAsync(new UserPhotoCacheItem { Key = UserServiceCache.GetUserPhotoCacheKey(tenant, id) }, CacheNotifyAction.Remove);
+        await CacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
@@ -324,7 +339,7 @@ public class CachedUserService : IUserService, ICachedService
     public async Task<Group> SaveGroupAsync(int tenant, Group group)
     {
         group = await Service.SaveGroupAsync(tenant, group);
-        CacheGroupCacheItem.Publish(new GroupCacheItem { Id = group.Id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+        await CacheGroupCacheItem.PublishAsync(new GroupCacheItem { Id = group.Id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
 
         return group;
     }
@@ -332,7 +347,7 @@ public class CachedUserService : IUserService, ICachedService
     public async Task RemoveGroupAsync(int tenant, Guid id)
     {
         await Service.RemoveGroupAsync(tenant, id);
-        CacheGroupCacheItem.Publish(new GroupCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+        await CacheGroupCacheItem.PublishAsync(new GroupCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
     }
 
 
@@ -399,7 +414,7 @@ public class CachedUserService : IUserService, ICachedService
     public async Task<UserGroupRef> SaveUserGroupRefAsync(int tenant, UserGroupRef r)
     {
         r = await Service.SaveUserGroupRefAsync(tenant, r);
-        CacheUserGroupRefItem.Publish(r, CacheNotifyAction.InsertOrUpdate);
+        await CacheUserGroupRefItem.PublishAsync(r, CacheNotifyAction.InsertOrUpdate);
 
         return r;
     }
@@ -408,8 +423,8 @@ public class CachedUserService : IUserService, ICachedService
     {
         await Service.RemoveUserGroupRefAsync(tenant, userId, groupId, refType);
 
-        var r = new UserGroupRef(userId, groupId, refType) { Tenant = tenant, Removed = true };
-        CacheUserGroupRefItem.Publish(r, CacheNotifyAction.Remove);
+        var r = new UserGroupRef(userId, groupId, refType) { TenantId = tenant, Removed = true };
+        await CacheUserGroupRefItem.PublishAsync(r, CacheNotifyAction.Remove);
     }
 
 

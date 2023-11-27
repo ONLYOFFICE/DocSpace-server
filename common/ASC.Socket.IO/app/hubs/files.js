@@ -28,7 +28,7 @@
       return;
     }
 
-    if (!session.user) {
+    if (!session.user && !session.anonymous) {
       logger.error("invalid session: unknown user");
       return;
     }
@@ -45,14 +45,18 @@
       return `${tenantId}-${roomPart}`;
     };
 
-    logger.info(
-      `connect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}'`
-    );
+    const connectMessage = !session.anonymous ? 
+      `connect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}'` : 
+      `connect anonymous user by share key on tenant='${tenantId}' socketId='${socket.id}'`;
+
+    logger.info(connectMessage);
 
     socket.on("disconnect", (reason) => {
-      logger.info(
-        `disconnect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}`
-      );
+      const disconnectMessage = !session.anonymous ? 
+        `disconnect user='${userId}' on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}` :
+        `disconnect anonymous user by share key on tenant='${tenantId}' socketId='${socket.id}' due to ${reason}`;
+
+      logger.info(disconnectMessage)
     });
 
     socket.on("subscribe", ({ roomParts, individual }) => {
@@ -71,7 +75,12 @@
 
     socket.on("restore-backup", () => {
       const room = getRoom("backup-restore");
-      logger.info(`restore backup in room ${room}`);
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+
+      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId} userId='${user}'|'${userId}']`);
       socket.to(room).emit("restore-backup");
     });
 
@@ -80,7 +89,7 @@
 
       changeFunc(roomParts);
 
-      if (individual) {
+      if (individual && !session.anonymous) {
         if (Array.isArray(roomParts)) {
           changeFunc(roomParts.map((p) => `${p}-${userId}`));
         } else {
@@ -167,9 +176,19 @@
     filesIO.to(room).emit("s:markasnew-file", { fileId, count });
   }
 
-  function markAsNewFolder({ folderId, count, room } = {}) {
-    logger.info(`markAsNewFolder ${folderId} in room ${room}:${count}`);
-    filesIO.to(room).emit("s:markasnew-folder", { folderId, count });
+  function markAsNewFiles(items = []) {
+    items.forEach(markAsNewFile);
+  }
+
+  function markAsNewFolder({ folderId, userIds, room } = {}) {
+    logger.info(`markAsNewFolder ${folderId}`);
+    userIds.forEach(({count, owner}) =>{
+      filesIO.to(`${room}-${owner}`).emit("s:markasnew-folder", { folderId, count });
+    });
+  }
+
+  function markAsNewFolders(items = []) {
+    items.forEach(markAsNewFolder);
   }
 
   function changeQuotaUsedValue({ featureId, value, room } = {}) {
@@ -191,9 +210,9 @@
     deleteFolder,
     updateFile,
     updateFolder,
-    markAsNewFile,
-    markAsNewFolder,
     changeQuotaUsedValue,
     changeQuotaFeatureValue,
+    markAsNewFiles,
+    markAsNewFolders
   };
 };

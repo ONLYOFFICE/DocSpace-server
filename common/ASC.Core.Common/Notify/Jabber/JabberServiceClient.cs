@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -54,17 +54,15 @@ public class JabberServiceClient
             return false;
         }
 
-        using (var service = GetService())
+        using var service = GetService();
+        try
         {
-            try
-            {
-                service.SendMessage(tenantId, from, to, text, subject);
-                return true;
-            }
-            catch (Exception error)
-            {
-                ProcessError(error);
-            }
+            service.SendMessage(tenantId, from, to, text, subject);
+            return true;
+        }
+        catch (Exception error)
+        {
+            ProcessError(error);
         }
 
         return false;
@@ -72,16 +70,14 @@ public class JabberServiceClient
 
     public string GetVersion()
     {
-        using (var service = GetService())
+        using var service = GetService();
+        try
         {
-            try
-            {
-                return service.GetVersion();
-            }
-            catch (Exception error)
-            {
-                ProcessError(error);
-            }
+            return service.GetVersion();
+        }
+        catch (Exception error)
+        {
+            ProcessError(error);
         }
 
         return null;
@@ -95,16 +91,14 @@ public class JabberServiceClient
             return result;
         }
 
-        using (var service = GetService())
+        await using var service = GetService();
+        try
         {
-            try
-            {
-                return service.GetNewMessagesCount(await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync());
-            }
-            catch (Exception error)
-            {
-                ProcessError(error);
-            }
+            return service.GetNewMessagesCount(await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync());
+        }
+        catch (Exception error)
+        {
+            ProcessError(error);
         }
 
         return result;
@@ -118,7 +112,7 @@ public class JabberServiceClient
             throw new Exception();
         }
 
-        using var service = GetService();
+        await using var service = GetService();
         try
         {
             result = service.AddXmppConnection(connectionId, await GetCurrentUserNameAsync(), state, await GetCurrentTenantIdAsync());
@@ -139,16 +133,14 @@ public class JabberServiceClient
             return result;
         }
 
-        using (var service = GetService())
+        await using var service = GetService();
+        try
         {
-            try
-            {
-                return service.RemoveXmppConnection(connectionId, await GetCurrentUserNameAsync(), await GetCurrentTenantIdAsync());
-            }
-            catch (Exception error)
-            {
-                ProcessError(error);
-            }
+            return service.RemoveXmppConnection(connectionId, await GetCurrentUserNameAsync(), await GetCurrentTenantIdAsync());
+        }
+        catch (Exception error)
+        {
+            ProcessError(error);
         }
 
         return result;
@@ -165,7 +157,7 @@ public class JabberServiceClient
                 return defaultState;
             }
 
-            using var service = GetService();
+            await using var service = GetService();
 
             return service.GetState(await GetCurrentTenantIdAsync(), userName);
         }
@@ -186,7 +178,7 @@ public class JabberServiceClient
                 throw new Exception();
             }
 
-            using var service = GetService();
+            await using var service = GetService();
 
             return service.SendState(await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync(), state);
         }
@@ -208,7 +200,7 @@ public class JabberServiceClient
                 throw new Exception();
             }
 
-            using var service = GetService();
+            await using var service = GetService();
             states = service.GetAllStates(await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync());
         }
         catch (Exception error)
@@ -229,7 +221,7 @@ public class JabberServiceClient
                 throw new Exception();
             }
 
-            using var service = GetService();
+            await using var service = GetService();
             messages = service.GetRecentMessages(await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync(), to, id);
         }
         catch (Exception error)
@@ -249,7 +241,7 @@ public class JabberServiceClient
                 throw new Exception();
             }
 
-            using var service = GetService();
+            await using var service = GetService();
             service.Ping(_authContext.CurrentAccount.ID.ToString(), await GetCurrentTenantIdAsync(), await GetCurrentUserNameAsync(), state);
         }
         catch (Exception error)
@@ -274,7 +266,7 @@ public class JabberServiceClient
         {
             throw error;
         }
-        if (error is CommunicationException || error is TimeoutException)
+        if (error is CommunicationException or TimeoutException)
         {
             _lastErrorTime = DateTime.Now;
         }

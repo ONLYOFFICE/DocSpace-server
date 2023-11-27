@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -33,49 +33,23 @@ public class AuditEventsRepository
     private readonly TenantManager _tenantManager;
     private readonly IDbContextFactory<MessagesContext> _dbContextFactory;
     private readonly IMapper _mapper;
+    private readonly GeolocationHelper _geolocationHelper;
 
     public AuditEventsRepository(
         AuditActionMapper auditActionMapper,
         TenantManager tenantManager,
         IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper)
+        IMapper mapper,
+        GeolocationHelper geolocationHelper)
     {
         _auditActionMapper = auditActionMapper;
         _tenantManager = tenantManager;
         _dbContextFactory = dbContextFactory;
         _mapper = mapper;
+        _geolocationHelper = geolocationHelper;
     }
 
-    private async Task<IEnumerable<AuditEventDto>> GetAsync(int tenant, DateTime? fromDate, DateTime? to, int? limit)
-    {
-        using var auditTrailContext = _dbContextFactory.CreateDbContext();
-        var query =
-           (from q in auditTrailContext.AuditEvents
-            from p in auditTrailContext.Users.Where(p => q.UserId == p.Id).DefaultIfEmpty()
-            where q.TenantId == tenant
-            orderby q.Date descending
-            select new AuditEventQuery
-            {
-                Event = q,
-                FirstName = p.FirstName,
-                LastName = p.LastName,
-                UserName = p.UserName
-            });
-
-        if (fromDate.HasValue && to.HasValue)
-        {
-            query = query.Where(q => q.Event.Date >= fromDate & q.Event.Date <= to);
-        }
-
-        if (limit.HasValue)
-        {
-            query = query.Take((int)limit);
-        }
-
-        return _mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEventDto>>(await query.ToListAsync());
-    }
-
-    public async Task<IEnumerable<AuditEventDto>> GetByFilterAsync(
+    public async Task<IEnumerable<AuditEvent>> GetByFilterAsync(
         Guid? userId = null,
         ProductType? productType = null,
         ModuleType? moduleType = null,
@@ -86,25 +60,25 @@ public class AuditEventsRepository
         DateTime? from = null,
         DateTime? to = null,
         int startIndex = 0,
-        int limit = 0, 
+        int limit = 0,
         Guid? withoutUserId = null)
     {
         return await GetByFilterWithActionsAsync(
             userId,
-            productType, 
+            productType,
             moduleType,
             actionType,
             new List<MessageAction?> { action },
             entry,
-            target, 
-            from, 
+            target,
+            from,
             to,
-            startIndex, 
+            startIndex,
             limit,
             withoutUserId);
     }
 
-    public async Task<IEnumerable<AuditEventDto>> GetByFilterWithActionsAsync(
+    public async Task<IEnumerable<AuditEvent>> GetByFilterWithActionsAsync(
         Guid? userId = null,
         ProductType? productType = null,
         ModuleType? moduleType = null,
@@ -119,7 +93,8 @@ public class AuditEventsRepository
         Guid? withoutUserId = null)
     {
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        using var auditTrailContext = _dbContextFactory.CreateDbContext();
+        await using var auditTrailContext = await _dbContextFactory.CreateDbContextAsync();
+
         var query =
            from q in auditTrailContext.AuditEvents
            from p in auditTrailContext.Users.Where(p => q.UserId == p.Id).DefaultIfEmpty()
@@ -136,18 +111,20 @@ public class AuditEventsRepository
         if (userId.HasValue && userId.Value != Guid.Empty)
         {
             query = query.Where(r => r.Event.UserId == userId.Value);
-        } 
+        }
         else if (withoutUserId.HasValue && withoutUserId.Value != Guid.Empty)
         {
             query = query.Where(r => r.Event.UserId != withoutUserId.Value);
         }
 
-        var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
-
-
         if (actions != null && actions.Any() && actions[0] != null && actions[0] != MessageAction.None)
         {
             query = query.Where(r => actions.Contains(r.Event.Action != null ? (MessageAction)r.Event.Action : MessageAction.None));
+
+            if (target != null)
+            {
+                query = query.Where(r => r.Event.Target == target);
+            }
         }
         else
         {
@@ -157,13 +134,13 @@ public class AuditEventsRepository
 
             if (productType.HasValue && productType.Value != ProductType.None)
             {
-                var productMapper = _auditActionMapper.Mappers.FirstOrDefault(m => m.Product == productType.Value);
+                var productMapper = _auditActionMapper.Mappers.Find(m => m.Product == productType.Value);
 
                 if (productMapper != null)
                 {
                     if (moduleType.HasValue && moduleType.Value != ModuleType.None)
                     {
-                        var moduleMapper = productMapper.Mappers.FirstOrDefault(m => m.Module == moduleType.Value);
+                        var moduleMapper = productMapper.Mappers.Find(m => m.Module == moduleType.Value);
                         if (moduleMapper != null)
                         {
                             actionsList = moduleMapper.Actions;
@@ -181,7 +158,7 @@ public class AuditEventsRepository
                         .SelectMany(r => r.Mappers)
                         .SelectMany(r => r.Actions);
             }
-
+            var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
             if (isFindActionType || isNeedFindEntry)
             {
                 actionsList = actionsList
@@ -191,7 +168,7 @@ public class AuditEventsRepository
 
             if (isNeedFindEntry)
             {
-                FindByEntry(query, entry.Value, target, actionsList);
+                query = FindByEntry(query, entry.Value, target, actionsList);
             }
             else
             {
@@ -209,7 +186,7 @@ public class AuditEventsRepository
             {
                 if (hasToFilter)
                 {
-                    query = query.Where(q => q.Event.Date >= from.Value & q.Event.Date <= to.Value);
+                    query = query.Where(q => q.Event.Date >= from.Value && q.Event.Date <= to.Value);
                 }
                 else
                 {
@@ -230,75 +207,28 @@ public class AuditEventsRepository
         {
             query = query.Take(limit);
         }
-        return _mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEventDto>>(await query.ToListAsync());
+        var events = _mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await query.ToListAsync());
+        foreach (var e in events)
+        {
+            await _geolocationHelper.AddGeolocationAsync(e);
+        }
+        return events;
     }
 
-    private static void FindByEntry(IQueryable<AuditEventQuery> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)
+    private static IQueryable<AuditEventQuery> FindByEntry(IQueryable<AuditEventQuery> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)
     {
-        Expression<Func<AuditEventQuery, bool>> a = r => false;
+        var dict = actions.Where(d => d.Value.EntryType1 == entry || d.Value.EntryType2 == entry).ToDictionary(a => (int)a.Key, a => a.Value);
 
-        foreach (var action in actions)
-        {
-            if (action.Value.EntryType1 == entry || action.Value.EntryType2 == entry)
-            {
-                a = a.Or(r => r.Event.Action == (int)action.Key && r.Event.Target.Split(',', StringSplitOptions.TrimEntries).Contains(target));
-            }
-        }
-
-        q = q.Where(a);
-    }
-
-    public async Task<int> GetCountAsync(int tenant, DateTime? from = null, DateTime? to = null)
-    {
-        using var auditTrailContext = _dbContextFactory.CreateDbContext();
-
-        var query = auditTrailContext.AuditEvents
-            .Where(a => a.TenantId == tenant);
-
-        if (from.HasValue && to.HasValue)
-        {
-            query = query.Where(a => a.Date >= from & a.Date <= to);
-        }
-
-        return await query.CountAsync();
+        q = q.Where(r => dict.Keys.Contains(r.Event.Action.Value)
+            && r.Event.Target.Contains(target));
+        return q;
     }
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)
     {
-        using var feedDbContext = _dbContextFactory.CreateDbContext();
-        return await feedDbContext.AuditEvents
-            .Where(r => r.Date >= from && r.Date <= to)
-            .GroupBy(r => r.TenantId)
-            .Select(r => r.Key)
-            .ToListAsync();
-    }
-}
+        await using var feedDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-internal static class PredicateBuilder
-{
-    internal static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> a, Expression<Func<T, bool>> b)
-    {
-        var p = a.Parameters[0];
-
-        var visitor = new SubstExpressionVisitor();
-        visitor.Subst[b.Parameters[0]] = p;
-
-        Expression body = Expression.OrElse(a.Body, visitor.Visit(b.Body));
-        return Expression.Lambda<Func<T, bool>>(body, p);
-    }
-}
-
-internal class SubstExpressionVisitor : ExpressionVisitor
-{
-    internal Dictionary<Expression, Expression> Subst = new Dictionary<Expression, Expression>();
-
-    protected override Expression VisitParameter(ParameterExpression node)
-    {
-        if (Subst.TryGetValue(node, out var newValue))
-        {
-            return newValue;
-        }
-        return node;
+        return await Queries.TenantsAsync(feedDbContext, from, to).ToListAsync();
     }
 }
 
@@ -308,4 +238,15 @@ public static class AuditEventsRepositoryExtensions
     {
         services.TryAdd<EventTypeConverter>();
     }
+}
+
+static file class Queries
+{
+    public static readonly Func<MessagesContext, DateTime?, DateTime?, IAsyncEnumerable<int>> TenantsAsync =
+        EF.CompileAsyncQuery(
+            (MessagesContext ctx, DateTime? from, DateTime? to) =>
+                ctx.AuditEvents
+                    .Where(r => r.Date >= from && r.Date <= to)
+                    .Select(r => r.TenantId)
+                    .Distinct());
 }

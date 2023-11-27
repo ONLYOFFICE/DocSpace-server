@@ -4,9 +4,9 @@
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "clearEvents",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "core__products__folder": "../../../products",
         "ASPNETCORE_URLS": "http://localhost:5027",
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -16,9 +16,9 @@
       "commandName": "WSL2",
       "launchBrowser": false,
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../../Data",
+        "$STORAGE_ROOT": "../../../../Data",
         "log__name": "clearEvents",
-        "log__dir": "../../../Logs",
+        "log__dir": "../../../../Logs",
         "core__products__folder": "../../../products",
         "ASPNETCORE_URLS": "http://localhost:5027",
         "ASPNETCORE_ENVIRONMENT": "Development"

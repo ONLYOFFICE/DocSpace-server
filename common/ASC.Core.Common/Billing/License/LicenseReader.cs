@@ -1,32 +1,34 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Core.Billing;
 
-[Singletone]
+[Singleton]
 public class LicenseReaderConfig
 {
     public readonly string LicensePath;
@@ -43,7 +45,7 @@ public class LicenseReader
     private readonly ITariffService _tariffService;
     private readonly CoreSettings _coreSettings;
     private readonly ILogger<LicenseReader> _logger;
-    private readonly Users.Constants _constants;
+    private readonly Constants _constants;
     public readonly string LicensePath;
     private readonly string _licensePathTemp;
 
@@ -55,7 +57,7 @@ public class LicenseReader
         CoreSettings coreSettings,
         LicenseReaderConfig licenseReaderConfig,
         ILogger<LicenseReader> logger,
-        Users.Constants constants)
+        Constants constants)
     {
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -114,10 +116,10 @@ public class LicenseReader
                 temp = false;
             }
 
-            using (var licenseStream = GetLicenseStream(temp))
+            await using (var licenseStream = GetLicenseStream(temp))
             using (var reader = new StreamReader(licenseStream))
             {
-                var licenseJsonString = reader.ReadToEnd();
+                var licenseJsonString = await reader.ReadToEndAsync();
                 var license = License.Parse(licenseJsonString);
 
                 await LicenseToDBAsync(license);
@@ -197,25 +199,31 @@ public class LicenseReader
 
         var quota = new TenantQuota(-1000)
         {
-            CountUser = _constants.MaxEveryoneCount,
+            Name = "license",
+            Trial = license.Trial,
+            Audit = true,
+            Ldap = true,
+            Sso = true,
+            WhiteLabel = true,
+            ThirdParty = true,
+            AutoBackupRestore = true,
+            Oauth = true,
+            ContentSearch = true,
             MaxFileSize = defaultQuota.MaxFileSize,
             MaxTotalSize = defaultQuota.MaxTotalSize,
-            Name = "license",
             DocsEdition = true,
-            Customization = license.Customization,
-            Update = true,
-            Trial = license.Trial
+            Customization = license.Customization
         };
 
         await _tenantManager.SaveTenantQuotaAsync(quota);
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new Quota(quota.Tenant, 1) },
+            Quotas = new List<Quota> { new(quota.TenantId, 1) },
             DueDate = license.DueDate,
         };
 
-        await _tariffService.SetTariffAsync(-1, tariff);
+        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });
     }
 
     private void LogError(Exception error)

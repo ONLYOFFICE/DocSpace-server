@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Billing;
 
-[Singletone]
+[Singleton]
 public class BillingClient
 {
     public readonly bool Configured;
@@ -34,10 +34,12 @@ public class BillingClient
     private readonly IHttpClientFactory _httpClientFactory;
     private const int StripePaymentSystemId = 9;
 
+    internal const string HttpClientOption = "billing";
+    public const string GetCurrentPaymentsUri = "GetActiveResources";
 
     public BillingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
-        _configuration = configuration.GetSection("core:payment").Get<PaymentConfiguration>();
+        _configuration = configuration.GetSection("core:payment").Get<PaymentConfiguration>() ?? new PaymentConfiguration();
         _httpClientFactory = httpClientFactory;
 
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
@@ -51,14 +53,14 @@ public class BillingClient
 
     public string GetAccountLink(string portalId, string backUrl)
     {
-        var result = Request("GetAccountLink", portalId, Tuple.Create("BackRef", backUrl));
+        var result = Request("GetAccountLink", portalId, new[] { Tuple.Create("BackRef", backUrl) });
         var link = JsonConvert.DeserializeObject<string>(result);
         return link;
     }
 
-    public PaymentLast[] GetCurrentPayments(string portalId)
+    public PaymentLast[] GetCurrentPayments(string portalId, bool refresh)
     {
-        var result = Request("GetActiveResources", portalId);
+        var result = Request(GetCurrentPaymentsUri, portalId, addPolicy: refresh);
         var payments = JsonSerializer.Deserialize<PaymentLast[]>(result);
 
         if (!_configuration.Test)
@@ -77,7 +79,7 @@ public class BillingClient
         return payments;
     }
 
-    public IDictionary<string, Uri> GetPaymentUrls(string portalId, string[] products, string affiliateId = null, string campaign = null, string currency = null, string language = null, string customerId = null, string quantity = null)
+    public IDictionary<string, Uri> GetPaymentUrls(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerId = null, string quantity = null)
     {
         var urls = new Dictionary<string, Uri>();
 
@@ -85,6 +87,10 @@ public class BillingClient
         if (!string.IsNullOrEmpty(affiliateId))
         {
             additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            additionalParameters.Add(Tuple.Create("PartnerId", partnerId));
         }
         if (!string.IsNullOrEmpty(campaign))
         {
@@ -119,11 +125,14 @@ public class BillingClient
 
         foreach (var p in products)
         {
-            string url;
             var paymentUrl = (Uri)null;
-            if (paymentUrls.TryGetValue(p, out url) && !string.IsNullOrEmpty(url = ToUrl(url)))
+            if (paymentUrls.TryGetValue(p, out var url))
             {
-                paymentUrl = new Uri(url);
+                url = ToUrl(url);
+                if (!string.IsNullOrEmpty(url))
+                {
+                    paymentUrl = new Uri(url);
+                }
             }
             urls[p] = paymentUrl;
         }
@@ -131,12 +140,16 @@ public class BillingClient
         return urls;
     }
 
-    public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
+    public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
         var additionalParameters = new List<Tuple<string, string>>() { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
         {
             additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
+        }
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            additionalParameters.Add(Tuple.Create("PartnerId", partnerId));
         }
         if (!string.IsNullOrEmpty(campaign))
         {
@@ -188,13 +201,18 @@ public class BillingClient
         return changed;
     }
 
-    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(params string[] productIds)
+    public IDictionary<string, Dictionary<string, decimal>> GetProductPriceInfo(string partnerId, params string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
         var parameters = productIds.Select(pid => Tuple.Create("ProductId", pid)).ToList();
         parameters.Add(Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()));
 
+        if (!string.IsNullOrEmpty(partnerId))
+        {
+            parameters.Add(Tuple.Create("PartnerId", partnerId));
+        }
+        
         var result = Request("GetProductsPrices", null, parameters.ToArray());
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 
@@ -217,46 +235,50 @@ public class BillingClient
 
     private string CreateAuthToken(string pkey, string machinekey)
     {
-        using (var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey)))
-        {
-            var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
 
-            return "ASC " + pkey + ":" + now + ":" + hash;
-        }
+        return "ASC " + pkey + ":" + now + ":" + hash;
     }
 
-    private string Request(string method, string portalId, params Tuple<string, string>[] parameters)
+    private string Request(string method, string portalId, Tuple<string, string>[] parameters = null, bool addPolicy = false)
     {
         var url = _configuration.Url + method;
 
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
-            Method = HttpMethod.Post
+            Method = HttpMethod.Post,
         };
+
         if (!string.IsNullOrEmpty(_configuration.Key))
         {
             request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
         }
 
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientOption : "");
         httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
         var data = new Dictionary<string, List<string>>();
+
         if (!string.IsNullOrEmpty(portalId))
         {
             data.Add("PortalId", new List<string>() { portalId });
         }
-        foreach (var parameter in parameters)
+
+        if (parameters != null)
         {
-            if (!data.ContainsKey(parameter.Item1))
+            foreach (var parameter in parameters)
             {
-                data.Add(parameter.Item1, new List<string>() { parameter.Item2 });
-            }
-            else
-            {
-                data[parameter.Item1].Add(parameter.Item2);
+                if (!data.ContainsKey(parameter.Item1))
+                {
+                    data.Add(parameter.Item1, new List<string>() { parameter.Item2 });
+                }
+                else
+                {
+                    data[parameter.Item1].Add(parameter.Item2);
+                }
             }
         }
 
@@ -264,7 +286,7 @@ public class BillingClient
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
         string result;
-        using (var response = httpClient.Send(request))
+        using (var response = httpClient.SendAsync(request).Result) //hack for polly
         using (var stream = response.Content.ReadAsStream())
         {
             if (stream == null)
@@ -286,8 +308,7 @@ public class BillingClient
             return result;
         }
 
-        var @params = parameters.Select(p => p.Item1 + ": " + p.Item2);
-        var info = new { Method = method, PortalId = portalId, Params = string.Join(", ", @params) };
+        var info = new { Method = method, PortalId = portalId, Params = parameters != null ? string.Join(", ", parameters.Select(p => p.Item1 + ": " + p.Item2)) : "" };
         if (result.Contains("{\"Message\":\"error: cannot find "))
         {
             throw new BillingNotFoundException(result, info);
@@ -313,29 +334,35 @@ public class BillingClient
     }
 }
 
-
-[ServiceContract]
-public interface IService
+internal class CustomResponse
 {
-    [OperationContract]
-    Message Request(Message message);
+    public string Message { get; set; }
 }
 
-[Serializable]
-public class Message
+public static class BillingHttplClientExtension
 {
-    public string Content { get; set; }
-    public MessageType Type { get; set; }
+    public static void AddBillingHttpClient(this IServiceCollection services)
+    {
+        services.AddHttpClient(BillingClient.HttpClientOption)
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+            .AddPolicyHandler((_, request) =>
+            {
+                if (!request.RequestUri.AbsolutePath.EndsWith(BillingClient.GetCurrentPaymentsUri))
+                {
+                    return null;
+                }
+
+                return Policy.HandleResult<HttpResponseMessage>
+                    (msg =>
+                    {
+                        var result = msg.Content.ReadAsStringAsync().Result;
+                        return result.Contains("{\"Message\":\"error: cannot find ");
+                    })
+                    .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+            });
+    }
 }
 
-public enum MessageType
-{
-    Undefined = 0,
-    Data = 1,
-    Error = 2,
-}
-
-[Serializable]
 public class BillingException : Exception
 {
     public BillingException(string message, object debugInfo = null) : base(message + (debugInfo != null ? " Debug info: " + debugInfo : string.Empty))
@@ -351,7 +378,6 @@ public class BillingException : Exception
     }
 }
 
-[Serializable]
 public class BillingNotFoundException : BillingException
 {
     public BillingNotFoundException(string message, object debugInfo = null) : base(message, debugInfo)
@@ -363,7 +389,6 @@ public class BillingNotFoundException : BillingException
     }
 }
 
-[Serializable]
 public class BillingNotConfiguredException : BillingException
 {
     public BillingNotConfiguredException(string message, object debugInfo = null) : base(message, debugInfo)

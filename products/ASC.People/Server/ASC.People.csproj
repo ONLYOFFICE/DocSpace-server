@@ -13,6 +13,8 @@
 	<ImplicitUsings>enable</ImplicitUsings>
     <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
 	  <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>false</Optimize>
@@ -109,6 +111,15 @@
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\PeopleResource.zh-CN.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.ar-SA.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.az.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.hy-AM.resx">
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -69,57 +69,22 @@ public class MessageService
 
     public async Task SendAsync(MessageAction action)
     {
-        await SendRequestMessageAsync(null, null, action, null);
+        await SendRequestMessageAsync(action);
     }
 
     public async Task SendAsync(MessageAction action, string d1)
     {
-        await SendRequestMessageAsync(null, null, action, null, d1);
-    }
-
-    public async Task SendAsync(MessageAction action, string d1, string d2)
-    {
-        await SendRequestMessageAsync(null, null, action, null, d1, d2);
-    }
-
-    public async Task SendAsync(MessageAction action, string d1, string d2, string d3)
-    {
-        await SendRequestMessageAsync(null, null, action, null, d1, d2, d3);
-    }
-
-    public async Task SendAsync(MessageAction action, string d1, string d2, string d3, string d4)
-    {
-        await SendRequestMessageAsync(null, null, action, null, d1, d2, d3, d4);
-    }
-
-    public async Task SendAsync(MessageAction action, IEnumerable<string> d1, string d2)
-    {
-        await SendRequestMessageAsync(null, null, action, null, string.Join(", ", d1), d2);
+        await SendRequestMessageAsync(action, description: d1);
     }
 
     public async Task SendAsync(MessageAction action, string d1, IEnumerable<string> d2)
     {
-        await SendRequestMessageAsync(null, null, action, null, d1, string.Join(", ", d2));
-    }
-
-    public async Task SendAsync(MessageAction action, string d1, string d2, IEnumerable<string> d3)
-    {
-        await SendRequestMessageAsync(null, null, action, null, d1, d2, string.Join(", ", d3));
-    }
-
-    public async Task SendAsync(MessageAction action, IEnumerable<string> d1)
-    {
-        await SendRequestMessageAsync(null, null, action, null, string.Join(", ", d1));
+        await SendRequestMessageAsync(action, description: new[] { d1, string.Join(", ", d2) });
     }
 
     public async Task SendAsync(string loginName, MessageAction action)
     {
-        await SendRequestMessageAsync(loginName, null, action, null);
-    }
-
-    public async Task SendAsync(string loginName, MessageAction action, string d1)
-    {
-        await SendRequestMessageAsync(loginName, null, action, null, d1);
+        await SendRequestMessageAsync(action, loginName: loginName);
     }
 
     #endregion
@@ -128,90 +93,61 @@ public class MessageService
 
     public async Task SendAsync(MessageAction action, MessageTarget target)
     {
-        await SendRequestMessageAsync(null, null, action, target);
+        await SendRequestMessageAsync(action, target);
     }
-    public async Task SendAsync(DateTime? dateTime, MessageAction action, MessageTarget target, string d1)
+
+    public async Task SendAsync(MessageAction action, MessageTarget target, DateTime? dateTime, string d1)
     {
-        await SendRequestMessageAsync(null, dateTime, action, target, d1);
+        await SendRequestMessageAsync(action, target, dateTime: dateTime, description: d1);
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, string d1)
     {
-        await SendRequestMessageAsync(null, null, action, target, d1);
+        await SendRequestMessageAsync(action, target, description: d1);
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, string d1, Guid userId)
     {
         if (TryAddNotificationParam(action, userId, out var parametr))
         {
-            await SendRequestMessageAsync(null, null, action, target, d1, parametr);
+            await SendRequestMessageAsync(action, target, description: new[] { d1, parametr });
         }
         else
         {
-            await SendRequestMessageAsync(null, null, action, target, d1);
+            await SendRequestMessageAsync(action, target, description: d1);
         }
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2)
     {
-        await SendRequestMessageAsync(null, null, action, target, d1, d2);
-    }
-
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, string d3)
-    {
-        await SendRequestMessageAsync(null, null, action, target, d1, d2, d3);
-    }
-
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, string d3, string d4)
-    {
-        await SendRequestMessageAsync(null, null, action, target, d1, d2, d3, d4);
-    }
-
-    public async Task SendAsync(MessageAction action, MessageTarget target, IEnumerable<string> d1, string d2)
-    {
-        await SendRequestMessageAsync(null, null, action, target, string.Join(", ", d1), d2);
-    }
-
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, IEnumerable<string> d2)
-    {
-        await SendRequestMessageAsync(null, null, action, target, d1, string.Join(", ", d2));
-    }
-
-    public async Task SendAsync(MessageAction action, MessageTarget target, string d1, string d2, IEnumerable<string> d3)
-    {
-        await SendRequestMessageAsync(null, null, action, target, d1, d2, string.Join(", ", d3));
+        await SendRequestMessageAsync(action, target, description: new[] { d1, d2 });
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, IEnumerable<string> d1)
     {
-        await SendRequestMessageAsync(null, null, action, target, string.Join(", ", d1));
+        await SendRequestMessageAsync(action, target, description: string.Join(", ", d1));
     }
 
     public async Task SendAsync(MessageAction action, MessageTarget target, IEnumerable<string> d1, List<Guid> userIds, EmployeeType userType)
     {
         if (TryAddNotificationParam(action, userIds, out var parametr, userType))
         {
-            await SendRequestMessageAsync(null, null, action, target, string.Join(", ", d1), parametr);
+            await SendRequestMessageAsync(action, target, description: new[] { string.Join(", ", d1), parametr });
         }
         else
         {
-            await SendRequestMessageAsync(null, null, action, target, string.Join(", ", d1));
+            await SendRequestMessageAsync(action, target, description: string.Join(", ", d1));
         }
     }
 
     public async Task SendAsync(string loginName, MessageAction action, MessageTarget target)
     {
-        await SendRequestMessageAsync(loginName, null, action, target);
-    }
-
-    public async Task SendAsync(string loginName, MessageAction action, MessageTarget target, string d1)
-    {
-        await SendRequestMessageAsync(loginName, null, action, target, d1);
+        await SendRequestMessageAsync(action, target, loginName);
     }
 
     #endregion
 
-    private async Task SendRequestMessageAsync(string loginName, DateTime? dateTime, MessageAction action, MessageTarget target, params string[] description)
+    private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null, params string[] description)
     {
         if (_sender == null)
         {
@@ -231,72 +167,52 @@ public class MessageService
             return;
         }
 
-        await _sender.SendAsync(message);
+        _ = _sender.SendAsync(message);
     }
 
     #region HttpHeaders
 
-    public async Task SendAsync(MessageUserData userData, IDictionary<string, StringValues> httpHeaders, MessageAction action)
+    public async Task SendHeadersMessageAsync(MessageAction action)
     {
-        await SendHeadersMessageAsync(userData, httpHeaders, action, null);
+        await SendRequestHeadersMessageAsync(action);
+    }
+    public async Task SendHeadersMessageAsync(MessageAction action, params string[] description)
+    {
+        await SendRequestHeadersMessageAsync(action, description: description);
     }
 
-    public async Task SendAsync(IDictionary<string, StringValues> httpHeaders, MessageAction action)
+    public async Task SendHeadersMessageAsync(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, string d1)
     {
-        await SendHeadersMessageAsync(null, httpHeaders, action, null);
+        await SendRequestHeadersMessageAsync(action, target, httpHeaders, d1);
     }
 
-    public async Task SendAsync(IDictionary<string, StringValues> httpHeaders, MessageAction action, string d1)
+    public async Task SendHeadersMessageAsync(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1)
     {
-        await SendHeadersMessageAsync(null, httpHeaders, action, null, d1);
+        await SendRequestHeadersMessageAsync(action, target, httpHeaders, d1?.ToArray());
     }
 
-    public async Task SendAsync(IDictionary<string, StringValues> httpHeaders, MessageAction action, IEnumerable<string> d1)
-    {
-        await SendHeadersMessageAsync(null, httpHeaders, action, null, d1?.ToArray());
-    }
-
-    public async Task SendAsync(MessageUserData userData, IDictionary<string, StringValues> httpHeaders, MessageAction action, MessageTarget target)
-    {
-        await SendHeadersMessageAsync(userData, httpHeaders, action, target);
-    }
-
-    #endregion
-
-    #region HttpHeaders & Target
-
-    public async Task SendAsync(IDictionary<string, StringValues> httpHeaders, MessageAction action, MessageTarget target)
-    {
-        await SendHeadersMessageAsync(null, httpHeaders, action, target);
-    }
-
-    public async Task SendAsync(IDictionary<string, StringValues> httpHeaders, MessageAction action, MessageTarget target, string d1)
-    {
-        await SendHeadersMessageAsync(null, httpHeaders, action, target, d1);
-    }
-
-    public async Task SendAsync(IDictionary<string, StringValues> httpHeaders, MessageAction action, MessageTarget target, IEnumerable<string> d1)
-    {
-        await SendHeadersMessageAsync(null, httpHeaders, action, target, d1?.ToArray());
-    }
-
-    #endregion
-
-    private async Task SendHeadersMessageAsync(MessageUserData userData, IDictionary<string, StringValues> httpHeaders, MessageAction action, MessageTarget target, params string[] description)
+    private async Task SendRequestHeadersMessageAsync(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, params string[] description)
     {
         if (_sender == null)
         {
             return;
         }
 
-        var message = await _messageFactory.CreateAsync(userData, httpHeaders, action, target, description);
+        if (httpHeaders == null && _request != null)
+        {
+            httpHeaders = _request.Headers.ToDictionary(k => k.Key, v => v.Value);
+        }
+
+        var message = await _messageFactory.CreateAsync(httpHeaders, action, target, description);
         if (!_messagePolicy.Check(message))
         {
             return;
         }
 
-        await _sender.SendAsync(message);
+        _ = _sender.SendAsync(message);
     }
+
+    #endregion
 
     #region Initiator
 
@@ -329,7 +245,7 @@ public class MessageService
             return;
         }
 
-        await _sender.SendAsync(message);
+        _ = _sender.SendAsync(message);
     }
     public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
     {
@@ -364,7 +280,7 @@ public class MessageService
                 UserRole = (int)userType
             });
         }
-        else if (action == MessageAction.UserCreated || action == MessageAction.UserUpdated)
+        else if (action is MessageAction.UserCreated or MessageAction.UserUpdated)
         {
             parametr = JsonSerializer.Serialize(new AdditionalNotificationInfo
             {

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -39,23 +39,23 @@ class DbQuotaService : IQuotaService
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
-        using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return _mapper.Map<List<DbQuota>, List<TenantQuota>>(await coreDbContext.Quotas.ToListAsync());
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)
     {
-        using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return _mapper.Map<DbQuota, TenantQuota>(await coreDbContext.Quotas.SingleOrDefaultAsync(r => r.Tenant == id));
+        return _mapper.Map<DbQuota, TenantQuota>(await coreDbContext.Quotas.SingleOrDefaultAsync(r => r.TenantId == id));
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
     {
         ArgumentNullException.ThrowIfNull(quota);
 
-        using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
         await coreDbContext.AddOrUpdateAsync(q => q.Quotas, _mapper.Map<TenantQuota, DbQuota>(quota));
         await coreDbContext.SaveChangesAsync();
 
@@ -64,14 +64,13 @@ class DbQuotaService : IQuotaService
 
     public async Task RemoveTenantQuotaAsync(int id)
     {
-        using var coreDbContext = _dbContextFactory.CreateDbContext();
-        var d = await coreDbContext.Quotas
-                 .Where(r => r.Tenant == id)
-                 .SingleOrDefaultAsync();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (d != null)
+        var quota = await Queries.QuotaAsync(coreDbContext, id);
+
+        if (quota != null)
         {
-            coreDbContext.Quotas.Remove(d);
+            coreDbContext.Quotas.Remove(quota);
             await coreDbContext.SaveChangesAsync();
         }
     }
@@ -81,11 +80,11 @@ class DbQuotaService : IQuotaService
     {
         ArgumentNullException.ThrowIfNull(row);
 
-        using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
         var dbTenantQuotaRow = _mapper.Map<TenantQuotaRow, DbQuotaRow>(row);
         dbTenantQuotaRow.UserId = row.UserId;
 
-        var exist = await coreDbContext.QuotaRows.FindAsync(new object[] { dbTenantQuotaRow.Tenant, dbTenantQuotaRow.UserId, dbTenantQuotaRow.Path });
+        var exist = await coreDbContext.QuotaRows.FindAsync(dbTenantQuotaRow.TenantId, dbTenantQuotaRow.UserId, dbTenantQuotaRow.Path);
 
         if (exist == null)
         {
@@ -96,9 +95,7 @@ class DbQuotaService : IQuotaService
         {
             if (exchange)
             {
-                await coreDbContext.QuotaRows
-                    .Where(r => r.Path == row.Path && r.Tenant == row.Tenant && r.UserId == row.UserId)
-                    .ExecuteUpdateAsync(x => x.SetProperty(p => p.Counter, p => (p.Counter + row.Counter)));
+                await Queries.UpdateCounterAsync(coreDbContext, row.TenantId, row.UserId, row.Path, row.Counter);
             }
             else
             {
@@ -115,12 +112,12 @@ class DbQuotaService : IQuotaService
 
     public async Task<IEnumerable<TenantQuotaRow>> FindUserQuotaRowsAsync(int tenantId, Guid userId)
     {
-        using var coreDbContext = _dbContextFactory.CreateDbContext();
+        await using var coreDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = coreDbContext.QuotaRows.Where(r => r.UserId == userId);
 
         if (tenantId != Tenant.DefaultTenant)
         {
-            q = q.Where(r => r.Tenant == tenantId);
+            q = q.Where(r => r.TenantId == tenantId);
         }
 
         return await q.ProjectTo<TenantQuotaRow>(_mapper.ConfigurationProvider).ToListAsync();
@@ -133,4 +130,21 @@ public static class DbQuotaServiceExtensions
     {
         services.TryAdd<TenantQuotaPriceResolver>();
     }
+}
+
+static file class Queries
+{
+    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync = EF.CompileAsyncQuery(
+    (CoreDbContext ctx, int tenantId) =>
+        ctx.Quotas
+            .SingleOrDefault(r => r.TenantId == tenantId));
+
+    public static readonly Func<CoreDbContext, int, Guid, string, long, Task<int>> UpdateCounterAsync =
+        EF.CompileAsyncQuery(
+            (CoreDbContext ctx, int tenantId, Guid userId, string path, long counter) =>
+                ctx.QuotaRows
+                    .Where(r => r.Path == path
+                                && r.TenantId == tenantId
+                                && r.UserId == userId)
+                    .ExecuteUpdate(x => x.SetProperty(p => p.Counter, p => p.Counter + counter)));
 }

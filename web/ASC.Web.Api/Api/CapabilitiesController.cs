@@ -1,31 +1,35 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Api.Controllers;
 
+/// <summary>
+/// Portal capabilities API.
+/// </summary>
+/// <name>capabilities</name>
 [DefaultRoute, DefaultRoute("{.format}")]
 [ApiController]
 [AllowAnonymous]
@@ -53,12 +57,14 @@ public class CapabilitiesController : ControllerBase
     }
 
     ///<summary>
-    ///Returns the information about portal capabilities
+    ///Returns the information about portal capabilities.
     ///</summary>
     ///<short>
     ///Get portal capabilities
     ///</short>
-    ///<returns>CapabilitiesData</returns>
+    ///<returns type="ASC.Web.Api.ApiModel.ResponseDto.CapabilitiesDto, ASC.Web.Api">Portal capabilities</returns>
+    ///<path>api/2.0/capabilities</path>
+    ///<httpMethod>GET</httpMethod>
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
@@ -96,13 +102,13 @@ public class CapabilitiesController : ControllerBase
             {
                 result.Providers = ProviderManager.AuthProviders.Where(loginProvider =>
                 {
-                    if ((loginProvider == ProviderConstants.Facebook || loginProvider == ProviderConstants.AppleId)
+                    if (loginProvider is ProviderConstants.Facebook or ProviderConstants.AppleId
                                                                     && _coreBaseSettings.Standalone && HttpContext.Request.MobileApp())
                     {
                         return false;
                     }
                     var provider = _providerManager.GetLoginProvider(loginProvider);
-                    return provider != null && provider.IsEnabled;
+                    return provider is { IsEnabled: true };
                 })
                 .ToList();
             }
@@ -120,7 +126,7 @@ public class CapabilitiesController : ControllerBase
             {
                 var settings = await _settingsManager.LoadAsync<SsoSettingsV2>();
 
-                if (settings.EnableSso)
+                if (settings.EnableSso.GetValueOrDefault())
                 {
                     result.SsoUrl = settings.IdpSettings.SsoUrl;
                     result.SsoLabel = settings.SpLoginLabel;

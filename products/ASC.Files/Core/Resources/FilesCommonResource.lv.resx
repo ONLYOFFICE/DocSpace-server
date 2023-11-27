@@ -269,7 +269,8 @@
     <value>Izveidojiet, rediģējiet un kopīgojiet dokumentus. Strādājiet pie tiem kopā reāllaikā. 100% savietojamība ar MS Office formātiem garantēta.</value>
   </data>
   <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>Izveidojiet un rediģējiet, kā arī kopīgojiet dokumentus. Strādājiet pie tiem kopā reāllaikā. 100% savietojamība ar MS Office formātiem garantēta.</value>
+    <value>Rediģējiet, kopīgojiet biroja dokumentus un sadarbojieties ar tiem reāllaikā. Izveidojiet un pārvaldiet kopīgus dokumentus, kuriem var piekļūt visa komanda. 
+Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="ProductName" xml:space="preserve">
     <value>Dokumenti</value>
@@ -360,5 +361,71 @@
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Jūs nevarat piespraust telpu</value>
+  </data>
+  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
+    <value>Telpas administrators</value>
+  </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Līdzstrādnieks</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktors</value>
+  </data>
+  <data name="AceStatusEnum_Comment" xml:space="preserve">
+    <value>Komentēt</value>
+  </data>
+  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
+    <value>Pielāgots filtrs</value>
+  </data>
+  <data name="AceStatusEnum_FillForms" xml:space="preserve">
+    <value>Veidlapas aizpildīšana</value>
+  </data>
+  <data name="CommentAutosave" xml:space="preserve">
+    <value>Automātiski saglabāts</value>
+  </data>
+  <data name="CommentCreateFillFormDraft" xml:space="preserve">
+    <value>Izveidots, lai aizpildītu veidlapu</value>
+  </data>
+  <data name="CommentEditEncrypt" xml:space="preserve">
+    <value>Rediģēts ar šifrēšanu</value>
+  </data>
+  <data name="CommentEncrypted" xml:space="preserve">
+    <value>Šifrēts</value>
+  </data>
+  <data name="CommentForcesave" xml:space="preserve">
+    <value>Saglabāts</value>
+  </data>
+  <data name="ErrorMassage_SecurityException_MoveFile" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai pārvietotu failu</value>
+  </data>
+  <data name="ErrorMassage_SecurityException_MoveFolder" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai pārvietotu mapi</value>
+  </data>
+  <data name="IndexTitle" xml:space="preserve">
+    <value>Meklēt dokumentu saturā</value>
+  </data>
+  <data name="MessageFileCreatedForm" xml:space="preserve">
+    <value>Aizpildāmais OFORM dokuments ir gatavs. Tas ir saglabāts {0}</value>
+  </data>
+  <data name="MessageFillFormDraftCreated" xml:space="preserve">
+    <value>OFORM kopija tiek izveidota mapē {0}. Aizpildiet veidlapu un lejupielādējiet rezultātu kā PDF vai DOCX failu.</value>
+  </data>
+  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
+    <value>Fails vairs nav melnraksts, kas jāaizpilda veidlapā.</value>
+  </data>
+  <data name="ProductDescriptionShort" xml:space="preserve">
+    <value>Skatiet un lejupielādējiet kopīgotos dokumentus. Augšupielādējiet failus koplietotajās mapēs. Visaugstākā saderība ar docx, xlsx, pptx garantēta.</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Koplietotā saite</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Ielūguma saite</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksimālais saišu skaits nedrīkst pārsniegt {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Jūs pārāk daudz reižu mēģinājāt ievadīt savu paroli. Mēģiniet vēlreiz vēlāk</value>
   </data>
 </root>

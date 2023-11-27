@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,6 +29,10 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
+/// <summary>
+/// Authorization API.
+/// </summary>
+/// <name>authentication</name>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -71,6 +75,7 @@ public class AuthenticationController : ControllerBase
     private readonly BruteForceLoginManager _bruteForceLoginManager;
     private readonly ILogger<AuthenticationController> _logger;
     private readonly InvitationLinkService _invitationLinkService;
+    private readonly IMapper _mapper;
 
     public AuthenticationController(
         UserManager userManager,
@@ -108,7 +113,8 @@ public class AuthenticationController : ControllerBase
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILogger<AuthenticationController> logger,
-        InvitationLinkService invitationLinkService)
+        InvitationLinkService invitationLinkService, 
+        IMapper mapper)
     {
         _userManager = userManager;
         _tenantManager = tenantManager;
@@ -146,8 +152,16 @@ public class AuthenticationController : ControllerBase
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _logger = logger;
         _invitationLinkService = invitationLinkService;
+        _mapper = mapper;
     }
 
+    /// <summary>
+    /// Checks if the current user is authenticated or not.
+    /// </summary>
+    /// <short>Check authentication</short>
+    /// <httpMethod>GET</httpMethod>
+    /// <path>api/2.0/authentication</path>
+    /// <returns type="System.Boolean, System">Boolean value: true if the current user is authenticated</returns>
     [AllowNotPayment]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -155,11 +169,21 @@ public class AuthenticationController : ControllerBase
         return _securityContext.IsAuthenticated;
     }
 
+    /// <summary>
+    /// Authenticates the current user by SMS or two-factor authentication code.
+    /// </summary>
+    /// <short>
+    /// Authenticate a user by code
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/{code}</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
     {
-        var tenant = _tenantManager.GetCurrentTenant().Id;
+        var tenant = (await _tenantManager.GetCurrentTenantAsync()).Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
         var sms = false;
 
@@ -182,7 +206,7 @@ public class AuthenticationController : ControllerBase
                 throw new SecurityException("Auth code is not available");
             }
 
-            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Tenant, user.Id, MessageAction.LoginSuccess);
+            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
             var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
             var result = new AuthenticationTokenDto
@@ -218,6 +242,16 @@ public class AuthenticationController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Authenticates the current user by SMS, authenticator app, or without two-factor authentication.
+    /// </summary>
+    /// <short>
+    /// Authenticate a user
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
@@ -225,6 +259,7 @@ public class AuthenticationController : ControllerBase
         var wrapper = await GetUserAsync(inDto);
         var viaEmail = wrapper.ViaEmail;
         var user = wrapper.UserInfo;
+        var session = inDto.Session;
 
         if (user == null || Equals(user, Constants.LostUser))
         {
@@ -253,38 +288,48 @@ public class AuthenticationController : ControllerBase
             };
         }
 
-        if (_tfaAppAuthSettingsHelper.IsVisibleSettings &&await  _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
+        if (_tfaAppAuthSettingsHelper.IsVisibleSettings && await _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
             if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
             {
+                (var urlActivation, var keyActivation) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+                await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
                     Tfa = true,
                     TfaKey = (await _tfaManager.GenerateSetupCodeAsync(user)).ManualEntryKey,
-                    ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaActivation)
+                    ConfirmUrl = urlActivation
                 };
             }
 
+            (var urlAuth, var keyAuth) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaAuth);
+            await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
                 Tfa = true,
-                ConfirmUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.TfaAuth)
+                ConfirmUrl = urlAuth
             };
         }
 
         try
         {
             var action = viaEmail ? MessageAction.LoginSuccessViaApi : MessageAction.LoginSuccessViaApiSocialAccount;
-            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Tenant, user.Id, action);
+            var token = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action, session);
 
-            var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-            var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
-
-            return new AuthenticationTokenDto
+            var outDto = new AuthenticationTokenDto
             {
-                Token = token,
-                Expires = new ApiDateTime(_tenantManager, _timeZoneConverter, expires)
+                Token = token
             };
+
+            if (!session)
+            {
+                var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+                var expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
+
+                outDto.Expires = new ApiDateTime(_tenantManager, _timeZoneConverter, expires);
+            }
+
+            return outDto;
         }
         catch (Exception ex)
         {
@@ -298,10 +343,19 @@ public class AuthenticationController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Logs out of the current user account.
+    /// </summary>
+    /// <short>
+    /// Log out
+    /// </short>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/logout</path>
+    /// <returns></returns>
     [AllowNotPayment]
     [HttpPost("logout")]
     [HttpGet("logout")]// temp fix
-    public async Task LogoutAsync()
+    public async Task<object> LogoutAsync()
     {
         var cookie = _cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = _cookieStorage.GetLoginEventIdFromCookie(cookie);
@@ -315,29 +369,73 @@ public class AuthenticationController : ControllerBase
         _cookiesManager.ClearCookies(CookiesType.SocketIO);
 
         _securityContext.Logout();
-    }
 
-    [AllowNotPayment, AllowSuspended]
-    [HttpPost("confirm")]
-    public async Task<ValidationResult> CheckConfirm(EmailValidationKeyModel inDto)
-    {
-        if (inDto.Type != ConfirmType.LinkInvite)
+
+        if (!string.IsNullOrEmpty(user.SsoNameId))
         {
-            return await _emailValidationKeyModelHelper.ValidateAsync(inDto);
+            var settings = _settingsManager.Load<SsoSettingsV2>();
+
+            if (settings.EnableSso.GetValueOrDefault() && !string.IsNullOrEmpty(settings.IdpSettings.SloUrl))
+            {
+                var logoutSsoUserData = _signature.Create(new LogoutSsoUserData
+                {
+                    NameId = user.SsoNameId,
+                    SessionId = user.SsoSessionId
+                });
+
+                return _setupInfo.SsoSamlLogoutUrl + "?data=" + HttpUtility.UrlEncode(logoutSsoUserData);
+            }
         }
 
-        var linkData = await _invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.UiD ?? default);
-
-        return linkData.Result;
+        return null;
     }
 
+    /// <summary>
+    /// Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).
+    /// </summary>
+    /// <short>
+    /// Open confirmation email URL
+    /// </short>
+    /// <param type="ASC.Security.Cryptography.EmailValidationKeyModel, ASC.Core.Common" name="inDto">Confirmation email parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/confirm</path>
+    /// <returns type="ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult, ASC.Security.Cryptography">Validation result: Ok, Invalid, or Expired</returns>
+    [AllowNotPayment, AllowSuspended]
+    [HttpPost("confirm")]
+    public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
+    {
+        if (string.IsNullOrEmpty(inDto.Key))
+        {
+            inDto.Key = _cookiesManager.GetCookies(CookiesType.ConfirmKey, $"_{inDto.Type}");
+        }
+
+        if (inDto.Type != ConfirmType.LinkInvite)
+        {
+            return new ConfirmDto { Result = await _emailValidationKeyModelHelper.ValidateAsync(inDto)};
+        }
+
+        var result = await _invitationLinkService.ValidateAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId);
+
+        return _mapper.Map<Validation, ConfirmDto>(result);
+    }
+
+    /// <summary>
+    /// Sets a mobile phone for the current user.
+    /// </summary>
+    /// <short>
+    /// Set a mobile phone
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MobileRequestsDto, ASC.Web.Api" name="inDto">Mobile phone request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/setphone</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
     public async Task<AuthenticationTokenDto> SaveMobilePhoneAsync(MobileRequestsDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
-        var user = _userManager.GetUsers(_authContext.CurrentAccount.ID);
+        var user = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         inDto.MobilePhone = await _smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
         await _messageService.SendAsync(MessageAction.UserUpdatedMobileNumber, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), inDto.MobilePhone);
 
@@ -349,6 +447,16 @@ public class AuthenticationController : ControllerBase
         };
     }
 
+    /// <summary>
+    /// Sends SMS with an authentication code.
+    /// </summary>
+    /// <short>
+    /// Send SMS code
+    /// </short>
+    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.AuthRequestsDto, ASC.Web.Api" name="inDto">Authentication request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <path>api/2.0/authentication/sendsms</path>
+    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.AuthenticationTokenDto, ASC.Web.Api">Authentication data</returns>
     [AllowNotPayment]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
@@ -422,7 +530,7 @@ public class AuthenticationController : ControllerBase
 
                 var requestIp = MessageSettings.GetIP(Request);
 
-                (_, user) = await _bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp);
+                user = await _bruteForceLoginManager.AttemptAsync(inDto.UserName, inDto.PasswordHash, requestIp, inDto.RecaptchaResponse);
             }
             else
             {
@@ -432,15 +540,9 @@ public class AuthenticationController : ControllerBase
                 }
                 wrapper.ViaEmail = false;
                 action = MessageAction.LoginFailViaApiSocialAccount;
-                LoginProfile thirdPartyProfile;
-                if (!string.IsNullOrEmpty(inDto.SerializedProfile))
-                {
-                    thirdPartyProfile = new LoginProfile(_signature, _instanceCrypto, inDto.SerializedProfile);
-                }
-                else
-                {
-                    thirdPartyProfile = _providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
-                }
+                var thirdPartyProfile = !string.IsNullOrEmpty(inDto.SerializedProfile) ? 
+                    new LoginProfile(_signature, _instanceCrypto, inDto.SerializedProfile) : 
+                    _providerManager.GetLoginProfile(inDto.Provider, inDto.AccessToken, inDto.CodeOAuth);
 
                 inDto.UserName = thirdPartyProfile.EMail;
 
@@ -450,7 +552,12 @@ public class AuthenticationController : ControllerBase
         catch (BruteForceCredentialException)
         {
             await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
-            throw new AuthenticationException("Login Fail. Too many attempts");
+            throw new BruteForceCredentialException(Resource.ErrorTooManyLoginAttempts);
+        }
+        catch (RecaptchaException)
+        {
+            await _messageService.SendAsync(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailRecaptcha);
+            throw new RecaptchaException(Resource.RecaptchaInvalid);
         }
         catch (Exception ex)
         {
@@ -478,16 +585,16 @@ public class AuthenticationController : ControllerBase
 
             var userInfo = Constants.LostUser;
 
-            (var succ, var userId) = await TryGetUserByHashAsync(loginProfile.HashId);
-            if (succ)
+            var (success, userId) = await TryGetUserByHashAsync(loginProfile.HashId);
+            if (success)
             {
-                userInfo = _userManager.GetUsers(userId);
+                userInfo = await _userManager.GetUsersAsync(userId);
             }
 
             var isNew = false;
             if (_coreBaseSettings.Personal)
             {
-                if (_userManager.UserExists(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
+                if (await _userManager.UserExistsAsync(userInfo.Id) && SetupInfo.IsSecretEmail(userInfo.Email))
                 {
                     try
                     {
@@ -501,7 +608,7 @@ public class AuthenticationController : ControllerBase
                     }
                 }
 
-                if (!_userManager.UserExists(userInfo.Id))
+                if (!await _userManager.UserExistsAsync(userInfo.Id))
                 {
                     userInfo = await JoinByThirdPartyAccount(loginProfile);
 
@@ -557,7 +664,7 @@ public class AuthenticationController : ControllerBase
         }
 
         var userInfo = await _userManager.GetUserByEmailAsync(loginProfile.EMail);
-        if (!_userManager.UserExists(userInfo.Id))
+        if (!await _userManager.UserExistsAsync(userInfo.Id))
         {
             var newUserInfo = ProfileToUserInfo(loginProfile);
 

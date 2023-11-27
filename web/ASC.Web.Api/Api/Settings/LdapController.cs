@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,8 +28,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class LdapController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly SettingsManager _settingsManager;
     private readonly TenantManager _tenantManager;
     private readonly LdapNotifyService _ldapNotifyHelper;
@@ -70,7 +68,9 @@ public class LdapController : BaseSettingsController
     /// Get the LDAP settings
     /// </short>
     /// <category>LDAP</category>
-    /// <returns>LDAP settings</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP settings</returns>
+    /// <path>api/2.0/settings/ldap</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("ldap")]
     public async Task<LdapSettingsDto> GetLdapSettingsAsync()
     {
@@ -101,13 +101,15 @@ public class LdapController : BaseSettingsController
     }
 
     /// <summary>
-    /// Returns the LDAP autosynchronous cron expression of the current portal if it exists.
+    /// Returns the LDAP autosynchronous cron expression for the current portal if it exists.
     /// </summary>
     /// <short>
     /// Get the LDAP cron expression
     /// </short>
     /// <category>LDAP</category>
-    /// <returns>Cron expression or null</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapCronSettingsDto, ASC.Web.Api">LDAP cron settings</returns>
+    /// <path>api/2.0/settings/ldap/cron</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("ldap/cron")]
     public async Task<LdapCronSettingsDto> GetLdapCronSettingsAsync()
     {
@@ -125,20 +127,22 @@ public class LdapController : BaseSettingsController
     }
 
     /// <summary>
-    /// Sets the LDAP autosynchronous cron expression of the current portal.
+    /// Sets the LDAP autosynchronous cron expression to the current portal.
     /// </summary>
     /// <short>
     /// Set the LDAP cron expression
     /// </short>
     /// <category>LDAP</category>
-    /// <param name="cron">Cron expression</param>
-    /// 
+    /// <path>api/2.0/settings/ldap/cron</path>
+    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapCronRequestDto, ASC.Web.Api" name="inDto">LDAP cron request parameters</param>
+    /// <httpMethod>POST</httpMethod>
+    /// <returns></returns>
     [HttpPost("ldap/cron")]
-    public async Task SetLdapCronSettingsAsync(LdapCronRequestDto ldapCronRequest)
+    public async Task SetLdapCronSettingsAsync(LdapCronRequestDto inDto)
     {
         await CheckLdapPermissionsAsync();
 
-        var cron = ldapCronRequest.Cron;
+        var cron = inDto.Cron;
 
         if (!string.IsNullOrEmpty(cron))
         {
@@ -171,13 +175,15 @@ public class LdapController : BaseSettingsController
     }
 
     /// <summary>
-    /// Starts synchronizing users and groups by LDAP.
+    /// Synchronizes the portal data with the new information from the LDAP server.
     /// </summary>
     /// <short>
-    /// Synchronize by LDAP
+    /// Synchronize with LDAP server
     /// </short>
     /// <category>LDAP</category>
-    /// <returns>Operation status</returns>
+    /// <path>api/2.0/settings/ldap/sync</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [HttpGet("ldap/sync")]
     public async Task<LdapStatusDto> SyncLdapAsync()
     {
@@ -187,7 +193,9 @@ public class LdapController : BaseSettingsController
 
         var userId = _authContext.CurrentAccount.ID.ToString();
 
-        var result = await _ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, Tenant, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -199,7 +207,9 @@ public class LdapController : BaseSettingsController
     /// Test the LDAP synchronization
     /// </short>
     /// <category>LDAP</category>
-    /// <returns>Operation status</returns>
+    /// <path>api/2.0/settings/ldap/sync/test</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [HttpGet("ldap/sync/test")]
     public async Task<LdapStatusDto> TestLdapSync()
     {
@@ -207,7 +217,9 @@ public class LdapController : BaseSettingsController
 
         var ldapSettings = await _settingsManager.LoadAsync<LdapSettings>();
 
-        var result = await _ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, Tenant);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -219,13 +231,14 @@ public class LdapController : BaseSettingsController
     /// Save the LDAP settings
     /// </short>
     /// <category>LDAP</category>
-    /// <param name="settings">LDAP settings in the serialized string format</param>
-    /// <param name="acceptCertificate">Specifies if the errors of checking certificates are allowed (true) or not (false)</param>
-    /// <returns>Operation status</returns>
+    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapRequestsDto, ASC.Web.Api" name="inDto">LDAP settings</param>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
+    /// <path>api/2.0/settings/ldap</path>
+    /// <httpMethod>POST</httpMethod>
     [HttpPost("ldap")]
-    public async Task<LdapStatusDto> SaveLdapSettingsAsync(LdapRequestsDto ldapRequestsDto)
+    public async Task<LdapStatusDto> SaveLdapSettingsAsync(LdapRequestsDto inDto)
     {
-        var ldapSettings = _mapper.Map<LdapRequestsDto, LdapSettings>(ldapRequestsDto);
+        var ldapSettings = _mapper.Map<LdapRequestsDto, LdapSettings>(inDto);
 
         await CheckLdapPermissionsAsync();
 
@@ -236,29 +249,34 @@ public class LdapController : BaseSettingsController
 
         var userId = _authContext.CurrentAccount.ID.ToString();
 
-        var result = await _ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, Tenant, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
 
     /// <summary>
-    /// Starts the process of collecting preliminary changes on the portal during the saving process according to the LDAP settings.
+    /// Starts the process of saving LDAP settings and collecting preliminary changes on the portal according to them.
     /// </summary>
     /// <short>
     /// Test the LDAP saving process
     /// </short>
     /// <category>LDAP</category>
-    /// <param name="settings">LDAP settings in the serialized string format</param>
-    /// <param name="acceptCertificate">Specifies if the errors of checking certificates are allowed (true) or not (false)</param>
-    /// <returns>Operation status</returns>
+    /// <param type="ASC.ActiveDirectory.Base.Settings.LdapSettings, ASC.ActiveDirectory.Base.Settings" name="inDto">LDAP settings</param>
+    /// <path>api/2.0/settings/ldap/save/test</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     [HttpPost("ldap/save/test")]
-    public async Task<LdapStatusDto> TestLdapSaveAsync(LdapSettings ldapSettings)
+    public async Task<LdapStatusDto> TestLdapSaveAsync(LdapSettings inDto)
     {
         await CheckLdapPermissionsAsync();
 
         var userId = _authContext.CurrentAccount.ID.ToString();
 
-        var result = await _ldapSaveSyncOperation.TestLdapSaveAsync(ldapSettings, Tenant, userId);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = await _ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -270,13 +288,17 @@ public class LdapController : BaseSettingsController
     /// Get the LDAP synchronization process status
     /// </short>
     /// <category>LDAP</category>
-    /// <returns>Operation status</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
+    /// <path>api/2.0/settings/ldap/status</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("ldap/status")]
     public async Task<LdapStatusDto> GetLdapOperationStatusAsync()
     {
         await CheckLdapPermissionsAsync();
 
-        var result = _ldapSaveSyncOperation.ToLdapOperationStatus(Tenant.Id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
+        var result = _ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
         return _mapper.Map<LdapOperationStatus, LdapStatusDto>(result);
     }
@@ -288,7 +310,9 @@ public class LdapController : BaseSettingsController
     /// Get the LDAP default settings
     /// </short>
     /// <category>LDAP</category>
-    /// <returns>LDAP default settings</returns>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not</returns>
+    /// <path>api/2.0/settings/ldap/default</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("ldap/default")]
     public async Task<LdapSettingsDto> GetDefaultLdapSettingsAsync()
     {
@@ -301,7 +325,7 @@ public class LdapController : BaseSettingsController
 
     private async Task CheckLdapPermissionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!_coreBaseSettings.Standalone
             && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())

@@ -87,7 +87,7 @@ ONLYOFFICEチーム</value>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>今日は、
 
-個人使用のONLYOFFICEアカウントを登録されたところです。”こちら”："$InviteLink"　をクリックして、登録を承認し、パスワードを作成します。
+個人使用のONLYOFFICEアカウントを登録されたところです。"こちら":"$InviteLink"　をクリックして、登録を承認し、パスワードを作成します。
 
 リンクを開けない場合に、"$InviteLink":"$InviteLink"をコピーして、ブラウザのアドレスバーに貼り付けできます。
 
@@ -97,7 +97,7 @@ ONLYOFFICEチーム</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>personal.onlyoffice.comでアカウント削除を要求しました。要求を完成するために、リンクに従ってください（リンクは７日間中に有効です）。
 
-$GreenButton
+$OrangeButton
 
 ＊ご注意ください＊：削除すると、「プライバシーポリシー」:"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"に従い、アカウントとそれに対応しているデータも消去されるようになります。
 
@@ -113,11 +113,7 @@ ONLYOFFICEチーム</value>
 
 "$FromUserName":"$FromUserLink"のデータ削除過程は正常に終了されました。
 
-個人データの削除により解放された容量：
-
-＃文書 ‐ $DocsSpace 
-＃メール ‐ $MailSpace
-＃チャット ‐ $TalkSpace</value>
+個人データの削除により解放された容量 $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.新しいポータルが登録された
@@ -138,9 +134,6 @@ ONLYOFFICEチーム</value>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>個人的なONLYOFFICEへようこそ</value>
   </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>個人的なONLYOFFICE。パスワード アシスタンス</value>
-  </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>個人的なONLYOFFICE。メールアドレスの照合を行ってください</value>
   </data>
@@ -156,7 +149,7 @@ ONLYOFFICEチーム</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>クラウドオフィスアカウントのメールを変更したいですか？下のボタンをクリックして、クラウドにログイン*してください。
 
-$GreenButton
+$OrangeButton
 
 このリンクは7日間有効です。
 
@@ -169,17 +162,30 @@ ONLYOFFICE DocSpaceへようこそ！あなたのユーザープロファイル�
  
 * 招待されたルームで他のユーザーと作業する*: リアルタイムの共同執筆のためのコラボレーションルームや、あらゆる目的のために柔軟な設定を持つカスタムルーム*.
  
-* *テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルを扱うことができます。
+* テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルを扱うことができます。
  
 * *リアルタイムまたは段落ロックという2つの共同編集モードにより、文書*の共同編集が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
  
 * *任意のクラウドストレージ*を接続し、アプリケーションを切り替えることなく作業することができます。
 
-$GreenButton
+$OrangeButton
 
 お困りの際は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/" をご覧いただくか、"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
 
 ONLYOFFICE チーム
-"www.onlyoffice.com":https://www.onlyoffice.com/ja</value>
+"www.onlyoffice.com":"https://www.onlyoffice.com/ja"</value>
+  </data>
+  <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
+    <value>クラウドオフィスアカウントのメールアドレスを変更したいですか？
+
+以下のボタンをクリックし、クラウドにログイン*してください。
+
+$OrangeButton
+
+リンクは7日間有効です。
+
+*このブラウザでクラウドオフィスにログインしていない場合、確認のために古いメールアドレスを使用する必要があります。
+
+メールアドレスを変更したくないで。</value>
   </data>
 </root>

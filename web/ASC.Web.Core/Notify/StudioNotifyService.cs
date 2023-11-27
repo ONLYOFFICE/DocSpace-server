@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
-using Constants = ASC.Core.Users.Constants;
+using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
@@ -34,7 +33,7 @@ public class StudioNotifyService
 {
     private readonly StudioNotifyServiceHelper _client;
 
-    public static string EMailSenderName { get { return ASC.Core.Configuration.Constants.NotifyEMailSenderSysName; } }
+    public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
     private readonly UserManager _userManager;
     private readonly StudioNotifyHelper _studioNotifyHelper;
@@ -47,7 +46,6 @@ public class StudioNotifyService
     private readonly SetupInfo _setupInfo;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly SettingsManager _settingsManager;
-    private readonly WebItemSecurity _webItemSecurity;
     private readonly MessageService _messageService;
     private readonly MessageTarget _messageTarget;
     private readonly ILogger _log;
@@ -65,7 +63,6 @@ public class StudioNotifyService
         SetupInfo setupInfo,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         SettingsManager settingsManager,
-        WebItemSecurity webItemSecurity,
         MessageService messageService,
         MessageTarget messageTarget,
         ILoggerProvider option)
@@ -81,21 +78,15 @@ public class StudioNotifyService
         _setupInfo = setupInfo;
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _settingsManager = settingsManager;
-        _webItemSecurity = webItemSecurity;
         _messageService = messageService;
         _messageTarget = messageTarget;
         _userManager = userManager;
         _studioNotifyHelper = studioNotifyHelper;
     }
 
-    public async Task SendMsgToAdminAboutProfileUpdatedAsync()
-    {
-        await _client.SendNoticeAsync(Actions.SelfProfileUpdated, null);
-    }
-
     public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message)
     {
-        await _client.SendNoticeAsync(Actions.UserMessageToAdmin, null, new TagValue(Tags.Body, message), new TagValue(Tags.UserEmail, email));
+        await _client.SendNoticeAsync(Actions.UserMessageToAdmin, new TagValue(Tags.Body, message), new TagValue(Tags.UserEmail, email));
     }
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)
@@ -109,56 +100,6 @@ public class StudioNotifyService
             new TagValue(Tags.Body, message),
             new TagValue(Tags.UserEmail, email),
             new TagValue(Tags.UserName, userName));
-    }
-
-    public async Task SendRequestTariffAsync(bool license, string fname, string lname, string title, string email, string phone, string ctitle, string csize, string site, string message)
-    {
-        fname = (fname ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(fname);
-
-        lname = (lname ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(lname);
-
-        title = (title ?? "").Trim();
-        email = (email ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
-
-        phone = (phone ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(phone);
-
-        ctitle = (ctitle ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(ctitle);
-
-        csize = (csize ?? "").Trim();
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(csize);
-        site = (site ?? "").Trim();
-        if (string.IsNullOrEmpty(site) && !_coreBaseSettings.CustomMode)
-        {
-            throw new ArgumentNullException(nameof(site));
-        }
-
-        message = (message ?? "").Trim();
-        if (string.IsNullOrEmpty(message) && !_coreBaseSettings.CustomMode)
-        {
-            throw new ArgumentNullException(nameof(message));
-        }
-
-        var salesEmail = (await _settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).SalesEmail ?? _setupInfo.SalesEmail;
-
-        var recipient = (IRecipient)new DirectRecipient(_authContext.CurrentAccount.ID.ToString(), string.Empty, new[] { salesEmail }, false);
-
-        await _client.SendNoticeToAsync(license ? Actions.RequestLicense : Actions.RequestTariff,
-                             new[] { recipient },
-                             new[] { "email.sender" },
-                             new TagValue(Tags.UserName, fname),
-                             new TagValue(Tags.UserLastName, lname),
-                             new TagValue(Tags.UserPosition, title),
-                             new TagValue(Tags.UserEmail, email),
-                             new TagValue(Tags.Phone, phone),
-                             new TagValue(Tags.Website, site),
-                             new TagValue(Tags.CompanyTitle, ctitle),
-                             new TagValue(Tags.CompanySize, csize),
-                             new TagValue(Tags.Body, message));
     }
 
     #region User Password
@@ -177,11 +118,11 @@ public class StudioNotifyService
             0,
             DateTimeKind.Utc);
 
-        var hash = auditEventDate.ToString("s");
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", GetCulture(userInfo));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", GetCulture(userInfo));
 
         var action = _coreBaseSettings.Personal
                          ? (_coreBaseSettings.CustomMode ? Actions.PersonalCustomModeEmailChangeV115 : Actions.PersonalPasswordChangeV115)
@@ -191,11 +132,11 @@ public class StudioNotifyService
                 action,
                     await _studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
                 new[] { EMailSenderName },
-                TagValues.GreenButton(greenButtonText, confirmationUrl));
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl));
 
         var displayUserName = userInfo.DisplayUserName(false, _displayUserSettingsHelper);
 
-        await _messageService.SendAsync(auditEventDate, MessageAction.UserSentPasswordChangeInstructions, _messageTarget.Create(userInfo.Id), displayUserName);
+        await _messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, _messageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
     }
 
     #endregion
@@ -204,9 +145,9 @@ public class StudioNotifyService
 
     public async Task SendEmailChangeInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID);
+        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID, _authContext.CurrentAccount.ID);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 
         var action = _coreBaseSettings.Personal
                          ? (_coreBaseSettings.CustomMode ? Actions.PersonalCustomModeEmailChangeV115 : Actions.PersonalEmailChangeV115)
@@ -216,7 +157,7 @@ public class StudioNotifyService
                 action,
                     await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
-                TagValues.GreenButton(greenButtonText, confirmationUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                 new TagValue(CommonTags.Culture, user.GetCulture().Name));
     }
 
@@ -224,90 +165,65 @@ public class StudioNotifyService
     {
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailActivation, null, user.Id);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonActivateEmail", GetCulture(user));
 
         await _client.SendNoticeToAsync(
                 Actions.ActivateEmail,
                     await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
                 new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.GreenButton(greenButtonText, confirmationUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
                     new TagValue(Tags.UserDisplayName, (user.DisplayUserName(_displayUserSettingsHelper) ?? string.Empty).Trim()));
     }
 
-    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl)
+    public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
     {
-        var greenButtonText = WebstudioNotifyPatternResource.ButtonAccept;
+        var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
+        var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
 
+        var tags = new List<ITagValue>
+        { 
+            new TagValue(Tags.Message, roomTitle),
+            new TagValue(Tags.InviteLink, confirmationUrl),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours) 
+        };
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+        
         await _client.SendNoticeToAsync(
             Actions.SaasRoomInvite,
                 await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
-                new TagValue(Tags.Message, roomTitle),
-                new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.GreenButton(greenButtonText, confirmationUrl));
+                tags.ToArray());
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl)
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
     {
-        var greenButtonText = WebstudioNotifyPatternResource.ButtonAccept;
+        var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
+        var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
+
+        var tags = new List<ITagValue>() 
+        {
+                new TagValue(Tags.InviteLink, confirmationUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif"))
+        };
+
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
 
         await _client.SendNoticeToAsync(
             Actions.SaasDocSpaceInvite,
                 await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
                 new[] { EMailSenderName },
-                new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.GreenButton(greenButtonText, confirmationUrl));
-    }
-
-    #endregion
-
-    #region MailServer
-
-    public async Task SendMailboxCreatedAsync(List<string> toEmails, string username, string address)
-    {
-        await SendMailboxCreatedAsync(toEmails, username, address, null, null, -1, -1, null);
-    }
-
-    public async Task SendMailboxCreatedAsync(List<string> toEmails, string username, string address, string server,
-        string encyption, int portImap, int portSmtp, string login, bool skipSettings = false)
-    {
-        var tags = new List<ITagValue>
-            {
-                new TagValue(Tags.UserName, username ?? string.Empty),
-                new TagValue(Tags.Address, address ?? string.Empty)
-            };
-
-        if (!skipSettings)
-        {
-            var link = $"{_commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')}/addons/mail/#accounts/changepwd={address}";
-
-            tags.Add(new TagValue(Tags.MyStaffLink, link));
-            tags.Add(new TagValue(Tags.Server, server));
-            tags.Add(new TagValue(Tags.Encryption, encyption ?? string.Empty));
-            tags.Add(new TagValue(Tags.ImapPort, portImap.ToString(CultureInfo.InvariantCulture)));
-            tags.Add(new TagValue(Tags.SmtpPort, portSmtp.ToString(CultureInfo.InvariantCulture)));
-            tags.Add(new TagValue(Tags.Login, login));
-        }
-
-        await _client.SendNoticeToAsync(
-        skipSettings
-            ? Actions.MailboxWithoutSettingsCreated
-            : Actions.MailboxCreated,
-        null,
-            await _studioNotifyHelper.RecipientFromEmailAsync(toEmails, false),
-        new[] { EMailSenderName });
-    }
-
-    public async Task SendMailboxPasswordChangedAsync(List<string> toEmails, string username, string address)
-    {
-        await _client.SendNoticeToAsync(
-        Actions.MailboxPasswordChanged,
-        null,
-           await _studioNotifyHelper.RecipientFromEmailAsync(toEmails, false),
-        new[] { EMailSenderName },
-        new TagValue(Tags.UserName, username ?? string.Empty),
-        new TagValue(Tags.Address, address ?? string.Empty));
+                tags.ToArray());
     }
 
     #endregion
@@ -316,26 +232,26 @@ public class StudioNotifyService
     {
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email.ToLower(), ConfirmType.PhoneActivation);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePhone", GetCulture(userInfo));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePhone", GetCulture(userInfo));
 
         await _client.SendNoticeToAsync(
         Actions.PhoneChange,
            await _studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
         new[] { EMailSenderName },
-        TagValues.GreenButton(greenButtonText, confirmationUrl));
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl));
     }
 
     public async Task SendMsgTfaResetAsync(UserInfo userInfo)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email.ToLower(), ConfirmType.TfaActivation);
+        var confirmationUrl = _commonLinkUtility.GetFullAbsolutePath(string.Empty);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeTfa", GetCulture(userInfo));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeTfa", GetCulture(userInfo));
 
         await _client.SendNoticeToAsync(
         Actions.TfaChange,
            await _studioNotifyHelper.RecipientFromEmailAsync(userInfo.Email, false),
         new[] { EMailSenderName },
-        TagValues.GreenButton(greenButtonText, confirmationUrl));
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl));
     }
 
 
@@ -343,7 +259,7 @@ public class StudioNotifyService
     {
         if (!_coreBaseSettings.Personal)
         {
-            await _client.SendNoticeAsync(Actions.UserHasJoin, null);
+            await _client.SendNoticeAsync(Actions.UserHasJoin);
         }
     }
 
@@ -352,14 +268,14 @@ public class StudioNotifyService
         var inviteUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmpInvite, (int)emplType)
                     + string.Format("&emplType={0}", (int)emplType);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ButtonJoin;
+        var orangeButtonText = WebstudioNotifyPatternResource.ButtonJoin;
 
         await _client.SendNoticeToAsync(
                 Actions.JoinUsers,
                    await _studioNotifyHelper.RecipientFromEmailAsync(email, true),
                 new[] { EMailSenderName },
                 new TagValue(Tags.InviteLink, inviteUrl),
-                TagValues.GreenButton(greenButtonText, inviteUrl));
+                TagValues.OrangeButton(orangeButtonText, inviteUrl));
     }
 
     public async Task UserInfoAddedAfterInviteAsync(UserInfo newUserInfo)
@@ -405,7 +321,14 @@ public class StudioNotifyService
             notifyAction = Actions.SaasUserWelcomeV1;
         }
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        var img1 = _studioNotifyHelper.GetNotificationImageUrl("users.png");
+        var img2 = _studioNotifyHelper.GetNotificationImageUrl("files.png");
+        var img3 = _studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
+        var img4 = _studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         await _client.SendNoticeToAsync(
         notifyAction,
@@ -413,9 +336,14 @@ public class StudioNotifyService
         new[] { EMailSenderName },
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
-            TagValues.GreenButton(greenButtonText, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-        new TagValue(CommonTags.Footer, footer),
-            new TagValue(CommonTags.MasterTemplate, _coreBaseSettings.Personal ? "HtmlMasterPersonal" : "HtmlMaster"));
+            TagValues.OrangeButton(orangeButtonText, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+        new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+        new TagValue("IMG1", img1),
+        new TagValue("IMG2", img2),
+        new TagValue("IMG3", img3),
+        new TagValue("IMG4", img4),
+        new TagValue(CommonTags.Footer, footer));
     }
 
     public async Task GuestInfoAddedAfterInviteAsync(UserInfo newUserInfo)
@@ -444,9 +372,17 @@ public class StudioNotifyService
             notifyAction = Actions.SaasGuestWelcomeV1;
         }
 
-        var greenButtonText = _tenantExtra.Enterprise
-                              ? WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", GetCulture(newUserInfo))
-                              : WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = _tenantExtra.Enterprise
+                              ? WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", culture)
+                              : WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", culture);
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        var img1 = _studioNotifyHelper.GetNotificationImageUrl("users.png");
+        var img2 = _studioNotifyHelper.GetNotificationImageUrl("files.png");
+        var img3 = _studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
+        var img4 = _studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
         await _client.SendNoticeToAsync(
         notifyAction,
@@ -454,7 +390,13 @@ public class StudioNotifyService
         new[] { EMailSenderName },
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(Tags.MyStaffLink, GetMyStaffLink()),
-            TagValues.GreenButton(greenButtonText, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
+            TagValues.OrangeButton(orangeButtonText, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+        new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+        new TagValue("IMG1", img1),
+        new TagValue("IMG2", img2),
+        new TagValue("IMG3", img3),
+        new TagValue("IMG4", img4),
         new TagValue(CommonTags.Footer, footer));
     }
 
@@ -485,15 +427,18 @@ public class StudioNotifyService
         }
 
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
-
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
         notifyAction,
            await _studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
         new[] { EMailSenderName },
         new TagValue(Tags.ActivateUrl, confirmationUrl),
-        TagValues.GreenButton(greenButtonText, confirmationUrl),
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl), 
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+        new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(CommonTags.Footer, footer));
     }
@@ -525,15 +470,18 @@ public class StudioNotifyService
         }
 
         var confirmationUrl = await GenerateActivationConfirmUrlAsync(newUserInfo);
-
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", GetCulture(newUserInfo));
+        var culture = GetCulture(newUserInfo);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
         notifyAction,
            await _studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
         new[] { EMailSenderName },
         new TagValue(Tags.ActivateUrl, confirmationUrl),
-        TagValues.GreenButton(greenButtonText, confirmationUrl),
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+        new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
         new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()),
         new TagValue(CommonTags.Footer, footer));
     }
@@ -541,56 +489,23 @@ public class StudioNotifyService
     public async Task SendMsgProfileDeletionAsync(UserInfo user)
     {
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.ProfileRemove, _authContext.CurrentAccount.ID, _authContext.CurrentAccount.ID);
-
-        var greenButtonText = _coreBaseSettings.Personal ?
-            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", GetCulture(user)) :
-            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", GetCulture(user));
+        var culture = GetCulture(user);
+        var orangeButtonText = _coreBaseSettings.Personal ?
+            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture) :
+            WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonRemoveProfile", culture);
 
         var action = _coreBaseSettings.Personal
                          ? (_coreBaseSettings.CustomMode ? Actions.PersonalCustomModeProfileDelete : Actions.PersonalProfileDelete)
                      : Actions.ProfileDelete;
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
         action,
            await _studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
         new[] { EMailSenderName },
-        TagValues.GreenButton(greenButtonText, confirmationUrl),
+        TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
         new TagValue(CommonTags.Culture, user.GetCulture().Name));
-    }
-
-    public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)
-    {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var admins = (await _userManager.GetUsersAsync()).ToAsyncEnumerable()
-                    .WhereAwait(async u => await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, u.Id));
-
-        ThreadPool.QueueUserWorkItem(async _ =>
-        {
-            try
-            {
-                _tenantManager.SetCurrentTenant(tenant);
-
-                await foreach (var admin in admins)
-                {
-                    var culture = string.IsNullOrEmpty(admin.CultureName) ? tenant.GetCulture() : admin.GetCulture();
-                    CultureInfo.CurrentCulture = culture;
-                    CultureInfo.CurrentUICulture = culture;
-
-                    await _client.SendNoticeToAsync(
-                    Actions.ProfileHasDeletedItself,
-                    null,
-                    new IRecipient[] { admin },
-                    new[] { EMailSenderName },
-                        new TagValue(Tags.FromUserName, user.DisplayUserName(_displayUserSettingsHelper)),
-                    new TagValue(Tags.FromUserLink, GetUserProfileLink(user)));
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.ErrorSendMsgProfileHasDeletedItself(ex);
-            }
-        });
-
     }
 
     public async Task SendMsgReassignsCompletedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser)
@@ -598,12 +513,12 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
         Actions.ReassignsCompleted,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUser)),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
             new TagValue(Tags.ToUserName, toUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.ToUserLink, GetUserProfileLink(toUser)));
+            new TagValue(Tags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id)));
     }
 
     public async Task SendMsgReassignsFailedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser, string message)
@@ -611,13 +526,13 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
         Actions.ReassignsFailed,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(Tags.FromUserName, fromUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(fromUser)),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
             new TagValue(Tags.ToUserName, toUser.DisplayUserName(_displayUserSettingsHelper)),
-        new TagValue(Tags.ToUserLink, GetUserProfileLink(toUser)),
-        new TagValue(Tags.Message, message));
+            new TagValue(Tags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id)),
+            new TagValue(Tags.Message, message));
     }
 
     public async Task SendMsgRemoveUserDataCompletedAsync(Guid recipientId, UserInfo user, string fromUserName, long docsSpace, long crmSpace, long mailSpace, long talkSpace)
@@ -625,14 +540,14 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
             _coreBaseSettings.CustomMode ? Actions.RemoveUserDataCompletedCustomMode : Actions.RemoveUserDataCompleted,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
-        new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(user)),
-        new TagValue("DocsSpace", FileSizeComment.FilesSizeToString(docsSpace)),
-        new TagValue("CrmSpace", FileSizeComment.FilesSizeToString(crmSpace)),
-        new TagValue("MailSpace", FileSizeComment.FilesSizeToString(mailSpace)),
-        new TagValue("TalkSpace", FileSizeComment.FilesSizeToString(talkSpace)));
+            new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
+            new TagValue("DocsSpace", FileSizeComment.FilesSizeToString(docsSpace)),
+            new TagValue("CrmSpace", FileSizeComment.FilesSizeToString(crmSpace)),
+            new TagValue("MailSpace", FileSizeComment.FilesSizeToString(mailSpace)),
+            new TagValue("TalkSpace", FileSizeComment.FilesSizeToString(talkSpace)));
     }
 
     public async Task SendMsgRemoveUserDataFailedAsync(Guid recipientId, UserInfo user, string fromUserName, string message)
@@ -640,11 +555,11 @@ public class StudioNotifyService
         await _client.SendNoticeToAsync(
         Actions.RemoveUserDataFailed,
             new[] { await _studioNotifyHelper.ToRecipientAsync(recipientId) },
-        new[] { EMailSenderName },
+            new[] { EMailSenderName },
             new TagValue(Tags.UserName, await _displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
-        new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
-        new TagValue(Tags.FromUserLink, GetUserProfileLink(user)),
-        new TagValue(Tags.Message, message));
+            new TagValue(Tags.FromUserName, fromUserName.HtmlEncode()),
+            new TagValue(Tags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
+            new TagValue(Tags.Message, message));
     }
 
     public async Task SendAdminWelcomeAsync(UserInfo newUserInfo)
@@ -664,13 +579,15 @@ public class StudioNotifyService
 
         if (_tenantExtra.Enterprise)
         {
-            var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
-            notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
+            return;
+            //var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
+            //notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
         }
         else if (_tenantExtra.Opensource)
         {
-            notifyAction = Actions.OpensourceAdminWelcomeV1;
-            tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
+            return;
+            //notifyAction = Actions.OpensourceAdminWelcomeV1;
+            //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
         else
         {
@@ -680,6 +597,8 @@ public class StudioNotifyService
 
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
         tagValues.Add(new TagValue(Tags.PricingPage, _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
+        tagValues.Add(TagValues.TrulyYours(_studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo))));
+        tagValues.Add(new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif")));
 
         await _client.SendNoticeToAsync(
         notifyAction,
@@ -693,42 +612,50 @@ public class StudioNotifyService
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)
     {
         var u = await _userManager.GetUsersAsync(t.OwnerId);
-
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeactivatePortal", GetCulture(u));
+        var culture = GetCulture(u);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeactivatePortal", culture);
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
         await _client.SendNoticeToAsync(
                 Actions.PortalDeactivate,
                 new IRecipient[] { u },
                 new[] { EMailSenderName },
                 new TagValue(Tags.ActivateUrl, activateUrl),
-                TagValues.GreenButton(greenButtonText, deactivateUrl),
+                TagValues.OrangeButton(orangeButtonText, deactivateUrl),
+                TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(_displayUserSettingsHelper)));
     }
 
     public async Task SendMsgPortalDeletionAsync(Tenant t, string url, bool showAutoRenewText)
     {
         var u = await _userManager.GetUsersAsync(t.OwnerId);
-
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeletePortal", GetCulture(u));
+        var culture = GetCulture(u);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonDeletePortal", culture);
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
 
         await _client.SendNoticeToAsync(
                 Actions.PortalDelete,
                 new IRecipient[] { u },
                 new[] { EMailSenderName },
-                TagValues.GreenButton(greenButtonText, url),
+                TagValues.OrangeButton(orangeButtonText, url),
+                TagValues.TrulyYours(_studioNotifyHelper, bestReagardsTxt),
                 new TagValue(Tags.AutoRenew, showAutoRenewText.ToString()),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(_displayUserSettingsHelper)));
     }
 
     public async Task SendMsgPortalDeletionSuccessAsync(UserInfo owner, string url)
     {
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", GetCulture(owner));
+        var culture = GetCulture(owner);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         await _client.SendNoticeToAsync(
                 Actions.PortalDeleteSuccessV1,
                 new IRecipient[] { owner },
                 new[] { EMailSenderName },
-                TagValues.GreenButton(greenButtonText, url),
+                TagValues.OrangeButton(orangeButtonText, url),
+                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
                     new TagValue(Tags.OwnerName, owner.DisplayUserName(_displayUserSettingsHelper)));
     }
 
@@ -738,14 +665,14 @@ public class StudioNotifyService
     {
         var u = await _userManager.GetUsersAsync(t.OwnerId);
 
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalAddressChange", GetCulture(u));
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalAddressChange", GetCulture(u));
 
         await _client.SendNoticeToAsync(
                 Actions.DnsChange,
                 new IRecipient[] { u },
                 new[] { EMailSenderName },
                 new TagValue("ConfirmDnsUpdate", confirmDnsUpdateUrl),//TODO: Tag is deprecated and replaced by TagGreenButton
-                TagValues.GreenButton(greenButtonText, confirmDnsUpdateUrl),
+                TagValues.OrangeButton(orangeButtonText, confirmDnsUpdateUrl),
                 new TagValue("PortalAddress", AddHttpToUrl(portalAddress)),
                 new TagValue("PortalDns", AddHttpToUrl(portalDns ?? string.Empty)),
                     new TagValue(Tags.OwnerName, u.DisplayUserName(_displayUserSettingsHelper)));
@@ -753,14 +680,14 @@ public class StudioNotifyService
 
     public async Task SendMsgConfirmChangeOwnerAsync(UserInfo owner, UserInfo newOwner, string confirmOwnerUpdateUrl)
     {
-        var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalOwnerUpdate", owner.GetCulture());
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmPortalOwnerUpdate", owner.GetCulture());
 
         await _client.SendNoticeToAsync(
         Actions.ConfirmOwnerChange,
         null,
         new IRecipient[] { owner },
         new[] { EMailSenderName },
-        TagValues.GreenButton(greenButtonText, confirmOwnerUpdateUrl),
+        TagValues.OrangeButton(orangeButtonText, confirmOwnerUpdateUrl),
             new TagValue(Tags.UserName, newOwner.DisplayUserName(_displayUserSettingsHelper)),
             new TagValue(Tags.OwnerName, owner.DisplayUserName(_displayUserSettingsHelper)));
     }
@@ -791,16 +718,20 @@ public class StudioNotifyService
             var userId = u.Id;
             var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(u.Email, ConfirmType.EmailActivation, null, userId);
 
-            _settingsManager.Save(new FirstEmailConfirmSettings() { IsFirst = true});
+            await _settingsManager.SaveAsync(new FirstEmailConfirmSettings() { IsFirst = true });
 
-            var greenButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", GetCulture(u));
+            var culture = GetCulture(u);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", culture);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
             await _client.SendNoticeToAsync(
             notifyAction,
                await _studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
             new[] { EMailSenderName },
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-            TagValues.GreenButton(greenButtonText, confirmationUrl),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
             new TagValue(CommonTags.Footer, footer));
         }
         catch (Exception error)
@@ -829,6 +760,7 @@ public class StudioNotifyService
                      + "&emplType=" + (int)EmployeeType.RoomAdmin
                      + "&lang=" + culture.Key
                      + additionalMember;
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture.Value);
 
         await _client.SendNoticeToAsync(
             _coreBaseSettings.CustomMode ? Actions.PersonalCustomModeConfirmation : Actions.PersonalConfirmation,
@@ -836,7 +768,8 @@ public class StudioNotifyService
         new[] { EMailSenderName },
         new TagValue(Tags.InviteLink, confirmUrl),
             new TagValue(CommonTags.Footer, _coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"),
-        new TagValue(CommonTags.Culture, CultureInfo.CurrentUICulture.Name));
+        new TagValue(CommonTags.Culture, CultureInfo.CurrentUICulture.Name),
+        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
     }
 
     public async Task SendAlreadyExistAsync(string email)
@@ -849,7 +782,7 @@ public class StudioNotifyService
 
         var portalUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s");
+        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s", CultureInfo.InvariantCulture);
 
         var linkToRecovery = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -865,12 +798,13 @@ public class StudioNotifyService
 
     public async Task SendUserWelcomePersonalAsync(UserInfo newUserInfo)
     {
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo));
         await _client.SendNoticeToAsync(
             _coreBaseSettings.CustomMode ? Actions.PersonalCustomModeAfterRegistration1 : Actions.PersonalAfterRegistration1,
             await _studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, true),
         new[] { EMailSenderName },
             new TagValue(CommonTags.Footer, _coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"),
-        new TagValue(CommonTags.MasterTemplate, "HtmlMasterPersonal"));
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours));
     }
 
     #endregion
@@ -916,9 +850,9 @@ public class StudioNotifyService
         return _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff());
     }
 
-    private string GetUserProfileLink(UserInfo userInfo)
+    private async Task<string> GetUserProfileLinkAsync(Guid userId)
     {
-        return _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetUserProfile(userInfo));
+        return _commonLinkUtility.GetFullAbsolutePath(await _commonLinkUtility.GetUserProfileAsync(userId));
     }
 
     private static string AddHttpToUrl(string url)
@@ -1010,7 +944,7 @@ public class StudioNotifyService
     private async Task SendStorageEncryptionNotifyAsync(INotifyAction action, bool notifyAdminsOnly, string serverRootPath)
     {
         var users = notifyAdminsOnly
-                    ? await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID)
+                    ? await _userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)
                     : (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)

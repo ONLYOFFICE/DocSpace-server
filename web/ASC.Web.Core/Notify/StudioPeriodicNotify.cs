@@ -1,35 +1,36 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
 public class StudioPeriodicNotify
 {
-    private readonly NotifyEngineQueue _notifyEngineQueue;
     private readonly WorkContext _workContext;
     private readonly TenantManager _tenantManager;
     private readonly UserManager _userManager;
@@ -45,11 +46,11 @@ public class StudioPeriodicNotify
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly AuthManager _authManager;
     private readonly SecurityContext _securityContext;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _log;
 
     public StudioPeriodicNotify(
         ILoggerProvider log,
-        NotifyEngineQueue notifyEngineQueue,
         WorkContext workContext,
         TenantManager tenantManager,
         UserManager userManager,
@@ -64,9 +65,9 @@ public class StudioPeriodicNotify
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         AuthManager authManager,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        IServiceProvider serviceProvider)
     {
-        _notifyEngineQueue = notifyEngineQueue;
         _workContext = workContext;
         _tenantManager = tenantManager;
         _userManager = userManager;
@@ -82,6 +83,7 @@ public class StudioPeriodicNotify
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _authManager = authManager;
         _securityContext = securityContext;
+        _serviceProvider = serviceProvider;
         _log = log.CreateLogger("ASC.Notify");
     }
 
@@ -103,7 +105,7 @@ public class StudioPeriodicNotify
             try
             {
                 await _tenantManager.SetCurrentTenantAsync(tenant.Id);
-                var client = _workContext.NotifyContext.RegisterClient(_notifyEngineQueue, _studioNotifyHelper.NotifySource);
+                var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
 
                 var tariff = await _tariffService.GetTariffAsync(tenant.Id);
                 var quota = await _tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -123,9 +125,17 @@ public class StudioPeriodicNotify
                 var toowner = false;
                 var topayer = false;
 
-                Func<CultureInfo, string> greenButtonText = (c) => string.Empty;
-                var greenButtonUrl = string.Empty;
+                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
+                var orangeButtonUrl = string.Empty;
 
+                var img1 = string.Empty;
+                var img2 = string.Empty;
+                var img3 = string.Empty;
+                var img4 = string.Empty;
+                var img5 = string.Empty;
+                Func<CultureInfo, string> txtTrulyYours = (c) =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+                var topGif = string.Empty;
+                
                 if (quota.Free)
                 {
                     #region After registration letters
@@ -138,9 +148,33 @@ public class StudioPeriodicNotify
                         paymentMessage = false;
                         toadmins = true;
 
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
                     }
+
+                    #endregion
+
+                    #region 4 days after registration to admins SAAS TRIAL
+
+                    if (createdDate.AddDays(4) == nowDate)
+                    {
+                        action = Actions.SaasAdminVideoGuides;
+                        paymentMessage = false;
+                        toadmins = true;
+
+                        img1 = _studioNotifyHelper.GetNotificationImageUrl("cover_1.png");
+                        img2 = _studioNotifyHelper.GetNotificationImageUrl("cover_2.png");
+                        img3 = _studioNotifyHelper.GetNotificationImageUrl("settings.png");
+                        img4 = _studioNotifyHelper.GetNotificationImageUrl("management.png");
+                        img5 = _studioNotifyHelper.GetNotificationImageUrl("administration.png");
+
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
+                        orangeButtonUrl = "https://www.youtube.com/playlist?list=PLCF48HEKMOYM8MBnwYs8q5J0ILMK9NzIx";
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("mainpic_video_guides.png");
+                    }
+
 
                     #endregion
 
@@ -153,8 +187,16 @@ public class StudioPeriodicNotify
                         toadmins = true;
                         tousers = true;
 
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+                        img1 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
+                        img2 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
+                        img3 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
+                        img4 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
+                        img5 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
+
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
                     }
 
                     #endregion
@@ -167,6 +209,13 @@ public class StudioPeriodicNotify
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("free_apps.gif");
+
+                        img1 = _studioNotifyHelper.GetNotificationImageUrl("windows.png");
+                        img2 = _studioNotifyHelper.GetNotificationImageUrl("apple.png");
+                        img3 = _studioNotifyHelper.GetNotificationImageUrl("linux.png");
+                        img4 = _studioNotifyHelper.GetNotificationImageUrl("android.png");
                     }
 
                     #endregion
@@ -180,23 +229,25 @@ public class StudioPeriodicNotify
                         action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
                         toowner = true;
 
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
 
                         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
-                        greenButtonUrl = _setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
+                        orangeButtonUrl = _setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
                                   HttpUtility.UrlEncode(Convert.ToBase64String(
                                       Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
                                                                          "\",\"lastname\":\"" + owner.LastName +
                                                                          "\",\"alias\":\"" + tenant.Alias +
                                                                          "\",\"email\":\"" + owner.Email + "\"}")));
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
                     }
                     else if (dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _authContext.CurrentAccount.ID);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
                     }
 
@@ -215,8 +266,8 @@ public class StudioPeriodicNotify
                         action = Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation;
                         toowner = true;
                         topayer = true;
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
                     #endregion
@@ -228,8 +279,8 @@ public class StudioPeriodicNotify
                         action = Actions.SaasOwnerPaymentWarningGracePeriodActivation;
                         toowner = true;
                         topayer = true;
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
                     #endregion
@@ -241,8 +292,8 @@ public class StudioPeriodicNotify
                         action = Actions.SaasOwnerPaymentWarningGracePeriodLastDay;
                         toowner = true;
                         topayer = true;
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
                     #endregion
@@ -254,8 +305,8 @@ public class StudioPeriodicNotify
                         action = Actions.SaasOwnerPaymentWarningGracePeriodExpired;
                         toowner = true;
                         topayer = true;
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
                     #endregion
@@ -267,23 +318,25 @@ public class StudioPeriodicNotify
                         action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
                         toowner = true;
 
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
 
                         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
-                        greenButtonUrl = _setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
+                        orangeButtonUrl = _setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
                                   HttpUtility.UrlEncode(Convert.ToBase64String(
                                       Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
                                                                          "\",\"lastname\":\"" + owner.LastName +
                                                                          "\",\"alias\":\"" + tenant.Alias +
                                                                          "\",\"email\":\"" + owner.Email + "\"}")));
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
                         await _tenantManager.RemoveTenantAsync(tenant.Id, true);
 
-                        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+                        if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _authContext.CurrentAccount.ID);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
                         }
                     }
 
@@ -304,10 +357,9 @@ public class StudioPeriodicNotify
 
                 if (topayer)
                 {
-                    var payerId = (await _tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-                    var payer = await _userManager.GetUserByEmailAsync(payerId);
+                    var payer = await _userManager.GetUserByEmailAsync(tariff.CustomerId);
 
-                    if (payer.Id != ASC.Core.Users.Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
+                    if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
                         users = users.Concat(new[] { payer });
                     }
@@ -322,15 +374,23 @@ public class StudioPeriodicNotify
 
                     await client.SendNoticeToAsync(
                         action,
-                            new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
+                        new[] { u },
                         new[] { senderName },
+                        new TagValue(CommonTags.Culture, culture.Name),
                         new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                            new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
+                        new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
-                        TagValues.GreenButton(greenButtonText(culture), greenButtonUrl),
+                        TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+                        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture)),
+                        new TagValue("IMG1", img1),
+                        new TagValue("IMG2", img2),
+                        new TagValue("IMG3", img3),
+                        new TagValue("IMG4", img4),
+                        new TagValue("IMG5", img5),
+                        new TagValue(CommonTags.TopGif, topGif),
                         new TagValue(Tags.PaymentDelay, _tariffService.GetPaymentDelay()),
                         new TagValue(CommonTags.Footer, await _userManager.IsDocSpaceAdminAsync(u) ? "common" : "social"));
                 }
@@ -364,14 +424,13 @@ public class StudioPeriodicNotify
             {
                 var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
                 await _tenantManager.SetCurrentTenantAsync(tenant.Id);
-                var client = _workContext.NotifyContext.RegisterClient(_notifyEngineQueue, _studioNotifyHelper.NotifySource);
+                var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
 
                 var tariff = await _tariffService.GetTariffAsync(tenant.Id);
                 var quota = await _tenantManager.GetTenantQuotaAsync(tenant.Id);
                 var createdDate = tenant.CreationDateTime.Date;
 
                 var actualEndDate = tariff.DueDate != DateTime.MaxValue ? tariff.DueDate : tariff.LicenseDate;
-                var dueDateIsNotMax = actualEndDate != DateTime.MaxValue;
                 var dueDate = actualEndDate.Date;
 
                 var delayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue;
@@ -383,9 +442,16 @@ public class StudioPeriodicNotify
                 var toadmins = false;
                 var tousers = false;
 
-                Func<CultureInfo, string> greenButtonText = (c) => string.Empty;
-                var greenButtonUrl = string.Empty;
+                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
+                var orangeButtonUrl = string.Empty;
 
+                Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+                var topGif = string.Empty;
+                var img1 = string.Empty;
+                var img2 = string.Empty;
+                var img3 = string.Empty;
+                var img4 = string.Empty;
+                var img5 = string.Empty;
 
                 if (quota.Trial && defaultRebranding)
                 {
@@ -399,8 +465,17 @@ public class StudioPeriodicNotify
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
-                        greenButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
-                        greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                        img1 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
+                        img2 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
+                        img3 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
+                        img4 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
+                        img5 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
+
+                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                        orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
                     }
 
                     #endregion
@@ -413,6 +488,13 @@ public class StudioPeriodicNotify
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
+
+                        topGif = _studioNotifyHelper.GetNotificationImageUrl("free_apps.gif");
+
+                        img1 = _studioNotifyHelper.GetNotificationImageUrl("windows.png");
+                        img2 = _studioNotifyHelper.GetNotificationImageUrl("apple.png");
+                        img3 = _studioNotifyHelper.GetNotificationImageUrl("linux.png");
+                        img4 = _studioNotifyHelper.GetNotificationImageUrl("android.png");
                     }
 
                     #endregion
@@ -438,15 +520,23 @@ public class StudioPeriodicNotify
 
                     await client.SendNoticeToAsync(
                         action,
-                            new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
+                        new[] { u },
                         new[] { senderName },
+                        new TagValue(CommonTags.Culture, culture.Name),
                         new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                            new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
+                        new TagValue(Tags.ActiveUsers, (await _userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
                         new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
-                        TagValues.GreenButton(greenButtonText(culture), greenButtonUrl));
+                        TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+                        TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture)),
+                        new TagValue("IMG1", img1),
+                        new TagValue("IMG2", img2),
+                        new TagValue("IMG3", img3),
+                        new TagValue("IMG4", img4),
+                        new TagValue("IMG5", img5),
+                        new TagValue(CommonTags.TopGif, topGif));
                 }
             }
             catch (Exception err)
@@ -477,7 +567,7 @@ public class StudioPeriodicNotify
             try
             {
                 await _tenantManager.SetCurrentTenantAsync(tenant.Id);
-                var client = _workContext.NotifyContext.RegisterClient(_notifyEngineQueue, _studioNotifyHelper.NotifySource);
+                var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
 
                 var createdDate = tenant.CreationDateTime.Date;
 
@@ -489,21 +579,41 @@ public class StudioPeriodicNotify
                 if (createdDate.AddDays(7) == nowDate)
                 {
                     var users = await _studioNotifyHelper.GetRecipientsAsync(true, true, false);
-                    var greenButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                    var orangeButtonUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+
+                    Func<CultureInfo, string> orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                    Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+
+                    var img1 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
+                    var img2 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");
+                    var img3 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips3.png");
+                    var img4 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
+                    var img5 = _studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
+
+                    var topGif = _studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
                     await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => await _studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                     {
                         var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                         Thread.CurrentThread.CurrentCulture = culture;
                         Thread.CurrentThread.CurrentUICulture = culture;
-                        var greenButtonText = WebstudioNotifyPatternResource.ButtonCollaborateDocSpace;
+
                         await client.SendNoticeToAsync(
-                                await _userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
-                                new[] { await _studioNotifyHelper.ToRecipientAsync(u.Id) },
+                            await _userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
+                            new[] { u },
                             new[] { senderName },
-                                new TagValue(Tags.UserName, u.DisplayUserName(_displayUserSettingsHelper)),
+                            new TagValue(CommonTags.Culture, culture.Name),
+                            new TagValue(Tags.UserName, u.DisplayUserName(_displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
-                            TagValues.GreenButton(greenButtonText, greenButtonUrl));
+                            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+                            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture)),
+                            new TagValue("IMG1", img1),
+                            new TagValue("IMG2", img2),
+                            new TagValue("IMG3", img3),
+                            new TagValue("IMG4", img4),
+                            new TagValue("IMG5", img5),
+                            new TagValue(CommonTags.TopGif, topGif));
                     }
                 }
                 #endregion
@@ -529,13 +639,13 @@ public class StudioPeriodicNotify
         {
             try
             {
-                var greenButtonText = string.Empty;
-                var greenButtonUrl = string.Empty;
+                var orangeButtonText = string.Empty;
+                var orangeButtonUrl = string.Empty;
 
                 var sendCount = 0;
 
                 await _tenantManager.SetCurrentTenantAsync(tenant.Id);
-                var client = _workContext.NotifyContext.RegisterClient(_notifyEngineQueue, _studioNotifyHelper.NotifySource);
+                var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
 
                 _log.InformationCurrentTenant(tenant.Id);
 
@@ -591,7 +701,7 @@ public class StudioPeriodicNotify
                       new[] { senderName },
                       TagValues.PersonalHeaderStart(),
                       TagValues.PersonalHeaderEnd(),
-                      TagValues.GreenButton(greenButtonText, greenButtonUrl),
+                      TagValues.OrangeButton(orangeButtonText, orangeButtonUrl),
                           new TagValue(CommonTags.Footer, _coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"));
                 }
 
@@ -615,22 +725,5 @@ public class StudioPeriodicNotify
         await studioNotifyHelper.SubscribeToNotifyAsync(recipient, Actions.PeriodicNotify, !isSubscribe);
 
         return !isSubscribe;
-    }
-
-    private CultureInfo GetCulture(UserInfo user)
-    {
-        CultureInfo culture = null;
-
-        if (!string.IsNullOrEmpty(user.CultureName))
-        {
-            culture = user.GetCulture();
-        }
-
-        if (culture == null)
-        {
-            culture = _tenantManager.GetCurrentTenant(false)?.GetCulture();
-        }
-
-        return culture;
     }
 }

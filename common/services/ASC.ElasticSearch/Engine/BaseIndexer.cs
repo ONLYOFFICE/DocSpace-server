@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -35,7 +35,7 @@ public enum UpdateAction
     Remove
 }
 
-[Singletone]
+[Singleton]
 public class BaseIndexerHelper
 {
     public ConcurrentDictionary<string, bool> IsExist { get; set; }
@@ -48,7 +48,7 @@ public class BaseIndexerHelper
         _notify = cacheNotify;
         _notify.Subscribe((a) =>
         {
-            IsExist.AddOrUpdate(a.Id, false, (string q, bool w) => false);
+            IsExist.AddOrUpdate(a.Id, false, (_, _) => false);
         }, CacheNotifyAction.Any);
     }
 
@@ -74,7 +74,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private readonly BaseIndexerHelper _baseIndexerHelper;
     private readonly Settings _settings;
     private readonly IServiceProvider _serviceProvider;
-    private static readonly object _locker = new object();
+    private static readonly object _locker = new();
 
     public BaseIndexer(
         Client client,
@@ -99,12 +99,9 @@ public class BaseIndexer<T> where T : class, ISearchItem
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {
-        using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
         var now = DateTime.UtcNow;
-        var lastIndexed = await webstudioDbContext.WebstudioIndex
-            .Where(r => r.IndexName == Wrapper.IndexName)
-            .Select(r => r.LastModified)
-            .FirstOrDefaultAsync();
+        var lastIndexed = await Queries.LastIndexedAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (lastIndexed.Equals(DateTime.MinValue))
         {
@@ -209,7 +206,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     internal async Task IndexAsync(T data, bool immediately = true)
     {
-        if (!(await BeforeIndex(data)))
+        if (!(await BeforeIndexAsync(data)))
         {
             return;
         }
@@ -240,7 +237,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 var t = data[i];
                 var runBulk = i == data.Count - 1;
 
-                await BeforeIndex(t);
+                await BeforeIndexAsync(t);
 
                 if (t is not ISearchItemDocument wwd || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
                 {
@@ -261,6 +258,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                             {
                                 throw;
                             }
+                            
                             _logger.ErrorIndex(e);
                         }
                         catch (Exception e)
@@ -271,7 +269,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
                         {
                             wwd.Document.Data = null;
                             wwd.Document = null;
-                            wwd = null;
                             GC.Collect();
                         }
 
@@ -293,10 +290,10 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 if (runBulk)
                 {
                     var portion1 = portion.ToList();
-                    _client.Instance.Bulk(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                    await _client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
                     for (var j = portionStart; j < i; j++)
                     {
-                        if (data[j] is ISearchItemDocument doc && doc.Document != null)
+                        if (data[j] is ISearchItemDocument { Document: not null } doc)
                         {
                             doc.Document.Data = null;
                             doc.Document = null;
@@ -315,10 +312,10 @@ public class BaseIndexer<T> where T : class, ISearchItem
         {
             foreach (var item in data)
             {
-                await BeforeIndex(item);
+                await BeforeIndexAsync(item);
             }
 
-            _client.Instance.Bulk(r => r.IndexMany(data, GetMeta));
+            await _client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
         }
     }
 
@@ -424,11 +421,6 @@ public class BaseIndexer<T> where T : class, ISearchItem
         return (result.Documents, total);
     }
 
-    protected virtual Task<bool> BeforeIndex(T data)
-    {
-        return Task.FromResult(CheckExist(data));
-    }
-
     protected virtual Task<bool> BeforeIndexAsync(T data)
     {
         return Task.FromResult(CheckExist(data));
@@ -436,18 +428,17 @@ public class BaseIndexer<T> where T : class, ISearchItem
 
     private async Task ClearAsync()
     {
-        using var webstudioDbContext = _dbContextFactory.CreateDbContext();
-        var index = await webstudioDbContext.WebstudioIndex.Where(r => r.IndexName == Wrapper.IndexName).FirstOrDefaultAsync();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (index != null)
         {
             webstudioDbContext.WebstudioIndex.Remove(index);
+            await webstudioDbContext.SaveChangesAsync();
         }
 
-        await webstudioDbContext.SaveChangesAsync();
-
         _logger.DebugIndexDeleted(Wrapper.IndexName);
-        _client.Instance.Indices.Delete(Wrapper.IndexName);
+        await _client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
         _baseIndexerHelper.Clear(Wrapper);
         CreateIfNotExist(Wrapper);
     }
@@ -472,7 +463,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     {
         var result = desc.Index(IndexName).Id(data.Id);
 
-        if (data is ISearchItemDocument doc && doc.Document != null)
+        if (data is ISearchItemDocument { Document: not null })
         {
             result.Pipeline("attachments");
         }
@@ -610,19 +601,16 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 }
                 break;
             default:
-                throw new ArgumentOutOfRangeException("action", action, null);
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
     }
 
     private string TryGetName(Expression expr, out MemberExpression member)
     {
         member = expr as MemberExpression;
-        if (member == null)
+        if (member == null && expr is UnaryExpression unary)
         {
-            if (expr is UnaryExpression unary)
-            {
-                member = unary.Operand as MemberExpression;
-            }
+            member = unary.Operand as MemberExpression;
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
@@ -673,4 +661,22 @@ static class CamelCaseExtension
     {
         return str.ToLowerInvariant()[0] + str.Substring(1);
     }
+}
+
+
+static file class Queries
+{
+    public static readonly Func<WebstudioDbContext, string, Task<DateTime>> LastIndexedAsync =
+        EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, string indexName) =>
+                ctx.WebstudioIndex
+                    .Where(r => r.IndexName == indexName)
+                    .Select(r => r.LastModified)
+                    .FirstOrDefault());
+
+    public static readonly Func<WebstudioDbContext, string, Task<DbWebstudioIndex>> IndexAsync =
+        EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, string indexName) =>
+                ctx.WebstudioIndex
+                    .FirstOrDefault(r => r.IndexName == indexName));
 }

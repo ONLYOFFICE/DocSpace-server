@@ -1,28 +1,30 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core;
 
@@ -161,11 +163,13 @@ public class SecurityContext
                 return false;
             }
 
-            var loginEventById = await _dbLoginEventsManager.GetByIdAsync(loginEventId);
-
-            if (loginEventById == null || !loginEventById.Active)
+            if (loginEventId != 0)
             {
-                return false;
+                var loginEventById = await _dbLoginEventsManager.GetByIdAsync(loginEventId);
+                if (loginEventById == null || !loginEventById.Active)
+                {
+                    return false;
+                }
             }
 
             await AuthenticateMeWithoutCookieAsync(new UserAccount(new UserInfo { Id = userid }, tenant, _userFormatter));
@@ -216,14 +220,14 @@ public class SecurityContext
 
     public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null)
     {
-        if (account == null || account.Equals(Configuration.Constants.Guest))
+        if (account == null || account.Equals(Constants.Guest))
         {
             throw new InvalidCredentialException("account");
         }
 
         var roles = new List<string> { Role.Everyone };
 
-        if (account is ISystemAccount && account.ID == Configuration.Constants.CoreSystem.ID)
+        if (account is ISystemAccount && account.ID == Constants.CoreSystem.ID)
         {
             roles.Add(Role.System);
         }
@@ -264,8 +268,8 @@ public class SecurityContext
 
         var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Sid, account.ID.ToString()),
-                new Claim(ClaimTypes.Name, account.Name)
+                new(ClaimTypes.Sid, account.ID.ToString()),
+                new(ClaimTypes.Name, account.Name)
             };
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
@@ -359,6 +363,7 @@ public class PermissionContext
 public class AuthContext
 {
     private IHttpContextAccessor HttpContextAccessor { get; }
+    private static readonly List<string> _typesCheck = new List<string>() { ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString() };
 
     public AuthContext()
     {
@@ -370,13 +375,18 @@ public class AuthContext
         HttpContextAccessor = httpContextAccessor;
     }
 
-    public IAccount CurrentAccount => Principal?.Identity is IAccount ? (IAccount)Principal.Identity : Configuration.Constants.Guest;
+    public IAccount CurrentAccount => Principal?.Identity is IAccount ? (IAccount)Principal.Identity : Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;
 
     public void Logout()
     {
         Principal = null;
+    }
+
+    public bool IsFromInvite()
+    {
+        return Principal.Claims.Any(c => _typesCheck.Contains(c.Value));
     }
 
     internal ClaimsPrincipal Principal

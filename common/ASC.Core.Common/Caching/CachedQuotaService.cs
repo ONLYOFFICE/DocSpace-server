@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 class QuotaServiceCache
 {
     internal const string KeyQuota = "quota";
@@ -105,20 +105,20 @@ class CachedQuotaService : IQuotaService
         return quotas;
     }
 
-    public async Task<TenantQuota> GetTenantQuotaAsync(int tenant)
+    public async Task<TenantQuota> GetTenantQuotaAsync(int id)
     {
-        return (await GetTenantQuotasAsync()).SingleOrDefault(q => q.Tenant == tenant);
+        return (await GetTenantQuotasAsync()).SingleOrDefault(q => q.TenantId == id);
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
     {
         var q = await Service.SaveTenantQuotaAsync(quota);
-        CacheNotify.Publish(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
+        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = QuotaServiceCache.KeyQuota }, CacheNotifyAction.Any);
 
         return q;
     }
 
-    public Task RemoveTenantQuotaAsync(int tenant)
+    public Task RemoveTenantQuotaAsync(int id)
     {
         throw new NotImplementedException();
     }
@@ -126,11 +126,11 @@ class CachedQuotaService : IQuotaService
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
         await Service.SetTenantQuotaRowAsync(row, exchange);
-        CacheNotify.Publish(new QuotaCacheItem { Key = GetKey(row.Tenant) }, CacheNotifyAction.Any);
+        await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId) }, CacheNotifyAction.Any);
 
         if (row.UserId != Guid.Empty)
         {
-            CacheNotify.Publish(new QuotaCacheItem { Key = GetKey(row.Tenant, row.UserId) }, CacheNotifyAction.Any);
+            await CacheNotify.PublishAsync(new QuotaCacheItem { Key = GetKey(row.TenantId, row.UserId) }, CacheNotifyAction.Any);
         }
     }
 

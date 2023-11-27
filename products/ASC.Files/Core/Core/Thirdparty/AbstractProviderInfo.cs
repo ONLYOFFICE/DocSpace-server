@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -40,7 +40,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
     private readonly DisposableWrapper _wrapper;
     internal readonly ProviderInfoHelper ProviderInfoHelper;
 
-    public AbstractProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
+    protected AbstractProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     {
         _wrapper = wrapper;
         ProviderInfoHelper = providerInfoHelper;
@@ -130,21 +130,19 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
     }
 }
 
-[Singletone]
+[Singleton]
 public class ProviderInfoHelper
 {
-    private readonly ICache _cacheChildItems;
+    private readonly ICache _cache;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(1);
-    private readonly ICache _cacheFile;
-    private readonly ICache _cacheFolder;
+    private readonly ConcurrentDictionary<string, object> _cacheKeys;
     private readonly ICacheNotify<BoxCacheItem> _cacheNotify;
     private readonly IEnumerable<string> _selectors = Selectors.StoredCache.Select(s => s.Id);
 
     public ProviderInfoHelper(ICacheNotify<BoxCacheItem> cacheNotify, ICache cache)
     {
-        _cacheFile = cache;
-        _cacheFolder = cache;
-        _cacheChildItems = cache;
+        _cache = cache;
+        _cacheKeys = new ConcurrentDictionary<string, object>();
         _cacheNotify = cacheNotify;
         foreach (var selector in _selectors)
         {
@@ -152,26 +150,26 @@ public class ProviderInfoHelper
             {
                 if (i.ResetAll)
                 {
-                    _cacheChildItems.Remove(new Regex($"^{selector}-" + i.Key + ".*"));
-                    _cacheFile.Remove(new Regex($"^{selector}f-" + i.Key + ".*"));
-                    _cacheFolder.Remove(new Regex($"^{selector}d-" + i.Key + ".*"));
+                    _cache.Remove(_cacheKeys, new Regex($"^{selector}-" + i.Key + ".*"));
+                    _cache.Remove(_cacheKeys, new Regex($"^{selector}f-" + i.Key + ".*"));
+                    _cache.Remove(_cacheKeys, new Regex($"^{selector}d-" + i.Key + ".*"));
                 }
 
                 if (!i.IsFileExists)
                 {
-                    _cacheChildItems.Remove($"{selector}-" + i.Key);
+                    _cache.Remove($"{selector}-" + i.Key);
 
-                    _cacheFolder.Remove($"{selector}d-" + i.Key);
+                    _cache.Remove($"{selector}d-" + i.Key);
                 }
                 else
                 {
                     if (i.IsFile)
                     {
-                        _cacheFile.Remove($"{selector}f-" + i.Key);
+                        _cache.Remove($"{selector}f-" + i.Key);
                     }
                     else
                     {
-                        _cacheFolder.Remove($"{selector}d-" + i.Key);
+                        _cache.Remove($"{selector}d-" + i.Key);
                     }
                 }
             }, CacheNotifyAction.Remove);
@@ -195,13 +193,15 @@ public class ProviderInfoHelper
 
     internal async ValueTask<TFile> GetFileAsync<TFile>(IThirdPartyFileStorage<TFile> storage, int id, string fileId, string selector) where TFile : class
     {
-        var file = _cacheFile.Get<TFile>($"{selector}f-" + id + "-" + fileId);
+        var key = $"{selector}f-" + id + "-" + fileId;
+        var file = _cache.Get<TFile>(key);
         if (file == null)
         {
             file = await storage.GetFileAsync(fileId);
             if (file != null)
             {
-                _cacheFile.Insert($"{selector}f-" + id + "-" + fileId, file, DateTime.UtcNow.Add(_cacheExpiration));
+                _cache.Insert(key, file, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+                _cacheKeys.TryAdd(key, null);
             }
         }
 
@@ -210,13 +210,15 @@ public class ProviderInfoHelper
 
     internal async Task<TFolder> GetFolderAsync<TFolder>(IThirdPartyFolderStorage<TFolder> storage, int id, string folderId, string selector) where TFolder : class
     {
-        var folder = _cacheFolder.Get<TFolder>($"{selector}d-" + id + "-" + folderId);
+        var key = $"{selector}d-" + id + "-" + folderId;
+        var folder = _cache.Get<TFolder>(key);
         if (folder == null)
         {
             folder = await storage.GetFolderAsync(folderId);
             if (folder != null)
             {
-                _cacheFolder.Insert($"{selector}d-" + id + "-" + folderId, folder, DateTime.UtcNow.Add(_cacheExpiration));
+                _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+                _cacheKeys.TryAdd(key, null);
             }
         }
 
@@ -225,23 +227,29 @@ public class ProviderInfoHelper
 
     internal async Task<List<TItem>> GetItemsAsync<TItem>(IThirdPartyItemStorage<TItem> storage, int id, string folderId, string selector, bool? folder = null) where TItem : class
     {
-        var items = _cacheChildItems.Get<List<TItem>>($"{selector}-{folder}" + id + "-" + folderId);
+        var items = _cache.Get<List<TItem>>($"{selector}-{folder}" + id + "-" + folderId);
 
         if (items == null)
         {
-            if (folder != null && folder.HasValue && storage is IGoogleDriveItemStorage<TItem>)
+            if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
             {
-                var googleStorage = storage as IGoogleDriveItemStorage<TItem>;
                 items = await googleStorage.GetItemsAsync(folderId, folder);
             }
             else
             {
                 items = await storage.GetItemsAsync(folderId);
             }
-            _cacheChildItems.Insert($"{selector}-" + id + "-" + folderId, items, DateTime.UtcNow.Add(_cacheExpiration));
+            var key = $"{selector}-" + id + "-" + folderId;
+            _cache.Insert(key, items, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+            _cacheKeys.TryAdd(key, null);
         }
 
         return items;
+    }
+
+    private void EvictionCallback(object key, object value, EvictionReason reason, object state)
+    {
+        _cacheKeys.TryRemove(key.ToString(), out _);
     }
 }
 
@@ -251,8 +259,7 @@ public class DisposableWrapper : IDisposable
     private readonly ConsumerFactory _consumerFactory;
     private readonly OAuth20TokenHelper _oAuth20TokenHelper;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages =
-        new ConcurrentDictionary<int, IThirdPartyStorage>();
+    private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages = new();
 
     public DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
     {
@@ -323,7 +330,6 @@ public class DisposableWrapper : IDisposable
 
         return storage;
     }
-
 }
 
 public static class DisposableWrapperExtension

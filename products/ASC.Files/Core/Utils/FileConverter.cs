@@ -1,38 +1,39 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Caching.Distributed;
+
+using Serializer = ProtoBuf.Serializer;
 
 namespace ASC.Web.Files.Utils;
 
-[Singletone]
-public class FileConverterQueue 
+[Singleton]
+public class FileConverterQueue
 {
-    private readonly object _locker = new object();
+    private readonly object _locker = new();
     private readonly IDistributedCache _distributedCache;
     private const string Cache_key_prefix = "asc_file_converter_queue_";
 
@@ -47,7 +48,8 @@ public class FileConverterQueue
                         IAccount account,
                         bool deleteAfter,
                         string url,
-                        string serverRootPath)
+                        string serverRootPath,
+                        ExternalShareData externalShareData = null)
     {
         lock (_locker)
         {
@@ -79,7 +81,8 @@ public class FileConverterQueue
                 StartDateTime = DateTime.UtcNow,
                 Url = url,
                 Password = password,
-                ServerRootPath = serverRootPath
+                ServerRootPath = serverRootPath,
+                ExternalShareData = externalShareData != null ? JsonSerializer.Serialize(externalShareData) : null
             };
 
             Enqueue(queueResult, cacheKey);
@@ -129,7 +132,7 @@ public class FileConverterQueue
         var cacheKey = GetCacheKey<T>();
         var queueTasks = LoadFromCache(cacheKey);
 
-        queueTasks = DeleteOrphanCacheItem<T>(queueTasks, cacheKey);
+        queueTasks = DeleteOrphanCacheItem(queueTasks, cacheKey);
 
         return queueTasks;
     }
@@ -196,13 +199,14 @@ public class FileConverterQueue
                                DateTime.UtcNow - x.StopDateTime > TimeSpan.FromMinutes(10));
     }
 
-    private IEnumerable<FileConverterOperationResult> DeleteOrphanCacheItem<T>(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
+    private IEnumerable<FileConverterOperationResult> DeleteOrphanCacheItem(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
     {
         var listTasks = queueTasks.ToList();
 
-        listTasks.RemoveAll(IsOrphanCacheItem);
-
-        SaveToCache(listTasks, cacheKey);
+        if (listTasks.RemoveAll(IsOrphanCacheItem) > 0)
+        {
+            SaveToCache(listTasks, cacheKey);
+        }
 
         return listTasks;
     }
@@ -218,7 +222,7 @@ public class FileConverterQueue
 
         using var ms = new MemoryStream();
 
-        ProtoBuf.Serializer.Serialize(ms, queueTasks);
+        Serializer.Serialize(ms, queueTasks);
 
         _distributedCache.Set(cacheKey, ms.ToArray(), new DistributedCacheEntryOptions
         {
@@ -242,7 +246,7 @@ public class FileConverterQueue
 
         using var ms = new MemoryStream(serializedObject);
 
-        return ProtoBuf.Serializer.Deserialize<List<FileConverterOperationResult>>(ms);
+        return Serializer.Deserialize<List<FileConverterOperationResult>>(ms);
     }
 }
 
@@ -283,6 +287,7 @@ public class FileConverter
     private readonly IHttpClientFactory _clientFactory;
     private readonly SocketManager _socketManager;
     private readonly FileConverterQueue _fileConverterQueue;
+    private readonly ExternalShare _externalShare;
 
     public FileConverter(
         FileUtility fileUtility,
@@ -307,7 +312,8 @@ public class FileConverter
         IServiceProvider serviceProvider,
         IHttpClientFactory clientFactory,
         SocketManager socketManager,
-        FileConverterQueue fileConverterQueue)
+        FileConverterQueue fileConverterQueue,
+        ExternalShare externalShare)
     {
         _fileUtility = fileUtility;
         _filesLinkUtility = filesLinkUtility;
@@ -332,6 +338,7 @@ public class FileConverter
         _clientFactory = clientFactory;
         _socketManager = socketManager;
         _fileConverterQueue = fileConverterQueue;
+        _externalShare = externalShare;
     }
 
     public FileConverter(
@@ -358,11 +365,11 @@ public class FileConverter
         IHttpContextAccessor httpContextAccesor,
         IHttpClientFactory clientFactory,
         SocketManager socketManager,
-        FileConverterQueue fileConverterQueue)
+        FileConverterQueue fileConverterQueue, ExternalShare externalShare)
         : this(fileUtility, filesLinkUtility, daoFactory, setupInfo, pathProvider, fileSecurity,
               fileMarker, tenantManager, authContext, entryManager, filesSettingsHelper,
               globalFolderHelper, filesMessageService, fileShareLink, documentServiceHelper, documentServiceConnector, fileTracker,
-              baseCommonLinkUtility, entryStatusManager, serviceProvider, clientFactory, socketManager, fileConverterQueue)
+              baseCommonLinkUtility, entryStatusManager, serviceProvider, clientFactory, socketManager, fileConverterQueue, externalShare)
     {
         _httpContextAccesor = httpContextAccesor;
     }
@@ -485,9 +492,10 @@ public class FileConverter
             Account = _authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
-            Url = _httpContextAccesor?.HttpContext != null ? _httpContextAccesor.HttpContext.Request.GetDisplayUrl() : null,
+            Url = _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
             Password = null,
-            ServerRootPath = _baseCommonLinkUtility.ServerRootPath
+            ServerRootPath = _baseCommonLinkUtility.ServerRootPath,
+            ExternalShareData = await _externalShare.GetLinkIdAsync() != Guid.Empty ? JsonSerializer.Serialize(_externalShare.GetCurrentShareDataAsync()) : null
         };
 
         var operationResultError = string.Empty;
@@ -526,7 +534,9 @@ public class FileConverter
         }
 
         await _fileMarker.RemoveMarkAsNewAsync(file);
-        _fileConverterQueue.Add(file, password, _tenantManager.GetCurrentTenant().Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext != null ? _httpContextAccesor.HttpContext.Request.GetDisplayUrl() : null, _baseCommonLinkUtility.ServerRootPath);
+
+        _fileConverterQueue.Add(file, password, (await _tenantManager.GetCurrentTenantAsync()).Id, _authContext.CurrentAccount, deleteAfter, _httpContextAccesor?.HttpContext?.Request.GetDisplayUrl(),
+            _baseCommonLinkUtility.ServerRootPath, await _externalShare.GetLinkIdAsync() != Guid.Empty ? await _externalShare.GetCurrentShareDataAsync() : null);
     }
 
     public bool IsConverting<T>(File<T> file)
@@ -541,7 +551,6 @@ public class FileConverter
 
     public async IAsyncEnumerable<FileOperationResult> GetStatusAsync<T>(IEnumerable<KeyValuePair<File<T>, bool>> filesPair)
     {
-        var result = new List<FileOperationResult>();
         foreach (var pair in filesPair)
         {
             var r = await _fileConverterQueue.GetStatusAsync(pair, _fileSecurity);
@@ -559,6 +568,7 @@ public class FileConverter
         var folderDao = _daoFactory.GetFolderDao<T>();
         File<T> newFile = null;
         var markAsTemplate = false;
+        var isNewFile = false;
         var newFileTitle = FileUtility.ReplaceFileExtension(file.Title, convertedFileType);
 
         if (!_filesSettingsHelper.StoreOriginalFiles && await _fileSecurity.CanEditAsync(file))
@@ -590,6 +600,7 @@ public class FileConverter
                 if (newFile != null && await _fileSecurity.CanEditAsync(newFile) && !await _entryManager.FileLockedForMeAsync(newFile.Id) && !_fileTracker.IsEditing(newFile.Id))
                 {
                     newFile.Version++;
+                    newFile.VersionGroup++;
                 }
                 else
                 {
@@ -601,6 +612,7 @@ public class FileConverter
             {
                 newFile = _serviceProvider.GetService<File<T>>();
                 newFile.ParentId = folderId;
+                isNewFile = true;
             }
         }
 
@@ -619,9 +631,18 @@ public class FileConverter
         try
         {
             using var response = await httpClient.SendAsync(request);
-            using var convertedFileStream = new ResponseStream(response);
+            await using var convertedFileStream = new ResponseStream(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
+
+            if (!isNewFile)
+            {
+                await _socketManager.UpdateFileAsync(newFile);
+            }
+            else
+            {
+                await _socketManager.CreateFileAsync(newFile);
+            }
         }
         catch (HttpRequestException e)
         {
@@ -629,16 +650,13 @@ public class FileConverter
 
             if (e.StatusCode != HttpStatusCode.NotFound)
             {
-                if (e.Message != null)
-                {
                     errorString += $" Error {e.Message}";
                 }
-            }
 
             throw new Exception(errorString);
         }
 
-        _ = _filesMessageService.SendAsync(newFile, MessageInitiator.DocsService, MessageAction.FileConverted, newFile.Title);
+        await _filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
 
         var linkDao = _daoFactory.GetLinkDao();
         await linkDao.DeleteAllLinkAsync(file.Id.ToString());
@@ -650,7 +668,7 @@ public class FileConverter
         if (tags.Count > 0)
         {
             tags.ForEach(r => r.EntryId = newFile.Id);
-            await tagDao.SaveTags(tags);
+            await tagDao.SaveTagsAsync(tags);
         }
 
         if (markAsTemplate)
@@ -661,20 +679,6 @@ public class FileConverter
         return newFile;
     }
 }
-
-internal class FileComparer<T> : IEqualityComparer<File<T>>
-{
-    public bool Equals(File<T> x, File<T> y)
-    {
-        return x != null && y != null && Equals(x.Id, y.Id) && x.Version == y.Version;
-    }
-
-    public int GetHashCode(File<T> obj)
-    {
-        return obj.Id.GetHashCode() + obj.Version.GetHashCode();
-    }
-}
-
 
 public static class FileConverterExtension
 {

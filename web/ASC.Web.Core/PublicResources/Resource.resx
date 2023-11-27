@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Validation code field cannot be empty</value>
@@ -263,7 +322,7 @@
     <value>Connect Google Cloud Storage service to backup and store data from your portal.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Connect Google Cloud Storage service to backup and store data from your portal. {0}Go to Google Cloud Platform Console and create a new service account for ONLYOFFICE. Paste the data you received  below:</value>
+    <value>Connect Google Cloud Storage service to backup and store data from your portal. {0}Go to Google Cloud Platform Console and create a new service account for ONLYOFFICE. Paste the data you received below:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
@@ -326,7 +385,7 @@
     <value>Connect Rackspace Cloud Storage service to backup and store data from your portal.</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Connect Rackspace Cloud Storage service to backup and store data from your portal. {0}In the security settings of  Rackspace Cloud Control Panel, click the Show link next to Rackspace API Key. Paste the data you received below:</value>
+    <value>Connect Rackspace Cloud Storage service to backup and store data from your portal. {0}In the security settings of Rackspace Cloud Control Panel, click the Show link next to Rackspace API Key. Paste the data you received below:</value>
   </data>
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Private Container</value>
@@ -470,7 +529,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Twitter account and search for contacts.</value>
+    <value>Enable the application to sign in to the portal using a Twitter account.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
@@ -647,7 +706,7 @@
     <value>Request limit is exceeded</value>
   </data>
   <data name="ErrorTenantTooShort" xml:space="preserve">
-    <value>The tenant domain can not be empty.</value>
+    <value>The tenant domain cannot be empty.</value>
   </data>
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>The domain name must be between {0} and {1} characters long.</value>
@@ -704,7 +763,7 @@
     <value>Invalid User Filter value.</value>
   </data>
   <data name="LdapSettingsErrorLostRights" xml:space="preserve">
-    <value>You attempted to take away admin rights from yourself. Your admin rights was unaffected.</value>
+    <value>You attempted to take away admin rights from yourself. Your admin rights were unaffected.</value>
   </data>
   <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
     <value>Your account is not linked to the LDAP directory and your LDAP password is no longer active. Please change or set the password to your account at the profile settings page.</value>
@@ -797,7 +856,7 @@
     <value>Updating user photos</value>
   </data>
   <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
-    <value>A more secure authentication type is required. Please use encripted connection or enable plain authentication on the server.</value>
+    <value>A more secure authentication type is required. Please use encrypted connection or enable plain authentication on the server.</value>
   </data>
   <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
     <value>The current pricing plan user limit has been reached</value>
@@ -987,5 +1046,53 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>What's New</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Third-party integrations</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Too many login attempts. Please try again later</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom client id</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom client secret</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a Zoom account.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Enable this app to allow your users to sign in to ONLYOFFICE using their Zoom accounts. {0}Go to the Zoom Developers website and create a new app ONLYOFFICE integration. Insert the data you received below:</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Wrong plugin archive</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin already exist</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Wrong file extension</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>File size exceeds limit</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Сhanges to system plugins are prohibited</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Wrong plugin name</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>No input file</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin not found</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>To many input files</value>
   </data>
 </root>

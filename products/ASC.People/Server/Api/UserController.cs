@@ -1,38 +1,34 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Api.Core.Security;
-using ASC.Common.Log;
 
 namespace ASC.People.Api;
 
 public class UserController : PeopleControllerBase
 {
-    private Tenant Tenant => _apiContext.Tenant;
-
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly ICache _cache;
     private readonly TenantManager _tenantManager;
     private readonly CookiesManager _cookiesManager;
@@ -66,6 +62,8 @@ public class UserController : PeopleControllerBase
     private readonly UsersQuotaSyncOperation _usersQuotaSyncOperation;
     private readonly CountUserChecker _countUserChecker;
     private readonly UsersInRoomChecker _usersInRoomChecker;
+    private readonly IUrlShortener _urlShortener;
+    private readonly FileSecurityCommon _fileSecurityCommon;
 
     public UserController(
         ICache cache,
@@ -106,7 +104,9 @@ public class UserController : PeopleControllerBase
         CountPaidUserChecker countPaidUserChecker,
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
-        IQuotaService quotaService)
+        IQuotaService quotaService,
+        IUrlShortener urlShortener,
+        FileSecurityCommon fileSecurityCommon)
         : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
         _cache = cache;
@@ -142,8 +142,22 @@ public class UserController : PeopleControllerBase
         _usersInRoomChecker = usersInRoomChecker;
         _quotaService = quotaService;
         _usersQuotaSyncOperation = usersQuotaSyncOperation;
+        _urlShortener = urlShortener;
+        _fileSecurityCommon = fileSecurityCommon;
     }
 
+    /// <summary>
+    /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Add an activated user
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
+    /// <path>api/2.0/people/active</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <visible>false</visible>
     [HttpPost("active")]
     public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
     {
@@ -177,10 +191,16 @@ public class UserController : PeopleControllerBase
         user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
-        user.Sex = "male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
-                       ? true
-                       : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : null);
 
+        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex = true;
+        }
+        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex =  false;
+        }
+        
         user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -202,6 +222,17 @@ public class UserController : PeopleControllerBase
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Add a user
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Newly added user with the detailed information</returns>
+    /// <path>api/2.0/people</path>
+    /// <httpMethod>POST</httpMethod>
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -265,10 +296,16 @@ public class UserController : PeopleControllerBase
         user.Title = inDto.Title;
         user.Location = inDto.Location;
         user.Notes = inDto.Comment;
-        user.Sex = "male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
-                       ? true
-                       : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? false : null);
 
+        if ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex = true;
+        }
+        else if ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Sex =  false;
+        }
+        
         user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
@@ -290,19 +327,27 @@ public class UserController : PeopleControllerBase
         {
             var success = int.TryParse(linkData.RoomId, out var id);
 
-            if (success)
+            try
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                await _semaphore.WaitAsync();
+                if (success)
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                }
+                else
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
-            else
+            finally
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                _semaphore.Release();
             }
         }
 
-        if (inDto.IsUser)
+        if (inDto.IsUser.GetValueOrDefault(false))
         {
             await _messageService.SendAsync(MessageAction.GuestCreated, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
         }
@@ -314,21 +359,36 @@ public class UserController : PeopleControllerBase
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Invites users specified in the request to the current portal.
+    /// </summary>
+    /// <short>
+    /// Invite users
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.InviteUsersRequestDto, ASC.People" name="inDto">Request parameters for inviting users</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
+    /// <path>api/2.0/people/invite</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <collection>list</collection>
     [HttpPost("invite")]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
+        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+
         foreach (var invite in inDto.Invitations)
         {
-            if (!await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invite.Type), Constants.Action_AddRemoveUser))
+            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync())) ||
+                !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invite.Type), Constants.Action_AddRemoveUser))
             {
                 continue;
             }
 
-            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type);
-            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID);
+            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
+            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID, inDto.Culture);
+            var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
 
-            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, link);
-            _logger.Debug(link);
+            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
         }
 
         var result = new List<EmployeeDto>();
@@ -343,7 +403,18 @@ public class UserController : PeopleControllerBase
         return result;
     }
 
+    /// <summary>
+    /// Sets a new password to the user with the ID specified in the request.
+    /// </summary>
+    /// <short>Change a user password</short>
+    /// <category>Password</category>
+    /// <param type="System.Guid, System" method="url" name="userid">User ID</param>
+    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Request parameters for setting new password</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
+    /// <path>api/2.0/people/{userid}/password</path>
+    /// <httpMethod>PUT</httpMethod>
     [HttpPut("{userid}/password")]
+    [EnableRateLimiting("sensitive_api")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)
     {
@@ -393,10 +464,21 @@ public class UserController : PeopleControllerBase
             await _cookiesManager.ResetUserCookieAsync(userid);
             await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
-
+        
         return await _employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
+    /// <summary>
+    /// Deletes a user with the ID specified in the request from the portal.
+    /// </summary>
+    /// <short>
+    /// Delete a user
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Deleted user detailed information</returns>
+    /// <path>api/2.0/people/{userid}</path>
+    /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("{userid}")]
     public async Task<EmployeeFullDto> DeleteMemberAsync(string userid)
     {
@@ -414,18 +496,36 @@ public class UserController : PeopleControllerBase
             throw new Exception("The user is not suspended");
         }
 
-        await CheckReassignProccessAsync(new[] { user.Id });
+        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+
+        if (await _fileSecurityCommon.IsDocSpaceAdministratorAsync(user.Id) && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
+        {
+            throw new SecurityException();
+        }
+        
+        await CheckReassignProcessAsync(new[] { user.Id });
 
         var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
-        _queueWorkerRemove.Start(Tenant.Id, user, _securityContext.CurrentAccount.ID, false);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
 
         await _messageService.SendAsync(MessageAction.UserDeleted, _messageTarget.Create(user.Id), userName);
 
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Deletes the current user profile.
+    /// </summary>
+    /// <short>
+    /// Delete my profile
+    /// </short>
+    /// <category>Profiles</category>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed information about my profile</returns>
+    /// <path>api/2.0/people/@self</path>
+    /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("@self")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
@@ -443,8 +543,9 @@ public class UserController : PeopleControllerBase
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
-
-        if (user.IsLDAP() || user.IsOwner(Tenant))
+        
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsLDAP() || user.IsOwner(tenant))
         {
             throw new SecurityException();
         }
@@ -474,6 +575,19 @@ public class UserController : PeopleControllerBase
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Returns a list of users matching the status filter and search query.
+    /// </summary>
+    /// <short>
+    /// Search users by status filter
+    /// </short>
+    /// <category>Search</category>
+    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">User status</param>
+    /// <param type="System.String, System" name="query">Search query</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/status/{status}/search</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(EmployeeStatus status, [FromQuery] string query)
     {
@@ -493,7 +607,7 @@ public class UserController : PeopleControllerBase
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.IndexOf(query, StringComparison.OrdinalIgnoreCase) > -1 || (x.LastName != null && x.LastName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) ||
-                                (x.UserName != null && x.UserName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.Email != null && x.Email.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.ContactsList != null && x.ContactsList.Any(y => y.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1)));
+                                (x.UserName != null && x.UserName.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.Email != null && x.Email.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1) || (x.ContactsList != null && x.ContactsList.Exists(y => y.IndexOf(query, StringComparison.OrdinalIgnoreCase) != -1)));
 
         await foreach (var item in list)
         {
@@ -501,17 +615,40 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns a list of profiles for all the portal users.
+    /// </summary>
+    /// <short>
+    /// Get profiles
+    /// </short>
+    /// <category>Profiles</category>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAll()
     {
         return GetByStatus(EmployeeStatus.Active);
     }
 
+    /// <summary>
+    /// Returns the detailed information about a profile of the user with the email specified in the request.
+    /// </summary>
+    /// <short>
+    /// Get a profile by user email
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="System.String, System" method="url" name="email">User email address</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
+    /// <path>api/2.0/people/email</path>
+    /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("email")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
     {
-        if (_coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).IsOwner(Tenant))
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (_coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).IsOwner(tenant))
         {
             throw new MethodAccessException("Method not available");
         }
@@ -525,6 +662,17 @@ public class UserController : PeopleControllerBase
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Returns the detailed information about a profile of the user with the name specified in the request.
+    /// </summary>
+    /// <short>
+    /// Get a profile by user name
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="System.String, System" method="url" name="username">User name</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed profile information</returns>
+    /// <path>api/2.0/people/{username}</path>
+    /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     [HttpGet("{username}", Order = 1)]
@@ -566,6 +714,18 @@ public class UserController : PeopleControllerBase
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Returns a list of profiles filtered by user status.
+    /// </summary>
+    /// <short>
+    /// Get profiles by status
+    /// </short>
+    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">User status</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <category>User status</category>
+    /// <path>api/2.0/people/status/{status}</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(EmployeeStatus status)
     {
@@ -581,20 +741,48 @@ public class UserController : PeopleControllerBase
             _apiContext.SetDataFiltered();
         }
 
-        return GetFullByFilter(status, groupId, null, null, null, null, null);
+        return GetFullByFilter(status, groupId, null, null, null, null, null, null);
     }
 
+    /// <summary>
+    /// Returns a list of users with full information about them matching the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Search users and their information by extended filter
+    /// </short>
+    /// <category>Search</category>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus">User status</param>
+    /// <param type="System.Nullable{System.Guid}, System" name="groupId">Group ID</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
+    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
+    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/filter</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("filter")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
     {
-        var users = await GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, isAdministrator, payments, accountLoginType);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType);
 
-        foreach (var user in users)
+        await foreach (var user in users)
         {
             yield return await _employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
+    /// <summary>
+    /// Returns the information about the People module.
+    /// </summary>
+    /// <short>Get the People information</short>
+    /// <category>Module</category>
+    /// <returns type="ASC.Api.Core.Module, ASC.Api.Core">Module information</returns>
+    /// <path>api/2.0/people/info</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <visible>false</visible>
     [HttpGet("info")]
     public Module GetModule()
     {
@@ -604,12 +792,32 @@ public class UserController : PeopleControllerBase
         return new Module(product);
     }
 
+    /// <summary>
+    /// Returns a list of users matching the search query. This method uses the query parameters.
+    /// </summary>
+    /// <short>Search users (using query parameters)</short>
+    /// <category>Search</category>
+    /// <param type="System.String, System" name="query">Search query</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
+    /// <path>api/2.0/people/search</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("search")]
     public IAsyncEnumerable<EmployeeDto> GetPeopleSearch([FromQuery] string query)
     {
         return GetSearch(query);
     }
 
+    /// <summary>
+    /// Returns a list of users matching the search query.
+    /// </summary>
+    /// <short>Search users</short>
+    /// <category>Search</category>
+    /// <param type="System.String, System" method="url" name="query">Search query</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/@search/{query}</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(string query)
     {
@@ -632,17 +840,48 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns a list of users matching the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Search users by extended filter
+    /// </short>
+    /// <category>Search</category>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeStatus}, System" name="employeeStatus">User status</param>
+    /// <param type="System.Nullable{System.Guid}, System" name="groupId">Group ID</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeActivationStatus}, System" name="activationStatus">Activation status</param>
+    /// <param type="System.Nullable{ASC.Core.Users.EmployeeType}, System" name="employeeType">User type</param>
+    /// <param type="ASC.Core.Users.EmployeeType[], ASC.Core.Common" name="employeeTypes">List of user types</param>
+    /// <param type="System.Nullable{System.Boolean}, System" name="isAdministrator">Specifies if the user is an administrator or not</param>
+    /// <param type="System.Nullable{ASC.Core.Payments}, System" name="payments">User payment status</param>
+    /// <param type="System.Nullable{ASC.Core.AccountLoginType}, System" name="accountLoginType">Account login type</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of users</returns>
+    /// <path>api/2.0/people/simple/filter</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
     [HttpGet("simple/filter")]
-    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, [FromQuery] EmployeeType[] employeeTypes, bool? isAdministrator, Payments? payments, AccountLoginType? accountLoginType)
     {
-        var users = await GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, isAdministrator, payments, accountLoginType);
+        var users = GetByFilterAsync(employeeStatus, groupId, activationStatus, employeeType, employeeTypes, isAdministrator, payments, accountLoginType);
 
-        foreach (var user in users)
+        await foreach (var user in users)
         {
             yield return await _employeeDtoHelper.GetAsync(user);
         }
     }
 
+    /// <summary>
+    /// Registers a user on the Personal portal.
+    /// </summary>
+    /// <short>
+    /// Register a Personal account
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.RegisterPersonalUserRequestDto, ASC.People" name="inDto">Request parameters for registering a Personal account</param>
+    /// <returns type="System.String, System">Error message or empty string</returns>
+    /// <path>api/2.0/people/register</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<string> RegisterUserOnPersonalAsync(RegisterPersonalUserRequestDto inDto)
@@ -666,11 +905,11 @@ public class UserController : PeopleControllerBase
                 CultureInfo.CurrentUICulture = cultureInfo;
             }
 
-            inDto.Email.ThrowIfNull(new ArgumentException(Resource.ErrorEmailEmpty, "email"));
+            inDto.Email.ThrowIfNull(new ArgumentException(Resource.ErrorEmailEmpty, inDto.Email));
 
             if (!inDto.Email.TestEmailRegex())
             {
-                throw new ArgumentException(Resource.ErrorNotCorrectEmail, "email");
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail, inDto.Email);
             }
 
             if (!SetupInfo.IsSecretEmail(inDto.Email)
@@ -736,18 +975,31 @@ public class UserController : PeopleControllerBase
         return string.Empty;
     }
 
+    /// <summary>
+    /// Deletes a list of the users with the IDs specified in the request.
+    /// </summary>
+    /// <short>
+    /// Delete users
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating portal users</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/delete</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
-        await CheckReassignProccessAsync(inDto.UserIds);
+        await CheckReassignProcessAsync(inDto.UserIds);
 
         var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
 
         var userNames = users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)).ToList();
-
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         foreach (var user in users)
         {
             if (user.Status != EmployeeStatus.Terminated)
@@ -757,7 +1009,7 @@ public class UserController : PeopleControllerBase
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            _queueWorkerRemove.Start(Tenant.Id, user, _securityContext.CurrentAccount.ID, false);
+            _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
         }
 
         await _messageService.SendAsync(MessageAction.UsersDeleted, _messageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -768,22 +1020,37 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    /// <summary>
+    /// Resends emails to the users who have not activated their emails.
+    /// </summary>
+    /// <short>
+    /// Resend activation emails
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating portal users</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/invite</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
     [AllowNotPayment]
     [HttpPut("invite")]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
     {
-        IEnumerable<UserInfo> users = null;
+        List<UserInfo> users;
 
         if (inDto.ResendAll)
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, EmployeeType.User), Constants.Action_AddRemoveUser);
-            users = (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
+            users = (await _userManager.GetUsersAsync())
+                .Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending)
+                .ToList();
         }
         else
         {
             users = await inDto.UserIds.ToAsyncEnumerable()
                 .Where(userId => !_userManager.IsSystemUser(userId))
-                .SelectAwait(async userId => await _userManager.GetUsersAsync(userId)).ToListAsync();
+                .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
+                .ToListAsync();
         }
 
         foreach (var user in users)
@@ -823,8 +1090,10 @@ public class UserController : PeopleControllerBase
                     continue;
                 }
 
-                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID);
-                await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, link);
+                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
+
+                await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
             }
             else
             {
@@ -840,18 +1109,39 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns a theme which is set to the current portal.
+    /// </summary>
+    /// <short>
+    /// Get portal theme
+    /// </short>
+    /// <category>Theme</category>
+    /// <returns type="ASC.Web.Core.Users.DarkThemeSettings, ASC.Web.Core">Theme</returns>
+    /// <path>api/2.0/people/theme</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("theme")]
     public async Task<DarkThemeSettings> GetThemeAsync()
     {
         return await _settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
     }
 
+    /// <summary>
+    /// Changes the current portal theme.
+    /// </summary>
+    /// <short>
+    /// Change portal theme
+    /// </short>
+    /// <category>Theme</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.DarkThemeSettingsRequestDto, ASC.People" name="inDto">Theme settings request parameters</param>
+    /// <returns type="ASC.Web.Core.Users.DarkThemeSettings, ASC.Web.Core">Theme</returns>
+    /// <path>api/2.0/people/theme</path>
+    /// <httpMethod>PUT</httpMethod>
     [HttpPut("theme")]
-    public async Task<DarkThemeSettings> ChangeThemeAsync(DarkThemeSettingsRequestDto model)
+    public async Task<DarkThemeSettings> ChangeThemeAsync(DarkThemeSettingsRequestDto inDto)
     {
         var darkThemeSettings = new DarkThemeSettings
         {
-            Theme = model.Theme
+            Theme = inDto.Theme
         };
 
         await _settingsManager.SaveForCurrentUserAsync(darkThemeSettings);
@@ -859,6 +1149,16 @@ public class UserController : PeopleControllerBase
         return darkThemeSettings;
     }
 
+    /// <summary>
+    /// Returns the detailed information about the current user profile.
+    /// </summary>
+    /// <short>
+    /// Get my profile
+    /// </short>
+    /// <category>Profiles</category>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed information about my profile</returns>
+    /// <path>api/2.0/people/@self</path>
+    /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
@@ -872,6 +1172,17 @@ public class UserController : PeopleControllerBase
         return result;
     }
 
+    /// <summary>
+    /// Sends a message to the user email with the instructions to change the email address connected to the portal.
+    /// </summary>
+    /// <short>
+    /// Send instructions to change email
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="System.Object, System">Message text</returns>
+    /// <path>api/2.0/people/email</path>
+    /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("email")]
     public async Task<object> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
@@ -880,7 +1191,7 @@ public class UserController : PeopleControllerBase
 
         if (userid == Guid.Empty)
         {
-            throw new ArgumentNullException("userid");
+            throw new ArgumentNullException(inDto.UserId);
         }
 
         var email = (inDto.Email ?? "").Trim();
@@ -896,14 +1207,26 @@ public class UserController : PeopleControllerBase
         }
 
         var viewer = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
-        if (user == null)
+        if (_userManager.IsSystemUser(user.Id))
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        if (viewer == null || (user.IsOwner(Tenant) && viewer.Id != user.Id))
+        if (!viewerIsAdmin && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (user.IsOwner(tenant) && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        if (!viewer.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
@@ -915,7 +1238,7 @@ public class UserController : PeopleControllerBase
             throw new Exception(_customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
-        if (!await _userManager.IsDocSpaceAdminAsync(viewer))
+        if (!viewerIsAdmin)
         {
             await _studioNotifyService.SendEmailChangeInstructionsAsync(user, email);
         }
@@ -929,6 +1252,7 @@ public class UserController : PeopleControllerBase
             user.Email = email;
             user.ActivationStatus = EmployeeActivationStatus.NotActivated;
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await _cookiesManager.ResetUserCookieAsync(user.Id);
             await _studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
         }
 
@@ -937,20 +1261,56 @@ public class UserController : PeopleControllerBase
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
+    /// <summary>
+    /// Reminds a password to the user using the email address specified in the request.
+    /// </summary>
+    /// <short>
+    /// Remind a user password
+    /// </short>
+    /// <category>Password</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.MemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
+    /// <returns type="System.Object, System">Email with the password</returns>
+    /// <path>api/2.0/people/password</path>
+    /// <httpMethod>POST</httpMethod>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
+    [EnableRateLimiting("sensitive_api")]
     public async Task<object> SendUserPasswordAsync(MemberRequestDto inDto)
     {
-        var error = await _userManagerWrapper.SendUserPasswordAsync(inDto.Email);
-        if (!string.IsNullOrEmpty(error))
+        if (_authContext.IsAuthenticated)
         {
-            _logger.ErrorPasswordRecovery(inDto.Email, error);
+            var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
+            if (currentUser.Id != _authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID)))
+            {
+                throw new Exception(Resource.ErrorAccessDenied);
+            }
         }
 
-        return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+        var error = await _userManagerWrapper.SendUserPasswordAsync(inDto.Email);
+        if (string.IsNullOrEmpty(error))
+        {
+            return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+        }
+
+        _logger.ErrorPasswordRecovery(inDto.Email, error);
+        throw new InvalidOperationException(error);
     }
 
+    /// <summary>
+    /// Sets the required activation status to the list of users with the IDs specified in the request.
+    /// </summary>
+    /// <short>
+    /// Set an activation status to the users
+    /// </short>
+    /// <category>User status</category>
+    /// <param type="ASC.Core.Users.EmployeeActivationStatus, ASC.Core.Common" method="url" name="activationstatus">Activation status</param>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
@@ -971,7 +1331,7 @@ public class UserController : PeopleControllerBase
             await _userManager.UpdateUserInfoAsync(u);
 
             if (activationstatus == EmployeeActivationStatus.Activated
-                && u.IsOwner(_tenantManager.GetCurrentTenant()))
+                && u.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
             {
                 var settings = _settingsManager.Load<FirstEmailConfirmSettings>();
 
@@ -980,7 +1340,7 @@ public class UserController : PeopleControllerBase
                     await _studioNotifyService.SendAdminWelcomeAsync(u);
 
                     settings.IsFirst = false;
-                    _settingsManager.Save(settings);
+                    await _settingsManager.SaveAsync(settings);
                 }
             }
 
@@ -988,6 +1348,18 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates the user language with the parameter specified in the request.
+    /// </summary>
+    /// <short>
+    /// Update user language
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
+    /// <path>api/2.0/people/{userid}/culture</path>
+    /// <httpMethod>PUT</httpMethod>
     [HttpPut("{userid}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(string userid, UpdateMemberRequestDto inDto)
     {
@@ -1002,30 +1374,39 @@ public class UserController : PeopleControllerBase
 
         var curLng = user.CultureName;
 
-        if (_setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null)
+        if (_setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
         {
-            if (curLng != inDto.CultureName)
+            user.CultureName = inDto.CultureName;
+
+            try
             {
-                user.CultureName = inDto.CultureName;
-
-                try
-                {
-                    await _userManager.UpdateUserInfoAsync(user);
-                }
-                catch
-                {
-                    user.CultureName = curLng;
-                    throw;
-                }
-
-                await _messageService.SendAsync(MessageAction.UserUpdatedLanguage, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
-
+                await _userManager.UpdateUserInfoAsync(user);
             }
+            catch
+            {
+                user.CultureName = curLng;
+                throw;
+            }
+
+            await _messageService.SendAsync(MessageAction.UserUpdatedLanguage, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+
         }
 
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Update a user
+    /// </short>
+    /// <category>Profiles</category>
+    /// <param type="System.String, System" method="url" name="userid">User ID</param>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Member request parameters</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Updated user with the detailed information</returns>
+    /// <path>api/2.0/people/{userid}</path>
+    /// <httpMethod>PUT</httpMethod>
     [HttpPut("{userid}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(string userid, UpdateMemberRequestDto inDto)
     {
@@ -1037,108 +1418,167 @@ public class UserController : PeopleControllerBase
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
+
+        var changed = false;
         var self = _securityContext.CurrentAccount.ID.Equals(user.Id);
-        var resetDate = new DateTime(1900, 01, 01);
-
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID);
+        
         //Update it
-
-        var isLdap = user.IsLDAP();
-        var isSso = user.IsSSO();
-        var isDocSpaceAdmin = await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID);
-
-        if (!isLdap && !isSso)
+        if (self)
         {
-            //Set common fields
+            var isLdap = user.IsLDAP();
+            var isSso = user.IsSSO();
 
-            user.FirstName = inDto.Firstname ?? user.FirstName;
-            user.LastName = inDto.Lastname ?? user.LastName;
-            user.Location = inDto.Location ?? user.Location;
-
-            if (isDocSpaceAdmin)
+            if (!isLdap && !isSso)
             {
-                user.Title = inDto.Title ?? user.Title;
+                //Set common fields
+
+                var firstName = inDto.Firstname ?? user.FirstName;
+                var lastName = inDto.Lastname ?? user.LastName;
+
+                if (!_userFormatter.IsValidUserName(firstName, lastName))
+                {
+                    throw new Exception(Resource.ErrorIncorrectUserName);
+                }
+
+                user.FirstName = firstName;
+                user.LastName = lastName;
+                user.Location = inDto.Location ?? user.Location;
+
+                if (isDocSpaceAdmin)
+                {
+                    user.Title = inDto.Title ?? user.Title;
+                }
             }
+
+            user.Notes = inDto.Comment ?? user.Notes;
+
+            user.Sex = inDto.Sex switch
+            {
+                "male" => true,
+                "female" => false,
+                _ => user.Sex
+            };
+
+
+            user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
+
+            var resetDate = new DateTime(1900, 01, 01);
+            if (user.BirthDate == resetDate)
+            {
+                user.BirthDate = null;
+            }
+
+            user.WorkFromDate = inDto.Worksfrom != null
+                ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom)
+                : user.WorkFromDate;
+
+            if (user.WorkFromDate == resetDate)
+            {
+                user.WorkFromDate = null;
+            }
+
+            //Update contacts
+            await UpdateContactsAsync(inDto.Contacts, user);
+            await UpdateDepartmentsAsync(inDto.Department, user);
+
+            if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+            {
+                await UpdatePhotoUrlAsync(inDto.Files, user);
+            }
+
+            changed = true;
         }
-
-        if (!_userFormatter.IsValidUserName(user.FirstName, user.LastName))
-        {
-            throw new Exception(Resource.ErrorIncorrectUserName);
-        }
-
-        user.Notes = inDto.Comment ?? user.Notes;
-        user.Sex = ("male".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase)
-            ? true
-            : ("female".Equals(inDto.Sex, StringComparison.OrdinalIgnoreCase) ? (bool?)false : null)) ?? user.Sex;
-
-        user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
-
-        if (user.BirthDate == resetDate)
-        {
-            user.BirthDate = null;
-        }
-
-        user.WorkFromDate = inDto.Worksfrom != null ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : user.WorkFromDate;
-
-        if (user.WorkFromDate == resetDate)
-        {
-            user.WorkFromDate = null;
-        }
-
-        //Update contacts
-        await UpdateContactsAsync(inDto.Contacts, user);
-        await UpdateDepartmentsAsync(inDto.Department, user);
-
-        if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
-        {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
-        }
-        if (inDto.Disable.HasValue)
+        
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var owner = user.IsOwner(tenant);
+        var statusChanged = false;
+        
+        if ((self || isDocSpaceAdmin && !owner) && inDto.Disable.HasValue)
         {
             user.Status = inDto.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
             user.TerminatedDate = inDto.Disable.Value ? DateTime.UtcNow : null;
+            changed = true;
+            statusChanged = true;
         }
+
 
         // change user type
-        var canBeGuestFlag = !user.IsOwner(Tenant) && !await _userManager.IsDocSpaceAdminAsync(user) && (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && !user.IsMe(_authContext);
+        var canBeGuestFlag = !owner && 
+                             !await _userManager.IsDocSpaceAdminAsync(user) && 
+                             (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && 
+                             !self;
 
-        if (inDto.IsUser && !await _userManager.IsUserAsync(user) && canBeGuestFlag)
+        if (inDto.IsUser.HasValue)
         {
-            await _countUserChecker.CheckAppend();
-            await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-            _webItemSecurityCache.ClearCache(Tenant.Id);
+            var isUser = inDto.IsUser.Value;
+            try
+            {
+                await _semaphore.WaitAsync();
+                if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
+                {
+                    await _countUserChecker.CheckAppend();
+                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
+                    _webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
+
+                if (!self && !isUser && await _userManager.IsUserAsync(user))
+                {
+                    await _countPaidUserChecker.CheckAppend();
+                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    _webItemSecurityCache.ClearCache(tenant.Id);
+                    changed = true;
+                }
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
-        if (!self && !inDto.IsUser && await _userManager.IsUserAsync(user))
+        if (changed)
         {
-            await _countPaidUserChecker.CheckAppend();
-            await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-            _webItemSecurityCache.ClearCache(Tenant.Id);
-        }
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+            await _messageService.SendAsync(MessageAction.UserUpdated, _messageTarget.Create(user.Id),
+                user.DisplayUserName(false, _displayUserSettingsHelper), user.Id);
 
-        await _messageService.SendAsync(MessageAction.UserUpdated, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), user.Id);
-
-        if (inDto.Disable.HasValue && inDto.Disable.Value)
-        {
-            await _cookiesManager.ResetUserCookieAsync(user.Id);
-            await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+            if (statusChanged && inDto.Disable.HasValue && inDto.Disable.Value)
+            {
+                await _cookiesManager.ResetUserCookieAsync(user.Id);
+                await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+            }
         }
 
         return await _employeeFullDtoHelper.GetFullAsync(user);
     }
 
+    /// <summary>
+    /// Changes a status for the users with the IDs specified in the request.
+    /// </summary>
+    /// <short>
+    /// Change a user status
+    /// </short>
+    /// <category>User status</category>
+    /// <param type="ASC.Core.Users.EmployeeStatus, ASC.Core.Common" method="url" name="status">New user status</param>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/status/{status}</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(EmployeeStatus status, UpdateMembersRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
         var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
 
         foreach (var user in users)
         {
-            if (user.IsOwner(Tenant) || user.IsMe(_authContext))
+            if (user.IsOwner(tenant) || _authContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(user) || user.IsMe(_authContext))
             {
                 continue;
             }
@@ -1148,18 +1588,26 @@ public class UserController : PeopleControllerBase
                 case EmployeeStatus.Active:
                     if (user.Status == EmployeeStatus.Terminated)
                     {
-                        if (!await _userManager.IsUserAsync(user))
+                        try
                         {
-                            await _countPaidUserChecker.CheckAppend();
+                            await _semaphore.WaitAsync();
+                            if (!await _userManager.IsUserAsync(user))
+                            {
+                                await _countPaidUserChecker.CheckAppend();
+                            }
+                            else
+                            {
+                                await _countUserChecker.CheckAppend();
+                            }
+
+                            user.Status = EmployeeStatus.Active;
+
+                            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                         }
-                        else
+                        finally
                         {
-                            await _countUserChecker.CheckAppend();
+                            _semaphore.Release();
                         }
-
-                        user.Status = EmployeeStatus.Active;
-
-                        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
                     }
                     break;
                 case EmployeeStatus.Terminated:
@@ -1181,6 +1629,19 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    /// <summary>
+    /// Changes a type for the users with the IDs specified in the request.
+    /// </summary>
+    /// <short>
+    /// Change a user type
+    /// </short>
+    /// <category>User type</category>
+    /// <param type="ASC.Core.Users.EmployeeType, ASC.Core.Common" method="url" name="type">New user type</param>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/type/{type}</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
     [HttpPut("type/{type}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserTypeAsync(EmployeeType type, UpdateMembersRequestDto inDto)
     {
@@ -1192,17 +1653,12 @@ public class UserController : PeopleControllerBase
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .ToListAsync();
 
-        var updatedUsers = new List<UserInfo>(users.Count());
-
         foreach (var user in users)
         {
-            if (await _userManagerWrapper.UpdateUserTypeAsync(user, type))
-            {
-                updatedUsers.Add(user);
-            }
+            await _userManagerWrapper.UpdateUserTypeAsync(user, type);
         }
 
-        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.CreateFromGroupValues(users.Select(x => x.Id.ToString())),
+        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.Create(users.Select(x => x.Id)),
         users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
 
         foreach (var user in users)
@@ -1211,20 +1667,52 @@ public class UserController : PeopleControllerBase
         }
     }
 
+    ///<summary>
+    /// Starts the process of recalculating quota.
+    /// </summary>
+    /// <short>
+    /// Recalculate quota 
+    /// </short>
+    /// <category>Quota</category>
+    /// <path>api/2.0/people/recalculatequota</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <returns></returns>
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         _usersQuotaSyncOperation.RecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
     }
 
+    /// <summary>
+    /// Checks the process of recalculating quota.
+    /// </summary>
+    /// <short>
+    /// Check quota recalculation
+    /// </short>
+    /// <category>Quota</category>
+    /// <returns type="ASC.Api.Core.Model.TaskProgressDto, ASC.Api.Core.Model">Task progress</returns>
+    /// <path>api/2.0/people/checkrecalculatequota</path>
+    /// <httpMethod>GET</httpMethod>
     [HttpGet("checkrecalculatequota")]
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return _usersQuotaSyncOperation.CheckRecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
     }
 
+    /// <summary>
+    /// Changes a quota limit for the users with the IDs specified in the request.
+    /// </summary>
+    /// <short>
+    /// Change a user quota limit
+    /// </short>
+    /// <category>Quota</category>
+    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMembersRequestDto, ASC.People" name="inDto">Request parameters for updating user information</param>
+    /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">List of users with the detailed information</returns>
+    /// <path>api/2.0/people/quota</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <collection>list</collection>
     [HttpPut("quota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
@@ -1232,26 +1720,26 @@ public class UserController : PeopleControllerBase
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId));
 
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         await foreach (var user in users)
         {
             if (inDto.Quota != -1)
             {
                 var usedSpace = Math.Max(0,
-                    (await _quotaService.FindUserQuotaRowsAsync(
-                            await _tenantManager.GetCurrentTenantIdAsync(),
-                            user.Id
-                        ))
-                .Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+                    (await _quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id))
+                    .Where(r => !string.IsNullOrEmpty(r.Tag))
+                    .Sum(r => r.Counter));
 
-                var tenanSpaceQuota = (await _quotaService.GetTenantQuotaAsync(Tenant.Id)).MaxTotalSize;
+                var tenantSpaceQuota = (await _quotaService.GetTenantQuotaAsync(tenant.Id)).MaxTotalSize;
 
-                if (tenanSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
+                if (tenantSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
                 {
                     continue;
                 }
             }
 
-            var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
             await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
@@ -1274,20 +1762,20 @@ public class UserController : PeopleControllerBase
 
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
         var managerGroups = new List<Guid>();
-        foreach (var groupInfo in groups)
+        foreach (var groupInfoId in groups.Select(r=> r.ID))
         {
-            await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfo.ID);
-            var managerId = await _userManager.GetDepartmentManagerAsync(groupInfo.ID);
+            await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfoId);
+            var managerId = await _userManager.GetDepartmentManagerAsync(groupInfoId);
             if (managerId == user.Id)
             {
-                managerGroups.Add(groupInfo.ID);
-                await _userManager.SetDepartmentManagerAsync(groupInfo.ID, Guid.Empty);
+                managerGroups.Add(groupInfoId);
+                await _userManager.SetDepartmentManagerAsync(groupInfoId, Guid.Empty);
             }
         }
         foreach (var guid in department)
         {
             var userDepartment = await _userManager.GetGroupInfoAsync(guid);
-            if (userDepartment != Constants.LostGroupInfo)
+            if (!Equals(userDepartment, Constants.LostGroupInfo))
             {
                 await _userManager.AddUserIntoGroupAsync(user.Id, guid);
                 if (managerGroups.Contains(guid))
@@ -1298,11 +1786,13 @@ public class UserController : PeopleControllerBase
         }
     }
 
-    private async Task CheckReassignProccessAsync(IEnumerable<Guid> userIds)
+    private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         foreach (var userId in userIds)
         {
-            var reassignStatus = _queueWorkerReassign.GetProgressItemStatus(Tenant.Id, userId);
+            var reassignStatus = _queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
             if (reassignStatus == null || reassignStatus.IsCompleted)
             {
                 continue;
@@ -1314,7 +1804,15 @@ public class UserController : PeopleControllerBase
         }
     }
 
-    private async Task<IQueryable<UserInfo>> GetByFilterAsync(EmployeeStatus? employeeStatus, Guid? groupId, EmployeeActivationStatus? activationStatus, EmployeeType? employeeType, bool? isDocSpaceAdministrator, Payments? payments, AccountLoginType? accountLoginType)
+    private async IAsyncEnumerable<UserInfo> GetByFilterAsync(
+        EmployeeStatus? employeeStatus,
+        Guid? groupId,
+        EmployeeActivationStatus? activationStatus,
+        EmployeeType? employeeType,
+        IEnumerable<EmployeeType> employeeTypes,
+        bool? isDocSpaceAdministrator,
+        Payments? payments,
+        AccountLoginType? accountLoginType)
     {
         if (_coreBaseSettings.Personal)
         {
@@ -1324,32 +1822,27 @@ public class UserController : PeopleControllerBase
         var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID)) ||
                       await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID);
 
+        var excludeGroups = new List<Guid>();
         var includeGroups = new List<List<Guid>>();
+        var combinedGroups = new List<Tuple<List<List<Guid>>, List<Guid>>>();
+
         if (groupId.HasValue)
         {
             includeGroups.Add(new List<Guid> { groupId.Value });
         }
 
-        var excludeGroups = new List<Guid>();
-
-        if (employeeType != null)
+        if (employeeType.HasValue)
         {
-            switch (employeeType)
+            FilterByUserType(employeeType.Value, includeGroups, excludeGroups);
+        }
+        else if (employeeTypes != null && employeeTypes.Any())
+        {
+            foreach (var et in employeeTypes)
             {
-                case EmployeeType.DocSpaceAdmin:
-                    includeGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
-                    break;
-                case EmployeeType.RoomAdmin:
-                    excludeGroups.Add(Constants.GroupUser.ID);
-                    excludeGroups.Add(Constants.GroupAdmin.ID);
-                    excludeGroups.Add(Constants.GroupCollaborator.ID);
-                    break;
-                case EmployeeType.Collaborator:
-                    includeGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
-                    break;
-                case EmployeeType.User:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
-                    break;
+                var combinedIncludeGroups = new List<List<Guid>>();
+                var combinedExcludeGroups = new List<Guid>();
+                FilterByUserType(et, combinedIncludeGroups, combinedExcludeGroups);
+                combinedGroups.Add(new(combinedIncludeGroups, combinedExcludeGroups));
             }
         }
 
@@ -1378,22 +1871,57 @@ public class UserController : PeopleControllerBase
             includeGroups.Add(adminGroups);
         }
 
-        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, activationStatus, accountLoginType, _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex, out var total, out var count);
+        var totalCountTask = _userManager.GetUsersCountAsync(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
+            _apiContext.FilterValue);
 
-        _apiContext.SetTotalCount(total).SetCount(count);
+        var users = _userManager.GetUsers(isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType,
+            _apiContext.FilterValue, _apiContext.SortBy, !_apiContext.SortDescending, _apiContext.Count, _apiContext.StartIndex);
 
-        return users;
+        var counter = 0;
+
+        await foreach (var user in users)
+        {
+            counter++;
+
+            yield return user;
+        }
+
+        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
+
+        void FilterByUserType(EmployeeType employeeType, List<List<Guid>> includeGroups, List<Guid> excludeGroups)
+        {
+            switch (employeeType)
+            {
+                case EmployeeType.DocSpaceAdmin:
+                    includeGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
+                    break;
+                case EmployeeType.RoomAdmin:
+                    excludeGroups.Add(Constants.GroupUser.ID);
+                    excludeGroups.Add(Constants.GroupAdmin.ID);
+                    excludeGroups.Add(Constants.GroupCollaborator.ID);
+                    break;
+                case EmployeeType.Collaborator:
+                    includeGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
+                    break;
+                case EmployeeType.User:
+                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    break;
+            }
+        }
     }
 
     ///// <summary>
-    ///// Adds a new portal user from import with the first and last name, email address
+    ///// Imports the new portal users with the first name, last name, and email address.
     ///// </summary>
     ///// <short>
-    ///// Add new import user
+    ///// Import users
     ///// </short>
-    ///// <param name="userList">The list of users to add</param>
-    ///// <param name="importUsersAsCollaborators" optional="true">Add users as guests (bool type: false|true)</param>
-    ///// <returns>Newly created users</returns>
+    ///// <category>Profiles</category>
+    ///// <param type="System.String, System" name="userList">List of users</param>
+    ///// <param type="System.Boolean, System" name="importUsersAsCollaborators" optional="true">Specifies whether to import users as guests or not</param>
+    ///// <returns></returns>
+    ///// <path>api/2.0/people/import/save</path>
+    ///// <httpMethod>POST</httpMethod>
     //[HttpPost("import/save")]
     //public void SaveUsers(string userList, bool importUsersAsCollaborators)
     //{
@@ -1419,6 +1947,16 @@ public class UserController : PeopleControllerBase
     //    }
     //}
 
+    // <summary>
+    // Returns a status of the current user.
+    // </summary>
+    // <short>
+    // Get a user status
+    // </short>
+    // <returns tye="System.Object, System">Current user information</returns>
+    // <category>User status</category>
+    // <path>api/2.0/people/import/status</path>
+    // <httpMethod>GET</httpMethod>
     //[HttpGet("import/status")]
     //public object GetStatus()
     //{
@@ -1438,4 +1976,73 @@ public class UserController : PeopleControllerBase
     //        };
     //    }
     //}
+}
+
+[ConstraintRoute("int")]
+public class UserControllerAdditionalInternal : UserControllerAdditional<int>
+{
+    public UserControllerAdditionalInternal(
+        EmployeeFullDtoHelper employeeFullDtoHelper, 
+        FileSecurity fileSecurity, 
+        ApiContext apiContext, 
+        IDaoFactory daoFactory) 
+        : base(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory)
+    {
+        
+    }
+}
+
+public class UserControllerAdditionalThirdParty : UserControllerAdditional<string>
+{
+    public UserControllerAdditionalThirdParty(
+        EmployeeFullDtoHelper employeeFullDtoHelper, 
+        FileSecurity fileSecurity, 
+        ApiContext apiContext, 
+        IDaoFactory daoFactory) 
+        : base(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory)
+    {
+        
+    }
+}
+
+public class UserControllerAdditional<T> : ApiControllerBase
+{
+    private readonly EmployeeFullDtoHelper _employeeFullDtoHelper;
+    private readonly FileSecurity _fileSecurity;
+    private readonly ApiContext _apiContext;
+    private readonly IDaoFactory _daoFactory;
+
+    public UserControllerAdditional(
+        EmployeeFullDtoHelper employeeFullDtoHelper, 
+        FileSecurity fileSecurity, 
+        ApiContext apiContext, 
+        IDaoFactory daoFactory)
+    {
+        _employeeFullDtoHelper = employeeFullDtoHelper;
+        _fileSecurity = fileSecurity;
+        _apiContext = apiContext;
+        _daoFactory = daoFactory;
+    }
+
+    [HttpGet("room/{id}")]
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
+    {
+        var offset = Convert.ToInt32(_apiContext.StartIndex);
+        var count = Convert.ToInt32(_apiContext.Count);
+
+        var room = (await _daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+        var totalCountTask = _fileSecurity.GetUsersWithSharedCountAsync(room, _apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
+
+        var counter = 0;
+
+        await foreach (var u in _fileSecurity.GetUsersWithSharedAsync(room, _apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
+                           count))
+        {
+            counter++;
+            
+            yield return await _employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
+        }
+
+        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
+    }
 }
