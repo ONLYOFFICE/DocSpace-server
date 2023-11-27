@@ -567,48 +567,93 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem> : ThirdPart
             return;
         }
 
-        using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            using var strategyFilesDbContext = _dbContextFactory.CreateDbContext();
-            using var tx = await strategyFilesDbContext.Database.BeginTransactionAsync();
-            var oldIDs = await Query(strategyFilesDbContext.ThirdpartyIdMapping)
-                .Where(r => r.Id.StartsWith(oldValue))
-                .Select(r => r.Id)
-                .ToListAsync();
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+            var oldIds = Queries.IdsAsync(dbContext, _tenantId, oldValue);
 
-            foreach (var oldId in oldIDs)
+            await foreach (var oldId in oldIds)
             {
                 var oldHashId = await MappingIDAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
                 var newHashId = await MappingIDAsync(newId);
 
-                await Query(strategyFilesDbContext.ThirdpartyIdMapping).Where(r => r.HashId == oldHashId)
-                    .ExecuteUpdateAsync(r => 
-                        r.SetProperty(p => p.Id, newId)
-                            .SetProperty(p => p.HashId, newHashId));
+                var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, _tenantId, oldHashId).ToListAsync();
 
-                await Query(strategyFilesDbContext.Security).Where(r => r.EntryId == oldHashId)
-                    .ExecuteUpdateAsync(r => 
-                        r.SetProperty(p => p.EntryId, newHashId));
+                var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping
+                {
+                    TenantId = m.TenantId,
+                    Id = newId,
+                    HashId = newHashId
+                });
 
-                await Query(strategyFilesDbContext.TagLink).Where(r => r.EntryId == oldHashId)
-                    .ExecuteUpdateAsync(r => 
-                        r.SetProperty(p => p.EntryId, newHashId));
+                dbContext.RemoveRange(mappingForDelete);
+                await dbContext.AddRangeAsync(mappingForInsert);
 
-                await Query(strategyFilesDbContext.FilesLink).Where(r => r.SourceId == oldHashId)
-                    .ExecuteUpdateAsync(r => 
-                        r.SetProperty(p => p.SourceId, newHashId));
+                var securityForDelete = await Queries.DbFilesSecuritiesAsync(dbContext, _tenantId, oldHashId).ToListAsync();
 
-                await Query(strategyFilesDbContext.FilesLink).Where(r => r.LinkedId == oldHashId)
-                    .ExecuteUpdateAsync(r => 
-                        r.SetProperty(p => p.LinkedId, newHashId));
+                var securityForInsert = securityForDelete.Select(s => new DbFilesSecurity
+                {
+                    TenantId = s.TenantId,
+                    TimeStamp = DateTime.Now,
+                    EntryId = newHashId,
+                    Share = s.Share,
+                    Subject = s.Subject,
+                    EntryType = s.EntryType,
+                    Owner = s.Owner
+                });
 
-                await Query(strategyFilesDbContext.ThirdpartyAccount).Where(a => a.FolderId == oldValue)
-                    .ExecuteUpdateAsync(r => 
-                        r.SetProperty(p => p.FolderId, newValue));
+                dbContext.RemoveRange(securityForDelete);
+                await dbContext.AddRangeAsync(securityForInsert);
+
+                var linkForDelete = await Queries.DbFilesTagLinksAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+
+                var linkForInsert = linkForDelete.Select(l => new DbFilesTagLink
+                {
+                    EntryId = newHashId,
+                    Count = l.Count,
+                    CreateBy = l.CreateBy,
+                    CreateOn = l.CreateOn,
+                    EntryType = l.EntryType,
+                    TagId = l.TagId,
+                    TenantId = l.TenantId
+                });
+
+                dbContext.RemoveRange(linkForDelete);
+                await dbContext.AddRangeAsync(linkForInsert);
+
+
+                var filesSourceForDelete = await Queries.FilesLinksBySourceIdAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+
+                var filesSourceForInsert = filesSourceForDelete.Select(l => new DbFilesLink
+                {
+                    TenantId = l.TenantId,
+                    SourceId = newHashId,
+                    LinkedId = l.LinkedId,
+                    LinkedFor = l.LinkedFor,
+                });
+
+                dbContext.RemoveRange(filesSourceForDelete);
+                await dbContext.AddRangeAsync(filesSourceForInsert);
+
+                var filesLinkedForDelete = await Queries.FilesLinksByLinkedIdAsync(dbContext, _tenantId, oldHashId).ToListAsync();
+
+                var filesLinkedForInsert = filesLinkedForDelete.Select(l => new DbFilesLink
+                {
+                    TenantId = l.TenantId,
+                    SourceId = l.SourceId,
+                    LinkedId = newHashId,
+                    LinkedFor = l.LinkedFor,
+                });
+
+                dbContext.RemoveRange(filesLinkedForDelete);
+                await dbContext.AddRangeAsync(filesLinkedForInsert);
+
+                await dbContext.SaveChangesAsync();
             }
 
             await tx.CommitAsync();
@@ -672,4 +717,47 @@ static file class Queries
                     .Where(r => r.HashId == hashId)
                     .Select(r => r.Id)
                     .FirstOrDefault());
+    
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> IdsAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string idStart) =>
+                ctx.ThirdpartyIdMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id.StartsWith(idStart))
+                    .Select(r => r.Id));
+    
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesThirdpartyIdMapping>>
+        ThirdPartyIdMappingsAsync = EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string hashId) =>
+                ctx.ThirdpartyIdMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.HashId == hashId));
+    
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesTagLink>> DbFilesTagLinksAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string entryId) =>
+                ctx.TagLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.EntryId == entryId));
+    
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesSecurity>> DbFilesSecuritiesAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string entryId) =>
+                ctx.Security
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.EntryId == entryId));
+    
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesLink>> FilesLinksBySourceIdAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string sourceId) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(l => l.SourceId == sourceId));
+
+    public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesLink>> FilesLinksByLinkedIdAsync =
+        EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, string linkedId) =>
+                ctx.FilesLink
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(l => l.LinkedId == linkedId));
 }
