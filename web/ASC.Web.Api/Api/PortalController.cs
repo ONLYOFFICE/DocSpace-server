@@ -588,7 +588,7 @@ public class PortalController : ControllerBase
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
         }
 
         try
@@ -725,7 +725,7 @@ public class PortalController : ControllerBase
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
         }
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);
