@@ -46,14 +46,14 @@ class TenantServiceCache
         Cache = cache;
         _cacheExpiration = TimeSpan.FromMinutes(2);
 
-        cacheNotifyItem.Subscribe((t) =>
+        cacheNotifyItem.Subscribe(t =>
         {
             var tenants = GetTenantStore();
             tenants.Remove(t.TenantId);
             tenants.Clear(coreBaseSettings);
         }, CacheNotifyAction.InsertOrUpdate);
 
-        cacheNotifySettings.Subscribe((s) =>
+        cacheNotifySettings.Subscribe(s =>
         {
             Cache.Remove(s.Key);
         }, CacheNotifyAction.Remove);

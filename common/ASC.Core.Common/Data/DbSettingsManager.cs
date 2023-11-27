@@ -36,7 +36,7 @@ public class DbSettingsManagerCache
     {
         Cache = cache;
         _notify = notify;
-        _notify.Subscribe((i) => Cache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => Cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public void Remove(string key)

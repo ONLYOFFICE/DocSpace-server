@@ -77,10 +77,10 @@ public class DbFile : BaseEntity, IDbFile, IDbSearch, ISearchItemDocument
     {
         if (searchSettings.CanSearchByContentAsync(GetType()).Result)
         {
-            return (a) => new[] { Title, Comment, Changes, Document.Attachment.Content };
+            return a => new[] { Title, Comment, Changes, Document.Attachment.Content };
         }
 
-        return (a) => new[] { Title, Comment, Changes };
+        return a => new[] { Title, Comment, Changes };
     }
 
     public override object[] GetKeys()

@@ -39,7 +39,7 @@ public class SubscriptionServiceCache
         NotifyRecord = notifyRecord;
         NotifyMethod = notifyMethod;
 
-        notifyRecord.Subscribe((s) =>
+        notifyRecord.Subscribe(s =>
         {
             var store = GetSubsciptionsStore(s.Tenant, s.SourceId, s.ActionId);
             if (store != null)
@@ -51,7 +51,7 @@ public class SubscriptionServiceCache
             }
         }, CacheNotifyAction.InsertOrUpdate);
 
-        notifyRecord.Subscribe((s) =>
+        notifyRecord.Subscribe(s =>
         {
             var store = GetSubsciptionsStore(s.Tenant, s.SourceId, s.ActionId);
             if (store != null)
@@ -70,7 +70,7 @@ public class SubscriptionServiceCache
             }
         }, CacheNotifyAction.Remove);
 
-        notifyMethod.Subscribe((m) =>
+        notifyMethod.Subscribe(m =>
         {
             var store = GetSubsciptionsStore(m.Tenant, m.SourceId, m.ActionId);
             if (store != null)

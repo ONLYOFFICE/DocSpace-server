@@ -37,7 +37,7 @@ public class AscCacheNotify
         _cacheNotify = cacheNotify;
         _cache = cache;
 
-        _cacheNotify.Subscribe((_) => { OnClearCache(); }, CacheNotifyAction.Any);
+        _cacheNotify.Subscribe(_ => { OnClearCache(); }, CacheNotifyAction.Any);
     }
 
     public void ClearCache() => _cacheNotify.Publish(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);

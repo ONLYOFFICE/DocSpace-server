@@ -64,7 +64,7 @@ public class TariffServiceStorage
         _coreBaseSettings = coreBaseSettings;
         _serviceProvider = serviceProvider;
         Notify = notify;
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             Cache.Insert(TariffService.GetTariffNeedToUpdateCacheKey(i.TenantId), "update", _cacheExpiration);
 
@@ -73,7 +73,7 @@ public class TariffServiceStorage
             Cache.Remove(TariffService.GetBillingPaymentCacheKey(i.TenantId)); // clear all payments
         }, CacheNotifyAction.Remove);
 
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             using var scope = _serviceProvider.CreateScope();
             var tariffService = scope.ServiceProvider.GetService<ITariffService>();

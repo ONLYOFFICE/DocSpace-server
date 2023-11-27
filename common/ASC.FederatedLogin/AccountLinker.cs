@@ -36,7 +36,7 @@ public class AccountLinkerStorage
     {
         _cache = cache;
         _notify = notify;
-        notify.Subscribe((c) => cache.Remove(c.Obj), CacheNotifyAction.Remove);
+        notify.Subscribe(c => cache.Remove(c.Obj), CacheNotifyAction.Remove);
     }
 
     public void RemoveFromCache(string obj)

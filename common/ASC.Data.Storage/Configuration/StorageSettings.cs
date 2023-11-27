@@ -48,7 +48,7 @@ public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICach
 
             _subscribed = true;
 
-            cacheNotify.Subscribe(async (i) =>
+            cacheNotify.Subscribe(async i =>
             {
                 using var scope = serviceProvider.CreateScope();
 

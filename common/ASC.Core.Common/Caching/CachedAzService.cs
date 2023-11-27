@@ -37,8 +37,8 @@ class AzServiceCache
         CacheNotify = cacheNotify;
         Cache = cache;
 
-        cacheNotify.Subscribe((r) => UpdateCache(r, true), CacheNotifyAction.Remove);
-        cacheNotify.Subscribe((r) => UpdateCache(r, false), CacheNotifyAction.InsertOrUpdate);
+        cacheNotify.Subscribe(r => UpdateCache(r, true), CacheNotifyAction.Remove);
+        cacheNotify.Subscribe(r => UpdateCache(r, false), CacheNotifyAction.InsertOrUpdate);
     }
 
     private void UpdateCache(AzRecord r, bool remove)

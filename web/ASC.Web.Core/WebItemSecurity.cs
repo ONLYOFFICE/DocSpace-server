@@ -39,7 +39,7 @@ public class WebItemSecurityCache
     {
         _cache = cache;
         _cacheNotify = cacheNotify;
-        _cacheNotify.Subscribe((r) =>
+        _cacheNotify.Subscribe(r =>
         {
             ClearCache(r.Tenant);
         }, CacheNotifyAction.Any);

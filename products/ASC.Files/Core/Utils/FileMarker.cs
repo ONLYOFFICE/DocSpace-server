@@ -38,7 +38,7 @@ public class FileMarkerCache
         _cache = cache;
         _notify = notify;
 
-        _notify.Subscribe((i) => _cache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public T Get<T>(string key) where T : class

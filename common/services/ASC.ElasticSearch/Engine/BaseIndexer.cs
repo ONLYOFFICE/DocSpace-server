@@ -46,7 +46,7 @@ public class BaseIndexerHelper
     {
         IsExist = new ConcurrentDictionary<string, bool>();
         _notify = cacheNotify;
-        _notify.Subscribe((a) =>
+        _notify.Subscribe(a =>
         {
             IsExist.AddOrUpdate(a.Id, false, (_, _) => false);
         }, CacheNotifyAction.Any);
@@ -357,7 +357,7 @@ public class BaseIndexer<T>(Client client,
     {
         try
         {
-            var isExist = baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, (k) => client.Instance.Indices.Exists(k).Exists);
+            var isExist = baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, k => client.Instance.Indices.Exists(k).Exists);
             if (isExist)
             {
                 return true;

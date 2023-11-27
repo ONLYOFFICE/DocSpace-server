@@ -115,7 +115,7 @@ public class UserPhotoManagerCache
 
             _cacheNotify.Subscribe(data =>
             {
-                _photoFiles.GetOrAdd(new Guid(data.UserId), (_) => new ConcurrentDictionary<CacheSize, string>())
+                _photoFiles.GetOrAdd(new Guid(data.UserId), _ => new ConcurrentDictionary<CacheSize, string>())
                               .AddOrUpdate(data.Size, data.FileName, (_, _) => data.FileName);
             }, CacheNotifyAction.InsertOrUpdate);
 

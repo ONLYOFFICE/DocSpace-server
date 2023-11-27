@@ -140,7 +140,7 @@ public class ProviderInfoHelper
         _cacheNotify = cacheNotify;
         foreach (var selector in _selectors)
         {
-            _cacheNotify.Subscribe((i) =>
+            _cacheNotify.Subscribe(i =>
             {
                 if (i.ResetAll)
                 {

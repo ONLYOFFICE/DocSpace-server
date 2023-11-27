@@ -103,7 +103,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         if (!_subscribed)
         {
-            cancelTaskNotify.Subscribe((c) =>
+            cancelTaskNotify.Subscribe(c =>
             {
                 if (_cancelations.TryGetValue(c.Id, out var s))
                 {
@@ -231,7 +231,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
     private Action<DistributedTask> GetPublication()
     {
-        return (task) =>
+        return task =>
         {
             var queueTasks = GetAllTasks().ToList().FindAll(x => x.Id != task.Id);
 

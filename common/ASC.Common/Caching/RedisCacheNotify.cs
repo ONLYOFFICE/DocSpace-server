@@ -61,7 +61,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public void Subscribe(Action<T> onChange, CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.SubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), (i) =>
+        Task.Run(async () => await _redis.SubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), i =>
         {
             if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(typeof(CacheNotifyAction), (i.Action & action))))
             {
@@ -77,7 +77,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public void Unsubscribe(CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), (_) =>
+        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), _ =>
         {
             return Task.FromResult(true);
         })).GetAwaiter()

@@ -233,7 +233,7 @@ public class UploadOperationProgress : DistributedTaskProgress
         foreach (var file in _directoryFiles)
         {
             var filePath = file.Substring(_mappedPath.TrimEnd('/').Length);
-            await staticUploader.UploadFileAsync(CrossPlatform.PathCombine(_relativePath, filePath), file, (_) => StepDone());
+            await staticUploader.UploadFileAsync(CrossPlatform.PathCombine(_relativePath, filePath), file, _ => StepDone());
         }
 
         tenant.SetStatus(TenantStatus.Active);

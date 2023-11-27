@@ -43,7 +43,7 @@ var logger = LogManager
     .Setup()
     .SetupExtensions(s =>
     {
-        s.RegisterLayoutRenderer("application-context", (_) => AppName);
+        s.RegisterLayoutRenderer("application-context", _ => AppName);
     })
     .LoadConfiguration(builder.Configuration, builder.Environment)
     .GetLogger(typeof(Startup).Namespace);

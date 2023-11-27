@@ -87,7 +87,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var toowner = false;
                 var topayer = false;
 
-                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
+                Func<CultureInfo, string> orangeButtonText = _ => string.Empty;
                 var orangeButtonUrl = string.Empty;
 
                 var img1 = string.Empty;
@@ -95,7 +95,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var img3 = string.Empty;
                 var img4 = string.Empty;
                 var img5 = string.Empty;
-                Func<CultureInfo, string> txtTrulyYours = (c) =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+                Func<CultureInfo, string> txtTrulyYours = c =>  WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
                 
                 if (quota.Free)
@@ -110,7 +110,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         paymentMessage = false;
                         toadmins = true;
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfigureRightNow", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/");
                         topGif = studioNotifyHelper.GetNotificationImageUrl("configure_docspace.gif");
                     }
@@ -131,7 +131,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img4 = studioNotifyHelper.GetNotificationImageUrl("management.png");
                         img5 = studioNotifyHelper.GetNotificationImageUrl("administration.png");
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonWatchFullPlaylist", c);
                         orangeButtonUrl = "https://www.youtube.com/playlist?list=PLCF48HEKMOYM8MBnwYs8q5J0ILMK9NzIx";
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("mainpic_video_guides.png");
@@ -155,7 +155,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         img4 = studioNotifyHelper.GetNotificationImageUrl("docs_tips4.png");
                         img5 = studioNotifyHelper.GetNotificationImageUrl("docs_tips5.png");
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
@@ -191,7 +191,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
                         toowner = true;
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
 
                         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
                         orangeButtonUrl = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
@@ -228,7 +228,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         action = Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation;
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
@@ -241,7 +241,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         action = Actions.SaasOwnerPaymentWarningGracePeriodActivation;
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
@@ -254,7 +254,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         action = Actions.SaasOwnerPaymentWarningGracePeriodLastDay;
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
@@ -267,7 +267,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         action = Actions.SaasOwnerPaymentWarningGracePeriodExpired;
                         toowner = true;
                         topayer = true;
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments");
                     }
 
@@ -280,7 +280,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
                         toowner = true;
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
 
                         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
                         orangeButtonUrl = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#" +
@@ -404,10 +404,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                 var toadmins = false;
                 var tousers = false;
 
-                Func<CultureInfo, string> orangeButtonText = (_) => string.Empty;
+                Func<CultureInfo, string> orangeButtonText = _ => string.Empty;
                 var orangeButtonUrl = string.Empty;
 
-                Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+                Func<CultureInfo, string> txtTrulyYours = c => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
                 var topGif = string.Empty;
                 var img1 = string.Empty;
                 var img2 = string.Empty;
@@ -436,7 +436,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
-                        orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                        orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
                         orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
                     }
 
@@ -544,8 +544,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     var orangeButtonUrl = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-                    Func<CultureInfo, string> orangeButtonText = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
-                    Func<CultureInfo, string> txtTrulyYours = (c) => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
+                    Func<CultureInfo, string> orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborateDocSpace", c);
+                    Func<CultureInfo, string> txtTrulyYours = c => WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", c);
 
                     var img1 = studioNotifyHelper.GetNotificationImageUrl("docs_tips1.png");
                     var img2 = studioNotifyHelper.GetNotificationImageUrl("docs_tips2.png");

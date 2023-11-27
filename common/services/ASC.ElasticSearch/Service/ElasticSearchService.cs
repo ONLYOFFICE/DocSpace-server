@@ -31,7 +31,7 @@ public class ElasticSearchService(IServiceProvider serviceProvider, ICacheNotify
 {
     public void Subscribe()
     {
-        cacheNotify.Subscribe((a) =>
+        cacheNotify.Subscribe(a =>
         {
             ReIndex(a.Names.ToList(), a.Tenant);
         }, CacheNotifyAction.Any);

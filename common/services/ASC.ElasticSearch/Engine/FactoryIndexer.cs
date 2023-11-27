@@ -34,7 +34,7 @@ public class FactoryIndexerHelper
 
     public FactoryIndexerHelper(ICacheNotify<IndexAction> cacheNotify)
     {
-        cacheNotify.Subscribe((a) =>
+        cacheNotify.Subscribe(a =>
         {
             if (a.LastIndexed != 0)
             {

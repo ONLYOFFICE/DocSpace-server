@@ -43,7 +43,7 @@ public class ElasticSearchIndexService(ILoggerProvider options,
 
         try
         {
-            notify.Subscribe(async (_) =>
+            notify.Subscribe(async _ =>
             {
                 while (_isStarted)
                 {

@@ -65,7 +65,7 @@ public class WebPluginCache
         _сache = cache;
         _notify = notify;
 
-        _notify.Subscribe((i) => _сache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => _сache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public List<WebPlugin> Get(string key)

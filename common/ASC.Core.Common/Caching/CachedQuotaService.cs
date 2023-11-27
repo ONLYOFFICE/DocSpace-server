@@ -50,7 +50,7 @@ class QuotaServiceCache
         CacheNotify = cacheNotify;
         Cache = cache;
 
-        cacheNotify.Subscribe((i) =>
+        cacheNotify.Subscribe(i =>
         {
             if (i.Key == KeyQuota)
             {

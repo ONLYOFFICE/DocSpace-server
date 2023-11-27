@@ -677,7 +677,7 @@ public class SharePointProviderInfoHelper
         _cacheKeys = new ConcurrentDictionary<string, object>();
         _notify = notify;
 
-        _notify.Subscribe((i) =>
+        _notify.Subscribe(i =>
         {
             if (!string.IsNullOrEmpty(i.FileKey))
             {
