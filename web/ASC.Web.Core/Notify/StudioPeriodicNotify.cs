@@ -37,7 +37,6 @@ public class StudioPeriodicNotify
     private readonly StudioNotifyHelper _studioNotifyHelper;
     private readonly ITariffService _tariffService;
     private readonly TenantExtra _tenantExtra;
-    private readonly AuthContext _authContext;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly ApiSystemHelper _apiSystemHelper;
     private readonly SetupInfo _setupInfo;
@@ -46,6 +45,7 @@ public class StudioPeriodicNotify
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
     private readonly AuthManager _authManager;
     private readonly SecurityContext _securityContext;
+    private readonly CoreSettings _coreSettings;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _log;
 
@@ -57,7 +57,6 @@ public class StudioPeriodicNotify
         StudioNotifyHelper studioNotifyHelper,
         ITariffService tariffService,
         TenantExtra tenantExtra,
-        AuthContext authContext,
         CommonLinkUtility commonLinkUtility,
         ApiSystemHelper apiSystemHelper,
         SetupInfo setupInfo,
@@ -66,6 +65,7 @@ public class StudioPeriodicNotify
         DisplayUserSettingsHelper displayUserSettingsHelper,
         AuthManager authManager,
         SecurityContext securityContext,
+        CoreSettings coreSettings,
         IServiceProvider serviceProvider)
     {
         _workContext = workContext;
@@ -74,7 +74,6 @@ public class StudioPeriodicNotify
         _studioNotifyHelper = studioNotifyHelper;
         _tariffService = tariffService;
         _tenantExtra = tenantExtra;
-        _authContext = authContext;
         _commonLinkUtility = commonLinkUtility;
         _apiSystemHelper = apiSystemHelper;
         _setupInfo = setupInfo;
@@ -83,6 +82,7 @@ public class StudioPeriodicNotify
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _authManager = authManager;
         _securityContext = securityContext;
+        _coreSettings = coreSettings;
         _serviceProvider = serviceProvider;
         _log = log.CreateLogger("ASC.Notify");
     }
@@ -247,7 +247,7 @@ public class StudioPeriodicNotify
 
                         if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
                         }
                     }
 
@@ -336,7 +336,7 @@ public class StudioPeriodicNotify
 
                         if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
                         {
-                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+                            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
                         }
                     }
 

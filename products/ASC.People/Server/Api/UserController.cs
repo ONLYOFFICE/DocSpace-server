@@ -207,10 +207,8 @@ public class UserController : PeopleControllerBase
         await UpdateContactsAsync(inDto.Contacts, user);
 
         _cache.Insert("REWRITE_URL" + await _tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
-        user = await _userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, true, false, inDto.Type,
+        user = await _userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
-
-        user.ActivationStatus = EmployeeActivationStatus.Activated;
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
