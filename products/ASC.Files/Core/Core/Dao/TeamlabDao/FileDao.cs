@@ -266,7 +266,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 break;
 
             case FilterType.BackupOnly:
-                query = query.Where(r => r.Category == (int)FilterType.ArchiveOnly && r.Title.EndsWith(".tar") || r.Title.EndsWith(".gz"));
+                query = query.Where(r => r.Category == (int)FilterType.ArchiveOnly && (r.Title.EndsWith(".tar") || r.Title.EndsWith(".gz")));
                 break;
         }
 
@@ -1210,7 +1210,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
                 break;
 
             case FilterType.BackupOnly:
-                q = q.Where(r => r.Category == (int)FilterType.ArchiveOnly && r.Title.EndsWith(".tar") || r.Title.EndsWith(".gz"));
+                q = q.Where(r => r.Category == (int)FilterType.ArchiveOnly && (r.Title.EndsWith(".tar") || r.Title.EndsWith(".gz")));
                 break;
         }
 
@@ -1667,7 +1667,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                 break;
             case FilterType.BackupOnly:
-                q = q.Where(r => r.Category == (int)FilterType.ArchiveOnly && r.Title.EndsWith(".tar") || r.Title.EndsWith(".gz"));
+                q = q.Where(r => r.Category == (int)FilterType.ArchiveOnly && (r.Title.EndsWith(".tar") || r.Title.EndsWith(".gz")));
                 break;
         }
 
