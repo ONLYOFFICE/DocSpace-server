@@ -118,9 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Acest mesaj de e-mail este generat automat, vă rugăm să nu răspundeţi la acesta scrisiare.&lt;br /&gt;Ați primit acest e-mail pentru că sunteți un utilizator înregistrat al spațiului &lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Faceți clic aici pentru a dezactiva notificările DocSpace prin e-mail: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Unsubscribe&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>Vă invităm să contactați echipa noastră pentru orice întrebări legate de achiziționare &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Dacă aveți probleme tehnice, vă rugăm să ne contactați la adresă &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;support team&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Faceți clic aici pentru a vă dezabona&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="HtmlMaster" xml:space="preserve">
     <value>&lt;body style="background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;"&gt;

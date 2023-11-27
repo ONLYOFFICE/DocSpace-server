@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -167,13 +167,16 @@ public class CspSettingsHelper
 
             if (!string.IsNullOrEmpty(internalUrl))
             {
-                defaultOptions.Def.Add(internalUrl);
+                defaultOptions.Img.Add(internalUrl);
+                defaultOptions.Media.Add(internalUrl);
+                defaultOptions.Connect.Add(internalUrl);
             }
 
             if (!string.IsNullOrEmpty(s3Storage.CdnDistributionDomain))
             {
-                defaultOptions.Def.Add(s3Storage.CdnDistributionDomain);
                 defaultOptions.Img.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Media.Add(s3Storage.CdnDistributionDomain);
+                defaultOptions.Connect.Add(s3Storage.CdnDistributionDomain);
             }
         }
 
@@ -183,8 +186,9 @@ public class CspSettingsHelper
         {
             options.Add(new CspOptions
             {
-                Def = new List<string> { _filesLinkUtility.DocServiceUrl },
                 Script = new List<string> { _filesLinkUtility.DocServiceUrl },
+                Frame = new List<string> { _filesLinkUtility.DocServiceUrl },
+                Connect = new List<string> { _filesLinkUtility.DocServiceUrl }
             });
         }
 
@@ -194,7 +198,6 @@ public class CspSettingsHelper
             var firebaseOptions = _configuration.GetSection("csp:firebase").Get<CspOptions>();
             if (firebaseOptions != null)
             {
-                firebaseOptions.Def.Add(firebaseDomain);
                 options.Add(firebaseOptions);
             }
         }
@@ -208,7 +211,7 @@ public class CspSettingsHelper
             }
         }
 
-        if (!string.IsNullOrEmpty(_configuration["files:oform:url"]))
+        if (!string.IsNullOrEmpty(_configuration["files:oform:domain"]))
         {
             var oformOptions = _configuration.GetSection("csp:oform").Get<CspOptions>();
             if (oformOptions != null)
@@ -241,12 +244,23 @@ public class CspSettingsHelper
 
         foreach (var domain in options.SelectMany(r => r.Frame).Distinct())
         {
+            csp.AllowFrames.From(domain);
             csp.AllowFraming.From(domain);
         }
 
         foreach (var domain in options.SelectMany(r => r.Fonts).Distinct())
         {
             csp.AllowFonts.From(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Connect).Distinct())
+        {
+            csp.AllowConnections.To(domain);
+        }
+
+        foreach (var domain in options.SelectMany(r => r.Media).Distinct())
+        {
+            csp.AllowAudioAndVideo.From(domain);
         }
 
         var (_, headerValue) = csp.BuildCspOptions().ToString(null);
@@ -261,12 +275,14 @@ public class CspSettingsHelper
 
 public class CspOptions
 {
+    public List<string> Def { get; set; } = new();
     public List<string> Script { get; set; } = new();
     public List<string> Style { get; set; } = new();
     public List<string> Img { get; set; } = new();
     public List<string> Frame { get; set; } = new();
     public List<string> Fonts { get; set; } = new();
-    public List<string> Def { get; set; } = new();
+    public List<string> Connect { get; set; } = new();
+    public List<string> Media { get; set; } = new();
 
     public CspOptions()
     {
@@ -281,5 +297,7 @@ public class CspOptions
         Img = new List<string> { domain };
         Frame = new List<string> { domain };
         Fonts = new List<string> { domain };
+        Connect = new List<string> { domain };
+        Media = new List<string> { domain };
     }
 }

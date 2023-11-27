@@ -25,14 +25,7 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="protos\search_item.proto" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Elasticsearch.Net" Version="7.10.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.57.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="NEST" Version="7.10.0" />
   </ItemGroup>
   <ItemGroup>
@@ -42,8 +35,5 @@
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="protos\search_item.proto" />
   </ItemGroup>
 </Project>

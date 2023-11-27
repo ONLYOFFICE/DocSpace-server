@@ -536,7 +536,7 @@
     <value>Twilio telefon numarası (SMS yetkilendirme için gereklidir)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabı kullanarak uygulamaya bağlan ve kişileri ara.</value>
+    <value>Twitter hesabı kullanarak uygulamaya bağlan.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Yahoo kişi aktarımı uygulamasını etkinleştir.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>Recaptcha geçersiz</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom müşteri kimliği</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom müşteri sırrı</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Uygulamanın bir Zoom hesabı kullanarak portalda oturum açmasını etkinleştirin.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Kullanıcılarınızın Zoom hesaplarını kullanarak ONLYOFFICE'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Zoom Developers web sitesine gidin ve yeni bir uygulama ONLYOFFICE entegrasyonu oluşturun. Aldığınız verileri aşağıya ekleyin:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin</value>
   </data>
 </root>

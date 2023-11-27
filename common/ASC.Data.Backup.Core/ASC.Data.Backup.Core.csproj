@@ -8,16 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="protos\backup_progress.proto" />
-    <None Remove="protos\delete_schedule.proto" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Grpc" Version="2.46.6">
       <TreatAsUsed>true</TreatAsUsed>
-    </PackageReference>
-    <PackageReference Include="Grpc.Tools" Version="2.57.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MySql.Data" Version="8.1.0" />
     <PackageReference Include="protobuf-net" Version="3.2.26" />
@@ -25,10 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
     <ProjectReference Include="..\ASC.Data.Storage\ASC.Data.Storage.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="protos\backup_progress.proto" />
-    <Protobuf Include="protos\delete_schedule.proto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="BackupResource.Designer.cs">

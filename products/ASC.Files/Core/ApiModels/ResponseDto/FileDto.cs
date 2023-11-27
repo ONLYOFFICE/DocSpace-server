@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,7 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
@@ -112,10 +111,8 @@ public class FileDto<T> : FileEntryDto<T>
     public bool DenySharing { get; set; }
 
     /// <summary>File accessibility</summary>
-    /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessability, System.Boolean}, System.Collections</type>
-    public IDictionary<Accessability, bool> ViewAccessability { get; set; }
-
-    protected internal override FileEntryType EntryType { get => FileEntryType.File; }
+    /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
+    public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     public static FileDto<int> GetSample()
     {
@@ -207,7 +204,7 @@ public class FileDtoHelper : FileEntryDtoHelper
             }
         }
 
-        result.ViewAccessability = _fileUtility.GetAccessability(file.Title);
+        result.ViewAccessibility = await _fileUtility.GetAccessibility(file);
 
         return result;
     }

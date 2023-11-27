@@ -1553,9 +1553,9 @@ ONLYOFFICE komandası</value>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>ONLYOFFICE Sizin DocSpace uğurla deaktiv edildi. Nəzərə alın ki, bütün məlumatlarınız "Məxfilik Siyasətimizə":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyğun olaraq silinəcək.
 
+
 Niyə ayrılmaq qərarına gəldiniz? Təcrübənizi bizimlə paylaşın.
 
-$OrangeButton
 
 Təşəkkürlər və uğurlar!
 
@@ -1809,5 +1809,17 @@ ONLYOFFICE Komandası
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>ONLYOFFICE DocSpace-niz üçün güzəşt müddəti aktivləşdirilib</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Hörmətlə, ONLYOFFICE Komandası</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Video bələdçilərlə ONLYOFFICE DocSpace-i təkmilləşdirin</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>TAM PLEYLİSTƏ BAXIN</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Hörmətlə, ONLYOFFICE Dəstək Qrupu</value>
   </data>
 </root>

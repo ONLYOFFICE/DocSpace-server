@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
-using Constants = ASC.Core.Users.Constants;
+using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
@@ -34,7 +33,7 @@ public class StudioNotifyService
 {
     private readonly StudioNotifyServiceHelper _client;
 
-    public static string EMailSenderName { get { return ASC.Core.Configuration.Constants.NotifyEMailSenderSysName; } }
+    public static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
     private readonly UserManager _userManager;
     private readonly StudioNotifyHelper _studioNotifyHelper;
@@ -119,7 +118,7 @@ public class StudioNotifyService
             0,
             DateTimeKind.Utc);
 
-        var hash = auditEventDate.ToString("s");
+        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
         var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -146,7 +145,7 @@ public class StudioNotifyService
 
     public async Task SendEmailChangeInstructionsAsync(UserInfo user, string email)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID);
+        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, ConfirmType.EmailChange, _authContext.CurrentAccount.ID, _authContext.CurrentAccount.ID);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeEmail", GetCulture(user));
 
@@ -179,22 +178,20 @@ public class StudioNotifyService
 
     public async Task SendEmailRoomInviteAsync(string email, string roomTitle, string confirmationUrl, string culture = null)
     {
-        var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
-        var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
+        var cultureInfo = string.IsNullOrEmpty(culture) ? CultureInfo.CurrentUICulture : new CultureInfo(culture);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>
         { 
             new TagValue(Tags.Message, roomTitle),
             new TagValue(Tags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours) 
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
 
-        if (!string.IsNullOrEmpty(culture))
-        {
-            tags.Add(new TagValue(CommonTags.Culture, culture));
-        }
-        
         await _client.SendNoticeToAsync(
             Actions.SaasRoomInvite,
                 await _studioNotifyHelper.RecipientFromEmailAsync(email, false),
@@ -204,21 +201,19 @@ public class StudioNotifyService
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "")
     {
-        var orangeButtonText = WebstudioNotifyPatternResource.ButtonAccept;
-        var txtTrulyYours = WebstudioNotifyPatternResource.TrulyYoursText;
+        var cultureInfo = string.IsNullOrEmpty(culture) ? CultureInfo.CurrentUICulture : new CultureInfo(culture);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         var tags = new List<ITagValue>() 
         {
-                new TagValue(Tags.InviteLink, confirmationUrl),
-                TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-                TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
-                new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif"))
+            new TagValue(Tags.InviteLink, confirmationUrl),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.TopGif, _studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
         };
-
-        if (!string.IsNullOrEmpty(culture))
-        {
-            tags.Add(new TagValue(CommonTags.Culture, culture));
-        }
 
         await _client.SendNoticeToAsync(
             Actions.SaasDocSpaceInvite,
@@ -244,7 +239,7 @@ public class StudioNotifyService
 
     public async Task SendMsgTfaResetAsync(UserInfo userInfo)
     {
-        var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email.ToLower(), ConfirmType.TfaActivation);
+        var confirmationUrl = _commonLinkUtility.GetFullAbsolutePath(string.Empty);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangeTfa", GetCulture(userInfo));
 
@@ -783,7 +778,7 @@ public class StudioNotifyService
 
         var portalUrl = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
-        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s");
+        var hash = (await _authentication.GetUserPasswordStampAsync(userInfo.Id)).ToString("s", CultureInfo.InvariantCulture);
 
         var linkToRecovery = await _commonLinkUtility.GetConfirmationEmailUrlAsync(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
 
@@ -945,7 +940,7 @@ public class StudioNotifyService
     private async Task SendStorageEncryptionNotifyAsync(INotifyAction action, bool notifyAdminsOnly, string serverRootPath)
     {
         var users = notifyAdminsOnly
-                    ? await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID)
+                    ? await _userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)
                     : (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
 
         foreach (var u in users)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
+using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Core.Quota;
 
@@ -62,8 +63,8 @@ public class CountPaidUserStatistic : ITenantQuotaFeatureStat<CountPaidUserFeatu
     public async Task<int> GetValueAsync()
     {
         var userManager = _serviceProvider.GetService<UserManager>();
-        var adminsCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupManager.ID)).Length;
-        var collaboratorsCount = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupCollaborator.ID)).Length;
+        var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupManager.ID)).Length;
+        var collaboratorsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupCollaborator.ID)).Length;
 
         return adminsCount + collaboratorsCount;
     }

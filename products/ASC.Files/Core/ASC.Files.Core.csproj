@@ -9,24 +9,11 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="proto\box_cache_item.proto" />
-    <None Remove="proto\dropbox_cache_item.proto" />
-    <None Remove="proto\file_marker_cache_item.proto" />
-    <None Remove="proto\google_drive_cache_item.proto" />
-    <None Remove="proto\one_drive_cache_item.proto" />
-    <None Remove="proto\provider_account_cache_item.proto" />
-    <None Remove="proto\share_point_provider_cache_item.proto" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
     <PackageReference Include="Box.V2.Core" Version="5.2.2" />
     <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3120" />
-    <PackageReference Include="Grpc.Tools" Version="2.57.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
@@ -36,15 +23,6 @@
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\..\common\services\ASC.ElasticSearch\ASC.ElasticSearch.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="proto\box_cache_item.proto" />
-    <Protobuf Include="proto\dropbox_cache_item.proto" />
-    <Protobuf Include="proto\file_marker_cache_item.proto" />
-    <Protobuf Include="proto\google_drive_cache_item.proto" />
-    <Protobuf Include="proto\one_drive_cache_item.proto" />
-    <Protobuf Include="proto\provider_account_cache_item.proto" />
-    <Protobuf Include="proto\share_point_provider_cache_item.proto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\FilesCommonResource.Designer.cs">

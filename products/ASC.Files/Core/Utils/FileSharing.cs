@@ -1,26 +1,25 @@
-
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -535,14 +534,12 @@ public class FileSharing
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
 
-        if (!await _fileSecurity.CanReadAsync(entry))
+        if (!await CheckAccessAsync(entry, filterType))
         {
             _logger.ErrorUserCanTGetSharedInfo(_authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
 
             yield break;
         }
-        
-        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
         var allDefaultAces = await GetDefaultAcesAsync(entry, filterType, status).ToListAsync();
         var defaultAces = allDefaultAces.Skip(offset).Take(count).ToList();
@@ -556,6 +553,8 @@ public class FileSharing
         {
             yield return record;
         }
+        
+        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
 
         await foreach (var record in records)
         {
@@ -563,10 +562,22 @@ public class FileSharing
         }
     }
 
-    public async Task<int> GetRoomSharesCountAsync<T>(Folder<T> room, ShareFilterType filterType)
+    public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {
-        var defaultAces = await GetDefaultAcesAsync(room, filterType, null).CountAsync();
-        var sharesCount = await _fileSecurity.GetPureSharesCountAsync(room, filterType, null);
+        if (entry == null)
+        {
+            throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
+        }
+
+        if (!await CheckAccessAsync(entry, filterType))
+        {
+            _logger.ErrorUserCanTGetSharedInfo(_authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
+
+            return 0;
+        }
+        
+        var defaultAces = await GetDefaultAcesAsync(entry, filterType, null).CountAsync();
+        var sharesCount = await _fileSecurity.GetPureSharesCountAsync(entry, filterType, null);
 
         return defaultAces + sharesCount;
     }
@@ -591,6 +602,7 @@ public class FileSharing
         var shares = await _fileSecurity.GetSharesAsync(entry);
         var isRoom = entry is Folder<T> { SettingsPrivate: false } room && DocSpaceHelper.IsRoom(room.FolderType);
         var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
+        var canReadLinks = await _fileSecurity.CanReadLinksAsync(entry);
 
         var records = shares
             .GroupBy(r => r.Subject)
@@ -600,6 +612,11 @@ public class FileSharing
 
         foreach (var r in records)
         {
+            if (r.IsLink && !canReadLinks)
+            {
+                continue;
+            }
+            
             if (subjectsTypes != null && !subjectsTypes.Contains(r.SubjectType))
             {
                 continue;
@@ -639,7 +656,7 @@ public class FileSharing
 
                 if (g.ID == Constants.LostGroupInfo.ID)
                 {
-                    await _fileSecurity.RemoveSubjectAsync<T>(r.Subject);
+                    await _fileSecurity.RemoveSubjectAsync<T>(r.Subject, true);
 
                     continue;
                 }
@@ -885,6 +902,21 @@ public class FileSharing
         return new List<AceShortWrapper>(aces
             .Where(aceWrapper => !aceWrapper.Id.Equals(FileConstant.ShareLinkId) || aceWrapper.Access != FileShare.Restrict)
             .Select(aceWrapper => new AceShortWrapper(aceWrapper)));
+    }
+    
+    private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
+    {
+        if (!await _fileSecurity.CanReadAsync(entry))
+        {
+            return false;
+        }
+
+        if (filterType == ShareFilterType.User)
+        {
+            return true;
+        }
+
+        return await _fileSecurity.CanReadLinksAsync(entry);
     }
     
     private async IAsyncEnumerable<AceWrapper> GetDefaultAcesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)

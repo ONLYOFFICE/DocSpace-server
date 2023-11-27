@@ -1,32 +1,30 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using static ASC.Security.Cryptography.EmailValidationKeyProvider;
-
-using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Api.Core.Security;
 
@@ -42,6 +40,7 @@ public class EmailValidationKeyModelHelper
     private readonly AuditEventsRepository _auditEventsRepository;
     private readonly TenantUtil _tenantUtil;
     private readonly MessageTarget _messageTarget;
+    private readonly CookiesManager _cookiesManager;
 
     public EmailValidationKeyModelHelper(
         IHttpContextAccessor httpContextAccessor,
@@ -52,7 +51,8 @@ public class EmailValidationKeyModelHelper
         InvitationLinkHelper invitationLinkHelper,
         AuditEventsRepository auditEventsRepository,
         TenantUtil tenantUtil,
-        MessageTarget messageTarget)
+        MessageTarget messageTarget,
+        CookiesManager cookiesManager)
     {
         _httpContextAccessor = httpContextAccessor;
         _provider = provider;
@@ -63,6 +63,7 @@ public class EmailValidationKeyModelHelper
         _auditEventsRepository = auditEventsRepository;
         _tenantUtil = tenantUtil;
         _messageTarget = messageTarget;
+        _cookiesManager = cookiesManager;
     }
 
     public EmailValidationKeyModel GetModel()
@@ -76,8 +77,11 @@ public class EmailValidationKeyModelHelper
         {
             cType = confirmType;
         }
-
-        request.TryGetValue("key", out var key);
+        
+        if (!request.TryGetValue("key", out var key))
+        {
+            key = _httpContextAccessor.HttpContext.Request.Cookies[_cookiesManager.GetConfirmCookiesName() + $"_{type}"];
+        }
 
         request.TryGetValue("emplType", out var emplType);
         EmployeeTypeExtensions.TryParse(emplType, out var employeeType);
@@ -122,6 +126,11 @@ public class EmailValidationKeyModelHelper
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await _userManager.GetUserByEmailAsync(email);
+                if(userInfo == Constants.LostUser || userInfo.Id != uiD)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
                 var auditEvent = (await _auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentPasswordChangeInstructions, entry: EntryType.User, target: _messageTarget.Create(userInfo.Id).ToString(), limit: 1)).FirstOrDefault();
                 var passwordStamp = await _authentication.GetUserPasswordStampAsync(userInfo.Id);
 
@@ -131,11 +140,11 @@ public class EmailValidationKeyModelHelper
                 {
                     var auditEventDate = _tenantUtil.DateTimeToUtc(auditEvent.Date);
 
-                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s");
+                    hash = (auditEventDate.CompareTo(passwordStamp) > 0 ? auditEventDate : passwordStamp).ToString("s", CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    hash = passwordStamp.ToString("s");
+                    hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
                 checkKeyResult = await _provider.ValidateEmailKeyAsync(email + type + hash, key, _provider.ValidEmailKeyInterval);
