@@ -116,10 +116,7 @@ public class ProductEntryPoint : Product
                 CanNotBeDisabled = true,
             };
 
-        if (_notifyConfiguration != null)
-        {
-            _notifyConfiguration.Configure();
-        }
+        _notifyConfiguration?.Configure();
         //SearchHandlerManager.Registry(new SearchHandler());
     }
 

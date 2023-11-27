@@ -306,10 +306,7 @@ public class NotifyEngine(Context context,
         var formatter = patternProvider.GetFormatter(pattern);
         try
         {
-            if (formatter != null)
-            {
-                formatter.FormatMessage(noticeMessage, noticeMessage.Arguments);
-            }
+            formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
                 noticeMessage, new[]
                                        {

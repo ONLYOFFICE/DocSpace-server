@@ -202,10 +202,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorCanNotGetSidProperty(propName, ex);
-            }
+            log?.ErrorCanNotGetSidProperty(propName, ex);
         }
 
         return null;

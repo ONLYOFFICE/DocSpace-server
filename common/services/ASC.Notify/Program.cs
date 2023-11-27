@@ -76,10 +76,7 @@ try
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }

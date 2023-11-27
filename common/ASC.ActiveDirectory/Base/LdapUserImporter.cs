@@ -907,9 +907,6 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
     public void Dispose()
     {
-        if (LdapHelper != null)
-        {
-            LdapHelper.Dispose();
-        }
+        LdapHelper?.Dispose();
     }
 }

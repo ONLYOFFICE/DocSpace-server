@@ -74,10 +74,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
 
     public async Task InvalidateStorageAsync()
     {
-        if (_clientContext != null)
-        {
-            _clientContext.Dispose();
-        }
+        _clientContext?.Dispose();
 
         await sharePointProviderInfoHelper.InvalidateAsync();
     }
@@ -638,10 +635,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
 
     public void Dispose()
     {
-        if (_clientContext != null)
-        {
-            _clientContext.Dispose();
-        }
+        _clientContext?.Dispose();
     }
 
     private void SetFolderType(Folder<string> folder, bool isRoot)

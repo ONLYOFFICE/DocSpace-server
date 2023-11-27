@@ -135,10 +135,6 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
     {
         var action = (MessageAction)actionInt;
         var mapper = Mappers.SelectMany(m => m.Mappers).FirstOrDefault(m => m.Actions.ContainsKey(action));
-        if (mapper != null)
-        {
-            return mapper.Actions[action];
-        }
-        return null;
+        return mapper?.Actions[action];
     }
 }

@@ -191,10 +191,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     public void Dispose()
     {
-        if (_consumerChannel != null)
-        {
-            _consumerChannel.Dispose();
-        }
+        _consumerChannel?.Dispose();
 
         _subsManager.Clear();
     }

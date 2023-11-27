@@ -347,10 +347,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             consumer.Dispose();
         }
 
-        if (_consumerSession != null)
-        {
-            _consumerSession.Dispose();
-        }
+        _consumerSession?.Dispose();
 
         _subsManager.Clear();
     }

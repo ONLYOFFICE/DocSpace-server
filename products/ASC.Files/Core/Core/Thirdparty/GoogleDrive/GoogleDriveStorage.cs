@@ -492,10 +492,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
     public void Dispose()
     {
-        if (_driveService != null)
-        {
-            _driveService.Dispose();
-        }
+        _driveService?.Dispose();
     }
 
     public Task<DriveFile> GetFolderAsync(string folderId)

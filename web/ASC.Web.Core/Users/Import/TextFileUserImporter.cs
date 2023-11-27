@@ -130,10 +130,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
             foreach (var info in infos)
             {
                 var propertyField = field.Trim();
-                if (NameMapping != null)
-                {
-                    NameMapping.TryGetValue(propertyField, out propertyField);
-                }
+                NameMapping?.TryGetValue(propertyField, out propertyField);
                 if (!string.IsNullOrEmpty(propertyField) && !ExcludeList.Contains(propertyField) && propertyField.Equals(info.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     //Add to map

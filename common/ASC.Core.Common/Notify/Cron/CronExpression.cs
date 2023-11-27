@@ -116,12 +116,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         var date = new DateTime(2014, 1, 1);
         DateTime.SpecifyKind(date, DateTimeKind.Utc);
         var after = GetTimeAfter(date);
-        if (!after.HasValue)
-        {
-            return null;
-        }
 
-        return after.Value.Subtract(date);
+        return after?.Subtract(date);
     }
 
     #region ICloneable Members

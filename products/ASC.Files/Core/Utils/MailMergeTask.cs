@@ -41,10 +41,7 @@ public class MailMergeTask : IDisposable
 
     public void Dispose()
     {
-        if (Attach != null)
-        {
-            Attach.Dispose();
-        }
+        Attach?.Dispose();
     }
 }
 

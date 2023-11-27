@@ -84,10 +84,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
 
     public Task InvalidateStorageAsync()
     {
-        if (wrapper != null)
-        {
-            wrapper.Dispose();
-        }
+        wrapper?.Dispose();
 
         return CacheResetAsync();
     }

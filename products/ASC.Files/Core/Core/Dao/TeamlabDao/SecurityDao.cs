@@ -447,19 +447,13 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
 
         var mappedId = folderId is int fid ? MappingIDAsync(fid) : await MappingIDAsync(folderId);
-        if (folders != null)
-        {
-            folders.Add(mappedId.ToString());
-        }
+        folders?.Add(mappedId.ToString());
     }
 
     internal async Task<IQueryable<DbFilesSecurity>> GetQuery(FilesDbContext filesDbContext, Expression<Func<DbFilesSecurity, bool>> where = null)
     {
         var q = await Query(filesDbContext.Security);
-        if (q != null)
-        {
-            q = q.Where(where);
-        }
+        q = q?.Where(where);
         return q;
     }
 

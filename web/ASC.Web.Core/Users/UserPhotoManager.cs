@@ -143,18 +143,12 @@ public class UserPhotoManagerCache
 
     public void ClearCache(Guid userID, int tenantId)
     {
-        if (_cacheNotify != null)
-        {
-            _cacheNotify.Publish(new UserPhotoManagerCacheItem { UserId = userID.ToString(), TenantId = tenantId }, CacheNotifyAction.Remove);
-        }
+        _cacheNotify?.Publish(new UserPhotoManagerCacheItem { UserId = userID.ToString(), TenantId = tenantId }, CacheNotifyAction.Remove);
     }
 
     public void AddToCache(Guid userID, Size size, string fileName, int tenantId)
     {
-        if (_cacheNotify != null)
-        {
-            _cacheNotify.Publish(new UserPhotoManagerCacheItem { UserId = userID.ToString(), Size = UserPhotoManager.ToCache(size), FileName = fileName, TenantId = tenantId }, CacheNotifyAction.InsertOrUpdate);
-        }
+        _cacheNotify?.Publish(new UserPhotoManagerCacheItem { UserId = userID.ToString(), Size = UserPhotoManager.ToCache(size), FileName = fileName, TenantId = tenantId }, CacheNotifyAction.InsertOrUpdate);
     }
 
     public string SearchInCache(Guid userId, Size size)

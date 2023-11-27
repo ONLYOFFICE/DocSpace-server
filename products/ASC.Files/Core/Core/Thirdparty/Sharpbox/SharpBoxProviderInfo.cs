@@ -102,10 +102,7 @@ internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisp
 
     public Task InvalidateStorageAsync()
     {
-        if (storageDisposableWrapper != null)
-        {
-            storageDisposableWrapper.Dispose();
-        }
+        storageDisposableWrapper?.Dispose();
 
         return Task.CompletedTask;
     }

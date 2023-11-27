@@ -149,10 +149,7 @@ internal class CrossDao //Additional SharpBox
         //Copy files first
         foreach (var fileId in fileIdsToCopy)
         {
-            if (cancellationToken.HasValue)
-            {
-                cancellationToken.Value.ThrowIfCancellationRequested();
-            }
+            cancellationToken?.ThrowIfCancellationRequested();
 
             try
             {
@@ -167,10 +164,7 @@ internal class CrossDao //Additional SharpBox
         }
         foreach (var folder in foldersToCopy)
         {
-            if (cancellationToken.HasValue)
-            {
-                cancellationToken.Value.ThrowIfCancellationRequested();
-            }
+            cancellationToken?.ThrowIfCancellationRequested();
 
             try
             {

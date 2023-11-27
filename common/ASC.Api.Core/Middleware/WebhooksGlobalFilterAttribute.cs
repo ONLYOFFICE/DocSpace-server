@@ -78,10 +78,7 @@ public class WebhooksGlobalFilterAttribute(IWebhookPublisher webhookPublisher,
 
     public void Dispose()
     {
-        if (_stream != null)
-        {
-            _stream.Dispose();
-        }
+        _stream?.Dispose();
     }
 
     private (string, string) GetData(HttpContext context)

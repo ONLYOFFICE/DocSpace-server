@@ -317,9 +317,6 @@ internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMe
 
     public void Dispose()
     {
-        if (_dropboxClient != null)
-        {
-            _dropboxClient.Dispose();
-        }
+        _dropboxClient?.Dispose();
     }
 }

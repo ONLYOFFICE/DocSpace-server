@@ -158,10 +158,7 @@ public static class LdapUtils
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorSkipErrors(ex);
-            }
+            log?.ErrorSkipErrors(ex);
         }
     }
 

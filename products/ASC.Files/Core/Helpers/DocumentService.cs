@@ -228,10 +228,7 @@ public static class DocumentService
                 await responseStream.DisposeAsync();
             }
 
-            if (response != null)
-            {
-                response.Dispose();
-            }
+            response?.Dispose();
         }
 
         return GetResponseUri(dataResponse);

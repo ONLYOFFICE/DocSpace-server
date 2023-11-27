@@ -518,10 +518,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                 if (_currentUser != null && _currentUser.Id == userId)
                 {
                     logger.DebugAttemptingTakeAdminRights(user);
-                    if (currentUserRights != null)
-                    {
-                        currentUserRights.Add(right.Key);
-                    }
+                    currentUserRights?.Add(right.Key);
                 }
                 else
                 {

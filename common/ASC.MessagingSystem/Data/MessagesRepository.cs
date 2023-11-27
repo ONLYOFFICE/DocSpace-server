@@ -266,10 +266,7 @@ public class MessagesRepository : IDisposable
 
     public void Dispose()
     {
-        if (_timer != null)
-        {
-            _timer.Dispose();
-        }
+        _timer?.Dispose();
     }
 }
 
