@@ -24,7 +24,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
             String state = token.getState();
             StringBuilder redirectUrl = new StringBuilder(String.format("%s?code=%s",
                     token.getRedirectUri(), token.getAuthorizationCode().getTokenValue()));
-            if (!state.isBlank())
+            if (state != null && !state.isBlank())
                 redirectUrl.append(String.format("&state=%s", state));
             response.setStatus(HttpStatus.OK.value());
             response.setHeader(REDIRECT_HEADER, redirectUrl.toString());
