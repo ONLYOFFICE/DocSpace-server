@@ -45,6 +45,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -429,20 +430,32 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         }
 
         if (entity.getAccessTokenValue() != null) {
+            Instant issuedAt = null;
+            Instant expiresAt = null;
+            if (entity.getAccessTokenIssuedAt() != null)
+                issuedAt = entity.getAccessTokenIssuedAt().toInstant();
+            if (entity.getAccessTokenExpiresAt() != null)
+                expiresAt = entity.getAccessTokenExpiresAt().toInstant();
             OAuth2AccessToken accessToken = new OAuth2AccessToken(
                     OAuth2AccessToken.TokenType.BEARER,
                     entity.getAccessTokenValue(),
-                    entity.getAccessTokenIssuedAt().toInstant(),
-                    entity.getAccessTokenExpiresAt().toInstant(),
+                    issuedAt,
+                    expiresAt,
                     StringUtils.commaDelimitedListToSet(entity.getAccessTokenScopes()));
             builder.token(accessToken, metadata -> metadata.putAll(parseMap(entity.getAccessTokenMetadata())));
         }
 
         if (entity.getRefreshTokenValue() != null) {
+            Instant issuedAt = null;
+            Instant expiresAt = null;
+            if (entity.getRefreshTokenIssuedAt() != null)
+                issuedAt = entity.getRefreshTokenIssuedAt().toInstant();
+            if (entity.getRefreshTokenExpiresAt() != null)
+                expiresAt = entity.getRefreshTokenExpiresAt().toInstant();
             OAuth2RefreshToken refreshToken = new OAuth2RefreshToken(
                     entity.getRefreshTokenValue(),
-                    entity.getRefreshTokenIssuedAt().toInstant(),
-                    entity.getRefreshTokenExpiresAt().toInstant());
+                    issuedAt,
+                    expiresAt);
             builder.token(refreshToken, metadata -> metadata.putAll(parseMap(entity.getRefreshTokenMetadata())));
         }
 
@@ -515,6 +528,8 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
     }
 
     private Map<String, Object> parseMap(String data) {
+        if (data == null || data.isBlank())
+            return Map.of();
         try {
             return this.objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
             });

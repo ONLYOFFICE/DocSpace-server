@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -50,6 +51,7 @@ public class AuthorizationServerConfiguration {
     private final ApplicationConfiguration applicationConfiguration;
     private final DocspaceAuthenticationProvider authenticationProvider;
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
+    private final AuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -63,6 +65,7 @@ public class AuthorizationServerConfiguration {
                     e.consentPage(CONSENT_URL);
                     e.authenticationProvider(authenticationProvider);
                     e.authorizationResponseHandler(authenticationSuccessHandler);
+                    e.errorResponseHandler(authenticationFailureHandler);
                 });
 
         http.exceptionHandling(e -> e.defaultAuthenticationEntryPointFor((request, response, authException) -> {
