@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,22 +27,12 @@
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileTrackerHelper
+public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
 {
     private const string Tracker = "filesTracker";
-    private readonly ICache _cache;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<FileTrackerHelper> _logger;
     public static readonly TimeSpan TrackTimeout = TimeSpan.FromSeconds(12);
     public static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(60);
     public static readonly TimeSpan CheckRightTimeout = TimeSpan.FromMinutes(1);
-
-    public FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
-    {
-        _cache = cache;
-        _serviceScopeFactory = serviceScopeFactory;
-        _logger = logger;
-    }
 
 
     public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
@@ -194,7 +184,7 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
         {
-            return _cache.Get<FileTracker>(Tracker + fileId);
+            return cache.Get<FileTracker>(Tracker + fileId);
         }
 
         return null;
@@ -206,11 +196,11 @@ public class FileTrackerHelper
         {
             if (tracker != null)
             {
-                _cache.Insert(Tracker + fileId, tracker, CacheTimeout, EvictionCallback(fileId, tracker));
+                cache.Insert(Tracker + fileId, tracker, CacheTimeout, EvictionCallback(fileId, tracker));
             }
             else
             {
-                _cache.Remove(Tracker + fileId);
+                cache.Remove(Tracker + fileId);
             }
         }
     }
@@ -232,7 +222,7 @@ public class FileTrackerHelper
                 }
 
                 var editedBy = fileTracker.EditingBy.FirstOrDefault();
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                await using var scope = serviceScopeFactory.CreateAsyncScope();
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(editedBy.Value.TenantId);
 
@@ -244,12 +234,12 @@ public class FileTrackerHelper
 
                 if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
                 {
-                    _cache.Insert(Tracker + fileId, fileTracker, CacheTimeout, EvictionCallback(fileId, fileTracker));
+                    cache.Insert(Tracker + fileId, fileTracker, CacheTimeout, EvictionCallback(fileId, fileTracker));
                 }
             }
             catch (Exception e)
             {
-                _logger.ErrorWithException(e);
+                logger.ErrorWithException(e);
             }
         };
     }

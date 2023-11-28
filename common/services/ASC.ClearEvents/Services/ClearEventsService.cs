@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,21 +27,14 @@
 namespace ASC.ClearEvents.Services;
 
 [Scope]
-public class ClearEventsService : IHostedService, IDisposable
+public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScopeFactory serviceScopeFactory)
+    : IHostedService, IDisposable
 {
-    private readonly ILogger<ClearEventsService> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
     private Timer _timer;
-
-    public ClearEventsService(ILogger<ClearEventsService> logger, IServiceScopeFactory serviceScopeFactory)
-    {
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-    }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.InformationTimerRunnig();
+        logger.InformationTimerRunnig();
 
         _timer = new Timer(async state => await DeleteOldEventsAsync(state), null, TimeSpan.Zero,
             TimeSpan.FromDays(1));
@@ -51,7 +44,7 @@ public class ClearEventsService : IHostedService, IDisposable
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.InformationTimerStopping();
+        logger.InformationTimerStopping();
 
         _timer?.Change(Timeout.Infinite, 0);
 
@@ -84,7 +77,7 @@ public class ClearEventsService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
     }
 
@@ -94,7 +87,7 @@ public class ClearEventsService : IHostedService, IDisposable
         var compile = func.Compile();
         do
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
             var table = compile.Invoke(ef);
 

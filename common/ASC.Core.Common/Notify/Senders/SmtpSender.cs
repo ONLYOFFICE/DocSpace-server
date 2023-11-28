@@ -1,38 +1,43 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MailKit.Net.Smtp;
+
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class SmtpSender : INotifySender
+public class SmtpSender(IConfiguration configuration,
+        IServiceProvider serviceProvider,
+        ILoggerProvider options)
+    : INotifySender
 {
-    protected ILogger _logger;
-    private IDictionary<string, string> _initProperties;
-    protected readonly IConfiguration _configuration;
-    protected readonly IServiceProvider _serviceProvider;
+    protected ILogger _logger = options.CreateLogger("ASC.Notify");
+    private IDictionary<string, string> _initProperties = new Dictionary<string, string>();
+    protected readonly IConfiguration _configuration = configuration;
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
 
     private string _host;
     private int _port;
@@ -41,17 +46,6 @@ public class SmtpSender : INotifySender
     private SaslMechanism _saslMechanism;
     protected bool _useCoreSettings;
     const int NetworkTimeout = 30000;
-
-    public SmtpSender(
-        IConfiguration configuration,
-        IServiceProvider serviceProvider,
-        ILoggerProvider options)
-    {
-        _initProperties = new Dictionary<string, string>();
-        _logger = options.CreateLogger("ASC.Notify");
-        _configuration = configuration;
-        _serviceProvider = serviceProvider;
-    }
 
     public virtual void Init(IDictionary<string, string> properties)
     {
@@ -114,26 +108,26 @@ public class SmtpSender : INotifySender
         {
             result = NoticeSendResult.TryOnceAgain;
         }
-        catch (MailKit.Net.Smtp.SmtpProtocolException)
+        catch (SmtpProtocolException)
         {
             result = NoticeSendResult.SendingImpossible;
         }
-        catch (MailKit.Net.Smtp.SmtpCommandException e)
+        catch (SmtpCommandException e)
         {
             switch (e.StatusCode)
             {
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxBusy:
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxUnavailable:
-                case MailKit.Net.Smtp.SmtpStatusCode.ExceededStorageAllocation:
+                case SmtpStatusCode.MailboxBusy:
+                case SmtpStatusCode.MailboxUnavailable:
+                case SmtpStatusCode.ExceededStorageAllocation:
                     result = NoticeSendResult.TryOnceAgain;
                     break;
-                case MailKit.Net.Smtp.SmtpStatusCode.MailboxNameNotAllowed:
-                case MailKit.Net.Smtp.SmtpStatusCode.UserNotLocalWillForward:
-                case MailKit.Net.Smtp.SmtpStatusCode.UserNotLocalTryAlternatePath:
+                case SmtpStatusCode.MailboxNameNotAllowed:
+                case SmtpStatusCode.UserNotLocalWillForward:
+                case SmtpStatusCode.UserNotLocalTryAlternatePath:
                     result = NoticeSendResult.MessageIncorrect;
                     break;
                 default:
-                    if (e.StatusCode != MailKit.Net.Smtp.SmtpStatusCode.Ok)
+                    if (e.StatusCode != SmtpStatusCode.Ok)
                     {
                         result = NoticeSendResult.TryOnceAgain;
                     }
@@ -305,9 +299,9 @@ public class SmtpSender : INotifySender
                       </html>";
     }
 
-    private MailKit.Net.Smtp.SmtpClient GetSmtpClient()
+    private SmtpClient GetSmtpClient()
     {
-        var smtpClient = new MailKit.Net.Smtp.SmtpClient
+        var smtpClient = new SmtpClient
         {
             Timeout = NetworkTimeout
         };

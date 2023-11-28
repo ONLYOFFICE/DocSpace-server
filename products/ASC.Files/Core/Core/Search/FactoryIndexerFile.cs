@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,12 +27,7 @@
 namespace ASC.Web.Files.Core.Search;
 
 [Scope]
-public class BaseIndexerFile : BaseIndexer<DbFile>
-{
-    private readonly IDaoFactory _daoFactory;
-
-    public BaseIndexerFile(
-        Client client,
+public class BaseIndexerFile(Client client,
         ILogger<BaseIndexerFile> log,
         IDbContextFactory<WebstudioDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -40,11 +35,8 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
         Settings settings,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory)
-        : base(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider)
-    {
-        _daoFactory = daoFactory;
-    }
-
+    : BaseIndexer<DbFile>(client, log, dbContextManager, tenantManager, baseIndexerHelper, settings, serviceProvider)
+{
     protected override async Task<bool> BeforeIndexAsync(DbFile data)
     {
         if (!(await base.BeforeIndexAsync(data)))
@@ -52,7 +44,7 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
             return false;
         }
 
-        if (_daoFactory.GetFileDao<int>() is FileDao fileDao)
+        if (daoFactory.GetFileDao<int>() is FileDao fileDao)
         {
             await _tenantManager.SetCurrentTenantAsync(data.TenantId);
             await fileDao.InitDocumentAsync(data);
@@ -64,13 +56,7 @@ public class BaseIndexerFile : BaseIndexer<DbFile>
 
 
 [Scope(Additional = typeof(FactoryIndexerFileExtension))]
-public class FactoryIndexerFile : FactoryIndexer<DbFile>
-{
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly Settings _settings;
-
-    public FactoryIndexerFile(
-        ILoggerProvider options,
+public class FactoryIndexerFile(ILoggerProvider options,
         TenantManager tenantManager,
         SearchSettingsHelper searchSettingsHelper,
         FactoryIndexer factoryIndexer,
@@ -79,12 +65,8 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
         IDbContextFactory<FilesDbContext> dbContextFactory,
         ICache cache,
         Settings settings)
-        : base(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
-    {
-        _dbContextFactory = dbContextFactory;
-        _settings = settings;
-    }
-
+    : FactoryIndexer<DbFile>(options, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider, cache)
+{
     public override async Task IndexAllAsync()
     {
         try
@@ -94,7 +76,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
             foreach (var data in await _indexer.IndexAllAsync(GetCount, GetIds, GetData))
             {
-                if (_settings.Threads == 1)
+                if (settings.Threads == 1)
                 {
                     await Index(data);
                 }
@@ -102,7 +84,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
                 {
                     tasks.Add(IndexAsync(data));
                     j++;
-                    if (j >= _settings.Threads)
+                    if (j >= settings.Threads)
                     {
                         Task.WaitAll(tasks.ToArray());
                         tasks = new List<Task>();
@@ -127,7 +109,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
             var start = 0;
             var result = new List<int>();
 
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
             while (true)
             {
@@ -148,7 +130,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
         List<DbFile> GetData(long start, long stop, DateTime lastIndexed)
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
             return Queries.FilesFoldersPair(filesDbContext, lastIndexed, start, stop)
                 .Select(r =>
                 {
@@ -162,7 +144,7 @@ public class FactoryIndexerFile : FactoryIndexer<DbFile>
 
         (int, int, int) GetCount(DateTime lastIndexed)
         {
-            using var filesDbContext = _dbContextFactory.CreateDbContext();
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
             var minId = Queries.FileMinId(filesDbContext, lastIndexed);
 

@@ -1,72 +1,32 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.People.Api;
 
-public class UserController : PeopleControllerBase
-{
-    private static readonly SemaphoreSlim _semaphore = new(1);
-    private readonly ICache _cache;
-    private readonly TenantManager _tenantManager;
-    private readonly CookiesManager _cookiesManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CustomNamingPeople _customNamingPeople;
-    private readonly EmployeeDtoHelper _employeeDtoHelper;
-    private readonly EmployeeFullDtoHelper _employeeFullDtoHelper;
-    private readonly ILogger<UserController> _logger;
-    private readonly PasswordHasher _passwordHasher;
-    private readonly QueueWorkerReassign _queueWorkerReassign;
-    private readonly QueueWorkerRemove _queueWorkerRemove;
-    private readonly Recaptcha _recaptcha;
-    private readonly TenantUtil _tenantUtil;
-    private readonly UserFormatter _userFormatter;
-    private readonly UserManagerWrapper _userManagerWrapper;
-    private readonly WebItemManager _webItemManager;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly WebItemSecurityCache _webItemSecurityCache;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly MessageTarget _messageTarget;
-    private readonly SecurityContext _securityContext;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly MessageService _messageService;
-    private readonly AuthContext _authContext;
-    private readonly SetupInfo _setupInfo;
-    private readonly SettingsManager _settingsManager;
-    private readonly InvitationLinkService _invitationLinkService;
-    private readonly FileSecurity _fileSecurity;
-    private readonly IQuotaService _quotaService;
-    private readonly CountPaidUserChecker _countPaidUserChecker;
-    private readonly UsersQuotaSyncOperation _usersQuotaSyncOperation;
-    private readonly CountUserChecker _countUserChecker;
-    private readonly UsersInRoomChecker _usersInRoomChecker;
-    private readonly IUrlShortener _urlShortener;
-    private readonly FileSecurityCommon _fileSecurityCommon;
-
-    public UserController(
-        ICache cache,
+public class UserController(ICache cache,
         TenantManager tenantManager,
         CookiesManager cookiesManager,
         CoreBaseSettings coreBaseSettings,
@@ -107,45 +67,9 @@ public class UserController : PeopleControllerBase
         IQuotaService quotaService,
         IUrlShortener urlShortener,
         FileSecurityCommon fileSecurityCommon)
-        : base(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
-        _cache = cache;
-        _tenantManager = tenantManager;
-        _cookiesManager = cookiesManager;
-        _coreBaseSettings = coreBaseSettings;
-        _customNamingPeople = customNamingPeople;
-        _employeeDtoHelper = employeeDtoHelper;
-        _employeeFullDtoHelper = employeeFullDtoHelper;
-        _logger = logger;
-        _passwordHasher = passwordHasher;
-        _queueWorkerReassign = queueWorkerReassign;
-        _queueWorkerRemove = queueWorkerRemove;
-        _recaptcha = recaptcha;
-        _tenantUtil = tenantUtil;
-        _userFormatter = userFormatter;
-        _userManagerWrapper = userManagerWrapper;
-        _webItemManager = webItemManager;
-        _webItemSecurity = webItemSecurity;
-        _webItemSecurityCache = webItemSecurityCache;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _messageTarget = messageTarget;
-        _securityContext = securityContext;
-        _studioNotifyService = studioNotifyService;
-        _messageService = messageService;
-        _authContext = authContext;
-        _setupInfo = setupInfo;
-        _settingsManager = settingsManager;
-        _invitationLinkService = invitationLinkService;
-        _fileSecurity = fileSecurity;
-        _countPaidUserChecker = countPaidUserChecker;
-        _countUserChecker = activeUsersChecker;
-        _usersInRoomChecker = usersInRoomChecker;
-        _quotaService = quotaService;
-        _usersQuotaSyncOperation = usersQuotaSyncOperation;
-        _urlShortener = urlShortener;
-        _fileSecurityCommon = fileSecurityCommon;
-    }
-
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     [HttpGet("tokendiagnostics")]
     public object GetClaims()
@@ -189,10 +113,10 @@ public class UserController : PeopleControllerBase
             }
             else
             {
-                await _userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
+                await userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
             }
 
-            inDto.PasswordHash = _passwordHasher.GetClientPassword(inDto.Password);
+            inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
         }
 
         //Validate email
@@ -214,16 +138,14 @@ public class UserController : PeopleControllerBase
             user.Sex =  false;
         }
         
-        user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
-        user.WorkFromDate = inDto.Worksfrom != null ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
+        user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
+        user.WorkFromDate = inDto.Worksfrom != null ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
         await UpdateContactsAsync(inDto.Contacts, user);
 
-        _cache.Insert("REWRITE_URL" + await _tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
-        user = await _userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, true, false, inDto.Type,
+        cache.Insert("REWRITE_URL" + await tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
+        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, false, false, inDto.Type,
             false, true, true);
-
-        user.ActivationStatus = EmployeeActivationStatus.Activated;
 
         await UpdateDepartmentsAsync(inDto.Department, user);
 
@@ -232,7 +154,7 @@ public class UserController : PeopleControllerBase
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -252,7 +174,7 @@ public class UserController : PeopleControllerBase
     {
         await _apiContext.AuthByClaimAsync();
 
-        var linkData = inDto.FromInviteLink ? await _invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
+        var linkData = inDto.FromInviteLink ? await invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.Type) : null;
         if (linkData is { IsCorrect: false })
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
@@ -294,9 +216,9 @@ public class UserController : PeopleControllerBase
             }
             else
             {
-                await _userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
+                await userManagerWrapper.CheckPasswordPolicyAsync(inDto.Password);
             }
-            inDto.PasswordHash = _passwordHasher.GetClientPassword(inDto.Password);
+            inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
         }
 
         //Validate email
@@ -319,14 +241,14 @@ public class UserController : PeopleControllerBase
             user.Sex =  false;
         }
         
-        user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
-        user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
+        user.BirthDate = inDto.Birthday != null && inDto.Birthday != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : null;
+        user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
 
         await UpdateContactsAsync(inDto.Contacts, user, !inDto.FromInviteLink);
 
-        _cache.Insert("REWRITE_URL" + await _tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
+        cache.Insert("REWRITE_URL" + await tenantManager.GetCurrentTenantIdAsync(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
-        user = await _userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
+        user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
             inDto.FromInviteLink && linkData is { IsCorrect: true }, true, true, byEmail);
 
         await UpdateDepartmentsAsync(inDto.Department, user);
@@ -345,13 +267,13 @@ public class UserController : PeopleControllerBase
                 await _semaphore.WaitAsync();
                 if (success)
                 {
-                    await _usersInRoomChecker.CheckAppend();
-                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                    await usersInRoomChecker.CheckAppend();
+                    await fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
                 }
                 else
                 {
-                    await _usersInRoomChecker.CheckAppend();
-                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                    await usersInRoomChecker.CheckAppend();
+                    await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
                 }
             }
             finally
@@ -362,14 +284,14 @@ public class UserController : PeopleControllerBase
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
-            await _messageService.SendAsync(MessageAction.GuestCreated, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+            await messageService.SendAsync(MessageAction.GuestCreated, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
         {
-            await _messageService.SendAsync(MessageAction.UserCreated, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper), user.Id);
+            await messageService.SendAsync(MessageAction.UserCreated, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -387,21 +309,21 @@ public class UserController : PeopleControllerBase
     [HttpPost("invite")]
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         foreach (var invite in inDto.Invitations)
         {
-            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync())) ||
+            if ((invite.Type == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync())) ||
                 !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invite.Type), Constants.Action_AddRemoveUser))
             {
                 continue;
             }
 
-            var user = await _userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
-            var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, _authContext.CurrentAccount.ID, inDto.Culture);
-            var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
+            var user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture);
+            var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
+            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture);
         }
 
         var result = new List<EmployeeDto>();
@@ -410,7 +332,7 @@ public class UserController : PeopleControllerBase
 
         foreach (var user in users)
         {
-            result.Add(await _employeeDtoHelper.GetAsync(user));
+            result.Add(await employeeDtoHelper.GetAsync(user));
         }
 
         return result;
@@ -465,20 +387,20 @@ public class UserController : PeopleControllerBase
 
             if (!string.IsNullOrEmpty(inDto.Password))
             {
-                inDto.PasswordHash = _passwordHasher.GetClientPassword(inDto.Password);
+                inDto.PasswordHash = passwordHasher.GetClientPassword(inDto.Password);
             }
         }
 
         if (!string.IsNullOrEmpty(inDto.PasswordHash))
         {
-            await _securityContext.SetUserPasswordHashAsync(userid, inDto.PasswordHash);
-            await _messageService.SendAsync(MessageAction.UserUpdatedPassword);
+            await securityContext.SetUserPasswordHashAsync(userid, inDto.PasswordHash);
+            await messageService.SendAsync(MessageAction.UserUpdatedPassword);
 
-            await _cookiesManager.ResetUserCookieAsync(userid);
-            await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+            await cookiesManager.ResetUserCookieAsync(userid);
+            await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
         }
         
-        return await _employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
+        return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(userid.ToString()));
     }
 
     /// <summary>
@@ -509,24 +431,24 @@ public class UserController : PeopleControllerBase
             throw new Exception("The user is not suspended");
         }
 
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if (await _fileSecurityCommon.IsDocSpaceAdministratorAsync(user.Id) && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
+        if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(user.Id) && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync()))
         {
             throw new SecurityException();
         }
         
         await CheckReassignProcessAsync(new[] { user.Id });
 
-        var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
+        var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        queueWorkerRemove.Start(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
-        await _messageService.SendAsync(MessageAction.UserDeleted, _messageTarget.Create(user.Id), userName);
+        await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -545,47 +467,44 @@ public class UserController : PeopleControllerBase
     {
         await _apiContext.AuthByClaimAsync();
 
-        if (_userManager.IsSystemUser(_securityContext.CurrentAccount.ID))
+        if (_userManager.IsSystemUser(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
 
-        var user = await GetUserInfoAsync(_securityContext.CurrentAccount.ID.ToString());
+        var user = await GetUserInfoAsync(securityContext.CurrentAccount.ID.ToString());
 
         if (!_userManager.UserExists(user))
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
         
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
             throw new SecurityException();
         }
 
-        await _securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
+        await securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
         user.Status = EmployeeStatus.Terminated;
 
         await _userManager.UpdateUserInfoAsync(user);
-        var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
-        await _messageService.SendAsync(MessageAction.UsersUpdatedStatus, _messageTarget.Create(user.Id), userName);
+        var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+        await messageService.SendAsync(MessageAction.UsersUpdatedStatus, messageTarget.Create(user.Id), userName);
 
-        await _cookiesManager.ResetUserCookieAsync(user.Id);
-        await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+        await cookiesManager.ResetUserCookieAsync(user.Id);
+        await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            await _messageService.SendAsync(MessageAction.UserDeleted, _messageTarget.Create(user.Id), userName);
-        }
-        else
-        {
-            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+            await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
+        //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -604,7 +523,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(EmployeeStatus status, [FromQuery] string query)
     {
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             throw new MethodAccessException("Method not available");
         }
@@ -624,7 +543,7 @@ public class UserController : PeopleControllerBase
 
         await foreach (var item in list)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(item);
+            yield return await employeeFullDtoHelper.GetFullAsync(item);
         }
     }
 
@@ -660,8 +579,8 @@ public class UserController : PeopleControllerBase
     [HttpGet("email")]
     public async Task<EmployeeFullDto> GetByEmailAsync([FromQuery] string email)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        if (_coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID)).IsOwner(tenant))
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (coreBaseSettings.Personal && !(await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).IsOwner(tenant))
         {
             throw new MethodAccessException("Method not available");
         }
@@ -672,7 +591,7 @@ public class UserController : PeopleControllerBase
             throw new ItemNotFoundException("User not found");
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -691,7 +610,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("{username}", Order = 1)]
     public async Task<EmployeeFullDto> GetById(string username)
     {
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             throw new MethodAccessException("Method not available");
         }
@@ -710,7 +629,7 @@ public class UserController : PeopleControllerBase
             }
             else
             {
-                _logger.ErrorCouldNotGetUserByName(_securityContext.CurrentAccount.ID, username);
+                logger.ErrorCouldNotGetUserByName(securityContext.CurrentAccount.ID, username);
             }
         }
 
@@ -721,10 +640,10 @@ public class UserController : PeopleControllerBase
 
         if (isInvite)
         {
-            return await _employeeFullDtoHelper.GetSimple(user);
+            return await employeeFullDtoHelper.GetSimple(user);
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -742,7 +661,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(EmployeeStatus status)
     {
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             throw new Exception("Method not available");
         }
@@ -783,7 +702,7 @@ public class UserController : PeopleControllerBase
 
         await foreach (var user in users)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -834,7 +753,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(string query)
     {
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             throw new MethodAccessException("Method not available");
         }
@@ -849,7 +768,7 @@ public class UserController : PeopleControllerBase
 
         foreach (var user in users)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -879,7 +798,7 @@ public class UserController : PeopleControllerBase
 
         await foreach (var user in users)
         {
-            yield return await _employeeDtoHelper.GetAsync(user);
+            yield return await employeeDtoHelper.GetAsync(user);
         }
     }
 
@@ -899,19 +818,19 @@ public class UserController : PeopleControllerBase
     [HttpPost("register")]
     public async Task<string> RegisterUserOnPersonalAsync(RegisterPersonalUserRequestDto inDto)
     {
-        if (!_coreBaseSettings.Personal)
+        if (!coreBaseSettings.Personal)
         {
             throw new MethodAccessException("Method is only available on personal.onlyoffice.com");
         }
 
         try
         {
-            if (_coreBaseSettings.CustomMode)
+            if (coreBaseSettings.CustomMode)
             {
                 inDto.Lang = "ru-RU";
             }
 
-            var cultureInfo = _setupInfo.GetPersonalCulture(inDto.Lang).Value;
+            var cultureInfo = setupInfo.GetPersonalCulture(inDto.Lang).Value;
 
             if (cultureInfo != null)
             {
@@ -926,12 +845,12 @@ public class UserController : PeopleControllerBase
             }
 
             if (!SetupInfo.IsSecretEmail(inDto.Email)
-                && !string.IsNullOrEmpty(_setupInfo.RecaptchaPublicKey) && !string.IsNullOrEmpty(_setupInfo.RecaptchaPrivateKey))
+                && !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey) && !string.IsNullOrEmpty(setupInfo.RecaptchaPrivateKey))
             {
                 var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
 
                 if (string.IsNullOrEmpty(inDto.RecaptchaResponse)
-                    || !await _recaptcha.ValidateRecaptchaAsync(inDto.RecaptchaResponse, ip))
+                    || !await recaptcha.ValidateRecaptchaAsync(inDto.RecaptchaResponse, ip))
                 {
                     throw new RecaptchaException(Resource.RecaptchaInvalid);
                 }
@@ -941,20 +860,20 @@ public class UserController : PeopleControllerBase
 
             if (await _userManager.UserExistsAsync(newUserInfo.Id))
             {
-                if (!SetupInfo.IsSecretEmail(inDto.Email) || _securityContext.IsAuthenticated)
+                if (!SetupInfo.IsSecretEmail(inDto.Email) || securityContext.IsAuthenticated)
                 {
-                    await _studioNotifyService.SendAlreadyExistAsync(inDto.Email);
+                    await studioNotifyService.SendAlreadyExistAsync(inDto.Email);
                     return string.Empty;
                 }
 
                 try
                 {
-                    await _securityContext.AuthenticateMeAsync(Core.Configuration.Constants.CoreSystem);
+                    await securityContext.AuthenticateMeAsync(Core.Configuration.Constants.CoreSystem);
                     await _userManager.DeleteUserAsync(newUserInfo.Id);
                 }
                 finally
                 {
-                    _securityContext.Logout();
+                    securityContext.Logout();
                 }
             }
             if (!inDto.Spam)
@@ -974,11 +893,11 @@ public class UserController : PeopleControllerBase
                 }
                 catch (Exception ex)
                 {
-                    _logger.DebugWriteToTemplateUnsubscribe(inDto.Email.ToLowerInvariant(), ex);
+                    logger.DebugWriteToTemplateUnsubscribe(inDto.Email.ToLowerInvariant(), ex);
                 }
             }
 
-            await _studioNotifyService.SendInvitePersonalAsync(inDto.Email);
+            await studioNotifyService.SendInvitePersonalAsync(inDto.Email);
         }
         catch (Exception ex)
         {
@@ -1010,8 +929,8 @@ public class UserController : PeopleControllerBase
         var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
 
-        var userNames = users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)).ToList();
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         
         foreach (var user in users)
         {
@@ -1022,14 +941,14 @@ public class UserController : PeopleControllerBase
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            _queueWorkerRemove.Start(tenant.Id, user, _securityContext.CurrentAccount.ID, false, false);
+            queueWorkerRemove.Start(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 
-        await _messageService.SendAsync(MessageAction.UsersDeleted, _messageTarget.Create(users.Select(x => x.Id)), userNames);
+        await messageService.SendAsync(MessageAction.UsersDeleted, messageTarget.Create(users.Select(x => x.Id)), userNames);
 
         foreach (var user in users)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -1073,7 +992,7 @@ public class UserController : PeopleControllerBase
                 continue;
             }
 
-            var viewer = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+            var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
             if (viewer == null)
             {
@@ -1103,22 +1022,22 @@ public class UserController : PeopleControllerBase
                     continue;
                 }
 
-                var link = await _invitationLinkService.GetInvitationLinkAsync(user.Email, type, _authContext.CurrentAccount.ID, user.GetCulture()?.Name);
-                var shortenLink = await _urlShortener.GetShortenLinkAsync(link);
+                var link = await invitationLinkService.GetInvitationLinkAsync(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await _studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
             }
             else
             {
-                await _studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
+                await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
             }
         }
 
-        await _messageService.SendAsync(MessageAction.UsersSentActivationInstructions, _messageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)));
+        await messageService.SendAsync(MessageAction.UsersSentActivationInstructions, messageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
 
         foreach (var user in users)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -1135,7 +1054,7 @@ public class UserController : PeopleControllerBase
     [HttpGet("theme")]
     public async Task<DarkThemeSettings> GetThemeAsync()
     {
-        return await _settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
+        return await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
     }
 
     /// <summary>
@@ -1157,7 +1076,7 @@ public class UserController : PeopleControllerBase
             Theme = inDto.Theme
         };
 
-        await _settingsManager.SaveForCurrentUserAsync(darkThemeSettings);
+        await settingsManager.SaveForCurrentUserAsync(darkThemeSettings);
 
         return darkThemeSettings;
     }
@@ -1176,11 +1095,11 @@ public class UserController : PeopleControllerBase
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
     {
-        var user = await _userManager.GetUserAsync(_securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
+        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
 
-        var result = await _employeeFullDtoHelper.GetFullAsync(user);
+        var result = await employeeFullDtoHelper.GetFullAsync(user);
 
-        result.Theme = (await _settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
+        result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
 
         return result;
     }
@@ -1219,7 +1138,7 @@ public class UserController : PeopleControllerBase
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
-        var viewer = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
@@ -1233,8 +1152,13 @@ public class UserController : PeopleControllerBase
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+
+        if (!viewer.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user) && viewer.Id != user.Id)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
@@ -1243,12 +1167,12 @@ public class UserController : PeopleControllerBase
 
         if (existentUser.Id != Constants.LostUser.Id)
         {
-            throw new Exception(_customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (!viewerIsAdmin)
         {
-            await _studioNotifyService.SendEmailChangeInstructionsAsync(user, email);
+            await studioNotifyService.SendEmailChangeInstructionsAsync(user, email);
         }
         else
         {
@@ -1260,10 +1184,11 @@ public class UserController : PeopleControllerBase
             user.Email = email;
             user.ActivationStatus = EmployeeActivationStatus.NotActivated;
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-            await _studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+            await cookiesManager.ResetUserCookieAsync(user.Id);
+            await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
         }
 
-        await _messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, user.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.UserSentEmailChangeInstructions, user.DisplayUserName(false, displayUserSettingsHelper));
 
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
@@ -1286,22 +1211,23 @@ public class UserController : PeopleControllerBase
     [EnableRateLimiting("sensitive_api")]
     public async Task<object> SendUserPasswordAsync(MemberRequestDto inDto)
     {
-        if (_authContext.IsAuthenticated)
+        if (authContext.IsAuthenticated)
         {
             var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-            if (currentUser.Id != _authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID)))
+            if (currentUser.Id != authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
             {
                 throw new Exception(Resource.ErrorAccessDenied);
             }
         }
 
-        var error = await _userManagerWrapper.SendUserPasswordAsync(inDto.Email);
-        if (!string.IsNullOrEmpty(error))
+        var error = await userManagerWrapper.SendUserPasswordAsync(inDto.Email);
+        if (string.IsNullOrEmpty(error))
         {
-            _logger.ErrorPasswordRecovery(inDto.Email, error);
+            return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
         }
 
-        return string.Format(Resource.MessageYourPasswordSendedToEmail, inDto.Email);
+        logger.ErrorPasswordRecovery(inDto.Email, error);
+        throw new InvalidOperationException(error);
     }
 
     /// <summary>
@@ -1337,20 +1263,20 @@ public class UserController : PeopleControllerBase
             await _userManager.UpdateUserInfoAsync(u);
 
             if (activationstatus == EmployeeActivationStatus.Activated
-                && u.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
+                && u.IsOwner(await tenantManager.GetCurrentTenantAsync()))
             {
-                var settings = _settingsManager.Load<FirstEmailConfirmSettings>();
+                var settings = settingsManager.Load<FirstEmailConfirmSettings>();
 
                 if (settings.IsFirst)
                 {
-                    await _studioNotifyService.SendAdminWelcomeAsync(u);
+                    await studioNotifyService.SendAdminWelcomeAsync(u);
 
                     settings.IsFirst = false;
-                    await _settingsManager.SaveAsync(settings);
+                    await settingsManager.SaveAsync(settings);
                 }
             }
 
-            yield return await _employeeFullDtoHelper.GetFullAsync(u);
+            yield return await employeeFullDtoHelper.GetFullAsync(u);
         }
     }
 
@@ -1380,7 +1306,7 @@ public class UserController : PeopleControllerBase
 
         var curLng = user.CultureName;
 
-        if (_setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
+        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, inDto.CultureName, StringComparison.InvariantCultureIgnoreCase)) != null && curLng != inDto.CultureName)
         {
             user.CultureName = inDto.CultureName;
 
@@ -1394,11 +1320,11 @@ public class UserController : PeopleControllerBase
                 throw;
             }
 
-            await _messageService.SendAsync(MessageAction.UserUpdatedLanguage, _messageTarget.Create(user.Id), user.DisplayUserName(false, _displayUserSettingsHelper));
+            await messageService.SendAsync(MessageAction.UserUpdatedLanguage, messageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
 
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -1426,8 +1352,8 @@ public class UserController : PeopleControllerBase
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
         var changed = false;
-        var self = _securityContext.CurrentAccount.ID.Equals(user.Id);
-        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID);
+        var self = securityContext.CurrentAccount.ID.Equals(user.Id);
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
         
         //Update it
         if (self)
@@ -1442,7 +1368,7 @@ public class UserController : PeopleControllerBase
                 var firstName = inDto.Firstname ?? user.FirstName;
                 var lastName = inDto.Lastname ?? user.LastName;
 
-                if (!_userFormatter.IsValidUserName(firstName, lastName))
+                if (!userFormatter.IsValidUserName(firstName, lastName))
                 {
                     throw new Exception(Resource.ErrorIncorrectUserName);
                 }
@@ -1467,7 +1393,7 @@ public class UserController : PeopleControllerBase
             };
 
 
-            user.BirthDate = inDto.Birthday != null ? _tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
+            user.BirthDate = inDto.Birthday != null ? tenantUtil.DateTimeFromUtc(inDto.Birthday) : user.BirthDate;
 
             var resetDate = new DateTime(1900, 01, 01);
             if (user.BirthDate == resetDate)
@@ -1476,7 +1402,7 @@ public class UserController : PeopleControllerBase
             }
 
             user.WorkFromDate = inDto.Worksfrom != null
-                ? _tenantUtil.DateTimeFromUtc(inDto.Worksfrom)
+                ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom)
                 : user.WorkFromDate;
 
             if (user.WorkFromDate == resetDate)
@@ -1496,7 +1422,7 @@ public class UserController : PeopleControllerBase
             changed = true;
         }
         
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         var owner = user.IsOwner(tenant);
         var statusChanged = false;
         
@@ -1512,7 +1438,7 @@ public class UserController : PeopleControllerBase
         // change user type
         var canBeGuestFlag = !owner && 
                              !await _userManager.IsDocSpaceAdminAsync(user) && 
-                             (await user.GetListAdminModulesAsync(_webItemSecurity, _webItemManager)).Count == 0 && 
+                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 && 
                              !self;
 
         if (inDto.IsUser.HasValue)
@@ -1523,17 +1449,17 @@ public class UserController : PeopleControllerBase
                 await _semaphore.WaitAsync();
                 if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
                 {
-                    await _countUserChecker.CheckAppend();
+                    await activeUsersChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-                    _webItemSecurityCache.ClearCache(tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
 
                 if (!self && !isUser && await _userManager.IsUserAsync(user))
                 {
-                    await _countPaidUserChecker.CheckAppend();
+                    await countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                    _webItemSecurityCache.ClearCache(tenant.Id);
+                    webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
             }
@@ -1547,17 +1473,17 @@ public class UserController : PeopleControllerBase
         {
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-            await _messageService.SendAsync(MessageAction.UserUpdated, _messageTarget.Create(user.Id),
-                user.DisplayUserName(false, _displayUserSettingsHelper), user.Id);
+            await messageService.SendAsync(MessageAction.UserUpdated, messageTarget.Create(user.Id),
+                user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
 
             if (statusChanged && inDto.Disable.HasValue && inDto.Disable.Value)
             {
-                await _cookiesManager.ResetUserCookieAsync(user.Id);
-                await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+                await cookiesManager.ResetUserCookieAsync(user.Id);
+                await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
             }
         }
 
-        return await _employeeFullDtoHelper.GetFullAsync(user);
+        return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
     /// <summary>
@@ -1578,13 +1504,13 @@ public class UserController : PeopleControllerBase
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         var users = await inDto.UserIds.ToAsyncEnumerable().SelectAwait(async userId => await _userManager.GetUsersAsync(userId))
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP()).ToListAsync();
 
         foreach (var user in users)
         {
-            if (user.IsOwner(tenant) || user.IsMe(_authContext))
+            if (user.IsOwner(tenant) || authContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(user) || user.IsMe(authContext))
             {
                 continue;
             }
@@ -1599,11 +1525,11 @@ public class UserController : PeopleControllerBase
                             await _semaphore.WaitAsync();
                             if (!await _userManager.IsUserAsync(user))
                             {
-                                await _countPaidUserChecker.CheckAppend();
+                                await countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
-                                await _countUserChecker.CheckAppend();
+                                await activeUsersChecker.CheckAppend();
                             }
 
                             user.Status = EmployeeStatus.Active;
@@ -1621,17 +1547,17 @@ public class UserController : PeopleControllerBase
 
                     await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
 
-                    await _cookiesManager.ResetUserCookieAsync(user.Id);
-                    await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+                    await cookiesManager.ResetUserCookieAsync(user.Id);
+                    await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
                     break;
             }
         }
 
-        await _messageService.SendAsync(MessageAction.UsersUpdatedStatus, _messageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)));
+        await messageService.SendAsync(MessageAction.UsersUpdatedStatus, messageTarget.Create(users.Select(x => x.Id)), users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
 
         foreach (var user in users)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -1661,15 +1587,15 @@ public class UserController : PeopleControllerBase
 
         foreach (var user in users)
         {
-            await _userManagerWrapper.UpdateUserTypeAsync(user, type);
+            await userManagerWrapper.UpdateUserTypeAsync(user, type);
         }
 
-        await _messageService.SendAsync(MessageAction.UsersUpdatedType, _messageTarget.Create(users.Select(x => x.Id)),
-        users.Select(x => x.DisplayUserName(false, _displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
+        await messageService.SendAsync(MessageAction.UsersUpdatedType, messageTarget.Create(users.Select(x => x.Id)),
+        users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)), users.Select(x => x.Id).ToList(), type);
 
         foreach (var user in users)
         {
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -1687,7 +1613,7 @@ public class UserController : PeopleControllerBase
     public async Task RecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        _usersQuotaSyncOperation.RecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
+        usersQuotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1704,7 +1630,7 @@ public class UserController : PeopleControllerBase
     public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        return _usersQuotaSyncOperation.CheckRecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
+        return usersQuotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -1726,18 +1652,18 @@ public class UserController : PeopleControllerBase
             .Where(userId => !_userManager.IsSystemUser(userId))
             .SelectAwait(async userId => await _userManager.GetUsersAsync(userId));
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         
         await foreach (var user in users)
         {
             if (inDto.Quota != -1)
             {
                 var usedSpace = Math.Max(0,
-                    (await _quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id))
+                    (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id))
                     .Where(r => !string.IsNullOrEmpty(r.Tag))
                     .Sum(r => r.Counter));
 
-                var tenantSpaceQuota = (await _quotaService.GetTenantQuotaAsync(tenant.Id)).MaxTotalSize;
+                var tenantSpaceQuota = (await quotaService.GetTenantQuotaAsync(tenant.Id)).MaxTotalSize;
 
                 if (tenantSpaceQuota < inDto.Quota || usedSpace > inDto.Quota)
                 {
@@ -1745,11 +1671,11 @@ public class UserController : PeopleControllerBase
                 }
             }
 
-            await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            await settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
-            await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -1794,17 +1720,17 @@ public class UserController : PeopleControllerBase
 
     private async Task CheckReassignProcessAsync(IEnumerable<Guid> userIds)
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         
         foreach (var userId in userIds)
         {
-            var reassignStatus = _queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
+            var reassignStatus = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
             if (reassignStatus == null || reassignStatus.IsCompleted)
             {
                 continue;
             }
 
-            var userName = (await _userManager.GetUsersAsync(userId)).DisplayUserName(_displayUserSettingsHelper);
+            var userName = (await _userManager.GetUsersAsync(userId)).DisplayUserName(displayUserSettingsHelper);
 
             throw new Exception(string.Format(Resource.ReassignDataRemoveUserError, userName));
         }
@@ -1820,13 +1746,13 @@ public class UserController : PeopleControllerBase
         Payments? payments,
         AccountLoginType? accountLoginType)
     {
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             throw new MethodAccessException("Method not available");
         }
 
-        var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID)) ||
-                      await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID);
+        var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
+                      await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
         var excludeGroups = new List<Guid>();
         var includeGroups = new List<List<Guid>>();
@@ -1871,7 +1797,7 @@ public class UserController : PeopleControllerBase
             {
                     Constants.GroupAdmin.ID
             };
-            var products = _webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
+            var products = webItemManager.GetItemsAll().Where(i => i is IProduct || i.ID == WebItemManager.MailProductID);
             adminGroups.AddRange(products.Select(r => r.ID));
 
             includeGroups.Add(adminGroups);
@@ -1985,70 +1911,43 @@ public class UserController : PeopleControllerBase
 }
 
 [ConstraintRoute("int")]
-public class UserControllerAdditionalInternal : UserControllerAdditional<int>
-{
-    public UserControllerAdditionalInternal(
-        EmployeeFullDtoHelper employeeFullDtoHelper, 
+public class UserControllerAdditionalInternal(EmployeeFullDtoHelper employeeFullDtoHelper,
         FileSecurity fileSecurity, 
         ApiContext apiContext, 
         IDaoFactory daoFactory) 
-        : base(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory)
-    {
+    : UserControllerAdditional<int>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
         
-    }
-}
-
-public class UserControllerAdditionalThirdParty : UserControllerAdditional<string>
-{
-    public UserControllerAdditionalThirdParty(
-        EmployeeFullDtoHelper employeeFullDtoHelper, 
+public class UserControllerAdditionalThirdParty(EmployeeFullDtoHelper employeeFullDtoHelper,
         FileSecurity fileSecurity, 
         ApiContext apiContext, 
         IDaoFactory daoFactory) 
-        : base(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory)
-    {
+    : UserControllerAdditional<string>(employeeFullDtoHelper, fileSecurity, apiContext, daoFactory);
         
-    }
-}
-
-public class UserControllerAdditional<T> : ApiControllerBase
-{
-    private readonly EmployeeFullDtoHelper _employeeFullDtoHelper;
-    private readonly FileSecurity _fileSecurity;
-    private readonly ApiContext _apiContext;
-    private readonly IDaoFactory _daoFactory;
-
-    public UserControllerAdditional(
-        EmployeeFullDtoHelper employeeFullDtoHelper, 
+public class UserControllerAdditional<T>(EmployeeFullDtoHelper employeeFullDtoHelper,
         FileSecurity fileSecurity, 
         ApiContext apiContext, 
         IDaoFactory daoFactory)
+    : ApiControllerBase
     {
-        _employeeFullDtoHelper = employeeFullDtoHelper;
-        _fileSecurity = fileSecurity;
-        _apiContext = apiContext;
-        _daoFactory = daoFactory;
-    }
-
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(T id, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool? excludeShared)
     {
-        var offset = Convert.ToInt32(_apiContext.StartIndex);
-        var count = Convert.ToInt32(_apiContext.Count);
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
 
-        var room = (await _daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
-        var totalCountTask = _fileSecurity.GetUsersWithSharedCountAsync(room, _apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(id)).NotFoundIfNull();
+        var totalCountTask = fileSecurity.GetUsersWithSharedCountAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false);
 
         var counter = 0;
 
-        await foreach (var u in _fileSecurity.GetUsersWithSharedAsync(room, _apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
+        await foreach (var u in fileSecurity.GetUsersWithSharedAsync(room, apiContext.FilterValue, employeeStatus, activationStatus, excludeShared ?? false, offset, 
                            count))
         {
             counter++;
             
-            yield return await _employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
+            yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
         }
 
-        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
+        apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 }

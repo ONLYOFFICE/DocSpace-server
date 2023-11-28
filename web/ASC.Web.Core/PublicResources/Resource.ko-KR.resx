@@ -991,4 +991,22 @@
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>이 도메인의 이메일은 등록할 수 없습니다</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom 클라이언트 ID</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom 클라이언트 시크릿</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Zoom 계정을 사용하여 포털에 로그인할 수 있도록 애플리케이션을 활성화하세요.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>사용자가 Zoom 계정을 사용하여 ONLYOFFICE에 로그인할 수 있도록 하려면 이 앱을 활성화하세요. {0}Zoom 개발자 웹사이트로 이동하여 새로운 ONLYOFFICE 통합 앱을 만드세요. 아래에 수신한 데이터를 삽입하세요:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>로그인 시도가 너무 많았습니다. 나중에 다시 시도해 주세요</value>
+  </data>
 </root>

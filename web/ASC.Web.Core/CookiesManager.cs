@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -36,7 +36,8 @@ public enum CookiesType
     AuthKey,
     SocketIO,
     ShareLink,
-    AnonymousSessionKey
+    AnonymousSessionKey,
+    ConfirmKey
 }
 
 [Scope]
@@ -46,6 +47,7 @@ public class CookiesManager
     private const string SocketIOCookiesName = "socketio.sid";
     private const string ShareLinkCookiesName = "sharelink";
     private const string AnonymousSessionKeyCookiesName = "anonymous_session_key";
+    private const string ConfirmCookiesName = "asc_confirm_key";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager _userManager;
@@ -98,7 +100,7 @@ public class CookiesManager
             Expires = await GetExpiresDateAsync(session)
         };
 
-        if (type == CookiesType.AuthKey)
+        if (type == CookiesType.AuthKey || type == CookiesType.ConfirmKey)
         {
             options.HttpOnly = true;
 
@@ -184,7 +186,7 @@ public class CookiesManager
 
         if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
         {
-            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions() { Expires = DateTime.Now.AddDays(-3) });
+            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions { Expires = DateTime.Now.AddDays(-3) });
         }
     }
 
@@ -239,17 +241,17 @@ public class CookiesManager
 
     public async Task ResetUserCookieAsync(Guid? userId = null)
     {
-        var currentUserId = _securityContext.CurrentAccount.ID;
+        var targetUserId = userId ?? _securityContext.CurrentAccount.ID;
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(userId ?? currentUserId);
+        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(targetUserId);
         settings.Index += 1;
-        await _tenantCookieSettingsHelper.SetForUserAsync(userId ?? currentUserId, settings);
+        await _tenantCookieSettingsHelper.SetForUserAsync(targetUserId, settings);
 
-        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, userId ?? currentUserId);
+        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, targetUserId);
 
-        if (!userId.HasValue)
+        if (targetUserId == _securityContext.CurrentAccount.ID)
         {
-            await AuthenticateMeAndSetCookiesAsync(currentUserId);
+            await AuthenticateMeAndSetCookiesAsync(targetUserId);
         }
     }
 
@@ -313,6 +315,11 @@ public class CookiesManager
         return GetCookiesName(CookiesType.AuthKey);
     }
 
+    public string GetConfirmCookiesName()
+    {
+        return GetCookiesName(CookiesType.ConfirmKey);
+    }
+
     private string GetCookiesName(CookiesType type)
     {
         var result = type switch
@@ -321,6 +328,7 @@ public class CookiesManager
             CookiesType.SocketIO => SocketIOCookiesName,
             CookiesType.ShareLink => ShareLinkCookiesName,
             CookiesType.AnonymousSessionKey => AnonymousSessionKeyCookiesName,
+            CookiesType.ConfirmKey => ConfirmCookiesName,
             _ => string.Empty,
         };
 
@@ -332,7 +340,7 @@ public class CookiesManager
 
         var originUri = new Uri(origin);
         var host = originUri.Host;
-        var alias = host.Substring(0, host.Length - _coreBaseSettings.Basedomain.Length - 1);
+        var alias = host[..(host.Length - _coreBaseSettings.Basedomain.Length - 1)];
         result = $"{result}_{alias}";
 
         return result;

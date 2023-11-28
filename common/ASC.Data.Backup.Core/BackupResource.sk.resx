@@ -123,4 +123,7 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>Záložný súbor je neplatný. Použite prosím súbor vytvorený vo verzii ONLYOFFICE v11.5 alebo novšej verzii.</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Záloha je väčšia ako celková veľkosť portálu</value>
+  </data>
 </root>

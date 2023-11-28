@@ -1,36 +1,49 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using HttpMethod = JSIStudios.SimpleRESTServices.Client.HttpMethod;
+
 namespace ASC.Data.Storage.RackspaceCloud;
 
 [Scope]
-public class RackspaceCloudStorage : BaseStorage
+public class RackspaceCloudStorage(TempPath tempPath,
+        TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider options,
+        ILogger<RackspaceCloudStorage> logger,
+        IHttpClientFactory httpClient,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportChunking => true;
-    public TempPath TempPath { get; }
+    public TempPath TempPath { get; } = tempPath;
 
     private string _region;
     private string _private_container;
@@ -44,25 +57,6 @@ public class RackspaceCloudStorage : BaseStorage
     private Uri _cname;
     private Uri _cnameSSL;
     private readonly List<string> _domains = new();
-    private readonly ILogger<RackspaceCloudStorage> _logger;
-
-    public RackspaceCloudStorage(
-        TempPath tempPath,
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<RackspaceCloudStorage> logger,
-        IHttpClientFactory httpClient,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-        _logger = logger;
-        TempPath = tempPath;
-    }
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -153,7 +147,7 @@ public class RackspaceCloudStorage : BaseStorage
         }
 
         return Task.FromResult(client.CreateTemporaryPublicUri(
-                                                JSIStudios.SimpleRESTServices.Client.HttpMethod.GET,
+                                                HttpMethod.GET,
                                                 _private_container,
                                                 MakePath(domain, path),
                                                 secretKey,
@@ -270,7 +264,7 @@ public class RackspaceCloudStorage : BaseStorage
             }
             catch (Exception exp)
             {
-                _logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
+                logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
             }
         }
 
@@ -441,7 +435,7 @@ public class RackspaceCloudStorage : BaseStorage
         var client = GetClient();
 
         return client.ListObjects(_private_container, null, null, null, MakePath(domain, path), _region)
-                  .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length)).ToAsyncEnumerable();
+                  .Select(x => x.Name[MakePath(domain, path + "/").Length..]).ToAsyncEnumerable();
     }
 
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
@@ -452,7 +446,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         return paths
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x)))
-                .Select(x => x.Substring(MakePath(domain, path + "/").Length).TrimStart('/')).ToAsyncEnumerable();
+                .Select(x => x[MakePath(domain, path + "/").Length..].TrimStart('/')).ToAsyncEnumerable();
     }
 
     public override Task<bool> IsFileAsync(string domain, string path)
@@ -723,7 +717,7 @@ public class RackspaceCloudStorage : BaseStorage
 
     private CloudFilesProvider GetClient()
     {
-        var cloudIdentity = new CloudIdentity()
+        var cloudIdentity = new CloudIdentity
         {
             Username = _username,
             APIKey = _apiKey

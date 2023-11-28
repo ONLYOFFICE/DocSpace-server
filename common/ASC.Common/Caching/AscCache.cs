@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -37,7 +37,7 @@ public class AscCacheNotify
         _cacheNotify = cacheNotify;
         _cache = cache;
 
-        _cacheNotify.Subscribe((_) => { OnClearCache(); }, CacheNotifyAction.Any);
+        _cacheNotify.Subscribe(_ => { OnClearCache(); }, CacheNotifyAction.Any);
     }
 
     public void ClearCache() => _cacheNotify.Publish(new AscCacheItem { Id = Guid.NewGuid().ToString() }, CacheNotifyAction.Any);
@@ -49,20 +49,13 @@ public class AscCacheNotify
 }
 
 [Singleton]
-public sealed class AscCache : ICache, IDisposable
+public sealed class AscCache(IMemoryCache memoryCache) : ICache, IDisposable
 {
-    private readonly IMemoryCache _memoryCache;
-    private CancellationTokenSource _resetCacheToken;
-
-    public AscCache(IMemoryCache memoryCache)
-    {
-        _memoryCache = memoryCache;
-        _resetCacheToken = new();
-    }
+    private CancellationTokenSource _resetCacheToken = new();
 
     public T Get<T>(string key) where T : class
     {
-        return _memoryCache.Get<T>(key);
+        return memoryCache.Get<T>(key);
     }
 
     public void Insert(string key, object value, TimeSpan slidingExpiration, Action<object, object, EvictionReason, object> evictionCallback = null)
@@ -77,7 +70,7 @@ public sealed class AscCache : ICache, IDisposable
 
     public void Remove(string key)
     {
-        _memoryCache.Remove(key);
+        memoryCache.Remove(key);
     }
 
     public void Remove(ConcurrentDictionary<string, object> keys, Regex pattern)
@@ -87,7 +80,7 @@ public sealed class AscCache : ICache, IDisposable
 
         foreach (var key in matchedKeys)
         {
-            _memoryCache.Remove(key);
+            memoryCache.Remove(key);
         }
     }
 
@@ -103,11 +96,11 @@ public sealed class AscCache : ICache, IDisposable
     }
 
     public ConcurrentDictionary<string, T> HashGetAll<T>(string key) =>
-        _memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
+        memoryCache.GetOrCreate(key, _ => new ConcurrentDictionary<string, T>());
 
     public T HashGet<T>(string key, string field)
     {
-        if (_memoryCache.TryGetValue<ConcurrentDictionary<string, T>>(key, out var dic)
+        if (memoryCache.TryGetValue<ConcurrentDictionary<string, T>>(key, out var dic)
             && dic.TryGetValue(field, out var value))
         {
             return value;
@@ -128,7 +121,7 @@ public sealed class AscCache : ICache, IDisposable
         {
             dic.AddOrUpdate(field, value, (_, _) => value);
 
-            _memoryCache.Set(key, dic, options);
+            memoryCache.Set(key, dic, options);
         }
         else if (dic != null)
         {
@@ -136,11 +129,11 @@ public sealed class AscCache : ICache, IDisposable
 
             if (dic.IsEmpty)
             {
-                _memoryCache.Remove(key);
+                memoryCache.Remove(key);
             }
             else
             {
-                _memoryCache.Set(key, dic, options);
+                memoryCache.Set(key, dic, options);
             }
         }
     }
@@ -165,14 +158,14 @@ public sealed class AscCache : ICache, IDisposable
             options = options.RegisterPostEvictionCallback(new PostEvictionDelegate(evictionCallback));
         }
 
-        _memoryCache.Set(key, value, options);
+        memoryCache.Set(key, value, options);
     }
     
     private void Dispose(bool disposing)
     {
         if (disposing)
         {
-            _memoryCache?.Dispose();
+            memoryCache?.Dispose();
             _resetCacheToken?.Dispose();
         }
     }
