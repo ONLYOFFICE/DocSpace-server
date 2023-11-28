@@ -7,7 +7,7 @@ server:
 
 docspace:
   server:
-    url: ${DOCSPACE_ADDRESS:http://127.0.0.1}
+    url: ${DOCSPACE_ADDRESS:http://localhost:8092}
 
 spring:
   application:
@@ -15,12 +15,12 @@ spring:
   profiles:
     active: ${PROFILE:dev}
   datasource:
-    url: jdbc:mysql://${JDBC_URL:127.0.0.1:33060}/${JDBC_DATABASE:docspace}
-    username: ${JDBC_USER_NAME:root}
-    password: ${JDBC_PASSWORD:my-secret-pw}
+    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}
+    username: ${JDBC_USER_NAME:dev}
+    password: ${JDBC_PASSWORD:dev}
     driver-class-name: com.mysql.cj.jdbc.Driver
   rabbitmq:
-    host: ${RABBIT_HOST:127.0.0.1}
+    host: ${RABBIT_HOST:localhost}
     port: ${RABBIT_PORT:5672}
     username: ${RABBIT_USER_NAME:guest}
     password: ${RABBIT_PASSWORD:guest}
