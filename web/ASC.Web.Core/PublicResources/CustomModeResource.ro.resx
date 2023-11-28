@@ -181,7 +181,7 @@ h3.Pentru un start rapid, iată ce puteți face cu ONLYOFFICE:
 
 - Utilizarea diferitor pluginuri pentru a încorpora noile funcții.
 
-- Un acces ușor la cloud Personal utilizând "Extensia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Un acces ușor la cloud Personal utilizând "Extensia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ro".
 
 De asemenea, puteți edita documente offline cu ajutorul "editorului de birou":"https://www.onlyoffice.com/download-desktop.aspx" gratuit sau instalați aplicația de editare pentru dispozitivul "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" sau "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
@@ -234,7 +234,7 @@ Nu doriți să modificați adresa de e-mail? Atunci ignorați acest mesaj.</valu
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Referitor la solicitarea dumneavoastră de închiderea contului pe personal.onlyoffice.com. Urmăriţi linkul pentru a finaliza solicitarea (link-ul este valabil timp de 7 zile): 
 
-Confirmare închidere cont
+$OrangeButton
 
 *Mențiune*: După demararea procesului de ştergere, contul dvs și toate datele asociate vor fi şterse definitiv conform "Declaraţiei de Confidențialitate":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 

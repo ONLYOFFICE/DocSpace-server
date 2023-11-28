@@ -176,7 +176,7 @@ $TrulyYours</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Դուք խնդրել եք դադարեցնել ձեր հաշիվը personal.onlyoffice.com. Հարցումը լրացնելու համար հետևեք հղմանը (հղումը ակտիվ է 7-օրյա ժամկետով)։ 
 
-Հաստատեք հաշվի դադարեցումը
+$OrangeButton
 
 *Նշում*. Ջնջումից հետո ձեր հաշիվը և դրա հետ կապված բոլոր տվյալները ընդմիշտ կջնջվեն՝ համաձայն մեր "Գաղտնիության քաղաքականությունը":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 

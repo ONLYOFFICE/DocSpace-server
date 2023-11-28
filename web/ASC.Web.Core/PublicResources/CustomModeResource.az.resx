@@ -63,24 +63,25 @@
 
 Siz indicə buludda şəxsi ofisinizi yaratdınız.
 
-h3.Bu, dostlarınız və ya həmkarlarınıza girişi təmin etməklə istənilən yerdən sənədləri redaktə edə və saxlaya, onlarla işləyə biləcəyiniz virtual iş sahəsidir. ONLYOFFICE Microsoft Office™ sənəd formatları ilə uyğun gəlir və yaradılmış obyektlərin format və keyfiyyətində heç bir itkinin olmayacağına zəmanət verir. Sizi uyğunluqla bağlı problemlərdən xilas etməyi və tam peşəkar redaktə alətləri dəsti ilə təmin etməyi vəd edirik.
+h3.Bu, dostlarınız və ya həmkarlarınıza girişi təmin etməklə istənilən yerdən sənədləri redaktə edə və saxlaya, onlarla işləyə biləcəyiniz virtual iş sahəsidir.
 
 h3. Sürətli başlanğıc üçün ONLYOFFICE-də edə biləcəkləriniz bunlardır:
 
-- Kompüterinizdən faylları endirmək və ya yenisini yaratmaq;
+Mətn sənədləri, cədvəllər və təqdimatlar yaradın, onlara baxın və redaktə edin.
 
-- Bütün məşhur fayl formatları ilə işləmək;
+- Bütün məşhur formatlarla işləyin. MS Office faylları ilə ən yüksək uyğunluq.
 
-- Avtoşəkilləri, diaqramları, cədvəlləri, tənlikləri və digər obyektləri redaktə etmək;
+- "Doldurmağa hazır formalar":"https://www.onlyoffice.com/form-creator.aspx" yaradın və redaktə edin.
 
-- Genişləndirilmiş redaktə xüsusiyyətləri üçün müxtəlif əlavələrdən istifadə etmək;
+- Sənədləri onlayn paylaşın və əməkdaşlıq edin.
 
-- "Chrome genişləndirilməsi" vasitəsilə şəxsi buludunuza asanlıqla daxil olmaq:"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Əlavə funksiyaları həyata keçirmək üçün müxtəlif plaginlərdən istifadə edin;
 
-Siz həmçinin ödənişsiz "masa üstü redaktorlarımız" vasitəsilə sənədləri oflayn rejimdə redaktə edə bilərsiniz:"https://www.onlyoffice.com/download-desktop.aspx" və ya "mobil redaktə dəsti" əldə edə bilərsiniz:"https://www.onlyoffice.com iOS və ya Android cihazınız üçün /mobile.aspx".
+- "Chrome genişləndirilməsi":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" vasitəsilə Şəxsi buludunuza asanlıqla daxil olun.
 
-Hörmətlə,
-ONLYOFFICE komandası</value>
+Siz həmçinin ödənişsiz "masaüstü redaktorlarımız vasitəsilə sənədləri oflayn rejimdə redaktə edə bilərsiniz":"https://www.onlyoffice.com/download-desktop.aspx" və ya "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" üçün mobil redaktə paketi əldə edə bilərsiniz və ya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" cihazı.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Bulud ofis hesabınızdakı e-poçtu dəyişmək istəyirsiniz?
@@ -109,14 +110,15 @@ $TrulyYours</value>
 
 $OrangeButton
 
-*Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid= 5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
+*Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
 
-Davam etmək istəmirsinizsə, bu e-poçtu nəzərə almayın.
+"Hesabın ləğvi haqqında ətraflı oxuyun":"${__HelpLink}/administration/configuration.aspx"
 
-Hər hansı sualınız varsa, "support@onlyoffice.com":"mailto:support@onlyoffice.com" ünvanında bizimlə əlaqə saxlayın
+Davam etmək istəmirsinizsə, bu e-poçtu nəzərə almayın. 
 
-Hörmətlə,
-ONLYOFFICE komandası</value>
+Hər hansı sualınız varsa, "${__SupportEmail}":"mailto:${__SupportEmail}" ünvanında bizimlə əlaqə saxlayın
+
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Hörmətli $UserName,
