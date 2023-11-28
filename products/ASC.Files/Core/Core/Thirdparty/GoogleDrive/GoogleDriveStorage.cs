@@ -106,7 +106,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         IsOpened = false;
     }
-    
+
     public async Task<bool> CheckAccessAsync()
     {
         try
@@ -129,7 +129,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
     {
         return InternalCopyFileAsync(toFolderId, fileId, newFileName);
     }
-    
+
     public async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream)
     {
         var file = await GetFileAsync(fileId);
@@ -140,7 +140,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
     {
         return GetItemAsync(fileId);
     }
-    
+
     public async Task<Stream> DownloadStreamAsync(DriveFile file, int offset = 0)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -179,7 +179,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         return tempBuffer;
     }
-    
+
     public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
     {
         try
@@ -194,17 +194,17 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             return null;
         }
     }
-    
+
     public Task<DriveFile> RenameFileAsync(string fileId, string newName)
     {
         return RenameEntryAsync(fileId, newName);
     }
-    
+
     public Task<DriveFile> MoveFileAsync(string fileId, string newFileName, string toFolderId)
     {
         return MoveEntryAsync(fileId, newFileName, toFolderId);
     }
-    
+
     public Task<DriveFile> CreateFolderAsync(string title, string parentId)
     {
         return InsertEntryAsync(null, title, parentId, true);
@@ -214,37 +214,37 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
     {
         return InternalCopyFolderAsync(folderId, newFolderName, toFolderId);
     }
-    
+
     public Task<DriveFile> GetFolderAsync(string folderId)
     {
         return GetItemAsync(folderId);
     }
-    
+
     public Task<DriveFile> RenameFolderAsync(string folderId, string newName)
     {
         return RenameEntryAsync(folderId, newName);
     }
-    
+
     public Task<DriveFile> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
         return MoveEntryAsync(folderId, newFolderName, toFolderId);
     }
 
-    public async Task<List<DriveFile>> GetItemsAsync(string folderId)
+    public Task<List<DriveFile>> GetItemsAsync(string folderId)
     {
-        return await GetItemsInternalAsync(folderId);
+        return GetItemsInternalAsync(folderId);
     }
 
-    public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folders)
+    public Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folders)
     {
-        return await GetItemsInternalAsync(folderId, folders);
+        return GetItemsInternalAsync(folderId, folders);
     }
-    
+
     public Task DeleteItemAsync(DriveFile entry)
     {
         return _driveService.Files.Delete(entry.Id).ExecuteAsync();
     }
-    
+
     public async Task<long> GetMaxUploadSizeAsync()
     {
         var request = _driveService.About.Get();
@@ -256,13 +256,10 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
     public void Dispose()
     {
-        if (_driveService != null)
-        {
-            _driveService.Dispose();
-        }
+        _driveService?.Dispose();
     }
 
-    public DriveFile FileConstructor(string title = null, string mimeType = null, string folderId = null)
+    public static DriveFile FileConstructor(string title = null, string mimeType = null, string folderId = null)
     {
         var file = new DriveFile();
 
@@ -353,7 +350,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         }
         else
         {
-            if (lastChunk) 
+            if (lastChunk)
             {
                 var bytesToTransfer = googleDriveSession.BytesTransfered + chunkLength;
 
@@ -445,12 +442,16 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
             var request = _driveService.Files.Get(itemId);
             request.Fields = GoogleLoginProvider.FilesFields;
 
-        return about.MaxUploadSize ?? MaxChunkedUploadFileSize;
-    }
-
-    public void Dispose()
-    {
-        _driveService?.Dispose();
+            return await request.ExecuteAsync();
+        }
+        catch (GoogleApiException ex)
+        {
+            if (ex.HttpStatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+            throw;
+        }
     }
 
     private async Task<List<DriveFile>> GetItemsInternalAsync(string folderId, bool? folders = null)
@@ -538,7 +539,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
 
         return newFolder;
     }
-    
+
     private Task<DriveFile> MoveEntryAsync(string entryId, string newEntryName, string toFolderId)
     {
         var request = _driveService.Files.Update(FileConstructor(title: newEntryName), entryId);
@@ -548,12 +549,12 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         return request.ExecuteAsync();
     }
 
-    private async Task<DriveFile> RenameEntryAsync(string fileId, string newTitle)
+    private Task<DriveFile> RenameEntryAsync(string fileId, string newTitle)
     {
         var request = _driveService.Files.Update(FileConstructor(newTitle), fileId);
         request.Fields = GoogleLoginProvider.FilesFields;
 
-        return await request.ExecuteAsync();
+        return request.ExecuteAsync();
     }
 
     private async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream, string fileTitle)
@@ -577,7 +578,7 @@ internal class GoogleDriveStorage(ConsumerFactory consumerFactory,
         return request.ResponseBody;
     }
 }
-    
+
 public enum ResumableUploadSessionStatus
 {
     None,
@@ -594,4 +595,4 @@ internal class ResumableUploadSession(string fileId, string folderId, long bytes
     public string FolderId { get; set; } = folderId;
     public ResumableUploadSessionStatus Status { get; set; } = ResumableUploadSessionStatus.None;
     public string Location { get; set; }
-}
+} 
