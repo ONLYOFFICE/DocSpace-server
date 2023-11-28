@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.IdentityModel.Tokens;
+
 namespace ASC.Files.Core.Core.Thirdparty;
 [Scope]
 internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<string>
@@ -119,7 +121,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
@@ -183,10 +185,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
         
-        if (!string.IsNullOrEmpty(extension))
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim().ToLower();
-            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         return files;
@@ -203,7 +205,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string extension ,bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
+        string[] extension ,bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -268,11 +270,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         {
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
-        
-        if (!string.IsNullOrEmpty(extension))
+
+        if (!extension.IsNullOrEmpty())
         {
-            extension = extension.Trim().ToLower();
-            files = files.Where(x => FileUtility.GetFileExtension(x.Title).Equals(extension));
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
 
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
@@ -590,7 +592,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent)
     {
         return AsyncEnumerable.Empty<File<string>>();
@@ -673,7 +675,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         throw new NotImplementedException();
     }
 
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, bool withSubfolders = false, 
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false, 
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();

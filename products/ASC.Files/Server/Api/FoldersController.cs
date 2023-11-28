@@ -138,7 +138,9 @@ public abstract class FoldersController<T> : ApiControllerBase
     public async Task<FolderContentDto<T>> GetFolderAsync(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withsubfolders, bool? excludeSubject, 
         ApplyFilterOption? applyFilterOption, string extension)
     {
-        var folder = await _foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, extension);
+
+        var split = extension == null ? new string[] { } : extension.Split(",");
+        var folder = await _foldersControllerHelper.GetFolderAsync(folderId, userIdOrGroupId, filterType, roomId, searchInContent, withsubfolders, excludeSubject, applyFilterOption, split);
 
         return folder.NotFoundIfNull();
     }
