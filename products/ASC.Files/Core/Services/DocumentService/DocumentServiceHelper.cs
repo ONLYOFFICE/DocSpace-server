@@ -205,12 +205,14 @@ public class DocumentServiceHelper
         }
 
         var locatedInPrivateRoom = false;
-
+        var options = new Options();
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = _daoFactory.GetFolderDao<T>();
 
             locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
+            var room = await DocSpaceHelper.GetRoomId(file, folderDao);
+            options = GetOptions( await folderDao.GetWaterMarksSettings(room));
         }
 
         if (file.Encrypted
@@ -302,8 +304,9 @@ public class DocumentServiceHelper
                         ModifyFilter = rightModifyFilter,
                         Print = rightToDownload,
                         Download = rightToDownload
-                    }
-                },
+                    },
+                    Options = options,
+            },
             EditorConfig =
                 {
                     ModeWrite = modeWrite,
@@ -364,7 +367,29 @@ public class DocumentServiceHelper
         return JsonWebToken.Encode(payload, _fileUtility.SignatureSecret);
     }
 
-
+    public Options GetOptions(WatermarkJson watermarkJson)
+    {
+        var runs = new List<Runs>();
+        var paragrahs = new List<Paragraphs>();
+        if(watermarkJson.Text.Count != 0)
+        {
+            for(var i = 0; i < watermarkJson.Text.Count; i++)
+            {
+                runs.Add(new Runs(watermarkJson.Text[i]));
+                if(i != watermarkJson.Text.Count - 1)
+                {
+                    runs.Add(new Runs("<%br%>"));
+                }
+            }
+            paragrahs.Add(new Paragraphs(runs));
+        }
+        
+        var options = new Options()
+        {
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkJson.Width, watermarkJson.Height, watermarkJson.ImageUrl, watermarkJson.Rotate, paragrahs)
+        };
+        return options;
+    }
     public async Task<string> GetDocKeyAsync<T>(File<T> file)
     {
         return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn);

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.VirtualRooms;
+
 namespace ASC.Files.Core.Data;
 
 [Scope]
@@ -50,7 +52,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     private readonly GlobalFolder _globalFolder;
     private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly GlobalStore _globalStore;
-
+    private readonly IHttpContextAccessor _httpContextAccessor;
     public FolderDao(
         FactoryIndexerFolder factoryIndexer,
         UserManager userManager,
@@ -71,7 +73,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         CrossDao crossDao,
         IMapper mapper,
         GlobalStore globalStore,
-        GlobalFolder globalFolder)
+        GlobalFolder globalFolder,
+        IHttpContextAccessor httpContextAccessor)
         : base(
               dbContextManager,
               userManager,
@@ -93,6 +96,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         _mapper = mapper;
         _globalStore = globalStore;
         _globalFolder = globalFolder;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -105,7 +109,35 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         return _mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
+    public async Task<WatermarkJson> GetWaterMarksSettings (Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
+        var userName = new Regex (@"\${UserName}");
+        var userEmail = new Regex(@"\${UserEmail}");
+        var userIpAdress = new Regex(@"\${UserIpAdress}");
+        var currentDate = new Regex(@"\${CurrentDate}");
+        var roomName = new Regex(@"\${RoomName}");
+        var userInfo = _userManager.GetUsers(_authContext.CurrentAccount.ID);
+        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var waterMarkJson = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id); 
+        waterMarkJson.Watermark = userName.Replace(waterMarkJson.Watermark, userInfo.UserName);
+        waterMarkJson.Watermark = userEmail.Replace(waterMarkJson.Watermark, userInfo.Email);
+        waterMarkJson.Watermark = userIpAdress.Replace(waterMarkJson.Watermark, ip);
+        waterMarkJson.Watermark = currentDate.Replace(waterMarkJson.Watermark, DateTime.Now.ToString());
+        waterMarkJson.Watermark = roomName.Replace(waterMarkJson.Watermark, room.Title);
+        return JsonSerializer.Deserialize<WatermarkJson>(waterMarkJson.Watermark);
+    }
+    public async Task<WatermarkJson> GetWatermarkInfo (Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var waterMarkJson = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id);
+        return JsonSerializer.Deserialize<WatermarkJson>(waterMarkJson.Watermark);
+    }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
@@ -509,6 +541,33 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     }
 
+    public async Task<int> WatermarksSaveToDbAsync(WatermarkJson waterMarkJson, Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var toUpdate = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id);
+
+        toUpdate.Watermark = JsonSerializer.Serialize(waterMarkJson);
+        filesDbContext.Update(toUpdate);
+
+        await filesDbContext.SaveChangesAsync();
+
+        return room.Id;
+    }
+
+    public async Task<Folder<int>> DeleteWatermarkFromDbAsync(Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var watermark = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id);
+        watermark.Watermark = null;
+        filesDbContext.Update(watermark);
+        await filesDbContext.SaveChangesAsync();
+        return room;
+    }
     private async Task<bool> IsExistAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -1827,7 +1886,10 @@ static file class Queries
                                          s.TenantId == tenantId && 
                                          s.EntryId == r.Id.ToString() && 
                                          s.EntryType == FileEntryType.Folder && 
-                                         s.SubjectType == SubjectType.PrimaryExternalLink)
+                                         s.SubjectType == SubjectType.PrimaryExternalLink),
+                            Settings = (from f in ctx.RoomSettings
+                                        where f.TenantId == tenantId && f.RoomId == folderId
+                                        select f).FirstOrDefault()
                         }
                     ).SingleOrDefault());
 
@@ -2117,6 +2179,23 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
                     .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomWaterMarkAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+            ctx.RoomSettings
+            .Where(r => r.TenantId == tenantId)
+            .Where(r => r.RoomId == roomId)
+            .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteRoomWaterMarkAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+            ctx.RoomSettings
+            .Where(r => r.TenantId == tenantId)
+            .Where(r => r.RoomId == roomId)
+            .Select(r => r.Watermark)
+            .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, Task<int>> CountTreesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

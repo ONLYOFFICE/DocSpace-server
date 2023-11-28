@@ -552,4 +552,24 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         var folderDao = selector.GetFolderDao(parentFolderId);
         await folderDao.InitCustomOrder(folderIds, parentFolderId);
     }
+
+    public Task<string> WatermarksSaveToDbAsync(WatermarkJson waterMarks, Folder<string> folder)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<WatermarkJson> GetWaterMarksSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<WatermarkJson> GetWatermarkInfo(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteWatermarkFromDbAsync(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
 }

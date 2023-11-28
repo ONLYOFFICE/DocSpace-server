@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Drawing;
+
 namespace ASC.Web.Files.Services.DocumentService;
 
 [EnumExtensions]
@@ -184,6 +186,7 @@ public class DocumentConfig<T>
     }
 
     public PermissionsConfig Permissions { get; set; }
+	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
     public FileReferenceData<T> ReferenceData
@@ -649,6 +652,54 @@ public class PermissionsConfig
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
+}
+
+public class Options
+{
+    [JsonPropertyName("watermark_on_draw")]
+    public WatermarkOnDraw WatermarkOnDraw { get; set; }
+}
+public class WatermarkOnDraw
+{
+    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraphs> paragraphs)
+    {
+        Width = width; 
+        Height = height;
+        Fill = fill;
+        Rotate = rotate;
+        Transparent = 0.3;
+        Paragraphs = paragraphs;
+    }
+	public double Width { get; set; }
+    public double Height { get; set; }
+	public string Fill { get; set; }
+    public int Rotate { get; set; }
+    public double Transparent { get; set; }
+    public List<Paragraphs> Paragraphs { get; set; }
+}
+public class Paragraphs
+{
+    public Paragraphs(List<Runs> runs)
+    {
+        Runs = runs;
+        Align = 2;
+    }
+    public int Align { get; set; }
+    public List<Runs> Runs { get; set; }
+}
+public class Runs
+{
+    public Runs(string text)
+    {
+        FontSize = "42";
+        Fill = new int[3]{ 182, 182, 182 };
+        Text = text;
+    }
+    public int[] Fill { get; set; }
+    public string Text { get; set; }
+
+    [JsonPropertyName("font-size")]
+    public string FontSize { get; set; }
 }
 
 /// <summary>

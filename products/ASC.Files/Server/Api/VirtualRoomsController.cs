@@ -34,6 +34,7 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
+        WaterMarksManager waterMarksManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -46,6 +47,7 @@ public class VirtualRoomsInternalController : VirtualRoomsController<int>
             fileOperationDtoHelper,
             coreBaseSettings,
             customTagsService,
+            waterMarksManager,
             roomLogoManager,
             fileStorageService,
             folderDtoHelper,
@@ -84,6 +86,7 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
+        WaterMarksManager waterMarksManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -96,6 +99,7 @@ public class VirtualRoomsThirdPartyController : VirtualRoomsController<string>
             fileOperationDtoHelper,
             coreBaseSettings,
             customTagsService,
+            waterMarksManager,
             roomLogoManager,
             fileStorageService,
             folderDtoHelper,
@@ -134,6 +138,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     private readonly FileOperationDtoHelper _fileOperationDtoHelper;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly CustomTagsService _customTagsService;
+    private readonly WaterMarksManager _waterMarksManager;
     private readonly RoomLogoManager _roomLogoManager;
     protected readonly FileStorageService _fileStorageService;
     private readonly FileShareDtoHelper _fileShareDtoHelper;
@@ -146,6 +151,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
+        WaterMarksManager waterMarksManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -159,6 +165,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         _fileOperationDtoHelper = fileOperationDtoHelper;
         _coreBaseSettings = coreBaseSettings;
         _customTagsService = customTagsService;
+        _waterMarksManager = waterMarksManager;
         _roomLogoManager = roomLogoManager;
         _fileStorageService = fileStorageService;
         _fileShareDtoHelper = fileShareDtoHelper;
@@ -457,6 +464,66 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
         ErrorIfNotDocSpace();
 
         var room = await _customTagsService.DeleteRoomTagsAsync(id, inDto.Names);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+
+    /// <summary>
+    /// Adds the watermarks settings to a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Add room watermarks settings</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarksRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("rooms/{id}/watermark")]
+    public async Task<FolderDto<T>> AddWaterMarksAsync(T id, WatermarksRequestDto inDto)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _waterMarksManager.AddRoomWaterMarksAsync(id, inDto);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
+
+    /// <summary>
+    /// Returns the watermark information.
+    /// </summary>
+    /// <short>Get watermark information</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Watermark information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>GET</httpMethod>
+    [AllowAnonymous]
+    [HttpGet("rooms/{id}/watermark")]
+    public async Task<WatermarksRequestDto> GetWatermarkInfoAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+
+        return await _waterMarksManager.GetWatermarkInformation(room);
+    }
+
+    /// <summary>
+    /// Removes the watermarks from a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Remove room watermarks</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchTagsRequestDto, ASC.Files.Core" name="inDto">Request parameters for removing watermarks</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
+    /// <path>api/2.0/files/rooms/{id}/tags</path>
+    /// <httpMethod>DELETE</httpMethod>
+    [HttpDelete("rooms/{id}/watermark")]
+    public async Task<FolderDto<T>> DeleteWatermarkAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _waterMarksManager.RemoveRoomWaterMarksAsync(id);
 
         return await _folderDtoHelper.GetAsync(room);
     }

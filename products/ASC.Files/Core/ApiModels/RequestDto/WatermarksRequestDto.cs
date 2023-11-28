@@ -24,47 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Helpers;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public static class DocSpaceHelper
+public class WatermarksRequestDto
 {
-    public static bool IsRoom(FolderType folderType)
-    {
-        return folderType is 
-            FolderType.CustomRoom or 
-            FolderType.EditingRoom or 
-            FolderType.ReviewRoom or 
-            FolderType.ReadOnlyRoom or 
-            FolderType.FillingFormsRoom or
-            FolderType.PublicRoom;
-    }
-
-    public static RoomType? GetRoomType(FolderType folderType)
-    {
-        return folderType switch
-        {
-            FolderType.FillingFormsRoom => RoomType.FillingFormsRoom,
-            FolderType.EditingRoom => RoomType.EditingRoom,
-            FolderType.ReviewRoom => RoomType.ReviewRoom,
-            FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
-            FolderType.CustomRoom => RoomType.CustomRoom,
-            FolderType.PublicRoom => RoomType.PublicRoom,
-            _ => null,
-        };
-    }
-
-    public static async Task<bool> LocatedInPrivateRoomAsync<T>(File<T> file, IFolderDao<T> folderDao)
-    {
-        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.Find(f => IsRoom(f.FolderType));
-
-        return room is { SettingsPrivate: true };
-    }
-    public static async Task<Folder<T>> GetRoomId<T>(File<T> file, IFolderDao<T> folderDao)
-    {
-        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-        var room = parents.Find(f => IsRoom(f.FolderType));
-
-        return room;
-    }
+    public bool UserName { get; set; }
+    public bool UserEmail { get; set; }
+    public bool UserIpAdress { get; set; }
+    public bool CurrentDate { get; set; }
+    public bool RoomName { get; set; }
+    public string Text { get; set; }
+    public int Rotate { get; set; }
+    public int Scale { get; set; }
+    public string UrlImage { get; set; }
+    public double Height { get; set; }
+    public double Width { get; set; }
 }
