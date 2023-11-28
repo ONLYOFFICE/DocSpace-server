@@ -245,7 +245,7 @@ internal abstract class ThirdPartyProviderDao
 
     public Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry)
     {
-        throw new NotImplementedException();
+        return Task.FromResult((-1, string.Empty));
     }
     
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, bool withSubfolders = false,

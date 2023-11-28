@@ -215,7 +215,7 @@ public class FilesMessageService
 
     private async Task<string> GetAdditionalNotificationParamAsync<T>(FileEntry<T> entry, MessageAction action, string oldTitle = null, Guid userid = default(Guid), FileShare userRole = FileShare.None)
     {
-        var folderDao = _daoFactory.GetFolderDao<int>();
+        var folderDao = _daoFactory.GetFolderDao<T>();
         var roomInfo = await folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
 
         var info = new AdditionalNotificationInfo
