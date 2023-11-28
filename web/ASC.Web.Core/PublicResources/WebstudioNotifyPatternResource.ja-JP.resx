@@ -1366,4 +1366,280 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})ポータルの削除
+
+$OwnerName 様
+
+お客様に[${__VirtualRootPath}](${__VirtualRootPath}) ポータルの永久削除リクエストをいただきました。
+
+_重要！ポータルに保存されているすべてのデータ、および登録情報は失われ、回復することはできません。_
+
+#if($AutoRenew == "True")
+ポータルを削除する前に、自動課金がオフになっていることをご確認ください。自動課金の状態は[Avangateアカウント](https://secure.avangate.com/myaccount/")で確認できます。
+#end
+
+それでもなお [${__VirtualRootPath}](${__VirtualRootPath}) ポータルを削除したい場合は、以下のリンクをたどって操作をご確認ください：
+
+$OrangeButton
+
+_ご注意_: このリンクは7日間のみ有効です。期間内にポータルの削除を完了してください。
+
+ご質問やサポートが必要な場合は、[${__SalesEmail}](mailto:${__SalesEmail}) までお気軽にお問い合わせください。
+
+どうぞよろしくお願いいたします。
+ONLYOFFICE™ サポートチーム
+[www.onlyoffice.com](http://onlyoffice.com/ja/)</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからのプロファイルの削除
+
+お客様に、"${__VirtualRootPath}":"${__VirtualRootPath}"ポータルからお客様のプロフィールを永久に削除するリクエストをいただきました。
+
+プロフィールを削除したい場合は、以下のリンクに従って操作をご確認ください：
+
+$OrangeButton
+
+*ご注意*：このリンクは7日間のみ有効です。期間内にプロファイルの削除を完了してください。</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>"$FromUserName":"$FromUserLink"ユーザーがプロフィールを削除しました。すべてのユーザーのファイルはまだそのユーザーに割り当てられており、ディスク領域を占有しています。
+
+他のユーザーと共有されている文書を他のアクティブなユーザーに割り当て直すか、削除してポータルのディスク領域を解放することができます。
+
+"このリンク":"$FromUserLink"を通じてユーザープロフィールに移動し、文書を別のユーザーに再割り当てするか、削除してください。</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1."$__VirtualRootPath":"$__VirtualRootPath"のプロフィールが変更されました。
+
+$UserName 様
+
+"$__VirtualRootPath":"$__VirtualRootPath"にあるお客様のユーザープロフィールの詳細は、"$__AuthorName":"$__AuthorUrl"によって変更されました。
+
+お客様のプロフィールを確認するには、以下のリンクをたどってください："$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath})のプロフィールが変更されました。
+
+$UserName 様
+
+お客様の [${__VirtualRootPath}](${__VirtualRootPath}) ユーザープロフィールの詳細は、[$__AuthorName]($__AuthorUrl) によって変更されました。
+
+お客様のプロフィールを確認するには、以下のリンクをたどってください：
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザーから"$ToUserName":"$ToUserLink"ユーザーへのデータ再割り当て処理は正常に完了しました。</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザから"$ToUserName":"$ToUserLink"ユーザへのデータ再割り当て処理は失敗しました。
+
+例外メッセージ： $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザーのデータ削除が完了しました。
+
+個人データの削除により、$DocsSpaceが解放されました</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>$UserName 様
+
+"$FromUserName":"$FromUserLink"ユーザーのデータ削除処理に失敗しました。
+
+例外メッセージ： $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.エンタープライズライセンスのリクエスト
+
+h3.名
+$UserName
+
+h3.姓
+$UserLastName
+
+h3.役職
+$Position
+
+h3.メールアドレス
+"$UserEmail":"mailto:$UserEmail"
+
+h3.電話番号
+$Phone
+
+h3.会社ウェブサイト
+$Website
+
+h3.会社名
+$CompanyTitle
+
+h3.会社規模
+$CompanySize
+
+h3.リクエスト内容
+$Body
+
+h3.ポータルアドレス
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.SAAS料金表リクエスト "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.名
+$UserName
+
+h3.姓
+$UserLastName
+
+h3.役職
+$Position
+
+h3.メールアドレス
+"$UserEmail":"mailto:$UserEmail"
+
+h3.電話番号
+$Phone
+
+h3.会社ウェブサイト
+$Website
+
+h3.会社名
+$CompanyTitle
+
+h3.会社規模
+$CompanySize
+
+h3.リクエスト内容
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.ポータルの復元
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+ポータルが復元されました。アクセスするには、新しいパスワードを設定する必要があります：
+
+$OrangeButton
+
+*ご注意*：このリンクは7日間のみ有効です。
+
+間違ってこのメールを受け取った場合は、無視するか、"${__VirtualRootPath}":"${__VirtualRootPath}" ポータル管理者に連絡して詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.ポータル復旧開始
+
+ポータルのリストアが開始されました。データ量により時間がかかる場合があります。
+
+*ご注意*：復元作業中はポータルをご利用いただけません。
+
+ご質問やサポートが必要な場合は、"${__SalesEmail}":"mailto:${__SalesEmail}"までお気軽にお問い合わせください。
+
+$TrulyYours
+
+^通知の種類を変更するには、"購読設定":"$RecipientSubscriptionConfigURL"を管理してください。^</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt;DocSpaceに参加しましょう
+
+
+こんにちは！
+
+ゲストユーザーとして "${__VirtualRootPath}":"${__VirtualRootPath}"に招待されています。リンクをクリックして招待をご承認ください：
+
+$OrangeButton
+
+ONLYOFFICEの最新情報やお役立ち情報をお届けします。お客様のプロフィールページでいつでも購読をキャンセルすることができます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルのプロフィール変更通知
+
+"$__AuthorName":"$__AuthorUrl" が "${__VirtualRootPath}":"${__VirtualRootPath}" ポータルのプロフィール詳細を変更しました。
+
+
+プロフィールの更新に関する通知を受信したくない場合は、"購読設定":"$RecipientSubscriptionConfigURL "を管理してください</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>(${__VirtualRootPath})](${__VirtualRootPath}) ポータルのプロフィール変更通知
+
+[$__AuthorName]($__AuthorUrl)が[${__VirtualRootPath}](${__VirtualRootPath})ポータルのプロフィール詳細を変更しました。</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>SMTPテストメッセージ
+
+このメッセージはSMTP設定をテストするために自動的に生成されました。このメッセージが表示されている場合は、設定が正しく、ポータルで使用できることを意味します。
+
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理は失敗しました。
+
+一部のファイルが復号化できませんでした。"コントロールパネル":"${ControlPanelUrl}/storage "で詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルでファイルの復号プロセスが開始されました。
+
+復号化には時間がかかるため、ポータルは一時的に利用できなくなります。復号化が終わり次第、再びデータを操作できるようになります。</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルのファイル復号化処理が正常に完了しました。
+
+お客様のポータルは再び利用可能です。</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルでのファイル暗号化処理は失敗しました。
+
+一部のファイルを暗号化できませんでした。"管理パネル":"${ControlPanelUrl}/storage "で詳細をご確認ください。</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルでファイル暗号化プロセスが開始されました。
+
+暗号化には時間がかかるため、ポータルは一時的に利用できなくなります。暗号化が終わり次第、再びデータを操作できるようになります。</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>$UserName 様
+
+"${PortalUrl}":"${PortalUrl}"ポータルのファイル暗号化処理が正常に完了しました。
+
+お客様のポータルは再び利用可能です。</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータルに新しいユーザーが追加されました
+
+"$__AuthorName":"$__AuthorUrl" が "${__VirtualRootPath}":"${__VirtualRootPath}" のポータルに参加しました。
+
+
+新しいユーザに関する通知を受信したくない場合は、"購読設定":"$RecipientSubscriptionConfigURL "を管理してください</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>新しいユーザーが [${__VirtualRootPath}](${__VirtualRootPath}) ポータルに追加されました。
+[$__AuthorName]($__AuthorUrl)が[${__VirtualRootPath}](${__VirtualRootPath})のポータルに参加しました。</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>$UserName 様
+
+お客様の企業の安全でセキュアなウェブオフィスに招待されました。そのアドレスは "${__VirtualRootPath}":"${__VirtualRootPath}" です。このリンクをブックマークに追加することをお勧めします。
+
+以下のリンクから招待を受け、企業アカウントのログイン名とパスワードを使ってサインインしてください。
+
+$OrangeButton
+
+リンクは7日間のみ有効です。</value>
+  </data>
 </root>

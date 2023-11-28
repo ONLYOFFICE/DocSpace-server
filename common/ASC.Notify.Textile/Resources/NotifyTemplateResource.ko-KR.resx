@@ -175,7 +175,7 @@
               &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt;이메일 문의&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;요청 전송&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>

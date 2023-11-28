@@ -110,14 +110,15 @@ $TrulyYours</value>
 
 $OrangeButton
 
-*Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid= 5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
+*Qeyd*: Silindikdən sonra hesabınız və onunla əlaqəli bütün məlumatlar "Məxfilik bəyanatımız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" a uyğun olaraq həmişəlik silinəcək.
 
-Davam etmək istəmirsinizsə, bu e-poçtu nəzərə almayın.
+"Hesabın ləğvi haqqında ətraflı oxuyun":"${__HelpLink}/administration/configuration.aspx"
 
-Hər hansı sualınız varsa, "support@onlyoffice.com":"mailto:support@onlyoffice.com" ünvanında bizimlə əlaqə saxlayın
+Davam etmək istəmirsinizsə, bu e-poçtu nəzərə almayın. 
 
-Hörmətlə,
-ONLYOFFICE komandası</value>
+Hər hansı sualınız varsa, "${__SupportEmail}":"mailto:${__SupportEmail}" ünvanında bizimlə əlaqə saxlayın
+
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Hörmətli $UserName,
