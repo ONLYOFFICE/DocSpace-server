@@ -64,7 +64,6 @@ public class SettingsController : BaseSettingsController
     private readonly UserFormatter _userFormatter;
 
     public SettingsController(
-        ILoggerProvider option,
         MessageService messageService,
         ApiContext apiContext,
         UserManager userManager,
@@ -1047,10 +1046,8 @@ public class SettingsController : BaseSettingsController
             var url = _telegramHelper.RegisterUser(_authContext.CurrentAccount.ID, tenant.Id);
             return url;
         }
-        else
-        {
-            return currentLink;
-        }
+
+        return currentLink;
     }
 
     /// <summary>

@@ -46,10 +46,8 @@ public static class DataOperatorFactory
         {
             return new ZipReadOperator(targetFile);
         }
-        else
-        {
-            return new TarReadOperator(targetFile);
-        }
+
+        return new TarReadOperator(targetFile);
     }
 }
  

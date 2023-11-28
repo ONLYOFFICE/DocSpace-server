@@ -39,12 +39,6 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         get { return new Guid("{197149b3-fbc9-44c2-b42a-232f7e729c16}"); }
     }
 
-    public LdapSettings()
-    {
-        LdapMapping = new Dictionary<MappingFields, string>();
-        AccessRights = new Dictionary<AccessRight, string>();
-    }
-
     /// <summary>LDAP settings mapping</summary>
     public enum MappingFields
     {
@@ -93,7 +87,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     {
         var isNotWindows = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        var settings = new LdapSettings()
+        var settings = new LdapSettings
         {
             Server = "",
             UserDN = "",
@@ -249,12 +243,12 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 
     /// <summary>Correspondence between the user data fields on the portal and the attributes in the LDAP server user record</summary>
     /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.MappingFields, System.String}, System.Collections.Generic</type>
-    public Dictionary<MappingFields, string> LdapMapping { get; set; }
+    public Dictionary<MappingFields, string> LdapMapping { get; set; } = new();
 
     /// <summary>Group access rights</summary>
     /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.AccessRight, System.String}, System.Collections.Generic</type>
     //ToDo: use SId instead of group name
-    public Dictionary<AccessRight, string> AccessRights { get; set; }
+    public Dictionary<AccessRight, string> AccessRights { get; set; } = new();
 
     /// <summary>Attribute in a user record that corresponds to the user's first name</summary>
     /// <type>System.String, System</type>
@@ -410,10 +404,8 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         {
             return setting;
         }
-        else
-        {
-            return "";
-        }
+
+        return "";
     }
     private void SetOldSetting(MappingFields field, string value)
     {
@@ -453,7 +445,7 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
 
     public LdapCronSettings GetDefault()
     {
-        return new LdapCronSettings()
+        return new LdapCronSettings
         {
             Cron = null
         };
@@ -472,15 +464,10 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 
     public LdapCurrentAcccessSettings GetDefault()
     {
-        return new LdapCurrentAcccessSettings() { CurrentAccessRights = null };
+        return new LdapCurrentAcccessSettings { CurrentAccessRights = null };
     }
 
-    public LdapCurrentAcccessSettings()
-    {
-        CurrentAccessRights = new Dictionary<LdapSettings.AccessRight, List<string>>();
-    }
-
-    public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; }
+    public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
 }
 
 public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
@@ -493,15 +480,10 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 
     public LdapCurrentUserPhotos GetDefault()
     {
-        return new LdapCurrentUserPhotos() { CurrentPhotos = null };
+        return new LdapCurrentUserPhotos { CurrentPhotos = null };
     }
 
-    public LdapCurrentUserPhotos()
-    {
-        CurrentPhotos = new Dictionary<Guid, string>();
-    }
-
-    public Dictionary<Guid, string> CurrentPhotos { get; set; }
+    public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
 }
 
 public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
@@ -514,7 +496,7 @@ public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
 
     public LdapCurrentDomain GetDefault()
     {
-        return new LdapCurrentDomain() { CurrentDomain = null };
+        return new LdapCurrentDomain { CurrentDomain = null };
     }
 
     public string CurrentDomain { get; set; }

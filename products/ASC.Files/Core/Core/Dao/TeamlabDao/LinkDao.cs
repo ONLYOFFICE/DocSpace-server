@@ -62,7 +62,7 @@ internal class LinkDao : AbstractDao, ILinkDao
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink()
+        await filesDbContext.AddOrUpdateAsync(r => r.FilesLink, new DbFilesLink
         {
             TenantId = tenantId,
             SourceId = (await MappingIDAsync(sourceId)).ToString(),

@@ -133,20 +133,13 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
 }
 
 [Scope]
-public class AdditionalWhiteLabelSettingsHelper
+public class AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelperInit)
 {
-    private readonly AdditionalWhiteLabelSettingsHelperInit _additionalWhiteLabelSettingsHelperInit;
-
-    public AdditionalWhiteLabelSettingsHelper(AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelperInit)
-    {
-        _additionalWhiteLabelSettingsHelperInit = additionalWhiteLabelSettingsHelperInit;
-    }
-
     public bool IsDefault(AdditionalWhiteLabelSettings settings)
     {
         if (settings.AdditionalWhiteLabelSettingsHelper == null)
         {
-            settings.AdditionalWhiteLabelSettingsHelper = _additionalWhiteLabelSettingsHelperInit;
+            settings.AdditionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelperInit;
         }
         var defaultSettings = settings.GetDefault();
 
@@ -168,22 +161,15 @@ public class AdditionalWhiteLabelSettingsHelper
 /// <summary>
 /// </summary>
 [Singleton]
-public class AdditionalWhiteLabelSettingsHelperInit
+public class AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public AdditionalWhiteLabelSettingsHelperInit(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     /// <summary>Default help center URL</summary>
     /// <type>System.String, System</type>
     public string DefaultHelpCenterUrl
     {
         get
         {
-            var url = _configuration["web:help-center"];
+            var url = configuration["web:help-center"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -194,7 +180,7 @@ public class AdditionalWhiteLabelSettingsHelperInit
     {
         get
         {
-            var url = _configuration["web:support-feedback"];
+            var url = configuration["web:support-feedback"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -205,7 +191,7 @@ public class AdditionalWhiteLabelSettingsHelperInit
     {
         get
         {
-            var url = _configuration["web:user-forum"];
+            var url = configuration["web:user-forum"];
             return string.IsNullOrEmpty(url) ? null : url;
         }
     }
@@ -227,7 +213,7 @@ public class AdditionalWhiteLabelSettingsHelperInit
     {
         get
         {
-            var email = _configuration["core:payment:email"];
+            var email = configuration["core:payment:email"];
             return !string.IsNullOrEmpty(email) ? email : "sales@onlyoffice.com";
         }
     }
@@ -238,7 +224,7 @@ public class AdditionalWhiteLabelSettingsHelperInit
     {
         get
         {
-            var site = _configuration["web:teamlab-site"];
+            var site = configuration["web:teamlab-site"];
             return !string.IsNullOrEmpty(site) ? site + "/post.ashx?type=buydocspaceenterprise" : "";
         }
     }

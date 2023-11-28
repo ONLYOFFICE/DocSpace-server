@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.Tasks.Modules;
 
-public abstract class ModuleSpecificsBase : IModuleSpecifics
+public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
 {
     public abstract ModuleName ModuleName { get; }
     public abstract IEnumerable<TableInfo> Tables { get; }
@@ -35,13 +35,8 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
         => _connectionStringName ??= ModuleName.ToString().ToLower();
 
     private string _connectionStringName;
-    private readonly Helpers _helpers;
-
-    protected ModuleSpecificsBase(Helpers helpers)
-    {
-        _helpers = helpers;
-    }
-
+    protected Helpers Helpers => helpers;
+    
     public IEnumerable<TableInfo> GetTablesOrdered()
     {
         var notOrderedTables = new List<TableInfo>(Tables);
@@ -120,10 +115,8 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
         {
             return "and t." + table.UserIDColumns[0] + " = '" + id + "' ";
         }
-        else
-        {
-            return "";
-        }
+
+        return "";
     }
 
     public DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table)
@@ -292,7 +285,7 @@ public abstract class ModuleSpecificsBase : IModuleSpecifics
             var userMapping = columnMapper.GetUserMapping(strVal);
             if (userMapping == null)
             {
-                return _helpers.IsEmptyOrSystemUser(strVal);
+                return helpers.IsEmptyOrSystemUser(strVal);
             }
 
             value = userMapping;

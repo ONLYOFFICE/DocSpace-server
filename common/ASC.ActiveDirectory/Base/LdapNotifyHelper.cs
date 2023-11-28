@@ -27,27 +27,16 @@
 namespace ASC.ActiveDirectory.Base;
 
 [Singleton(Additional = typeof(LdapNotifyHelperExtension))]
-public class LdapNotifyService : BackgroundService
-{
-    private readonly ConcurrentDictionary<int, Tuple<INotifyClient, LdapNotifySource>> _clients;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly WorkContext _workContext;
-    private readonly LdapSaveSyncOperation _ldapSaveSyncOperation;
-
-    public LdapNotifyService(
-        IServiceScopeFactory serviceScopeFactory,
+public class LdapNotifyService(IServiceScopeFactory serviceScopeFactory,
         WorkContext workContext,
         LdapSaveSyncOperation ldapSaveSyncOperation)
-    {
-        _clients = new ConcurrentDictionary<int, Tuple<INotifyClient, LdapNotifySource>>();
-        _serviceScopeFactory = serviceScopeFactory;
-        _workContext = workContext;
-        _ldapSaveSyncOperation = ldapSaveSyncOperation;
-    }
+    : BackgroundService
+{
+    private readonly ConcurrentDictionary<int, Tuple<INotifyClient, LdapNotifySource>> _clients = new();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
         var dbHelper = scope.ServiceProvider.GetRequiredService<DbHelper>();
@@ -77,11 +66,11 @@ public class LdapNotifyService : BackgroundService
     {
         if (!_clients.ContainsKey(tenant.Id))
         {
-            var scope = _serviceScopeFactory.CreateScope();
+            var scope = serviceScopeFactory.CreateScope();
             var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
             source.Init(tenant);
-            var client = _workContext.RegisterClient(scope.ServiceProvider, source);
-            _workContext.RegisterSendMethod(source.AutoSyncAsync, cron);
+            var client = workContext.RegisterClient(scope.ServiceProvider, source);
+            workContext.RegisterSendMethod(source.AutoSyncAsync, cron);
             _clients.TryAdd(tenant.Id, new Tuple<INotifyClient, LdapNotifySource>(client, source));
         }
     }
@@ -90,14 +79,14 @@ public class LdapNotifyService : BackgroundService
     {
         if (_clients.TryGetValue(tenant.Id, out var client))
         {
-            _workContext.UnregisterSendMethod(client.Item2.AutoSyncAsync);
+            workContext.UnregisterSendMethod(client.Item2.AutoSyncAsync);
             _clients.TryRemove(tenant.Id, out _);
         }
     }
 
     public async Task AutoSyncAsync(Tenant tenant)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
         var ldapSettings = await settingsManager.LoadAsync<LdapSettings>(tenant.Id);
 
@@ -110,7 +99,7 @@ public class LdapNotifyService : BackgroundService
             return;
         }
 
-        await _ldapSaveSyncOperation.RunJobAsync(ldapSettings, tenant, LdapOperationType.Sync);
+        await ldapSaveSyncOperation.RunJobAsync(ldapSettings, tenant, LdapOperationType.Sync);
     }
 }
 

@@ -27,32 +27,21 @@
 namespace ASC.Data.Backup;
 
 [Scope]
-public class Schedule
+public class Schedule(ILogger<Schedule> options, TenantManager tenantManager, TenantUtil tenantUtil)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly ILogger<Schedule> _logger;
-    private readonly TenantUtil _tenantUtil;
-
-    public Schedule(ILogger<Schedule> options, TenantManager tenantManager, TenantUtil tenantUtil)
-    {
-        _logger = options;
-        _tenantManager = tenantManager;
-        _tenantUtil = tenantUtil;
-    }
-
     public async Task<bool> IsToBeProcessedAsync(BackupSchedule backupSchedule)
     {
         try
         {
             var cron = new CronExpression(backupSchedule.Cron);
-            var tenant = await _tenantManager.GetTenantAsync(backupSchedule.TenantId);
+            var tenant = await tenantManager.GetTenantAsync(backupSchedule.TenantId);
             var tenantTimeZone = tenant.TimeZone;
             var culture = tenant.GetCulture();
             CultureInfo.CurrentCulture = culture;
 
             var lastBackupTime = backupSchedule.LastBackupTime.Equals(default)
                 ? DateTime.UtcNow.Date.AddSeconds(-1)
-                : _tenantUtil.DateTimeFromUtc(tenantTimeZone, backupSchedule.LastBackupTime);
+                : tenantUtil.DateTimeFromUtc(tenantTimeZone, backupSchedule.LastBackupTime);
 
             var nextBackupTime = cron.GetTimeAfter(lastBackupTime);
 
@@ -61,13 +50,13 @@ public class Schedule
                 return false;
             }
 
-            var now = _tenantUtil.DateTimeFromUtc(tenantTimeZone, DateTime.UtcNow);
+            var now = tenantUtil.DateTimeFromUtc(tenantTimeZone, DateTime.UtcNow);
 
             return nextBackupTime <= now;
         }
         catch (Exception e)
         {
-            _logger.ErrorSchedule(backupSchedule.TenantId, e);
+            options.ErrorSchedule(backupSchedule.TenantId, e);
 
             return false;
         }

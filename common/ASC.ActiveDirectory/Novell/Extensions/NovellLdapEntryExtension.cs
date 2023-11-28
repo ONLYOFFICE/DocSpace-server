@@ -27,13 +27,8 @@
 namespace ASC.ActiveDirectory.Novell.Extensions;
 
 [Singleton]
-public class NovellLdapEntryExtension
+public class NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
 {
-    private readonly ILogger<NovellLdapEntryExtension> _logger;
-    public NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
-    {
-        _logger = logger;
-    }
     public object GetAttributeValue(LdapEntry ldapEntry, string attributeName, bool getBytes = false)
     {
         try
@@ -136,7 +131,7 @@ public class NovellLdapEntryExtension
             throw new ArgumentNullException(nameof(ldapEntry));
         }
 
-        var novellLdapObject = new NovellLdapObject(_logger, this);
+        var novellLdapObject = new NovellLdapObject(logger, this);
         novellLdapObject.Init(ldapEntry, ldapUniqueIdAttribute);
 
         return novellLdapObject;

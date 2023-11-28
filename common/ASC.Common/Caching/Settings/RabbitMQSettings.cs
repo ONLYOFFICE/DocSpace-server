@@ -39,7 +39,7 @@ public class RabbitMQSettings
 
     public ConnectionFactory GetConnectionFactory()
     {
-        var factory = new ConnectionFactory()
+        var factory = new ConnectionFactory
         {
             DispatchConsumersAsync = true
         };

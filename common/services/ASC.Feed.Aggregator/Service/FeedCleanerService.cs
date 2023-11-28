@@ -27,17 +27,12 @@
 namespace ASC.Feed.Aggregator.Service;
 
 [Singleton]
-public class FeedCleanerService : FeedBaseService
-{
-    protected override string LoggerName { get; } = "ASC.Feed.Cleaner";
-
-    public FeedCleanerService(
-        FeedSettings feedSettings,
+public class FeedCleanerService(FeedSettings feedSettings,
         IServiceScopeFactory serviceScopeFactory,
         ILoggerProvider optionsMonitor)
-        : base(feedSettings, serviceScopeFactory, optionsMonitor)
-    {
-    }
+    : FeedBaseService(feedSettings, serviceScopeFactory, optionsMonitor)
+{
+    protected override string LoggerName { get; } = "ASC.Feed.Cleaner";
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

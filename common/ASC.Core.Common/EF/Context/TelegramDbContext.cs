@@ -26,14 +26,9 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class TelegramDbContext : DbContext
+public class TelegramDbContext(DbContextOptions<TelegramDbContext> options) : DbContext(options)
 {
     public DbSet<TelegramUser> Users { get; set; }
-
-    public TelegramDbContext(DbContextOptions<TelegramDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

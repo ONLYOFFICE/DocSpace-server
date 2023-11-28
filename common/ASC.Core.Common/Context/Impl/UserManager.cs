@@ -520,7 +520,7 @@ public class UserManager
                     var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri, email.ToLower(), true, true, itemID: newUser.Id.ToString());
                     try
                     {
-                        var davItemRequest = new DavRequest()
+                        var davItemRequest = new DavRequest
                         {
                             Url = requestUrlItem,
                             Authorization = rootAuthorization,
@@ -600,7 +600,7 @@ public class UserManager
                 var addBookCollection = await _cardDavAddressbook.GetCollection(requestUrlBook, userAuthorization, myUri);
                 if (addBookCollection.Completed && addBookCollection.StatusCode != 404)
                 {
-                    var davbookRequest = new DavRequest()
+                    var davbookRequest = new DavRequest
                     {
                         Url = requestUrlBook,
                         Authorization = rootAuthorization,
@@ -614,7 +614,7 @@ public class UserManager
                     var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri, email.ToLower(), true, true, itemID: delUser.Id.ToString());
                     try
                     {
-                        var davItemRequest = new DavRequest()
+                        var davItemRequest = new DavRequest
                         {
                             Url = requestUrlItem,
                             Authorization = rootAuthorization,

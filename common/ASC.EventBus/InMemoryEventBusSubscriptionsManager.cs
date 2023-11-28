@@ -28,16 +28,10 @@ namespace ASC.EventBus;
 
 public partial class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManager
 {
-    private readonly Dictionary<string, List<SubscriptionInfo>> _handlers;
-    private readonly List<Type> _eventTypes;
+    private readonly Dictionary<string, List<SubscriptionInfo>> _handlers = new();
+    private readonly List<Type> _eventTypes = new();
 
     public event EventHandler<string> OnEventRemoved;
-
-    public InMemoryEventBusSubscriptionsManager()
-    {
-        _handlers = new Dictionary<string, List<SubscriptionInfo>>();
-        _eventTypes = new List<Type>();
-    }
 
     public bool IsEmpty => _handlers is { Count: 0 };
     public void Clear() => _handlers.Clear();

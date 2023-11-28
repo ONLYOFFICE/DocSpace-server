@@ -197,9 +197,6 @@ public class AWSSender : SmtpSender, IDisposable
 
     public void Dispose()
     {
-        if (_amazonEmailServiceClient != null)
-        {
-            _amazonEmailServiceClient.Dispose();
-        }
+        _amazonEmailServiceClient?.Dispose();
     }
 }

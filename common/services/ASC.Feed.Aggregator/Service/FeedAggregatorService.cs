@@ -27,17 +27,12 @@
 namespace ASC.Feed.Aggregator.Service;
 
 [Singleton]
-public class FeedAggregatorService : FeedBaseService
-{
-    protected override string LoggerName { get; } = "ASC.Feed.Aggregator";
-
-    public FeedAggregatorService(
-        FeedSettings feedSettings,
+public class FeedAggregatorService(FeedSettings feedSettings,
         IServiceScopeFactory serviceScopeFactory,
         ILoggerProvider optionsMonitor)
-        : base(feedSettings, serviceScopeFactory, optionsMonitor)
-    {
-    }
+    : FeedBaseService(feedSettings, serviceScopeFactory, optionsMonitor)
+{
+    protected override string LoggerName { get; } = "ASC.Feed.Aggregator";
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

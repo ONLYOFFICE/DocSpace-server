@@ -27,18 +27,11 @@
 namespace ASC.Data.Storage.Encryption;
 
 [Singleton]
-public class EncryptionFactory
+public class EncryptionFactory(IServiceScopeFactory serviceScopeFactory)
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public EncryptionFactory(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
     public ICrypt GetCrypt(string storageName, EncryptionSettings encryptionSettings)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var result = scope.ServiceProvider.GetService<ICrypt>();
 
         result ??= new FakeCrypt();

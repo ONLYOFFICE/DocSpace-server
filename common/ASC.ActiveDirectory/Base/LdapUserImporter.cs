@@ -28,16 +28,21 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.ActiveDirectory.Base;
 [Scope]
-public class LdapUserImporter : IDisposable
+public class LdapUserImporter(ILogger<LdapUserImporter> logger,
+        UserManager userManager,
+        IConfiguration configuration,
+        NovellLdapHelper novellLdapHelper,
+        LdapObjectExtension ldapObjectExtension)
+    : IDisposable
 {
-    public List<LdapObject> AllDomainUsers { get; private set; }
-    public List<LdapObject> AllDomainGroups { get; private set; }
+    public List<LdapObject> AllDomainUsers { get; private set; } = new();
+    public List<LdapObject> AllDomainGroups { get; private set; } = new();
 
-    public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainUsers { get; private set; }
-    public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainGroups { get; private set; }
+    public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainUsers { get; private set; } = new();
+    public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainGroups { get; private set; } = new();
 
     private string _ldapDomain;
-    private readonly string _unknownDomain;
+    private readonly string _unknownDomain = configuration["ldap:domain"] ?? "LDAP";
     public string LDAPDomain
     {
         get
@@ -64,36 +69,12 @@ public class LdapUserImporter : IDisposable
         get { return LdapHelper.Settings; }
     }
 
-    public LdapHelper LdapHelper { get; private set; }
+    public LdapHelper LdapHelper { get; private set; } = novellLdapHelper;
     public LdapLocalization Resource { get; private set; }
 
-    private List<string> _watchedNestedGroups;
+    private List<string> _watchedNestedGroups = new();
 
-    private readonly ILogger<LdapUserImporter> _logger;
-    private readonly LdapObjectExtension _ldapObjectExtension;
-
-    private UserManager UserManager { get; set; }
-
-    public LdapUserImporter(
-        ILogger<LdapUserImporter> logger,
-        UserManager userManager,
-        IConfiguration configuration,
-        NovellLdapHelper novellLdapHelper,
-        LdapObjectExtension ldapObjectExtension)
-    {
-        _unknownDomain = configuration["ldap:domain"] ?? "LDAP";
-        AllDomainUsers = new List<LdapObject>();
-        AllDomainGroups = new List<LdapObject>();
-        AllSkipedDomainUsers = new Dictionary<LdapObject, LdapSettingsStatus>();
-        AllSkipedDomainGroups = new Dictionary<LdapObject, LdapSettingsStatus>();
-
-        LdapHelper = novellLdapHelper;
-        _logger = logger;
-        UserManager = userManager;
-
-        _watchedNestedGroups = new List<string>();
-        _ldapObjectExtension = ldapObjectExtension;
-    }
+    private UserManager UserManager { get; set; } = userManager;
 
     public void Init(LdapSettings settings, LdapLocalization resource)
     {
@@ -110,7 +91,7 @@ public class LdapUserImporter : IDisposable
             return users;
         }
 
-        var usersToAdd = await AllDomainUsers.ToAsyncEnumerable().SelectAwait(async ldapObject => await _ldapObjectExtension.ToUserInfoAsync(ldapObject, this)).ToListAsync();
+        var usersToAdd = await AllDomainUsers.ToAsyncEnumerable().SelectAwait(async ldapObject => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this)).ToListAsync();
 
         users.AddRange(usersToAdd);
 
@@ -131,7 +112,7 @@ public class LdapUserImporter : IDisposable
 
         var groups = new List<GroupInfo>();
 
-        var groupsToAdd = AllDomainGroups.ConvertAll(g => _ldapObjectExtension.ToGroupInfo(g, Settings));
+        var groupsToAdd = AllDomainGroups.ConvertAll(g => ldapObjectExtension.ToGroupInfo(g, Settings));
 
         groups.AddRange(groupsToAdd);
 
@@ -150,7 +131,7 @@ public class LdapUserImporter : IDisposable
             LdapHelper.Connect();
         }
 
-        _logger.DebugGetGroupUsers(groupInfo.Name);
+        logger.DebugGetGroupUsers(groupInfo.Name);
 
         var users = new List<UserInfo>();
 
@@ -166,7 +147,7 @@ public class LdapUserImporter : IDisposable
             return users;
         }
 
-        var members = _ldapObjectExtension.GetAttributes(domainGroup, Settings.GroupAttribute);
+        var members = ldapObjectExtension.GetAttributes(domainGroup, Settings.GroupAttribute);
 
         foreach (var member in members)
         {
@@ -178,7 +159,7 @@ public class LdapUserImporter : IDisposable
 
                 if (nestedLdapGroup != null)
                 {
-                    _logger.DebugFoundNestedLdapGroup(nestedLdapGroup.DistinguishedName);
+                    logger.DebugFoundNestedLdapGroup(nestedLdapGroup.DistinguishedName);
 
                     if (clearCache)
                     {
@@ -187,13 +168,13 @@ public class LdapUserImporter : IDisposable
 
                     if (_watchedNestedGroups.Contains(nestedLdapGroup.DistinguishedName))
                     {
-                        _logger.DebugSkipAlreadyWatched(nestedLdapGroup.DistinguishedName);
+                        logger.DebugSkipAlreadyWatched(nestedLdapGroup.DistinguishedName);
                         continue;
                     }
 
                     _watchedNestedGroups.Add(nestedLdapGroup.DistinguishedName);
 
-                    var nestedGroupInfo = _ldapObjectExtension.ToGroupInfo(nestedLdapGroup, Settings);
+                    var nestedGroupInfo = ldapObjectExtension.ToGroupInfo(nestedLdapGroup, Settings);
 
                     var nestedGroupUsers = await GetGroupUsersAsync(nestedGroupInfo, false);
 
@@ -209,7 +190,7 @@ public class LdapUserImporter : IDisposable
                 continue;
             }
 
-            var userInfo = await _ldapObjectExtension.ToUserInfoAsync(ldapUser, this);
+            var userInfo = await ldapObjectExtension.ToUserInfoAsync(ldapUser, this);
 
             if (!users.Exists(u => u.Sid == userInfo.Sid))
             {
@@ -224,7 +205,7 @@ public class LdapUserImporter : IDisposable
 
             foreach (var ldapUser in ldapUsers)
             {
-                var userInfo = await _ldapObjectExtension.ToUserInfoAsync(ldapUser, this);
+                var userInfo = await ldapObjectExtension.ToUserInfoAsync(ldapUser, this);
 
                 if (!users.Exists(u => u.Sid == userInfo.Sid))
                 {
@@ -259,13 +240,13 @@ public class LdapUserImporter : IDisposable
                 LdapHelper.Connect();
             }
 
-            var userGroups = _ldapObjectExtension.GetAttributes(ldapUser, LdapConstants.ADSchemaAttributes.MEMBER_OF)
+            var userGroups = ldapObjectExtension.GetAttributes(ldapUser, LdapConstants.ADSchemaAttributes.MEMBER_OF)
                 .Select(s => LdapUtils.UnescapeLdapString(s))
                 .ToList();
 
             if (!userGroups.Any())
             {
-                userGroups = _ldapObjectExtension.GetAttributes(ldapUser, GROUP_MEMBERSHIP);
+                userGroups = ldapObjectExtension.GetAttributes(ldapUser, GROUP_MEMBERSHIP);
             }
 
             var searchExpressions = new List<Expression>();
@@ -279,7 +260,7 @@ public class LdapUserImporter : IDisposable
 
                 if (index > -1)
                 {
-                    var primaryGroupSid = userSid.Substring(0, index + 1) + primaryGroupId;
+                    var primaryGroupSid = userSid[..(index + 1)] + primaryGroupId;
                     searchExpressions.Add(Expression.Equal(ldapUser.SidAttribute, primaryGroupSid));
                 }
             }
@@ -288,7 +269,7 @@ public class LdapUserImporter : IDisposable
             {
                 var cnRegex = new Regex(",[A-z]{2}=");
                 searchExpressions.AddRange(userGroups
-                    .Select(g => g.Substring(0, cnRegex.Match(g).Index))
+                    .Select(g => g[..cnRegex.Match(g).Index])
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Select(Expression.Parse)
                     .Where(e => e != null));
@@ -316,7 +297,7 @@ public class LdapUserImporter : IDisposable
         {
             if (ldapUser != null)
             {
-                _logger.ErrorIsUserExistInGroups(ldapUser.DistinguishedName, ldapUser.Sid, ex);
+                logger.ErrorIsUserExistInGroups(ldapUser.DistinguishedName, ldapUser.Sid, ex);
             }
         }
 
@@ -358,7 +339,7 @@ public class LdapUserImporter : IDisposable
         {
             if (ldapUser != null)
             {
-                _logger.ErrorGetAndCheckCurrentGroups(ldapUser.DistinguishedName, ldapUser.Sid, ex);
+                logger.ErrorGetAndCheckCurrentGroups(ldapUser.DistinguishedName, ldapUser.Sid, ex);
             }
         }
         return result;
@@ -397,15 +378,15 @@ public class LdapUserImporter : IDisposable
 
             if (Equals(groupInfo, Constants.LostGroupInfo))
             {
-                _logger.DebugTrySyncUserGroupMembershipCreatingPortalGroup(ldapUserGroup.DistinguishedName, ldapUserGroup.Sid);
-                 groupInfo = await UserManager.SaveGroupInfoAsync(_ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
+                logger.DebugTrySyncUserGroupMembershipCreatingPortalGroup(ldapUserGroup.DistinguishedName, ldapUserGroup.Sid);
+                 groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
 
-                _logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
+                logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
                 await UserManager.AddUserIntoGroupAsync(userInfo.Id, groupInfo.ID);
             }
             else if (!portalUserLdapGroups.Contains(groupInfo))
             {
-                _logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
+                logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
                 await UserManager.AddUserIntoGroupAsync(userInfo.Id, groupInfo.ID);
             }
 
@@ -416,7 +397,7 @@ public class LdapUserImporter : IDisposable
         {
             if (!actualPortalLdapGroups.Contains(portalUserLdapGroup))
             {
-                _logger.DebugTrySyncUserGroupMembershipRemovingUserFromGroup(userInfo.UserName, ldapUser.Sid, portalUserLdapGroup.Name, portalUserLdapGroup.Sid);
+                logger.DebugTrySyncUserGroupMembershipRemovingUserFromGroup(userInfo.UserName, ldapUser.Sid, portalUserLdapGroup.Name, portalUserLdapGroup.Sid);
                 await UserManager.RemoveUserFromGroupAsync(userInfo.Id, portalUserLdapGroup.ID);
             }
         }
@@ -480,7 +461,7 @@ public class LdapUserImporter : IDisposable
         }
         catch (ArgumentException)
         {
-            _logger.ErrorTryLoadLDAPUsersIncorrectUserFilter(Settings.UserFilter);
+            logger.ErrorTryLoadLDAPUsersIncorrectUserFilter(Settings.UserFilter);
         }
 
         return false;
@@ -529,7 +510,7 @@ public class LdapUserImporter : IDisposable
         }
         catch (ArgumentException)
         {
-            _logger.ErrorTryLoadLDAPUsersIncorrectGroupFilter(Settings.GroupFilter);
+            logger.ErrorTryLoadLDAPUsersIncorrectGroupFilter(Settings.GroupFilter);
         }
 
         return false;
@@ -553,7 +534,7 @@ public class LdapUserImporter : IDisposable
 
             if (AllDomainUsers.Any())
             {
-                ldapDomain = _ldapObjectExtension.GetDomainFromDn(AllDomainUsers.First());
+                ldapDomain = ldapObjectExtension.GetDomainFromDn(AllDomainUsers.First());
 
                 if (!string.IsNullOrEmpty(ldapDomain))
                 {
@@ -584,7 +565,7 @@ public class LdapUserImporter : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.ErrorLoadLDAPDomain(ex);
+            logger.ErrorLoadLDAPDomain(ex);
         }
 
         return null;
@@ -597,13 +578,13 @@ public class LdapUserImporter : IDisposable
             var member = user.GetValue(loginAttribute);
             if (member == null || string.IsNullOrWhiteSpace(member.ToString()))
             {
-                _logger.DebugLoginAttributeParameterNotFound(Settings.LoginAttribute, user.DistinguishedName);
+                logger.DebugLoginAttributeParameterNotFound(Settings.LoginAttribute, user.DistinguishedName);
                 return false;
             }
         }
         catch (Exception e)
         {
-            _logger.ErrorLoginAttributeParameterNotFound(Settings.LoginAttribute, loginAttribute, e);
+            logger.ErrorLoginAttributeParameterNotFound(Settings.LoginAttribute, loginAttribute, e);
             return false;
         }
         return true;
@@ -616,14 +597,14 @@ public class LdapUserImporter : IDisposable
             var userAttribute = user.GetValue(userAttr);
             if (userAttribute == null || string.IsNullOrWhiteSpace(userAttribute.ToString()))
             {
-                _logger.DebugUserAttributeParameterNotFound(Settings.UserAttribute,
+                logger.DebugUserAttributeParameterNotFound(Settings.UserAttribute,
                     user.DistinguishedName);
                 return false;
             }
         }
         catch (Exception e)
         {
-            _logger.ErrorUserAttributeParameterNotFound(Settings.UserAttribute, userAttr, e);
+            logger.ErrorUserAttributeParameterNotFound(Settings.UserAttribute, userAttr, e);
             return false;
         }
         return true;
@@ -637,7 +618,7 @@ public class LdapUserImporter : IDisposable
         }
         catch (Exception e)
         {
-            _logger.ErrorGroupAttributeParameterNotFound(Settings.GroupAttribute, groupAttr, e);
+            logger.ErrorGroupAttributeParameterNotFound(Settings.GroupAttribute, groupAttr, e);
             return false;
         }
         return true;
@@ -650,14 +631,14 @@ public class LdapUserImporter : IDisposable
             var groupNameAttribute = group.GetValues(groupAttr);
             if (!groupNameAttribute.Any())
             {
-                _logger.DebugGroupNameAttributeParameterNotFound(Settings.GroupNameAttribute,
+                logger.DebugGroupNameAttributeParameterNotFound(Settings.GroupNameAttribute,
                     groupAttr);
                 return false;
             }
         }
         catch (Exception e)
         {
-            _logger.ErrorGroupAttributeParameterNotFound(Settings.GroupNameAttribute,
+            logger.ErrorGroupAttributeParameterNotFound(Settings.GroupNameAttribute,
                 groupAttr, e);
             return false;
         }
@@ -666,7 +647,7 @@ public class LdapUserImporter : IDisposable
 
     private List<LdapObject> FindUsersByPrimaryGroup(string sid)
     {
-        _logger.DebugFindUsersByPrimaryGroup();
+        logger.DebugFindUsersByPrimaryGroup();
 
         if (!AllDomainUsers.Any() && !TryLoadLDAPUsers())
         {
@@ -693,7 +674,7 @@ public class LdapUserImporter : IDisposable
             return null;
         }
 
-        _logger.DebugFindUserByMember(userAttributeValue);
+        logger.DebugFindUserByMember(userAttributeValue);
 
         return AllDomainUsers.FirstOrDefault(u =>
             u.DistinguishedName.Equals(userAttributeValue, StringComparison.InvariantCultureIgnoreCase)
@@ -708,7 +689,7 @@ public class LdapUserImporter : IDisposable
             return null;
         }
 
-        _logger.DebugFindGroupByMember(member);
+        logger.DebugFindGroupByMember(member);
 
         return AllDomainGroups.FirstOrDefault(g =>
             g.DistinguishedName.Equals(member, StringComparison.InvariantCultureIgnoreCase));
@@ -760,11 +741,11 @@ public class LdapUserImporter : IDisposable
                         _ldapDomain = LdapUtils.DistinguishedNameToDomain(lu.DistinguishedName);
                     }
 
-                    ui = await _ldapObjectExtension.ToUserInfoAsync(lu, this);
+                    ui = await ldapObjectExtension.ToUserInfoAsync(lu, this);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ErrorToUserInfo(ex);
+                    logger.ErrorToUserInfo(ex);
                 }
 
                 return Tuple.Create(ui, lu);
@@ -791,7 +772,7 @@ public class LdapUserImporter : IDisposable
 
             if (string.IsNullOrEmpty(ldapLoginAttribute))
             {
-                _logger.WarnLoginAttributeIsEmpty(ul.DistinguishedName, Settings.LoginAttribute);
+                logger.WarnLoginAttributeIsEmpty(ul.DistinguishedName, Settings.LoginAttribute);
                 continue;
             }
 
@@ -878,7 +859,7 @@ public class LdapUserImporter : IDisposable
 
             var ldapUsers = await FindLdapUsersAsync(login);
 
-            _logger.DebugFindLdapUsers(login, ldapUsers.Count);
+            logger.DebugFindLdapUsers(login, ldapUsers.Count);
 
             foreach (var ldapUser in ldapUsers)
             {
@@ -893,16 +874,17 @@ public class LdapUserImporter : IDisposable
                     {
                         continue;
                     }
-                    else if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
+
+                    if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
                         || string.IsNullOrEmpty(ldapUserObject.Sid))
                     {
-                        _logger.DebugLdapUserImporterFailed(login, ldapUserObject.Sid);
+                        logger.DebugLdapUserImporterFailed(login, ldapUserObject.Sid);
                         continue;
                     }
 
                     currentLogin = ldapUserObject.DistinguishedName;
 
-                    _logger.DebugLdapUserImporterLogin(currentLogin);
+                    logger.DebugLdapUserImporterLogin(currentLogin);
 
                     LdapHelper.CheckCredentials(currentLogin, password, Settings.Server,
                         Settings.PortNumber, Settings.StartTls, Settings.Ssl, Settings.AcceptCertificate,
@@ -912,13 +894,13 @@ public class LdapUserImporter : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    _logger.ErrorLdapUserImporterLoginFailed(currentLogin ?? login, ex);
+                    logger.ErrorLdapUserImporterLoginFailed(currentLogin ?? login, ex);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.ErrorLdapUserImporterLoginFailed(login, ex);
+            logger.ErrorLdapUserImporterLoginFailed(login, ex);
         }
 
         return null;
@@ -926,9 +908,6 @@ public class LdapUserImporter : IDisposable
 
     public void Dispose()
     {
-        if (LdapHelper != null)
-        {
-            LdapHelper.Dispose();
-        }
+        LdapHelper?.Dispose();
     }
 }

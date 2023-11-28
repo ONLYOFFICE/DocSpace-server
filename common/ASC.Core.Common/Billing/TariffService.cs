@@ -27,30 +27,21 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class TenantExtraConfig
+public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReaderConfig _licenseReaderConfig;
-
-    public TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReaderConfig = licenseReaderConfig;
-    }
-
     public bool Saas
     {
-        get { return !_coreBaseSettings.Standalone; }
+        get { return !coreBaseSettings.Standalone; }
     }
 
     public bool Enterprise
     {
-        get { return _coreBaseSettings.Standalone && !string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
     public bool Opensource
     {
-        get { return _coreBaseSettings.Standalone && string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 }
 
@@ -73,7 +64,7 @@ public class TariffServiceStorage
         _coreBaseSettings = coreBaseSettings;
         _serviceProvider = serviceProvider;
         Notify = notify;
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             Cache.Insert(TariffService.GetTariffNeedToUpdateCacheKey(i.TenantId), "update", _cacheExpiration);
 
@@ -82,7 +73,7 @@ public class TariffServiceStorage
             Cache.Remove(TariffService.GetBillingPaymentCacheKey(i.TenantId)); // clear all payments
         }, CacheNotifyAction.Remove);
 
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             using var scope = _serviceProvider.CreateScope();
             var tariffService = scope.ServiceProvider.GetService<ITariffService>();
@@ -811,7 +802,7 @@ public class TariffService : ITariffService
                 var unlimTariff = await CreateDefaultAsync();
                 unlimTariff.LicenseDate = tariff.DueDate;
                 unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = new List<Quota>()
+                unlimTariff.Quotas = new List<Quota>
                 {
                     new(defaultQuota.TenantId, 1)
                 };

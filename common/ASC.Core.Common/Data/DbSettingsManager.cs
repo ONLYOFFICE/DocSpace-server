@@ -36,7 +36,7 @@ public class DbSettingsManagerCache
     {
         Cache = cache;
         _notify = notify;
-        _notify.Subscribe((i) => Cache.Remove(i.Key), CacheNotifyAction.Remove);
+        _notify.Subscribe(i => Cache.Remove(i.Key), CacheNotifyAction.Remove);
     }
 
     public void Remove(string key)
@@ -46,40 +46,22 @@ public class DbSettingsManagerCache
 }
 
 [Scope]
-public class SettingsManager
+public class SettingsManager(IServiceProvider serviceProvider,
+    DbSettingsManagerCache dbSettingsManagerCache,
+    ILogger<SettingsManager> logger,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IDbContextFactory<WebstudioDbContext> dbContextFactory)
 {
     private readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
 
-    private readonly ILogger<SettingsManager> _logger;
-    private readonly ICache _cache;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly DbSettingsManagerCache _dbSettingsManagerCache;
-    private readonly AuthContext _authContext;
-    private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<WebstudioDbContext> _dbContextFactory;
-
-    public SettingsManager(
-        IServiceProvider serviceProvider,
-        DbSettingsManagerCache dbSettingsManagerCache,
-        ILogger<SettingsManager> logger,
-        AuthContext authContext,
-        TenantManager tenantManager,
-        IDbContextFactory<WebstudioDbContext> dbContextFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _dbSettingsManagerCache = dbSettingsManagerCache;
-        _authContext = authContext;
-        _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _cache = dbSettingsManagerCache.Cache;
-        _logger = logger;
-    }
+    private readonly ICache _cache = dbSettingsManagerCache.Cache;
 
     private int TenantID
     {
         get
         {
-            return _tenantManager.GetCurrentTenant().Id;
+            return tenantManager.GetCurrentTenant().Id;
         }
     }
 
@@ -87,13 +69,13 @@ public class SettingsManager
     {
         get
         {
-            return _authContext.CurrentAccount.ID;
+            return authContext.CurrentAccount.ID;
         }
     }
 
     public async Task ClearCacheAsync<T>() where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await ClearCacheAsync<T>(tenantId);
     }
 
@@ -102,12 +84,12 @@ public class SettingsManager
         var settings = await LoadAsync<T>(tenantId, Guid.Empty);
         var key = $"{settings.ID}{tenantId}{Guid.Empty}";
 
-        _dbSettingsManagerCache.Remove(key);
+        dbSettingsManagerCache.Remove(key);
     }
 
     public T GetDefault<T>() where T : class, ISettings<T>
     {
-        var settingsInstance = ActivatorUtilities.CreateInstance<T>(_serviceProvider);
+        var settingsInstance = ActivatorUtilities.CreateInstance<T>(serviceProvider);
         return settingsInstance.GetDefault();
     }
     
@@ -128,19 +110,19 @@ public class SettingsManager
     
     public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await LoadAsync<T>(tenantId, Guid.Empty);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await LoadAsync<T>(tenantId, userId);
     }
 
     public async Task<T> LoadAsync<T>(UserInfo user) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await LoadAsync<T>(tenantId, user.Id);
     }
 
@@ -171,20 +153,20 @@ public class SettingsManager
 
     public async Task<bool> SaveAsync<T>(T data) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await SaveAsync(data, tenantId, Guid.Empty);
     }
     
 
     public async Task<bool> SaveAsync<T>(T data, Guid userId) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await SaveAsync(data, tenantId, userId);
     }
 
     public async Task<bool> SaveAsync<T>(T data, UserInfo user) where T : class, ISettings<T>
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         return await SaveAsync(data, tenantId, user.Id);
     }
 
@@ -245,7 +227,7 @@ public class SettingsManager
                 return settings;
             }
 
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var context = await dbContextFactory.CreateDbContextAsync();
             var result = await Queries.DataAsync(context, tenantId, def.ID, userId);
 
             settings = result != null ? Deserialize<T>(result) : def;
@@ -256,7 +238,7 @@ public class SettingsManager
         }
         catch (Exception ex)
         {
-            _logger.ErrorLoadSettingsFor(ex);
+            logger.ErrorLoadSettingsFor(ex);
         }
 
         return def;
@@ -275,7 +257,7 @@ public class SettingsManager
                 return settings;
             }
 
-            using var context = _dbContextFactory.CreateDbContext();
+            using var context = dbContextFactory.CreateDbContext();
             var result = Queries.Data(context, tenantId, def.ID, userId);
 
             settings = result != null ? Deserialize<T>(result) : def;
@@ -286,7 +268,7 @@ public class SettingsManager
         }
         catch (Exception ex)
         {
-            _logger.ErrorLoadSettingsFor(ex);
+            logger.ErrorLoadSettingsFor(ex);
         }
 
         return def;
@@ -296,7 +278,7 @@ public class SettingsManager
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
         try
         {
@@ -332,7 +314,7 @@ public class SettingsManager
                 await context.SaveChangesAsync();
             }
 
-            _dbSettingsManagerCache.Remove(key);
+            dbSettingsManagerCache.Remove(key);
 
             _cache.Insert(key, settings, _expirationTimeout);
 
@@ -340,7 +322,7 @@ public class SettingsManager
         }
         catch (Exception ex)
         {
-            _logger.ErrorSaveSettingsFor(ex);
+            logger.ErrorSaveSettingsFor(ex);
 
             return false;
         }
@@ -350,7 +332,7 @@ public class SettingsManager
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        using var context = _dbContextFactory.CreateDbContext();
+        using var context = dbContextFactory.CreateDbContext();
 
         try
         {
@@ -386,7 +368,7 @@ public class SettingsManager
                 context.SaveChanges();
             }
 
-            _dbSettingsManagerCache.Remove(key);
+            dbSettingsManagerCache.Remove(key);
 
             _cache.Insert(key, settings, _expirationTimeout);
 
@@ -394,7 +376,7 @@ public class SettingsManager
         }
         catch (Exception ex)
         {
-            _logger.ErrorSaveSettingsFor(ex);
+            logger.ErrorSaveSettingsFor(ex);
 
             return false;
         }

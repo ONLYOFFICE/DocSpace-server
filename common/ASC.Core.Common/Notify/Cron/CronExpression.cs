@@ -116,12 +116,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         var date = new DateTime(2014, 1, 1);
         DateTime.SpecifyKind(date, DateTimeKind.Utc);
         var after = GetTimeAfter(date);
-        if (!after.HasValue)
-        {
-            return null;
-        }
 
-        return after.Value.Subtract(date);
+        return after?.Subtract(date);
     }
 
     #region ICloneable Members
@@ -165,10 +161,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     public virtual DateTime? GetNextValidTimeAfter(DateTime date)
@@ -382,7 +376,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                         try
                         {
                             i += 4;
-                            _nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
+                            _nthdayOfWeek = Convert.ToInt32(s[i..], CultureInfo.InvariantCulture);
                             if (_nthdayOfWeek is < 1 or > 5)
                             {
                                 throw new Exception();
@@ -448,12 +442,14 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
                 return i + 1;
             }
-            else if (c == '/'
-                     && ((i + 1) >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
+
+            if (c == '/'
+                && ((i + 1) >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
             {
                 throw new FormatException("'/' must be followed by an integer.");
             }
-            else if (c == '*')
+
+            if (c == '*')
             {
                 i++;
             }
@@ -476,25 +472,29 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 60 : {0}", incr));
                 }
-                else if (incr > 23 && (type == Hour))
+
+                if (incr > 23 && (type == Hour))
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 24 : {0}", incr));
                 }
-                else if (incr > 31 && (type == DayOfMonth))
+
+                if (incr > 31 && (type == DayOfMonth))
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 31 : {0}", incr));
                 }
-                else if (incr > 7 && (type == DayOfWeek))
+
+                if (incr > 7 && (type == DayOfWeek))
                 {
                     throw new FormatException(
                         string.Format(CultureInfo.InvariantCulture, "Increment > 7 : {0}", incr));
                 }
-                else if (incr > 12 && (type == Month))
+
+                if (incr > 12 && (type == Month))
                 {
                     throw new FormatException(string.Format(CultureInfo.InvariantCulture, "Increment > 12 : {0}",
-                                                            incr));
+                        incr));
                 }
             }
             else
@@ -505,7 +505,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             return i;
         }
-        else if (c == 'L')
+
+        if (c == 'L')
         {
             i++;
             if (type == DayOfMonth)
@@ -528,7 +529,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             return i;
         }
-        else if (c is >= '0' and <= '9')
+
+        if (c is >= '0' and <= '9')
         {
             var val = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
             i++;
@@ -613,7 +615,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             i++;
             try
             {
-                _nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
+                _nthdayOfWeek = Convert.ToInt32(s[i..], CultureInfo.InvariantCulture);
                 if (_nthdayOfWeek is < 1 or > 5)
                 {
                     throw new Exception();
@@ -694,19 +696,15 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
                     return i;
                 }
-                else
-                {
-                    AddToSet(val, end, v2, type);
 
-                    return i;
-                }
-            }
-            else
-            {
-                AddToSet(val, end, 1, type);
+                AddToSet(val, end, v2, type);
 
                 return i;
             }
+
+            AddToSet(val, end, 1, type);
+
+            return i;
         }
         if (c == '/')
         {
@@ -730,11 +728,9 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
                 return i;
             }
-            else
-            {
-                throw new FormatException(string.Format(CultureInfo.InvariantCulture,
-                                                        "Unexpected character '{0}' after '/'", c));
-            }
+
+            throw new FormatException(string.Format(CultureInfo.InvariantCulture,
+                "Unexpected character '{0}' after '/'", c));
         }
 
         AddToSet(val, end, 0, type);
@@ -1060,10 +1056,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         {
             return (int)_monthMap[s];
         }
-        else
-        {
-            return -1;
-        }
+
+        return -1;
     }
 
     protected virtual int GetDayOfWeekNumber(string s)
@@ -1072,10 +1066,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
         {
             return (int)_dayMap[s];
         }
-        else
-        {
-            return -1;
-        }
+
+        return -1;
     }
 
     protected virtual DateTime? GetTime(int sc, int mn, int hr, int dayofmn, int mon)
@@ -1406,7 +1398,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
                         continue;
                     }
-                    else if (daysToAdd > 0 || dayShifted)
+
+                    if (daysToAdd > 0 || dayShifted)
                     {
                         d = new DateTime(d.Year, mon, day, 0, 0, 0);
 
@@ -1451,7 +1444,8 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
                         continue;
                     }
-                    else if (daysToAdd > 0)
+
+                    if (daysToAdd > 0)
                     {
                         d = new DateTime(d.Year, mon, day + daysToAdd, 0, 0, 0);
 

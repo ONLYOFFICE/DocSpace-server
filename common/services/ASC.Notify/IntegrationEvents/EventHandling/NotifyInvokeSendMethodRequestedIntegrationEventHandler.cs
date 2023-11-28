@@ -27,18 +27,11 @@
 namespace ASC.Notify.IntegrationEvents.EventHandling;
 
 [Scope]
-public class NotifyInvokeSendMethodRequestedIntegrationEventHandler : IIntegrationEventHandler<NotifyInvokeSendMethodRequestedIntegrationEvent>
-{
-    private readonly ILogger _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public NotifyInvokeSendMethodRequestedIntegrationEventHandler(
-        ILoggerProvider options,
+public class NotifyInvokeSendMethodRequestedIntegrationEventHandler(ILoggerProvider options,
         IServiceScopeFactory serviceScopeFactory)
-    {
-        _logger = options.CreateLogger("ASC.NotifyService");
-        _serviceScopeFactory = serviceScopeFactory;
-    }
+    : IIntegrationEventHandler<NotifyInvokeSendMethodRequestedIntegrationEvent>
+{
+    private readonly ILogger _logger = options.CreateLogger("ASC.NotifyService");
 
     private async Task InvokeSendMethodAsync(NotifyInvoke notifyInvoke)
     {
@@ -49,7 +42,7 @@ public class NotifyInvokeSendMethodRequestedIntegrationEventHandler : IIntegrati
 
         var serviceType = Type.GetType(service, true);
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
 
         var instance = scope.ServiceProvider.GetService(serviceType);
         if (instance == null)

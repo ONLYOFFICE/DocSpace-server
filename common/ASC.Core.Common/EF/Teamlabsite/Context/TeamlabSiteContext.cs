@@ -27,11 +27,9 @@
 using ASC.Core.Common.EF.Teamlabsite.Model;
 
 namespace ASC.Core.Common.EF.Teamlabsite.Context;
-public class TeamlabSiteContext: DbContext, ITeamlabsiteDb
+public class TeamlabSiteContext(DbContextOptions<TeamlabSiteContext> options) : DbContext(options), ITeamlabsiteDb
 {
     public DbSet<DbCache> Cache { get; set; }
-
-    public TeamlabSiteContext(DbContextOptions<TeamlabSiteContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

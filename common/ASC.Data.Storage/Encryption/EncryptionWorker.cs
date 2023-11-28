@@ -27,20 +27,12 @@
 namespace ASC.Data.Storage.Encryption;
 
 [Singleton]
-public class EncryptionWorker
+public class EncryptionWorker(IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly object _locker = new();
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "encryption";
-
-    public EncryptionWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider)
-    {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
 
     public void Start(EncryptionSettings encryptionSettings, string serverRootPath)
     {
@@ -59,7 +51,7 @@ public class EncryptionWorker
             if (item == null)
             {
 
-                encryptionOperation = _serviceProvider.GetService<EncryptionOperation>();
+                encryptionOperation = serviceProvider.GetService<EncryptionOperation>();
                 encryptionOperation.Init(encryptionSettings, GetCacheId(), serverRootPath);
 
                 _queue.EnqueueTask(encryptionOperation);

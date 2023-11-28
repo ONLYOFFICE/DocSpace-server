@@ -141,8 +141,8 @@ public class IPSecurity
         var dividerIdx = restrictionIp.IndexOf('-');
         if (dividerIdx > 0)
         {
-            var lower = IPAddress.Parse(restrictionIp.Substring(0, dividerIdx).Trim());
-            var upper = IPAddress.Parse(restrictionIp.Substring(dividerIdx + 1).Trim());
+            var lower = IPAddress.Parse(restrictionIp[..dividerIdx].Trim());
+            var upper = IPAddress.Parse(restrictionIp[(dividerIdx + 1)..].Trim());
 
             var range = new IPAddressRange(lower, upper);
 
@@ -161,7 +161,7 @@ public class IPSecurity
     {
         var portIdx = ip.IndexOf(':');
 
-        return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
+        return portIdx > 0 ? ip[..portIdx] : ip;
     }
 
     private bool IsMyNetwork(string[] ips)

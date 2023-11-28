@@ -27,40 +27,16 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class DnsSettings
+public class DnsSettings(PermissionContext permissionContext,
+    TenantManager tenantManager,
+    UserManager userManager,
+    CoreBaseSettings coreBaseSettings,
+    CoreSettings coreSettings,
+    StudioNotifyService studioNotifyService,
+    CommonLinkUtility commonLinkUtility,
+    MessageService messageService,
+    CspSettingsHelper cspSettingsHelper)
 {
-    private readonly PermissionContext _permissionContext;
-    private readonly TenantManager _tenantManager;
-    private readonly UserManager _userManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CoreSettings _coreSettings;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly MessageService _messageService;
-    private readonly CspSettingsHelper _cspSettingsHelper;
-
-    public DnsSettings(
-        PermissionContext permissionContext,
-        TenantManager tenantManager,
-        UserManager userManager,
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        StudioNotifyService studioNotifyService,
-        CommonLinkUtility commonLinkUtility,
-        MessageService messageService,
-        CspSettingsHelper cspSettingsHelper)
-    {
-        _permissionContext = permissionContext;
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-        _coreBaseSettings = coreBaseSettings;
-        _coreSettings = coreSettings;
-        _studioNotifyService = studioNotifyService;
-        _commonLinkUtility = commonLinkUtility;
-        _messageService = messageService;
-        _cspSettingsHelper = cspSettingsHelper;
-    }
-
     public async Task<string> SaveDnsSettingsAsync(string dnsName, bool enableDns)
     {
         try
@@ -70,9 +46,9 @@ public class DnsSettings
                 throw new Exception(Resource.ErrorNotAllowedOption);
             }
 
-            await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-            var tenant = await _tenantManager.GetCurrentTenantAsync();
+            var tenant = await tenantManager.GetCurrentTenantAsync();
 
             if (!enableDns || string.IsNullOrEmpty(dnsName))
             {
@@ -81,25 +57,25 @@ public class DnsSettings
 
             if (dnsName == null || await CheckCustomDomainAsync(dnsName))
             {
-                if (_coreBaseSettings.Standalone)
+                if (coreBaseSettings.Standalone)
                 {
-                    var oldDomain = tenant.GetTenantDomain(_coreSettings);
+                    var oldDomain = tenant.GetTenantDomain(coreSettings);
 
                     tenant.MappedDomain = dnsName;
-                    await _tenantManager.SaveTenantAsync(tenant);
+                    await tenantManager.SaveTenantAsync(tenant);
 
-                    await _cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(_coreSettings));
+                    await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
                     return null;
                 }
 
                 if (tenant.MappedDomain != dnsName)
                 {
-                    var portalAddress = $"http://{tenant.Alias ?? string.Empty}.{_coreSettings.BaseDomain}";
+                    var portalAddress = $"http://{tenant.Alias ?? string.Empty}.{coreSettings.BaseDomain}";
 
-                    var u = await _userManager.GetUsersAsync(tenant.OwnerId);
-                    await _studioNotifyService.SendMsgDnsChangeAsync(tenant, await GenerateDnsChangeConfirmUrlAsync(u.Email, dnsName, tenant.Alias, ConfirmType.DnsChange), portalAddress, dnsName);
+                    var u = await userManager.GetUsersAsync(tenant.OwnerId);
+                    await studioNotifyService.SendMsgDnsChangeAsync(tenant, await GenerateDnsChangeConfirmUrlAsync(u.Email, dnsName, tenant.Alias, ConfirmType.DnsChange), portalAddress, dnsName);
 
-                    await _messageService.SendAsync(MessageAction.DnsSettingsUpdated);
+                    await messageService.SendAsync(MessageAction.DnsSettingsUpdated);
                     return string.Format(Resource.DnsChangeMsg, string.Format("<a href=\"mailto:{0}\">{0}</a>", u.Email.HtmlEncode()));
                 }
 
@@ -133,7 +109,7 @@ public class DnsSettings
         {
             try
             {
-                await _tenantManager.CheckTenantAddressAsync(test.Host);
+                await tenantManager.CheckTenantAddressAsync(test.Host);
             }
             catch (TenantTooShortException ex)
             {
@@ -159,7 +135,7 @@ public class DnsSettings
         var postfix = string.Join(string.Empty, dnsName, tenantAlias);
 
         var sb = new StringBuilder();
-        sb.Append(await _commonLinkUtility.GetConfirmationEmailUrlAsync(email, confirmType, postfix));
+        sb.Append(await commonLinkUtility.GetConfirmationEmailUrlAsync(email, confirmType, postfix));
         if (!string.IsNullOrEmpty(dnsName))
         {
             sb.AppendFormat("&dns={0}", dnsName);
@@ -175,9 +151,9 @@ public class DnsSettings
     {
         get
         {
-            return string.IsNullOrEmpty(_coreSettings.BaseDomain)
+            return string.IsNullOrEmpty(coreSettings.BaseDomain)
                        ? string.Empty
-                       : $".{_coreSettings.BaseDomain}";
+                       : $".{coreSettings.BaseDomain}";
         }
     }
 }

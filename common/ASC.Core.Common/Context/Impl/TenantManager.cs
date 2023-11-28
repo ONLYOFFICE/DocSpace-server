@@ -126,7 +126,7 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = await TenantService.GetTenantAsync(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = await TenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
         if (t == null)
@@ -161,7 +161,7 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = TenantService.GetTenant(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = TenantService.GetTenant(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
         if (t == null)

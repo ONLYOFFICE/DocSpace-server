@@ -30,14 +30,8 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope(Additional = typeof(SharePointDaoSelectorExtension))]
-internal class SharePointDaoSelector : RegexDaoSelectorBase<File, Folder, ClientObject>
+internal class SharePointDaoSelector(IServiceProvider serviceProvider, IDaoFactory daoFactory) : RegexDaoSelectorBase<File, Folder, ClientObject>(serviceProvider, daoFactory)
 {
-
-    public SharePointDaoSelector(IServiceProvider serviceProvider, IDaoFactory daoFactory)
-        : base(serviceProvider, daoFactory)
-    {
-    }
-
     public override IFileDao<string> GetFileDao(string id)
     {
         var fileDao = _serviceProvider.GetService<SharePointFileDao>();

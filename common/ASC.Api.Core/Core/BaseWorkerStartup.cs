@@ -26,18 +26,11 @@
 
 namespace ASC.Api.Core;
 
-public class BaseWorkerStartup
+public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
 {
-    protected IConfiguration Configuration { get; }
-    protected IHostEnvironment HostEnvironment { get; }
-    protected DIHelper DIHelper { get; }
-    public BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    {
-        Configuration = configuration;
-        HostEnvironment = hostEnvironment;
-
-        DIHelper = new DIHelper();
-    }
+    protected IConfiguration Configuration { get; } = configuration;
+    protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    protected DIHelper DIHelper { get; } = new();
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
@@ -99,11 +92,11 @@ public class BaseWorkerStartup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).ShortCircuit();
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
             {
                 Predicate = r => r.Name.Contains("self")

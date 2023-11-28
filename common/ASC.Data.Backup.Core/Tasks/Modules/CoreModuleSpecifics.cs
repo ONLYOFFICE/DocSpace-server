@@ -34,27 +34,26 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
     private readonly RelationInfo[] _tableRelations;
     private readonly Helpers _helpers;
-    private readonly TableInfo[] _tables = new[]
-    {
-            new TableInfo("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
-            new TableInfo("core_subscription", "tenant"),
-            new TableInfo("core_subscriptionmethod", "tenant"),
-            new TableInfo("core_userphoto", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("core_usersecurity", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("core_usergroup", "tenant") {UserIDColumns = new[] {"userid"}},
-            new TableInfo("feed_aggregate", "tenant")
+    private readonly TableInfo[] _tables = {
+            new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
+            new("core_subscription", "tenant"),
+            new("core_subscriptionmethod", "tenant"),
+            new("core_userphoto", "tenant") {UserIDColumns = new[] {"userid"}},
+            new("core_usersecurity", "tenant") {UserIDColumns = new[] {"userid"}},
+            new("core_usergroup", "tenant") {UserIDColumns = new[] {"userid"}},
+            new("feed_aggregate", "tenant")
             {
                 InsertMethod = InsertMethod.None,
                 DateColumns = new Dictionary<string, bool> {{"created_date", false}, {"aggregated_date", false}}
             },
-            new TableInfo("feed_readed", "tenant_id")
+            new("feed_readed", "tenant_id")
             {
                 InsertMethod = InsertMethod.None,
                 DateColumns = new Dictionary<string, bool> {{"timestamp", false}}
             },
-            new TableInfo("feed_users") {InsertMethod = InsertMethod.None},
-            new TableInfo("backup_schedule", "tenant_id"),
-            new TableInfo("core_settings", "tenant")
+            new("feed_users") {InsertMethod = InsertMethod.None},
+            new("backup_schedule", "tenant_id"),
+            new("core_settings", "tenant")
         };
 
     public CoreModuleSpecifics(Helpers helpers) : base(helpers)

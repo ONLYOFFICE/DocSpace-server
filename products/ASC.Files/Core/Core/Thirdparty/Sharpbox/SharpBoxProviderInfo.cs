@@ -27,17 +27,11 @@
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Transient]
-internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
+internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisposableWrapper,
+        ILogger<SharpBoxProviderInfo> logger)
+    : IProviderInfo<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
 {
     private nSupportedCloudConfigurations _providerKey;
-    private readonly ILogger<SharpBoxProviderInfo> _logger;
-    private readonly SharpBoxStorageDisposableWrapper _wrapper;
-
-    public SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisposableWrapper, ILogger<SharpBoxProviderInfo> logger)
-    {
-        _wrapper = storageDisposableWrapper;
-        _logger = logger;
-    }
 
     public AuthData AuthData { get; set; }
     public bool HasLogo { get; set; }
@@ -67,16 +61,16 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
         get
         {
 
-            if (!_wrapper.TryGetStorage(ProviderId, out var storage) || !storage.IsOpened)
+            if (!storageDisposableWrapper.TryGetStorage(ProviderId, out var storage) || !storage.IsOpened)
             {
-                return _wrapper.CreateStorage(AuthData, _providerKey, ProviderId);
+                return storageDisposableWrapper.CreateStorage(AuthData, _providerKey, ProviderId);
             }
 
             return storage;
         }
     }
 
-    internal bool StorageOpened => _wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
+    internal bool StorageOpened => storageDisposableWrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
     public Task<IThirdPartyStorage<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>> StorageAsync =>
         throw new NotImplementedException();
@@ -93,7 +87,7 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
         }
         catch (SharpBoxException ex)
         {
-            _logger.ErrorSharpboxCheckAccess(ex);
+            logger.ErrorSharpboxCheckAccess(ex);
 
             return Task.FromResult(false);
         }
@@ -109,10 +103,7 @@ internal class SharpBoxProviderInfo : IProviderInfo<ICloudFileSystemEntry, IClou
 
     public Task InvalidateStorageAsync()
     {
-        if (_wrapper != null)
-        {
-            _wrapper.Dispose();
-        }
+        storageDisposableWrapper?.Dispose();
 
         return Task.CompletedTask;
     }

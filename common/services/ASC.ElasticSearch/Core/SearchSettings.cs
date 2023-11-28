@@ -67,43 +67,27 @@ public class SearchSettings : ISettings<SearchSettings>
 }
 
 [Scope]
-public class SearchSettingsHelper
+public class SearchSettingsHelper(TenantManager tenantManager,
+    SettingsManager settingsManager,
+    CoreBaseSettings coreBaseSettings,
+    ICacheNotify<ReIndexAction> cacheNotify,
+    IServiceProvider serviceProvider,
+    IConfiguration configuration)
 {
     internal IEnumerable<IFactoryIndexer> AllItems =>
-        _allItems ??= _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
+        _allItems ??= serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
 
-    private readonly IConfiguration _configuration;
-    private readonly TenantManager _tenantManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly ICacheNotify<ReIndexAction> _cacheNotify;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IConfiguration _configuration = configuration;
     private IEnumerable<IFactoryIndexer> _allItems;
-
-    public SearchSettingsHelper(
-        TenantManager tenantManager,
-        SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
-        ICacheNotify<ReIndexAction> cacheNotify,
-        IServiceProvider serviceProvider,
-        IConfiguration configuration)
-    {
-        _tenantManager = tenantManager;
-        _settingsManager = settingsManager;
-        _coreBaseSettings = coreBaseSettings;
-        _cacheNotify = cacheNotify;
-        _serviceProvider = serviceProvider;
-        _configuration = configuration;
-    }
 
     public async Task<List<SearchSettingsItem>> GetAllItemsAsync()
     {
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return new List<SearchSettingsItem>();
         }
 
-        var settings = await _settingsManager.LoadAsync<SearchSettings>();
+        var settings = await settingsManager.LoadAsync<SearchSettings>();
 
         return AllItems.Select(r => new SearchSettingsItem
         {
@@ -115,24 +99,24 @@ public class SearchSettingsHelper
 
     public async Task SetAsync(List<SearchSettingsItem> items)
     {
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return;
         }
 
-        var settings = await _settingsManager.LoadAsync<SearchSettings>();
+        var settings = await settingsManager.LoadAsync<SearchSettings>();
 
         var settingsItems = settings.Items;
         var toReIndex = settingsItems.Count == 0 ? items.Where(r => r.Enabled).ToList() : items.Where(item => settingsItems.Any(r => r.ID == item.ID && r.Enabled != item.Enabled)).ToList();
 
         settings.Items = items;
         settings.Data = JsonConvert.SerializeObject(items);
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
 
-        var action = new ReIndexAction() { Tenant = await _tenantManager.GetCurrentTenantIdAsync() };
+        var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
-        await _cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
+        await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
     }
 
     public async Task<bool> CanIndexByContentAsync<T>() where T : class, ISearchItem
@@ -171,18 +155,18 @@ public class SearchSettingsHelper
 
     public async Task<bool> CanSearchByContentAsync(Type t)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         if (!await CanIndexByContentAsync(t))
         {
             return false;
         }
 
-        if (_coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone)
         {
             return true;
         }
 
-        return (await _tenantManager.GetTenantQuotaAsync(tenantId)).ContentSearch;
+        return (await tenantManager.GetTenantQuotaAsync(tenantId)).ContentSearch;
     }
 }
 

@@ -30,13 +30,8 @@ namespace Textile.States;
 /// Formatting state for a standard text (i.e. just paragraphs).
 /// </summary>
 [FormatterState(PatternBegin + @"p" + PatternEnd)]
-public class ParagraphFormatterState : SimpleBlockFormatterState
+public class ParagraphFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
-    public ParagraphFormatterState(TextileFormatter f)
-        : base(f)
-    {
-    }
-
     public override void Enter()
     {
         Formatter.Output.Write("<p" + FormattedStylesAndAlignment("p") + ">");

@@ -57,7 +57,7 @@ public class NotificationController : BaseSettingsController
     {
         var isEnabled = await _notificationControllerHelper.GetNotificationStatusAsync(type);
 
-        return new NotificationSettingsDto() { Type = type, IsEnabled = isEnabled };
+        return new NotificationSettingsDto { Type = type, IsEnabled = isEnabled };
     }
 
     /// <summary>

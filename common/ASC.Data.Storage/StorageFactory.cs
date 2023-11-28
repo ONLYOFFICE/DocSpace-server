@@ -27,17 +27,8 @@
 namespace ASC.Data.Storage;
 
 [Singleton(Additional = typeof(StorageConfigExtension))]
-public class StorageFactoryConfig
+public class StorageFactoryConfig(Configuration.Storage storage, ConfigurationExtension configurationExtension)
 {
-    private readonly Configuration.Storage _section;
-    private readonly ConfigurationExtension _configurationExtension;
-
-    public StorageFactoryConfig(Configuration.Storage storage, ConfigurationExtension configurationExtension)
-    {
-        _section = storage;
-        _configurationExtension = configurationExtension;
-    }
-
     public IEnumerable<string> GetModuleList(string region = "current", bool exceptDisabledMigration = false)
     {
         return GetStorage(region).Module
@@ -62,7 +53,7 @@ public class StorageFactoryConfig
 
     public Configuration.Storage GetStorage(string region)
     {
-        return region == "current" ? _section : _configurationExtension.GetSetting<Configuration.Storage>($"regions:{region}:storage");
+        return region == "current" ? storage : configurationExtension.GetSetting<Configuration.Storage>($"regions:{region}:storage");
     }
 }
 
@@ -108,33 +99,17 @@ public static class StorageFactoryExtenstion
 }
 
 [Scope(Additional = typeof(StorageFactoryExtension))]
-public class StorageFactory
+public class StorageFactory(IServiceProvider serviceProvider,
+    StorageFactoryConfig storageFactoryConfig,
+    SettingsManager settingsManager,
+    StorageSettingsHelper storageSettingsHelper,
+    CoreBaseSettings coreBaseSettings)
 {
     private const string DefaultTenantName = "default";
 
-    private readonly StorageFactoryConfig _storageFactoryConfig;
-    private readonly SettingsManager _settingsManager;
-    private readonly StorageSettingsHelper _storageSettingsHelper;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceProvider _serviceProvider;
-
-    public StorageFactory(
-        IServiceProvider serviceProvider,
-        StorageFactoryConfig storageFactoryConfig,
-        SettingsManager settingsManager,
-        StorageSettingsHelper storageSettingsHelper,
-        CoreBaseSettings coreBaseSettings)
-    {
-        _serviceProvider = serviceProvider;
-        _storageFactoryConfig = storageFactoryConfig;
-        _settingsManager = settingsManager;
-        _storageSettingsHelper = storageSettingsHelper;
-        _coreBaseSettings = coreBaseSettings;
-    }
-
     public async Task<IDataStore> GetStorageAsync(int tenant, string module, string region = "current")
     {
-        var tenantQuotaController = _serviceProvider.GetService<TenantQuotaController>();
+        var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
         tenantQuotaController.Init(tenant);
 
         return await GetStorageAsync(tenant, module, tenantQuotaController, region);
@@ -146,28 +121,28 @@ public class StorageFactory
 
         tenant = tenant ?? -2;
 
-        var section = _storageFactoryConfig.GetStorage(region);
+        var section = storageFactoryConfig.GetStorage(region);
         if (section == null)
         {
             throw new InvalidOperationException("config section not found");
         }
 
-        var settings = await _settingsManager.LoadAsync<StorageSettings>(tenant.Value);
+        var settings = await settingsManager.LoadAsync<StorageSettings>(tenant.Value);
         //TODO:GetStoreAndCache
-        return GetDataStore(tenantPath, module, _storageSettingsHelper.DataStoreConsumer(settings), controller, region);
+        return GetDataStore(tenantPath, module, storageSettingsHelper.DataStoreConsumer(settings), controller, region);
     }
 
     public IDataStore GetStorageFromConsumer(int? tenant, string module, DataStoreConsumer consumer, string region = "current")
     {
         var tenantPath = tenant != null ? TenantPath.CreatePath(tenant.Value) : TenantPath.CreatePath(DefaultTenantName);
 
-        var section = _storageFactoryConfig.GetStorage(region);
+        var section = storageFactoryConfig.GetStorage(region);
         if (section == null)
         {
             throw new InvalidOperationException("config section not found");
         }
 
-        var tenantQuotaController = _serviceProvider.GetService<TenantQuotaController>();
+        var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
         tenantQuotaController.Init(tenant.GetValueOrDefault());
 
         return GetDataStore(tenantPath, module, consumer, tenantQuotaController);
@@ -175,7 +150,7 @@ public class StorageFactory
 
     private IDataStore GetDataStore(string tenantPath, string module, DataStoreConsumer consumer, IQuotaController controller, string region = "current")
     {
-        var storage = _storageFactoryConfig.GetStorage(region);
+        var storage = storageFactoryConfig.GetStorage(region);
         var moduleElement = storage.GetModuleElement(module);
         if (moduleElement == null)
         {
@@ -186,7 +161,7 @@ public class StorageFactory
         Type instanceType;
         IDictionary<string, string> props;
 
-        if (_coreBaseSettings.Standalone &&
+        if (coreBaseSettings.Standalone &&
             !moduleElement.DisableMigrate &&
             consumer.IsSet)
         {
@@ -205,11 +180,11 @@ public class StorageFactory
             var validatorType = Type.GetType(moduleElement.ValidatorType, false);
             if (validatorType != null)
             {
-                validator = (IDataStoreValidator)ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, validatorType);
+                validator = (IDataStoreValidator)ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, validatorType);
             }
         }
 
-        return ((IDataStore)ActivatorUtilities.CreateInstance(_serviceProvider, instanceType))
+        return ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
             .Configure(tenantPath, handler, moduleElement, props, validator)
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);

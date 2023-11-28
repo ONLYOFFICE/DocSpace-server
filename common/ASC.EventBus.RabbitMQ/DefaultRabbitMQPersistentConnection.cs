@@ -26,22 +26,15 @@
 
 namespace ASC.EventBus.RabbitMQ;
 
-public class DefaultRabbitMQPersistentConnection
+public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFactory,
+        ILogger<DefaultRabbitMQPersistentConnection> logger, int retryCount = 5)
     : IRabbitMQPersistentConnection
 {
-    private readonly IConnectionFactory _connectionFactory;
-    private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger;
-    private readonly int _retryCount;
+    private readonly IConnectionFactory _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+    private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
     readonly object _sync_root = new();
-
-    public DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFactory, ILogger<DefaultRabbitMQPersistentConnection> logger, int retryCount = 5)
-    {
-        _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _retryCount = retryCount;
-    }
 
     public bool IsConnected
     {
@@ -103,7 +96,7 @@ public class DefaultRabbitMQPersistentConnection
 
             var policy = Policy.Handle<SocketException>()
                 .Or<BrokerUnreachableException>()
-                .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                 {
                     _logger.WarningRabbitMQCouldNotConnect(time.TotalSeconds, ex);
                 }
@@ -125,12 +118,10 @@ public class DefaultRabbitMQPersistentConnection
 
                 return true;
             }
-            else
-            {
-                _logger.CriticalRabbitMQCouldNotBeCreated();
 
-                return false;
-            }
+            _logger.CriticalRabbitMQCouldNotBeCreated();
+
+            return false;
         }
     }
 

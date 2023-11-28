@@ -26,15 +26,8 @@
 
 namespace ASC.Web.Studio.Core.Notify;
 
-internal class StudioSubscriptionManager : ISubscriptionManager
+internal class StudioSubscriptionManager(StudioNotifyHelper studioNotifyHelper) : ISubscriptionManager
 {
-    private readonly StudioNotifyHelper _studioNotifyHelper;
-
-    public StudioSubscriptionManager(StudioNotifyHelper studioNotifyHelper)
-    {
-        _studioNotifyHelper = studioNotifyHelper;
-    }
-
     #region ISubscriptionManager Members
 
     public List<SubscriptionObject> GetSubscriptionObjects(Guid subItem)
@@ -55,7 +48,7 @@ internal class StudioSubscriptionManager : ISubscriptionManager
                 }
             };
 
-        var astype = new SubscriptionType()
+        var astype = new SubscriptionType
         {
             ID = new Guid("{A4FFC01F-BDB5-450e-88C4-03FED17D67C5}"),
             Name = Resource.AdministratorNotifySenderTypeName,
@@ -70,7 +63,7 @@ internal class StudioSubscriptionManager : ISubscriptionManager
 
     public ISubscriptionProvider SubscriptionProvider
     {
-        get { return _studioNotifyHelper.SubscriptionProvider; }
+        get { return studioNotifyHelper.SubscriptionProvider; }
     }
 
     #endregion

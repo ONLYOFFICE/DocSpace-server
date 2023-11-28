@@ -26,13 +26,13 @@
 
 namespace ASC.Web.Api.Routing;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class AllowNotPaymentAttribute : Attribute
 {
 
 }
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class AllowSuspendedAttribute : Attribute
 {
 

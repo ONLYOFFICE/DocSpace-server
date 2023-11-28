@@ -26,18 +26,14 @@
 
 namespace ASC.Notify.Model;
 
-public class TopSubscriptionProvider : ISubscriptionProvider
+public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
+        ISubscriptionProvider directSubscriptionProvider)
+    : ISubscriptionProvider
 {
     private readonly string[] _defaultSenderMethods = Array.Empty<string>();
-    private readonly ISubscriptionProvider _subscriptionProvider;
-    private readonly IRecipientProvider _recipientProvider;
+    private readonly ISubscriptionProvider _subscriptionProvider = directSubscriptionProvider ?? throw new ArgumentNullException(nameof(directSubscriptionProvider));
+    private readonly IRecipientProvider _recipientProvider = recipientProvider ?? throw new ArgumentNullException(nameof(recipientProvider));
 
-
-    public TopSubscriptionProvider(IRecipientProvider recipientProvider, ISubscriptionProvider directSubscriptionProvider)
-    {
-        _recipientProvider = recipientProvider ?? throw new ArgumentNullException(nameof(recipientProvider));
-        _subscriptionProvider = directSubscriptionProvider ?? throw new ArgumentNullException(nameof(directSubscriptionProvider));
-    }
 
     public TopSubscriptionProvider(IRecipientProvider recipientProvider, ISubscriptionProvider directSubscriptionProvider, string[] defaultSenderMethods)
         : this(recipientProvider, directSubscriptionProvider)

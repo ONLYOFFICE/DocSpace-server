@@ -33,54 +33,22 @@ namespace ASC.Web.Core.Users;
 /// </summary>
 /// 
 [Scope]
-public sealed class UserManagerWrapper
+public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
+    UserManager userManager,
+    SecurityContext securityContext,
+    CustomNamingPeople customNamingPeople,
+    TenantUtil tenantUtil,
+    CoreBaseSettings coreBaseSettings,
+    SettingsManager settingsManager,
+    UserFormatter userFormatter,
+    CountPaidUserChecker countPaidUserChecker,
+    TenantManager tenantManager,
+    WebItemSecurityCache webItemSecurityCache,
+    QuotaSocketManager quotaSocketManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
 {
     private static readonly SemaphoreSlim _semaphore = new(1);
-    private Tenant Tenant => _tenantManager.GetCurrentTenant();
-
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly CustomNamingPeople _customNamingPeople;
-    private readonly TenantUtil _tenantUtil;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly SettingsManager _settingsManager;
-    private readonly UserFormatter _userFormatter;
-    private readonly CountPaidUserChecker _countPaidUserChecker;
-    private readonly TenantManager _tenantManager;
-    private readonly WebItemSecurityCache _webItemSecurityCache;
-    private readonly QuotaSocketManager _quotaSocketManager;
-    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
-
-    public UserManagerWrapper(
-        StudioNotifyService studioNotifyService,
-        UserManager userManager,
-        SecurityContext securityContext,
-        CustomNamingPeople customNamingPeople,
-        TenantUtil tenantUtil,
-        CoreBaseSettings coreBaseSettings,
-        SettingsManager settingsManager,
-        UserFormatter userFormatter,
-        CountPaidUserChecker countPaidUserChecker,
-        TenantManager tenantManager,
-        WebItemSecurityCache webItemSecurityCache,
-        QuotaSocketManager quotaSocketManager,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
-    {
-        _studioNotifyService = studioNotifyService;
-        _userManager = userManager;
-        _securityContext = securityContext;
-        _customNamingPeople = customNamingPeople;
-        _tenantUtil = tenantUtil;
-        _coreBaseSettings = coreBaseSettings;
-        _settingsManager = settingsManager;
-        _userFormatter = userFormatter;
-        _countPaidUserChecker = countPaidUserChecker;
-        _tenantManager = tenantManager;
-        _webItemSecurityCache = webItemSecurityCache;
-        _quotaSocketManager = quotaSocketManager;
-        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-    }
+    private Tenant Tenant => tenantManager.GetCurrentTenant();
 
     private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
@@ -89,7 +57,7 @@ public sealed class UserManagerWrapper
             return false;
         }
 
-        return Equals(await _userManager.GetUserByUserNameAsync(uniqueName), Constants.LostUser);
+        return Equals(await userManager.GetUserByUserNameAsync(uniqueName), Constants.LostUser);
     }
 
     private async Task<string> MakeUniqueNameAsync(UserInfo userInfo)
@@ -111,7 +79,7 @@ public sealed class UserManagerWrapper
 
     public async Task<bool> CheckUniqueEmailAsync(Guid userId, string email)
     {
-        var foundUser = await _userManager.GetUserByEmailAsync(email);
+        var foundUser = await userManager.GetUserByEmailAsync(email);
         return Equals(foundUser, Constants.LostUser) || foundUser.Id == userId;
     }
 
@@ -119,9 +87,9 @@ public sealed class UserManagerWrapper
     {
         var mail = new MailAddress(email);
 
-        if ((await _userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
+        if ((await userManager.GetUserByEmailAsync(mail.Address)).Id != Constants.LostUser.Id)
         {
-            throw new Exception(_customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         var user = new UserInfo
@@ -137,7 +105,7 @@ public sealed class UserManagerWrapper
 
         user.UserName = await MakeUniqueNameAsync(user);
 
-        var newUser = await _userManager.SaveUserInfo(user, type);
+        var newUser = await userManager.SaveUserInfo(user, type);
 
         var groupId = type switch
         {
@@ -149,12 +117,12 @@ public sealed class UserManagerWrapper
 
         if (groupId != Guid.Empty)
         {
-            await _userManager.AddUserIntoGroupAsync(newUser.Id, groupId, true);
+            await userManager.AddUserIntoGroupAsync(newUser.Id, groupId, true);
         }
         else if (type == EmployeeType.RoomAdmin)
         {
-            var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
-            _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+            _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
 
         return newUser;
@@ -165,14 +133,14 @@ public sealed class UserManagerWrapper
     {
         ArgumentNullException.ThrowIfNull(userInfo);
 
-        if (!_userFormatter.IsValidUserName(userInfo.FirstName, userInfo.LastName))
+        if (!userFormatter.IsValidUserName(userInfo.FirstName, userInfo.LastName))
         {
             throw new Exception(Resource.ErrorIncorrectUserName);
         }
 
         if (!updateExising && !await CheckUniqueEmailAsync(userInfo.Id, userInfo.Email))
         {
-            throw new Exception(_customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+            throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
         }
 
         if (makeUniqueName && !updateExising)
@@ -181,10 +149,10 @@ public sealed class UserManagerWrapper
         }
         if (!userInfo.WorkFromDate.HasValue)
         {
-            userInfo.WorkFromDate = _tenantUtil.DateTimeNow();
+            userInfo.WorkFromDate = tenantUtil.DateTimeNow();
         }
 
-        if (!_coreBaseSettings.Personal && (!fromInviteLink || updateExising))
+        if (!coreBaseSettings.Personal && (!fromInviteLink || updateExising))
         {
             userInfo.ActivationStatus = !afterInvite ? EmployeeActivationStatus.Pending : EmployeeActivationStatus.Activated;
         }
@@ -192,18 +160,18 @@ public sealed class UserManagerWrapper
         UserInfo newUserInfo;
         if (updateExising)
         {
-            newUserInfo = await _userManager.UpdateUserInfoAsync(userInfo, true);
+            newUserInfo = await userManager.UpdateUserInfoAsync(userInfo, true);
         }
         else
         {
-            newUserInfo = await _userManager.SaveUserInfo(userInfo, type, isCardDav);
+            newUserInfo = await userManager.SaveUserInfo(userInfo, type, isCardDav);
         }
 
-        await _securityContext.SetUserPasswordHashAsync(newUserInfo.Id, passwordHash);
+        await securityContext.SetUserPasswordHashAsync(newUserInfo.Id, passwordHash);
 
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
-            await _studioNotifyService.SendUserWelcomePersonalAsync(newUserInfo);
+            await studioNotifyService.SendUserWelcomePersonalAsync(newUserInfo);
             return newUserInfo;
         }
 
@@ -214,16 +182,16 @@ public sealed class UserManagerWrapper
             {
                 if (type is EmployeeType.User)
                 {
-                    await _studioNotifyService.GuestInfoAddedAfterInviteAsync(newUserInfo);
+                    await studioNotifyService.GuestInfoAddedAfterInviteAsync(newUserInfo);
                 }
                 else
                 {
-                    await _studioNotifyService.UserInfoAddedAfterInviteAsync(newUserInfo);
+                    await studioNotifyService.UserInfoAddedAfterInviteAsync(newUserInfo);
                 }
 
                 if (fromInviteLink && newUserInfo.ActivationStatus != EmployeeActivationStatus.Activated)
                 {
-                    await _studioNotifyService.SendEmailActivationInstructionsAsync(newUserInfo, newUserInfo.Email);
+                    await studioNotifyService.SendEmailActivationInstructionsAsync(newUserInfo, newUserInfo.Email);
                 }
             }
             else
@@ -231,11 +199,11 @@ public sealed class UserManagerWrapper
                 //Send user invite
                 if (type is EmployeeType.User)
                 {
-                    await _studioNotifyService.GuestInfoActivationAsync(newUserInfo);
+                    await studioNotifyService.GuestInfoActivationAsync(newUserInfo);
                 }
                 else
                 {
-                    await _studioNotifyService.UserInfoActivationAsync(newUserInfo);
+                    await studioNotifyService.UserInfoActivationAsync(newUserInfo);
                 }
 
             }
@@ -249,13 +217,13 @@ public sealed class UserManagerWrapper
         switch (type)
         {
             case EmployeeType.User:
-                await _userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupUser.ID, true);
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupUser.ID, true);
                 break;
             case EmployeeType.DocSpaceAdmin:
-                await _userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupAdmin.ID, true);
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupAdmin.ID, true);
                 break;
             case EmployeeType.Collaborator:
-                await _userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupCollaborator.ID, true);
+                await userManager.AddUserIntoGroupAsync(newUserInfo.Id, Constants.GroupCollaborator.ID, true);
                 break;
         }
 
@@ -266,7 +234,7 @@ public sealed class UserManagerWrapper
 
     public async Task<bool> UpdateUserTypeAsync(UserInfo user, EmployeeType type)
     {
-        var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var changed = false;
 
         if (user.IsOwner(Tenant) || user.IsMe(currentUser.Id))
@@ -274,7 +242,7 @@ public sealed class UserManagerWrapper
             return await Task.FromResult(false);
         }
 
-        var currentType = await _userManager.GetUserTypeAsync(user.Id);
+        var currentType = await userManager.GetUserTypeAsync(user.Id);
 
         try
         {
@@ -283,23 +251,23 @@ public sealed class UserManagerWrapper
             {
                 if (currentType is EmployeeType.RoomAdmin)
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID, notifyWebSocket: false);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID, notifyWebSocket: false);
+                    webItemSecurityCache.ClearCache(Tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.Collaborator)
                 {
-                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
+                    webItemSecurityCache.ClearCache(Tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.User)
                 {
-                    await _countPaidUserChecker.CheckAppend();
-                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    await countPaidUserChecker.CheckAppend();
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
+                    webItemSecurityCache.ClearCache(Tenant.Id);
                     changed = true;
                 }
             }
@@ -307,30 +275,30 @@ public sealed class UserManagerWrapper
             {
                 if (currentType is EmployeeType.DocSpaceAdmin && currentUser.IsOwner(Tenant))
                 {
-                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
+                    webItemSecurityCache.ClearCache(Tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.Collaborator)
                 {
-                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupCollaborator.ID);
+                    webItemSecurityCache.ClearCache(Tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.User)
                 {
-                    await _countPaidUserChecker.CheckAppend();
-                    await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                    _webItemSecurityCache.ClearCache(Tenant.Id);
+                    await countPaidUserChecker.CheckAppend();
+                    await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                    webItemSecurityCache.ClearCache(Tenant.Id);
                     changed = true;
                 }
             }
             else if (type is EmployeeType.Collaborator && currentType is EmployeeType.User)
             {
-                await _countPaidUserChecker.CheckAppend();
-                await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupCollaborator.ID);
-                _webItemSecurityCache.ClearCache(Tenant.Id);
+                await countPaidUserChecker.CheckAppend();
+                await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
+                await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupCollaborator.ID);
+                webItemSecurityCache.ClearCache(Tenant.Id);
                 changed = true;
             }
         }
@@ -349,7 +317,7 @@ public sealed class UserManagerWrapper
             throw new Exception(Resource.ErrorPasswordEmpty);
         }
 
-        var passwordSettingsObj = await _settingsManager.LoadAsync<PasswordSettings>();
+        var passwordSettingsObj = await settingsManager.LoadAsync<PasswordSettings>();
 
         if (!CheckPasswordRegex(passwordSettingsObj, password))
         {
@@ -396,8 +364,8 @@ public sealed class UserManagerWrapper
             throw new ArgumentNullException(nameof(email), Resource.ErrorNotCorrectEmail);
         }
 
-        var userInfo = await _userManager.GetUserByEmailAsync(email);
-        if (!_userManager.UserExists(userInfo) || string.IsNullOrEmpty(userInfo.Email))
+        var userInfo = await userManager.GetUserByEmailAsync(email);
+        if (!userManager.UserExists(userInfo) || string.IsNullOrEmpty(userInfo.Email))
         {
             return string.Format(Resource.ErrorUserNotFoundByEmail, email);
         }
@@ -414,7 +382,7 @@ public sealed class UserManagerWrapper
             return Resource.CouldNotRecoverPasswordForSsoUser;
         }
 
-        await _studioNotifyService.UserPasswordChangeAsync(userInfo);
+        await studioNotifyService.UserPasswordChangeAsync(userInfo);
 
         return null;
     }
@@ -465,7 +433,7 @@ public sealed class UserManagerWrapper
 
     public async Task<string> GetPasswordHelpMessageAsync()
     {
-        return GetPasswordHelpMessage(await _settingsManager.LoadAsync<PasswordSettings>());
+        return GetPasswordHelpMessage(await settingsManager.LoadAsync<PasswordSettings>());
     }
 
     #endregion

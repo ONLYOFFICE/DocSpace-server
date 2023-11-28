@@ -27,18 +27,11 @@
 namespace ASC.Common.Utils;
 
 [Singleton]
-public class Signature
+public class Signature(MachinePseudoKeys machinePseudoKeys)
 {
-    private readonly MachinePseudoKeys _machinePseudoKeys;
-
-    public Signature(MachinePseudoKeys machinePseudoKeys)
-    {
-        _machinePseudoKeys = machinePseudoKeys;
-    }
-
     public string Create<T>(T obj)
     {
-        return Create(obj, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()));
+        return Create(obj, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()));
     }
 
     public static string Create<T>(T obj, string secret)
@@ -51,12 +44,12 @@ public class Signature
 
     public T Read<T>(string signature)
     {
-        return Read<T>(signature, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()));
+        return Read<T>(signature, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()));
     }
 
     public T Read<T>(string signature, Action<string> signatureResolver = null)
     {
-        return Read<T>(signature, Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()), signatureResolver);
+        return Read<T>(signature, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), signatureResolver);
     }
 
     public static T Read<T>(string signature, string secret, Action<string> signatureResolver = null)

@@ -50,7 +50,7 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
     {
         return new object[] { Id };
     }
-};
+}
 
 public static class DbFilesThirdpartyAccountExtension
 {

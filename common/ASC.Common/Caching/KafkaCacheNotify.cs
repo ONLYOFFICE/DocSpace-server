@@ -220,10 +220,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     {
         _cancelationToken.TryGetValue(GetChannelName(notifyAction), out var source);
 
-        if (source != null)
-        {
-            source.Cancel();
-        }
+        source?.Cancel();
     }
 
     public void Dispose()

@@ -31,133 +31,101 @@ using Constants = ASC.Core.Configuration.Constants;
 namespace ASC.Web.Studio.Core.Notify;
 
 [Singleton(Additional = typeof(ServiceLauncherExtension))]
-public class StudioNotifyServiceSender
+public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
+    IConfiguration configuration,
+    WorkContext workContext,
+    TenantExtraConfig tenantExtraConfig,
+    CoreBaseSettings coreBaseSettings)
 {
     private static string EMailSenderName { get { return Constants.NotifyEMailSenderSysName; } }
 
-    private readonly IServiceScopeFactory _serviceProvider;
-    private readonly IConfiguration _configuration;
-    private readonly WorkContext _workContext;
-    private readonly TenantExtraConfig _tenantExtraConfig;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public StudioNotifyServiceSender(
-        IServiceScopeFactory serviceProvider,
-        IConfiguration configuration,
-        WorkContext workContext,
-        TenantExtraConfig tenantExtraConfig,
-        CoreBaseSettings coreBaseSettings)
-    {
-        _serviceProvider = serviceProvider;
-        _configuration = configuration;
-        _workContext = workContext;
-        _tenantExtraConfig = tenantExtraConfig;
-        _coreBaseSettings = coreBaseSettings;
-    }
-
     public void RegisterSendMethod()
     {
-        var cron = _configuration["core:notify:cron"] ?? "0 0 5 ? * *"; // 5am every day
+        var cron = configuration["core:notify:cron"] ?? "0 0 5 ? * *"; // 5am every day
 
-        if (_configuration["core:notify:tariff"] != "false")
+        if (configuration["core:notify:tariff"] != "false")
         {
-            if (_tenantExtraConfig.Enterprise)
+            if (tenantExtraConfig.Enterprise)
             {
-                _workContext.RegisterSendMethod(SendEnterpriseTariffLettersAsync, cron);
+                workContext.RegisterSendMethod(SendEnterpriseTariffLettersAsync, cron);
             }
-            else if (_tenantExtraConfig.Opensource)
+            else if (tenantExtraConfig.Opensource)
             {
-                _workContext.RegisterSendMethod(SendOpensourceTariffLettersAsync, cron);
+                workContext.RegisterSendMethod(SendOpensourceTariffLettersAsync, cron);
             }
-            else if (_tenantExtraConfig.Saas)
+            else if (tenantExtraConfig.Saas)
             {
-                if (_coreBaseSettings.Personal)
+                if (coreBaseSettings.Personal)
                 {
-                    if (!_coreBaseSettings.CustomMode)
+                    if (!coreBaseSettings.CustomMode)
                     {
-                        _workContext.RegisterSendMethod(SendLettersPersonalAsync, cron);
+                        workContext.RegisterSendMethod(SendLettersPersonalAsync, cron);
                     }
                 }
                 else
                 {
-                    _workContext.RegisterSendMethod(SendSaasTariffLettersAsync, cron);
+                    workContext.RegisterSendMethod(SendSaasTariffLettersAsync, cron);
                 }
             }
         }
 
-        if (!_coreBaseSettings.Personal)
+        if (!coreBaseSettings.Personal)
         {
-            _workContext.RegisterSendMethod(SendMsgWhatsNewAsync, "0 0 * ? * *"); // every hour
-            _workContext.RegisterSendMethod(SendRoomsActivityAsync, "0 0 * ? * *"); //every hour
+            workContext.RegisterSendMethod(SendMsgWhatsNewAsync, "0 0 * ? * *"); // every hour
+            workContext.RegisterSendMethod(SendRoomsActivityAsync, "0 0 * ? * *"); //every hour
         }
     }
 
     public async Task SendSaasTariffLettersAsync(DateTime scheduleDate)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendSaasLettersAsync(EMailSenderName, scheduleDate);
     }
 
     public async Task SendEnterpriseTariffLettersAsync(DateTime scheduleDate)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendEnterpriseLettersAsync(EMailSenderName, scheduleDate);
     }
 
     public async Task SendOpensourceTariffLettersAsync(DateTime scheduleDate)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendOpensourceLettersAsync(EMailSenderName, scheduleDate);
     }
 
     public async Task SendLettersPersonalAsync(DateTime scheduleDate)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetService<StudioPeriodicNotify>().SendPersonalLettersAsync(EMailSenderName, scheduleDate);
     }
 
     public async Task SendMsgWhatsNewAsync(DateTime scheduleDate)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetRequiredService<StudioWhatsNewNotify>().SendMsgWhatsNewAsync(scheduleDate, WhatsNewType.DailyFeed);
     }
 
     public async Task SendRoomsActivityAsync(DateTime scheduleDate)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         await scope.ServiceProvider.GetRequiredService<StudioWhatsNewNotify>().SendMsgWhatsNewAsync(scheduleDate, WhatsNewType.RoomsActivity);
     }
 }
 
 [Scope]
-public class StudioNotifyWorker
+public class StudioNotifyWorker(TenantManager tenantManager,
+    StudioNotifyHelper studioNotifyHelper,
+    CommonLinkUtility baseCommonLinkUtility,
+    WorkContext workContext,
+    IServiceProvider serviceProvider)
 {
-    private readonly WorkContext _workContext;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TenantManager _tenantManager;
-    private readonly StudioNotifyHelper _studioNotifyHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-
-    public StudioNotifyWorker(
-        TenantManager tenantManager,
-        StudioNotifyHelper studioNotifyHelper,
-        CommonLinkUtility baseCommonLinkUtility,
-        WorkContext workContext,
-        IServiceProvider serviceProvider)
-    {
-        _tenantManager = tenantManager;
-        _studioNotifyHelper = studioNotifyHelper;
-        _commonLinkUtility = baseCommonLinkUtility;
-        _workContext = workContext;
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task OnMessageAsync(NotifyItemIntegrationEvent item)
     {
-        _commonLinkUtility.ServerUri = item.BaseUrl;
-        await _tenantManager.SetCurrentTenantAsync(item.TenantId);
+        baseCommonLinkUtility.ServerUri = item.BaseUrl;
+        await tenantManager.SetCurrentTenantAsync(item.TenantId);
 
-        var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
+        var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
         await client.SendNoticeToAsync(
             (NotifyAction)item.Action,

@@ -27,19 +27,13 @@
 namespace ASC.ActiveDirectory.Base;
 
 [Scope]
-public class LdapNotifySource : INotifySource
+public class LdapNotifySource(LdapNotifyService ldapNotifyHelper) : INotifySource
 {
     private Tenant _tenant;
-    private readonly LdapNotifyService _ldapNotifyHelper;
 
     public string Id
     {
         get { return "asc.activedirectory." + _tenant.Id; }
-    }
-
-    public LdapNotifySource(LdapNotifyService ldapNotifyHelper)
-    {
-        _ldapNotifyHelper = ldapNotifyHelper;
     }
 
     public void Init(Tenant tenant)
@@ -49,7 +43,7 @@ public class LdapNotifySource : INotifySource
 
     public async Task AutoSyncAsync(DateTime date)
     {
-        await _ldapNotifyHelper.AutoSyncAsync(_tenant);
+        await ldapNotifyHelper.AutoSyncAsync(_tenant);
     }
 
     public Task<IActionProvider> GetActionProvider(NotifyRequest r)

@@ -30,14 +30,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
-{
-    private readonly CrossDao _crossDao;
-    private readonly SharePointDaoSelector _sharePointDaoSelector;
-    private readonly IFileDao<int> _fileDao;
-
-    public SharePointFileDao(
-        IServiceProvider serviceProvider,
+internal class SharePointFileDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -50,13 +43,9 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         TempPath tempPath,
         AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-        _crossDao = crossDao;
-        _sharePointDaoSelector = sharePointDaoSelector;
-        _fileDao = fileDao;
-    }
-
+    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
+        fileUtility, tempPath, authContext, regexDaoSelectorBase), IFileDao<string>
+{
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharePointProviderInfo.InvalidateStorageAsync();
@@ -380,9 +369,9 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<int> MoveFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharePointDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharePointDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             true)
             ;
 
@@ -414,9 +403,9 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharePointDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharePointDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             false)
             ;
 

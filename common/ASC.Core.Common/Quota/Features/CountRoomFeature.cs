@@ -26,10 +26,7 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class CountRoomFeature : TenantQuotaFeatureCount
+public class CountRoomFeature(TenantQuota tenantQuota) : TenantQuotaFeatureCount(tenantQuota)
 {
     public override string Name { get => "room"; }
-    public CountRoomFeature(TenantQuota tenantQuota) : base(tenantQuota)
-    {
-    }
 }

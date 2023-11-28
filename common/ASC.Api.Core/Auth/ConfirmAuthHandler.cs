@@ -39,20 +39,18 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
     public ConfirmAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock) :
-        base(options, logger, encoder, clock)
+        UrlEncoder encoder) :
+        base(options, logger, encoder)
     { }
 
     public ConfirmAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         SecurityContext securityContext,
         UserManager userManager,
         EmailValidationKeyModelHelper emailValidationKeyModelHelper) :
-        base(options, logger, encoder, clock)
+        base(options, logger, encoder)
     {
         _securityContext = securityContext;
         _userManager = userManager;
@@ -80,7 +78,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
             checkKeyResult = EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
-        var claims = new List<Claim>()
+        var claims = new List<Claim>
         {
                 new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };

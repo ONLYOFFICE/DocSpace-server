@@ -46,20 +46,13 @@ public class CustomSynchronizationContext
 }
 
 
-public class SynchronizationContextMiddleware
+public class SynchronizationContextMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public SynchronizationContextMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(HttpContext context)
     {
         CustomSynchronizationContext.CreateContext();
 
-        await _next.Invoke(context);
+        await next.Invoke(context);
     }
 }
 

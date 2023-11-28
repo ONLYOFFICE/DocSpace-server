@@ -26,10 +26,4 @@
 
 namespace ASC.Common.Radicale;
 
-public class RadicaleException : Exception
-{
-    public RadicaleException(string message)
-        : base(message)
-    {
-    }
-}
+public class RadicaleException(string message) : Exception(message);

@@ -39,7 +39,7 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 
     public RoomsNotificationSettings GetDefault()
     {
-        return new RoomsNotificationSettings()
+        return new RoomsNotificationSettings
         {
             DisabledRooms = new List<int>()
         };
@@ -47,38 +47,31 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 }
 
 [Scope]
-public class RoomsNotificationSettingsHelper
+public class RoomsNotificationSettingsHelper(SettingsManager settingsManager)
 {
-    private readonly SettingsManager _settingsManager;
-    public RoomsNotificationSettingsHelper(
-        SettingsManager settingsManager)
-    {
-        _settingsManager = settingsManager;
-    }
-
     public async Task<List<int>> GetDisabledRoomsForUserAsync(Guid userId)
     {
-        var settings = await _settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
+        var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
         var disabledRooms = settings.DisabledRooms;
         return disabledRooms;
     }
 
     public IEnumerable<string> GetDisabledRoomsForCurrentUser()
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms;
         return disabledRooms.Select(r => r.ToString());
     }
 
     public RoomsNotificationSettings GetSettingsForCurrentUser()
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
         return settings;
     }
 
     public bool CheckMuteForRoom(string roomsId)
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms.Select(r => r.ToString());
 
         if (disabledRooms.Contains(roomsId))
@@ -91,7 +84,7 @@ public class RoomsNotificationSettingsHelper
 
     public RoomsNotificationSettings SetForCurrentUser(int roomsId, bool mute)
     {
-        var settings = _settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
+        var settings = settingsManager.LoadForCurrentUser<RoomsNotificationSettings>();
         var disabledRooms = settings.DisabledRooms;
 
         if (disabledRooms.Contains(roomsId))
@@ -109,7 +102,7 @@ public class RoomsNotificationSettingsHelper
             }
         }
 
-        _settingsManager.SaveForCurrentUser(settings);
+        settingsManager.SaveForCurrentUser(settings);
 
         return settings;
     }

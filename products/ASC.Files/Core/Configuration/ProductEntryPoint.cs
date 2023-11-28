@@ -116,10 +116,7 @@ public class ProductEntryPoint : Product
                 CanNotBeDisabled = true,
             };
 
-        if (_notifyConfiguration != null)
-        {
-            _notifyConfiguration.Configure();
-        }
+        _notifyConfiguration?.Configure();
         //SearchHandlerManager.Registry(new SearchHandler());
     }
 
@@ -336,11 +333,13 @@ public class ProductEntryPoint : Product
         {
             return true;
         }
-        else if (IsRoomAdminAction())
+
+        if (IsRoomAdminAction())
         {
             return false;
         }
-        else if (targetUsers != null
+
+        if (targetUsers != null
             && !targetUsers.Contains(userId)
             && IsRoomAdminOrTargetUserAction())
         {

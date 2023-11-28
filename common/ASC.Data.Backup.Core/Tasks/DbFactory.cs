@@ -27,7 +27,7 @@
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
-public class DbFactory
+public class DbFactory(IConfiguration configuration, ConfigurationExtension configurationExtension)
 {
     public const string DefaultConnectionStringName = "default";
 
@@ -37,15 +37,13 @@ public class DbFactory
         {
             return connectionString;
         }
-        else
-        {
-            if (key != null)
-            {
-                return _configurationExtension.GetConnectionStrings(key, region).ConnectionString;
-            }
 
-            return _configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
+        if (key != null)
+        {
+            return configurationExtension.GetConnectionStrings(key, region).ConnectionString;
         }
+
+        return configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
     }
 
     private DbProviderFactory DbProviderFactory
@@ -54,7 +52,7 @@ public class DbFactory
         {
             if (_dbProviderFactory == null)
             {
-                var type = Type.GetType(_configuration["DbProviderFactories:mysql:type"], true);
+                var type = Type.GetType(configuration["DbProviderFactories:mysql:type"], true);
                 _dbProviderFactory = (DbProviderFactory)Activator.CreateInstance(type, true);
             }
 
@@ -63,14 +61,6 @@ public class DbFactory
     }
 
     private DbProviderFactory _dbProviderFactory;
-    private readonly IConfiguration _configuration;
-    private readonly ConfigurationExtension _configurationExtension;
-
-    public DbFactory(IConfiguration configuration, ConfigurationExtension configurationExtension)
-    {
-        _configuration = configuration;
-        _configurationExtension = configurationExtension;
-    }
 
     public DbConnection OpenConnection(string path = "default", string connectionString = null, string region = "current")
     {
@@ -101,7 +91,7 @@ public class DbFactory
         if (command != null)
         {
             command.CommandText =
-                _configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.IndexOf("MySql", StringComparison.OrdinalIgnoreCase) != -1
+                configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.IndexOf("MySql", StringComparison.OrdinalIgnoreCase) != -1
                     ? "select Last_Insert_Id();"
                     : "select last_insert_rowid();";
         }

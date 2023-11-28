@@ -105,9 +105,9 @@ public class Startup : BaseStartup
         services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
         .SetHandlerLifetime(lifeTime)
         .AddPolicyHandler(policyHandler)
-        .ConfigurePrimaryHttpMessageHandler((_) =>
+        .ConfigurePrimaryHttpMessageHandler(_ =>
         {
-            return new HttpClientHandler()
+            return new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };

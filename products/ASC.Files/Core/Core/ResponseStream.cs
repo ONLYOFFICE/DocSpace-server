@@ -87,10 +87,7 @@ public class ResponseStream : Stream
         if (disposing)
         {
             _stream.Dispose();
-            if (_response != null)
-            {
-                _response.Dispose();
-            }
+            _response?.Dispose();
         }
         base.Dispose(disposing);
     }

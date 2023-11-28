@@ -27,14 +27,9 @@
 namespace ASC.Api.Core.Convention;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class ControllerNameAttribute : Attribute
+public class ControllerNameAttribute(string name) : Attribute
 {
-    public string Name { get; }
-
-    public ControllerNameAttribute(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; } = name;
 }
 
 public class ControllerNameAttributeConvention : IControllerModelConvention

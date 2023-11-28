@@ -28,15 +28,10 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Notify;
 
-public class EmailSenderSink : Sink
+public class EmailSenderSink(INotifySender sender) : Sink
 {
     private static readonly string _senderName = Constants.NotifyEMailSenderSysName;
-    private readonly INotifySender _sender;
-
-    public EmailSenderSink(INotifySender sender)
-    {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-    }
+    private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     public override async Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope)
     {
@@ -69,18 +64,11 @@ public class EmailSenderSink : Sink
 }
 
 [Scope]
-public class EmailSenderSinkMessageCreator : SinkMessageCreator
+public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConfiguration coreConfiguration,
+        ILoggerProvider options)
+    : SinkMessageCreator
 {
-    private readonly TenantManager _tenantManager;
-    private readonly CoreConfiguration _coreConfiguration;
-    private readonly ILogger _logger;
-
-    public EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConfiguration coreConfiguration, ILoggerProvider options)
-    {
-        _tenantManager = tenantManager;
-        _coreConfiguration = coreConfiguration;
-        _logger = options.CreateLogger("ASC.Notify");
-    }
+    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
 
     public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
     {
@@ -93,10 +81,10 @@ public class EmailSenderSinkMessageCreator : SinkMessageCreator
             CreationDate = DateTime.UtcNow,
         };
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
         m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
-        var settings = await _coreConfiguration.GetDefaultSmtpSettingsAsync();
+        var settings = await coreConfiguration.GetDefaultSmtpSettingsAsync();
         var from = MailAddressUtils.Create(settings.SenderAddress, settings.SenderDisplayName);
         var fromTag = message.Arguments.FirstOrDefault(x => x.Tag.Equals("MessageFrom"));
         if ((settings.IsDefaultSettings || string.IsNullOrEmpty(settings.SenderDisplayName)) &&

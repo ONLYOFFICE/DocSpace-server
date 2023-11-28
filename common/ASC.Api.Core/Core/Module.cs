@@ -28,54 +28,41 @@ namespace ASC.Api.Core;
 
 /// <summary>
 /// </summary>
-public class Module
+public class Module(Product product)
 {
     /// <summary>ID</summary>
     /// <type>System.Guid, System</type>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = product.ProductID;
 
     /// <summary>Product class name</summary>
     /// <type>System.String, System</type>
-    public string AppName { get; set; }
+    public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>Title</summary>
     /// <type>System.String, System</type>
-    public string Title { get; set; }
+    public string Title { get; set; } = product.Name;
 
     /// <summary>Start link</summary>
     /// <type>System.String, System</type>
-    public string Link { get; set; }
+    public string Link { get; set; } = product.StartURL;
 
     /// <summary>Icon URL</summary>
     /// <type>System.String, System</type>
-    public string IconUrl { get; set; }
+    public string IconUrl { get; set; } = product.Context.IconFileName;
 
     /// <summary>Large image URL</summary>
     /// <type>System.String, System</type>
-    public string ImageUrl { get; set; }
+    public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
     /// <summary>Help URL</summary>
     /// <type>System.String, System</type>
-    public string HelpUrl { get; set; }
+    public string HelpUrl { get; set; } = product.HelpURL;
 
     /// <summary>Description</summary>
     /// <type>System.String, System</type>
-    public string Description { get; set; }
+    public string Description { get; set; } = product.Description;
 
     /// <summary>Specifies if the module is primary or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool IsPrimary { get; set; }
-
-    public Module(Product product)
-    {
-        Id = product.ProductID;
-        AppName = product.ProductClassName;
-        Title = product.Name;
-        Description = product.Description;
-        IconUrl = product.Context.IconFileName;
-        ImageUrl = product.Context.LargeIconFileName;
-        Link = product.StartURL;
-        IsPrimary = product.IsPrimary;
-        HelpUrl = product.HelpURL;
-    }
+    public bool IsPrimary { get; set; } = product.IsPrimary;
 }

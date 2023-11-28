@@ -27,22 +27,16 @@
 namespace ASC.Core.Common.Hosting;
 
 [Scope]
-public class RegisterInstanceDao<T> : IRegisterInstanceDao<T> where T : IHostedService
-{
-    private readonly ILogger _logger;
-    private readonly IDbContextFactory<InstanceRegistrationContext> _dbContextFactory;
-
-    public RegisterInstanceDao(
-        ILogger<RegisterInstanceDao<T>> logger,
+public class RegisterInstanceDao<T>(ILogger<RegisterInstanceDao<T>> logger,
         IDbContextFactory<InstanceRegistrationContext> dbContextFactory)
-    {
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-    }
+    : IRegisterInstanceDao<T>
+    where T : IHostedService
+{
+    private readonly ILogger _logger = logger;
 
     public async Task AddOrUpdateAsync(InstanceRegistration obj)
     {
-        await using var instanceRegistrationContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var instanceRegistrationContext = await dbContextFactory.CreateDbContextAsync();
         var inst = await instanceRegistrationContext.InstanceRegistrations.FindAsync(obj.InstanceRegistrationId);
 
         if (inst == null)
@@ -84,13 +78,13 @@ public class RegisterInstanceDao<T> : IRegisterInstanceDao<T> where T : IHostedS
 
     public async Task<IEnumerable<InstanceRegistration>> GetAllAsync()
     {
-        await using var instanceRegistrationContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var instanceRegistrationContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.InstanceRegistrationsAsync(instanceRegistrationContext, typeof(T).GetFormattedName()).ToListAsync();
     }
 
     public async Task DeleteAsync(string instanceId)
     {
-        await using var instanceRegistrationContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var instanceRegistrationContext = await dbContextFactory.CreateDbContextAsync();
         var item = await instanceRegistrationContext.InstanceRegistrations.FindAsync(instanceId);
 
         if (item == null)

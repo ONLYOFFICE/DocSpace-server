@@ -29,18 +29,13 @@ using ThumbnailSize = Dropbox.Api.Files.ThumbnailSize;
 namespace ASC.Files.Thirdparty.Dropbox;
 
 [Transient]
-internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, IDisposable
+internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
+    IDisposable
 {
     public bool IsOpened { get; private set; }
     private readonly long _maxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
 
     private DropboxClient _dropboxClient;
-    private readonly TempStream _tempStream;
-
-    public DropboxStorage(TempStream tempStream)
-    {
-        _tempStream = tempStream;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -158,10 +153,8 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         {
             return ThumbnailSize.W480h320.Instance;
         }
-        else
-        {
-            return ThumbnailSize.W256h256.Instance;
-        }
+
+        return ThumbnailSize.W256h256.Instance;
     }
 
     public async Task<Stream> DownloadStreamAsync(FileMetadata file, int offset = 0)
@@ -170,7 +163,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
         using var response = await _dropboxClient.Files.DownloadAsync(filePath);
-        var tempBuffer = _tempStream.Create();
+        var tempBuffer = tempStream.Create();
         await using var str = await response.GetContentAsStreamAsync();
         if (str != null)
         {
@@ -306,7 +299,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
 
         var pathLength = dropboxItem.PathDisplay.Length - dropboxItem.Name.Length;
 
-        return dropboxItem.PathDisplay.Substring(0, pathLength > 1 ? pathLength - 1 : 0);
+        return dropboxItem.PathDisplay[..(pathLength > 1 ? pathLength - 1 : 0)];
     }
 
     private bool IsRoot(FolderMetadata dropboxFolder)
@@ -322,9 +315,6 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
 
     public void Dispose()
     {
-        if (_dropboxClient != null)
-        {
-            _dropboxClient.Dispose();
-        }
+        _dropboxClient?.Dispose();
     }
 }

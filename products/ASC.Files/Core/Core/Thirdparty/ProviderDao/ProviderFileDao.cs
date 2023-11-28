@@ -27,19 +27,13 @@
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope]
-internal class ProviderFileDao : ProviderDaoBase, IFileDao<string>
-{
-    public ProviderFileDao(
-        IServiceProvider serviceProvider,
+internal class ProviderFileDao(IServiceProvider serviceProvider,
         TenantManager tenantManager,
         CrossDao crossDao,
         SelectorFactory selectorFactory,
         ISecurityDao<string> securityDao)
-        : base(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao)
-    {
-
-    }
-
+    : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IFileDao<string>
+{
     public async Task InvalidateCacheAsync(string fileId)
     {
         var selector = _selectorFactory.GetSelector(fileId);

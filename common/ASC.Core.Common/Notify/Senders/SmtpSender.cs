@@ -29,12 +29,15 @@ using MailKit.Net.Smtp;
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class SmtpSender : INotifySender
+public class SmtpSender(IConfiguration configuration,
+        IServiceProvider serviceProvider,
+        ILoggerProvider options)
+    : INotifySender
 {
-    protected ILogger _logger;
-    private IDictionary<string, string> _initProperties;
-    protected readonly IConfiguration _configuration;
-    protected readonly IServiceProvider _serviceProvider;
+    protected ILogger _logger = options.CreateLogger("ASC.Notify");
+    private IDictionary<string, string> _initProperties = new Dictionary<string, string>();
+    protected readonly IConfiguration _configuration = configuration;
+    protected readonly IServiceProvider _serviceProvider = serviceProvider;
 
     private string _host;
     private int _port;
@@ -43,17 +46,6 @@ public class SmtpSender : INotifySender
     private SaslMechanism _saslMechanism;
     protected bool _useCoreSettings;
     const int NetworkTimeout = 30000;
-
-    public SmtpSender(
-        IConfiguration configuration,
-        IServiceProvider serviceProvider,
-        ILoggerProvider options)
-    {
-        _initProperties = new Dictionary<string, string>();
-        _logger = options.CreateLogger("ASC.Notify");
-        _configuration = configuration;
-        _serviceProvider = serviceProvider;
-    }
 
     public virtual void Init(IDictionary<string, string> properties)
     {

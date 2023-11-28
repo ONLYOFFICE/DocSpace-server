@@ -38,7 +38,7 @@ public class IPRestrictionsServiceCache
     public IPRestrictionsServiceCache(ICacheNotify<IPRestrictionItem> notify, ICache cache)
     {
         Cache = cache;
-        notify.Subscribe((r) => Cache.Remove(GetCacheKey(r.TenantId)), CacheNotifyAction.InsertOrUpdate);
+        notify.Subscribe(r => Cache.Remove(GetCacheKey(r.TenantId)), CacheNotifyAction.InsertOrUpdate);
         Notify = notify;
     }
 
@@ -49,21 +49,12 @@ public class IPRestrictionsServiceCache
 }
 
 [Scope]
-public class IPRestrictionsService
+public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsRepository,
+    IPRestrictionsServiceCache iPRestrictionsServiceCache)
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<IPRestrictionItem> _notify;
-    private readonly IPRestrictionsRepository _ipRestrictionsRepository;
+    private readonly ICache _cache = iPRestrictionsServiceCache.Cache;
+    private readonly ICacheNotify<IPRestrictionItem> _notify = iPRestrictionsServiceCache.Notify;
     private static readonly TimeSpan _timeout = TimeSpan.FromMinutes(5);
-
-    public IPRestrictionsService(
-        IPRestrictionsRepository iPRestrictionsRepository,
-        IPRestrictionsServiceCache iPRestrictionsServiceCache)
-    {
-        _ipRestrictionsRepository = iPRestrictionsRepository;
-        _cache = iPRestrictionsServiceCache.Cache;
-        _notify = iPRestrictionsServiceCache.Notify;
-    }
 
     public async Task<IEnumerable<IPRestriction>> GetAsync(int tenant)
     {
@@ -71,7 +62,7 @@ public class IPRestrictionsService
         var restrictions = _cache.Get<List<IPRestriction>>(key);
         if (restrictions == null)
         {
-            restrictions = await _ipRestrictionsRepository.GetAsync(tenant);
+            restrictions = await iPRestrictionsRepository.GetAsync(tenant);
             _cache.Insert(key, restrictions, _timeout);
         }
 
@@ -80,7 +71,7 @@ public class IPRestrictionsService
 
     public async Task<IEnumerable<IpRestrictionBase>> SaveAsync(IEnumerable<IpRestrictionBase> ips, int tenant)
     {
-        var restrictions = await _ipRestrictionsRepository.SaveAsync(ips, tenant);
+        var restrictions = await iPRestrictionsRepository.SaveAsync(ips, tenant);
         await _notify.PublishAsync(new IPRestrictionItem { TenantId = tenant }, CacheNotifyAction.InsertOrUpdate);
 
         return restrictions;

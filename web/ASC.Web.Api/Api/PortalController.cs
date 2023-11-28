@@ -239,7 +239,7 @@ public class PortalController : ControllerBase
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
         var docServiceQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
         
@@ -590,7 +590,7 @@ public class PortalController : ControllerBase
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
         }
 
         try
@@ -727,7 +727,7 @@ public class PortalController : ControllerBase
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
         }
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);

@@ -39,7 +39,7 @@ public class SubscriptionServiceCache
         NotifyRecord = notifyRecord;
         NotifyMethod = notifyMethod;
 
-        notifyRecord.Subscribe((s) =>
+        notifyRecord.Subscribe(s =>
         {
             var store = GetSubsciptionsStore(s.Tenant, s.SourceId, s.ActionId);
             if (store != null)
@@ -51,7 +51,7 @@ public class SubscriptionServiceCache
             }
         }, CacheNotifyAction.InsertOrUpdate);
 
-        notifyRecord.Subscribe((s) =>
+        notifyRecord.Subscribe(s =>
         {
             var store = GetSubsciptionsStore(s.Tenant, s.SourceId, s.ActionId);
             if (store != null)
@@ -70,7 +70,7 @@ public class SubscriptionServiceCache
             }
         }, CacheNotifyAction.Remove);
 
-        notifyMethod.Subscribe((m) =>
+        notifyMethod.Subscribe(m =>
         {
             var store = GetSubsciptionsStore(m.Tenant, m.SourceId, m.ActionId);
             if (store != null)
@@ -95,22 +95,14 @@ public class SubscriptionServiceCache
 }
 
 [Scope]
-public class CachedSubscriptionService : ISubscriptionService
+public class CachedSubscriptionService(DbSubscriptionService service, SubscriptionServiceCache subscriptionServiceCache)
+    : ISubscriptionService
 {
-    private readonly ISubscriptionService _service;
-    private readonly ICache _cache;
-    private readonly ICacheNotify<SubscriptionRecord> _notifyRecord;
-    private readonly ICacheNotify<SubscriptionMethodCache> _notifyMethod;
-    private readonly TimeSpan _cacheExpiration;
-
-    public CachedSubscriptionService(DbSubscriptionService service, SubscriptionServiceCache subscriptionServiceCache)
-    {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        _cache = subscriptionServiceCache.Cache;
-        _notifyRecord = subscriptionServiceCache.NotifyRecord;
-        _notifyMethod = subscriptionServiceCache.NotifyMethod;
-        _cacheExpiration = TimeSpan.FromMinutes(5);
-    }
+    private readonly ISubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly ICache _cache = subscriptionServiceCache.Cache;
+    private readonly ICacheNotify<SubscriptionRecord> _notifyRecord = subscriptionServiceCache.NotifyRecord;
+    private readonly ICacheNotify<SubscriptionMethodCache> _notifyMethod = subscriptionServiceCache.NotifyMethod;
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(5);
 
 
     public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)

@@ -26,28 +26,16 @@
 
 namespace ASC.ElasticSearch;
 
-public class ElasticSearchIndexService : BackgroundService
-{
-    private readonly ILogger _logger;
-    private readonly ICacheNotify<AscCacheItem> _notify;
-    private readonly ICacheNotify<IndexAction> _indexNotify;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly TimeSpan _period;
-    private bool _isStarted;
-
-    public ElasticSearchIndexService(
-        ILoggerProvider options,
+public class ElasticSearchIndexService(ILoggerProvider options,
         ICacheNotify<AscCacheItem> notify,
         ICacheNotify<IndexAction> indexNotify,
         IServiceScopeFactory serviceScopeFactory,
         Settings settings)
-    {
-        _logger = options.CreateLogger("ASC.Indexer");
-        _notify = notify;
-        _indexNotify = indexNotify;
-        _serviceScopeFactory = serviceScopeFactory;
-        _period = TimeSpan.FromMinutes(settings.Period.Value);
-    }
+    : BackgroundService
+{
+    private readonly ILogger _logger = options.CreateLogger("ASC.Indexer");
+    private readonly TimeSpan _period = TimeSpan.FromMinutes(settings.Period.Value);
+    private bool _isStarted;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -55,7 +43,7 @@ public class ElasticSearchIndexService : BackgroundService
 
         try
         {
-            _notify.Subscribe(async (_) =>
+            notify.Subscribe(async _ =>
             {
                 while (_isStarted)
                 {
@@ -69,7 +57,7 @@ public class ElasticSearchIndexService : BackgroundService
             _logger.ErrorSubscribeOnStart(e);
         }
 
-        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
         var factoryIndexer = scope.ServiceProvider.GetService<FactoryIndexer>();
 
         while (!await factoryIndexer.CheckStateAsync(false))
@@ -121,7 +109,7 @@ public class ElasticSearchIndexService : BackgroundService
             }
 
             _logger.DebugProduct(product.IndexName);
-            await _indexNotify.PublishAsync(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
+            await indexNotify.PublishAsync(new IndexAction { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
             await product.IndexAllAsync();
         }
         catch (Exception e)
@@ -138,19 +126,19 @@ public class ElasticSearchIndexService : BackgroundService
 
             IEnumerable<Type> wrappers;
 
-            await using (var scope = _serviceScopeFactory.CreateAsyncScope())
+            await using (var scope = serviceScopeFactory.CreateAsyncScope())
             {
                 wrappers = scope.ServiceProvider.GetService<IEnumerable<IFactoryIndexer>>().Select(r => r.GetType()).ToList();
             }
 
             await Parallel.ForEachAsync(wrappers, async (wrapper, _) =>
             {
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                await using var scope = serviceScopeFactory.CreateAsyncScope();
                 await IndexProductAsync((IFactoryIndexer)scope.ServiceProvider.GetRequiredService(wrapper), reindex);
             });
 
 
-            await _indexNotify.PublishAsync(new IndexAction() { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
+            await indexNotify.PublishAsync(new IndexAction { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
             _isStarted = false;
         }
         catch (Exception e)

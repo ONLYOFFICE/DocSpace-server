@@ -28,19 +28,15 @@ using ASC.Core.Billing;
 
 namespace ASC.Files.Core.Core;
 
-public class CountRoomChecker : TenantQuotaFeatureCheckerCount<CountRoomFeature>
+public class CountRoomChecker(ITenantQuotaFeatureStat<CountRoomFeature, int> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager, ITariffService tariffService)
+    : TenantQuotaFeatureCheckerCount<CountRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    private readonly ITariffService _tariffService;
     public override string Exception => Resource.TariffsFeature_room_exception;
-    public CountRoomChecker(ITenantQuotaFeatureStat<CountRoomFeature, int> tenantQuotaFeatureStatistic, TenantManager tenantManager, ITariffService tariffService)
-        : base(tenantQuotaFeatureStatistic, tenantManager)
-    {
-        _tariffService = tariffService;
-    }
 
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
-        if ((await _tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
+        if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
             throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "room");
         }
@@ -49,20 +45,13 @@ public class CountRoomChecker : TenantQuotaFeatureCheckerCount<CountRoomFeature>
     }
 }
 
-public class CountRoomCheckerStatistic : ITenantQuotaFeatureStat<CountRoomFeature, int>
+public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountRoomFeature, int>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public CountRoomCheckerStatistic(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task<int> GetValueAsync()
     {
-        var daoFactory = _serviceProvider.GetService<IDaoFactory>();
-        var folderDao = _serviceProvider.GetService<IFolderDao<int>>();
-        var globalFolder = _serviceProvider.GetService<GlobalFolder>();
+        var daoFactory = serviceProvider.GetService<IDaoFactory>();
+        var folderDao = serviceProvider.GetService<IFolderDao<int>>();
+        var globalFolder = serviceProvider.GetService<GlobalFolder>();
 
         var parentId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
 

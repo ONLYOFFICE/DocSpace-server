@@ -36,16 +36,10 @@ public interface IThirdPartyApp
 }
 
 [Scope(Additional = typeof(ThirdPartySelectorExtension))]
-public class ThirdPartySelector
+public class ThirdPartySelector(ConsumerFactory consumerFactory)
 {
     public const string AppAttr = "app";
     public static readonly Regex AppRegex = new("^" + AppAttr + @"-(\S+)\|(\S+)$", RegexOptions.Singleline | RegexOptions.Compiled);
-    private readonly ConsumerFactory _consumerFactory;
-
-    public ThirdPartySelector(ConsumerFactory consumerFactory)
-    {
-        _consumerFactory = consumerFactory;
-    }
 
     public static string BuildAppFileId(string app, object fileId)
     {
@@ -73,9 +67,9 @@ public class ThirdPartySelector
     {
         return app switch
         {
-            GoogleDriveApp.AppAttr => _consumerFactory.Get<GoogleDriveApp>(),
-            BoxApp.AppAttr => _consumerFactory.Get<BoxApp>(),
-            _ => _consumerFactory.Get<GoogleDriveApp>(),
+            GoogleDriveApp.AppAttr => consumerFactory.Get<GoogleDriveApp>(),
+            BoxApp.AppAttr => consumerFactory.Get<BoxApp>(),
+            _ => consumerFactory.Get<GoogleDriveApp>(),
         };
     }
 }

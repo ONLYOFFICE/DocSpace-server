@@ -36,7 +36,8 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     public override string CodeUrl => "https://zoom.us/oauth/authorize";
     public override string Scopes => "";
 
-    private const string ApiUrl = "https://api.zoom.us/v2";
+    // used in ZoomService
+    public const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
     
     private readonly RequestHelper _requestHelper;
@@ -94,12 +95,13 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
     }
 
-    private OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
+    // used in ZoomService
+    public OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
     {
         var clientPair = $"{ClientID}:{ClientSecret}";
         var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
 
-        var body = new Dictionary<string, string>()
+        var body = new Dictionary<string, string>
         {
             { "code", code },
             { "grant_type", "authorization_code" },

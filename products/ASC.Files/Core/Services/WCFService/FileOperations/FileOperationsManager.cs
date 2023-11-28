@@ -27,25 +27,13 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton(Additional = typeof(FileOperationsManagerHelperExtention))]
-public class FileOperationsManager
+public class FileOperationsManager(TempStream tempStream,
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    ThumbnailSettings thumbnailSettings)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "files_operation";
-    private readonly ThumbnailSettings _thumbnailSettings;
-    private readonly DistributedTaskQueue _tasks;
-    private readonly TempStream _tempStream;
-    private readonly IServiceProvider _serviceProvider;
-
-    public FileOperationsManager(
-        TempStream tempStream,
-        IDistributedTaskQueueFactory queueFactory,
-        IServiceProvider serviceProvider,
-        ThumbnailSettings thumbnailSettings)
-    {
-        _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-        _tempStream = tempStream;
-        _serviceProvider = serviceProvider;
-        _thumbnailSettings = thumbnailSettings;
-    }
+    private readonly DistributedTaskQueue _tasks = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public List<FileOperationResult> GetOperationResults(Guid userId)
     {
@@ -110,9 +98,9 @@ public class FileOperationsManager
         var (folderIntIds, folderStringIds) = GetIds(folderIds);
         var (fileIntIds, fileStringIds) = GetIds(fileIds);
 
-        var op1 = new FileMarkAsReadOperation<int>(_serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenant, headers, externalShareData));
-        var op2 = new FileMarkAsReadOperation<string>(_serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenant, headers, externalShareData));
-        var op = new FileMarkAsReadOperation(_serviceProvider, op2, op1);
+        var op1 = new FileMarkAsReadOperation<int>(serviceProvider, new FileMarkAsReadOperationData<int>(folderIntIds, fileIntIds, tenant, headers, externalShareData));
+        var op2 = new FileMarkAsReadOperation<string>(serviceProvider, new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenant, headers, externalShareData));
+        var op = new FileMarkAsReadOperation(serviceProvider, op2, op1);
 
         return QueueTask(userId, op);
     }
@@ -132,9 +120,9 @@ public class FileOperationsManager
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        var op1 = new FileDownloadOperation<int>(_serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenant, headers, externalShareData));
-        var op2 = new FileDownloadOperation<string>(_serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenant, headers, externalShareData));
-        var op = new FileDownloadOperation(_serviceProvider, _tempStream, op2, op1);
+        var op1 = new FileDownloadOperation<int>(serviceProvider, new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenant, headers, externalShareData));
+        var op2 = new FileDownloadOperation<string>(serviceProvider, new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenant, headers, externalShareData));
+        var op = new FileDownloadOperation(serviceProvider, tempStream, op2, op1);
 
         return QueueTask(userId, op);
     }
@@ -151,9 +139,9 @@ public class FileOperationsManager
             await GetContent(folderStringIds, fileStringIds);
         }
 
-        var op1 = new FileMoveCopyOperation<int>(_serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenant, destFolderId, copy, resolveType, externalShareData, holdResult, headers), _thumbnailSettings);
-        var op2 = new FileMoveCopyOperation<string>(_serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenant, destFolderId, copy, resolveType, externalShareData, holdResult, headers), _thumbnailSettings);
-        var op = new FileMoveCopyOperation(_serviceProvider, op2, op1);
+        var op1 = new FileMoveCopyOperation<int>(serviceProvider, new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenant, destFolderId, copy, resolveType, externalShareData, holdResult, headers), thumbnailSettings);
+        var op2 = new FileMoveCopyOperation<string>(serviceProvider, new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenant, destFolderId, copy, resolveType, externalShareData, holdResult, headers), thumbnailSettings);
+        var op = new FileMoveCopyOperation(serviceProvider, op2, op1);
 
         return QueueTask(userId, op);
 
@@ -162,7 +150,7 @@ public class FileOperationsManager
             var copyFolderIds = folderIds.ToList();
             folderIds.Clear();
 
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
             var fileDao = daoFactory.GetFileDao<T1>();
             var folderDao = daoFactory.GetFolderDao<T1>();
@@ -178,7 +166,7 @@ public class FileOperationsManager
     public List<FileOperationResult> Delete<T>(Guid userId, Tenant tenant, IEnumerable<T> folders, IEnumerable<T> files, bool ignoreException, bool holdResult, bool immediately, IDictionary<string, StringValues> headers, ExternalShareData externalShareData,
         bool isEmptyTrash = false)
     {
-        var op = new FileDeleteOperation<T>(_serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
+        var op = new FileDeleteOperation<T>(serviceProvider, new FileDeleteOperationData<T>(folders, files, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
         return QueueTask(userId, op);
     }
 
@@ -188,9 +176,9 @@ public class FileOperationsManager
         var (folderIntIds, folderStringIds) = GetIds(folders);
         var (fileIntIds, fileStringIds) = GetIds(files);
 
-        var op1 = new FileDeleteOperation<int>(_serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
-        var op2 = new FileDeleteOperation<string>(_serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
-        var op = new FileDeleteOperation(_serviceProvider, op2, op1);
+        var op1 = new FileDeleteOperation<int>(serviceProvider, new FileDeleteOperationData<int>(folderIntIds, fileIntIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
+        var op2 = new FileDeleteOperation<string>(serviceProvider, new FileDeleteOperationData<string>(folderStringIds, fileStringIds, tenant, externalShareData, holdResult, ignoreException, immediately, headers, isEmptyTrash));
+        var op = new FileDeleteOperation(serviceProvider, op2, op1);
 
         return QueueTask(userId, op);
     }
@@ -274,14 +262,14 @@ public class FileOperationsManager
 
     private Guid ProcessUserId(Guid userId)
     {
-        var securityContext = _serviceProvider.GetRequiredService<SecurityContext>();
+        var securityContext = serviceProvider.GetRequiredService<SecurityContext>();
 
         if (securityContext.IsAuthenticated)
         {
             return userId;
         }
 
-        var externalShare = _serviceProvider.GetRequiredService<ExternalShare>();
+        var externalShare = serviceProvider.GetRequiredService<ExternalShare>();
 
         return externalShare.GetSessionId();
     }

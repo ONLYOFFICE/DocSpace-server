@@ -57,7 +57,4 @@ public interface IProviderInfo<TFile, TFolder, TItem> : IProviderInfo
     Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync { get; }
 }
 
-public class ProviderInfoArgumentException : ArgumentException
-{
-    public ProviderInfoArgumentException(string message) : base(message) { }
-}
+public class ProviderInfoArgumentException(string message) : ArgumentException(message);

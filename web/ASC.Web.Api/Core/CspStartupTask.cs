@@ -26,27 +26,20 @@
 
 namespace ASC.Api.Core.Core;
 
-public class CspStartupTask : IStartupTask
+public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache)
+    : IStartupTask
 {
-    private readonly IServiceProvider _provider;
-    private readonly IDistributedCache _distributedCache;
-    private const string HeaderKey = $"csp";
-
-    public CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache)
-    {
-        _provider = provider;
-        _distributedCache = distributedCache;
-    }
+    private const string HeaderKey = "csp";
 
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        await using var scope = _provider.CreateAsyncScope();
+        await using var scope = provider.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;
         var helper = serviceProvider.GetService<CspSettingsHelper>();
         var tenantManager = serviceProvider.GetService<TenantManager>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
 
-        var oldHeaderValue = await _distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
+        var oldHeaderValue = await distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
         var currentHeaderValue = await helper.CreateHeaderAsync(null, true, false);
 
         if (oldHeaderValue != currentHeaderValue)
@@ -60,7 +53,7 @@ public class CspStartupTask : IStartupTask
                 await helper.SaveAsync(current.Domains, current.SetDefaultIfEmpty);
             }
 
-            await _distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
+            await distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
         }
     }
 }

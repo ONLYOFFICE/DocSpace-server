@@ -35,7 +35,7 @@ public static class Validate
 
     public static T IfNull<T>(this T item, Func<T> func) where T : class
     {
-        return item.If((x) => x == default(T), func);
+        return item.If(x => x == default(T), func);
     }
 
     public static T ThrowIfNull<T>(this T item, Exception e) where T : class

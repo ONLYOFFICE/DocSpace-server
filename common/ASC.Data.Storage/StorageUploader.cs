@@ -27,33 +27,20 @@
 namespace ASC.Data.Storage;
 
 [Singleton]
-public class StorageUploader
+public class StorageUploader(
+    IServiceProvider serviceProvider,
+    TempStream tempStream,
+    ICacheNotify<MigrationProgress> cacheMigrationNotify,
+    IDistributedTaskQueueFactory queueFactory,
+    ILogger<StorageUploader> logger)
 {
-    protected readonly DistributedTaskQueue _queue;
+    protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
 
     private static readonly object _locker;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TempStream _tempStream;
-    private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
-    private readonly ILogger<StorageUploader> _logger;
 
     static StorageUploader()
     {
         _locker = new object();
-    }
-
-    public StorageUploader(
-        IServiceProvider serviceProvider,
-        TempStream tempStream,
-        ICacheNotify<MigrationProgress> cacheMigrationNotify,
-        IDistributedTaskQueueFactory queueFactory,
-        ILogger<StorageUploader> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _tempStream = tempStream;
-        _cacheMigrationNotify = cacheMigrationNotify;
-        _logger = logger;
-        _queue = queueFactory.CreateQueue();
     }
 
     public void Start(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
@@ -67,7 +54,7 @@ public class StorageUploader
                 return;
             }
 
-            var migrateOperation = new MigrateOperation(_serviceProvider, _cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, _tempStream, _logger);
+            var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger);
             _queue.EnqueueTask(migrateOperation);
         }
     }
@@ -223,42 +210,10 @@ public class MigrateOperation : DistributedTaskProgress
     }
 }
 
-public class MigrateOperationScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
-    private readonly StorageFactory _storageFactory;
-    private readonly ILogger _options;
-    private readonly StorageSettingsHelper _storageSettingsHelper;
-    private readonly SettingsManager _settingsManager;
-
-    public MigrateOperationScope(TenantManager tenantManager,
-        SecurityContext securityContext,
-        StorageFactory storageFactory,
-        ILogger<MigrateOperationScope> options,
-        StorageSettingsHelper storageSettingsHelper,
-        SettingsManager settingsManager)
-    {
-        _tenantManager = tenantManager;
-        _securityContext = securityContext;
-        _storageFactory = storageFactory;
-        _options = options;
-        _storageSettingsHelper = storageSettingsHelper;
-        _settingsManager = settingsManager;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager,
-        out SecurityContext securityContext,
-        out StorageFactory storageFactory,
-        out ILogger options,
-        out StorageSettingsHelper storageSettingsHelper,
-        out SettingsManager settingsManager)
-    {
-        tenantManager = _tenantManager;
-        securityContext = _securityContext;
-        storageFactory = _storageFactory;
-        options = _options;
-        storageSettingsHelper = _storageSettingsHelper;
-        settingsManager = _settingsManager;
-    }
-}
+public record MigrateOperationScope(
+    TenantManager TenantManager,
+    SecurityContext SecurityContext,
+    StorageFactory StorageFactory,
+    ILogger<MigrateOperationScope> Options,
+    StorageSettingsHelper StorageSettingsHelper,
+    SettingsManager SettingsManager);

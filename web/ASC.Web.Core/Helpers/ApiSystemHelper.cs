@@ -46,6 +46,9 @@ public class ApiSystemHelper
     private readonly TenantDomainValidator _tenantDomainValidator;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly IConfiguration _configuration;
+    private const string TenantRegionKey = "tenant_region";
+    private const string TenantDomainKey = "tenant_domain";
+    private const string RegionTableName = "docspace-tenants_region";
 
     public ApiSystemHelper(IConfiguration configuration,
         CoreBaseSettings coreBaseSettings,
@@ -67,17 +70,6 @@ public class ApiSystemHelper
         {
             ApiCacheEnable = true;
         }
-
-
-    }
-
-    private AmazonDynamoDBClient GetDynamoDBClient()
-    {
-        var awsAccessKeyId = _configuration["aws:dynamoDB:accessKeyId"];
-        var awsSecretAccessKey = _configuration["aws:dynamoDB:secretAccessKey"];
-        var region = _configuration["aws:dynamoDB:region"];
-        
-        return new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey, RegionEndpoint.GetBySystemName(region));
     }
 
     public string CreateAuthToken(string pkey)
@@ -99,13 +91,13 @@ public class ApiSystemHelper
 
         var dataJson = JsonSerializer.Serialize(data);
         var result = await SendToApiAsync(ApiSystemUrl, "portal/validateportalname", WebRequestMethods.Http.Post, userId, dataJson);
-        var resObj = JsonNode.Parse(result).AsObject();
-        if (resObj["error"] != null)
+        var resObj = JsonNode.Parse(result)?.AsObject();
+        if (resObj?["error"] != null)
         {
             if (resObj["error"].ToString() == "portalNameExist")
             {
-                var varians = resObj["variants"].AsArray().Select(r => r.ToString()).ToList();
-                throw new TenantAlreadyExistsException("Address busy.", varians);
+                var variants = resObj["variants"].AsArray().Select(r => r.ToString()).ToList();
+                throw new TenantAlreadyExistsException("Address busy.", variants);
             }
 
             throw new Exception(resObj["error"].ToString());
@@ -124,41 +116,45 @@ public class ApiSystemHelper
             tenantRegion = "default";
         }
 
-        using var _awsDynamoDBClient = GetDynamoDBClient();
+        using var awsDynamoDbClient = GetDynamoDBClient();
 
         var putItemRequest = new PutItemRequest
         {
-            TableName = "docspace-tenants_region",
-            Item = new Dictionary<string, AttributeValue>()
-                {
-                    { "tenant_domain", new AttributeValue {
-                            S = tenantDomain
-                        }},
-                    { "tenant_region", new AttributeValue {
-                            S = tenantRegion
-                    }}
+            TableName = RegionTableName,
+            Item = new Dictionary<string, AttributeValue>
+            {
+                { TenantDomainKey, new AttributeValue 
+                    {
+                        S = tenantDomain
+                    }
+                },
+                { TenantRegionKey, new AttributeValue 
+                    {
+                        S = tenantRegion
+                    }
                 }
+            }
         };
 
-        await _awsDynamoDBClient.PutItemAsync(putItemRequest);
+        await awsDynamoDbClient.PutItemAsync(putItemRequest);
     }
 
     public async Task UpdateTenantToCacheAsync(string oldTenantDomain, string newTenantDomain)
     {
-        using var _awsDynamoDBClient = GetDynamoDBClient();
+        using var awsDynamoDbClient = GetDynamoDBClient();
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = "docspace-tenants_region",
-            Key = new Dictionary<string, AttributeValue>()
-                {
-                    { "tenant_domain", new AttributeValue { S = oldTenantDomain } }
-                },
-            ProjectionExpression = "tenant_region",
+            TableName = RegionTableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                    { TenantDomainKey, new AttributeValue { S = oldTenantDomain } }
+            },
+            ProjectionExpression = TenantRegionKey,
             ConsistentRead = true
         };
 
-        var region = (await _awsDynamoDBClient.GetItemAsync(getItemRequest)).Item.Values.First().S;
+        var region = (await awsDynamoDbClient.GetItemAsync(getItemRequest)).Item.Values.First().S;
 
         await AddTenantToCacheAsync(newTenantDomain, region);
         await RemoveTenantFromCacheAsync(oldTenantDomain);
@@ -166,39 +162,38 @@ public class ApiSystemHelper
 
     public async Task RemoveTenantFromCacheAsync(string tenantDomain)
     {
-        using var _awsDynamoDBClient = GetDynamoDBClient();
+        using var awsDynamoDbClient = GetDynamoDBClient();
 
         var request = new DeleteItemRequest
         {
-            TableName = "docspace-tenants_region",
-            Key = new Dictionary<string, AttributeValue>()
-                {
-                  { "tenant_domain", new AttributeValue { S = tenantDomain }
-                }
+            TableName = RegionTableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                { TenantDomainKey, new AttributeValue { S = tenantDomain } }
             },
         };
 
-        await _awsDynamoDBClient.DeleteItemAsync(request);
+        await awsDynamoDbClient.DeleteItemAsync(request);
     }
 
     public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)
     {
-        using var _awsDynamoDBClient = GetDynamoDBClient();
+        using var awsDynamoDbClient = GetDynamoDBClient();
 
         var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = "docspace-tenants_region",
-            Key = new Dictionary<string, AttributeValue>()
-                {
-                    { "tenant_domain", new AttributeValue { S = tenantDomain } }
-                },
-            ProjectionExpression = "tenant_region",
+            TableName = RegionTableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                { TenantDomainKey, new AttributeValue { S = tenantDomain } }
+            },
+            ProjectionExpression = TenantRegionKey,
             ConsistentRead = true
         };
 
-        var getItemResponse = await _awsDynamoDBClient.GetItemAsync(getItemRequest);
+        var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
         if (getItemResponse.Item.Count == 0) return null;
 
@@ -207,7 +202,7 @@ public class ApiSystemHelper
         {
             if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
             {
-                portalName = portalName[0..^1];
+                portalName = portalName[..^1];
             }
             else
             {
@@ -217,22 +212,29 @@ public class ApiSystemHelper
 
         var scanRequest = new ScanRequest
         {
-            TableName = "docspace-tenants_region",
+            TableName = RegionTableName,
             FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
                                                 {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = "tenant_domain",
+            ProjectionExpression = TenantDomainKey,
             ConsistentRead = true
         };
 
-        var scanResponce = await _awsDynamoDBClient.ScanAsync(scanRequest);
-        var result = scanResponce.Items.Select(x => x.Values.First().S.Split('.')[0]);
-
+        var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
+        var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
         return result;
     }
 
     #endregion
-
+    private AmazonDynamoDBClient GetDynamoDBClient()
+    {
+        var awsAccessKeyId = _configuration["aws:dynamoDB:accessKeyId"];
+        var awsSecretAccessKey = _configuration["aws:dynamoDB:secretAccessKey"];
+        var region = _configuration["aws:dynamoDB:region"];
+        
+        return new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey, RegionEndpoint.GetBySystemName(region));
+    }
+    
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
         if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))

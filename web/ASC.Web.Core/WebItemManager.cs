@@ -198,19 +198,8 @@ public class WebItemManager
 }
 
 [Scope]
-public class WebItemManagerSecurity
+public class WebItemManagerSecurity(WebItemSecurity webItemSecurity, AuthContext authContext, WebItemManager webItemManager)
 {
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly AuthContext _authContext;
-    private readonly WebItemManager _webItemManager;
-
-    public WebItemManagerSecurity(WebItemSecurity webItemSecurity, AuthContext authContext, WebItemManager webItemManager)
-    {
-        _webItemSecurity = webItemSecurity;
-        _authContext = authContext;
-        _webItemManager = webItemManager;
-    }
-
     public List<IWebItem> GetItems(WebZoneType webZone)
     {
         return GetItems(webZone, ItemAvailableState.Normal);
@@ -218,10 +207,10 @@ public class WebItemManagerSecurity
 
     public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState avaliableState)
     {
-        var copy = _webItemManager.GetItemsAll().ToList();
+        var copy = webItemManager.GetItemsAll().ToList();
         var list = copy.Where(item =>
             {
-                if ((avaliableState & ItemAvailableState.Disabled) != ItemAvailableState.Disabled && item.IsDisabledAsync(_webItemSecurity, _authContext).Result)
+                if ((avaliableState & ItemAvailableState.Disabled) != ItemAvailableState.Disabled && item.IsDisabledAsync(webItemSecurity, authContext).Result)
                 {
                     return false;
                 }
@@ -229,7 +218,7 @@ public class WebItemManagerSecurity
                 return attribute != null && (attribute.Type & webZone) != 0;
             }).ToList();
 
-        list.Sort((x, y) => _webItemManager.GetSortOrder(x).CompareTo(_webItemManager.GetSortOrder(y)));
+        list.Sort((x, y) => webItemManager.GetSortOrder(x).CompareTo(webItemManager.GetSortOrder(y)));
         return list;
     }
 

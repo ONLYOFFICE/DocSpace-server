@@ -27,17 +27,10 @@
 namespace ASC.Web.Api.Core;
 
 [Singleton(Additional = typeof(SmtpOperationExtension))]
-public class SmtpOperation
+public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "smtp";
-    private readonly DistributedTaskQueue _progressQueue;
-    private readonly IServiceProvider _serviceProvider;
-
-    public SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public void StartSmtpJob(SmtpSettingsDto smtpSettings, Tenant tenant, Guid user)
     {
@@ -51,7 +44,7 @@ public class SmtpOperation
 
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<SmtpJob>();
+            item = serviceProvider.GetRequiredService<SmtpJob>();
             item.Init(smtpSettings, tenant.Id, user);
             _progressQueue.EnqueueTask(item);
         }
@@ -68,7 +61,7 @@ public class SmtpOperation
             return null;
         }
 
-        if (item.IsCompleted == true)
+        if (item.IsCompleted)
         {
             _progressQueue.DequeueTask(item.Id);
         }

@@ -30,15 +30,7 @@ using ResumableUploadSession = AppLimit.CloudComputing.SharpBox.StorageProvider.
 namespace ASC.Files.Thirdparty.Sharpbox;
 
 [Scope]
-internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
-{
-    private readonly TempStream _tempStream;
-    private readonly CrossDao _crossDao;
-    private readonly SharpBoxDaoSelector _sharpBoxDaoSelector;
-    private readonly IFileDao<int> _fileDao;
-
-    public SharpBoxFileDao(
-        IServiceProvider serviceProvider,
+internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         TempStream tempStream,
         UserManager userManager,
         TenantManager tenantManager,
@@ -53,14 +45,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         TempPath tempPath,
         AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-        _tempStream = tempStream;
-        _crossDao = crossDao;
-        _sharpBoxDaoSelector = sharpBoxDaoSelector;
-        _fileDao = fileDao;
-    }
-
+    : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
+        fileUtility, tempPath, authContext, regexDaoSelectorBase), IFileDao<string>
+{
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharpBoxProviderInfo.InvalidateStorageAsync();
@@ -293,7 +280,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
         {
             if (!fileStream.CanSeek)
             {
-                var tempBuffer = _tempStream.Create();
+                var tempBuffer = tempStream.Create();
 
                 await fileStream.CopyToAsync(tempBuffer);
                 await tempBuffer.FlushAsync();
@@ -348,7 +335,7 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
         try
         {
-            entry.GetDataTransferAccessor().Transfer(_tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
+            entry.GetDataTransferAccessor().Transfer(tempStream.GetBuffered(fileStream), nTransferDirection.nUpload);
         }
         catch (SharpBoxException e)
         {
@@ -356,12 +343,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
             if (webException != null)
             {
                 var response = (HttpWebResponse)webException.Response;
-                if (response != null)
+                if (response?.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
-                    if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-                    {
-                        throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
-                    }
+                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
                 }
                 throw;
             }
@@ -452,9 +436,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
     public async Task<int> MoveFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharpBoxDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharpBoxDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             true)
             ;
 
@@ -523,9 +507,9 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
     public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharpBoxDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharpBoxDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             false)
             ;
 
@@ -702,7 +686,8 @@ internal class SharpBoxFileDao : SharpBoxDaoBase, IFileDao<string>
 
             return Task.FromResult(0);
         }
-        else if (uploadSession.Items.ContainsKey("TempPath"))
+
+        if (uploadSession.Items.ContainsKey("TempPath"))
         {
             File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 

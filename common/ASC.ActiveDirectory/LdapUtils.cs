@@ -42,7 +42,7 @@ public static class LdapUtils
 
         var matchList = _dcRegex.Matches(distinguishedName);
 
-        var dcList = matchList.Cast<Match>().Select(match => match.Groups[1].Value).ToList();
+        var dcList = matchList.Select(match => match.Groups[1].Value).ToList();
 
         return !dcList.Any() ? null : string.Join(".", dcList);
     }
@@ -158,10 +158,7 @@ public static class LdapUtils
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorSkipErrors(ex);
-            }
+            log?.ErrorSkipErrors(ex);
         }
     }
 

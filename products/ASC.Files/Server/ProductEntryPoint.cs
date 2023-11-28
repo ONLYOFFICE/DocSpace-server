@@ -30,15 +30,7 @@ using ASC.Web.Core.Notify;
 namespace ASC.Files;
 
 [Scope]
-public class ApiProductEntryPoint : ProductEntryPoint
-{
-    public override string ApiURL
-    {
-        get => "api/2.0/files/info.json";
-    }
-
-    public ApiProductEntryPoint(
-       FilesSpaceUsageStatManager filesSpaceUsageStatManager,
+public class ApiProductEntryPoint(FilesSpaceUsageStatManager filesSpaceUsageStatManager,
        CoreBaseSettings coreBaseSettings,
        AuthContext authContext,
        UserManager userManager,
@@ -51,9 +43,8 @@ public class ApiProductEntryPoint : ProductEntryPoint
        FilesLinkUtility filesLinkUtility,
        FileSecurity fileSecurity,
        GlobalFolder globalFolder,
-       CommonLinkUtility commonLinkUtility
-       //SubscriptionManager subscriptionManager
-       ) : base(filesSpaceUsageStatManager,
+        CommonLinkUtility commonLinkUtility)
+    : ProductEntryPoint(filesSpaceUsageStatManager,
            coreBaseSettings,
            authContext, 
            userManager,
@@ -68,6 +59,10 @@ public class ApiProductEntryPoint : ProductEntryPoint
            globalFolder,
            commonLinkUtility)
     {
-
+    public override string ApiURL
+    {
+        get => "api/2.0/files/info.json";
     }
-}
+
+    //SubscriptionManager subscriptionManager
+    }

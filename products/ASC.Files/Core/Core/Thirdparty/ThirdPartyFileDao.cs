@@ -26,37 +26,22 @@
 
 namespace ASC.Files.Core.Core.Thirdparty;
 [Scope]
-internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<string>
-    where TFile : class, TItem
-    where TFolder : class, TItem
-    where TItem : class
-{
-    internal IDaoBase<TFile, TFolder, TItem> Dao { get; }
-    internal IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; private set; }
-
-    private readonly UserManager _userManager;
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly IDaoSelector<TFile, TFolder, TItem> _daoSelector;
-    private readonly CrossDao _crossDao;
-    private readonly IFileDao<int> _fileDao;
-    private readonly int _tenantId;
-
-    protected ThirdPartyFileDao(UserManager userManager,
+internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         IDaoSelector<TFile, TFolder, TItem> daoSelector,
         CrossDao crossDao,
         IFileDao<int> fileDao,
         IDaoBase<TFile, TFolder, TItem> dao,
         TenantManager tenantManager)
-    {
-        _userManager = userManager;
-        _dbContextFactory = dbContextFactory;
-        _daoSelector = daoSelector;
-        _crossDao = crossDao;
-        _fileDao = fileDao;
-        Dao = dao;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
-    }
+    : IFileDao<string>
+    where TFile : class, TItem
+    where TFolder : class, TItem
+    where TItem : class
+{
+    internal IDaoBase<TFile, TFolder, TItem> Dao { get; } = dao;
+    internal IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; private set; }
+
+    private readonly int _tenantId = tenantManager.GetCurrentTenant().Id;
 
     public void Init(string pathPrefix, IProviderInfo<TFile, TFolder, TItem> providerInfo)
     {
@@ -133,7 +118,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         if (subjectID != Guid.Empty)
         {
             files = files.Where(x => subjectGroup
-                                         ? _userManager.IsUserInGroup(x.CreateBy, subjectID)
+                                         ? userManager.IsUserInGroup(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
 
@@ -218,7 +203,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
         if (subjectID != Guid.Empty)
         {
             files = files.Where(x => subjectGroup
-                                         ? _userManager.IsUserInGroup(x.CreateBy, subjectID)
+                                         ? userManager.IsUserInGroup(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
 
@@ -383,12 +368,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
 
         var id = Dao.MakeId(Dao.GetId(file));
 
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
             await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
             await Queries.DeleteTagsAsync(filesDbContext);
@@ -429,9 +414,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
 
     public async Task<int> MoveFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _daoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, daoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             true);
 
         return moved.Id;
@@ -510,9 +495,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem> : IFileDao<stri
 
     public Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
     {
-        var moved = _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _daoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, daoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             false);
 
         return moved;

@@ -151,12 +151,10 @@ public class SecurityController : ControllerBase
         {
             return await GetLastLoginEventsAsync();
         }
-        else
-        {
-            await DemandAuditPermissionAsync();
 
-            return (await _loginEventsRepository.GetByFilterAsync(userId, action, from, to, startIndex, limit)).Select(x => new LoginEventDto(x));
-        }
+        await DemandAuditPermissionAsync();
+
+        return (await _loginEventsRepository.GetByFilterAsync(userId, action, from, to, startIndex, limit)).Select(x => new LoginEventDto(x));
     }
 
     /// <summary>
@@ -202,12 +200,10 @@ public class SecurityController : ControllerBase
         {
             return await GetLastAuditEventsAsync();
         }
-        else
-        {
-            await DemandAuditPermissionAsync();
 
-            return (await _auditEventsRepository.GetByFilterAsync(userId, productType, moduleType, actionType, action, entryType, target, from, to, startIndex, limit)).Select(x => new AuditEventDto(x, _auditActionMapper));
-        }
+        await DemandAuditPermissionAsync();
+
+        return (await _auditEventsRepository.GetByFilterAsync(userId, productType, moduleType, actionType, action, entryType, target, from, to, startIndex, limit)).Select(x => new AuditEventDto(x, _auditActionMapper));
     }
 
     /// <summary>

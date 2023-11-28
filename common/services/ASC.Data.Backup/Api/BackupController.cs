@@ -33,24 +33,15 @@ namespace ASC.Data.Backup.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class BackupController : ControllerBase
-{
-    private readonly BackupAjaxHandler _backupHandler;
-    private readonly IEventBus _eventBus;
-    private readonly Guid _currentUserId;
-    private readonly int _tenantId;
-
-    public BackupController(
-        BackupAjaxHandler backupAjaxHandler,
+public class BackupController(BackupAjaxHandler backupAjaxHandler,
         TenantManager tenantManager,
         SecurityContext securityContext,
         IEventBus eventBus)
+    : ControllerBase
     {
-        _currentUserId = securityContext.CurrentAccount.ID;
-        _tenantId = tenantManager.GetCurrentTenant().Id;
-        _backupHandler = backupAjaxHandler;
-        _eventBus = eventBus;
-    }
+    private readonly Guid _currentUserId = securityContext.CurrentAccount.ID;
+    private readonly int _tenantId = tenantManager.GetCurrentTenant().Id;
+
     /// <summary>
     /// Returns the backup schedule of the current portal.
     /// </summary>
@@ -61,7 +52,7 @@ public class BackupController : ControllerBase
     [HttpGet("getbackupschedule")]
     public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
     {
-        return await _backupHandler.GetScheduleAsync();
+        return await backupAjaxHandler.GetScheduleAsync();
     }
 
     /// <summary>
@@ -78,7 +69,7 @@ public class BackupController : ControllerBase
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
         var backupStored = inDto.BackupsStored == null ? 0 : Int32.Parse(inDto.BackupsStored);
-        var cron = new CronParams()
+        var cron = new CronParams
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
@@ -90,14 +81,14 @@ public class BackupController : ControllerBase
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await _backupHandler.CheckAccessToFolderAsync(fId);
+                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        await _backupHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron);
+        await backupAjaxHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron);
         return true;
     }
 
@@ -111,7 +102,7 @@ public class BackupController : ControllerBase
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule()
     {
-        await _backupHandler.DeleteScheduleAsync();
+        await backupAjaxHandler.DeleteScheduleAsync();
 
         return true;
     }
@@ -136,22 +127,22 @@ public class BackupController : ControllerBase
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await _backupHandler.CheckAccessToFolderAsync(fId);
+                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await _backupHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
 
-        _eventBus.Publish(new BackupRequestIntegrationEvent(
+        eventBus.Publish(new BackupRequestIntegrationEvent(
              tenantId: _tenantId,
              storageParams: storageParams,
              storageType: storageType,
              createBy: _currentUserId
         ));
 
-        return await _backupHandler.GetBackupProgressAsync();
+        return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
     /// <summary>
@@ -165,7 +156,7 @@ public class BackupController : ControllerBase
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
-        return await _backupHandler.GetBackupProgressAsync();
+        return await backupAjaxHandler.GetBackupProgressAsync();
     }
 
     /// <summary>
@@ -179,7 +170,7 @@ public class BackupController : ControllerBase
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory()
     {
-        return await _backupHandler.GetBackupHistory();
+        return await backupAjaxHandler.GetBackupHistory();
     }
 
     /// <summary>
@@ -193,7 +184,7 @@ public class BackupController : ControllerBase
     [HttpDelete("deletebackup/{id}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
-        await _backupHandler.DeleteBackupAsync(id);
+        await backupAjaxHandler.DeleteBackupAsync(id);
         return true;
     }
 
@@ -207,7 +198,7 @@ public class BackupController : ControllerBase
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory()
     {
-        await _backupHandler.DeleteAllBackupsAsync();
+        await backupAjaxHandler.DeleteAllBackupsAsync();
         return true;
     }
 
@@ -224,7 +215,7 @@ public class BackupController : ControllerBase
     {
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
-        _eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
+        eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: _tenantId,
                              createBy: _currentUserId,
                              storageParams: storageParams,
@@ -234,7 +225,7 @@ public class BackupController : ControllerBase
                         ));
 
 
-        return await _backupHandler.GetRestoreProgressAsync();
+        return await backupAjaxHandler.GetRestoreProgressAsync();
     }
 
     /// <summary>
@@ -250,7 +241,7 @@ public class BackupController : ControllerBase
     [AllowNotPayment]
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
-        return await _backupHandler.GetRestoreProgressAsync();
+        return await backupAjaxHandler.GetRestoreProgressAsync();
     }
 
     /// <summary>
@@ -264,6 +255,6 @@ public class BackupController : ControllerBase
     [HttpGet("backuptmp")]
     public object GetTempPath()
     {
-        return _backupHandler.GetTmpFolder();
+        return backupAjaxHandler.GetTmpFolder();
     }
 }

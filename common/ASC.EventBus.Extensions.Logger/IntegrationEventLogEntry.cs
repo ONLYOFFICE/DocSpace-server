@@ -64,7 +64,7 @@ public class IntegrationEventLogEntry
 
     public IntegrationEventLogEntry DeserializeJsonContent(Type type)
     {
-        IntegrationEvent = JsonSerializer.Deserialize(Content, type, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) as IntegrationEvent;
+        IntegrationEvent = JsonSerializer.Deserialize(Content, type, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) as IntegrationEvent;
         return this;
     }
 }

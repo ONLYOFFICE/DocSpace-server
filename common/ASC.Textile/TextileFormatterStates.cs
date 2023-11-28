@@ -110,10 +110,8 @@ public partial class TextileFormatter
             {
                 return _stackOfStates.Peek();
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
     }
 
