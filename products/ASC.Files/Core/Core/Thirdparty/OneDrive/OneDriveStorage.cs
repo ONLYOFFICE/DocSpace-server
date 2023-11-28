@@ -336,7 +336,7 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
         if (thumbnails.Count > 0)
         {
             var url = thumbnails[0].Medium.Url;
-            url = url.Substring(0, url.IndexOf("?width"));
+            url = url[..url.IndexOf("?width")];
             url = url + $"?width={width}&height={height}&cropmode=none";
             var request = new HttpRequestMessage
             {
@@ -348,10 +348,8 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
             var bytes = await response.Content.ReadAsByteArrayAsync();
             return new MemoryStream(bytes);
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     public Task<Item> GetFolderAsync(string folderId)

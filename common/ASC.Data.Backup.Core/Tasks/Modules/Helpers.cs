@@ -70,7 +70,7 @@ public class Helpers(InstanceCrypto instanceCrypto)
 
     public string CreateHash(string s)
     {
-        return !string.IsNullOrEmpty(s) && s.StartsWith("S|") ? instanceCrypto.Encrypt(Crypto.GetV(s.Substring(2), 1, false)) : s;
+        return !string.IsNullOrEmpty(s) && s.StartsWith("S|") ? instanceCrypto.Encrypt(Crypto.GetV(s[2..], 1, false)) : s;
     }
 
     public string CreateHash2(string s)

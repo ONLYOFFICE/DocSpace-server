@@ -109,7 +109,7 @@ public class ElasticSearchIndexService(ILoggerProvider options,
             }
 
             _logger.DebugProduct(product.IndexName);
-            await indexNotify.PublishAsync(new IndexAction() { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
+            await indexNotify.PublishAsync(new IndexAction { Indexing = product.IndexName, LastIndexed = 0 }, CacheNotifyAction.Any);
             await product.IndexAllAsync();
         }
         catch (Exception e)
@@ -138,7 +138,7 @@ public class ElasticSearchIndexService(ILoggerProvider options,
             });
 
 
-            await indexNotify.PublishAsync(new IndexAction() { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
+            await indexNotify.PublishAsync(new IndexAction { Indexing = "", LastIndexed = DateTime.Now.Ticks }, CacheNotifyAction.Any);
             _isStarted = false;
         }
         catch (Exception e)

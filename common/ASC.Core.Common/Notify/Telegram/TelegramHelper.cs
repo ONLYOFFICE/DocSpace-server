@@ -63,10 +63,8 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
 
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     public async Task<RegStatus> UserIsConnectedAsync(Guid userId, int tenantId)

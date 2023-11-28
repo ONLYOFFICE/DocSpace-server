@@ -152,7 +152,7 @@ static file class Queries
                                 x.settings.Id == filesSettingsId &&
                                 Convert.ToBoolean(DbFunctionsExtension.JsonValue(nameof(x.settings.Data).ToLower(),
                                     "AutomaticallyCleanUp.IsAutoCleanUp")))
-                    .Select(r => new TenantUserSettings()
+                    .Select(r => new TenantUserSettings
                     {
                         TenantId = r.tenants.Id,
                         UserId = r.settings.UserId,

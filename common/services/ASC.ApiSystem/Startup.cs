@@ -150,7 +150,7 @@ public class Startup
         {
             endpoints.MapCustomAsync().Wait();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse

@@ -288,10 +288,8 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         {
             return await _providerInfo.GetItemsAsync(parentDriveId);
         }
-        else
-        {
-            return await _providerInfo.GetItemsAsync(parentDriveId, folder);
-        }
+
+        return await _providerInfo.GetItemsAsync(parentDriveId, folder);
     }
 
     public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)

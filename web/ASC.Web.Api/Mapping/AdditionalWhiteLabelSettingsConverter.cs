@@ -34,7 +34,7 @@ public class AdditionalWhiteLabelSettingsConverter(
 {
     public AdditionalWhiteLabelSettingsDto Convert(AdditionalWhiteLabelSettings source, AdditionalWhiteLabelSettingsDto destination, ResolutionContext context)
     {
-        var result = new AdditionalWhiteLabelSettingsDto()
+        var result = new AdditionalWhiteLabelSettingsDto
         {
             BuyUrl = source.BuyUrl,
             FeedbackAndSupportEnabled = source.FeedbackAndSupportEnabled,

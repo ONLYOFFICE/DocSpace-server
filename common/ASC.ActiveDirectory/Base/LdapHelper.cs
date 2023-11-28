@@ -89,20 +89,18 @@ public abstract class LdapHelper(ILogger<LdapHelper> logger,
                 // Domain Users found
                 return true;
             }
-            else
+
+            var members = domainGroup.GetValues(groupAttribute);
+
+            if (members.Count == 0)
             {
-                var members = domainGroup.GetValues(groupAttribute);
+                return false;
+            }
 
-                if (members.Count == 0)
-                {
-                    return false;
-                }
-
-                if (members.Any(member => memberString.Equals(member, StringComparison.InvariantCultureIgnoreCase)
-                    || member.Equals(domainUser.DistinguishedName, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    return true;
-                }
+            if (members.Any(member => memberString.Equals(member, StringComparison.InvariantCultureIgnoreCase)
+                                      || member.Equals(domainUser.DistinguishedName, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                return true;
             }
         }
         catch (Exception e)

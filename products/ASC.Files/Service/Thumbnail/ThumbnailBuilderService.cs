@@ -41,7 +41,8 @@ public class ThumbnailBuilderService(IServiceScopeFactory serviceScopeFactory,
 
         logger.TraceProcedureStart();
 
-        var readers = new List<ChannelReader<FileData<int>>>() {
+        var readers = new List<ChannelReader<FileData<int>>>
+        {
             channelReader 
         };
 

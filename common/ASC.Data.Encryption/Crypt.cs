@@ -260,10 +260,8 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
         {
             return metadata.GetFileSize();
         }
-        else
-        {
-            return new FileInfo(filePath).Length;
-        }
+
+        return new FileInfo(filePath).Length;
     }
 
 

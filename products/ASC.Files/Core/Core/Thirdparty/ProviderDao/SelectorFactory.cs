@@ -43,18 +43,17 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
     {
         if (selector == Selectors.SharpBox.Id)
             return serviceProvider.GetService<IDaoSelector<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>>();
-        else if (selector == Selectors.SharePoint.Id)
+        if (selector == Selectors.SharePoint.Id)
             return serviceProvider.GetService<IDaoSelector<File, Folder, ClientObject>>();
-        else if (selector == Selectors.GoogleDrive.Id)
+        if (selector == Selectors.GoogleDrive.Id)
             return serviceProvider.GetService<IDaoSelector<DriveFile, DriveFile, DriveFile>>();
-        else if (selector == Selectors.Box.Id)
+        if (selector == Selectors.Box.Id)
             return serviceProvider.GetService<IDaoSelector<BoxFile, BoxFolder, BoxItem>>();
-        else if (selector == Selectors.Dropbox.Id)
+        if (selector == Selectors.Dropbox.Id)
             return serviceProvider.GetService<IDaoSelector<FileMetadata, FolderMetadata, Metadata>>();
-        else if (selector == Selectors.OneDrive.Id)
+        if (selector == Selectors.OneDrive.Id)
             return serviceProvider.GetService<IDaoSelector<Item, Item, Item>>();
-        else
-            return null;
+        return null;
     }
 
     public Dictionary<IDaoSelector, List<string>> GetSelectors(IEnumerable<string> ids)

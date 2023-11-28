@@ -173,7 +173,7 @@ public class GroupController(UserManager userManager,
 
         var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
 
-        await TransferUserToDepartment(inDto.GroupManager, @group, true);
+        await TransferUserToDepartment(inDto.GroupManager, group, true);
 
         if (inDto.Members != null)
         {
@@ -214,7 +214,7 @@ public class GroupController(UserManager userManager,
 
         await RemoveMembersFrom(groupid, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(groupid, EmployeeStatus.All)).Select(u => u.Id).Where(id => !inDto.Members.Contains(id)) });
 
-        await TransferUserToDepartment(inDto.GroupManager, @group, true);
+        await TransferUserToDepartment(inDto.GroupManager, group, true);
 
         if (inDto.Members != null)
         {
@@ -244,7 +244,7 @@ public class GroupController(UserManager userManager,
     {
          await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var @group = await GetGroupInfoAsync(groupid);
+        var group = await GetGroupInfoAsync(groupid);
 
         await userManager.DeleteGroupAsync(groupid);
 
@@ -389,7 +389,7 @@ public class GroupController(UserManager userManager,
             throw new ItemNotFoundException("group not found");
         }
 
-        return @group;
+        return group;
     }
 
     private async Task TransferUserToDepartment(Guid userId, GroupInfo group, bool setAsManager)
@@ -401,12 +401,12 @@ public class GroupController(UserManager userManager,
 
         if (setAsManager)
         {
-            await userManager.SetDepartmentManagerAsync(@group.ID, userId);
+            await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
-        await userManager.AddUserIntoGroupAsync(userId, @group.ID);
+        await userManager.AddUserIntoGroupAsync(userId, group.ID);
     }
 
-    private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo @group)
+    private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)
     {
         if (!await userManager.UserExistsAsync(userId))
         {
@@ -414,7 +414,7 @@ public class GroupController(UserManager userManager,
         }
 
         var user = await userManager.GetUsersAsync(userId);
-        await userManager.RemoveUserFromGroupAsync(user.Id, @group.ID);
+        await userManager.RemoveUserFromGroupAsync(user.Id, group.ID);
         await userManager.UpdateUserInfoAsync(user);
     }
 }

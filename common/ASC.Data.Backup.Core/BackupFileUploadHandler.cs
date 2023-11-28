@@ -134,7 +134,7 @@ public class BackupFileUploadHandler
             result = Error(error.Message);
         }
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions()
+        await context.Response.WriteAsync(JsonSerializer.Serialize(result, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         }));

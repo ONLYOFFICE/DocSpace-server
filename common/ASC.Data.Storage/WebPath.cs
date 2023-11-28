@@ -94,8 +94,8 @@ public class WebPathSettings
                 if (relativePath.IndexOfAny(new[] { '?', '=', '&' }) != -1)
                 {
                     //Cut it
-                    query = relativePath.Substring(relativePath.IndexOf('?'));
-                    relativePath = relativePath.Substring(0, relativePath.IndexOf('?'));
+                    query = relativePath[relativePath.IndexOf('?')..];
+                    relativePath = relativePath[..relativePath.IndexOf('?')];
                 }
                 //if (HostingEnvironment.IsHosted)
                 //{

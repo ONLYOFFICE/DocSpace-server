@@ -148,11 +148,11 @@ public class Tenant : IMapFrom<DbTenant>
         {
             if (MappedDomain.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase))
             {
-                MappedDomain = MappedDomain.Substring(7);
+                MappedDomain = MappedDomain[7..];
             }
             if (MappedDomain.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
             {
-                MappedDomain = MappedDomain.Substring(8);
+                MappedDomain = MappedDomain[8..];
             }
             result = MappedDomain.ToLowerInvariant();
         }

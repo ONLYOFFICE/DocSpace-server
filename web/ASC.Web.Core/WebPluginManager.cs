@@ -195,7 +195,7 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
             webPlugin.CreateBy = authContext.CurrentAccount.ID;
             webPlugin.CreateOn = DateTime.UtcNow;
 
-            var configString = System.Text.Json.JsonSerializer.Serialize(webPlugin, options);
+            var configString = JsonSerializer.Serialize(webPlugin, options);
 
             using var configStream = new MemoryStream(Encoding.UTF8.GetBytes(configString));
 

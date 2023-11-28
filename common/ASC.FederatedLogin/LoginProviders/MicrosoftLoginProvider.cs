@@ -69,7 +69,7 @@ public class MicrosoftLoginProvider : BaseLoginProvider<MicrosoftLoginProvider>
 
     private LoginProfile RequestProfile(string accessToken)
     {
-        var openidProfile = _requestHelper.PerformRequest(MicrosoftProfileUrl, headers: new Dictionary<string, string>() { { "Authorization", "Bearer " + accessToken } });
+        var openidProfile = _requestHelper.PerformRequest(MicrosoftProfileUrl, headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });
         var loginProfile = ProfileFromMicrosoft(openidProfile);
         return loginProfile;
     }

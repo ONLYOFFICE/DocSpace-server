@@ -260,10 +260,8 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
             {
                 return true;
             }
-            else
-            {
-                log.LogDebug("Recaptcha error: {0}", resp);
-            }
+
+            log.LogDebug("Recaptcha error: {0}", resp);
 
             if (resObj["error-codes"] != null && resObj["error-codes"].HasValues)
             {

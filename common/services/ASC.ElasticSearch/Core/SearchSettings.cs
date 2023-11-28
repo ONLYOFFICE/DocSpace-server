@@ -113,7 +113,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
         settings.Data = JsonConvert.SerializeObject(items);
         await settingsManager.SaveAsync(settings);
 
-        var action = new ReIndexAction() { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
+        var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
         await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);

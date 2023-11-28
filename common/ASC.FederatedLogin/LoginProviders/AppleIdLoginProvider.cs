@@ -139,7 +139,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     private ClaimsPrincipal ValidateIdToken(string idToken)
     {
         var handler = new JwtSecurityTokenHandler();
-        var claims = handler.ValidateToken(idToken, new TokenValidationParameters()
+        var claims = handler.ValidateToken(idToken, new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = GetApplePublicKeys(),

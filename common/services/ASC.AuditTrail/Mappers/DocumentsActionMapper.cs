@@ -49,7 +49,7 @@ internal class FilesActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Documents, Module)
         {
             {
-                EntryType.File, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.File, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Create, new[] { MessageAction.FileCreated, MessageAction.FileCreatedVersion, MessageAction.FileRestoreVersion, MessageAction.FileConverted } },
                     {
@@ -65,7 +65,7 @@ internal class FilesActionMapper : IModuleActionMapper
                     { ActionType.Download, new[] {  MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded } },
                     { ActionType.Send, new[] { MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner } },
                 },
-                new Dictionary<ActionType, MessageAction>()
+                new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Upload, MessageAction.FileUploaded },
                     { ActionType.Import, MessageAction.FileImported },
@@ -73,7 +73,7 @@ internal class FilesActionMapper : IModuleActionMapper
                 }
             },
             {
-                EntryType.File, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.File, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Copy, new[] { MessageAction.FileCopied, MessageAction.FileCopiedWithOverwriting } },
                     { ActionType.Move, new[] { MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting } },
@@ -97,12 +97,12 @@ internal class FoldersActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Documents, Module)
         {
             {
-                EntryType.Folder, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Update, new[] { MessageAction.FolderRenamed, MessageAction.FolderMarkedAsRead } },
                     { ActionType.UpdateAccess, new[] { MessageAction.FolderUpdatedAccess, MessageAction.FolderUpdatedAccessFor, MessageAction.FolderRemovedFromList } }
                 },
-                new Dictionary<ActionType, MessageAction>()
+                new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Create, MessageAction.FolderCreated },
                     { ActionType.Move, MessageAction.FolderMovedToTrash },
@@ -111,7 +111,7 @@ internal class FoldersActionMapper : IModuleActionMapper
                 }
             },
             {
-                EntryType.Folder, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>()
+                EntryType.Folder, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Copy, new[] { MessageAction.FolderCopied, MessageAction.FolderCopiedWithOverwriting } },
                     { ActionType.Move, new[] { MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting } },
@@ -183,7 +183,7 @@ internal class SettingsActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Documents, Module)
         {
             {
-                EntryType.Folder, new Dictionary<ActionType, MessageAction>()
+                EntryType.Folder, new Dictionary<ActionType, MessageAction>
                 {
                     { ActionType.Create,  MessageAction.ThirdPartyCreated  },
                     { ActionType.Update, MessageAction.ThirdPartyUpdated },

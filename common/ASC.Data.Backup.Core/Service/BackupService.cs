@@ -166,7 +166,7 @@ public class BackupService(ILogger<BackupService> logger,
     public async Task CreateScheduleAsync(CreateScheduleRequest request)
     {
         await backupRepository.SaveBackupScheduleAsync(
-            new BackupSchedule()
+            new BackupSchedule
             {
                 TenantId = request.TenantId,
                 Cron = request.Cron,

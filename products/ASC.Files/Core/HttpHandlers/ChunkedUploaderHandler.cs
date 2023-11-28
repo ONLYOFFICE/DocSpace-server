@@ -175,7 +175,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions()
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions
         {
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,

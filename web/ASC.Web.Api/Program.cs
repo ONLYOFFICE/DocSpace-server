@@ -81,5 +81,5 @@ finally
 public partial class Program
 {
     private static readonly string _namespace = typeof(Startup).Namespace;
-    public static readonly string AppName = _namespace.Substring(_namespace.LastIndexOf('.') + 1).Replace(".", "");
+    public static readonly string AppName = _namespace[(_namespace.LastIndexOf('.') + 1)..].Replace(".", "");
 }

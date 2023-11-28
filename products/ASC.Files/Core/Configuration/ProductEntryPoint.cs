@@ -333,11 +333,13 @@ public class ProductEntryPoint : Product
         {
             return true;
         }
-        else if (IsRoomAdminAction())
+
+        if (IsRoomAdminAction())
         {
             return false;
         }
-        else if (targetUsers != null
+
+        if (targetUsers != null
             && !targetUsers.Contains(userId)
             && IsRoomAdminOrTargetUserAction())
         {

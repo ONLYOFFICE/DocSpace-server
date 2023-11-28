@@ -173,6 +173,6 @@ public class TfaManager(SettingsManager settingsManager,
         var token = Convert.ToBase64String(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(userSalt + machineSalt)));
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-        return encodedToken.Substring(0, 10);
+        return encodedToken[..10];
     }
 }

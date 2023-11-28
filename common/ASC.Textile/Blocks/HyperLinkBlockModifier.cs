@@ -44,7 +44,7 @@ public class HyperLinkBlockModifier : BlockModifier
                                 @"(?<slash>\/)?" +						// slash
                                 @"(?<post>[^\w\/;]*)" +					// post
                                 @"(?=\s|$)",
-                                new MatchEvaluator(HyperLinksFormatMatchEvaluator));
+                                HyperLinksFormatMatchEvaluator);
         return line;
     }
 

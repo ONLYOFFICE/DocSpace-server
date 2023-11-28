@@ -286,8 +286,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 Expression<Func<UserWithGroup, int>> orderByUserType = u => 
                     u.User.Id == ownerId ? 0 :
                     u.Group == null ? 2 : 
-                    u.Group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 : 
-                    u.Group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4;
+                    u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
+                    u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
                 
                 q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
             }
@@ -762,10 +762,8 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         {
             return await q.Select(exp).FirstOrDefaultAsync();
         }
-        else
-        {
-            return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
-        }
+
+        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant)

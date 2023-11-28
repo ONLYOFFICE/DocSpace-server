@@ -48,7 +48,7 @@ internal class StudioSubscriptionManager(StudioNotifyHelper studioNotifyHelper) 
                 }
             };
 
-        var astype = new SubscriptionType()
+        var astype = new SubscriptionType
         {
             ID = new Guid("{A4FFC01F-BDB5-450e-88C4-03FED17D67C5}"),
             Name = Resource.AdministratorNotifySenderTypeName,

@@ -38,7 +38,7 @@ public class AdminHelperSettings : ISettings<AdminHelperSettings>
 
     public AdminHelperSettings GetDefault()
     {
-        return new AdminHelperSettings()
+        return new AdminHelperSettings
         {
             Viewed = false
         };

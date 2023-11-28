@@ -484,16 +484,14 @@ public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
             else
             {
                 ext = format.ext;
-                var xB64 = logo.Substring($"data:{format.mime};base64,".Length); // Get the Base64 string
+                var xB64 = logo[$"data:{format.mime};base64,".Length..]; // Get the Base64 string
                 data = Convert.FromBase64String(xB64); // Convert the Base64 string to binary data
             }
 
             return (data, ext);
         }
-        else
-        {
-            return (null, ext);
-        }
+
+        return (null, ext);
     }
 
     private (byte[], string) GetNotificationLogoData(byte[] logoData, string extLogo, TenantWhiteLabelSettings tenantWhiteLabelSettings)

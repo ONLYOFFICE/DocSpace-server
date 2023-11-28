@@ -114,7 +114,7 @@ internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObj
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

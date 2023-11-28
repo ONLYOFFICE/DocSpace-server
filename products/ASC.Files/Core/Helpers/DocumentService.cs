@@ -58,7 +58,7 @@ public static class DocumentService
         }
 
         var key = Regex.Replace(expectedKey, "[^0-9a-zA-Z_]", "_");
-        return key.Substring(key.Length - Math.Min(key.Length, maxLength));
+        return key[^Math.Min(key.Length, maxLength)..];
     }
 
     /// <summary>
@@ -180,7 +180,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -305,7 +305,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -405,7 +405,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping

@@ -1508,7 +1508,7 @@ public class FileStorageService //: IFileStorageService
 
             if (result.Count == 0)
             {
-                await MarkAsReadAsync(new List<JsonElement>() { JsonDocument.Parse(JsonSerializer.Serialize(folderId)).RootElement }, new List<JsonElement>()); //TODO
+                await MarkAsReadAsync(new List<JsonElement> { JsonDocument.Parse(JsonSerializer.Serialize(folderId)).RootElement }, new List<JsonElement>()); //TODO
             }
 
             return result;
@@ -1573,10 +1573,8 @@ public class FileStorageService //: IFileStorageService
 
             return folder;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     public IAsyncEnumerable<FileEntry> GetThirdPartyFolderAsync(int folderType = 0)
@@ -1967,12 +1965,12 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<List<FileOperationResult>> DeleteFileAsync<T>(string action, T fileId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T>() { fileId }, ignoreException,
+        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T> { fileId }, ignoreException,
             !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
     }
     public async Task<List<FileOperationResult>> DeleteFolderAsync<T>(string action, T folderId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>() { folderId }, new List<T>(), ignoreException,
+        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T> { folderId }, new List<T>(), ignoreException,
             !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
     }
 
@@ -2099,7 +2097,8 @@ public class FileStorageService //: IFileStorageService
 
                 return filesLinkUtility.GetFileWebEditorUrl(form.Id) + comment;
             }
-            else if (!await entryManager.CheckFillFormDraftAsync(file))
+
+            if (!await entryManager.CheckFillFormDraftAsync(file))
             {
                 var comment = "#message/" + HttpUtility.UrlEncode(FilesCommonResource.MessageFillFormDraftDiscard);
 
@@ -3187,7 +3186,7 @@ public class FileStorageService //: IFileStorageService
 
     public AutoCleanUpData ChangeAutomaticallyCleanUp(bool set, DateToAutoCleanUp gap)
     {
-        filesSettingsHelper.AutomaticallyCleanUp = new AutoCleanUpData() { IsAutoCleanUp = set, Gap = gap };
+        filesSettingsHelper.AutomaticallyCleanUp = new AutoCleanUpData { IsAutoCleanUp = set, Gap = gap };
 
         return filesSettingsHelper.AutomaticallyCleanUp;
     }

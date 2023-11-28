@@ -112,27 +112,27 @@ public class S3Storage(TempStream tempStream,
                 
                 if (h.StartsWith("Content-Disposition"))
                 {
-                    headersOverrides.ContentDisposition = (h.Substring("Content-Disposition".Length + 1));
+                    headersOverrides.ContentDisposition = (h[("Content-Disposition".Length + 1)..]);
                 }
                 else if (h.StartsWith("Cache-Control"))
                 {
-                    headersOverrides.CacheControl = (h.Substring("Cache-Control".Length + 1));
+                    headersOverrides.CacheControl = (h[("Cache-Control".Length + 1)..]);
                 }
                 else if (h.StartsWith("Content-Encoding"))
                 {
-                    headersOverrides.ContentEncoding = (h.Substring("Content-Encoding".Length + 1));
+                    headersOverrides.ContentEncoding = (h[("Content-Encoding".Length + 1)..]);
                 }
                 else if (h.StartsWith("Content-Language"))
                 {
-                    headersOverrides.ContentLanguage = (h.Substring("Content-Language".Length + 1));
+                    headersOverrides.ContentLanguage = (h[("Content-Language".Length + 1)..]);
                 }
                 else if (h.StartsWith("Content-Type"))
                 {
-                    headersOverrides.ContentType = (h.Substring("Content-Type".Length + 1));
+                    headersOverrides.ContentType = (h[("Content-Type".Length + 1)..]);
                 }
                 else if (h.StartsWith("Expires"))
                 {
-                    headersOverrides.Expires = (h.Substring("Expires".Length + 1));
+                    headersOverrides.Expires = (h[("Expires".Length + 1)..]);
                 }
                 else
                 {
@@ -169,31 +169,31 @@ public class S3Storage(TempStream tempStream,
             {
                 if (h.StartsWith("Content-Disposition"))
                 {
-                    queryParams["response-content-disposition"] = h.Substring("Content-Disposition".Length + 1);
+                    queryParams["response-content-disposition"] = h[("Content-Disposition".Length + 1)..];
                 }
                 else if (h.StartsWith("Cache-Control"))
                 {
-                    queryParams["response-cache-control"] = h.Substring("Cache-Control".Length + 1);
+                    queryParams["response-cache-control"] = h[("Cache-Control".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Encoding"))
                 {
-                    queryParams["response-content-encoding"] = h.Substring("Content-Encoding".Length + 1);
+                    queryParams["response-content-encoding"] = h[("Content-Encoding".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Language"))
                 {
-                    queryParams["response-content-language"] = h.Substring("Content-Language".Length + 1);
+                    queryParams["response-content-language"] = h[("Content-Language".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Type"))
                 {
-                    queryParams["response-content-type"] = h.Substring("Content-Type".Length + 1);
+                    queryParams["response-content-type"] = h[("Content-Type".Length + 1)..];
                 }
                 else if (h.StartsWith("Expires"))
                 {
-                    queryParams["response-expires"] = h.Substring("Expires".Length + 1);
+                    queryParams["response-expires"] = h[("Expires".Length + 1)..];
                 }
                 else if (h.StartsWith("Custom-Cache-Key"))
                 {
-                    queryParams["custom-cache-key"] = h.Substring("Custom-Cache-Key".Length + 1);
+                    queryParams["custom-cache-key"] = h[("Custom-Cache-Key".Length + 1)..];
                 }
                 else
                 {
@@ -457,10 +457,8 @@ public class S3Storage(TempStream tempStream,
         {
             return new S3ZipWriteOperator(_tempStream, chunkedUploadSession, sessionHolder);
         }
-        else
-        {
-            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder);
-        }
+
+        return new S3TarWriteOperator(chunkedUploadSession, sessionHolder);
     }
 
     public override string GetBackupExtension(bool isConsumerStorage = false)
@@ -469,10 +467,8 @@ public class S3Storage(TempStream tempStream,
         {
             return "tar.gz";
         }
-        else
-        {
-            return "tar";
-        }
+
+        return "tar";
     }
 
     #endregion
@@ -657,7 +653,7 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Select(x => x.Key.Substring((MakePath(domain, path) + "/").Length));
+        var obj = tmp.Select(x => x.Key[(MakePath(domain, path) + "/").Length..]);
         foreach (var e in obj)
         {
             yield return e;
@@ -827,7 +823,7 @@ public class S3Storage(TempStream tempStream,
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
         var obj = tmp.Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
-            .Select(x => x.Key.Substring((MakePath(domain, path) + "/").Length).TrimStart('/'));
+            .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 
         foreach (var e in obj)
         {

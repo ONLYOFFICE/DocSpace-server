@@ -87,7 +87,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     {
         var isNotWindows = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        var settings = new LdapSettings()
+        var settings = new LdapSettings
         {
             Server = "",
             UserDN = "",
@@ -404,10 +404,8 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         {
             return setting;
         }
-        else
-        {
-            return "";
-        }
+
+        return "";
     }
     private void SetOldSetting(MappingFields field, string value)
     {
@@ -447,7 +445,7 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
 
     public LdapCronSettings GetDefault()
     {
-        return new LdapCronSettings()
+        return new LdapCronSettings
         {
             Cron = null
         };
@@ -466,7 +464,7 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 
     public LdapCurrentAcccessSettings GetDefault()
     {
-        return new LdapCurrentAcccessSettings() { CurrentAccessRights = null };
+        return new LdapCurrentAcccessSettings { CurrentAccessRights = null };
     }
 
     public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
@@ -482,7 +480,7 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 
     public LdapCurrentUserPhotos GetDefault()
     {
-        return new LdapCurrentUserPhotos() { CurrentPhotos = null };
+        return new LdapCurrentUserPhotos { CurrentPhotos = null };
     }
 
     public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
@@ -498,7 +496,7 @@ public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
 
     public LdapCurrentDomain GetDefault()
     {
-        return new LdapCurrentDomain() { CurrentDomain = null };
+        return new LdapCurrentDomain { CurrentDomain = null };
     }
 
     public string CurrentDomain { get; set; }

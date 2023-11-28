@@ -167,7 +167,7 @@ public class FileConverterQueue(IDistributedCache distributedCache)
 
         await EntryManager.SetFileStatusAsync(file);
 
-        var options = new JsonSerializerOptions()
+        var options = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             IgnoreReadOnlyProperties = true,
@@ -175,7 +175,7 @@ public class FileConverterQueue(IDistributedCache distributedCache)
         };
 
         return JsonSerializer.Serialize(
-            new FileJsonSerializerData<T>()
+            new FileJsonSerializerData<T>
             {
                 Id = file.Id,
                 Title = file.Title,

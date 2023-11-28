@@ -186,7 +186,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
             return;
         }
 
-        cancelTaskNotify.Publish(new DistributedTaskCancelation() { Id = id }, CacheNotifyAction.Remove);
+        cancelTaskNotify.Publish(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
 
         queueTasks = queueTasks.FindAll(x => x.Id != id);
 
@@ -321,7 +321,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
                         }
                     });
 
-        destination.GetType().GetProperties().Where(p => p.CanWrite == true && !p.GetIndexParameters().Any())
+        destination.GetType().GetProperties().Where(p => p.CanWrite && !p.GetIndexParameters().Any())
                     .ToList()
                     .ForEach(prop =>
                     {

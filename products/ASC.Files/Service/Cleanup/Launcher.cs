@@ -30,7 +30,7 @@ namespace ASC.Files.AutoCleanUp;
 public class Launcher(ILogger<Launcher> logger, Worker worker, IConfiguration configuration)
     : BackgroundService
 {
-    private readonly TimeSpan _period = TimeSpan.Parse(ConfigurationBinder.GetValue<string>(configuration, "files:autoCleanUp:period") ?? "0:5:0");
+    private readonly TimeSpan _period = TimeSpan.Parse(configuration.GetValue<string>("files:autoCleanUp:period") ?? "0:5:0");
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

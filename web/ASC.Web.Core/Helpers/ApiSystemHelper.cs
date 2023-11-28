@@ -202,7 +202,7 @@ public class ApiSystemHelper
         {
             if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
             {
-                portalName = portalName[0..^1];
+                portalName = portalName[..^1];
             }
             else
             {

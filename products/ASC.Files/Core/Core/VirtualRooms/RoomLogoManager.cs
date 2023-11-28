@@ -200,7 +200,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         if (pathAsString.IndexOf('?') > 0)
         {
-            pathWithoutQuery = pathAsString.Substring(0, pathAsString.IndexOf('?'));
+            pathWithoutQuery = pathAsString[..pathAsString.IndexOf('?')];
         }
 
         return pathWithoutQuery;
@@ -211,13 +211,13 @@ public class RoomLogoManager(StorageFactory storageFactory,
         var rand = new Random();
         var color = fileUtilityConfiguration.LogoColors[rand.Next(fileUtilityConfiguration.LogoColors.Count - 1)];
         var result = Color.FromRgba(color.R, color.G, color.B, 1).ToHex();
-        return result.Substring(0, result.Length - 2);//without opacity
+        return result[..^2];//without opacity
     }
 
     private async Task RemoveTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName.Substring(0, index) : fileName;
+        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
 
         try
         {

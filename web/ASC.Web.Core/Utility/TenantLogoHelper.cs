@@ -40,25 +40,23 @@ public class TenantLogoHelper(TenantLogoManager tenantLogoManager,
             var _tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
             return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(_tenantWhiteLabelSettings, type, dark);
         }
+
+        if (isDefIfNoWhiteLabel)
+        {
+            imgUrl = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
+        }
         else
         {
-            if (isDefIfNoWhiteLabel)
+            if (type == WhiteLabelLogoType.LoginPage)
             {
-                imgUrl = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
+                /*** simple scheme ***/
+                var _tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
+                imgUrl = await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(_tenantInfoSettings);
+                /***/
             }
             else
             {
-                if (type == WhiteLabelLogoType.LoginPage)
-                {
-                    /*** simple scheme ***/
-                    var _tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
-                    imgUrl = await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(_tenantInfoSettings);
-                    /***/
-                }
-                else
-                {
-                    imgUrl = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
-                }
+                imgUrl = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(type, dark);
             }
         }
 

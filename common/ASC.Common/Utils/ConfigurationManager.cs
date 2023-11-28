@@ -28,7 +28,7 @@ namespace ASC.Common.Utils;
 
 public class ConnectionStringCollection(IEnumerable<ConnectionStringSettings> data) : IEnumerable<ConnectionStringSettings>
 {
-    private readonly List<ConnectionStringSettings> _data = Enumerable.ToList<ConnectionStringSettings>(data);
+    private readonly List<ConnectionStringSettings> _data = data.ToList();
 
     public ConnectionStringSettings this[string name] => _data.Find(r => r.Name == name);
 
@@ -102,10 +102,8 @@ public class ConfigurationExtension
         {
             return GetConnectionStrings()[key];
         }
-        else
-        {
-            var connectionStrings = new ConnectionStringCollection(GetSettings<ConnectionStringSettings>($"regions:{region}:ConnectionStrings"));
-            return connectionStrings[key];
-        }
+
+        var connectionStrings = new ConnectionStringCollection(GetSettings<ConnectionStringSettings>($"regions:{region}:ConnectionStrings"));
+        return connectionStrings[key];
     }
 }

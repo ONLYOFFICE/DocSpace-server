@@ -97,10 +97,8 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             }
             return list;
         }
-        else
-        {
-            return GetAttributes(ldapUser, bindings[0]);
-        }
+
+        return GetAttributes(ldapUser, bindings[0]);
     }
 
     private void PopulateContacts(List<string> Contacts, string type, List<string> values)
@@ -170,7 +168,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         if (!string.IsNullOrEmpty(firstName))
         {
             user.FirstName = firstName.Length > MAX_NUMBER_OF_SYMBOLS
-                ? firstName.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? firstName[..MAX_NUMBER_OF_SYMBOLS]
                 : firstName;
         }
         else
@@ -181,7 +179,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
         if (!string.IsNullOrEmpty(secondName))
         {
             user.LastName = secondName.Length > MAX_NUMBER_OF_SYMBOLS
-                ? secondName.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? secondName[..MAX_NUMBER_OF_SYMBOLS]
                 : secondName;
         }
         else

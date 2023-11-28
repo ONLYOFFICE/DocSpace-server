@@ -802,7 +802,7 @@ public class TariffService : ITariffService
                 var unlimTariff = await CreateDefaultAsync();
                 unlimTariff.LicenseDate = tariff.DueDate;
                 unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = new List<Quota>()
+                unlimTariff.Quotas = new List<Quota>
                 {
                     new(defaultQuota.TenantId, 1)
                 };

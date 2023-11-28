@@ -135,7 +135,7 @@ public class HostedSolution(ITenantService tenantService,
         // create user
         var user = new UserInfo
         {
-            UserName = registrationInfo.Email.Substring(0, registrationInfo.Email.IndexOf('@')),
+            UserName = registrationInfo.Email[..registrationInfo.Email.IndexOf('@')],
             LastName = registrationInfo.LastName,
             FirstName = registrationInfo.FirstName,
             Email = registrationInfo.Email,

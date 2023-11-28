@@ -58,7 +58,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
 
-    public static readonly ImmutableDictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>>()
+    public static readonly ImmutableDictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>>
     {
         {
             FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -188,7 +188,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }.ToImmutableDictionary();
 
-    public static readonly ImmutableDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>()
+    public static readonly ImmutableDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>
     {
         {
             EmployeeType.DocSpaceAdmin, new HashSet<FileShare>
@@ -217,10 +217,10 @@ public class FileSecurity(IDaoFactory daoFactory,
     }.ToImmutableDictionary();
 
     private static readonly ImmutableDictionary<FileEntryType, IEnumerable<FilesSecurityActions>> _securityEntries =
-    new Dictionary<FileEntryType, IEnumerable<FilesSecurityActions>>()
+    new Dictionary<FileEntryType, IEnumerable<FilesSecurityActions>>
     {
             {
-                FileEntryType.File, new List<FilesSecurityActions>()
+                FileEntryType.File, new List<FilesSecurityActions>
                 {
                     FilesSecurityActions.Read,
                     FilesSecurityActions.Comment,
@@ -242,7 +242,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             },
             {
-                FileEntryType.Folder, new List<FilesSecurityActions>()
+                FileEntryType.Folder, new List<FilesSecurityActions>
                 {
                     FilesSecurityActions.Read,
                     FilesSecurityActions.Create,

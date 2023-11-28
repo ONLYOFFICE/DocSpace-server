@@ -229,7 +229,7 @@ public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory
 
             if (baseUrl != null && tenant.MappedDomain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
-                await ValidateDomainAsync(tenant.MappedDomain.Substring(0, tenant.MappedDomain.Length - baseUrl.Length - 1), tenant.Id, false);
+                await ValidateDomainAsync(tenant.MappedDomain[..(tenant.MappedDomain.Length - baseUrl.Length - 1)], tenant.Id, false);
             }
             else
             {
@@ -424,7 +424,7 @@ public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory
             {
                 if (tenantDomainValidator.MinLength < domain.Length && char.IsNumber(domain, domain.Length - 1))
                 {
-                    domain = domain[0..^1];
+                    domain = domain[..^1];
                 }
                 else
                 {

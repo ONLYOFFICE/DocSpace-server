@@ -337,7 +337,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             SetProgress(Convert.ToInt32(percentage),
                 currentSource:
                     string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(existingLDAPUser, DisplayUserNameFormat.Default)));
+                        userFormatter.GetUserName(existingLDAPUser)));
 
             switch (OperationType)
             {
@@ -453,7 +453,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             try
             {
                 SetProgress((int)(currentPercent += step),
-                    string.Format("{0}: {1}", Resource.LdapSettingsStatusSavingUserPhoto, userFormatter.GetUserName(user, DisplayUserNameFormat.Default)));
+                    string.Format("{0}: {1}", Resource.LdapSettingsStatusSavingUserPhoto, userFormatter.GetUserName(user)));
 
                 await userPhotoManager.SyncPhotoAsync(user.Id, (byte[])image);
 
@@ -600,7 +600,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                         currentAccessRights[access.Key].Add(user.Id.ToString());
 
                         SetProgress((int)currentPercent,
-                            string.Format(Resource.LdapSettingsStatusGivingRights, userFormatter.GetUserName(user, DisplayUserNameFormat.Default), access.Key));
+                            string.Format(Resource.LdapSettingsStatusGivingRights, userFormatter.GetUserName(user), access.Key));
                         await webItemSecurity.SetProductAdministrator(LdapSettings.AccessRightsGuids[access.Key], user.Id, true);
 
                         if (currentUserRights != null && currentUserRights.Contains(access.Key))
@@ -773,7 +773,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                                     gCount, ldapGroup.Name,
                                     Resource.LdapSettingsStatusAddingGroupUser,
                                     ++index, count,
-                                    userFormatter.GetUserName(userBySid, DisplayUserNameFormat.Default)));
+                                    userFormatter.GetUserName(userBySid)));
 
                         await userManager.AddUserIntoGroupAsync(userBySid.Id, ldapGroup.ID);
                     }
@@ -847,7 +847,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                                 dbLdapGroup.Name,
                                 Resource.LdapSettingsStatusRemovingGroupUser,
                                 ++index, count,
-                                userFormatter.GetUserName(dbUser, DisplayUserNameFormat.Default)));
+                                userFormatter.GetUserName(dbUser)));
 
                     await userManager.RemoveUserFromGroupAsync(dbUser.Id, dbLdapGroup.ID);
                 }
@@ -863,7 +863,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                                 ldapGroup.Name,
                                 Resource.LdapSettingsStatusAddingGroupUser,
                                 ++index, count,
-                                userFormatter.GetUserName(userInfo, DisplayUserNameFormat.Default)));
+                                userFormatter.GetUserName(userInfo)));
 
                     await userManager.AddUserIntoGroupAsync(userInfo.Id, dbLdapGroup.ID);
                 }
@@ -940,7 +940,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             SetProgress(Convert.ToInt32(percentage),
                 currentSource:
                     string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(userInfo, DisplayUserNameFormat.Default)));
+                        userFormatter.GetUserName(userInfo)));
 
             switch (OperationType)
             {
@@ -997,7 +997,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             SetProgress(Convert.ToInt32(percentage),
                 currentSource:
                     string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(removedUser, DisplayUserNameFormat.Default)));
+                        userFormatter.GetUserName(removedUser)));
 
             switch (OperationType)
             {
@@ -1103,7 +1103,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             SetProgress(Convert.ToInt32(percentage),
                 currentSource:
                     string.Format("({0}/{1}): {2}", ++index, count,
-                        userFormatter.GetUserName(ldapGroupUser, DisplayUserNameFormat.Default)));
+                        userFormatter.GetUserName(ldapGroupUser)));
 
             UserInfo user;
             switch (OperationType)

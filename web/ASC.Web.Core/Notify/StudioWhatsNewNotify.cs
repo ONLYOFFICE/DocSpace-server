@@ -297,7 +297,8 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         {
             return true;
         }
-        else if (whatsNewType == WhatsNewType.RoomsActivity &&
+
+        if (whatsNewType == WhatsNewType.RoomsActivity &&
             await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
         {
             return true;

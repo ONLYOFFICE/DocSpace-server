@@ -489,12 +489,9 @@ public class UserController(ICache cache,
             await _userManager.DeleteUserAsync(user.Id);
             await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
         }
-        else
-        {
-            //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
-            //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
-        }
 
+        //StudioNotifyService.Instance.SendMsgProfileHasDeletedItself(user);
+        //StudioNotifyService.SendMsgProfileDeletion(Tenant.TenantId, user);
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 

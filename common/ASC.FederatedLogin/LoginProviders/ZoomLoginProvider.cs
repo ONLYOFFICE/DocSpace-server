@@ -101,7 +101,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         var clientPair = $"{ClientID}:{ClientSecret}";
         var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
 
-        var body = new Dictionary<string, string>()
+        var body = new Dictionary<string, string>
         {
             { "code", code },
             { "grant_type", "authorization_code" },

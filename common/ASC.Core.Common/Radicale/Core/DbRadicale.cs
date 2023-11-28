@@ -32,7 +32,7 @@ public class DbRadicale(IDbContextFactory<UserDbContext> dbContextFactory)
     public async Task SaveCardDavUserAsync(int tenant, Guid id)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        await userDbContext.AddOrUpdateAsync(q => q.UsersDav, new UserDav() { TenantId = tenant, UserId = id });
+        await userDbContext.AddOrUpdateAsync(q => q.UsersDav, new UserDav { TenantId = tenant, UserId = id });
         await userDbContext.SaveChangesAsync();
     }
 

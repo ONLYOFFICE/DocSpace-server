@@ -671,7 +671,8 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
             return Task.FromResult(0);
         }
-        else if (uploadSession.Items.ContainsKey("TempPath"))
+
+        if (uploadSession.Items.ContainsKey("TempPath"))
         {
             File.Delete(uploadSession.GetItemOrDefault<string>("TempPath"));
 

@@ -173,8 +173,8 @@ public class NotifyHelper(UserManager userManager,
 
     private async Task<List<ITagValue>> CreateArgsAsync(string region, string url)
     {
-        var args = new List<ITagValue>()
-                    {
+        var args = new List<ITagValue>
+        {
                         new TagValue(Tags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
                         new TagValue(Tags.PortalUrl, url)
                     };

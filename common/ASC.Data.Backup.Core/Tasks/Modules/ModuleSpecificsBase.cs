@@ -115,10 +115,8 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         {
             return "and t." + table.UserIDColumns[0] + " = '" + id + "' ";
         }
-        else
-        {
-            return "";
-        }
+
+        return "";
     }
 
     public DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table)

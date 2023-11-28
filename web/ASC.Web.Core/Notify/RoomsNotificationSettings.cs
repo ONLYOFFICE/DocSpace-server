@@ -39,7 +39,7 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 
     public RoomsNotificationSettings GetDefault()
     {
-        return new RoomsNotificationSettings()
+        return new RoomsNotificationSettings
         {
             DisabledRooms = new List<int>()
         };

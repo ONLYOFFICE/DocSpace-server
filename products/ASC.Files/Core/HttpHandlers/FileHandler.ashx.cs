@@ -645,7 +645,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             throw new Exception(exceptionMessage);
                         }
 
-                        header = header.Substring("Bearer ".Length);
+                        header = header["Bearer ".Length..];
 
                         var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
 
@@ -750,7 +750,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         throw new Exception("Invalid header " + header);
                     }
 
-                    header = header.Substring("Bearer ".Length);
+                    header = header["Bearer ".Length..];
 
                     var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
 
@@ -1339,12 +1339,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             file.ContentLength = fileStream.Length;
             return await fileDao.SaveFileAsync(file, fileStream);
         }
-        else
-        {
-            await using var buffered = tempStream.GetBuffered(fileStream);
-            file.ContentLength = buffered.Length;
-            return await fileDao.SaveFileAsync(file, buffered);
-        }
+
+        await using var buffered = tempStream.GetBuffered(fileStream);
+        file.ContentLength = buffered.Length;
+        return await fileDao.SaveFileAsync(file, buffered);
 
 
     }
@@ -1493,7 +1491,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     logger.ErrorDocServiceTrackHeaderIsNull();
                     throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMassage_SecurityException);
                 }
-                header = header.Substring("Bearer ".Length);
+                header = header["Bearer ".Length..];
 
                 try
                 {

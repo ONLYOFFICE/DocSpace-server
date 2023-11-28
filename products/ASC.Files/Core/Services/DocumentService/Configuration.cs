@@ -189,7 +189,7 @@ public class DocumentConfig<T>(DocumentServiceConnector documentServiceConnector
         {
             if(_referenceData == null)
             {
-                _referenceData = new FileReferenceData<T>()
+                _referenceData = new FileReferenceData<T>
                 {
                     FileKey = Info.GetFile().Id,
                     InstanceId = tenantManager.GetCurrentTenant().Id.ToString()

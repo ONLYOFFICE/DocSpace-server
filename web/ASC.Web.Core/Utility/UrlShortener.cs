@@ -80,33 +80,29 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
             {
                 return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + link.Short);
             }
-            else
+
+            while (true)
             {
-                while (true)
+                var key = ShortUrl.GenerateRandomKey();
+                var id = ShortUrl.Decode(key);
+                var existId = await context.ShortLinks.AnyAsync(q => q.Id == id);
+                if (!existId)
                 {
-                    var key = ShortUrl.GenerateRandomKey();
-                    var id = ShortUrl.Decode(key);
-                    var existId = await context.ShortLinks.AnyAsync(q => q.Id == id);
-                    if (!existId)
+                    var newShortLink = new ShortLink
                     {
-                        var newShortLink = new ShortLink()
-                        {
-                            Id = id,
-                            Link = shareLink,
-                            Short = key,
-                            TenantId = (await tenantManager.GetCurrentTenantAsync()).Id
-                        };
-                        await context.ShortLinks.AddAsync(newShortLink);
-                        await context.SaveChangesAsync();
-                        return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + key);
-                    }
+                        Id = id,
+                        Link = shareLink,
+                        Short = key,
+                        TenantId = (await tenantManager.GetCurrentTenantAsync()).Id
+                    };
+                    await context.ShortLinks.AddAsync(newShortLink);
+                    await context.SaveChangesAsync();
+                    return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + key);
                 }
             }
         }
-        else
-        {
-            return shareLink;
-        }
+
+        return shareLink;
     }
 }
 

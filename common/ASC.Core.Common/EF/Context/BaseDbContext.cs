@@ -99,12 +99,10 @@ public static class BaseDbContextExtension
         {
             return dbSet.Add(entity).Entity;
         }
-        else
-        {
-            b.Entry(existingBlog).CurrentValues.SetValues(entity);
-            b.Entry(existingBlog).State = EntityState.Modified;
-            return entity;
-        }
+
+        b.Entry(existingBlog).CurrentValues.SetValues(entity);
+        b.Entry(existingBlog).State = EntityState.Modified;
+        return entity;
     }
 
     public static async Task<T> AddOrUpdateAsync<T, TContext>(this TContext b, Expression<Func<TContext, DbSet<T>>> expressionDbSet, T entity) where T : BaseEntity where TContext : DbContext
@@ -117,12 +115,10 @@ public static class BaseDbContextExtension
 
             return entityEntry.Entity;
         }
-        else
-        {
-            b.Entry(existingBlog).CurrentValues.SetValues(entity);
-            b.Entry(existingBlog).State = EntityState.Modified;
-            return entity;
-        }
+
+        b.Entry(existingBlog).CurrentValues.SetValues(entity);
+        b.Entry(existingBlog).State = EntityState.Modified;
+        return entity;
     }
 }
 

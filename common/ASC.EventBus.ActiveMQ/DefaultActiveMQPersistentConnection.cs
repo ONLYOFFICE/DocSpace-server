@@ -147,12 +147,10 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
                 return true;
             }
-            else
-            {
-                _logger.CriticalActiveMQCouldNotBeCreated();
 
-                return false;
-            }
+            _logger.CriticalActiveMQCouldNotBeCreated();
+
+            return false;
         }
     }
 

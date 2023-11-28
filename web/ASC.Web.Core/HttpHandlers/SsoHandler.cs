@@ -101,7 +101,7 @@ public class SsoHandlerService
         _countPaidUserChecker = countPaidUserChecker;
         _signatureResolver = signature =>
         {
-            int.TryParse(signature.Substring(signature.Length - 1), out var lastSignChar);
+            int.TryParse(signature[^1..], out var lastSignChar);
             signature = signature.Remove(signature.Length - 1);
 
             while (lastSignChar > 0)
@@ -453,7 +453,7 @@ public class SsoHandlerService
         var newStr = str.Trim();
 
         return newStr.Length > limit
-                ? newStr.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? newStr[..MAX_NUMBER_OF_SYMBOLS]
                 : newStr;
     }
 }

@@ -47,7 +47,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
     {
         var rewriterUri = uri.StartsWith("http") ? uri : "";
 
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = uri,
             Authorization = authorization,
@@ -66,7 +66,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
         var requestUrl = _defaultRadicaleUrl + "/" + HttpUtility.UrlEncode(userName) + "/" + addbookId;
 
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = requestUrl,
             Authorization = authorization,
@@ -82,7 +82,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
     {
         var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
         var defaultUrlconn = _defaultRadicaleUrl + path;
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = defaultUrlconn,
             Authorization = authorization,
@@ -96,7 +96,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
     {
         var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
         var requrl = _defaultRadicaleUrl + path;
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = requrl,
             Authorization = authorization,
@@ -157,7 +157,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
         if (changedEmail != null)
         {
             var deleteUrlBook = GetRadicaleUrl(uri, changedEmail.ToLower(), true, true);
-            var davRequest = new DavRequest()
+            var davRequest = new DavRequest
             {
                 Url = deleteUrlBook,
                 Authorization = authorization

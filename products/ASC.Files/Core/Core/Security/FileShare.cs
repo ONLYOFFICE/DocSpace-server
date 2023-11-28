@@ -54,17 +54,13 @@ public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<F
         {
             return (FileShare)result;
         }
-        else
+
+        if (reader.TokenType == JsonTokenType.String && FileShareExtensions.TryParse(reader.GetString(), out var share))
         {
-            if (reader.TokenType == JsonTokenType.String && FileShareExtensions.TryParse(reader.GetString(), out var share))
-            {
-                return share;
-            }
-            else
-            {
-                return FileShare.None;
-            }
+            return share;
         }
+
+        return FileShare.None;
     }
 
     public override void Write(Utf8JsonWriter writer, FileShare value, JsonSerializerOptions options)

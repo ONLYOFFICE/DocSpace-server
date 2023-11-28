@@ -390,7 +390,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         return GetObjectsAsync(domain, path, recursive)
-               .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length));
+               .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
 
     private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
@@ -424,7 +424,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         return GetObjectsAsync(domain, path, recursive).Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Name)))
-               .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length).TrimStart('/'));
+               .Select(x => x.Name[MakePath(domain, path + "/").Length..].TrimStart('/'));
     }
 
     public override async Task<bool> IsFileAsync(string domain, string path)

@@ -34,7 +34,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
     public void SetSkipUserChange(UserInfo user)
     {
         var change = new LdapChange(user.Sid,
-            userFormatter.GetUserName(user, DisplayUserNameFormat.Default),
+            userFormatter.GetUserName(user),
             user.Email,
             LdapChangeType.User, LdapChangeAction.Skip);
 
@@ -49,7 +49,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
             };
 
         var change = new LdapChange(user.Sid,
-            userFormatter.GetUserName(user, DisplayUserNameFormat.Default),
+            userFormatter.GetUserName(user),
             user.Email, LdapChangeType.User, LdapChangeAction.SaveAsPortal, fieldChanges);
 
         Add(change);
@@ -58,7 +58,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
     public void SetNoneUserChange(UserInfo user)
     {
         var change = new LdapChange(user.Sid,
-                    userFormatter.GetUserName(user, DisplayUserNameFormat.Default), user.Email,
+                    userFormatter.GetUserName(user), user.Email,
                     LdapChangeType.User, LdapChangeAction.None);
 
         Add(change);
@@ -72,7 +72,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
                             .ToList();
 
         var change = new LdapChange(beforeUserInfo.Sid,
-            userFormatter.GetUserName(afterUserInfo, DisplayUserNameFormat.Default), afterUserInfo.Email,
+            userFormatter.GetUserName(afterUserInfo), afterUserInfo.Email,
             LdapChangeType.User, LdapChangeAction.Update, fieldChanges);
 
         Add(change);
@@ -86,7 +86,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
                         .ToList();
 
         var change = new LdapChange(user.Sid,
-            userFormatter.GetUserName(user, DisplayUserNameFormat.Default), user.Email,
+            userFormatter.GetUserName(user), user.Email,
             LdapChangeType.User, LdapChangeAction.Add, fieldChanges);
 
         Add(change);
@@ -95,7 +95,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
     public void SetRemoveUserChange(UserInfo user)
     {
         var change = new LdapChange(user.Sid,
-                            userFormatter.GetUserName(user, DisplayUserNameFormat.Default), user.Email,
+                            userFormatter.GetUserName(user), user.Email,
                             LdapChangeType.User, LdapChangeAction.Remove);
 
         Add(change);
@@ -125,7 +125,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
             members.Select(
                 member =>
                     new LdapItemChange(LdapItemChangeKey.Member, null,
-                        userFormatter.GetUserName(member, DisplayUserNameFormat.Default))).ToList();
+                        userFormatter.GetUserName(member))).ToList();
 
         var change = new LdapChange(group.Sid, group.Name,
             LdapChangeType.Group, LdapChangeAction.AddMember, fieldChanges);
@@ -169,7 +169,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
             members.Select(
                 member =>
                     new LdapItemChange(LdapItemChangeKey.Member, null,
-                        userFormatter.GetUserName(member, DisplayUserNameFormat.Default))).ToList();
+                        userFormatter.GetUserName(member))).ToList();
 
         var change = new LdapChange(group.Sid, group.Name,
             LdapChangeType.Group, LdapChangeAction.RemoveMember, fieldChanges);

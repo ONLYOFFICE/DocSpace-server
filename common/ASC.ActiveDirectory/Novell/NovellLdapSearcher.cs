@@ -78,7 +78,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
     {
         if (Server.StartsWith("LDAP://"))
         {
-            Server = Server.Substring("LDAP://".Length);
+            Server = Server["LDAP://".Length..];
         }
 
         LdapConnection ldapConnection;
@@ -403,7 +403,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
 
         // initially, cookie must be set to an empty string
         var pageSize = 2;
-        var cookie = Array.ConvertAll(Encoding.ASCII.GetBytes(""), b => unchecked(b));
+        var cookie = Array.ConvertAll(Encoding.ASCII.GetBytes(""), b => b);
         var i = 0;
 
         do

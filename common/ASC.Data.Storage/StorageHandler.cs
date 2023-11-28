@@ -126,7 +126,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
                 continue;
             }
 
-            context.Response.Headers[toCopy] = h.Substring(toCopy.Length + 1);
+            context.Response.Headers[toCopy] = h[(toCopy.Length + 1)..];
         }
                 
         try

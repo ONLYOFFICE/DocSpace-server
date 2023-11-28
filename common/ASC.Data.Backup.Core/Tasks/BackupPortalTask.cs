@@ -591,7 +591,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
             await using (var tmpFile = new FileStream(f, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose))
             {
-                await writer.WriteEntryAsync(enumerateFile.Substring(subDir.Length), tmpFile);
+                await writer.WriteEntryAsync(enumerateFile[subDir.Length..], tmpFile);
             }
 
             SetStepCompleted();

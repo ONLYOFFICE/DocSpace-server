@@ -84,10 +84,8 @@ public class SuccessApiResponse : CommonApiResponse
             {
                 return 0;
             }
-            else
-            {
-                return 1;
-            }
+
+            return 1;
         }
     }
 
@@ -137,7 +135,7 @@ public class CommonApiError
 
     public static CommonApiError FromException(Exception exception, string message, bool withStackTrace)
     {
-        var result = new CommonApiError()
+        var result = new CommonApiError
         {
             Message = message ?? exception.Message
         };

@@ -84,10 +84,8 @@ public class ConsumerBackupStorage(StorageSettingsHelper storageSettingsHelper,
         {
             return await _store.IsFileAsync(Domain, storagePath);
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     public async Task<string> GetPublicLinkAsync(string storagePath)
@@ -96,10 +94,8 @@ public class ConsumerBackupStorage(StorageSettingsHelper storageSettingsHelper,
         {
             return (await _store.GetPreSignedUriAsync(Domain, storagePath, TimeSpan.FromDays(1), null)).ToString();
         }
-        else
-        {
-            return (await _store.GetInternalUriAsync(Domain, storagePath, TimeSpan.FromDays(1), null)).AbsoluteUri;
-        }
+
+        return (await _store.GetInternalUriAsync(Domain, storagePath, TimeSpan.FromDays(1), null)).AbsoluteUri;
     }
 
     public async Task<IDataWriteOperator> GetWriteOperatorAsync(string storageBasePath, string title, Guid userId)

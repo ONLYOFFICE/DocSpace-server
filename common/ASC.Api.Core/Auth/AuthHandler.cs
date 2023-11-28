@@ -66,7 +66,7 @@ public class AuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
 
             if (header.StartsWith(substring, StringComparison.InvariantCultureIgnoreCase))
             {
-                var splitted = header.Substring(substring.Length).Trim().Split(':', StringSplitOptions.RemoveEmptyEntries);
+                var splitted = header[substring.Length..].Trim().Split(':', StringSplitOptions.RemoveEmptyEntries);
 
                 if (splitted.Length < 3)
                 {

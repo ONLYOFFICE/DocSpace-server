@@ -1572,10 +1572,8 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             throw new Exception(FilesCommonResource.ErrorMassage_UpdateEditingFile);
         }
-        else
-        {
-            cache.Insert(UpdateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
-        }
+
+        cache.Insert(UpdateList + fileId, fileId.ToString(), TimeSpan.FromMinutes(2));
 
         try
         {

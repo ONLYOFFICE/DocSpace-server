@@ -260,7 +260,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
 
                 if (index > -1)
                 {
-                    var primaryGroupSid = userSid.Substring(0, index + 1) + primaryGroupId;
+                    var primaryGroupSid = userSid[..(index + 1)] + primaryGroupId;
                     searchExpressions.Add(Expression.Equal(ldapUser.SidAttribute, primaryGroupSid));
                 }
             }
@@ -269,7 +269,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
             {
                 var cnRegex = new Regex(",[A-z]{2}=");
                 searchExpressions.AddRange(userGroups
-                    .Select(g => g.Substring(0, cnRegex.Match(g).Index))
+                    .Select(g => g[..cnRegex.Match(g).Index])
                     .Where(s => !string.IsNullOrEmpty(s))
                     .Select(Expression.Parse)
                     .Where(e => e != null));
@@ -874,7 +874,8 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
                     {
                         continue;
                     }
-                    else if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
+
+                    if (string.IsNullOrEmpty(ldapUserObject.DistinguishedName)
                         || string.IsNullOrEmpty(ldapUserObject.Sid))
                     {
                         logger.DebugLdapUserImporterFailed(login, ldapUserObject.Sid);

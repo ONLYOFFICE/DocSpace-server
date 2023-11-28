@@ -106,8 +106,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpGet("file/{fileId}/checkconversion")]
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(T fileId, bool start)
     {
-        await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>()
-        {
+        await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
+                       {
             FileId = fileId,
             StartConvert = start
         }))
@@ -148,7 +148,8 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         {
             return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetInt32(), inDto.DestTitle, inDto.Password);
         }
-        else if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
+
+        if (inDto.DestFolderId.ValueKind == JsonValueKind.String)
         {
             return await filesControllerHelper.CopyFileAsAsync(fileId, inDto.DestFolderId.GetString(), inDto.DestTitle, inDto.Password);
         }

@@ -78,7 +78,7 @@ public class ConfirmAuthHandler : AuthenticationHandler<AuthenticationSchemeOpti
             checkKeyResult = EmailValidationKeyProvider.ValidationResult.Invalid;
         }
 
-        var claims = new List<Claim>()
+        var claims = new List<Claim>
         {
                 new(ClaimTypes.Role, emailValidationKeyModel.Type.ToString())
         };

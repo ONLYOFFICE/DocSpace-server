@@ -67,7 +67,7 @@ public class CookieAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> opti
 
             if (0 <= authorization.IndexOf("Bearer", 0))
             {
-                authorization = authorization.Substring("Bearer ".Length);
+                authorization = authorization["Bearer ".Length..];
             }
 
             if (!(await _securityContext.AuthenticateMe(authorization)))

@@ -232,11 +232,9 @@ public class Builder<T>(ThumbnailSettings settings,
                 {
                     throw new Exception(string.Format("MakeThumbnail: FileId: {0}, ThumbnailUrl: {1}, ResultPercent: {2}. Attempts limmit exceeded.", file.Id, thumbnailUrl, resultPercent));
                 }
-                else
-                {
-                    _logger.DebugMakeThumbnailAfter(file.Id.ToString(), settings.AttemptWaitInterval, attempt);
-                    attempt++;
-                }
+
+                _logger.DebugMakeThumbnailAfter(file.Id.ToString(), settings.AttemptWaitInterval, attempt);
+                attempt++;
 
                 await Task.Delay(settings.AttemptWaitInterval);
             }

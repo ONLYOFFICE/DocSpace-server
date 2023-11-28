@@ -44,7 +44,7 @@ internal class LoginNoneModuleActionMapper : IModuleActionMapper
     {
         Module = ModuleType.None;
 
-        Actions = new MessageMapsDictionary()
+        Actions = new MessageMapsDictionary
         {
             MessageAction.LoginSuccess,
             MessageAction.LoginSuccessViaSms,MessageAction.LoginSuccessViaApi,MessageAction.LoginSuccessViaApiSms,

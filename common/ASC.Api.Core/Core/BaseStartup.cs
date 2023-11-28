@@ -27,7 +27,6 @@
 using Flurl.Util;
 
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core;
@@ -354,7 +353,7 @@ public abstract class BaseStartup
 
                     if (authorizationHeader.StartsWith("Bearer "))
                     {
-                        var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                        var token = authorizationHeader["Bearer ".Length..].Trim();
                         var jwtHandler = new JwtSecurityTokenHandler();
 
                         if (jwtHandler.CanReadToken(token))
@@ -427,7 +426,7 @@ public abstract class BaseStartup
         {
             endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse

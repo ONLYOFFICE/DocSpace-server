@@ -206,7 +206,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     {
         UserInfo userToUpdate;
 
-        var wrapper = new UserInfoAndLdapChangeCollectionWrapper()
+        var wrapper = new UserInfoAndLdapChangeCollectionWrapper
         {
             LdapChangeCollection = new LdapChangeCollection(userFormatter),
             UserInfo = Constants.LostUser
@@ -656,10 +656,8 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     logger.DebugTryGetAndSyncLdapUserInfo(login);
                     return userInfo;
                 }
-                else
-                {
-                    userInfo = portalUser;
-                }
+
+                userInfo = portalUser;
             }
 
             return userInfo;

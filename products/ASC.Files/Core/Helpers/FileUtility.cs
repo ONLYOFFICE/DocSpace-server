@@ -231,7 +231,7 @@ public class FileUtility
             var position = fileName.LastIndexOf('.');
             if (0 <= position)
             {
-                extension = fileName.Substring(position).Trim().ToLower();
+                extension = fileName[position..].Trim().ToLower();
             }
         }
         return extension == null ? string.Empty : extension.Trim().ToLower();
@@ -630,7 +630,7 @@ public class FileUtility
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     private readonly SetupInfo _setupInfo;
 
-    public static readonly ImmutableList<string> ExtsArchive =  new List<string>()
+    public static readonly ImmutableList<string> ExtsArchive =  new List<string>
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
@@ -639,7 +639,7 @@ public class FileUtility
                 ".z", ".zoo"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsVideo =  new List<string>()
+    public static readonly ImmutableList<string> ExtsVideo =  new List<string>
     {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
@@ -648,7 +648,7 @@ public class FileUtility
                 ".vob", ".webm", ".wmv"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsAudio =  new List<string>()
+    public static readonly ImmutableList<string> ExtsAudio =  new List<string>
     {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
@@ -657,7 +657,7 @@ public class FileUtility
                 ".raw", ".wav", ".wma"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsImage =  new List<string>()
+    public static readonly ImmutableList<string> ExtsImage =  new List<string>
     {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
@@ -665,7 +665,7 @@ public class FileUtility
                 ".svgt", ".svgy", ".gdraw", ".webp"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>()
+    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>
     {
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
@@ -675,7 +675,7 @@ public class FileUtility
                 ".gsheet"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsPresentation = new List<string>()
+    public static readonly ImmutableList<string> ExtsPresentation = new List<string>
     {
                 ".pps", ".ppsx", ".ppsm",
                 ".ppt", ".pptx", ".pptm",
@@ -686,7 +686,7 @@ public class FileUtility
                 ".gslides"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsDocument = new List<string>()
+    public static readonly ImmutableList<string> ExtsDocument = new List<string>
     {
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
@@ -698,17 +698,17 @@ public class FileUtility
                 ".gdoc"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>()
+    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>
     {
                 ".docxf"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsOForm = new List<string>()
+    public static readonly ImmutableList<string> ExtsOForm = new List<string>
     {
                 ".oform"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsTemplate = new List<string>()
+    public static readonly ImmutableList<string> ExtsTemplate = new List<string>
     {
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",

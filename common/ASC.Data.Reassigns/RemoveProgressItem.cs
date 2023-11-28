@@ -76,7 +76,7 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, messageTarget, webItemManagerSecurity,  userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
-        var userName = userFormatter.GetUserName(User, DisplayUserNameFormat.Default);
+        var userName = userFormatter.GetUserName(User);
 
         try
         {

@@ -646,7 +646,8 @@ public class FileMarker(TenantManager tenantManager,
 
             return count;
         }
-        else if (fromCache > 0)
+
+        if (fromCache > 0)
         {
             return fromCache;
         }
@@ -799,10 +800,7 @@ public class FileMarker(TenantManager tenantManager,
             {
                 entryTags.Add(entry, tag);
             }
-            else
-            {
-                //todo: RemoveMarkAsNew(tag);
-            }
+            //todo: RemoveMarkAsNew(tag);
         }
 
         return entryTags;

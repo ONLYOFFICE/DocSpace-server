@@ -35,7 +35,7 @@ public abstract class PhraseBlockModifier : BlockModifier
         var compressedModifier = modifier;
         if (modifier.Length == 4)
         {
-            compressedModifier = modifier.Substring(0, 2);
+            compressedModifier = modifier[..2];
         }
         else if (modifier.Length == 2)
         {
@@ -63,7 +63,7 @@ public abstract class PhraseBlockModifier : BlockModifier
                                         @"(?<end>" + punctuationPattern + @"*)" +
                                         modifier +
                                         @"(?=[\]\)}]|" + punctuationPattern + @"+|\s|$)",
-                                    new MatchEvaluator(pmme.MatchEvaluator)
+                                    pmme.MatchEvaluator
                                     );
         return res;
     }

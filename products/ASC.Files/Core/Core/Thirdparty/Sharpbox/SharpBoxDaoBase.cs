@@ -299,7 +299,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
             if (index != -1)
             {
                 //Cut to it
-                return path.Substring(0, index);
+                return path[..index];
             }
         }
 
@@ -574,7 +574,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

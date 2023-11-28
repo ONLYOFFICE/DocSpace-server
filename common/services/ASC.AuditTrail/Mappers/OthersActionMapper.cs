@@ -38,7 +38,7 @@ internal class OthersActionsMapper : IProductActionMapper
 internal class OthersNoneModuleActionMapper : IModuleActionMapper
 {
     public ModuleType Module { get; } = ModuleType.None;
-    public IDictionary<MessageAction, MessageMaps> Actions { get; } = new MessageMapsDictionary()
+    public IDictionary<MessageAction, MessageMaps> Actions { get; } = new MessageMapsDictionary
     {
         { ActionType.Send, new[] { MessageAction.ContactAdminMailSent } }
     };

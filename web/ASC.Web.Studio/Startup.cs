@@ -107,7 +107,7 @@ public class Startup : BaseStartup
         .AddPolicyHandler(policyHandler)
         .ConfigurePrimaryHttpMessageHandler(_ =>
         {
-            return new HttpClientHandler()
+            return new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };

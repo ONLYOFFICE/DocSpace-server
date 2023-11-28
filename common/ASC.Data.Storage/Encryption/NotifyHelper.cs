@@ -70,7 +70,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
     private void SendStorageEncryptionNotification(string method, int tenantId)
     {
-        var notifyInvoke = new NotifyInvoke()
+        var notifyInvoke = new NotifyInvoke
         {
             Service = NotifyService,
             Method = method,

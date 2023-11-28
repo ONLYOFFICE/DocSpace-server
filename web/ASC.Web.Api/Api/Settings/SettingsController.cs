@@ -1046,10 +1046,8 @@ public class SettingsController : BaseSettingsController
             var url = _telegramHelper.RegisterUser(_authContext.CurrentAccount.ID, tenant.Id);
             return url;
         }
-        else
-        {
-            return currentLink;
-        }
+
+        return currentLink;
     }
 
     /// <summary>

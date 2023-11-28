@@ -64,9 +64,7 @@ public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramL
 
             return true;
         }
-        else
-        {
-            return _telegramHelper.CreateClient((await TenantManager.GetCurrentTenantAsync()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
-        }
+
+        return _telegramHelper.CreateClient((await TenantManager.GetCurrentTenantAsync()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
     }
 }

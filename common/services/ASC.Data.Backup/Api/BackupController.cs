@@ -69,7 +69,7 @@ public class BackupController(BackupAjaxHandler backupAjaxHandler,
         var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)Int32.Parse(inDto.StorageType);
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
         var backupStored = inDto.BackupsStored == null ? 0 : Int32.Parse(inDto.BackupsStored);
-        var cron = new CronParams()
+        var cron = new CronParams
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),

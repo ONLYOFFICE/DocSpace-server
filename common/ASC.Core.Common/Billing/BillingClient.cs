@@ -83,7 +83,7 @@ public class BillingClient
     {
         var urls = new Dictionary<string, Uri>();
 
-        var additionalParameters = new List<Tuple<string, string>>() { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
+        var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
         {
             additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
@@ -142,7 +142,7 @@ public class BillingClient
 
     public string GetPaymentUrl(string portalId, string[] products, string affiliateId = null, string partnerId = null, string campaign = null, string currency = null, string language = null, string customerEmail = null, string quantity = null, string backUrl = null)
     {
-        var additionalParameters = new List<Tuple<string, string>>() { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
+        var additionalParameters = new List<Tuple<string, string>> { Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()) };
         if (!string.IsNullOrEmpty(affiliateId))
         {
             additionalParameters.Add(Tuple.Create("AffiliateId", affiliateId));
@@ -264,7 +264,7 @@ public class BillingClient
 
         if (!string.IsNullOrEmpty(portalId))
         {
-            data.Add("PortalId", new List<string>() { portalId });
+            data.Add("PortalId", new List<string> { portalId });
         }
 
         if (parameters != null)
@@ -273,7 +273,7 @@ public class BillingClient
             {
                 if (!data.ContainsKey(parameter.Item1))
                 {
-                    data.Add(parameter.Item1, new List<string>() { parameter.Item2 });
+                    data.Add(parameter.Item1, new List<string> { parameter.Item2 });
                 }
                 else
                 {

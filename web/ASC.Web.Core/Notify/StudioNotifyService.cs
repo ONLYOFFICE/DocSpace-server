@@ -171,7 +171,7 @@ public class StudioNotifyService(UserManager userManager,
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", cultureInfo);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
-        var tags = new List<ITagValue>() 
+        var tags = new List<ITagValue>
         {
                 new TagValue(Tags.InviteLink, confirmationUrl),
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl),
@@ -544,17 +544,16 @@ public class StudioNotifyService(UserManager userManager,
             //var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager);
             //notifyAction = defaultRebranding ? Actions.EnterpriseAdminWelcomeV1 : Actions.EnterpriseWhitelabelAdminWelcomeV1;
         }
-        else if (tenantExtra.Opensource)
+
+        if (tenantExtra.Opensource)
         {
             return;
             //notifyAction = Actions.OpensourceAdminWelcomeV1;
             //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
-        else
-        {
-            notifyAction = Actions.SaasAdminWelcomeV1;
-            tagValues.Add(new TagValue(CommonTags.Footer, "common"));
-        }
+
+        notifyAction = Actions.SaasAdminWelcomeV1;
+        tagValues.Add(new TagValue(CommonTags.Footer, "common"));
 
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));
         tagValues.Add(new TagValue(Tags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")));
@@ -679,7 +678,7 @@ public class StudioNotifyService(UserManager userManager,
             var userId = u.Id;
             var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(u.Email, ConfirmType.EmailActivation, null, userId);
 
-            await settingsManager.SaveAsync(new FirstEmailConfirmSettings() { IsFirst = true });
+            await settingsManager.SaveAsync(new FirstEmailConfirmSettings { IsFirst = true });
 
             var culture = GetCulture(u);
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirmEmail", culture);

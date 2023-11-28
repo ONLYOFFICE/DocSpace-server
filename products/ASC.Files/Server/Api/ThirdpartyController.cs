@@ -198,10 +198,8 @@ public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
 
             return await _folderDtoHelper.GetAsync(folder);
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     /// <summary>

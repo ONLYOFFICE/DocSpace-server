@@ -38,7 +38,7 @@ public class NotifyAction(string id, string name) : INotifyAction
 
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
-        return new NotifyActionItem() { Id = cache.ID };
+        return new NotifyActionItem { Id = cache.ID };
     }
 
     public static explicit operator NotifyAction(NotifyActionItem cache)

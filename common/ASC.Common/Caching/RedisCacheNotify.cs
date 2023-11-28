@@ -39,7 +39,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public void Publish(T obj, CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T>() { Id = _instanceId, Object = obj, Action = action }))
+        Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }))
             .GetAwaiter()
             .GetResult();
 
@@ -51,7 +51,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public async Task PublishAsync(T obj, CacheNotifyAction action)
     {
-        await Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T>() { Id = _instanceId, Object = obj, Action = action }));
+        await Task.Run(async () => await _redis.PublishAsync(GetChannelName(), new RedisCachePubSubItem<T> { Id = _instanceId, Object = obj, Action = action }));
 
         foreach (var hanlder in GetInvoctionList(action))
         {
