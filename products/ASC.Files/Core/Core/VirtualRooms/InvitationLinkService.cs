@@ -39,6 +39,7 @@ public class InvitationLinkService
     private readonly CountPaidUserChecker _countPaidUserChecker;
     private readonly FileSecurity _fileSecurity;
     private readonly UserManager _userManager;
+    private readonly IPSecurity.IPSecurity _iPSecurity;
 
     public InvitationLinkService(
         CommonLinkUtility commonLinkUtility, 
@@ -48,7 +49,8 @@ public class InvitationLinkService
         TenantManager tenantManager, 
         CountPaidUserChecker countPaidUserChecker, 
         FileSecurity fileSecurity, 
-        UserManager userManager)
+        UserManager userManager,
+        IPSecurity.IPSecurity iPSecurity)
     {
         _commonLinkUtility = commonLinkUtility;
         _daoFactory = daoFactory;
@@ -58,6 +60,7 @@ public class InvitationLinkService
         _countPaidUserChecker = countPaidUserChecker;
         _fileSecurity = fileSecurity;
         _userManager = userManager;
+        _iPSecurity = iPSecurity;
     }
 
     public string GetInvitationLink(Guid linkId, Guid createdBy)
@@ -97,6 +100,11 @@ public class InvitationLinkService
 
     public async Task<Validation> ValidateAsync(string key, string email, EmployeeType employeeType, string roomId = default)
     {
+        if (!await _iPSecurity.VerifyAsync())
+        {
+            throw new SecurityException();
+        }
+
         var linkData = await GetProcessedLinkDataAsync(key, email, employeeType);
         var result = new Validation { Result = linkData.Result };
 
