@@ -17,6 +17,6 @@ public class UrlCollectionValidator implements ConstraintValidator<URLCollection
     private Pattern pattern = Pattern.compile("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
     @Override
     public boolean isValid(Collection<String> urls, ConstraintValidatorContext context) {
-        return urls.size() > 0 && urls.stream().allMatch(url -> pattern.matcher(url).matches());
+        return urls != null && urls.size() > 0 && urls.stream().allMatch(url -> pattern.matcher(url).matches());
     }
 }
