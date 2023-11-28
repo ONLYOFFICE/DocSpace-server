@@ -46,6 +46,26 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
         IUrlShortener urlShortener,
         IConfiguration configuration)
     {
+
+    private TimeSpan _defaultLinkLifeTime;
+    private TimeSpan DefaultLinkLifeTime
+    {
+        get
+        {
+            if (_defaultLinkLifeTime != default)
+            {
+                return _defaultLinkLifeTime;
+            }
+
+            if (!TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime))
+            {
+                defaultLifetime = TimeSpan.FromDays(7);
+            }
+
+            return _defaultLinkLifeTime = defaultLifetime;
+        }
+    }
+
     private static readonly SemaphoreSlim _semaphore = new(1);
     
     private const int MaxInvitationLinks = 1;
@@ -97,7 +117,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
             
             if (entryType == FileEntryType.File)
             {
-                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.None) && !_fileUtility.CanWebView(entry.Title)) 
+                if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.None) && !fileUtility.CanWebView(entry.Title)) 
                     || entry.RootFolderType != FolderType.USER)
                 {
                     continue;
@@ -117,7 +137,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
 
                 if (eventType == EventType.Create && w.FileShareOptions.ExpirationDate == DateTime.MinValue)
                 {
-                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(_defaultLinkLifetime);
+                    w.FileShareOptions.ExpirationDate = DateTime.UtcNow.Add(DefaultLinkLifeTime);
                 }
             }
             
@@ -221,7 +241,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
 
                 if (maxCount > 0)
                 {
-                    var linksCount = await _fileSecurity.GetPureSharesCountAsync(entry, filter, null);
+                    var linksCount = await fileSecurity.GetPureSharesCountAsync(entry, filter, null);
 
                     if (linksCount >= maxCount)
                     {
@@ -482,7 +502,7 @@ public class FileSharing(Global global,
             throw new ArgumentNullException(FilesCommonResource.ErrorMassage_BadRequest);
         }
         
-        var canEditAccess = await _fileSecurity.CanEditAccessAsync(entry);
+        var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
 
         var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
             ? await CheckAccessAsync(entry, filterType)
@@ -507,8 +527,6 @@ public class FileSharing(Global global,
         {
             yield return record;
         }
-
-        var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
 
         await foreach (var record in records)
         {

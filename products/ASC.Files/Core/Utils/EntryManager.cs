@@ -329,8 +329,8 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             if (searchArea == SearchArea.RecentByLinks)
             {
-                var fileDao = _daoFactory.GetFileDao<T>();
-                var userId = _authContext.CurrentAccount.ID;
+                var fileDao = daoFactory.GetFileDao<T>();
+                var userId = authContext.CurrentAccount.ID;
 
                 var filesTotalCountTask = fileDao.GetFilesByTagCountAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
                 var files = await fileDao.GetFilesByTagAsync(userId, TagType.RecentByLink, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, orderBy, from, count).ToListAsync();
@@ -1807,8 +1807,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
     public async Task MarkAsRecentByLink<T>(File<T> file, Guid linkId)
     {
-        var tagDao = _daoFactory.GetTagDao<T>();
-        var userId = _authContext.CurrentAccount.ID;
+        var tagDao = daoFactory.GetTagDao<T>();
+        var userId = authContext.CurrentAccount.ID;
         var linkIdString = linkId.ToString();
 
         var tags = await tagDao.GetTagsAsync(userId, TagType.RecentByLink, new[] { file })
@@ -1823,7 +1823,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (!tags.ContainsKey(linkIdString))
         {
-            var tag = Tag.RecentByLink(_authContext.CurrentAccount.ID, linkId, file);
+            var tag = Tag.RecentByLink(authContext.CurrentAccount.ID, linkId, file);
 
             await tagDao.SaveTagsAsync(tag);
         }

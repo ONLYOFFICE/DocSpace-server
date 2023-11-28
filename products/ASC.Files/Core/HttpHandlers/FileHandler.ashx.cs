@@ -171,7 +171,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sessionId = await externalShare.GetSessionIdAsync();
 
             if (session != null && sessionId != Guid.Empty && session.Id == sessionId &&
-                (await externalShare.ValidateAsync(session.LinkId, _securityContext.IsAuthenticated)) == Status.Ok)
+                (await externalShare.ValidateAsync(session.LinkId, securityContext.IsAuthenticated)) == Status.Ok)
             {
                 path = $@"{session.LinkId}\{session.Id}\{filename}";
             }

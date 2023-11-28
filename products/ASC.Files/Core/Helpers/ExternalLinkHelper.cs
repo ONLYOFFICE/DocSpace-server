@@ -49,7 +49,7 @@ public class ExternalLinkHelper(ExternalShare externalShare, RoomLogoManager roo
             return result;
         }
 
-        var status = await externalShare.ValidateRecordAsync(record, password, _securityContext.IsAuthenticated);
+        var status = await externalShare.ValidateRecordAsync(record, password, securityContext.IsAuthenticated);
         result.Status = status;
 
         if (status != Status.Ok && status != Status.RequiredPassword)

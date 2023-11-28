@@ -32,15 +32,15 @@ public class ExternalShare(Global global,
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
     CommonLinkUtility commonLinkUtility,
-    FilesLinkUtility _filesLinkUtility,
-    FileUtility _fileUtility)
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility)
 {
     private Guid _linkId;
     private Guid _sessionId;
     private string _passwordKey;
     private string _dbKey;
 
-    public async Task<LinkData> GetLinkDataAsync(Guid linkId)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
         string url = null;
@@ -48,8 +48,8 @@ public class ExternalShare(Global global,
         switch (entry)
         {
             case File<T> file:
-                url = _fileUtility.CanWebView(file.Title)
-                    ? _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, file.Title, file.Id)
+                url = fileUtility.CanWebView(file.Title)
+                    ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id)
                     : file.DownloadUrl;
 
                 url += $"&{FilesLinkUtility.ShareKey}={key}";

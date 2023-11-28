@@ -465,20 +465,20 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpGet("file/{fileId}/links")]
     public async IAsyncEnumerable<FileShareDto> GetLinksAsync(T fileId)
     {
-        var offset = Convert.ToInt32(_apiContext.StartIndex);
-        var count = Convert.ToInt32(_apiContext.Count);
+        var offset = Convert.ToInt32(apiContext.StartIndex);
+        var count = Convert.ToInt32(apiContext.Count);
         var counter = 0;
 
-        var totalCountTask = _fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink);
+        var totalCountTask = fileStorageService.GetPureSharesCountAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink);
 
-        await foreach (var ace in _fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, offset, count))
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(fileId, FileEntryType.File, ShareFilterType.ExternalLink, offset, count))
         {
             counter++;
 
-            yield return await _fileShareDtoHelper.Get(ace);
+            yield return await fileShareDtoHelper.Get(ace);
         }
 
-        _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
+        apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
     }
 
     /// <summary>
@@ -494,10 +494,10 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetExternalLinkAsync(T id, FileLinkRequestDto inDto)
     {
-        var linkAce = await _fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
+        var linkAce = await fileStorageService.SetExternalLinkAsync(id, FileEntryType.File, inDto.LinkId, null, inDto.Access, requiredAuth: inDto.Internal, 
             primary: inDto.Primary, expirationDate: inDto.ExpirationDate ?? default);
         
-        return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
+        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
     
     /// <summary>
@@ -512,9 +512,9 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpGet("file/{id}/link")]
     public async Task<FileShareDto> GetPrimaryExternalLinkAsync(T id)
     {
-        var linkAce = await _fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(id, FileEntryType.File);
         
-        return linkAce != null ? await _fileShareDtoHelper.Get(linkAce) : null;
+        return linkAce != null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 }
 
