@@ -27,10 +27,10 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
                     token.getRedirectUri(), token.getAuthorizationCode().getTokenValue()));
             if (state != null && !state.isBlank())
                 redirectUrl.append(String.format("&state=%s", state));
-            response.setStatus(HttpStatus.OK.value());
             Cookie cookie = new Cookie(REDIRECT_COOKIE, redirectUrl.toString());
             cookie.setMaxAge(10000);
             response.addCookie(cookie);
+            response.sendRedirect(redirectUrl.toString());
         }
     }
 }
