@@ -56,6 +56,13 @@ application:
 messaging:
   rabbitmq:
     configuration:
+      audit:
+        exchange: asc_identity_audit_exchange
+        queue: asc_identity_audit_queue
+        routing: asc_identity_audit_routing
+        deadExchange: asc_identity_audit_dlx
+        deadQueue: asc_identity_audit_dlq
+        deadRouting: asc_identity_audit_dlr
       authorization:
         exchange: asc_identity_authorization_exchange
         queue: asc_identity_authorization_queue

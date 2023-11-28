@@ -36,6 +36,7 @@ import java.util.Map;
 @Setter
 @Slf4j
 public class RabbitMQConfiguration {
+    private GenericQueueConfiguration audit;
     private GenericQueueConfiguration authorization;
     private GenericQueueConfiguration client;
     private GenericQueueConfiguration consent;

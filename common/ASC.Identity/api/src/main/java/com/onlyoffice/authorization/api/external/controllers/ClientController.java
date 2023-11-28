@@ -4,6 +4,9 @@
 package com.onlyoffice.authorization.api.external.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
+import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
+import com.onlyoffice.authorization.api.core.entities.enums.Action;
+import com.onlyoffice.authorization.api.core.transfer.messages.AuditMessage;
 import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
 import com.onlyoffice.authorization.api.core.transfer.request.UpdateClientDTO;
@@ -16,11 +19,13 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCle
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
 import com.onlyoffice.authorization.api.external.mappers.ClientMapper;
+import com.onlyoffice.authorization.api.external.utilities.HttpUtils;
 import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -29,6 +34,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +42,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -57,8 +65,12 @@ public class ClientController {
     private final String X_TENANT_HEADER = "X-Tenant";
     private List<String> allowedScopes = new ArrayList<>();
 
-    private final DocspaceClient docspaceClient;
     private final ApplicationConfiguration applicationConfiguration;
+    private final RabbitMQConfiguration configuration;
+
+    private final DocspaceClient docspaceClient;
+    private final AmqpTemplate amqpTemplate;
+
     private final ClientRetrieveUsecases retrieveUsecases;
     private final ClientCreationUsecases creationUsecases;
     private final ClientMutationUsecases mutationUsecases;
@@ -77,6 +89,7 @@ public class ClientController {
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
     public ResponseEntity<PaginationDTO<ClientDTO>> getClients(
+            HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = AUTH_COOKIE_NAME) String ascAuth,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
@@ -115,27 +128,27 @@ public class ClientController {
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("get_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .updateClient(response, address, client.getClientId(), null))
+                    .updateClient(request, response, address, client.getClientId(), null))
                     .withRel(HttpMethod.PUT.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("update_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .deleteClient(response, address, client.getClientId()))
+                    .deleteClient(request, response, address, client.getClientId()))
                     .withRel(HttpMethod.DELETE.name())
                     .withTitle("delete_client"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .regenerateSecret(response, address, client.getClientId()))
+                    .regenerateSecret(request, response, address, client.getClientId()))
                     .withRel(HttpMethod.PATCH.name())
                     .withTitle("regenerate_secret"));
             client.add(linkTo(methodOn(ClientController.class)
-                    .activateClient(response, address, client.getClientId(), null))
+                    .activateClient(request, response, address, client.getClientId(), null))
                     .withRel(HttpMethod.PATCH.name())
                     .withMedia(MediaType.APPLICATION_JSON_VALUE)
                     .withTitle("activate_client"));
         }
 
         pagination.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, address,null))
+                .postClient(request, response, address,null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
 
@@ -158,16 +171,33 @@ public class ClientController {
     @DeleteMapping("/{clientId}/revoke")
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
-    public ResponseEntity revokeUserClient(@PathVariable @NotEmpty String clientId) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+    public ResponseEntity revokeUserClient(
+            HttpServletRequest request,
+            @PathVariable @NotEmpty String clientId
+    ) {
+        var tenantContext = TenantContextContainer.context.get();
+        var userContext = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new user revocation request");
         MDC.clear();
         var user = UserContextContainer.context
                 .get().getResponse();
         consentCleanupUsecases.asyncRevokeConsent(clientId, user.getEmail());
+        amqpTemplate.convertAndSend(
+                configuration.getAudit().getExchange(),
+                configuration.getAudit().getRouting(),
+                AuditMessage.builder()
+                        .ip(HttpUtils.getRequestIP(request))
+                        .browser(HttpUtils.getClientBrowser(request))
+                        .platform(HttpUtils.getClientOS(request))
+                        .date(Timestamp.from(Instant.now()))
+                        .tenantId(tenantContext.getResponse().getTenantId())
+                        .userId(userContext.getResponse().getId())
+                        .page(HttpUtils.getFullURL(request))
+                        .actionEnum(Action.REVOKE_USER_CLIENT)
+                        .build());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -208,24 +238,24 @@ public class ClientController {
         var client = retrieveUsecases.getClient(clientId);
         log.debug("Found client", client);
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, address, clientId, null))
+                .updateClient(null, response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, address, clientId))
+                .deleteClient(null, response, address, clientId))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, address, client.getClientId()))
+                .regenerateSecret(null, response, address, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, address,null))
+                .postClient(null, response, address,null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, address, clientId, null))
+                .activateClient(null, response, address, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
@@ -237,13 +267,15 @@ public class ClientController {
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity<ClientDTO> postClient(
+            HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @RequestBody @Valid CreateClientDTO body
     ) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        var tenantContext = TenantContextContainer.context.get();
+        var userContext = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         log.info("Received a new create client request", body);
         if (!body.getScopes().stream()
                 .allMatch(s -> allowedScopes.contains(s))) {
@@ -253,7 +285,7 @@ public class ClientController {
         }
 
         log.debug("Generating a new client's credentials");
-        var client = creationUsecases.clientAsyncCreationTask(body, context
+        var client = creationUsecases.clientAsyncCreationTask(body, tenantContext
                 .getResponse().getTenantId(), address);
         log.debug("Successfully submitted a new client broker message", client);
 
@@ -263,25 +295,38 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, address, client.getClientId(),null))
+                .updateClient(request, response, address, client.getClientId(),null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, address, client.getClientId()))
+                .deleteClient(request, response, address, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, address, client.getClientId()))
+                .regenerateSecret(request, response, address, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, address, client.getClientId(), null))
+                .activateClient(request, response, address, client.getClientId(), null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
 
         MDC.clear();
+        amqpTemplate.convertAndSend(
+                configuration.getAudit().getExchange(),
+                configuration.getAudit().getRouting(),
+                AuditMessage.builder()
+                        .ip(HttpUtils.getRequestIP(request))
+                        .browser(HttpUtils.getClientBrowser(request))
+                        .platform(HttpUtils.getClientOS(request))
+                        .date(Timestamp.from(Instant.now()))
+                        .tenantId(tenantContext.getResponse().getTenantId())
+                        .userId(userContext.getResponse().getId())
+                        .page(HttpUtils.getFullURL(request))
+                        .actionEnum(Action.CREATE_CLIENT)
+                        .build());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(client);
     }
@@ -290,18 +335,20 @@ public class ClientController {
     @Retry(name = "updateClientRetryRateLimiter")
     @RateLimiter(name = "updateClientRateLimiter")
     public ResponseEntity<ClientDTO> updateClient(
+            HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid UpdateClientDTO body
     ) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        var tenantContext = TenantContextContainer.context.get();
+        var userContext = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new update client request");
         log.debug("Trying to update client with body", body);
-        var client = creationUsecases.updateClient(body, clientId, context
+        var client = creationUsecases.updateClient(body, clientId, tenantContext
                 .getResponse().getTenantId());
         log.debug("Client has been updated", client);
         MDC.clear();
@@ -311,22 +358,36 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, address, client.getClientId()))
+                .deleteClient(request, response, address, client.getClientId()))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .regenerateSecret(response, address, client.getClientId()))
+                .regenerateSecret(request, response, address, client.getClientId()))
                 .withRel(HttpMethod.PATCH.name())
                 .withTitle("regenerate_secret"));
         client.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, address,null))
+                .postClient(request, response, address,null))
                 .withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         client.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, address, clientId, null))
+                .activateClient(request, response, address, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
+
+        amqpTemplate.convertAndSend(
+                configuration.getAudit().getExchange(),
+                configuration.getAudit().getRouting(),
+                AuditMessage.builder()
+                        .ip(HttpUtils.getRequestIP(request))
+                        .browser(HttpUtils.getClientBrowser(request))
+                        .platform(HttpUtils.getClientOS(request))
+                        .date(Timestamp.from(Instant.now()))
+                        .tenantId(tenantContext.getResponse().getTenantId())
+                        .userId(userContext.getResponse().getId())
+                        .page(HttpUtils.getFullURL(request))
+                        .actionEnum(Action.UPDATE_CLIENT)
+                        .build());
 
         return ResponseEntity.ok(client);
     }
@@ -335,18 +396,20 @@ public class ClientController {
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     public ResponseEntity<SecretDTO> regenerateSecret(
+            HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        var tenantContext = TenantContextContainer.context.get();
+        var userContext = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new regenerate client's secret request");
         log.debug("Trying to regenerate client's secret");
         MDC.clear();
-        var regenerate = mutationUsecases.regenerateSecret(clientId, context
+        var regenerate = mutationUsecases.regenerateSecret(clientId, tenantContext
                 .getResponse().getTenantId());
         log.debug("Regeneration result", regenerate);
 
@@ -356,22 +419,36 @@ public class ClientController {
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("get_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .updateClient(response, address, clientId, null))
+                .updateClient(request, response, address, clientId, null))
                 .withRel(HttpMethod.PUT.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("update_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .deleteClient(response, address, clientId))
+                .deleteClient(request, response, address, clientId))
                 .withRel(HttpMethod.DELETE.name())
                 .withTitle("delete_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .postClient(response, address,null)).withRel(HttpMethod.POST.name())
+                .postClient(request, response, address,null)).withRel(HttpMethod.POST.name())
                 .withTitle("create_client"));
         regenerate.add(linkTo(methodOn(ClientController.class)
-                .activateClient(response, address, clientId, null))
+                .activateClient(request, response, address, clientId, null))
                 .withRel(HttpMethod.PATCH.name())
                 .withMedia(MediaType.APPLICATION_JSON_VALUE)
                 .withTitle("activate_client"));
+
+        amqpTemplate.convertAndSend(
+                configuration.getAudit().getExchange(),
+                configuration.getAudit().getRouting(),
+                AuditMessage.builder()
+                        .ip(HttpUtils.getRequestIP(request))
+                        .browser(HttpUtils.getClientBrowser(request))
+                        .platform(HttpUtils.getClientOS(request))
+                        .date(Timestamp.from(Instant.now()))
+                        .tenantId(tenantContext.getResponse().getTenantId())
+                        .userId(userContext.getResponse().getId())
+                        .page(HttpUtils.getFullURL(request))
+                        .actionEnum(Action.REGENERATE_SECRET)
+                        .build());
 
         return ResponseEntity.ok(regenerate);
     }
@@ -380,17 +457,32 @@ public class ClientController {
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
     public ResponseEntity deleteClient(
+            HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId
     ) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        var tenantContext = TenantContextContainer.context.get();
+        var userContext = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new delete client request for tenant");
         MDC.clear();
-        cleanupUsecases.clientAsyncDeletionTask(clientId, context.getResponse().getTenantId());
+        cleanupUsecases.clientAsyncDeletionTask(clientId, tenantContext.getResponse().getTenantId());
+        amqpTemplate.convertAndSend(
+                configuration.getAudit().getExchange(),
+                configuration.getAudit().getRouting(),
+                AuditMessage.builder()
+                        .ip(HttpUtils.getRequestIP(request))
+                        .browser(HttpUtils.getClientBrowser(request))
+                        .platform(HttpUtils.getClientOS(request))
+                        .date(Timestamp.from(Instant.now()))
+                        .tenantId(tenantContext.getResponse().getTenantId())
+                        .userId(userContext.getResponse().getId())
+                        .page(HttpUtils.getFullURL(request))
+                        .actionEnum(Action.DELETE_CLIENT)
+                        .build());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -398,17 +490,32 @@ public class ClientController {
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
     public ResponseEntity activateClient(
+            HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
             @PathVariable @NotEmpty String clientId,
             @RequestBody @Valid ChangeClientActivationDTO body
     ) {
-        var context = TenantContextContainer.context.get();
-        MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
-        MDC.put("tenantAlias", context.getResponse().getTenantAlias());
+        var tenantContext = TenantContextContainer.context.get();
+        var userContext = UserContextContainer.context.get();
+        MDC.put("tenantId", String.valueOf(tenantContext.getResponse().getTenantId()));
+        MDC.put("tenantAlias", tenantContext.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Received a new change client activation request for tenant");
         MDC.clear();
+        amqpTemplate.convertAndSend(
+                configuration.getAudit().getExchange(),
+                configuration.getAudit().getRouting(),
+                AuditMessage.builder()
+                        .ip(HttpUtils.getRequestIP(request))
+                        .browser(HttpUtils.getClientBrowser(request))
+                        .platform(HttpUtils.getClientOS(request))
+                        .date(Timestamp.from(Instant.now()))
+                        .tenantId(tenantContext.getResponse().getTenantId())
+                        .userId(userContext.getResponse().getId())
+                        .page(HttpUtils.getFullURL(request))
+                        .actionEnum(Action.CHANGE_CLIENT_ACTIVATION)
+                        .build());
         if (mutationUsecases.changeActivation(body, clientId))
             return ResponseEntity.status(HttpStatus.OK).build();
         return ResponseEntity.badRequest().build();
