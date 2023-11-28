@@ -2336,6 +2336,15 @@ $OrangeButton
 $TrulyYours</comment>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
-    <value>Master ONLYOFFICE DocSpace with video guides</value>
+    <value>إتقانONLYOFFICE DocSpace  مع الفيديو التوضيحي</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>مع أطيب التحيات، فريق دعم ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>مشاهدة القائمة الكاملة</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>شكرًا لك، فريق ONLYOFFICE</value>
   </data>
 </root>

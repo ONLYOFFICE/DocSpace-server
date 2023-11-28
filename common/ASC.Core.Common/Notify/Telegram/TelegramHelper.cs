@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,7 +27,11 @@
 namespace ASC.Core.Common.Notify;
 
 [Scope]
-public class TelegramHelper
+public class TelegramHelper(ConsumerFactory consumerFactory,
+    TelegramDao telegramDao,
+    TelegramServiceClient telegramServiceClient,
+    IHttpClientFactory httpClientFactory,
+    ILogger<TelegramHelper> logger)
 {
     public enum RegStatus
     {
@@ -36,38 +40,18 @@ public class TelegramHelper
         AwaitingConfirmation
     }
 
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly TelegramDao _telegramDao;
-    private readonly TelegramServiceClient _telegramServiceClient;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<TelegramHelper> _logger;
-
-    public TelegramHelper(
-        ConsumerFactory consumerFactory,
-        TelegramDao telegramDao,
-        TelegramServiceClient telegramServiceClient,
-        IHttpClientFactory httpClientFactory,
-        ILogger<TelegramHelper> logger)
-    {
-        _consumerFactory = consumerFactory;
-        _telegramDao = telegramDao;
-        _telegramServiceClient = telegramServiceClient;
-        _httpClientFactory = httpClientFactory;
-        _logger = logger;
-    }
-
     public string RegisterUser(Guid userId, int tenantId)
     {
         var token = GenerateToken(userId);
 
-        _telegramServiceClient.RegisterUser(userId.ToString(), tenantId, token);
+        telegramServiceClient.RegisterUser(userId.ToString(), tenantId, token);
 
         return GetLink(token);
     }
 
     public void SendMessage(NotifyMessage msg)
     {
-        _telegramServiceClient.SendMessage(msg);
+        telegramServiceClient.SendMessage(msg);
     }
 
     public bool CreateClient(int tenantId, string token, int tokenLifespan, string proxy)
@@ -75,7 +59,7 @@ public class TelegramHelper
         var client = InitClient(token, proxy);
         if (TestingClient(client))
         {
-            _telegramServiceClient.CreateOrUpdateClient(tenantId, token, tokenLifespan, proxy);
+            telegramServiceClient.CreateOrUpdateClient(tenantId, token, tokenLifespan, proxy);
 
             return true;
         }
@@ -87,7 +71,7 @@ public class TelegramHelper
 
     public async Task<RegStatus> UserIsConnectedAsync(Guid userId, int tenantId)
     {
-        if (await _telegramDao.GetUserAsync(userId, tenantId) != null)
+        if (await telegramDao.GetUserAsync(userId, tenantId) != null)
         {
             return RegStatus.Registered;
         }
@@ -108,12 +92,12 @@ public class TelegramHelper
 
     public void DisableClient(int tenantId)
     {
-        _telegramServiceClient.DisableClient(tenantId);
+        telegramServiceClient.DisableClient(tenantId);
     }
 
     public async Task DisconnectAsync(Guid userId, int tenantId)
     {
-        await _telegramDao.DeleteAsync(userId, tenantId);
+        await telegramDao.DeleteAsync(userId, tenantId);
     }
 
     private bool IsAwaitingRegistration(Guid userId, int tenantId)
@@ -123,7 +107,7 @@ public class TelegramHelper
 
     private string GetCurrentToken(Guid userId, int tenantId)
     {
-        return _telegramServiceClient.RegistrationToken(userId.ToString(), tenantId);
+        return telegramServiceClient.RegistrationToken(userId.ToString(), tenantId);
     }
 
     private string GenerateToken(Guid userId)
@@ -141,7 +125,7 @@ public class TelegramHelper
 
     private string GetLink(string token)
     {
-        var tgProvider = (ITelegramLoginProvider)_consumerFactory.GetByKey("telegram");
+        var tgProvider = (ITelegramLoginProvider)consumerFactory.GetByKey("telegram");
         var botname = tgProvider == null ? default : tgProvider.TelegramBotName;
         if (string.IsNullOrEmpty(botname))
         {
@@ -162,7 +146,7 @@ public class TelegramHelper
         }
         catch (Exception e)
         {
-            _logger.DebugCouldNotTest(e);
+            logger.DebugCouldNotTest(e);
 
             return false;
         }
@@ -177,7 +161,7 @@ public class TelegramHelper
             return new TelegramBotClient(token);
         }
 
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
 
         httpClient.BaseAddress = new Uri(proxy);
 

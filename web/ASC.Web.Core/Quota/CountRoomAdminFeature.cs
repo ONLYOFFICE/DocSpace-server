@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,20 +29,15 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Core.Quota;
 
-public class CountPaidUserChecker : TenantQuotaFeatureCheckerCount<CountPaidUserFeature>
+public class CountPaidUserChecker(ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic,
+        TenantManager tenantManager, ITariffService tariffService)
+    : TenantQuotaFeatureCheckerCount<CountPaidUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    private readonly ITariffService _tariffService;
-
     public override string Exception => Resource.TariffsFeature_manager_exception;
-
-    public CountPaidUserChecker(ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic, TenantManager tenantManager, ITariffService tariffService) : base(tenantQuotaFeatureStatistic, tenantManager)
-    {
-        _tariffService = tariffService;
-    }
 
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
-        if ((await _tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
+        if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
             throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "paid users");
         }
@@ -51,18 +46,11 @@ public class CountPaidUserChecker : TenantQuotaFeatureCheckerCount<CountPaidUser
     }
 }
 
-public class CountPaidUserStatistic : ITenantQuotaFeatureStat<CountPaidUserFeature, int>
+public class CountPaidUserStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountPaidUserFeature, int>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public CountPaidUserStatistic(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task<int> GetValueAsync()
     {
-        var userManager = _serviceProvider.GetService<UserManager>();
+        var userManager = serviceProvider.GetService<UserManager>();
         var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupManager.ID)).Length;
         var collaboratorsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupCollaborator.ID)).Length;
 

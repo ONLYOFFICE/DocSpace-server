@@ -1,46 +1,37 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Api;
 
-public class OperationController : ApiControllerBase
-{
-    private readonly FileOperationDtoHelper _fileOperationDtoHelper;
-    private readonly FileStorageService _fileStorageService;
-
-    public OperationController(
-        FileOperationDtoHelper fileOperationDtoHelper,
+public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileStorageService fileStorageService) : base(folderDtoHelper, fileDtoHelper)
-    {
-        _fileOperationDtoHelper = fileOperationDtoHelper;
-        _fileStorageService = fileStorageService;
-    }
-
+        FileStorageService fileStorageService)
+    : ApiControllerBase(folderDtoHelper, fileDtoHelper)
+{
     /// <summary>
     /// Starts the download process of files and folders with the IDs specified in the request.
     /// </summary>
@@ -73,9 +64,9 @@ public class OperationController : ApiControllerBase
             folders.Add(folderId, string.Empty);
         }
 
-        foreach (var e in await _fileStorageService.BulkDownloadAsync(folders, files))
+        foreach (var e in await fileStorageService.BulkDownloadAsync(folders, files))
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
@@ -92,9 +83,9 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        foreach (var e in await _fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content))
+        foreach (var e in await fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content))
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
@@ -111,11 +102,11 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var tasks = await _fileStorageService.DeleteItemsAsync("delete", inDto.FileIds.ToList(), inDto.FolderIds.ToList(), false, inDto.DeleteAfter, inDto.Immediately);
+        var tasks = await fileStorageService.DeleteItemsAsync("delete", inDto.FileIds.ToList(), inDto.FolderIds.ToList(), false, inDto.DeleteAfter, inDto.Immediately);
 
         foreach (var e in tasks)
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
@@ -131,11 +122,11 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var emptyTrash = await _fileStorageService.EmptyTrashAsync();
+        var emptyTrash = await fileStorageService.EmptyTrashAsync();
 
         foreach (var e in emptyTrash)
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
@@ -152,9 +143,9 @@ public class OperationController : ApiControllerBase
     [HttpGet("fileops")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
     {
-        foreach (var e in _fileStorageService.GetTasksStatuses())
+        foreach (var e in fileStorageService.GetTasksStatuses())
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
@@ -171,9 +162,9 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
-        foreach (var e in await _fileStorageService.MarkAsReadAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList()))
+        foreach (var e in await fileStorageService.MarkAsReadAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList()))
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 
@@ -190,9 +181,9 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
-        foreach (var e in await _fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content))
+        foreach (var e in await fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content))
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
 
     }
@@ -214,16 +205,16 @@ public class OperationController : ApiControllerBase
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            (checkedFiles, _) = await _fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
+            (checkedFiles, _) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
         }
         else
         {
-            (checkedFiles, _) = await _fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
+            (checkedFiles, _) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
         }
 
-        var entries = await _fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFiles.OfType<int>().Select(Convert.ToInt32), FilterType.FilesOnly, false, "", "");
+        var entries = await fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFiles.OfType<int>().Select(Convert.ToInt32), FilterType.FilesOnly, false, "", "");
 
-        entries.AddRange(await _fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), checkedFiles.OfType<string>(), FilterType.FilesOnly, false, "", ""));
+        entries.AddRange(await fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), checkedFiles.OfType<string>(), FilterType.FilesOnly, false, "", ""));
 
         foreach (var e in entries)
         {
@@ -244,11 +235,11 @@ public class OperationController : ApiControllerBase
     [HttpPut("fileops/terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)
     {
-        var tasks = _fileStorageService.TerminateTasks(id);
+        var tasks = fileStorageService.TerminateTasks(id);
 
         foreach (var e in tasks)
         {
-            yield return await _fileOperationDtoHelper.GetAsync(e);
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
 }

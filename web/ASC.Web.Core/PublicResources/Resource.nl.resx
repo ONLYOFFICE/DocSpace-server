@@ -536,7 +536,7 @@
     <value>Telefoonnummer van Twilio (vereist voor SMS autorisatie)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een Twitter-account en zoek naar contacten.</value>
+    <value>Verbind de applicatie om in te loggen op het portaal met een Twitter-account.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Schakel de applicatie in voor importeren van Yahoo-contacten.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TfaTooMuchError" xml:space="preserve">
     <value>U hebt te veel SMS berichten verstuurd. Probeer het later opnieuw.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom client id</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom client secret</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Activeer dat deze toepassing zich met een Zoom account aanmeldt bij het portaal.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Schakel deze app in zodat uw gebruikers zich met hun Zoom-accounts kunnen aanmelden bij ONLYOFFICE. {0}Ga naar de Zoom Developers website en maak een nieuwe app ONLYOFFICE integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Te veel aanmeldingspogingen. Probeer het later opnieuw</value>
   </data>
 </root>

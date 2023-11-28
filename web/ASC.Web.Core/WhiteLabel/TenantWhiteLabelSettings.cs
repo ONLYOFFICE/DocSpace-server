@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -312,35 +312,15 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 }
 
 [Scope]
-public class TenantWhiteLabelSettingsHelper
+public class TenantWhiteLabelSettingsHelper(WebImageSupplier webImageSupplier,
+    UserPhotoManager userPhotoManager,
+    StorageFactory storageFactory,
+    WhiteLabelHelper whiteLabelHelper,
+    TenantManager tenantManager,
+    SettingsManager settingsManager,
+    ILogger<TenantWhiteLabelSettingsHelper> logger)
 {
     private const string ModuleName = "whitelabel";
-
-    private readonly WebImageSupplier _webImageSupplier;
-    private readonly UserPhotoManager _userPhotoManager;
-    private readonly StorageFactory _storageFactory;
-    private readonly WhiteLabelHelper _whiteLabelHelper;
-    private readonly TenantManager _tenantManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly ILogger<TenantWhiteLabelSettingsHelper> _log;
-
-    public TenantWhiteLabelSettingsHelper(
-        WebImageSupplier webImageSupplier,
-        UserPhotoManager userPhotoManager,
-        StorageFactory storageFactory,
-        WhiteLabelHelper whiteLabelHelper,
-        TenantManager tenantManager,
-        SettingsManager settingsManager,
-        ILogger<TenantWhiteLabelSettingsHelper> logger)
-    {
-        _webImageSupplier = webImageSupplier;
-        _userPhotoManager = userPhotoManager;
-        _storageFactory = storageFactory;
-        _whiteLabelHelper = whiteLabelHelper;
-        _tenantManager = tenantManager;
-        _settingsManager = settingsManager;
-        _log = logger;
-    }
 
     #region Restore default
 
@@ -377,7 +357,7 @@ public class TenantWhiteLabelSettingsHelper
 
         tenantWhiteLabelSettings.SetLogoText(null);
 
-        var store = storage ?? await _storageFactory.GetStorageAsync(tenantId, ModuleName);
+        var store = storage ?? await storageFactory.GetStorageAsync(tenantId, ModuleName);
 
         try
         {
@@ -385,7 +365,7 @@ public class TenantWhiteLabelSettingsHelper
         }
         catch (Exception e)
         {
-            _log.ErrorRestoreDefault(e);
+            logger.ErrorRestoreDefault(e);
         }
 
         await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
@@ -397,7 +377,7 @@ public class TenantWhiteLabelSettingsHelper
 
     private async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
     {
-        var store = storage ?? await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var store = storage ?? await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
 
         #region delete from storage if already exists
 
@@ -411,7 +391,7 @@ public class TenantWhiteLabelSettingsHelper
             }
             catch (Exception e)
             {
-                _log.ErrorSetLogo(e);
+                logger.ErrorSetLogo(e);
             }
         }
         #endregion
@@ -491,14 +471,14 @@ public class TenantWhiteLabelSettingsHelper
             {
                 var fileName = Path.GetFileName(logo);
                 ext = fileName.Split('.').Last();
-                data = await _userPhotoManager.GetTempPhotoData(fileName);
+                data = await userPhotoManager.GetTempPhotoData(fileName);
                 try
                 {
-                    await _userPhotoManager.RemoveTempPhotoAsync(fileName);
+                    await userPhotoManager.RemoveTempPhotoAsync(fileName);
                 }
                 catch (Exception ex)
                 {
-                    _log.ErrorSetLogo(ex);
+                    logger.ErrorSetLogo(ex);
                 }
             }
             else
@@ -611,7 +591,7 @@ public class TenantWhiteLabelSettingsHelper
 
     private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark)
     {
-        var store = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
         var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
 
         if (await store.IsFileAsync(fileName))
@@ -642,19 +622,19 @@ public class TenantWhiteLabelSettingsHelper
             _ => "logo/"
         };
 
-        return _webImageSupplier.GetAbsoluteWebPath(path + BuildLogoFileName(type, ext, dark));
+        return webImageSupplier.GetAbsoluteWebPath(path + BuildLogoFileName(type, ext, dark));
     }
 
     private async Task<string> GetPartnerStorageLogoPathAsync(WhiteLabelLogoType type, bool dark)
     {
-        var partnerSettings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
         if (partnerSettings.GetIsDefault(type))
         {
             return null;
         }
 
-        var partnerStorage = await _storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await storageFactory.GetStorageAsync(-1, "static_partnerdata");
 
         if (partnerStorage == null)
         {
@@ -685,7 +665,7 @@ public class TenantWhiteLabelSettingsHelper
 
     private async Task<Stream> GetStorageLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark)
     {
-        var storage = await _storageFactory.GetStorageAsync(await _tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var storage = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
 
         if (storage == null)
         {
@@ -699,14 +679,14 @@ public class TenantWhiteLabelSettingsHelper
 
     private async Task<Stream> GetPartnerStorageLogoData(WhiteLabelLogoType type, bool dark)
     {
-        var partnerSettings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
         if (partnerSettings.GetIsDefault(type))
         {
             return null;
         }
 
-        var partnerStorage = await _storageFactory.GetStorageAsync(-1, "static_partnerdata");
+        var partnerStorage = await storageFactory.GetStorageAsync(-1, "static_partnerdata");
 
         if (partnerStorage == null)
         {
@@ -767,7 +747,7 @@ public class TenantWhiteLabelSettingsHelper
 
     public async Task SaveAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, TenantLogoManager tenantLogoManager, bool restore = false)
     {
-        await _settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
+        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
 
         if (tenantId == Tenant.DefaultTenant)
         {
@@ -782,16 +762,16 @@ public class TenantWhiteLabelSettingsHelper
 
     private async Task SetNewLogoTextAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, bool restore = false)
     {
-        _whiteLabelHelper.DefaultLogoText = TenantWhiteLabelSettings.DefaultLogoText;
-        var partnerSettings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        whiteLabelHelper.DefaultLogoText = TenantWhiteLabelSettings.DefaultLogoText;
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
-        if (restore && string.IsNullOrEmpty(await partnerSettings.GetLogoTextAsync(_settingsManager)))
+        if (restore && string.IsNullOrEmpty(await partnerSettings.GetLogoTextAsync(settingsManager)))
         {
-            _whiteLabelHelper.RestoreOldText(tenantId);
+            whiteLabelHelper.RestoreOldText(tenantId);
         }
         else
         {
-            _whiteLabelHelper.SetNewText(tenantId, await tenantWhiteLabelSettings.GetLogoTextAsync(_settingsManager));
+            whiteLabelHelper.SetNewText(tenantId, await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager));
         }
     }
 
