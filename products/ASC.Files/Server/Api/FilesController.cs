@@ -349,10 +349,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> StartConversion(T fileId, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] CheckConversionRequestDto<T> inDto)
     {
-        if (inDto == null)
-        {
-            inDto = new CheckConversionRequestDto<T>();
-        }
+        inDto ??= new CheckConversionRequestDto<T>();
         inDto.FileId = fileId;
 
         return filesControllerHelper.StartConversionAsync(inDto);

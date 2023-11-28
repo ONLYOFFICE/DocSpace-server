@@ -128,7 +128,7 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
             return null;
         }
 
-        return text.Length < 50 ? text : $"{text.Substring(0, 47)}...";
+        return text.Length < 50 ? text : $"{text[..47]}...";
     }
 
     public MessageMaps GetMessageMaps(int actionInt)

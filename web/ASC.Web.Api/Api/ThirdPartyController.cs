@@ -62,44 +62,27 @@ public class ThirdPartyController : ControllerBase
             additionals = HttpContext.Request.Query.ToDictionary(r => r.Key, r => r.Value.FirstOrDefault());
         }
 
-        switch (provider)
+        return provider switch
         {
-            case LoginProvider.Google:
-                return _oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
-                                                                    GoogleLoginProvider.GoogleScopeDrive,
-                                                                    new Dictionary<string, string>
-                                                                        {
-                                                                    { "access_type", "offline" },
-                                                                    { "prompt", "consent" }
-                                                                        }, additionalStateArgs: additionals);
-
-            case LoginProvider.Dropbox:
-                return _oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
-                                                    additionalArgs: new Dictionary<string, string>
-                                                        {
-                                                                        { "force_reauthentication", "true" },
-                                                                        { "token_access_type","offline" }
-                                                        }, additionalStateArgs: additionals);
-
-            case LoginProvider.Docusign:
-                return _oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
-                                                                        DocuSignLoginProvider.DocuSignLoginProviderScopes,
-                                                                        new Dictionary<string, string>
-                                                                            {
-                                                                        { "prompt", "login" }
-                                                                            }, additionalStateArgs: additionals);
-            case LoginProvider.Box:
-                return _oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals);
-
-            case LoginProvider.OneDrive:
-                return _oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals);
-
-            case LoginProvider.Wordpress:
-                return _oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(additionalStateArgs: additionals);
-
-        }
-
-        return null;
+            LoginProvider.Google => _oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
+                GoogleLoginProvider.GoogleScopeDrive,
+                new Dictionary<string, string> { { "access_type", "offline" }, { "prompt", "consent" } },
+                additionalStateArgs: additionals),
+            LoginProvider.Dropbox => _oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
+                additionalArgs: new Dictionary<string, string>
+                {
+                    { "force_reauthentication", "true" }, { "token_access_type", "offline" }
+                }, additionalStateArgs: additionals),
+            LoginProvider.Docusign => _oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
+                DocuSignLoginProvider.DocuSignLoginProviderScopes,
+                new Dictionary<string, string> { { "prompt", "login" } }, additionalStateArgs: additionals),
+            LoginProvider.Box => _oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.OneDrive => _oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(
+                OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals),
+            LoginProvider.Wordpress => _oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
+                additionalStateArgs: additionals),
+            _ => null
+        };
     }
 
     /// <summary>

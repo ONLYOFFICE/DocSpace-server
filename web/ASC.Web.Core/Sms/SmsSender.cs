@@ -45,7 +45,7 @@ public class SmsSender(IConfiguration configuration,
         if ("log".Equals(configuration["core:notify:postman"], StringComparison.InvariantCultureIgnoreCase))
         {
             var tenant = await tenantManager.GetCurrentTenantAsync(false);
-            var tenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+            var tenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
             logger.InformationSendSmsToPhoneNumber(tenantId, number, message);
             return false;
@@ -59,7 +59,7 @@ public class SmsSender(IConfiguration configuration,
     {
         var reg = new Regex(@"[^\d]");
         mobilePhone = reg.Replace(mobilePhone ?? "", string.Empty).Trim();
-        return mobilePhone.Substring(0, Math.Min(64, mobilePhone.Length));
+        return mobilePhone[..Math.Min(64, mobilePhone.Length)];
     }
 
     public static string BuildPhoneNoise(string mobilePhone)

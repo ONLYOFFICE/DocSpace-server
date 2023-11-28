@@ -467,8 +467,7 @@ public class BackupPortalTask(DbFactory dbFactory,
                         }
                         else
                         {
-                            var s = obj[i] as string;
-                            if (s != null)
+                            if (obj[i] is string s)
                             {
                                 sw.Write("'" + s.Replace("\r", "\\r").Replace("\n", "\\n") + "'");
                             }

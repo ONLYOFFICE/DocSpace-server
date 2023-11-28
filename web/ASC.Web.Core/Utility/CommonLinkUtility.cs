@@ -242,9 +242,9 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
             var pos = url.IndexOf("/products/", StringComparison.InvariantCultureIgnoreCase);
             if (0 <= pos)
             {
-                url = url.Substring(pos + 10).ToLower();
+                url = url[(pos + 10)..].ToLower();
                 pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
+                return 0 < pos ? url[..pos] : url;
             }
         }
         catch
@@ -260,9 +260,9 @@ public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
             var pos = url.IndexOf("/modules/", StringComparison.InvariantCultureIgnoreCase);
             if (0 <= pos)
             {
-                url = url.Substring(pos + 9).ToLower();
+                url = url[(pos + 9)..].ToLower();
                 pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
+                return 0 < pos ? url[..pos] : url;
             }
         }
         catch

@@ -300,7 +300,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                         if (commandText.StartsWith("REPLACE INTO"))
                         {
                             var innerValues = commandText.Split(',').ToList();
-                            for (var i = 0; i < innerValues.Count(); i++)
+                            for (var i = 0; i < innerValues.Count; i++)
                             {
                                 var flag1 = false;
                                 var flag2 = false;
@@ -315,12 +315,12 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                                     flag2 = true;
                                     innerValues[i] = innerValues[i].TrimEnd(')');
                                 }
-                                if (i == innerValues.Count() - 1)
+                                if (i == innerValues.Count - 1)
                                 {
                                     innerValues[i] = innerValues[i].Remove(innerValues[i].Length - 2, 2);
                                 }
                                 if (innerValues[i].StartsWith("\'") && ((!innerValues[i].EndsWith("\'") || innerValues[i] == "'")
-                                    || i != innerValues.Count() - 1 && (!innerValues[i + 1].StartsWith("\'") && innerValues[i + 1].EndsWith("\'") && !innerValues[i + 1].StartsWith("(\'") || innerValues[i + 1] == "'")))
+                                    || i != innerValues.Count - 1 && (!innerValues[i + 1].StartsWith("\'") && innerValues[i + 1].EndsWith("\'") && !innerValues[i + 1].StartsWith("(\'") || innerValues[i + 1] == "'")))
                                 {
                                     innerValues[i] += "," + innerValues[i + 1];
                                     innerValues.RemoveAt(i + 1);
@@ -347,7 +347,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                                 {
                                     innerValues[i] = innerValues[i] + ")";
                                 }
-                                if (i == innerValues.Count() - 1)
+                                if (i == innerValues.Count - 1)
                                 {
                                     innerValues[i] = innerValues[i] + ");";
                                 }

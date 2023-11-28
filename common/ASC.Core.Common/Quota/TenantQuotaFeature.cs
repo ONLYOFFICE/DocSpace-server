@@ -81,7 +81,7 @@ public class TenantQuotaFeatureCount(TenantQuota tenantQuota) : TenantQuotaFeatu
 
     protected override bool TryParse(string s, out int result)
     {
-        return int.TryParse(s.Substring(s.IndexOf(':') + 1), out result);
+        return int.TryParse(s[(s.IndexOf(':') + 1)..], out result);
     }
 
     protected internal override void Multiply(int quantity)
@@ -106,7 +106,7 @@ public class TenantQuotaFeatureSize(TenantQuota tenantQuota) : TenantQuotaFeatur
 
     protected override bool TryParse(string s, out long result)
     {
-        return long.TryParse(s.Substring(s.IndexOf(':') + 1), out result);
+        return long.TryParse(s[(s.IndexOf(':') + 1)..], out result);
     }
 
     protected internal override void Multiply(int quantity)

@@ -71,10 +71,7 @@ public class PathUtils
 
     public string ResolveVirtualPath(string virtPath, bool addTrailingSlash = true)
     {
-        if (virtPath == null)
-        {
-            virtPath = "";
-        }
+        virtPath ??= "";
 
         if (virtPath.StartsWith('~') && !Uri.IsWellFormedUriString(virtPath, UriKind.Absolute))
         {

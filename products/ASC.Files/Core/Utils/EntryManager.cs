@@ -49,7 +49,7 @@ public class LockerManager(AuthContext authContext, IDaoFactory daoFactory, Thir
         var tags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.Locked);
         var tagLock = await tags.FirstOrDefaultAsync();
 
-        return tagLock != null ? tagLock.Owner : Guid.Empty;
+        return tagLock?.Owner ?? Guid.Empty;
     }
 }
 
@@ -108,17 +108,14 @@ public class BreadCrumbsManager(IDaoFactory daoFactory,
                     }
                     else
                     {
-                        switch (firstVisible.RootFolderType)
+                        rootId = firstVisible.RootFolderType switch
                         {
-                            case FolderType.USER:
-                                rootId = authContext.CurrentAccount.ID == firstVisible.RootCreateBy
-                                    ? await globalFolderHelper.FolderMyAsync
-                                    : await globalFolderHelper.FolderShareAsync;
-                                break;
-                            case FolderType.COMMON:
-                                rootId = await globalFolderHelper.FolderCommonAsync;
-                                break;
-                        }
+                            FolderType.USER => authContext.CurrentAccount.ID == firstVisible.RootCreateBy
+                                ? await globalFolderHelper.FolderMyAsync
+                                : await globalFolderHelper.FolderShareAsync,
+                            FolderType.COMMON => await globalFolderHelper.FolderCommonAsync,
+                            _ => rootId
+                        };
                     }
                     break;
 
@@ -795,10 +792,7 @@ public class EntryManager(IDaoFactory daoFactory,
             return entries;
         }
 
-        if (orderBy == null)
-        {
-            orderBy = filesSettingsHelper.DefaultOrder;
-        }
+        orderBy ??= filesSettingsHelper.DefaultOrder;
 
         var c = orderBy.IsAsc ? 1 : -1;
         Comparison<FileEntry> sorter = orderBy.SortedBy switch
@@ -1510,10 +1504,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var (editLink, fromFile, _) = await fileShareLink.CheckAsync(doc, false, fileDao);
 
-        if (fromFile == null)
-        {
-            fromFile = await fileDao.GetFileAsync(fileId);
-        }
+        fromFile ??= await fileDao.GetFileAsync(fileId);
 
         if (fromFile == null)
         {

@@ -178,7 +178,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         var range = context.Request.Headers["Range"][0].Split('=', '-');
         offset = Convert.ToInt64(range[1]);
-        if (range.Count() > 2 && !string.IsNullOrEmpty(range[2]))
+        if (range.Length > 2 && !string.IsNullOrEmpty(range[2]))
         {
             endOffset = Convert.ToInt64(range[2]);
         }

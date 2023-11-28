@@ -53,27 +53,16 @@ public static class ByteConverter
             {
                 var num = int.Parse(matches[0].Value);
                 var unit = matches[1].Value.ToLower();
-                switch (unit)
+                bytes = unit switch
                 {
-                    case "bytes":
-                        bytes = num;
-                        break;
-                    case "kb":
-                        bytes = num * 1024;
-                        break;
-                    case "mb":
-                        bytes = Convert.ToInt64(num * Math.Pow(1024, 2));
-                        break;
-                    case "gb":
-                        bytes = Convert.ToInt64(num * Math.Pow(1024, 3));
-                        break;
-                    case "tb":
-                        bytes = Convert.ToInt64(num * Math.Pow(1024, 4));
-                        break;
-                    case "pb":
-                        bytes = Convert.ToInt64(num * Math.Pow(1024, 5));
-                        break;
-                }
+                    "bytes" => num,
+                    "kb" => num * 1024,
+                    "mb" => Convert.ToInt64(num * Math.Pow(1024, 2)),
+                    "gb" => Convert.ToInt64(num * Math.Pow(1024, 3)),
+                    "tb" => Convert.ToInt64(num * Math.Pow(1024, 4)),
+                    "pb" => Convert.ToInt64(num * Math.Pow(1024, 5)),
+                    _ => bytes
+                };
                 return bytes;
             }
         }

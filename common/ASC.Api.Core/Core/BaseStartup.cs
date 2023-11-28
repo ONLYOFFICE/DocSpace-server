@@ -134,10 +134,7 @@ public abstract class BaseStartup
                     string partitionKey;
                     int permitLimit;
 
-                    if (userId == null)
-                    {
-                        userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                    }
+                    userId ??= httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                     if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
                     {

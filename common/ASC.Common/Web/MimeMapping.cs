@@ -853,7 +853,7 @@ public static class MimeMapping
 
         if (0 <= startIndex && fileName.LastIndexOf('\\') < startIndex)
         {
-            str = (string)_extensionToMimeMappingTable[fileName.Substring(startIndex)];
+            str = (string)_extensionToMimeMappingTable[fileName[startIndex..]];
         }
 
         if (str == null)

@@ -205,8 +205,7 @@ public class Builder<T>(ThumbnailSettings settings,
                 {
                     if (exception.InnerException != null)
                     {
-                        var documentServiceException = exception.InnerException as DocumentServiceException;
-                        if (documentServiceException != null)
+                        if (exception.InnerException is DocumentServiceException documentServiceException)
                         {
                             if (documentServiceException.Code == DocumentServiceException.ErrorCode.ConvertPassword)
                             {

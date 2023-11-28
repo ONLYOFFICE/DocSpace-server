@@ -85,10 +85,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
     public void EnqueueTask(Func<DistributedTask, CancellationToken, Task> action, DistributedTask distributedTask = null)
     {
-        if (distributedTask == null)
-        {
-            distributedTask = new DistributedTask();
-        }
+        distributedTask ??= new DistributedTask();
 
         distributedTask.InstanceId = INSTANCE_ID;
 
@@ -126,10 +123,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
-        if (distributedTask.Publication == null)
-        {
-            distributedTask.Publication = GetPublication();
-        }
+        distributedTask.Publication ??= GetPublication();
         distributedTask.PublishChanges();
 
         task.Start(Scheduler);
@@ -151,10 +145,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
 
         foreach (var task in queueTasks)
         {
-            if (task.Publication == null)
-            {
-                task.Publication = GetPublication();
-            }
+            task.Publication ??= GetPublication();
         }
 
         return queueTasks;

@@ -720,18 +720,13 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 u.Email.Contains(text));
         }
 
-        switch (accountLoginType)
+        q = accountLoginType switch
         {
-            case AccountLoginType.LDAP:
-                q = q.Where(r => r.Sid != null);
-                break;
-            case AccountLoginType.SSO:
-                q = q.Where(r => r.SsoNameId != null);
-                break;
-            case AccountLoginType.Standart:
-                q = q.Where(r => r.SsoNameId == null && r.Sid == null);
-                break;
-        }
+            AccountLoginType.LDAP => q.Where(r => r.Sid != null),
+            AccountLoginType.SSO => q.Where(r => r.SsoNameId != null),
+            AccountLoginType.Standart => q.Where(r => r.SsoNameId == null && r.Sid == null),
+            _ => q
+        };
 
         return q;
     }

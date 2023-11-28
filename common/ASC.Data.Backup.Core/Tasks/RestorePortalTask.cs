@@ -159,7 +159,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         foreach (var db in dbs)
         {
             var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(k => Path.GetFileName(k)).ToList();
-            stepscount += keys1.Count() * 2;
+            stepscount += keys1.Count * 2;
             databasesFromDirs.Add(db, keys1);
         }
 

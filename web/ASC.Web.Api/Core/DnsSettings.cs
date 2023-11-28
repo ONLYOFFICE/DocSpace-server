@@ -138,11 +138,11 @@ public class DnsSettings(PermissionContext permissionContext,
         sb.Append(await commonLinkUtility.GetConfirmationEmailUrlAsync(email, confirmType, postfix));
         if (!string.IsNullOrEmpty(dnsName))
         {
-            sb.AppendFormat("&dns={0}", dnsName);
+            sb.Append($"&dns={dnsName}");
         }
         if (!string.IsNullOrEmpty(tenantAlias))
         {
-            sb.AppendFormat("&alias={0}", tenantAlias);
+            sb.Append($"&alias={tenantAlias}");
         }
         return sb.ToString();
     }

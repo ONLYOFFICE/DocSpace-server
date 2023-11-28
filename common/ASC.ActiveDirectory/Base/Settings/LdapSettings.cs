@@ -395,10 +395,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 
     private string GetOldSetting(MappingFields field)
     {
-        if (LdapMapping == null)
-        {
-            LdapMapping = new Dictionary<MappingFields, string>();
-        }
+        LdapMapping ??= new Dictionary<MappingFields, string>();
 
         if (LdapMapping.TryGetValue(field, out var setting))
         {
@@ -409,10 +406,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     }
     private void SetOldSetting(MappingFields field, string value)
     {
-        if (LdapMapping == null)
-        {
-            LdapMapping = new Dictionary<MappingFields, string>();
-        }
+        LdapMapping ??= new Dictionary<MappingFields, string>();
 
         if (string.IsNullOrEmpty(value))
         {

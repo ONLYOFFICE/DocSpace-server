@@ -660,11 +660,7 @@ public class TariffService : ITariffService
                     tariffInfo.Id = efTariff.Id;
                 }
 
-                if (efTariff.CustomerId == default)
-                {
-                    efTariff.CustomerId = "";
-                }
-
+                efTariff.CustomerId ??= "";
                 efTariff = await dbContext.AddOrUpdateAsync(q => q.Tariffs, efTariff);
 
                 foreach (var q in tariffInfo.Quotas)

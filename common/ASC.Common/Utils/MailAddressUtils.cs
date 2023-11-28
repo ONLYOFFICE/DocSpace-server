@@ -52,7 +52,7 @@ public static class MailAddressUtils
 
             if (125 < displayName.Length)
             {
-                displayName = displayName.Substring(0, 125);
+                displayName = displayName[..125];
             }
         }
 

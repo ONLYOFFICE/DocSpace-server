@@ -88,15 +88,14 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
     private async Task<IEnumerable<int>> GetChangedTenantsAsync(DateTime date, WhatsNewType whatsNewType)
     {
-        switch (whatsNewType)
+        return whatsNewType switch
         {
-            case WhatsNewType.DailyFeed:
-                return await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1), date.Date.AddSeconds(-1));
-            case WhatsNewType.RoomsActivity:
-                return await auditEventsRepository.GetTenantsAsync(date.AddHours(-1), date.AddSeconds(-1));
-            default:
-                return Enumerable.Empty<int>();
-        }
+            WhatsNewType.DailyFeed => await auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1),
+                date.Date.AddSeconds(-1)),
+            WhatsNewType.RoomsActivity => await auditEventsRepository.GetTenantsAsync(date.AddHours(-1),
+                date.AddSeconds(-1)),
+            _ => Enumerable.Empty<int>()
+        };
     }
 
     private async Task SendMsgWhatsNewAsync(int tenantid, DateTime scheduleDate, WhatsNewType whatsNewType, List<IProduct> products)

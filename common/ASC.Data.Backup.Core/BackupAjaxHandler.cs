@@ -215,7 +215,7 @@ public class BackupAjaxHandler(BackupService backupService,
             {
                 TenantId = await tenantManager.GetCurrentTenantIdAsync(),
                 Cron = schedule.CronParams.ToString(),
-                NumberOfBackupsStored = schedule.BackupsStored == null ? 0 : (int)schedule.BackupsStored,
+                NumberOfBackupsStored = schedule.BackupsStored ?? 0,
                 StorageType = schedule.StorageType,
                 StorageParams = schedule.StorageParams
             };

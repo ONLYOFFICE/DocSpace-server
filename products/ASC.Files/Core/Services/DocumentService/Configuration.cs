@@ -340,29 +340,15 @@ public class EditorConfiguration<T>
                 return null;
             }
 
-            var filter = FilterType.FilesOnly;
-            switch (_configuration.GetFileType)
+            var filter = _configuration.GetFileType switch
             {
-                case FileType.Document:
-                    filter = FilterType.DocumentsOnly;
-                    break;
-
-                case FileType.OForm:
-                    filter = FilterType.OFormOnly;
-                    break;
-
-                case FileType.OFormTemplate:
-                    filter = FilterType.OFormTemplateOnly;
-                    break;
-
-                case FileType.Spreadsheet:
-                    filter = FilterType.SpreadsheetsOnly;
-                    break;
-
-                case FileType.Presentation:
-                    filter = FilterType.PresentationsOnly;
-                    break;
-            }
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.OForm => FilterType.OFormOnly,
+                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                _ => FilterType.FilesOnly
+            };
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var files = _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, string.Empty, false).Result.Cast<File<int>>();
@@ -401,29 +387,15 @@ public class EditorConfiguration<T>
             }
 
             var extension = _fileUtility.GetInternalExtension(_configuration.Document.Title).TrimStart('.');
-            var filter = FilterType.FilesOnly;
-            switch (_configuration.GetFileType)
+            var filter = _configuration.GetFileType switch
             {
-                case FileType.Document:
-                    filter = FilterType.DocumentsOnly;
-                    break;
-
-                case FileType.OForm:
-                    filter = FilterType.OFormOnly;
-                    break;
-
-                case FileType.OFormTemplate:
-                    filter = FilterType.OFormTemplateOnly;
-                    break;
-
-                case FileType.Spreadsheet:
-                    filter = FilterType.SpreadsheetsOnly;
-                    break;
-
-                case FileType.Presentation:
-                    filter = FilterType.PresentationsOnly;
-                    break;
-            }
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.OForm => FilterType.OFormOnly,
+                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                _ => FilterType.FilesOnly
+            };
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var fileDao = _daoFactory.GetFileDao<int>();

@@ -104,10 +104,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                 return portalUserInfo;
             }
 
-            if (!ldapUserInfo.WorkFromDate.HasValue)
-            {
-                ldapUserInfo.WorkFromDate = tenantUtil.DateTimeNow();
-            }
+            ldapUserInfo.WorkFromDate ??= tenantUtil.DateTimeNow();
 
             if (onlyGetChanges)
             {

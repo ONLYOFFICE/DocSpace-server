@@ -172,7 +172,7 @@ public static class LdapUtils
         var sBuilder = new StringBuilder();
         foreach (var contact in userInfo.Contacts)
         {
-            sBuilder.AppendFormat("{0}|", contact);
+            sBuilder.Append($"{contact}|");
         }
         return sBuilder.ToString();
     }

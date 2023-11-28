@@ -71,7 +71,7 @@ public class NovellLdapEntryExtension(ILogger<NovellLdapEntryExtension> logger)
     public string[] GetAttributeArrayValue(LdapEntry ldapEntry, string attributeName)
     {
         var attribute = ldapEntry.GetAttribute(attributeName);
-        return attribute == null ? null : attribute.StringValueArray;
+        return attribute?.StringValueArray;
     }
 
     private string DecodeSid(byte[] sid)

@@ -59,6 +59,6 @@ public class MessagePolicy(IConfiguration configuration)
 
         var portIdx = ip.IndexOf(':');
 
-        return portIdx > -1 ? ip.Substring(0, portIdx) : ip;
+        return portIdx > -1 ? ip[..portIdx] : ip;
     }
 }

@@ -215,10 +215,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
             Connect();
         }
 
-        if (searchBase == null)
-        {
-            searchBase = "";
-        }
+        searchBase ??= "";
 
         var entries = new List<LdapEntry>();
 
@@ -350,10 +347,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
             Connect();
         }
 
-        if (searchBase == null)
-        {
-            searchBase = "";
-        }
+        searchBase ??= "";
 
         var entries = new List<LdapEntry>();
 

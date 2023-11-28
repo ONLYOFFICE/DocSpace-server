@@ -224,19 +224,12 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
     {
         try
         {
-            string privateKey;
-            switch (recaptchaType)
+            var privateKey = recaptchaType switch
             {
-                case RecaptchaType.AndroidV2:
-                    privateKey = configuration["recaptcha:private-key:android"];
-                    break;
-                case RecaptchaType.iOSV2:
-                    privateKey = configuration["recaptcha:private-key:ios"];
-                    break;
-                default:
-                    privateKey = configuration["recaptcha:private-key:default"];
-                    break;
-            }
+                RecaptchaType.AndroidV2 => configuration["recaptcha:private-key:android"],
+                RecaptchaType.iOSV2 => configuration["recaptcha:private-key:ios"],
+                _ => configuration["recaptcha:private-key:default"]
+            };
 
             var data = $"secret={privateKey}&remoteip={ip}&response={response}";
             var url = configuration["recaptcha:verify-url"] ?? "https://www.recaptcha.net/recaptcha/api/siteverify";

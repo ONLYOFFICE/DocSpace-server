@@ -68,7 +68,7 @@ public class TelegramSenderSinkMessageCreator(TenantManager tenantManager) : Sin
         };
 
         var tenant = await tenantManager.GetCurrentTenantAsync(false);
-        m.TenantId = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        m.TenantId = tenant?.Id ?? Tenant.DefaultTenant;
 
         return m;
     }

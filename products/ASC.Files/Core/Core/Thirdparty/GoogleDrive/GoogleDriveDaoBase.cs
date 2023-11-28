@@ -227,7 +227,7 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         var file = GetFile();
 
         file.Id = MakeId(driveFile.Id);
-        file.ContentLength = driveFile.Size.HasValue ? (long)driveFile.Size : 0;
+        file.ContentLength = driveFile.Size ?? 0;
         file.CreateOn = driveFile.CreatedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;

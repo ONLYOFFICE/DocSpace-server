@@ -532,7 +532,7 @@ public class DiscDataStore(TempStream tempStream,
             var entries = Directory.GetDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             var tmp = Array.ConvertAll(
             entries,
-            x => x.Substring(targetDir.Length));
+            x => x[targetDir.Length..]);
             return tmp.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
@@ -554,7 +554,7 @@ public class DiscDataStore(TempStream tempStream,
             var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             var tmp = Array.ConvertAll(
             entries,
-            x => x.Substring(targetDir.Length));
+            x => x[targetDir.Length..]);
             return tmp.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();

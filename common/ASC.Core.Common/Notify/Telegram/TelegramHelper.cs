@@ -124,7 +124,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     private string GetLink(string token)
     {
         var tgProvider = (ITelegramLoginProvider)consumerFactory.GetByKey("telegram");
-        var botname = tgProvider == null ? default : tgProvider.TelegramBotName;
+        var botname = tgProvider?.TelegramBotName;
         if (string.IsNullOrEmpty(botname))
         {
             return null;

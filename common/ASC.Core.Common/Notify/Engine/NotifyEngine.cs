@@ -388,10 +388,8 @@ public class NotifyEngine(Context context,
                 {
                     pattern = apProvider.GetPatternMethod(request.NotifyAction, senderName, request);
                 }
-                if (pattern == null)
-                {
-                    pattern = apProvider.GetPattern(request.NotifyAction, senderName);
-                }
+                
+                pattern ??= apProvider.GetPattern(request.NotifyAction, senderName);
 
                 request._patterns[i] = pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted.");
             }

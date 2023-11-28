@@ -71,7 +71,7 @@ public class PeopleController(ILogger<PeopleController> option,
             link = await GetUserProfileLinkAsync(user)
         }).ToListAsync();
 
-        option.LogDebug("People find {0} / {1}; Elapsed {2} ms", result.Count(), userIds.Count(), sw.ElapsedMilliseconds);
+        option.LogDebug("People find {0} / {1}; Elapsed {2} ms", result.Count, userIds.Count(), sw.ElapsedMilliseconds);
         sw.Stop();
 
         return Ok(new

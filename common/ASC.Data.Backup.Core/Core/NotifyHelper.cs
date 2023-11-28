@@ -140,7 +140,7 @@ public class NotifyHelper(UserManager userManager,
                 {
                     var currentArgs = new List<ITagValue>(args);
 
-                    var newTenantId = toTenantId.HasValue ? toTenantId.Value : tenant.Id;
+                    var newTenantId = toTenantId ?? tenant.Id;
                     var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
                     var confirmationUrl = url + "/" + commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
                     var culture = user.GetCulture();

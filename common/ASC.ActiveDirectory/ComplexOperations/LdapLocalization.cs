@@ -596,13 +596,13 @@ public class LdapLocalization
     {
         try
         {
-            var val = _resourceManager != null ? _resourceManager.GetString(key) : null;
+            var val = _resourceManager?.GetString(key);
             if (val == null && _notifyResourceManager != null)
             {
                 val = _notifyResourceManager.GetString(key);
             }
 
-            return val != null ? val : defaultValue;
+            return val ?? defaultValue;
         }
         catch
         {

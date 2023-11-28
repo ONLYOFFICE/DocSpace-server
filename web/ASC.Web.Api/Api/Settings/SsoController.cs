@@ -208,7 +208,7 @@ public class SsoController : BaseSettingsController
         }
         else if (settings.SpLoginLabel.Length > 100)
         {
-            settings.SpLoginLabel = settings.SpLoginLabel.Substring(0, 100);
+            settings.SpLoginLabel = settings.SpLoginLabel[..100];
         }
 
         if (!await _settingsManager.SaveAsync(settings))

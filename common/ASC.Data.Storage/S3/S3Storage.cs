@@ -796,7 +796,7 @@ public class S3Storage(TempStream tempStream,
             formBuilder.Append($"<input type=\"hidden\" name=\"success_action_redirect\" value=\"{redirectTo}\" />");
         }
 
-        formBuilder.AppendFormat("<input type=\"hidden\" name=\"success_action_status\" value=\"{0}\" />", 201);
+        formBuilder.Append($"<input type=\"hidden\" name=\"success_action_status\" value=\"{201}\" />");
 
         if (!string.IsNullOrEmpty(contentType))
         {
@@ -1122,7 +1122,7 @@ public class S3Storage(TempStream tempStream,
                 Paths = new Paths
                 {
                     Items = paths.ToList(),
-                    Quantity = paths.Count()
+                    Quantity = paths.Length
                 }
             }
         };

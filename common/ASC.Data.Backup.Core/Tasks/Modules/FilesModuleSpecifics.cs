@@ -232,13 +232,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
                 return false;
             }
 
-            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, strValue.Substring(start.Length));
+            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, strValue[start.Length..]);
             if (entityId == null)
             {
                 return false;
             }
 
-            value = strValue.Substring(0, start.Length) + entityId;
+            value = strValue[..start.Length] + entityId;
 
             return true;
         }
@@ -325,12 +325,12 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
             {
                 return false;
             }
-            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, str.Substring(start.Length));
+            var entityId = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, str[start.Length..]);
             if (entityId == null)
             {
                 return false;
             }
-            value = str.Substring(0, start.Length) + entityId;
+            value = str[..start.Length] + entityId;
 
             return true;
         }

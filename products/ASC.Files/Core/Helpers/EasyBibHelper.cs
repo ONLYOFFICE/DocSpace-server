@@ -69,19 +69,13 @@ public class EasyBibHelper : Consumer
 
     public string GetEasyBibCitationsList(int source, string data)
     {
-        var uri = "";
-        switch (source)
+        var uri = source switch
         {
-            case 0:
-                uri = _searchBookUrl;
-                break;
-            case 1:
-                uri = _searchJournalUrl;
-                break;
-            case 2:
-                uri = _searchWebSiteUrl;
-                break;
-        }
+            0 => _searchBookUrl,
+            1 => _searchJournalUrl,
+            2 => _searchWebSiteUrl,
+            _ => ""
+        };
         uri += data;
 
         const string method = "GET";

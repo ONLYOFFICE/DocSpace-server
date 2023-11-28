@@ -187,11 +187,11 @@ public class TariffController(CommonMethods commonMethods,
         return new
         {
             countManager = q.CountRoomAdmin,
-            dueDate = t == null ? DateTime.MaxValue : t.DueDate,
+            dueDate = t?.DueDate ?? DateTime.MaxValue,
             features = q.Features,
             maxFileSize = q.MaxFileSize,
             maxTotalSize = q.MaxTotalSize,
-            state = t == null ? TariffState.Paid : t.State,
+            state = t?.State ?? TariffState.Paid,
         };
     }
 

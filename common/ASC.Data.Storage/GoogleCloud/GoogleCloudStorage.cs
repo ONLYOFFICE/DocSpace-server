@@ -215,10 +215,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         uploaded.ContentEncoding = contentEncoding;
         uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
 
-        if (uploaded.Metadata == null)
-        {
-            uploaded.Metadata = new Dictionary<string, string>();
-        }
+        uploaded.Metadata ??= new Dictionary<string, string>();
 
         uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
 
@@ -596,12 +593,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
         uploaded.ContentDisposition = "attachment";
-
-        if (uploaded.Metadata == null)
-        {
-            uploaded.Metadata = new Dictionary<string, string>();
-        }
-
+        uploaded.Metadata ??= new Dictionary<string, string>();
         uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
         uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 

@@ -85,7 +85,7 @@ public class SmsKeyStorage
     private async Task<string> BuildCacheKeyAsync(string phone)
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync(false);
-        var tenantCache = tenant == null ? Tenant.DefaultTenant : tenant.Id;
+        var tenantCache = tenant?.Id ?? Tenant.DefaultTenant;
         return "smskey" + phone + tenantCache;
     }
 

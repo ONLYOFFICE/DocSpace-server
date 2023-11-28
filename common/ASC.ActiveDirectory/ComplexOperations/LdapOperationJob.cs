@@ -417,10 +417,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var photoSettings = await settingsManager.LoadAsync<LdapCurrentUserPhotos>();
 
-        if (photoSettings.CurrentPhotos == null)
-        {
-            photoSettings.CurrentPhotos = new Dictionary<Guid, string>();
-        }
+        photoSettings.CurrentPhotos ??= new Dictionary<Guid, string>();
 
         var ldapUsers = _ldapUserImporter.AllDomainUsers.Where(x => !x.IsDisabled);
         var step = 5.0 / ldapUsers.Count();
@@ -563,7 +560,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
                 var users = await userManager.GetUsersByGroupAsync(gr.ID);
 
-                logger.DebugGiveUsersRightsFoundUsersForGroup(users.Count(), gr.Name, gr.ID);
+                logger.DebugGiveUsersRightsFoundUsersForGroup(users.Length, gr.Name, gr.ID);
 
 
                 foreach (var user in users)
@@ -1384,49 +1381,29 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private static string GetError(LdapSettingsStatus result)
     {
-        switch (result)
+        return result switch
         {
-            case LdapSettingsStatus.Ok:
-                return string.Empty;
-            case LdapSettingsStatus.WrongServerOrPort:
-                return Resource.LdapSettingsErrorWrongServerOrPort;
-            case LdapSettingsStatus.WrongUserDn:
-                return Resource.LdapSettingsErrorWrongUserDn;
-            case LdapSettingsStatus.IncorrectLDAPFilter:
-                return Resource.LdapSettingsErrorIncorrectLdapFilter;
-            case LdapSettingsStatus.UsersNotFound:
-                return Resource.LdapSettingsErrorUsersNotFound;
-            case LdapSettingsStatus.WrongLoginAttribute:
-                return Resource.LdapSettingsErrorWrongLoginAttribute;
-            case LdapSettingsStatus.WrongGroupDn:
-                return Resource.LdapSettingsErrorWrongGroupDn;
-            case LdapSettingsStatus.IncorrectGroupLDAPFilter:
-                return Resource.LdapSettingsErrorWrongGroupFilter;
-            case LdapSettingsStatus.GroupsNotFound:
-                return Resource.LdapSettingsErrorGroupsNotFound;
-            case LdapSettingsStatus.WrongGroupAttribute:
-                return Resource.LdapSettingsErrorWrongGroupAttribute;
-            case LdapSettingsStatus.WrongUserAttribute:
-                return Resource.LdapSettingsErrorWrongUserAttribute;
-            case LdapSettingsStatus.WrongGroupNameAttribute:
-                return Resource.LdapSettingsErrorWrongGroupNameAttribute;
-            case LdapSettingsStatus.CredentialsNotValid:
-                return Resource.LdapSettingsErrorCredentialsNotValid;
-            case LdapSettingsStatus.ConnectError:
-                return Resource.LdapSettingsConnectError;
-            case LdapSettingsStatus.StrongAuthRequired:
-                return Resource.LdapSettingsStrongAuthRequired;
-            case LdapSettingsStatus.WrongSidAttribute:
-                return Resource.LdapSettingsWrongSidAttribute;
-            case LdapSettingsStatus.TlsNotSupported:
-                return Resource.LdapSettingsTlsNotSupported;
-            case LdapSettingsStatus.DomainNotFound:
-                return Resource.LdapSettingsErrorDomainNotFound;
-            case LdapSettingsStatus.CertificateRequest:
-                return Resource.LdapSettingsStatusCertificateVerification;
-            default:
-                return Resource.LdapSettingsErrorUnknownError;
-        }
+            LdapSettingsStatus.Ok => string.Empty,
+            LdapSettingsStatus.WrongServerOrPort => Resource.LdapSettingsErrorWrongServerOrPort,
+            LdapSettingsStatus.WrongUserDn => Resource.LdapSettingsErrorWrongUserDn,
+            LdapSettingsStatus.IncorrectLDAPFilter => Resource.LdapSettingsErrorIncorrectLdapFilter,
+            LdapSettingsStatus.UsersNotFound => Resource.LdapSettingsErrorUsersNotFound,
+            LdapSettingsStatus.WrongLoginAttribute => Resource.LdapSettingsErrorWrongLoginAttribute,
+            LdapSettingsStatus.WrongGroupDn => Resource.LdapSettingsErrorWrongGroupDn,
+            LdapSettingsStatus.IncorrectGroupLDAPFilter => Resource.LdapSettingsErrorWrongGroupFilter,
+            LdapSettingsStatus.GroupsNotFound => Resource.LdapSettingsErrorGroupsNotFound,
+            LdapSettingsStatus.WrongGroupAttribute => Resource.LdapSettingsErrorWrongGroupAttribute,
+            LdapSettingsStatus.WrongUserAttribute => Resource.LdapSettingsErrorWrongUserAttribute,
+            LdapSettingsStatus.WrongGroupNameAttribute => Resource.LdapSettingsErrorWrongGroupNameAttribute,
+            LdapSettingsStatus.CredentialsNotValid => Resource.LdapSettingsErrorCredentialsNotValid,
+            LdapSettingsStatus.ConnectError => Resource.LdapSettingsConnectError,
+            LdapSettingsStatus.StrongAuthRequired => Resource.LdapSettingsStrongAuthRequired,
+            LdapSettingsStatus.WrongSidAttribute => Resource.LdapSettingsWrongSidAttribute,
+            LdapSettingsStatus.TlsNotSupported => Resource.LdapSettingsTlsNotSupported,
+            LdapSettingsStatus.DomainNotFound => Resource.LdapSettingsErrorDomainNotFound,
+            LdapSettingsStatus.CertificateRequest => Resource.LdapSettingsStatusCertificateVerification,
+            _ => Resource.LdapSettingsErrorUnknownError
+        };
     }
 
     public static class LdapOperationExtension

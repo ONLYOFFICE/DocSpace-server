@@ -73,7 +73,7 @@ public class OAuth20TokenHelper(IHttpContextAccessor httpContextAccessor, Consum
                 .Where(a => a != null)
                 .Aggregate(stateQuery, (current, a) => $"{current}&{a.Trim()}={additionalStateArgs[a] ?? "".Trim()}");
 
-            stateUriBuilder.Query = stateQuery.Substring(1);
+            stateUriBuilder.Query = stateQuery[1..];
         }
 
         var state = HttpUtility.UrlEncode(stateUriBuilder.Uri.AbsoluteUri);

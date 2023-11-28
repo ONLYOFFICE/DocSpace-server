@@ -617,10 +617,8 @@ public class FileStorageService //: IFileStorageService
             filter = FilterType.FilesOnly;
         }
 
-        if (orderBy == null)
-        {
-            orderBy = filesSettingsHelper.DefaultOrder;
-        }
+        orderBy ??= filesSettingsHelper.DefaultOrder;
+        
         if (Equals(parent.Id, await globalFolderHelper.GetFolderShareAsync<T>()) && orderBy.SortedBy == SortedByType.DateAndTime)
         {
             orderBy.SortedBy = SortedByType.New;
@@ -684,11 +682,8 @@ public class FileStorageService //: IFileStorageService
                 folder = null;
             }
         }
-        if (folder == null)
-        {
-            folder = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderMyAsync<T>());
-        }
-
+        
+        folder ??= await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderMyAsync<T>());
 
         var file = serviceProvider.GetService<File<T>>();
         file.ParentId = folder.Id;
@@ -1200,10 +1195,7 @@ public class FileStorageService //: IFileStorageService
     {
         var fileDao = GetFileDao<T>();
         var (readLink, file, _) = await fileShareLink.CheckAsync(doc, true, fileDao);
-        if (file == null)
-        {
-            file = await fileDao.GetFileAsync(fileId);
-        }
+        file ??= await fileDao.GetFileAsync(fileId);
 
         ErrorIf(file == null, FilesCommonResource.ErrorMassage_FileNotFound);
         ErrorIf(!readLink && !await fileSecurity.CanReadHistoryAsync(file), FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
@@ -2847,10 +2839,7 @@ public class FileStorageService //: IFileStorageService
         var recipients = new List<Guid>();
         foreach (var email in mentionMessage.Emails)
         {
-            if (!canShare.HasValue)
-            {
-                canShare = await fileSharing.CanSetAccessAsync(file);
-            }
+            canShare ??= await fileSharing.CanSetAccessAsync(file);
 
             var recipient = await userManager.GetUserByEmailAsync(email);
             if (recipient == null || recipient.Id == Constants.LostUser.Id)
@@ -2872,7 +2861,7 @@ public class FileStorageService //: IFileStorageService
         const int maxMessageLength = 200;
         if (message.Length > maxMessageLength)
         {
-            message = message.Substring(0, maxMessageLength) + "...";
+            message = message[..maxMessageLength] + "...";
         }
 
         try

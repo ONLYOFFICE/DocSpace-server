@@ -77,8 +77,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
                 return (T)Items[key];
             }
 
-            var jToken = Items[key] as JToken;
-            if (jToken != null)
+            if (Items[key] is JToken jToken)
             {
                 var item = jToken.ToObject<T>();
                 Items[key] = item;

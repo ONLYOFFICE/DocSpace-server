@@ -57,28 +57,17 @@ public class FileDateTime(TenantUtil tenantUtil)
     public DateTime GetModifiedOnWithAutoCleanUp(DateTime modifiedOn, DateToAutoCleanUp date, bool utc = false)
     {
         var dateTime = modifiedOn;
-        switch (date)
+        dateTime = date switch
         {
-            case DateToAutoCleanUp.OneWeek: 
-                dateTime = dateTime.AddDays(7); 
-                break;
-            case DateToAutoCleanUp.TwoWeeks: 
-                dateTime = dateTime.AddDays(14); 
-                break;
-            case DateToAutoCleanUp.OneMonth: 
-                dateTime = dateTime.AddMonths(1); 
-                break;
-            case DateToAutoCleanUp.ThirtyDays: 
-                dateTime = dateTime.AddDays(30); 
-                break;
-            case DateToAutoCleanUp.TwoMonths: 
-                dateTime = dateTime.AddMonths(2); 
-                break;
-            case DateToAutoCleanUp.ThreeMonths: 
-                dateTime = dateTime.AddMonths(3); 
-                break;
-        }
-        
+            DateToAutoCleanUp.OneWeek => dateTime.AddDays(7),
+            DateToAutoCleanUp.TwoWeeks => dateTime.AddDays(14),
+            DateToAutoCleanUp.OneMonth => dateTime.AddMonths(1),
+            DateToAutoCleanUp.ThirtyDays => dateTime.AddDays(30),
+            DateToAutoCleanUp.TwoMonths => dateTime.AddMonths(2),
+            DateToAutoCleanUp.ThreeMonths => dateTime.AddMonths(3),
+            _ => dateTime
+        };
+
         return utc ? tenantUtil.DateTimeToUtc(dateTime) : dateTime;
     }
 }

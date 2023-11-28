@@ -213,34 +213,13 @@ public class CronExpression : ICloneable, IDeserializationCallback
         _expressionParsed = true;
         try
         {
-            if (_seconds == null)
-            {
-                _seconds = new TreeSet();
-            }
-            if (_minutes == null)
-            {
-                _minutes = new TreeSet();
-            }
-            if (_hours == null)
-            {
-                _hours = new TreeSet();
-            }
-            if (_daysOfMonth == null)
-            {
-                _daysOfMonth = new TreeSet();
-            }
-            if (_months == null)
-            {
-                _months = new TreeSet();
-            }
-            if (_daysOfWeek == null)
-            {
-                _daysOfWeek = new TreeSet();
-            }
-            if (_years == null)
-            {
-                _years = new TreeSet();
-            }
+            _seconds ??= new TreeSet();
+            _minutes ??= new TreeSet();
+            _hours ??= new TreeSet();
+            _daysOfMonth ??= new TreeSet();
+            _months ??= new TreeSet();
+            _daysOfWeek ??= new TreeSet();
+            _years ??= new TreeSet();
             var exprOn = Second;
 
 
