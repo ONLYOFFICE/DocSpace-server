@@ -6,8 +6,11 @@ package com.onlyoffice.authorization.api.integration.services;
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.docspace.DocspaceResponseDTO;
+import com.onlyoffice.authorization.api.core.transfer.response.docspace.TenantDTO;
 import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
 import com.onlyoffice.authorization.api.ports.services.ClientService;
+import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
 import com.onlyoffice.authorization.api.security.crypto.Cipher;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +44,17 @@ public class ClientServiceTest extends ContainerBase {
     @BeforeEach
     @SneakyThrows
     void beforeEach() {
+        TenantContextContainer.context.set(DocspaceResponseDTO
+                .<TenantDTO>builder()
+                .status(200)
+                .statusCode(200)
+                .response(TenantDTO
+                        .builder()
+                        .name("mock")
+                        .tenantAlias("mock")
+                        .tenantId(1)
+                        .build())
+                .build());
         clientRepository.save(Client
                 .builder()
                         .clientId("client")
