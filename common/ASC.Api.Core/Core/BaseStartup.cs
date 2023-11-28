@@ -110,12 +110,8 @@ public abstract class BaseStartup
             options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
             {
-                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
-
-                if (userId == null)
-                {
-                    userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                }
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                 var permitLimit = 1500;
 
@@ -157,12 +153,8 @@ public abstract class BaseStartup
                 }), 
                 PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                    {
-                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
-
-                       if (userId == null)
-                       {
-                           userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
-                       }
+                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                                    httpContext?.Connection.RemoteIpAddress.ToInvariantString();
 
                        var partitionKey = $"fw_post_put_{userId}";
                        var permitLimit = 10000;

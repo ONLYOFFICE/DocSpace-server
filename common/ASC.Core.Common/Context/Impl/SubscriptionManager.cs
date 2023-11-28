@@ -126,13 +126,8 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
             methods = await _service.GetSubscriptionMethodsAsync(await GetTenantAsync(), sourceID, actionID, recipientID);
         }
 
-        var m = methods
-            .FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase));
-
-        if (m == null)
-        {
-            m = methods.FirstOrDefault();
-        }
+        var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
+                methods.FirstOrDefault();
 
         return m != null ? m.Methods : Array.Empty<string>();
     }

@@ -100,12 +100,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         init { _timeZone = value; }
         get
         {
-            if (_timeZone == null)
-            {
-                _timeZone = TimeZoneInfo.Utc;
-            }
-
-            return _timeZone;
+            return _timeZone ??= TimeZoneInfo.Utc;
         }
     }
 
@@ -875,71 +870,86 @@ public class CronExpression : ICloneable, IDeserializationCallback
             incr = 1;
             data.Add(AllSpec);
         }
-        if (type is Second or Minute)
+        switch (type)
         {
-            if (stopAt == -1)
-            {
-                stopAt = 59;
-            }
-            if (startAt is -1 or AllSpecInt)
-            {
-                startAt = 0;
-            }
-        }
-        else if (type == Hour)
-        {
-            if (stopAt == -1)
-            {
-                stopAt = 23;
-            }
-            if (startAt is -1 or AllSpecInt)
-            {
-                startAt = 0;
-            }
-        }
-        else if (type == DayOfMonth)
-        {
-            if (stopAt == -1)
-            {
-                stopAt = 31;
-            }
-            if (startAt is -1 or AllSpecInt)
-            {
-                startAt = 1;
-            }
-        }
-        else if (type == Month)
-        {
-            if (stopAt == -1)
-            {
-                stopAt = 12;
-            }
-            if (startAt is -1 or AllSpecInt)
-            {
-                startAt = 1;
-            }
-        }
-        else if (type == DayOfWeek)
-        {
-            if (stopAt == -1)
-            {
-                stopAt = 7;
-            }
-            if (startAt is -1 or AllSpecInt)
-            {
-                startAt = 1;
-            }
-        }
-        else if (type == Year)
-        {
-            if (stopAt == -1)
-            {
-                stopAt = 2099;
-            }
-            if (startAt is -1 or AllSpecInt)
-            {
-                startAt = 1970;
-            }
+            case Second or Minute:
+                {
+                    if (stopAt == -1)
+                    {
+                        stopAt = 59;
+                    }
+                    if (startAt is -1 or AllSpecInt)
+                    {
+                        startAt = 0;
+                    }
+
+                    break;
+                }
+            case Hour:
+                {
+                    if (stopAt == -1)
+                    {
+                        stopAt = 23;
+                    }
+                    if (startAt is -1 or AllSpecInt)
+                    {
+                        startAt = 0;
+                    }
+
+                    break;
+                }
+            case DayOfMonth:
+                {
+                    if (stopAt == -1)
+                    {
+                        stopAt = 31;
+                    }
+                    if (startAt is -1 or AllSpecInt)
+                    {
+                        startAt = 1;
+                    }
+
+                    break;
+                }
+            case Month:
+                {
+                    if (stopAt == -1)
+                    {
+                        stopAt = 12;
+                    }
+                    if (startAt is -1 or AllSpecInt)
+                    {
+                        startAt = 1;
+                    }
+
+                    break;
+                }
+            case DayOfWeek:
+                {
+                    if (stopAt == -1)
+                    {
+                        stopAt = 7;
+                    }
+                    if (startAt is -1 or AllSpecInt)
+                    {
+                        startAt = 1;
+                    }
+
+                    break;
+                }
+            case Year:
+                {
+                    if (stopAt == -1)
+                    {
+                        stopAt = 2099;
+                    }
+                    if (startAt is -1 or AllSpecInt)
+                    {
+                        startAt = 1970;
+                    }
+
+                    break;
+                }
         }
 
         var max = -1;
@@ -1271,14 +1281,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     else
                     {
                         var lDay = DateTime.DaysInMonth(d.Year, mon);
-                        if (day <= lDay)
-                        {
-                            d = new DateTime(d.Year, mon, day, 0, 0, 0);
-                        }
-                        else
-                        {
-                            d = new DateTime(d.Year, mon, lDay, 0, 0, 0).AddDays(day - lDay);
-                        }
+                        d = day <= lDay ? new DateTime(d.Year, mon, day, 0, 0, 0) : new DateTime(d.Year, mon, lDay, 0, 0, 0).AddDays(day - lDay);
                     }
 
                     continue;

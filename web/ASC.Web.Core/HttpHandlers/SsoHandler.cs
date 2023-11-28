@@ -106,7 +106,7 @@ public class SsoHandlerService
 
             while (lastSignChar > 0)
             {
-                signature = signature + "=";
+                signature += "=";
                 lastSignChar--;
             }
         };

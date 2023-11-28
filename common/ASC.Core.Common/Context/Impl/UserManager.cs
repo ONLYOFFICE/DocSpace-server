@@ -903,12 +903,8 @@ public class UserManager
 
     public async Task<GroupInfo> GetGroupInfoAsync(Guid groupID)
     {
-        var group = await _userService.GetGroupAsync(Tenant.Id, groupID);
-
-        if (group == null)
-        {
-            group = ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
-        }
+        var group = await _userService.GetGroupAsync(Tenant.Id, groupID) ?? 
+                    ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
 
         if (group == null)
         {

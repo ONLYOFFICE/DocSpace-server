@@ -38,7 +38,7 @@ internal sealed class BackupCleanerService(ConfigurationExtension configuration,
     {
         logger.DebugBackupCleanerServiceStarting();
 
-        stoppingToken.Register(() => logger.DebugBackupCleanerServiceStopping());
+        stoppingToken.Register(logger.DebugBackupCleanerServiceStopping);
 
         while (!stoppingToken.IsCancellationRequested)
         {

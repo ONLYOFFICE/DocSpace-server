@@ -58,7 +58,7 @@ public class RegisterInstanceWorkerService<T> : BackgroundService where T : IHos
         }
 
 
-        _intervalCheckRegisterInstanceInSeconds = _intervalCheckRegisterInstanceInSeconds * 1000;
+        _intervalCheckRegisterInstanceInSeconds *= 1000;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

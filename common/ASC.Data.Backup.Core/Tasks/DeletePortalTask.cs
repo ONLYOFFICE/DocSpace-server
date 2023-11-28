@@ -75,7 +75,7 @@ public class DeletePortalTask : PortalTaskBase
                     {
                         var t = (TableInfo)state;
                         module.CreateDeleteCommand(connection.Fix(), TenantId, t).WithTimeout(120).ExecuteNonQuery();
-                    }, table, 5, onFailure: error => { throw ThrowHelper.CantDeleteTable(table.Name, error); });
+                    }, table, 5, onFailure: error => throw ThrowHelper.CantDeleteTable(table.Name, error));
                 SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)tablesCount));
             }
         }

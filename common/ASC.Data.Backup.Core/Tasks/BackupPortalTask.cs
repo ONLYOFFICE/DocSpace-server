@@ -431,7 +431,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     private ConnectionStringSettings GetConnectionString(int id, string connectionString)
     {
-        connectionString = connectionString + ";convert zero datetime=True";
+        connectionString += ";convert zero datetime=True";
         return new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
     }
 
@@ -485,14 +485,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                     sw.Write(")");
 
-                    if (j != portion.Count - 1)
-                    {
-                        sw.Write(",");
-                    }
-                    else
-                    {
-                        sw.Write(";");
-                    }
+                    sw.Write(j != portion.Count - 1 ? "," : ";");
 
                     sw.WriteLine();
                 }
@@ -643,8 +636,8 @@ public class BackupPortalTask(DbFactory dbFactory,
                         },
                         table,
                         maxAttempts: 5,
-                        onFailure: error => { throw ThrowHelper.CantBackupTable(table.Name, error); },
-                        onAttemptFailure: error => logger.WarningBackupAttemptFailure(error));
+                        onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
+                        onAttemptFailure: logger.WarningBackupAttemptFailure);
 
                     foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
                     {

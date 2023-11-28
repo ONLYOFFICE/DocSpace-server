@@ -241,7 +241,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
             }
 
             var userGroups = ldapObjectExtension.GetAttributes(ldapUser, LdapConstants.ADSchemaAttributes.MEMBER_OF)
-                .Select(s => LdapUtils.UnescapeLdapString(s))
+                .Select(LdapUtils.UnescapeLdapString)
                 .ToList();
 
             if (!userGroups.Any())

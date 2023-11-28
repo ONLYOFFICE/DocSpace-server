@@ -42,12 +42,7 @@ public class CoreBaseSettings(IConfiguration configuration)
     {
         get
         {
-            if (_basedomain == null)
-            {
-                _basedomain = Configuration["core:base-domain"] ?? string.Empty;
-            }
-
-            return _basedomain;
+            return _basedomain ??= Configuration["core:base-domain"] ?? string.Empty;
         }
     }
 
@@ -55,12 +50,7 @@ public class CoreBaseSettings(IConfiguration configuration)
     {
         get
         {
-            if (_serverRoot == null)
-            {
-                _serverRoot = Configuration["core:server-root"] ?? string.Empty;
-            }
-
-            return _serverRoot;
+            return _serverRoot ??= Configuration["core:server-root"] ?? string.Empty;
         }
     }
 

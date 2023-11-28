@@ -290,10 +290,9 @@ public class S3Storage(TempStream tempStream,
             AutoCloseStream = false
         };
 
-        if (!(client is IAmazonS3Encryption))
+        if (client is not IAmazonS3Encryption)
         {
-            string kmsKeyId;
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
             request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
         }
 
@@ -358,10 +357,9 @@ public class S3Storage(TempStream tempStream,
         };
 
         using var s3 = GetClient();
-        if (!(s3 is IAmazonS3Encryption))
+        if (s3 is not IAmazonS3Encryption)
         {
-            string kmsKeyId;
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
             request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
         }
         var response = await s3.InitiateMultipartUploadAsync(request);
@@ -1285,10 +1283,9 @@ public class S3Storage(TempStream tempStream,
                     CannedACL = GetDomainACL(newdomain)
                 };
 
-            if (!(client is IAmazonS3Encryption))
+            if (client is not IAmazonS3Encryption)
             {
-                string kmsKeyId;
-                initiateRequest.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+                initiateRequest.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
                 initiateRequest.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
@@ -1350,10 +1347,9 @@ public class S3Storage(TempStream tempStream,
                 MetadataDirective = metadataDirective,
             };
 
-            if (!(client is IAmazonS3Encryption))
+            if (client is not IAmazonS3Encryption)
             {
-                string kmsKeyId;
-                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
                 request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 

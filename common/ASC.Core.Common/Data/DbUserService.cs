@@ -682,14 +682,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
             {
                 case EmployeeStatus.LeaveOfAbsence:
                 case EmployeeStatus.Terminated:
-                    if (isDocSpaceAdmin)
-                    {
-                        q = q.Where(u => u.Status == EmployeeStatus.Terminated);
-                    }
-                    else
-                    {
-                        q = q.Where(u => false);
-                    }
+                    q = isDocSpaceAdmin ? q.Where(u => u.Status == EmployeeStatus.Terminated) : q.Where(u => false);
                     break;
                 case EmployeeStatus.All:
                     if (!isDocSpaceAdmin)

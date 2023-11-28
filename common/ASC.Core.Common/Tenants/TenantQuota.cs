@@ -82,14 +82,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         }
         set
         {
-            if (value != null)
-            {
-                _featuresList = value.Split(' ', ',', ';').ToList();
-            }
-            else
-            {
-                _featuresList = new List<string>();
-            }
+            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : new List<string>();
         }
     }
 
@@ -509,14 +502,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
         if (!EqualityComparer<T>.Default.Equals(value, default) && !EqualityComparer<T>.Default.Equals(value, defaultValue))
         {
-            if (value is bool)
-            {
-                _featuresList.Add($"{name}");
-            }
-            else
-            {
-                _featuresList.Add($"{name}:{value}");
-            }
+            _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
     }
 }

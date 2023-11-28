@@ -345,11 +345,11 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                                 }
                                 else if (flag2)
                                 {
-                                    innerValues[i] = innerValues[i] + ")";
+                                    innerValues[i] += ")";
                                 }
                                 if (i == innerValues.Count - 1)
                                 {
-                                    innerValues[i] = innerValues[i] + ");";
+                                    innerValues[i] += ");";
                                 }
                             }
 

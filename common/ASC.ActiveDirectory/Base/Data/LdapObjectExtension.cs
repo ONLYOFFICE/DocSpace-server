@@ -189,8 +189,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
 
         if (!string.IsNullOrEmpty(birthDay))
         {
-            DateTime date;
-            if (DateTime.TryParse(birthDay, out date))
+            if (DateTime.TryParse(birthDay, out var date))
             {
                 user.BirthDate = date;
             }
@@ -198,8 +197,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
 
         if (!string.IsNullOrEmpty(gender))
         {
-            bool b;
-            if (bool.TryParse(gender, out b))
+            if (bool.TryParse(gender, out var b))
             {
                 user.Sex = b;
             }

@@ -40,7 +40,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
     {
         _processedProtoTypes = new SynchronizedCollection<string>();
 
-        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), a => BuildTypeModelFromAssembly(a));
+        Array.ForEach(AppDomain.CurrentDomain.GetAssemblies(), BuildTypeModelFromAssembly);
     }
 
     private void BuildTypeModelFromAssembly(Assembly assembly)

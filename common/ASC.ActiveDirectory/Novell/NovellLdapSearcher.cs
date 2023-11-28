@@ -286,10 +286,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
                     {
                         _logger.WarnStartTrySearchSimple();
 
-                        List<LdapObject> simpleResults;
-
-                        if (TrySearchSimple(searchBase, scope, searchFilter, out simpleResults, attributes, limit,
-                            searchConstraints))
+                        if (TrySearchSimple(searchBase, scope, searchFilter, out var simpleResults, attributes, limit, searchConstraints))
                         {
                             if (entries.Count >= simpleResults.Count)
                             {
@@ -462,13 +459,12 @@ public class NovellLdapSearcher(IConfiguration configuration,
                 foreach (var control in controls)
                 {
                     /* Is this the LdapPagedResultsResponse control? */
-                    if (!(control is SimplePagedResultsControl))
+                    if (control is not SimplePagedResultsControl)
                     {
                         continue;
                     }
 
-                    var response = new SimplePagedResultsControl(control.Id,
-                        control.Critical, control.GetValue());
+                    var response = new SimplePagedResultsControl(control.Id, control.Critical, control.GetValue());
 
                     cookie = response.Cookie;
                 }

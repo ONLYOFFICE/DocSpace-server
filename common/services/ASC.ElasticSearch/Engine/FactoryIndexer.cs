@@ -774,10 +774,7 @@ public class FactoryIndexer
                 DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })
-            .Where(r =>
-            {
-                return r.Count > 0;
-            });
+            .Where(r => r.Count > 0);
 
         return new
         {

@@ -52,7 +52,6 @@ public static class HttpRequestExtensions
 
             if (url != rewrittenUri)
             {
-                var requestUri = url;
                 try
                 {
                     //Push it
@@ -69,7 +68,7 @@ public static class HttpRequestExtensions
                     else
                     {
                         request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host + ":" + requestUri.Port);
+                                                    rewrittenUri.Host + ":" + url.Port);
                     }
                     //Hack:
                     typeof(HttpRequest).InvokeMember("_url",
@@ -77,7 +76,7 @@ public static class HttpRequestExtensions
                                                       BindingFlags.Instance,
                                                       null, request,
                                                       new object[] { null });
-                    oldUri = requestUri;
+                    oldUri = url;
                     context.Items["oldUri"] = oldUri;
 
                 }

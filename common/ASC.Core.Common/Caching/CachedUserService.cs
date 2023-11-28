@@ -60,9 +60,9 @@ public class UserServiceCache
         CacheGroupCacheItem = cacheGroupCacheItem;
         CacheUserGroupRefItem = cacheUserGroupRefItem;
 
-        cacheUserInfoItem.Subscribe(u => InvalidateCache(u), CacheNotifyAction.Any);
+        cacheUserInfoItem.Subscribe(InvalidateCache, CacheNotifyAction.Any);
         cacheUserPhotoItem.Subscribe(p => Cache.Remove(p.Key), CacheNotifyAction.Remove);
-        cacheGroupCacheItem.Subscribe(g => InvalidateCache(g), CacheNotifyAction.Any);
+        cacheGroupCacheItem.Subscribe(InvalidateCache, CacheNotifyAction.Any);
 
         cacheUserGroupRefItem.Subscribe(r => UpdateUserGroupRefCache(r), CacheNotifyAction.Remove);
         cacheUserGroupRefItem.Subscribe(r => UpdateUserGroupRefCache(r), CacheNotifyAction.InsertOrUpdate);

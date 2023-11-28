@@ -33,10 +33,9 @@ public class WebPathSettings
 
     public WebPathSettings(Configuration.Storage storage)
     {
-        var section = storage;
-        if (section != null)
+        if (storage != null)
         {
-            _appenders = section.Appender;
+            _appenders = storage.Appender;
         }
     }
 

@@ -565,8 +565,8 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
 
     public override Task<IEnumerable<string>> GetChildrenAsync(string folderId)
     {
-        var subFolders = GetFolderSubfolders(folderId).Select(x => MakeId(x));
-        var files = GetFolderFiles(folderId).Select(x => MakeId(x));
+        var subFolders = GetFolderSubfolders(folderId).Select(MakeId);
+        var files = GetFolderFiles(folderId).Select(MakeId);
 
         return Task.FromResult(subFolders.Concat(files));
     }

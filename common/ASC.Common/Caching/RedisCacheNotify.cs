@@ -77,10 +77,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
     public void Unsubscribe(CacheNotifyAction action)
     {
-        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), _ =>
-        {
-            return Task.FromResult(true);
-        })).GetAwaiter()
+        Task.Run(async () => await _redis.UnsubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), _ => Task.FromResult(true))).GetAwaiter()
           .GetResult();
 
         _invoctionList.TryRemove(action, out _);

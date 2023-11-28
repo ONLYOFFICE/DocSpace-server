@@ -190,8 +190,7 @@ public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange
                 ? after.GetType().GetProperty(propName).GetValue(before, null) as string
                 : "";
 
-            LdapItemChangeKey key;
-            if (!Enum.TryParse(propName, out key))
+            if (!Enum.TryParse(propName, out LdapItemChangeKey key))
             {
                 throw new InvalidEnumArgumentException(propName);
             }

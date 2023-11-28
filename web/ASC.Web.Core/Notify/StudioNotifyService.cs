@@ -949,11 +949,6 @@ public class StudioNotifyService(UserManager userManager,
             culture = user.GetCulture();
         }
 
-        if (culture == null)
-        {
-            culture = tenantManager.GetCurrentTenant(false)?.GetCulture();
-        }
-
-        return culture;
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture();
     }
 }

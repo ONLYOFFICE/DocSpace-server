@@ -1273,11 +1273,7 @@ public class EntryManager(IDaoFactory daoFactory,
         var fileDao = daoFactory.GetFileDao<T>();
         var check = await fileShareLink.CheckAsync(doc, false, fileDao);
         var editLink = check.EditLink;
-        var file = check.File;
-        if (file == null)
-        {
-            file = await fileDao.GetFileAsync(fileId);
-        }
+        var file = check.File ?? await fileDao.GetFileAsync(fileId);
 
         if (file == null)
         {
@@ -1456,11 +1452,7 @@ public class EntryManager(IDaoFactory daoFactory,
         var fileDao = daoFactory.GetFileDao<T>();
         var check = await fileShareLink.CheckAsync(doc, false, fileDao);
         var editLink = check.EditLink;
-        var file = check.File;
-        if (file == null)
-        {
-            file = await fileDao.GetFileAsync(fileId);
-        }
+        var file = check.File ?? await fileDao.GetFileAsync(fileId);
 
         if (file == null)
         {

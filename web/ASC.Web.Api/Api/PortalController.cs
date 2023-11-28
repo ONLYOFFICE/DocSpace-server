@@ -411,15 +411,7 @@ public class PortalController : ControllerBase
         var bytes = new byte[stream.Length];
         stream.Read(bytes, 0, (int)stream.Length);
 
-        string type;
-        if (response.Headers.TryGetValues("Content-Type", out var values))
-        {
-            type = values.First();
-        }
-        else
-        {
-            type = "image/png";
-        }
+        var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);
     }
 

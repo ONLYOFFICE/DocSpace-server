@@ -115,9 +115,7 @@ public class BackupProgressItem(ILogger<BackupProgressItem> logger,
             }
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
-            var repo = backupRepository;
-
-            await repo.SaveBackupRecordAsync(
+            await backupRepository.SaveBackupRecordAsync(
                 new BackupRecord
                 {
                     Id = Guid.Parse(Id),

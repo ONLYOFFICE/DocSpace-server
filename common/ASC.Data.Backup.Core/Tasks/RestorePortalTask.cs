@@ -143,8 +143,8 @@ public class RestorePortalTask(DbFactory dbFactory,
     private async Task RestoreFromDump(IDataReadOperator dataReader)
     {
         var keyBase = KeyHelper.GetDatabaseSchema();
-        var keys = dataReader.GetEntries(keyBase).Select(r => Path.GetFileName(r)).ToList();
-        var dbs = dataReader.GetDirectories("").Where(r => Path.GetFileName(r).StartsWith("mailservice")).Select(r => Path.GetFileName(r)).ToList();
+        var keys = dataReader.GetEntries(keyBase).Select(Path.GetFileName).ToList();
+        var dbs = dataReader.GetDirectories("").Where(r => Path.GetFileName(r).StartsWith("mailservice")).Select(Path.GetFileName).ToList();
         var upgrades = new List<string>();
 
         if (!string.IsNullOrEmpty(UpgradesPath) && Directory.Exists(UpgradesPath))
@@ -158,7 +158,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         var databases = new Dictionary<Tuple<string, string>, List<string>>();
         foreach (var db in dbs)
         {
-            var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(k => Path.GetFileName(k)).ToList();
+            var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(Path.GetFileName).ToList();
             stepscount += keys1.Count * 2;
             databasesFromDirs.Add(db, keys1);
         }
@@ -272,7 +272,7 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private ConnectionStringSettings GetConnectionString(int id, string connectionString)
     {
-        connectionString = connectionString + ";convert zero datetime=True";
+        connectionString += ";convert zero datetime=True";
         return new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
     }
 

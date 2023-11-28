@@ -856,12 +856,7 @@ public static class MimeMapping
             str = (string)_extensionToMimeMappingTable[fileName[startIndex..]];
         }
 
-        if (str == null)
-        {
-            str = (string)_extensionToMimeMappingTable[".*"];
-        }
-
-        return str;
+        return str ?? (string)_extensionToMimeMappingTable[".*"];
     }
 
     private static void AddMimeMapping(string extension, string MimeType)

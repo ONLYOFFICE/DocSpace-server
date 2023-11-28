@@ -85,15 +85,9 @@ public class NotifyEngine(Context context,
             sendResponces.AddRange(await SendGroupNotify(request, serviceScope));
         }
 
-        NotifyResult result;
-        if (sendResponces.Count == 0)
-        {
-            result = new NotifyResult(SendResult.OK, sendResponces);
-        }
-        else
-        {
-            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
-        }
+        var result = sendResponces.Count == 0 ? 
+            new NotifyResult(SendResult.OK, sendResponces) : 
+            new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
         _logger.Debug(result.ToString());
 
         return result;
