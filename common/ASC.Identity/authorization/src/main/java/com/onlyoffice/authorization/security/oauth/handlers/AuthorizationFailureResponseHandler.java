@@ -1,7 +1,6 @@
 package com.onlyoffice.authorization.security.oauth.handlers;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 @Component
 @Slf4j
 public class AuthorizationFailureResponseHandler implements AuthenticationFailureHandler {
-    private final String REDIRECT_COOKIE = "x-redirect-uri";
+    private final String REDIRECT_HEADER = "X-Redirect-URI";
 
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.info("Authentication failure");
@@ -63,8 +62,6 @@ public class AuthorizationFailureResponseHandler implements AuthenticationFailur
 
         String redirectUri = uriBuilder.build(true).toUriString();
         response.setStatus(HttpStatus.OK.value());
-        Cookie cookie = new Cookie(REDIRECT_COOKIE, redirectUri);
-        cookie.setMaxAge(10000);
-        response.addCookie(cookie);
+        response.setHeader(REDIRECT_HEADER, redirectUri);
     }
 }
