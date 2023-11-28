@@ -724,16 +724,6 @@ internal class TagDao(UserManager userManager,
             tempTags = tempTags.Concat(Queries.ProjectsAsync(filesDbContext, tenantId, subject));
         }
 
-        if (!deepSearch && parentFolder.RootFolderType != FolderType.VirtualRooms)
-        {
-            await foreach (var e in tempTags)
-            {
-                yield return await ToTagAsync(e);
-            }
-
-            yield break;
-        }
-
         await foreach (var e in tempTags)
         {
             var tag = await ToTagAsync(e);

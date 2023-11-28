@@ -824,17 +824,18 @@ public class FileMarker(TenantManager tenantManager,
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
                                     : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
 
-        totalTags = totalTags.Where(e => e != parentFolderTag).ToList();
+        totalTags = totalTags.Where(e => !e.Equals(parentFolderTag)).ToList();
 
         foreach (var e in entries)
         {
-            if (e is FileEntry<int> entry)
+            switch (e)
             {
-                SetTagNewForEntry(entry);
-            }
-            else if (e is FileEntry<string> thirdPartyEntry)
-            {
-                SetTagNewForEntry(thirdPartyEntry);
+                case FileEntry<int> entry:
+                    SetTagNewForEntry(entry);
+                    break;
+                case FileEntry<string> thirdPartyEntry:
+                    SetTagNewForEntry(thirdPartyEntry);
+                    break;
             }
         }
 
