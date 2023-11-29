@@ -32,7 +32,7 @@ namespace Textile.States;
 public abstract class ListFormatterState(TextileFormatter formatter) : FormatterState(formatter)
 {
     internal const string PatternBegin = @"^\s*(?<tag>";
-    internal const string PatternEnd = @")" + Globals.BlockModifiersPattern + @"(?:\s+)? (?<content>.*)$";
+    internal const string PatternEnd = ")" + Globals.BlockModifiersPattern + @"(?:\s+)? (?<content>.*)$";
 
     private bool _firstItem = true;
     private bool _firstItemLine = true;

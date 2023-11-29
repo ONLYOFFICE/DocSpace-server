@@ -214,14 +214,7 @@ public class Consumer() : IDictionary<string, string>
         
         if (!ManagedKeys.Contains(name))
         {
-            if (_additional.ContainsKey(name))
-            {
-                _additional[name] = value;
-            }
-            else
-            {
-                _additional.Add(name, value);
-            }
+            _additional[name] = value;
 
             return;
         }

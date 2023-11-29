@@ -199,7 +199,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
         return (await SyncLDAPUserAsync(ldapUserInfo, ldapUsers, false)).UserInfo;
     }
 
-    private async Task<UserInfoAndLdapChangeCollectionWrapper> SyncLDAPUserAsync(UserInfo ldapUserInfo, List<UserInfo> ldapUsers, bool onlyGetChanges = false)
+    private async Task<UserInfoAndLdapChangeCollectionWrapper> SyncLDAPUserAsync(UserInfo ldapUserInfo, IReadOnlyCollection<UserInfo> ldapUsers, bool onlyGetChanges = false)
     {
         UserInfo userToUpdate;
 
@@ -336,7 +336,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     private const string EXT_PHONE = "extphone";
     private const string EXT_SKYPE = "extskype";
 
-    private static void UpdateLdapUserContacts(UserInfo ldapUser, List<string> portalUserContacts)
+    private static void UpdateLdapUserContacts(UserInfo ldapUser, IReadOnlyList<string> portalUserContacts)
     {
         if (portalUserContacts == null || !portalUserContacts.Any())
         {

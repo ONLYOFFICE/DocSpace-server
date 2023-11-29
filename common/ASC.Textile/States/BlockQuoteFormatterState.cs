@@ -26,7 +26,7 @@
 
 namespace Textile.States;
 
-[FormatterState(PatternBegin + @"bq" + PatternEnd)]
+[FormatterState(PatternBegin + "bq" + PatternEnd)]
 public class BlockQuoteFormatterState(TextileFormatter f) : SimpleBlockFormatterState(f)
 {
     public override void Enter()

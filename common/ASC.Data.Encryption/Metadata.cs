@@ -135,7 +135,7 @@ public class Metadata(IConfiguration configuration)
         Password = password;
 
         Prefix = Encoding.UTF8.GetBytes(prefixString);
-        Version = new byte[versionLength] { version };
+        Version = new[] { version };
         Size = LongToByteArray(fileSize);
 
         Salt = GenerateRandom(saltLength);

@@ -3383,7 +3383,7 @@ public class FileStorageService //: IFileStorageService
 
     private IDictionary<string, StringValues> GetHttpHeaders()
     {
-        return httpContextAccessor?.HttpContext?.Request?.Headers?.ToDictionary(k => k.Key, v => v.Value);
+        return httpContextAccessor?.HttpContext?.Request.Headers.ToDictionary(k => k.Key, v => v.Value);
     }
     
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,

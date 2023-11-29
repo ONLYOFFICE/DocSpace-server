@@ -30,13 +30,11 @@ namespace ASC.Web.Core.Sms;
 public class SmsKeyStorageCache
 {
     private readonly ICacheNotify<SmsKeyCacheKey> _keyCacheNotify;
-    private readonly ICache _keyCache;
 
     public SmsKeyStorageCache(ICacheNotify<SmsKeyCacheKey> keyCacheNotify, ICache cache)
     {
-        _keyCache = cache;
         _keyCacheNotify = keyCacheNotify;
-        _keyCacheNotify.Subscribe(r => _keyCache.Remove(r.Key), CacheNotifyAction.Remove);
+        _keyCacheNotify.Subscribe(r => cache.Remove(r.Key), CacheNotifyAction.Remove);
     }
 
     public void RemoveFromCache(string cacheKey)

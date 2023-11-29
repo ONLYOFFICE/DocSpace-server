@@ -413,7 +413,7 @@ public static class DocumentService
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
 
-        string dataResponse = null;
+        string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())

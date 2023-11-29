@@ -409,14 +409,7 @@ public class WebPluginManager(CoreBaseSettings coreBaseSettings,
         {
             var webPluginState = new WebPluginState(enabled, encryptedSettings);
 
-            if (enabledPlugins.ContainsKey(webPlugin.Name))
-        {
-                enabledPlugins[webPlugin.Name] = webPluginState;
-        }
-        else
-        {
-                enabledPlugins.Add(webPlugin.Name, webPluginState);
-        }
+            enabledPlugins[webPlugin.Name] = webPluginState;
         }
         else
         {

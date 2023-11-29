@@ -434,6 +434,4 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
 }
 
 [Scope]
-public class TwilioSaaSProvider : TwilioProvider
-{
-}
+public class TwilioSaaSProvider : TwilioProvider;

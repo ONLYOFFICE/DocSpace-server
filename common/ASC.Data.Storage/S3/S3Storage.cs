@@ -1444,8 +1444,6 @@ public class S3Storage(TempStream tempStream,
         stream.Write(header);
         stream.Position = 0;
 
-        prevFileSize = objFile.ContentLength;
-
         var uploadRequest = new UploadPartRequest
         {
             BucketName = _bucket,

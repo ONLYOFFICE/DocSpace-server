@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
-public class CommonMethods(IHttpContextAccessor httpContextAccessor,
+public class CommonMethods(
+    IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration,
-    ILogger<CommonMethods> log,
+    ILogger log,
     CoreSettings coreSettings,
     CommonLinkUtility commonLinkUtility,
     EmailValidationKeyProvider emailValidationKeyProvider,
@@ -118,7 +120,7 @@ public class CommonMethods(IHttpContextAccessor httpContextAccessor,
 
     public async Task<(bool, Tenant)> TryGetTenantAsync(IModel model)
     {
-        Tenant tenant = null;
+        Tenant tenant;
         if (coreBaseSettings.Standalone && model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
         {
             tenant = await tenantManager.GetTenantAsync((model.PortalName ?? "").Trim());

@@ -34,4 +34,4 @@ namespace ASC.People.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("people")]
-public abstract class ApiControllerBase : ControllerBase { }
+public abstract class ApiControllerBase : ControllerBase;

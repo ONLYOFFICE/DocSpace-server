@@ -29,7 +29,8 @@ using AutoMapper;
 namespace ASC.Webhooks.Core;
 
 [Scope]
-public class DbWorker(IDbContextFactory<WebhooksDbContext> dbContextFactory,
+public class DbWorker(
+    IDbContextFactory<WebhooksDbContext> dbContextFactory,
     TenantManager tenantManager,
     AuthContext authContext,
     IMapper mapper)

@@ -535,7 +535,6 @@ public class StudioNotifyService(UserManager userManager,
             throw new ArgumentException("User is not activated yet!");
         }
 
-        INotifyAction notifyAction;
         var tagValues = new List<ITagValue>();
 
         if (tenantExtra.Enterprise)
@@ -552,7 +551,7 @@ public class StudioNotifyService(UserManager userManager,
             //tagValues.Add(new TagValue(CommonTags.Footer, "opensource"));
         }
 
-        notifyAction = Actions.SaasAdminWelcomeV1;
+        var notifyAction = Actions.SaasAdminWelcomeV1;
         tagValues.Add(new TagValue(CommonTags.Footer, "common"));
 
         tagValues.Add(new TagValue(Tags.UserName, newUserInfo.FirstName.HtmlEncode()));

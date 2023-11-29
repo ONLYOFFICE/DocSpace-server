@@ -27,7 +27,8 @@
 namespace ASC.Data.Backup.Services;
 
 [Scope]
-public class BackupService(ILogger<BackupService> logger,
+public class BackupService(
+    ILogger<BackupService> logger,
     BackupStorageFactory backupStorageFactory,
     BackupWorker backupWorker,
     BackupRepository backupRepository)
