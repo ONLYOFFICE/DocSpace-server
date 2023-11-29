@@ -109,6 +109,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>File accessibility</summary>
     /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
+    public IDictionary<string, bool> AvailableExternalRights { get; set; }
     public string RequestToken { get; set; }
     
     public static FileDto<int> GetSample()
@@ -151,8 +152,8 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         FilesSettingsHelper filesSettingsHelper,
         FileDateTime fileDateTime,
         ExternalShare externalShare)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
-    {
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+{
     public async Task<FileDto<T>> GetAsync<T>(File<T> file, List<Tuple<FileEntry<T>, bool>> folders = null, int foldersCount = 0, string order = null)
     {
         var result = await GetFileWrapperAsync(file, foldersCount, order);
@@ -181,9 +182,10 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 }
             }
         }
-
+        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
-
+        result.AvailableExternalRights = fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        
         return result;
     }
 

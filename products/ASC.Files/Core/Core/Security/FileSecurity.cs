@@ -58,7 +58,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
     
-    public static readonly Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses = new()
+    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableFileAccesses = new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
     {
         {
             FolderType.USER, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -66,20 +66,20 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     SubjectType.ExternalLink, new HashSet<FileShare>
                     {
-                        FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
+                        FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
                     }
                 },
                 {
                     SubjectType.PrimaryExternalLink, new HashSet<FileShare>
                     {
-                        FileShare.Editing, FileShare.FillForms, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
+                        FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         }
-    };
+    }.ToFrozenDictionary();
 
-    public static readonly ImmutableDictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new Dictionary<FolderType, Dictionary<SubjectType, HashSet<FileShare>>>()
+    public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses = new Dictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>>()
     {
         {
             FolderType.CustomRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -108,7 +108,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         FileShare.Read, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         },
         {
             FolderType.PublicRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -137,7 +137,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         FileShare.Read, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         },
         {
             FolderType.FillingFormsRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -154,7 +154,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.FillForms, FileShare.Read, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         },
         {
             FolderType.EditingRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -171,7 +171,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Editing, FileShare.Read, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         },
         {
             FolderType.ReviewRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -188,7 +188,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         },
         {
             FolderType.ReadOnlyRoom, new Dictionary<SubjectType, HashSet<FileShare>>
@@ -205,11 +205,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                         FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
                     }
                 }
-            }
+            }.ToFrozenDictionary()
         }
-    }.ToImmutableDictionary();
+    }.ToFrozenDictionary();
 
-    public static readonly ImmutableDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>()
+    public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>()
     {
         {
             EmployeeType.DocSpaceAdmin, new HashSet<FileShare>
@@ -235,9 +235,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.FillForms, FileShare.Read, FileShare.None
             }
         }
-    }.ToImmutableDictionary();
+    }.ToFrozenDictionary();
 
-    private static readonly ImmutableDictionary<FileEntryType, IEnumerable<FilesSecurityActions>> _securityEntries =
+    private static readonly FrozenDictionary<FileEntryType, IEnumerable<FilesSecurityActions>> _securityEntries =
     new Dictionary<FileEntryType, IEnumerable<FilesSecurityActions>>()
     {
             {
@@ -282,7 +282,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.CopySharedLink
                 }
             }
-    }.ToImmutableDictionary();
+    }.ToFrozenDictionary();
 
     private readonly ConcurrentDictionary<string, FileShareRecord> _cachedRecords = new();
     private readonly ConcurrentDictionary<string, Guid> _cachedRoomOwner = new();
@@ -1948,6 +1948,55 @@ public class FileSecurity(IDaoFactory daoFactory,
                 file.Security[action] = false;
             }
         }
+    }
+
+    public IDictionary<string, bool> GetFileAccesses<T>(File<T> file, SubjectType subjectType)
+    {
+        var result = new Dictionary<string, bool>();
+
+        var mustConvert = fileUtility.MustConvert(file.Title);
+        var canEdit = fileUtility.CanWebEdit(file.Title);
+        var canCustomFiltering = fileUtility.CanWebCustomFilterEditing(file.Title);
+        var canComment = fileUtility.CanWebComment(file.Title);
+        var canReview = fileUtility.CanWebReview(file.Title);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
+        if (!AvailableFileAccesses.TryGetValue(file.RootFolderType, out var subjectShares)
+            || !subjectShares.TryGetValue(subjectType, out var shares))
+        {
+            return null;
+        }
+
+        foreach (var s in shares)
+        {
+            if (s is FileShare.Read or FileShare.Restrict or FileShare.None)
+            {
+                result.Add(s.ToStringFast(), true);
+                continue;
+            }
+            
+            if (mustConvert)
+            {
+                result.Add(s.ToStringFast(), false);
+                continue;
+            }
+
+            switch (s)
+            {
+                case FileShare.Editing when canEdit && FileUtility.GetFileExtension(file.Title) != ".pdf":
+                case FileShare.FillForms when fileType is FileType.OForm:
+                case FileShare.CustomFilter when canCustomFiltering:
+                case FileShare.Comment when canComment:
+                case FileShare.Review when canReview:
+                    result.Add(s.ToStringFast(), true);
+                    break;
+                default:
+                    result.Add(s.ToStringFast(), false);
+                    break;
+            }
+        }
+
+        return result;
     }
 
     private async Task<bool> HasFullAccessAsync<T>(FileEntry<T> entry, Guid userId, bool isUser, bool isDocSpaceAdmin, bool isRoom, bool isCollaborator)
