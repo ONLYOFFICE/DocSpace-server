@@ -99,7 +99,8 @@ public class BackupProgressItem : BaseBackupProgressItem
             var backupStorage = await backupStorageFactory.GetBackupStorageAsync(_storageType, TenantId, _storageParams);
 
             var getter = backupStorage as IGetterWriteOperator;
-            var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", (await tenantManager.GetTenantAsync(TenantId)).Alias, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
+            var name = _dump ? "workspace" : (await tenantManager.GetTenantAsync(TenantId)).Alias;
+            var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", name, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
 
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
             storagePath = tempFile;
