@@ -262,9 +262,7 @@ public class FilesLinkUtility
     {
         get
         {
-            bool isDefault;
-
-            GetUrlSetting(PublicUrlKey, out isDefault);
+            GetUrlSetting(PublicUrlKey, out var isDefault);
             if (!isDefault) return false;
 
             GetUrlSetting(InternalUrlKey, out isDefault);
@@ -434,8 +432,7 @@ public class FilesLinkUtility
 
     private string GetFileUploaderHandlerVirtualPath()
     {
-        var virtualPath = _filesUploaderURL;
-        return virtualPath.EndsWith(".ashx") ? virtualPath : virtualPath.TrimEnd('/') + "/ChunkedUploader.ashx";
+        return _filesUploaderURL.EndsWith(".ashx") ? _filesUploaderURL : _filesUploaderURL.TrimEnd('/') + "/ChunkedUploader.ashx";
     }
 
     private string GetUrlSetting(string key, out bool isDefault)

@@ -30,7 +30,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.Web.Core.HttpHandlers;
 public class SsoHandler
 {
-    public SsoHandler(RequestDelegate next)
+    public SsoHandler(RequestDelegate _)
     {
     }
 
@@ -101,12 +101,12 @@ public class SsoHandlerService
         _countPaidUserChecker = countPaidUserChecker;
         _signatureResolver = signature =>
         {
-            int.TryParse(signature.Substring(signature.Length - 1), out var lastSignChar);
+            int.TryParse(signature[^1..], out var lastSignChar);
             signature = signature.Remove(signature.Length - 1);
 
             while (lastSignChar > 0)
             {
-                signature = signature + "=";
+                signature += "=";
                 lastSignChar--;
             }
         };
@@ -388,7 +388,7 @@ public class SsoHandlerService
             userInfo.Location = location;
             userInfo.Title = title;
 
-            var portalUserContacts = userInfo.ContactsList == null ? new List<string>() : userInfo.ContactsList;
+            var portalUserContacts = userInfo.ContactsList ?? new List<string>();
 
             var newContacts = new List<string>();
             var phones = new List<string>();
@@ -453,7 +453,7 @@ public class SsoHandlerService
         var newStr = str.Trim();
 
         return newStr.Length > limit
-                ? newStr.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? newStr[..MAX_NUMBER_OF_SYMBOLS]
                 : newStr;
     }
 }
@@ -481,14 +481,9 @@ public enum MessageKey
     SsoAttributesNotFound,
 }
 
-public class SSOException : Exception
+public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
-    public MessageKey MessageKey { get; }
-
-    public SSOException(string message, MessageKey messageKey) : base(message)
-    {
-        MessageKey = messageKey;
-    }
+    public MessageKey MessageKey { get; } = messageKey;
 }
 
 public static class SsoHandlerExtensions

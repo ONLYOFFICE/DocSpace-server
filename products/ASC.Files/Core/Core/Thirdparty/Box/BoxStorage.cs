@@ -31,21 +31,15 @@ using BoxSDK = Box.V2;
 namespace ASC.Files.Thirdparty.Box;
 
 [Transient]
-internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
+internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 {
     private BoxClient _boxClient;
 
     private readonly List<string> _boxFields = new() { "created_at", "modified_at", "name", "parent", "size" };
 
     public bool IsOpened { get; private set; }
-    private readonly TempStream _tempStream;
 
     private readonly long _maxChunkedUploadFileSize = 250L * 1024L * 1024L;
-
-    public BoxStorage(TempStream tempStream)
-    {
-        _tempStream = tempStream;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -134,7 +128,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
             return str;
         }
 
-        var tempBuffer = _tempStream.Create();
+        var tempBuffer = tempStream.Create();
         if (str != null)
         {
             await str.CopyToAsync(tempBuffer);
@@ -268,7 +262,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 
     public async Task<long> GetMaxUploadSizeAsync()
     {
-        var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string>() { "max_upload_size" });
+        var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string> { "max_upload_size" });
         var max = boxUser.MaxUploadSize ?? _maxChunkedUploadFileSize;
 
         //todo: without chunked uploader:
@@ -279,7 +273,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
     {
         var boxRepresentation = new BoxRepresentationRequest();
         boxRepresentation.FileId = fileId;
-        boxRepresentation.XRepHints = $"[jpg?dimensions=320x320]";
+        boxRepresentation.XRepHints = "[jpg?dimensions=320x320]";
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);
     }
 }

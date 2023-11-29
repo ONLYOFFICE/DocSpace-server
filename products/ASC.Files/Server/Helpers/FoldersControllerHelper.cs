@@ -26,16 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
-public class FoldersControllerHelper : FilesHelperBase
-{
-    private readonly UserManager _userManager;
-    private readonly SecurityContext _securityContext;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly FileUtility _fileUtility;
-
-    public FoldersControllerHelper(
-        FilesSettingsHelper filesSettingsHelper,
+public class FoldersControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
@@ -49,24 +40,16 @@ public class FoldersControllerHelper : FilesHelperBase
         GlobalFolderHelper globalFolderHelper,
         CoreBaseSettings coreBaseSettings,
         FileUtility fileUtility)
-        : base(
-            filesSettingsHelper,
-            fileUploader,
-            socketManager,
-            fileDtoHelper,
-            apiContext,
-            fileStorageService,
-            folderContentDtoHelper,
-            httpContextAccessor,
-            folderDtoHelper)
-    {
-        _globalFolderHelper = globalFolderHelper;
-        _coreBaseSettings = coreBaseSettings;
-        _fileUtility = fileUtility;
-        _securityContext = securityContext;
-        _userManager = userManager;
-    }
-
+    : FilesHelperBase(filesSettingsHelper,
+    fileUploader,
+    socketManager,
+    fileDtoHelper,
+    apiContext,
+    fileStorageService,
+    folderContentDtoHelper,
+    httpContextAccessor,
+    folderDtoHelper)
+{
     public async Task<FolderDto<T>> CreateFolderAsync<T>(T folderId, string title)
     {
         var folder = await _fileStorageService.CreateNewFolderAsync(folderId, title);
@@ -90,9 +73,9 @@ public class FoldersControllerHelper : FilesHelperBase
 
     public async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash, bool withoutAdditionalFolder)
     {
-        var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        var IsUser = await _userManager.IsUserAsync(user);
-        var IsOutsider = await _userManager.IsOutsiderAsync(user);
+        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var IsUser = await userManager.IsUserAsync(user);
+        var IsOutsider = await userManager.IsOutsiderAsync(user);
 
         if (IsOutsider)
         {
@@ -102,60 +85,60 @@ public class FoldersControllerHelper : FilesHelperBase
 
         if (!IsUser)
         {
-            yield return await _globalFolderHelper.FolderMyAsync;
+            yield return await globalFolderHelper.FolderMyAsync;
         }
 
-        if (_coreBaseSettings.DisableDocSpace)
+        if (coreBaseSettings.DisableDocSpace)
         {
-            if (!_coreBaseSettings.Personal &&
-                !await _userManager.IsOutsiderAsync(user))
+            if (!coreBaseSettings.Personal &&
+                !await userManager.IsOutsiderAsync(user))
             {
-                yield return await _globalFolderHelper.FolderShareAsync;
+                yield return await globalFolderHelper.FolderShareAsync;
             }
 
             if (!withoutAdditionalFolder)
             {
                 if (_filesSettingsHelper.FavoritesSection)
                 {
-                    yield return await _globalFolderHelper.FolderFavoritesAsync;
+                    yield return await globalFolderHelper.FolderFavoritesAsync;
                 }
 
                 if (_filesSettingsHelper.RecentSection)
                 {
-                    yield return await _globalFolderHelper.FolderRecentAsync;
+                    yield return await globalFolderHelper.FolderRecentAsync;
                 }
 
                 if (!IsUser &&
-                    !_coreBaseSettings.Personal &&
+                    !coreBaseSettings.Personal &&
                     PrivacyRoomSettings.IsAvailable())
                 {
-                    yield return await _globalFolderHelper.FolderPrivacyAsync;
+                    yield return await globalFolderHelper.FolderPrivacyAsync;
                 }
             }
 
-            if (!_coreBaseSettings.Personal)
+            if (!coreBaseSettings.Personal)
             {
-                yield return await _globalFolderHelper.FolderCommonAsync;
+                yield return await globalFolderHelper.FolderCommonAsync;
             }
 
             if (!IsUser &&
                 !withoutAdditionalFolder &&
-                _fileUtility.ExtsWebTemplate.Count > 0 &&
+                fileUtility.ExtsWebTemplate.Count > 0 &&
                 _filesSettingsHelper.TemplatesSection)
             {
-                yield return await _globalFolderHelper.FolderTemplatesAsync;
+                yield return await globalFolderHelper.FolderTemplatesAsync;
             }
         }
 
         if (!withoutTrash && !IsUser)
         {
-            yield return await _globalFolderHelper.FolderTrashAsync;
+            yield return await globalFolderHelper.FolderTrashAsync;
         }
 
-        if (!_coreBaseSettings.DisableDocSpace)
+        if (!coreBaseSettings.DisableDocSpace)
         {
-            yield return await _globalFolderHelper.FolderVirtualRoomsAsync;
-            yield return await _globalFolderHelper.FolderArchiveAsync;
+            yield return await globalFolderHelper.FolderVirtualRoomsAsync;
+            yield return await globalFolderHelper.FolderArchiveAsync;
         }
     }
 

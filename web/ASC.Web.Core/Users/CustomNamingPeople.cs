@@ -152,24 +152,18 @@ public class PeopleNamesItem
 }
 
 [Scope]
-public class CustomNamingPeople
+public class CustomNamingPeople(SettingsManager settingsManager)
 {
     private static readonly object _locked = new();
     private static bool _loaded;
 
     private static readonly List<PeopleNamesItem> _items = new();
-    private readonly SettingsManager _settingsManager;
-
-    public CustomNamingPeople(SettingsManager settingsManager)
-    {
-        _settingsManager = settingsManager;
-    }
 
     public PeopleNamesItem Current
     {
         get
         {
-            var settings = _settingsManager.Load<PeopleNamesSettings>();
+            var settings = settingsManager.Load<PeopleNamesSettings>();
             return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ?
                 settings.Item :
                 GetPeopleNames(settings.ItemId);
@@ -205,24 +199,20 @@ public class CustomNamingPeople
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
-            var result = settings.Item;
-            if (result == null)
+            var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
+            var result = settings.Item ?? new PeopleNamesItem
             {
-                result = new PeopleNamesItem
-                {
-                    Id = PeopleNamesItem.CustomID,
-                    GroupCaption = string.Empty,
-                    GroupHeadCaption = string.Empty,
-                    GroupsCaption = string.Empty,
-                    RegDateCaption = string.Empty,
-                    UserCaption = string.Empty,
-                    UserPostCaption = string.Empty,
-                    UsersCaption = string.Empty,
-                    GuestCaption = string.Empty,
-                    GuestsCaption = string.Empty
-                };
-            }
+                Id = PeopleNamesItem.CustomID,
+                GroupCaption = string.Empty,
+                GroupHeadCaption = string.Empty,
+                GroupsCaption = string.Empty,
+                RegDateCaption = string.Empty,
+                UserCaption = string.Empty,
+                UserPostCaption = string.Empty,
+                UsersCaption = string.Empty,
+                GuestCaption = string.Empty,
+                GuestsCaption = string.Empty
+            };
 
             result.SchemaName = Resource.CustomNamingPeopleSchema;
 
@@ -234,28 +224,24 @@ public class CustomNamingPeople
         return _items.Find(i => i.Id.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public PeopleNamesItem GetPeopleNames(string schemaId)
+    private PeopleNamesItem GetPeopleNames(string schemaId)
     {
         if (PeopleNamesItem.CustomID.Equals(schemaId, StringComparison.InvariantCultureIgnoreCase))
         {
-            var settings = _settingsManager.Load<PeopleNamesSettings>();
-            var result = settings.Item;
-            if (result == null)
+            var settings = settingsManager.Load<PeopleNamesSettings>();
+            var result = settings.Item ?? new PeopleNamesItem
             {
-                result = new PeopleNamesItem
-                {
-                    Id = PeopleNamesItem.CustomID,
-                    GroupCaption = string.Empty,
-                    GroupHeadCaption = string.Empty,
-                    GroupsCaption = string.Empty,
-                    RegDateCaption = string.Empty,
-                    UserCaption = string.Empty,
-                    UserPostCaption = string.Empty,
-                    UsersCaption = string.Empty,
-                    GuestCaption = string.Empty,
-                    GuestsCaption = string.Empty
-                };
-            }
+                Id = PeopleNamesItem.CustomID,
+                GroupCaption = string.Empty,
+                GroupHeadCaption = string.Empty,
+                GroupsCaption = string.Empty,
+                RegDateCaption = string.Empty,
+                UserCaption = string.Empty,
+                UserPostCaption = string.Empty,
+                UsersCaption = string.Empty,
+                GuestCaption = string.Empty,
+                GuestsCaption = string.Empty
+            };
 
             result.SchemaName = Resource.CustomNamingPeopleSchema;
 
@@ -269,18 +255,18 @@ public class CustomNamingPeople
 
     public async Task SetPeopleNamesAsync(string schemaId)
     {
-        var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
         settings.ItemId = schemaId;
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
     public async Task SetPeopleNamesAsync(PeopleNamesItem custom)
     {
-        var settings = await _settingsManager.LoadAsync<PeopleNamesSettings>();
+        var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
         custom.Id = PeopleNamesItem.CustomID;
         settings.ItemId = PeopleNamesItem.CustomID;
         settings.Item = custom;
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
     }
 
 

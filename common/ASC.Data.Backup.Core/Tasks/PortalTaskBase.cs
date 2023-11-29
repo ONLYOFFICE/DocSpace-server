@@ -26,42 +26,27 @@
 
 namespace ASC.Data.Backup.Tasks;
 
-public class ProgressChangedEventArgs : EventArgs
+public class ProgressChangedEventArgs(int progress) : EventArgs
 {
-    public int Progress { get; private set; }
-
-    public ProgressChangedEventArgs(int progress)
-    {
-        Progress = progress;
-    }
+    public int Progress { get; private set; } = progress;
 }
 
-public abstract class PortalTaskBase
+public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, StorageFactory storageFactory, StorageFactoryConfig storageFactoryConfig, ModuleProvider moduleProvider)
 {
     protected const int TasksLimit = 10;
 
-    protected StorageFactory StorageFactory { get; set; }
-    protected StorageFactoryConfig StorageFactoryConfig { get; set; }
-    protected ILogger Logger { get; set; }
+    protected StorageFactory StorageFactory { get; set; } = storageFactory;
+    protected StorageFactoryConfig StorageFactoryConfig { get; set; } = storageFactoryConfig;
+    protected ILogger Logger { get; set; } = logger;
     public int Progress { get; private set; }
     public int TenantId { get; private set; }
-    public bool ProcessStorage { get; set; }
+    public bool ProcessStorage { get; set; } = true;
     protected IDataWriteOperator WriteOperator { get; set; }
-    protected ModuleProvider ModuleProvider { get; set; }
-    protected DbFactory DbFactory { get; init; }
+    protected ModuleProvider ModuleProvider { get; set; } = moduleProvider;
+    protected DbFactory DbFactory { get; init; } = dbFactory;
 
     protected readonly List<ModuleName> _ignoredModules = new();
     protected readonly List<string> _ignoredTables = new(); //todo: add using to backup and transfer tasks
-
-    protected PortalTaskBase(DbFactory dbFactory, ILogger logger, StorageFactory storageFactory, StorageFactoryConfig storageFactoryConfig, ModuleProvider moduleProvider)
-    {
-        Logger = logger;
-        ProcessStorage = true;
-        StorageFactory = storageFactory;
-        StorageFactoryConfig = storageFactoryConfig;
-        ModuleProvider = moduleProvider;
-        DbFactory = dbFactory;
-    }
 
     public void Init(int tenantId)
     {
@@ -315,7 +300,7 @@ public abstract class PortalTaskBase
                         if (commandText.StartsWith("REPLACE INTO"))
                         {
                             var innerValues = commandText.Split(',').ToList();
-                            for (var i = 0; i < innerValues.Count(); i++)
+                            for (var i = 0; i < innerValues.Count; i++)
                             {
                                 var flag1 = false;
                                 var flag2 = false;
@@ -330,12 +315,12 @@ public abstract class PortalTaskBase
                                     flag2 = true;
                                     innerValues[i] = innerValues[i].TrimEnd(')');
                                 }
-                                if (i == innerValues.Count() - 1)
+                                if (i == innerValues.Count - 1)
                                 {
                                     innerValues[i] = innerValues[i].Remove(innerValues[i].Length - 2, 2);
                                 }
                                 if (innerValues[i].StartsWith("\'") && ((!innerValues[i].EndsWith("\'") || innerValues[i] == "'")
-                                    || i != innerValues.Count() - 1 && (!innerValues[i + 1].StartsWith("\'") && innerValues[i + 1].EndsWith("\'") && !innerValues[i + 1].StartsWith("(\'") || innerValues[i + 1] == "'")))
+                                    || i != innerValues.Count - 1 && (!innerValues[i + 1].StartsWith("\'") && innerValues[i + 1].EndsWith("\'") && !innerValues[i + 1].StartsWith("(\'") || innerValues[i + 1] == "'")))
                                 {
                                     innerValues[i] += "," + innerValues[i + 1];
                                     innerValues.RemoveAt(i + 1);
@@ -360,11 +345,11 @@ public abstract class PortalTaskBase
                                 }
                                 else if (flag2)
                                 {
-                                    innerValues[i] = innerValues[i] + ")";
+                                    innerValues[i] += ")";
                                 }
-                                if (i == innerValues.Count() - 1)
+                                if (i == innerValues.Count - 1)
                                 {
-                                    innerValues[i] = innerValues[i] + ");";
+                                    innerValues[i] += ");";
                                 }
                             }
 

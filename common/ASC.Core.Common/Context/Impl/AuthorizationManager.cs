@@ -27,21 +27,11 @@
 namespace ASC.Core;
 
 [Scope]
-public class AuthorizationManager
+public class AuthorizationManager(IAzService service, TenantManager tenantManager)
 {
-    private readonly IAzService _service;
-    private readonly TenantManager _tenantManager;
-
-    public AuthorizationManager(IAzService service, TenantManager tenantManager)
-    {
-        _service = service;
-        _tenantManager = tenantManager;
-    }
-
-
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(Guid subjectId, Guid actionId)
     {
-        var aces = await _service.GetAcesAsync(await _tenantManager.GetCurrentTenantIdAsync(), default);
+        var aces = await service.GetAcesAsync(await tenantManager.GetCurrentTenantIdAsync(), default);
 
         return aces
             .Where(a => a.Action == actionId && (a.Subject == subjectId || subjectId == Guid.Empty))
@@ -50,7 +40,7 @@ public class AuthorizationManager
 
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(Guid subjectId, Guid actionId, ISecurityObjectId objectId)
     {
-        var aces = await _service.GetAcesAsync(await _tenantManager.GetCurrentTenantIdAsync(), default);
+        var aces = await service.GetAcesAsync(await tenantManager.GetCurrentTenantIdAsync(), default);
 
         return FilterAces(aces, subjectId, actionId, objectId)
             .ToList();
@@ -64,7 +54,7 @@ public class AuthorizationManager
         }
 
         var result = new List<AzRecord>();
-        var aces = await _service.GetAcesAsync(await _tenantManager.GetCurrentTenantIdAsync(), default);
+        var aces = await service.GetAcesAsync(await tenantManager.GetCurrentTenantIdAsync(), default);
         result.AddRange(FilterAces(aces, subjectId, actionId, objectId));
 
         var inherits = new List<AzRecord>();
@@ -83,12 +73,12 @@ public class AuthorizationManager
 
     public async Task AddAceAsync(AzRecord r)
     {
-        await _service.SaveAceAsync(await _tenantManager.GetCurrentTenantIdAsync(), r);
+        await service.SaveAceAsync(await tenantManager.GetCurrentTenantIdAsync(), r);
     }
 
     public async Task RemoveAceAsync(AzRecord r)
     {
-        await _service.RemoveAceAsync(await _tenantManager.GetCurrentTenantIdAsync(), r);
+        await service.RemoveAceAsync(await tenantManager.GetCurrentTenantIdAsync(), r);
     }
 
     public async Task RemoveAllAcesAsync(ISecurityObjectId id)

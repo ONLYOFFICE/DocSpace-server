@@ -47,18 +47,11 @@ public class LoginSettings : ISettings<LoginSettings>
     }
 }
 
-public class LoginSettingsWrapper
+public class LoginSettingsWrapper(LoginSettings loginSettings)
 {
-    private readonly LoginSettings _loginSettings;
+    public int AttemptCount { get => loginSettings.AttemptCount; }
 
-    public int AttemptCount { get => _loginSettings.AttemptCount; }
+    public TimeSpan BlockTime { get => TimeSpan.FromSeconds(loginSettings.BlockTime); }
 
-    public TimeSpan BlockTime { get => TimeSpan.FromSeconds(_loginSettings.BlockTime); }
-
-    public TimeSpan CheckPeriod { get => TimeSpan.FromSeconds(_loginSettings.CheckPeriod); }
-
-    public LoginSettingsWrapper(LoginSettings loginSettings)
-    {
-        _loginSettings = loginSettings;
-    }
+    public TimeSpan CheckPeriod { get => TimeSpan.FromSeconds(loginSettings.CheckPeriod); }
 }

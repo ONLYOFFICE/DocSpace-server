@@ -151,7 +151,7 @@ public class XmlPatternProvider2 : IPatternProvider
 
         static string ToUpper(string name)
         {
-            return name[0].ToString().ToUpper() + name.Substring(1);
+            return name[0].ToString().ToUpper() + name[1..];
         }
     }
 }

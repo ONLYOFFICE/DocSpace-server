@@ -27,16 +27,9 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class TelegramSender : INotifySender
+public class TelegramSender(ILoggerProvider options, IServiceProvider serviceProvider) : INotifySender
 {
-    private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
-
-    public TelegramSender(ILoggerProvider options, IServiceProvider serviceProvider)
-    {
-        _logger = options.CreateLogger("ASC");
-        _serviceProvider = serviceProvider;
-    }
+    private readonly ILogger _logger = options.CreateLogger("ASC");
 
 
     public void Init(IDictionary<string, string> properties) { }
@@ -50,7 +43,7 @@ public class TelegramSender : INotifySender
         }
         try
         {
-            await using var scope = _serviceProvider.CreateAsyncScope();
+            await using var scope = serviceProvider.CreateAsyncScope();
             var TelegramHelper = scope.ServiceProvider.GetService<TelegramHelper>();
             TelegramHelper.SendMessage(m);
         }

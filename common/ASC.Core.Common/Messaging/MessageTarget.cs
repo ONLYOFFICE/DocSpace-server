@@ -27,15 +27,9 @@
 namespace ASC.MessagingSystem.EF.Model;
 
 [Singleton]
-public class MessageTarget
+public class MessageTarget(ILoggerProvider option)
 {
     private IEnumerable<string> _items;
-    private readonly ILoggerProvider _option;
-
-    public MessageTarget(ILoggerProvider option)
-    {
-        _option = option;
-    }
 
     public MessageTarget Create<T>(T value)
     {
@@ -45,7 +39,7 @@ public class MessageTarget
             res.Add(value.ToString());
         }
 
-        return new MessageTarget(_option)
+        return new MessageTarget(option)
         {
             _items = res
         };
@@ -53,7 +47,7 @@ public class MessageTarget
 
     public MessageTarget  Create<T>(IEnumerable<T> value)
     {
-        var res = new MessageTarget(_option)
+        var res = new MessageTarget(option)
         {
             _items = new List<string>()
         };
@@ -80,7 +74,7 @@ public class MessageTarget
             return null;
         }
 
-        return new MessageTarget(_option)
+        return new MessageTarget(option)
         {
             _items = items
         };

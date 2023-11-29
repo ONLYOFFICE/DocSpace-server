@@ -29,21 +29,14 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class SettingsController : ControllerBase
-{
-    private CommonMethods CommonMethods { get; }
-    private CoreSettings CoreSettings { get; }
-    private ILogger<SettingsController> Log { get; }
-
-    public SettingsController(
-        CommonMethods commonMethods,
+public class SettingsController(CommonMethods commonMethods,
         CoreSettings coreSettings,
         ILogger<SettingsController> option)
-    {
-        CommonMethods = commonMethods;
-        CoreSettings = coreSettings;
-        Log = option;
-    }
+    : ControllerBase
+{
+    private CommonMethods CommonMethods { get; } = commonMethods;
+    private CoreSettings CoreSettings { get; } = coreSettings;
+    private ILogger<SettingsController> Log { get; } = option;
 
     #region For TEST api
 
@@ -115,7 +108,7 @@ public class SettingsController : ControllerBase
             });
         }
 
-        Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId);
+        Log.LogDebug("Set {0} value {1} for {2}", model.Key, model.Value, tenantId.ToString());
 
         await CoreSettings.SaveSettingAsync(model.Key, model.Value, tenantId);
 

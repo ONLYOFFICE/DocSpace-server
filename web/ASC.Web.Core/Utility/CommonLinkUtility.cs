@@ -54,7 +54,16 @@ public enum ManagementType
 }
 
 [Scope]
-public class CommonLinkUtility : BaseCommonLinkUtility
+public class CommonLinkUtility(IHttpContextAccessor httpContextAccessor,
+        CoreBaseSettings coreBaseSettings,
+        CoreSettings coreSettings,
+        TenantManager tenantManager,
+        UserManager userManager,
+        WebItemManagerSecurity webItemManagerSecurity,
+        WebItemManager webItemManager,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        ILoggerProvider options)
+    : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
     private static readonly Regex _regFilePathTrim = new("/[^/]*\\.aspx", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -62,11 +71,6 @@ public class CommonLinkUtility : BaseCommonLinkUtility
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
-
-    private readonly UserManager _userManager;
-    private readonly WebItemManagerSecurity _webItemManagerSecurity;
-    private readonly WebItemManager _webItemManager;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
 
     public CommonLinkUtility(
         CoreBaseSettings coreBaseSettings,
@@ -80,19 +84,6 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         this(null, coreBaseSettings, coreSettings, tenantManager, userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider, options)
     {
     }
-
-    public CommonLinkUtility(
-        IHttpContextAccessor httpContextAccessor,
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        TenantManager tenantManager,
-        UserManager userManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        WebItemManager webItemManager,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        ILoggerProvider options) :
-        base(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options) =>
-        (_userManager, _webItemManagerSecurity, _webItemManager, _emailValidationKeyProvider) = (userManager, webItemManagerSecurity, webItemManager, emailValidationKeyProvider);
 
     public string Logout
     {
@@ -134,7 +125,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     public async Task<string> GetUserProfileAsync(Guid userId, bool absolute = true)
     {
-        if (!await _userManager.UserExistsAsync(userId))
+        if (!await userManager.UserExistsAsync(userId))
         {
             return GetEmployees();
         }
@@ -200,7 +191,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         if (!string.IsNullOrEmpty(currentProductName) || !string.IsNullOrEmpty(currentModuleName))
         {
-            foreach (var product in _webItemManager.GetItemsAll<IProduct>())
+            foreach (var product in webItemManager.GetItemsAll<IProduct>())
             {
                 var startProductName = GetProductNameFromUrl(product.StartURL);
                 if (string.IsNullOrEmpty(startProductName) || !string.Equals(currentProductName, startProductName, StringComparison.InvariantCultureIgnoreCase))
@@ -212,7 +203,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
                 if (!string.IsNullOrEmpty(currentModuleName))
                 {
-                    foreach (var module in _webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
+                    foreach (var module in webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
                     {
                         var startModuleName = GetModuleNameFromUrl(module.StartURL);
                         if (!string.IsNullOrEmpty(startModuleName) && string.Equals(currentModuleName, startModuleName, StringComparison.InvariantCultureIgnoreCase))
@@ -224,7 +215,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
                 }
                 else
                 {
-                    foreach (var module in _webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
+                    foreach (var module in webItemManagerSecurity.GetSubItems(product.ID).OfType<IModule>())
                     {
                         if (!module.StartURL.Equals(product.StartURL) && currentURL.Contains(_regFilePathTrim.Replace(module.StartURL, string.Empty)))
                         {
@@ -240,7 +231,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         if (pid != Guid.Empty)
         {
-            currentProduct = _webItemManager[pid] as IProduct;
+            currentProduct = webItemManager[pid] as IProduct;
         }
     }
 
@@ -251,9 +242,9 @@ public class CommonLinkUtility : BaseCommonLinkUtility
             var pos = url.IndexOf("/products/", StringComparison.InvariantCultureIgnoreCase);
             if (0 <= pos)
             {
-                url = url.Substring(pos + 10).ToLower();
+                url = url[(pos + 10)..].ToLower();
                 pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
+                return 0 < pos ? url[..pos] : url;
             }
         }
         catch
@@ -269,9 +260,9 @@ public class CommonLinkUtility : BaseCommonLinkUtility
             var pos = url.IndexOf("/modules/", StringComparison.InvariantCultureIgnoreCase);
             if (0 <= pos)
             {
-                url = url.Substring(pos + 9).ToLower();
+                url = url[(pos + 9)..].ToLower();
                 pos = url.IndexOf('/');
-                return 0 < pos ? url.Substring(0, pos) : url;
+                return 0 < pos ? url[..pos] : url;
             }
         }
         catch
@@ -286,7 +277,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
         if (!string.IsNullOrEmpty(sysName))
         {
-            foreach (var product in _webItemManager.GetItemsAll<IProduct>())
+            foreach (var product in webItemManager.GetItemsAll<IProduct>())
             {
                 if (string.Equals(sysName, product.GetSysName()))
                 {
@@ -301,12 +292,12 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     private async Task<string> GetUserParamsPairAsync(Guid userID)
     {
-        return GetUserParamsPair(await _userManager.GetUsersAsync(userID));
+        return GetUserParamsPair(await userManager.GetUsersAsync(userID));
     }
 
     public string GetUserParamsPair(UserInfo user)
     {
-        if (user == null || string.IsNullOrEmpty(user.UserName) || !_userManager.UserExists(user))
+        if (user == null || string.IsNullOrEmpty(user.UserName) || !userManager.UserExists(user))
         {
             return "";
         }
@@ -406,7 +397,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var key = _emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var key = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
         return (url, key);
     }
 
@@ -454,7 +445,7 @@ public class CommonLinkUtility : BaseCommonLinkUtility
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        var validationKey = _emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
 
         var link = $"type={confirmType}&key={validationKey}";
 

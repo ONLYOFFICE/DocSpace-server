@@ -29,30 +29,15 @@ using ASC.Data.Backup.EF.Model;
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<BackupRequestIntegrationEvent>
-{
-    private readonly BackupAjaxHandler _backupAjaxHandler;
-    private readonly ILogger _logger;
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
-    private readonly AuthManager _authManager;
-    private readonly BackupWorker _backupWorker;
-
-    public BackupRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
+public class BackupRequestedIntegrationEventHandler(BackupAjaxHandler backupAjaxHandler,
         ILogger<BackupRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
         AuthManager authManager,
         BackupWorker backupWorker)
-    {
-        _tenantManager = tenantManager;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _backupAjaxHandler = backupAjaxHandler;
-        _logger = logger;
-        _backupWorker = backupWorker;
-    }
+    : IIntegrationEventHandler<BackupRequestIntegrationEvent>
+{
+    private readonly ILogger _logger = logger;
 
     public async Task Handle(BackupRequestIntegrationEvent @event)
     {
@@ -61,17 +46,17 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && _backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
 
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
             if (@event.IsScheduled)
             {
-                _backupWorker.StartScheduledBackup(new BackupSchedule
+                backupWorker.StartScheduledBackup(new BackupSchedule
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,
@@ -83,7 +68,7 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
             }
             else
             {
-                await _backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.Dump);
+                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.Dump);
             }
         }
     }

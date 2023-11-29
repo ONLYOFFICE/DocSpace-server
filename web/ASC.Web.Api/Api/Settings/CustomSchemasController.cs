@@ -148,15 +148,15 @@ public class CustomSchemasController : BaseSettingsController
         var names = new PeopleNamesItem
         {
             Id = PeopleNamesItem.CustomID,
-            UserCaption = usrCaption.Substring(0, Math.Min(30, usrCaption.Length)),
-            UsersCaption = usrsCaption.Substring(0, Math.Min(30, usrsCaption.Length)),
-            GroupCaption = grpCaption.Substring(0, Math.Min(30, grpCaption.Length)),
-            GroupsCaption = grpsCaption.Substring(0, Math.Min(30, grpsCaption.Length)),
-            UserPostCaption = usrStatusCaption.Substring(0, Math.Min(30, usrStatusCaption.Length)),
-            RegDateCaption = regDateCaption.Substring(0, Math.Min(30, regDateCaption.Length)),
-            GroupHeadCaption = grpHeadCaption.Substring(0, Math.Min(30, grpHeadCaption.Length)),
-            GuestCaption = guestCaption.Substring(0, Math.Min(30, guestCaption.Length)),
-            GuestsCaption = guestsCaption.Substring(0, Math.Min(30, guestsCaption.Length)),
+            UserCaption = usrCaption[..Math.Min(30, usrCaption.Length)],
+            UsersCaption = usrsCaption[..Math.Min(30, usrsCaption.Length)],
+            GroupCaption = grpCaption[..Math.Min(30, grpCaption.Length)],
+            GroupsCaption = grpsCaption[..Math.Min(30, grpsCaption.Length)],
+            UserPostCaption = usrStatusCaption[..Math.Min(30, usrStatusCaption.Length)],
+            RegDateCaption = regDateCaption[..Math.Min(30, regDateCaption.Length)],
+            GroupHeadCaption = grpHeadCaption[..Math.Min(30, grpHeadCaption.Length)],
+            GuestCaption = guestCaption[..Math.Min(30, guestCaption.Length)],
+            GuestsCaption = guestsCaption[..Math.Min(30, guestsCaption.Length)],
         };
 
         await _customNamingPeople.SetPeopleNamesAsync(names);

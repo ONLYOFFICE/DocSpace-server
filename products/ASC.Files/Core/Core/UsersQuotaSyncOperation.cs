@@ -29,13 +29,11 @@ using ASC.Web.Core.WebZones;
 namespace ASC.Web.Files;
 
 [Singleton(Additional = typeof(UsersQuotaOperationExtension))]
-public class UsersQuotaSyncOperation
+public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";
 
-    private readonly DistributedTaskQueue _progressQueue;
-
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
 
     public void RecalculateQuota(Tenant tenant)
@@ -49,7 +47,7 @@ public class UsersQuotaSyncOperation
 
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
+            item = serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
             item.InitJob(tenant);
             _progressQueue.EnqueueTask(item.RunJobAsync, item);
         }
@@ -77,14 +75,6 @@ public class UsersQuotaSyncOperation
     }
 
 
-    public UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
-
-
     public static class UsersQuotaOperationExtension
     {
         public static void Register(DIHelper services)
@@ -94,10 +84,8 @@ public class UsersQuotaSyncOperation
     }
 }
 
-public class UsersQuotaSyncJob : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
     private int? _tenantId;
     public int TenantId
     {
@@ -112,11 +100,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         }
     }
 
-    public UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
@@ -126,7 +109,7 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
     {
         try
         {
-           await using var scope = _serviceScopeFactory.CreateAsyncScope();
+           await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
@@ -157,8 +140,7 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
                 {
                     if (item.ID == WebItemManager.DocumentsProductID)
                     {
-                        var manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
-                        if (manager == null)
+                        if (item.Context.SpaceUsageStatManager is not IUserSpaceUsage manager)
                         {
                             continue;
                         }

@@ -27,25 +27,14 @@
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class PaymentFilter : IAsyncResourceFilter
+public class PaymentFilter(ILogger<PaymentFilter> logger, TenantExtra tenantExtra) : IAsyncResourceFilter
 {
-    private readonly TenantExtra _tenantExtra;
-    private readonly ILogger<PaymentFilter> _logger;
-
-    public PaymentFilter(ILogger<PaymentFilter> logger, TenantExtra tenantExtra)
-    {
-        _logger = logger;
-        _tenantExtra = tenantExtra;
-    }
-
-    public void OnResourceExecuted(ResourceExecutedContext context) { }
-
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
         if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor
             && controllerActionDescriptor.EndpointMetadata.OfType<AllowNotPaymentAttribute>().Any())
         {
-            _logger.DebugPaymentIsNotRequired();
+            logger.DebugPaymentIsNotRequired();
             await next();
             return;
         }
@@ -53,10 +42,10 @@ public class PaymentFilter : IAsyncResourceFilter
         var header = context.HttpContext.Request.Headers["Payment-Info"];
         if (string.IsNullOrEmpty(header) || (bool.TryParse(header, out var flag) && flag))
         {
-            if (await _tenantExtra.IsNotPaidAsync(false))
+            if (await tenantExtra.IsNotPaidAsync(false))
             {
                 context.Result = new StatusCodeResult((int)HttpStatusCode.PaymentRequired);
-                _logger.WarningPaymentRequired(context.HttpContext.Request.Url());
+                logger.WarningPaymentRequired(context.HttpContext.Request.Url());
                 return;
             }
         }

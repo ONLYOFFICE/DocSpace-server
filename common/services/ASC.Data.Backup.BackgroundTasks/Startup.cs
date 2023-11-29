@@ -26,14 +26,9 @@
 
 namespace ASC.Data.Backup.BackgroundTasks;
 
-public class Startup : BaseStartup
+public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    : BaseStartup(configuration, hostEnvironment)
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-
-    }
-
     public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);

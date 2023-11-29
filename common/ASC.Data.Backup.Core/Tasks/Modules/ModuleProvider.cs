@@ -27,26 +27,20 @@
 namespace ASC.Data.Backup.Tasks.Modules;
 
 [Scope]
-public class ModuleProvider
+public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, CoreSettings coreSettings)
 {
-    public List<IModuleSpecifics> AllModules { get; }
-    private IModuleSpecifics RoomLogosModule { get; }
-
-    public ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, CoreSettings coreSettings)
-    {
-        AllModules = new List<IModuleSpecifics>
-            {
-                new TenantsModuleSpecifics(coreSettings,helpers),
-                new AuditModuleSpecifics(helpers),
-                new FilesModuleSpecifics(logger,helpers),
-                new FilesModuleSpecifics2(helpers),
-                new WebStudioModuleSpecifics(helpers),
-                new CoreModuleSpecifics(helpers)
-            }
+    public List<IModuleSpecifics> AllModules { get; } = new List<IModuleSpecifics>
+        {
+            new TenantsModuleSpecifics(coreSettings,helpers),
+            new AuditModuleSpecifics(helpers),
+            new FilesModuleSpecifics(logger,helpers),
+            new FilesModuleSpecifics2(helpers),
+            new WebStudioModuleSpecifics(helpers),
+            new CoreModuleSpecifics(helpers)
+        }
         .ToList();
 
-        RoomLogosModule = new RoomLogosModuleSpecifics(helpers);
-    }
+    private IModuleSpecifics RoomLogosModule { get; } = new RoomLogosModuleSpecifics(helpers);
 
     public IModuleSpecifics GetByStorageModule(string storageModuleName, string storageDomainName = null)
     {

@@ -60,14 +60,11 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     {
         try
         {
-            if (_producer == null)
-            {
-                _producer = new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
+            _producer ??= new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
                 .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
                 .SetKeySerializer(_keySerializer)
                 .SetValueSerializer(_valueSerializer)
                 .Build();
-            }
 
             var channelName = GetChannelName(notifyAction);
 
@@ -101,14 +98,11 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     {
         try
         {
-            if (_producer == null)
-            {
-                _producer = new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
+            _producer ??= new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
                 .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
                 .SetKeySerializer(_keySerializer)
                 .SetValueSerializer(_valueSerializer)
                 .Build();
-            }
 
             var channelName = GetChannelName(cacheNotifyAction);
 
@@ -220,10 +214,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
     {
         _cancelationToken.TryGetValue(GetChannelName(notifyAction), out var source);
 
-        if (source != null)
-        {
-            source.Cancel();
-        }
+        source?.Cancel();
     }
 
     public void Dispose()

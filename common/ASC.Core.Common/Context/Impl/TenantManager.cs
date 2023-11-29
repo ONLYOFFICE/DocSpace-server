@@ -126,13 +126,12 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = await TenantService.GetTenantAsync(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = await TenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        if (t == null)
-        {
-            t = await TenantService.GetTenantAsync(domain);
-        }
+        
+        t ??= await TenantService.GetTenantAsync(domain);
+        
         if (t == null && CoreBaseSettings.Standalone && !isAlias)
         {
             t = await TenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
@@ -161,13 +160,12 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = TenantService.GetTenant(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = TenantService.GetTenant(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        if (t == null)
-        {
-            t = TenantService.GetTenant(domain);
-        }
+        
+        t ??= TenantService.GetTenant(domain);
+        
         if (t == null && CoreBaseSettings.Standalone && !isAlias)
         {
             t = TenantService.GetTenantForStandaloneWithoutAlias(domain);

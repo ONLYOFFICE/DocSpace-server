@@ -26,15 +26,8 @@
 
 namespace ASC.Core.Common.Notify;
 
-class FirebaseApiKey
+class FirebaseApiKey(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public FirebaseApiKey(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     [JsonProperty("type")]
     public string Type
     {
@@ -49,7 +42,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase-mobile:projectId"] ?? "";
+            return configuration["firebase-mobile:projectId"] ?? "";
         }
     }
     [JsonProperty("private_key_id")]
@@ -57,7 +50,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase-mobile:privateKeyId"] ?? "";
+            return configuration["firebase-mobile:privateKeyId"] ?? "";
         }
     }
     [JsonProperty("private_key")]
@@ -65,7 +58,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase-mobile:privateKey"] ?? "";
+            return configuration["firebase-mobile:privateKey"] ?? "";
         }
     }
     [JsonProperty("client_email")]
@@ -73,7 +66,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase-mobile:clientEmail"] ?? "";
+            return configuration["firebase-mobile:clientEmail"] ?? "";
         }
     }
     [JsonProperty("client_id")]
@@ -81,7 +74,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase-mobile:clientId"] ?? "";
+            return configuration["firebase-mobile:clientId"] ?? "";
         }
     }
     [JsonProperty("auth_uri")]
@@ -113,7 +106,7 @@ class FirebaseApiKey
     {
         get
         {
-            return _configuration["firebase-mobile:x509CertUrl"] ?? "";
+            return configuration["firebase-mobile:x509CertUrl"] ?? "";
         }
     }
 }

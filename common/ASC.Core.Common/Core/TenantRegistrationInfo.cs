@@ -30,8 +30,8 @@ public class TenantRegistrationInfo
 {
     public string Name { get; init; }
     public string Address { get; init; }
-    public CultureInfo Culture { get; init; }
-    public TimeZoneInfo TimeZoneInfo { get; init; }
+    public CultureInfo Culture { get; init; } = CultureInfo.CurrentCulture;
+    public TimeZoneInfo TimeZoneInfo { get; init; } = TimeZoneInfo.Local;
     public string FirstName { get; init; }
     public string LastName { get; init; }
     public string Email { get; init; }
@@ -46,10 +46,4 @@ public class TenantRegistrationInfo
     public bool Calls { get; init; }
     public string Campaign { get; set; }
     public bool LimitedAccessSpace { get; set; }
-
-    public TenantRegistrationInfo()
-    {
-        Culture = CultureInfo.CurrentCulture;
-        TimeZoneInfo = TimeZoneInfo.Local;
-    }
 }

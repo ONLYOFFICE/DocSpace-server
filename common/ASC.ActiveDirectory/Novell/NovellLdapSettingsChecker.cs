@@ -27,18 +27,13 @@
 namespace ASC.ActiveDirectory.Novell;
 
 [Scope]
-public class NovellLdapSettingsChecker : LdapSettingsChecker
+public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : LdapSettingsChecker(logger)
 {
     public LdapCertificateConfirmRequest CertificateConfirmRequest { get; set; }
 
     public LdapHelper LdapHelper
     {
         get { return LdapImporter.LdapHelper; }
-    }
-
-    public NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) :
-        base(logger)
-    {
     }
 
     public new void Init(LdapUserImporter importer)

@@ -253,14 +253,9 @@ public class SetupInfo
 
         foreach (var culture in EnabledCulturesPersonal)
         {
-            if (result.ContainsKey(culture.TwoLetterISOLanguageName))
-            {
-                result.Add(culture.Name, culture);
-            }
-            else
-            {
-                result.Add(culture.TwoLetterISOLanguageName, culture);
-            }
+            result.Add(
+                result.ContainsKey(culture.TwoLetterISOLanguageName) ? culture.Name : culture.TwoLetterISOLanguageName,
+                culture);
         }
 
         return result.OrderBy(item => item.Value.DisplayName).ToList();
@@ -276,12 +271,8 @@ public class SetupInfo
             }
         }
 
-        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase));
-
-        if (cultureInfo == null)
-        {
-            cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
-        }
+        var cultureInfo = EnabledCulturesPersonal.Find(c => string.Equals(c.Name, lang, StringComparison.InvariantCultureIgnoreCase)) ??
+                          EnabledCulturesPersonal.Find(c => string.Equals(c.TwoLetterISOLanguageName, lang, StringComparison.InvariantCultureIgnoreCase));
 
         if (cultureInfo != null)
         {

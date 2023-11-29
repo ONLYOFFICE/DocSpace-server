@@ -873,29 +873,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 }
 
 [Scope]
-public class FileMoveCopyOperationScope
-{
-    private readonly FilesMessageService _filesMessageService;
-    private readonly FileMarker _fileMarker;
-    private readonly FileUtility _fileUtility;
-    private readonly Global _global;
-    private readonly EntryManager _entryManager;
-
-    public FileMoveCopyOperationScope(FilesMessageService filesMessageService, FileMarker fileMarker, FileUtility fileUtility, Global global, EntryManager entryManager)
-    {
-        _filesMessageService = filesMessageService;
-        _fileMarker = fileMarker;
-        _fileUtility = fileUtility;
-        _global = global;
-        _entryManager = entryManager;
-    }
-
-    public void Deconstruct(out FilesMessageService filesMessageService, out FileMarker fileMarker, out FileUtility fileUtility, out Global global, out EntryManager entryManager)
-    {
-        filesMessageService = _filesMessageService;
-        fileMarker = _fileMarker;
-        fileUtility = _fileUtility;
-        global = _global;
-        entryManager = _entryManager;
-    }
-}
+public record FileMoveCopyOperationScope(
+    FilesMessageService FilesMessageService, 
+    FileMarker FileMarker,
+    FileUtility FileUtility, 
+    Global Global, 
+    EntryManager EntryManager);

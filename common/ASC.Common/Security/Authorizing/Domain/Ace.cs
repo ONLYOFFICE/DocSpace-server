@@ -26,14 +26,8 @@
 
 namespace ASC.Common.Security.Authorizing;
 
-public class Ace
+public class Ace(Guid actionId, AceType reaction)
 {
-    public Guid ActionId { get; set; }
-    public AceType Reaction { get; set; }
-
-    public Ace(Guid actionId, AceType reaction)
-    {
-        ActionId = actionId;
-        Reaction = reaction;
+    public Guid ActionId { get; set; } = actionId;
+    public AceType Reaction { get; set; } = reaction;
     }
-}

@@ -40,7 +40,7 @@ public class NotifyResult
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.AppendFormat("SendResult: {0} whith {1} sub-results", Result, Responses.Count);
+        sb.Append($"SendResult: {Result} whith {Responses.Count} sub-results");
         foreach (var responce in Responses)
         {
             var recipient = "<recipient:nomessage>";

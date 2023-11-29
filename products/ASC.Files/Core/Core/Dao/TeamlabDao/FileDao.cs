@@ -964,7 +964,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         comment ??= string.Empty;
-        comment = comment.Substring(0, Math.Min(comment.Length, 255));
+        comment = comment[..Math.Min(comment.Length, 255)];
 
         await Queries.UpdateDbFilesCommentAsync(filesDbContext, tenantId, fileId, fileVersion, comment);
 
@@ -2183,7 +2183,7 @@ static file class Queries
                                 select f
                             ).FirstOrDefault()
                     })
-                    .Select(r => new DbFileQueryWithSecurity() { DbFileQuery = r, Security = null }));
+                    .Select(r => new DbFileQueryWithSecurity { DbFileQuery = r, Security = null }));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFileQueryWithSecurity>>
         DbFileQueryWithSecurityAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

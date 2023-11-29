@@ -30,9 +30,8 @@ namespace ASC.Web.Studio.UserControls.CustomNavigation;
 
 public class LogoUploader
 {
-    public LogoUploader(RequestDelegate next)
+    public LogoUploader(RequestDelegate _)
     {
-
     }
 
     public async Task Invoke

@@ -222,7 +222,7 @@ public class StorageController : BaseSettingsController, IDisposable
 
         foreach (var tenant in tenants)
         {
-            await _cacheDeleteSchedule.PublishAsync(new DeleteSchedule() { TenantId = tenant.Id }, CacheNotifyAction.Insert);
+            await _cacheDeleteSchedule.PublishAsync(new DeleteSchedule { TenantId = tenant.Id }, CacheNotifyAction.Insert);
         }
 
         var settings = await _encryptionSettingsHelper.LoadAsync();

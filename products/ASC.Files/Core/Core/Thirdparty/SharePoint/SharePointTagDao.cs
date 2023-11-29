@@ -30,9 +30,7 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
-{
-    public SharePointTagDao(IServiceProvider serviceProvider,
+internal class SharePointTagDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -42,10 +40,9 @@ internal class SharePointTagDao : SharePointDaoBase, IThirdPartyTagDao
         TempPath tempPath,
         AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, authContext, regexDaoSelectorBase)
-    {
-    }
-
+    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
+        fileUtility, tempPath, authContext, regexDaoSelectorBase), IThirdPartyTagDao
+{
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
         var folderId = DaoSelector.ConvertId(parentFolder.Id);

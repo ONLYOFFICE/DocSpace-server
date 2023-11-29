@@ -227,7 +227,7 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         var file = GetFile();
 
         file.Id = MakeId(driveFile.Id);
-        file.ContentLength = driveFile.Size.HasValue ? (long)driveFile.Size : 0;
+        file.ContentLength = driveFile.Size ?? 0;
         file.CreateOn = driveFile.CreatedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;
@@ -288,10 +288,8 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         {
             return await _providerInfo.GetItemsAsync(parentDriveId);
         }
-        else
-        {
-            return await _providerInfo.GetItemsAsync(parentDriveId, folder);
-        }
+
+        return await _providerInfo.GetItemsAsync(parentDriveId, folder);
     }
 
     public Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)

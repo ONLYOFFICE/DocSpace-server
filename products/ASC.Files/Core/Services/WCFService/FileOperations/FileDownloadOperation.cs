@@ -26,18 +26,13 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDownloadOperationData<T> : FileOperationData<T>
-{
-    public Dictionary<T, string> FilesDownload { get; }
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileDownloadOperationData(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant, IDictionary<string, StringValues> headers,
+internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
+        IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool holdResult = true)
-        : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
-    {
-        FilesDownload = files;
-        Headers = headers;
-    }
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+{
+    public Dictionary<T, string> FilesDownload { get; } = files;
+    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]
@@ -460,7 +455,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path.Substring(path.LastIndexOf('/'));
+            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
             entriesPathId.Add(newtitle, ids);
         }
     }

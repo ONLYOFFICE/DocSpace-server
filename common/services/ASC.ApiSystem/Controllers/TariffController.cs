@@ -29,21 +29,14 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class TariffController : ControllerBase
-{
-    private CommonMethods CommonMethods { get; }
-    private HostedSolution HostedSolution { get; }
-    private ILogger<TariffController> Log { get; }
-    public TariffController(
-        CommonMethods commonMethods,
+public class TariffController(CommonMethods commonMethods,
         HostedSolution hostedSolution,
-        ILogger<TariffController> option
-        )
-    {
-        CommonMethods = commonMethods;
-        HostedSolution = hostedSolution;
-        Log = option;
-    }
+        ILogger<TariffController> option)
+    : ControllerBase
+{
+    private CommonMethods CommonMethods { get; } = commonMethods;
+    private HostedSolution HostedSolution { get; } = hostedSolution;
+    private ILogger<TariffController> Log { get; } = option;
 
     #region For TEST api
 
@@ -194,11 +187,11 @@ public class TariffController : ControllerBase
         return new
         {
             countManager = q.CountRoomAdmin,
-            dueDate = t == null ? DateTime.MaxValue : t.DueDate,
+            dueDate = t?.DueDate ?? DateTime.MaxValue,
             features = q.Features,
             maxFileSize = q.MaxFileSize,
             maxTotalSize = q.MaxTotalSize,
-            state = t == null ? TariffState.Paid : t.State,
+            state = t?.State ?? TariffState.Paid,
         };
     }
 

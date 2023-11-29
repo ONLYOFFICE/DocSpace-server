@@ -29,7 +29,17 @@ using Object = Google.Apis.Storage.v1.Data.Object;
 namespace ASC.Data.Storage.GoogleCloud;
 
 [Scope]
-public class GoogleCloudStorage : BaseStorage
+public class GoogleCloudStorage(TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider factory,
+        ILogger<GoogleCloudStorage> options,
+        IHttpClientFactory clientFactory,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportChunking => true;
 
@@ -41,21 +51,6 @@ public class GoogleCloudStorage : BaseStorage
     private Uri _bucketRoot;
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
-
-    public GoogleCloudStorage(
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider factory,
-        ILogger<GoogleCloudStorage> options,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-    }
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -220,10 +215,7 @@ public class GoogleCloudStorage : BaseStorage
         uploaded.ContentEncoding = contentEncoding;
         uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
 
-        if (uploaded.Metadata == null)
-        {
-            uploaded.Metadata = new Dictionary<string, string>();
-        }
+        uploaded.Metadata ??= new Dictionary<string, string>();
 
         uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(cacheDays)).ToString("R", CultureInfo.InvariantCulture);
 
@@ -395,7 +387,7 @@ public class GoogleCloudStorage : BaseStorage
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
     {
         return GetObjectsAsync(domain, path, recursive)
-               .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length));
+               .Select(x => x.Name[MakePath(domain, path + "/").Length..]);
     }
 
     private IEnumerable<Object> GetObjects(string domain, string path, bool recursive)
@@ -429,7 +421,7 @@ public class GoogleCloudStorage : BaseStorage
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         return GetObjectsAsync(domain, path, recursive).Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Name)))
-               .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length).TrimStart('/'));
+               .Select(x => x.Name[MakePath(domain, path + "/").Length..].TrimStart('/'));
     }
 
     public override async Task<bool> IsFileAsync(string domain, string path)
@@ -601,12 +593,7 @@ public class GoogleCloudStorage : BaseStorage
 
         uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
         uploaded.ContentDisposition = "attachment";
-
-        if (uploaded.Metadata == null)
-        {
-            uploaded.Metadata = new Dictionary<string, string>();
-        }
-
+        uploaded.Metadata ??= new Dictionary<string, string>();
         uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
         uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 

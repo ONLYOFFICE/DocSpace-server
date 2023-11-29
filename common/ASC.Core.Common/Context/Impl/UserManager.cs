@@ -520,7 +520,7 @@ public class UserManager
                     var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri, email.ToLower(), true, true, itemID: newUser.Id.ToString());
                     try
                     {
-                        var davItemRequest = new DavRequest()
+                        var davItemRequest = new DavRequest
                         {
                             Url = requestUrlItem,
                             Authorization = rootAuthorization,
@@ -600,7 +600,7 @@ public class UserManager
                 var addBookCollection = await _cardDavAddressbook.GetCollection(requestUrlBook, userAuthorization, myUri);
                 if (addBookCollection.Completed && addBookCollection.StatusCode != 404)
                 {
-                    var davbookRequest = new DavRequest()
+                    var davbookRequest = new DavRequest
                     {
                         Url = requestUrlBook,
                         Authorization = rootAuthorization,
@@ -614,7 +614,7 @@ public class UserManager
                     var requestUrlItem = _cardDavAddressbook.GetRadicaleUrl(myUri, email.ToLower(), true, true, itemID: delUser.Id.ToString());
                     try
                     {
-                        var davItemRequest = new DavRequest()
+                        var davItemRequest = new DavRequest
                         {
                             Url = requestUrlItem,
                             Authorization = rootAuthorization,
@@ -903,12 +903,8 @@ public class UserManager
 
     public async Task<GroupInfo> GetGroupInfoAsync(Guid groupID)
     {
-        var group = await _userService.GetGroupAsync(Tenant.Id, groupID);
-
-        if (group == null)
-        {
-            group = ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
-        }
+        var group = await _userService.GetGroupAsync(Tenant.Id, groupID) ?? 
+                    ToGroup(Constants.BuildinGroups.FirstOrDefault(r => r.ID == groupID) ?? Constants.LostGroupInfo);
 
         if (group == null)
         {

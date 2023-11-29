@@ -33,10 +33,9 @@ public class WebPathSettings
 
     public WebPathSettings(Configuration.Storage storage)
     {
-        var section = storage;
-        if (section != null)
+        if (storage != null)
         {
-            _appenders = section.Appender;
+            _appenders = storage.Appender;
         }
     }
 
@@ -94,8 +93,8 @@ public class WebPathSettings
                 if (relativePath.IndexOfAny(new[] { '?', '=', '&' }) != -1)
                 {
                     //Cut it
-                    query = relativePath.Substring(relativePath.IndexOf('?'));
-                    relativePath = relativePath.Substring(0, relativePath.IndexOf('?'));
+                    query = relativePath[relativePath.IndexOf('?')..];
+                    relativePath = relativePath[..relativePath.IndexOf('?')];
                 }
                 //if (HostingEnvironment.IsHosted)
                 //{
@@ -126,39 +125,21 @@ public class WebPathSettings
 }
 
 [Scope]
-public class WebPath
+public class WebPath(WebPathSettings webPathSettings,
+    IServiceProvider serviceProvider,
+    SettingsManager settingsManager,
+    StorageSettingsHelper storageSettingsHelper,
+    IHostEnvironment hostEnvironment,
+    CoreBaseSettings coreBaseSettings,
+    ILoggerProvider options,
+    IHttpClientFactory clientFactory)
 {
-    public IServiceProvider ServiceProvider { get; }
-    public IHostEnvironment HostEnvironment { get; }
-    private IHttpClientFactory ClientFactory { get; }
+    public IServiceProvider ServiceProvider { get; } = serviceProvider;
+    public IHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    private IHttpClientFactory ClientFactory { get; } = clientFactory;
 
     private static readonly IDictionary<string, bool> _existing = new ConcurrentDictionary<string, bool>();
-    private readonly WebPathSettings _webPathSettings;
-    private readonly SettingsManager _settingsManager;
-    private readonly StorageSettingsHelper _storageSettingsHelper;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly ILoggerProvider _options;
-
-    public WebPath(
-        WebPathSettings webPathSettings,
-        IServiceProvider serviceProvider,
-        SettingsManager settingsManager,
-        StorageSettingsHelper storageSettingsHelper,
-        IHostEnvironment hostEnvironment,
-        CoreBaseSettings coreBaseSettings,
-        ILoggerProvider options,
-        IHttpClientFactory clientFactory)
-    {
-        _webPathSettings = webPathSettings;
-        ServiceProvider = serviceProvider;
-        _settingsManager = settingsManager;
-        _storageSettingsHelper = storageSettingsHelper;
-        HostEnvironment = hostEnvironment;
-        _coreBaseSettings = coreBaseSettings;
-        _options = options;
-        ClientFactory = clientFactory;
-    }
 
     public WebPath(
         WebPathSettings webPathSettings,
@@ -183,11 +164,11 @@ public class WebPath
             throw new ArgumentException($"bad path format {relativePath} remove '~'", nameof(relativePath));
         }
 
-        if (_coreBaseSettings.Standalone && await ServiceProvider.GetService<StaticUploader>().CanUploadAsync()) //hack for skip resolve DistributedTaskQueueOptionsManager
+        if (coreBaseSettings.Standalone && await ServiceProvider.GetService<StaticUploader>().CanUploadAsync()) //hack for skip resolve DistributedTaskQueueOptionsManager
         {
             try
             {
-                var uri = await (await _storageSettingsHelper.DataStoreAsync(await _settingsManager.LoadAsync<CdnStorageSettings>())).GetInternalUriAsync("", relativePath, TimeSpan.Zero, null);
+                var uri = await (await storageSettingsHelper.DataStoreAsync(await settingsManager.LoadAsync<CdnStorageSettings>())).GetInternalUriAsync("", relativePath, TimeSpan.Zero, null);
                 var result = uri.AbsoluteUri.ToLower();
                 if (!string.IsNullOrEmpty(result))
                 {
@@ -200,7 +181,7 @@ public class WebPath
             }
         }
 
-        return _webPathSettings.GetPath(_httpContextAccessor?.HttpContext, _options, relativePath);
+        return webPathSettings.GetPath(_httpContextAccessor?.HttpContext, options, relativePath);
     }
 
     public async Task<bool> ExistsAsync(string relativePath)

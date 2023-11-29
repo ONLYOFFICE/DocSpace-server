@@ -199,20 +199,11 @@ public class ThumbnailItem
     public Image Image { get; set; }
 }
 
-public class ThumbnailsData
+public class ThumbnailsData(Guid userId, UserPhotoManager userPhotoManager)
 {
-    private readonly Guid _userId;
-    private readonly UserPhotoManager _userPhotoManager;
-
-    public ThumbnailsData(Guid userId, UserPhotoManager userPhotoManager)
-    {
-        _userId = userId;
-        _userPhotoManager = userPhotoManager;
-    }
-
     public async Task<(Image, IImageFormat)> MainImgBitmapAsync()
     {
-        var (img, imageFormat) = await _userPhotoManager.GetPhotoImageAsync(_userId);
+        var (img, imageFormat) = await userPhotoManager.GetPhotoImageAsync(userId);
         return (img, imageFormat);
     }
 
@@ -223,27 +214,27 @@ public class ThumbnailsData
                     new()
                     {
                             Size = UserPhotoManager.RetinaFotoSize,
-                            ImgUrl = await _userPhotoManager.GetRetinaPhotoURL(_userId)
+                            ImgUrl = await userPhotoManager.GetRetinaPhotoURL(userId)
                         },
                     new()
                     {
                             Size = UserPhotoManager.MaxFotoSize,
-                            ImgUrl = await _userPhotoManager.GetMaxPhotoURL(_userId)
+                            ImgUrl = await userPhotoManager.GetMaxPhotoURL(userId)
                         },
                     new()
                     {
                             Size = UserPhotoManager.BigFotoSize,
-                            ImgUrl = await _userPhotoManager.GetBigPhotoURL(_userId)
+                            ImgUrl = await userPhotoManager.GetBigPhotoURL(userId)
                         },
                     new()
                     {
                             Size = UserPhotoManager.MediumFotoSize,
-                            ImgUrl = await _userPhotoManager.GetMediumPhotoURL(_userId)
+                            ImgUrl = await userPhotoManager.GetMediumPhotoURL(userId)
                         },
                     new()
                     {
                             Size = UserPhotoManager.SmallFotoSize,
-                            ImgUrl = await _userPhotoManager.GetSmallPhotoURL(_userId)
+                            ImgUrl = await userPhotoManager.GetSmallPhotoURL(userId)
                         }
             };
     }
@@ -254,7 +245,7 @@ public class ThumbnailsData
         {
             var (mainImgBitmap, format) = await MainImgBitmapAsync();
             using var mainImg = mainImgBitmap;
-            await _userPhotoManager.SaveThumbnail(_userId, item.Image, format);
+            await userPhotoManager.SaveThumbnail(userId, item.Image, format);
         }
     }
 }

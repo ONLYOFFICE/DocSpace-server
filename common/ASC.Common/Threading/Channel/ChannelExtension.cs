@@ -94,7 +94,7 @@ public static class ChannelExtension
                     }
                 }
 
-                await Task.WhenAll(inputs.Select(i => Redirect(i)).ToArray());
+                await Task.WhenAll(inputs.Select(Redirect).ToArray());
             }
             catch (OperationCanceledException)
             {

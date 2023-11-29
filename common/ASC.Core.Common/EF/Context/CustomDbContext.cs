@@ -26,13 +26,11 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class CustomDbContext : DbContext
+public class CustomDbContext(DbContextOptions<CustomDbContext> options) : DbContext(options)
 {
     public DbSet<MobileAppInstall> MobileAppInstall { get; set; }
     public DbSet<DbIPLookup> DbIPLookup { get; set; }
     public DbSet<Regions> Regions { get; set; }
-
-    public CustomDbContext(DbContextOptions<CustomDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

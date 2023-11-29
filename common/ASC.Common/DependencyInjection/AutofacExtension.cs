@@ -130,7 +130,7 @@ public static class AutofacExtension
 
         void LoadAssembly(string type)
         {
-            var dll = type.Substring(type.IndexOf(',') + 1).Trim();
+            var dll = type[(type.IndexOf(',') + 1)..].Trim();
             var path = GetFullPath(dll);
 
             if (!string.IsNullOrEmpty(path))
@@ -159,18 +159,11 @@ public static class AutofacExtension
     }
 }
 
-class Resolver
+class Resolver(string assemblyPath)
 {
-    private readonly string _resolvePath;
-
-    public Resolver(string assemblyPath)
-    {
-        _resolvePath = assemblyPath;
-    }
-
     public Assembly Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
     {
-        var path = CrossPlatform.PathCombine(Path.GetDirectoryName(_resolvePath), $"{assemblyName.Name}.dll");
+        var path = CrossPlatform.PathCombine(Path.GetDirectoryName(assemblyPath), $"{assemblyName.Name}.dll");
 
         if (!File.Exists(path))
         {

@@ -26,7 +26,17 @@
 
 namespace ASC.Data.Storage;
 
-public abstract class BaseStorage : IDataStore
+public abstract class BaseStorage(TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider options,
+        ILogger logger,
+        IHttpClientFactory clientFactory,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : IDataStore
 {
     public IQuotaController QuotaController { get; set; }
     public IDataStoreValidator DataStoreValidator { get; set; }
@@ -39,43 +49,13 @@ public abstract class BaseStorage : IDataStore
     internal DataList DataList { get; set; }
     internal string Tenant { get; set; }
     internal Dictionary<string, TimeSpan> DomainsExpires { get; set; } = new();
-    protected ILogger Logger { get; set; }
+    protected ILogger Logger { get; set; } = logger;
 
-    protected readonly TempStream _tempStream;
-    private readonly TenantManager _tenantManager;
-    protected readonly PathUtils _pathUtils;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
-    protected readonly ILoggerProvider _options;
-    protected readonly IHttpClientFactory _clientFactory;
-
-    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
-    private readonly QuotaSocketManager _quotaSocketManager;
-
-    protected BaseStorage(
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger logger,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-    {
-
-        _tempStream = tempStream;
-        _tenantManager = tenantManager;
-        _pathUtils = pathUtils;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _options = options;
-        _clientFactory = clientFactory;
-        Logger = logger;
-        _httpContextAccessor = httpContextAccessor;
-        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-        _quotaSocketManager = quotaSocketManager;
-    }
+    protected readonly TempStream _tempStream = tempStream;
+    protected readonly PathUtils _pathUtils = pathUtils;
+    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    protected readonly ILoggerProvider _options = options;
+    protected readonly IHttpClientFactory _clientFactory = clientFactory;
 
     public TimeSpan GetExpire(string domain)
     {
@@ -118,7 +98,7 @@ public abstract class BaseStorage : IDataStore
             var expireString = expire.TotalMinutes.ToString(CultureInfo.InvariantCulture);
 
             int currentTenantId;
-            var currentTenant = await _tenantManager.GetCurrentTenantAsync(false);
+            var currentTenant = await tenantManager.GetCurrentTenantAsync(false);
             if (currentTenant != null)
             {
                 currentTenantId = currentTenant.Id;
@@ -128,7 +108,7 @@ public abstract class BaseStorage : IDataStore
                 currentTenantId = 0;
             }
 
-            var auth = _emailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
+            var auth = emailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
             query = $"{(path.IndexOf('?') >= 0 ? "&" : "?")}{Constants.QueryExpire}={expireString}&{Constants.QueryAuth}={auth}";
         }
 
@@ -356,8 +336,8 @@ public abstract class BaseStorage : IDataStore
         if (QuotaController != null)
         {
             await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, quotaCheckFileSize);
-            var(name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
-            _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            var(name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
+            _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
     }
 
@@ -366,8 +346,8 @@ public abstract class BaseStorage : IDataStore
         if (QuotaController != null)
         {
             await QuotaController.QuotaUsedDeleteAsync(Modulename, domain, DataList.GetData(domain), size);
-            var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
-            _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
+            _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
         }
     }
 
@@ -391,7 +371,7 @@ public abstract class BaseStorage : IDataStore
             var s = base.ToString();
             if (WorkContext.IsMono && s.StartsWith(UriSchemeFile + SchemeDelimiter))
             {
-                return s.Substring(7);
+                return s[7..];
             }
 
             return s;

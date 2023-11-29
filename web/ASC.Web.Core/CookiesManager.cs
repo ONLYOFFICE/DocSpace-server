@@ -186,7 +186,7 @@ public class CookiesManager
 
         if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
         {
-            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions() { Expires = DateTime.Now.AddDays(-3) });
+            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions { Expires = DateTime.Now.AddDays(-3) });
         }
     }
 
@@ -340,7 +340,7 @@ public class CookiesManager
 
         var originUri = new Uri(origin);
         var host = originUri.Host;
-        var alias = host.Substring(0, host.Length - _coreBaseSettings.Basedomain.Length - 1);
+        var alias = host[..(host.Length - _coreBaseSettings.Basedomain.Length - 1)];
         result = $"{result}_{alias}";
 
         return result;

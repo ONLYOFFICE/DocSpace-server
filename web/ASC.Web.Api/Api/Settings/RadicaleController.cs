@@ -92,7 +92,7 @@ public class RadicaleController : BaseSettingsController
         var currUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
         var userName = currUser.Email.ToLower();
         var currentAccountPaswd = _crypto.Encrypt(userName);
-        var cardBuilder = await CardDavAllSerializationAsync(myUri);
+        var cardBuilder = await CardDavAllSerializationAsync();
 
 
         var userAuthorization = userName + ":" + currentAccountPaswd;
@@ -101,13 +101,14 @@ public class RadicaleController : BaseSettingsController
         var getResponse = await _cardDavAddressbook.GetCollection(sharedCardUrl, userAuthorization, myUri.ToString());
         if (getResponse.Completed)
         {
-            return new DavResponse()
+            return new DavResponse
             {
                 Completed = true,
                 Data = sharedCardUrl
             };
         }
-        else if (getResponse.StatusCode == 404)
+
+        if (getResponse.StatusCode == 404)
         {
             var createResponse = await _cardDavAddressbook.Create("", "", "", sharedCardUrl, rootAuthorization);
             if (createResponse.Completed)
@@ -122,7 +123,7 @@ public class RadicaleController : BaseSettingsController
                 }
 
                 await _cardDavAddressbook.UpdateItem(sharedCardUrl, rootAuthorization, cardBuilder, myUri.ToString()).ConfigureAwait(false);
-                return new DavResponse()
+                return new DavResponse
                 {
                     Completed = true,
                     Data = sharedCardUrl
@@ -132,11 +133,9 @@ public class RadicaleController : BaseSettingsController
             _logger.Error(createResponse.Error);
             throw new RadicaleException(createResponse.Error);
         }
-        else
-        {
-            _logger.Error(getResponse.Error);
-            throw new RadicaleException(getResponse.Error);
-        }
+
+        _logger.Error(getResponse.Error);
+        throw new RadicaleException(getResponse.Error);
 
     }
 
@@ -160,7 +159,7 @@ public class RadicaleController : BaseSettingsController
         var myUri = HttpContext.Request.Url();
         var requestUrlBook = _cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), currentUserEmail, true, true);
         var tenant = await _tenantManager.GetCurrentTenantIdAsync();
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = requestUrlBook,
             Authorization = authorization,
@@ -173,7 +172,7 @@ public class RadicaleController : BaseSettingsController
         {
             await _dbRadicale.RemoveCardDavUserAsync(tenant, currUser.Id);
 
-            return new DavResponse()
+            return new DavResponse
             {
                 Completed = true
             };
@@ -181,7 +180,7 @@ public class RadicaleController : BaseSettingsController
         catch (Exception ex)
         {
             _logger.ErrorWithException(ex);
-            return new DavResponse()
+            return new DavResponse
             {
                 Completed = false,
                 Error = ex.Message
@@ -191,7 +190,7 @@ public class RadicaleController : BaseSettingsController
 
     }
 
-    private async Task<string> CardDavAllSerializationAsync(Uri uri)
+    private async Task<string> CardDavAllSerializationAsync()
     {
         var builder = new StringBuilder();
         var users = await _userManager.GetUsersAsync();

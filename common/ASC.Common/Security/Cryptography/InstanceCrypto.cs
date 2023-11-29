@@ -27,14 +27,9 @@
 namespace ASC.Security.Cryptography;
 
 [Singleton]
-public class InstanceCrypto
+public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
 {
-    private readonly byte[] _eKey;
-
-    public InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
-    {
-        _eKey = machinePseudoKeys.GetMachineConstant(32);
-    }
+    private readonly byte[] _eKey = machinePseudoKeys.GetMachineConstant(32);
 
     public string Encrypt(string data)
     {

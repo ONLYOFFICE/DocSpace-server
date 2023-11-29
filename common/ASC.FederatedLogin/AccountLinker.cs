@@ -36,7 +36,7 @@ public class AccountLinkerStorage
     {
         _cache = cache;
         _notify = notify;
-        notify.Subscribe((c) => cache.Remove(c.Obj), CacheNotifyAction.Remove);
+        notify.Subscribe(c => cache.Remove(c.Obj), CacheNotifyAction.Remove);
     }
 
     public void RemoveFromCache(string obj)
@@ -58,26 +58,11 @@ public class AccountLinkerStorage
 }
 
 [Scope]
-public class AccountLinker
+public class AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager, TenantManager tenantManager)
 {
-    private readonly Signature _signature;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly AccountLinkerStorage _accountLinkerStorage;
-    private readonly IDbContextFactory<AccountLinkContext> _accountLinkContextManager;
-    private readonly TenantManager _tenantManager;
-
-    public AccountLinker(Signature signature, InstanceCrypto instanceCrypto, AccountLinkerStorage accountLinkerStorage, IDbContextFactory<AccountLinkContext> accountLinkContextManager, TenantManager tenantManager)
-    {
-        _signature = signature;
-        _instanceCrypto = instanceCrypto;
-        _accountLinkerStorage = accountLinkerStorage;
-        _accountLinkContextManager = accountLinkContextManager;
-        _tenantManager = tenantManager;
-    }
-
     public async Task<IEnumerable<string>> GetLinkedObjectsAsync(string id, string provider)
     {
-        return await GetLinkedObjectsAsync(new LoginProfile(_signature, _instanceCrypto) { Id = id, Provider = provider });
+        return await GetLinkedObjectsAsync(new LoginProfile(signature, instanceCrypto) { Id = id, Provider = provider });
     }
 
     public async Task<IEnumerable<string>> GetLinkedObjectsAsync(LoginProfile profile)
@@ -87,7 +72,7 @@ public class AccountLinker
 
     public async Task<IEnumerable<string>> GetLinkedObjectsByHashIdAsync(string hashid)
     {
-        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
+        await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
         return await Queries.LinkedObjectsByHashIdAsync(accountLinkContext, hashid).ToListAsync();
     }
 
@@ -103,7 +88,7 @@ public class AccountLinker
 
     public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync(string obj)
     {
-        return await _accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
+        return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
 
     public async Task AddLinkAsync(string obj, LoginProfile profile)
@@ -117,8 +102,8 @@ public class AccountLinker
             Linked = DateTime.UtcNow
         };
 
-        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
-        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+        await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
+        var tenant = await tenantManager.GetCurrentTenantIdAsync();
 
         if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
         {
@@ -127,17 +112,17 @@ public class AccountLinker
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        _accountLinkerStorage.RemoveFromCache(obj);
+        accountLinkerStorage.RemoveFromCache(obj);
     }
 
     public async Task AddLinkAsync(string obj, string id, string provider)
     {
-        await AddLinkAsync(obj, new LoginProfile(_signature, _instanceCrypto) { Id = id, Provider = provider });
+        await AddLinkAsync(obj, new LoginProfile(signature, instanceCrypto) { Id = id, Provider = provider });
     }
 
     public async Task RemoveLinkAsync(string obj, string id, string provider)
     {
-        await RemoveLinkAsync(obj, new LoginProfile(_signature, _instanceCrypto) { Id = id, Provider = provider });
+        await RemoveLinkAsync(obj, new LoginProfile(signature, instanceCrypto) { Id = id, Provider = provider });
     }
 
     public async Task RemoveLinkAsync(string obj, LoginProfile profile)
@@ -147,31 +132,31 @@ public class AccountLinker
 
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
     {
-        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
+        await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
 
         var accountLink = await Queries.AccountLinkAsync(accountLinkContext, obj, provider, hashId);
 
         accountLinkContext.AccountLinks.Remove(accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        _accountLinkerStorage.RemoveFromCache(obj);
+        accountLinkerStorage.RemoveFromCache(obj);
     }
 
     private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
     {
-        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
+        await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
         //Retrieve by uinque id
         return (await Queries.LinkedProfilesFromDbAsync(accountLinkContext, obj).ToListAsync())
-                .ConvertAll(x => LoginProfile.CreateFromSerializedString(_signature, _instanceCrypto, x));
+                .ConvertAll(x => LoginProfile.CreateFromSerializedString(signature, instanceCrypto, x));
     }
 
     private async Task<IDictionary<string, LoginProfile>> GetLinkedProfilesAsync(IEnumerable<string> objects)
     {
-        await using var accountLinkContext = await _accountLinkContextManager.CreateDbContextAsync();
+        await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
 
         return await accountLinkContext.AccountLinks.Where(r => objects.Contains(r.Id))
             .Select(r => new { r.Id, r.Profile })
-            .ToDictionaryAsync(k => k.Id, v => LoginProfile.CreateFromSerializedString(_signature, _instanceCrypto, v.Profile));
+            .ToDictionaryAsync(k => k.Id, v => LoginProfile.CreateFromSerializedString(signature, instanceCrypto, v.Profile));
     }
 }
 

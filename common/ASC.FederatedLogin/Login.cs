@@ -27,7 +27,10 @@
 namespace ASC.FederatedLogin;
 
 [Scope]
-public class Login
+public class Login(IWebHostEnvironment webHostEnvironment,
+    Signature signature,
+    InstanceCrypto instanceCrypto,
+    ProviderManager providerManager)
 {
     public bool IsReusable => false;
     protected string Callback => _params.Get("callback") ?? "loginCallback";
@@ -63,22 +66,6 @@ public class Login
     }
 
     private Dictionary<string, string> _params;
-    private readonly IWebHostEnvironment _webHostEnvironment;
-    private readonly Signature _signature;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly ProviderManager _providerManager;
-
-    public Login(
-        IWebHostEnvironment webHostEnvironment,
-        Signature signature,
-        InstanceCrypto instanceCrypto,
-        ProviderManager providerManager)
-    {
-        _webHostEnvironment = webHostEnvironment;
-        _signature = signature;
-        _instanceCrypto = instanceCrypto;
-        _providerManager = providerManager;
-    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -121,7 +108,7 @@ public class Login
                     }
                 }
 
-                var profile = _providerManager.Process(Auth, context, null, additionalStateArgs);
+                var profile = providerManager.Process(Auth, context, null, additionalStateArgs);
                 if (profile != null)
                 {
                     await SendJsCallbackAsync(context, profile);
@@ -133,7 +120,7 @@ public class Login
             }
             catch (Exception ex)
             {
-                await SendJsCallbackAsync(context, LoginProfile.FromError(_signature, _instanceCrypto, ex));
+                await SendJsCallbackAsync(context, LoginProfile.FromError(signature, instanceCrypto, ex));
             }
         }
         else
@@ -147,7 +134,7 @@ public class Login
     private async Task RenderXrdsAsync(HttpContext context)
     {
         var xrdsloginuri = new Uri(context.Request.Url(), new Uri(context.Request.Url().AbsolutePath, UriKind.Relative)) + "?auth=openid&returnurl=" + ReturnUrl;
-        var xrdsimageuri = new Uri(context.Request.Url(), new Uri(_webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
+        var xrdsimageuri = new Uri(context.Request.Url(), new Uri(webHostEnvironment.WebRootPath, UriKind.Relative)) + "openid.gif";
         await XrdsHelper.RenderXrdsAsync(context.Response, xrdsloginuri, xrdsimageuri);
     }
 
@@ -166,7 +153,7 @@ public class Login
 
 public class LoginHandler
 {
-    public LoginHandler(RequestDelegate next)
+    public LoginHandler(RequestDelegate _)
     {
     }
 

@@ -29,12 +29,12 @@ using CallContext = ASC.Common.Notify.Engine.CallContext;
 namespace ASC.Api.Core.Middleware;
 
 [Scope]
-public class ProductSecurityFilter : IAsyncResourceFilter
+public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
+        WebItemSecurity webItemSecurity,
+        AuthContext authContext)
+    : IAsyncResourceFilter
 {
     private static readonly IDictionary<string, Guid> _products;
-    private readonly ILogger<ProductSecurityFilter> _logger;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly AuthContext _authContext;
 
     static ProductSecurityFilter()
     {
@@ -64,19 +64,9 @@ public class ProductSecurityFilter : IAsyncResourceFilter
     }
 
 
-    public ProductSecurityFilter(
-        ILogger<ProductSecurityFilter> logger,
-        WebItemSecurity webItemSecurity,
-        AuthContext authContext)
-    {
-        _logger = logger;
-        _webItemSecurity = webItemSecurity;
-        _authContext = authContext;
-    }
-
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             await next();
             return;
@@ -92,10 +82,10 @@ public class ProductSecurityFilter : IAsyncResourceFilter
                     CallContext.SetData("asc.web.product_id", pid);
                 }
 
-                if (!await _webItemSecurity.IsAvailableForMeAsync(pid))
+                if (!await webItemSecurity.IsAvailableForMeAsync(pid))
                 {
                     context.Result = new StatusCodeResult((int)HttpStatusCode.Forbidden);
-                    _logger.WarningPaymentRequired(controllerActionDescriptor.ControllerName, _authContext.CurrentAccount.ID);
+                    logger.WarningPaymentRequired(controllerActionDescriptor.ControllerName, authContext.CurrentAccount.ID);
                     return;
                 }
             }

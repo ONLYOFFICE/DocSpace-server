@@ -29,12 +29,7 @@ namespace ASC.Common.Caching;
 [Singleton]
 public class MemoryCacheNotify<T> : ICacheNotify<T> where T : new()
 {
-    private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
-
-    public MemoryCacheNotify()
-    {
-        _actions = new ConcurrentDictionary<string, List<Action<T>>>();
-    }
+    private readonly ConcurrentDictionary<string, List<Action<T>>> _actions = new();
 
     public void Publish(T obj, CacheNotifyAction notifyAction)
     {

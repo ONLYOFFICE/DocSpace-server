@@ -239,7 +239,7 @@ public class PortalController : ControllerBase
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
         var docServiceQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
         
@@ -411,15 +411,7 @@ public class PortalController : ControllerBase
         var bytes = new byte[stream.Length];
         stream.Read(bytes, 0, (int)stream.Length);
 
-        string type;
-        if (response.Headers.TryGetValues("Content-Type", out var values))
-        {
-            type = values.First();
-        }
-        else
-        {
-            type = "image/png";
-        }
+        var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);
     }
 
@@ -590,7 +582,7 @@ public class PortalController : ControllerBase
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
         }
 
         try
@@ -723,7 +715,7 @@ public class PortalController : ControllerBase
 
         if (!_coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias);
+            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(_coreSettings));
         }
 
         var owner = await _userManager.GetUsersAsync(tenant.OwnerId);

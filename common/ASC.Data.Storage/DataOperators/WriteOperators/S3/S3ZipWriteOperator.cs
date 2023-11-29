@@ -56,7 +56,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _tempStream = tempStream;
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
-        _sessionHolder.MaxChunkUploadSize = _sessionHolder.MaxChunkUploadSize * 5;
+        _sessionHolder.MaxChunkUploadSize *= 5;
 
         _fileStream = _tempStream.Create();
         _gZipOutputStream = new GZipOutputStream(_fileStream)

@@ -30,14 +30,11 @@ namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Transient]
 [DebuggerDisplay("{CustomerTitle}")]
-internal class GoogleDriveProviderInfo : AbstractProviderInfo<DriveFile, DriveFile, DriveFile, GoogleLoginProvider>
+internal class GoogleDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
+    : AbstractProviderInfo<DriveFile, DriveFile, DriveFile, GoogleLoginProvider>(wrapper, providerInfoHelper)
 {
     public override Selector Selector { get; } = Selectors.GoogleDrive;
     public override ProviderFilter ProviderFilter { get; } = ProviderFilter.GoogleDrive;
-
-    public GoogleDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper) : base(wrapper, providerInfoHelper)
-    {
-    }
 
     public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folder)
     {

@@ -27,20 +27,14 @@
 namespace ASC.ActiveDirectory.ComplexOperations.Data;
 
 [Scope]
-public class LdapChangeCollection : List<LdapChange>
+public class LdapChangeCollection(UserFormatter userFormatter) : List<LdapChange>
 {
-    private readonly UserFormatter _userFormatter;
-    public LdapChangeCollection(UserFormatter userFormatter)
-    {
-        _userFormatter = userFormatter;
-    }
-
     #region User
 
     public void SetSkipUserChange(UserInfo user)
     {
         var change = new LdapChange(user.Sid,
-            _userFormatter.GetUserName(user, DisplayUserNameFormat.Default),
+            userFormatter.GetUserName(user),
             user.Email,
             LdapChangeType.User, LdapChangeAction.Skip);
 
@@ -55,7 +49,7 @@ public class LdapChangeCollection : List<LdapChange>
             };
 
         var change = new LdapChange(user.Sid,
-            _userFormatter.GetUserName(user, DisplayUserNameFormat.Default),
+            userFormatter.GetUserName(user),
             user.Email, LdapChangeType.User, LdapChangeAction.SaveAsPortal, fieldChanges);
 
         Add(change);
@@ -64,7 +58,7 @@ public class LdapChangeCollection : List<LdapChange>
     public void SetNoneUserChange(UserInfo user)
     {
         var change = new LdapChange(user.Sid,
-                    _userFormatter.GetUserName(user, DisplayUserNameFormat.Default), user.Email,
+                    userFormatter.GetUserName(user), user.Email,
                     LdapChangeType.User, LdapChangeAction.None);
 
         Add(change);
@@ -78,7 +72,7 @@ public class LdapChangeCollection : List<LdapChange>
                             .ToList();
 
         var change = new LdapChange(beforeUserInfo.Sid,
-            _userFormatter.GetUserName(afterUserInfo, DisplayUserNameFormat.Default), afterUserInfo.Email,
+            userFormatter.GetUserName(afterUserInfo), afterUserInfo.Email,
             LdapChangeType.User, LdapChangeAction.Update, fieldChanges);
 
         Add(change);
@@ -92,7 +86,7 @@ public class LdapChangeCollection : List<LdapChange>
                         .ToList();
 
         var change = new LdapChange(user.Sid,
-            _userFormatter.GetUserName(user, DisplayUserNameFormat.Default), user.Email,
+            userFormatter.GetUserName(user), user.Email,
             LdapChangeType.User, LdapChangeAction.Add, fieldChanges);
 
         Add(change);
@@ -101,7 +95,7 @@ public class LdapChangeCollection : List<LdapChange>
     public void SetRemoveUserChange(UserInfo user)
     {
         var change = new LdapChange(user.Sid,
-                            _userFormatter.GetUserName(user, DisplayUserNameFormat.Default), user.Email,
+                            userFormatter.GetUserName(user), user.Email,
                             LdapChangeType.User, LdapChangeAction.Remove);
 
         Add(change);
@@ -131,7 +125,7 @@ public class LdapChangeCollection : List<LdapChange>
             members.Select(
                 member =>
                     new LdapItemChange(LdapItemChangeKey.Member, null,
-                        _userFormatter.GetUserName(member, DisplayUserNameFormat.Default))).ToList();
+                        userFormatter.GetUserName(member))).ToList();
 
         var change = new LdapChange(group.Sid, group.Name,
             LdapChangeType.Group, LdapChangeAction.AddMember, fieldChanges);
@@ -175,7 +169,7 @@ public class LdapChangeCollection : List<LdapChange>
             members.Select(
                 member =>
                     new LdapItemChange(LdapItemChangeKey.Member, null,
-                        _userFormatter.GetUserName(member, DisplayUserNameFormat.Default))).ToList();
+                        userFormatter.GetUserName(member))).ToList();
 
         var change = new LdapChange(group.Sid, group.Name,
             LdapChangeType.Group, LdapChangeAction.RemoveMember, fieldChanges);
@@ -196,8 +190,7 @@ public class LdapChangeCollection : List<LdapChange>
                 ? after.GetType().GetProperty(propName).GetValue(before, null) as string
                 : "";
 
-            LdapItemChangeKey key;
-            if (!Enum.TryParse(propName, out key))
+            if (!Enum.TryParse(propName, out LdapItemChangeKey key))
             {
                 throw new InvalidEnumArgumentException(propName);
             }
@@ -208,10 +201,7 @@ public class LdapChangeCollection : List<LdapChange>
         }
         catch (Exception ex)
         {
-            if (log != null)
-            {
-                log.ErrorCanNotGetSidProperty(propName, ex);
-            }
+            log?.ErrorCanNotGetSidProperty(propName, ex);
         }
 
         return null;

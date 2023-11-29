@@ -27,22 +27,12 @@
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileTrackerHelper
+public class FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
 {
     private const string Tracker = "filesTracker";
-    private readonly ICache _cache;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<FileTrackerHelper> _logger;
     public static readonly TimeSpan TrackTimeout = TimeSpan.FromSeconds(12);
     public static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(60);
     public static readonly TimeSpan CheckRightTimeout = TimeSpan.FromMinutes(1);
-
-    public FileTrackerHelper(ICache cache, IServiceScopeFactory serviceScopeFactory, ILogger<FileTrackerHelper> logger)
-    {
-        _cache = cache;
-        _serviceScopeFactory = serviceScopeFactory;
-        _logger = logger;
-    }
 
 
     public bool ProlongEditing<T>(T fileId, Guid tabId, Guid userId, int tenantId, bool editingAlone = false)
@@ -194,7 +184,7 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
         {
-            return _cache.Get<FileTracker>(Tracker + fileId);
+            return cache.Get<FileTracker>(Tracker + fileId);
         }
 
         return null;
@@ -206,11 +196,11 @@ public class FileTrackerHelper
         {
             if (tracker != null)
             {
-                _cache.Insert(Tracker + fileId, tracker, CacheTimeout, EvictionCallback(fileId, tracker));
+                cache.Insert(Tracker + fileId, tracker, CacheTimeout, EvictionCallback(fileId, tracker));
             }
             else
             {
-                _cache.Remove(Tracker + fileId);
+                cache.Remove(Tracker + fileId);
             }
         }
     }
@@ -232,7 +222,7 @@ public class FileTrackerHelper
                 }
 
                 var editedBy = fileTracker.EditingBy.FirstOrDefault();
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                await using var scope = serviceScopeFactory.CreateAsyncScope();
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(editedBy.Value.TenantId);
 
@@ -244,12 +234,12 @@ public class FileTrackerHelper
 
                 if (await tracker.StartTrackAsync(fileId.ToString(), docKey))
                 {
-                    _cache.Insert(Tracker + fileId, fileTracker, CacheTimeout, EvictionCallback(fileId, fileTracker));
+                    cache.Insert(Tracker + fileId, fileTracker, CacheTimeout, EvictionCallback(fileId, fileTracker));
                 }
             }
             catch (Exception e)
             {
-                _logger.ErrorWithException(e);
+                logger.ErrorWithException(e);
             }
         };
     }

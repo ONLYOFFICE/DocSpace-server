@@ -26,15 +26,8 @@
 
 namespace ASC.Api.Core.Middleware;
 
-public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
+public class CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribute> logger) : ExceptionFilterAttribute
 {
-    private readonly ILogger<CustomExceptionFilterAttribute> _logger;
-
-    public CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribute> logger)
-    {
-        _logger = logger;
-    }
-
     public override void OnException(ExceptionContext context)
     {
         var status = (HttpStatusCode)context.HttpContext.Response.StatusCode;
@@ -85,7 +78,7 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
                 break;
         }
 
-        _logger.LogCritical(exception,
+        logger.LogCritical(exception,
     $"error during executing {context.HttpContext.Request.Method}: {context.HttpContext.Request.Path.Value}");
 
         var result = new ObjectResult(new ErrorApiResponse(status, exception, message, withStackTrace))

@@ -32,17 +32,11 @@ public class BaseBatchRequestDto
 {
     /// <summary>List of folder IDs</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
-    public IEnumerable<JsonElement> FolderIds { get; set; }
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>List of file IDs</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
-    public IEnumerable<JsonElement> FileIds { get; set; }
-
-    public BaseBatchRequestDto()
-    {
-        FolderIds = new List<JsonElement>();
-        FileIds = new List<JsonElement>();
-    }
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
 /// <summary>
@@ -51,12 +45,7 @@ public class DownloadRequestDto : BaseBatchRequestDto
 {
     /// <summary>List of file IDs which will be converted</summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Text.Json.JsonElement, System.String}}, System.Collections.Generic</type>
-    public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; }
-
-    public DownloadRequestDto() : base()
-    {
-        FileConvertIds = new List<ItemKeyValuePair<JsonElement, string>>();
-    }
+    public IEnumerable<ItemKeyValuePair<JsonElement, string>> FileConvertIds { get; set; } = new List<ItemKeyValuePair<JsonElement, string>>();
 }
 
 /// <summary>

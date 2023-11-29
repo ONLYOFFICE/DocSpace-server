@@ -26,7 +26,7 @@
 
 namespace ASC.ApiSystem.Classes;
 
-[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property)]
 public sealed class EmailAttribute : DataTypeAttribute
 {
     public EmailAttribute() : base(DataType.EmailAddress)

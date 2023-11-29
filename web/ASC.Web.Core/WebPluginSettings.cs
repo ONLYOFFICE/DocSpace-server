@@ -82,14 +82,8 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     }
 }
 
-public class WebPluginState
+public class WebPluginState(bool enabled, string settings)
 {
-    public bool Enabled { get; set; }
-    public string Settings { get; set; }
-
-    public WebPluginState(bool enabled, string settings)
-    {
-        Enabled = enabled;
-        Settings = settings;
-    }
+    public bool Enabled { get; set; } = enabled;
+    public string Settings { get; set; } = settings;
 }

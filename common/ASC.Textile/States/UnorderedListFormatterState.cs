@@ -30,13 +30,8 @@ namespace Textile.States;
 /// Formatting state for a bulleted list.
 /// </summary>
 [FormatterState(PatternBegin + @"\*+" + PatternEnd)]
-public class UnorderedListFormatterState : ListFormatterState
+public class UnorderedListFormatterState(TextileFormatter formatter) : ListFormatterState(formatter)
 {
-    public UnorderedListFormatterState(TextileFormatter formatter)
-        : base(formatter)
-    {
-    }
-
     protected override void WriteIndent()
     {
         Formatter.Output.WriteLine("<ul" + FormattedStylesAndAlignment("ul") + ">");

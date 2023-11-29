@@ -27,7 +27,7 @@
 namespace ASC.Core;
 
 [Singleton]
-public class CoreBaseSettings
+public class CoreBaseSettings(IConfiguration configuration)
 {
     private bool? _standalone;
     private string _basedomain;
@@ -36,23 +36,13 @@ public class CoreBaseSettings
     private bool? _disableDocSpace;
     private string _serverRoot;
 
-    private IConfiguration Configuration { get; }
-
-    public CoreBaseSettings(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
+    private IConfiguration Configuration { get; } = configuration;
 
     public string Basedomain
     {
         get
         {
-            if (_basedomain == null)
-            {
-                _basedomain = Configuration["core:base-domain"] ?? string.Empty;
-            }
-
-            return _basedomain;
+            return _basedomain ??= Configuration["core:base-domain"] ?? string.Empty;
         }
     }
 
@@ -60,12 +50,7 @@ public class CoreBaseSettings
     {
         get
         {
-            if (_serverRoot == null)
-            {
-                _serverRoot = Configuration["core:server-root"] ?? string.Empty;
-            }
-
-            return _serverRoot;
+            return _serverRoot ??= Configuration["core:server-root"] ?? string.Empty;
         }
     }
 
@@ -274,16 +259,9 @@ public class CoreSettings : IDisposable
 }
 
 [Scope]
-public class CoreConfiguration
+public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager, IConfiguration configuration)
 {
     private long? _personalMaxSpace;
-
-    public CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager, IConfiguration configuration)
-    {
-        _coreSettings = coreSettings;
-        _tenantManager = tenantManager;
-        _configuration = configuration;
-    }
 
     public async Task<long> PersonalMaxSpaceAsync(SettingsManager settingsManager)
     {
@@ -299,7 +277,7 @@ public class CoreConfiguration
             return _personalMaxSpace.Value;
         }
 
-        if (!long.TryParse(_configuration["core:personal.maxspace"], out var value))
+        if (!long.TryParse(configuration["core:personal.maxspace"], out var value))
         {
             value = long.MaxValue;
         }
@@ -312,7 +290,7 @@ public class CoreConfiguration
     public async Task<SmtpSettings> GetDefaultSmtpSettingsAsync()
     {
         var isDefaultSettings = false;
-        var tenant = await _tenantManager.GetCurrentTenantAsync(false);
+        var tenant = await tenantManager.GetCurrentTenantAsync(false);
 
         if (tenant != null)
         {
@@ -341,28 +319,24 @@ public class CoreConfiguration
 
     public async Task SetSmtpSettingsAsync(SmtpSettings value)
     {
-        await SaveSettingAsync("SmtpSettings", value?.Serialize(), await _tenantManager.GetCurrentTenantIdAsync());
+        await SaveSettingAsync("SmtpSettings", value?.Serialize(), await tenantManager.GetCurrentTenantIdAsync());
     }
-
-    private readonly CoreSettings _coreSettings;
-    private readonly TenantManager _tenantManager;
-    private readonly IConfiguration _configuration;
 
     #region Methods Get/Save Setting
 
     public async Task SaveSettingAsync(string key, string value, int tenant = Tenant.DefaultTenant)
     {
-        await _coreSettings.SaveSettingAsync(key, value, tenant);
+        await coreSettings.SaveSettingAsync(key, value, tenant);
     }
 
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
-        return await _coreSettings.GetSettingAsync(key, tenant);
+        return await coreSettings.GetSettingAsync(key, tenant);
     }
 
     public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
     {
-        return _coreSettings.GetSetting(key, tenant);
+        return coreSettings.GetSetting(key, tenant);
     }
 
     #endregion
@@ -381,7 +355,7 @@ public class CoreConfiguration
 
     public async Task<T> GetSectionAsync<T>(string sectionName) where T : class
     {
-        return await GetSectionAsync<T>(await _tenantManager.GetCurrentTenantIdAsync(), sectionName);
+        return await GetSectionAsync<T>(await tenantManager.GetCurrentTenantIdAsync(), sectionName);
     }
 
     public async Task<T> GetSectionAsync<T>(int tenantId, string sectionName) where T : class
@@ -397,7 +371,7 @@ public class CoreConfiguration
 
     public async Task SaveSectionAsync<T>(string sectionName, T section) where T : class
     {
-        await SaveSectionAsync(await _tenantManager.GetCurrentTenantIdAsync(), sectionName, section);
+        await SaveSectionAsync(await tenantManager.GetCurrentTenantIdAsync(), sectionName, section);
     }
 
     public async Task SaveSectionAsync<T>(T section) where T : class

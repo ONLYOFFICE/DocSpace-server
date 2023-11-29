@@ -27,20 +27,13 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class NotifyServiceSender : INotifySender
+public class NotifyServiceSender(NotifyServiceClient notifyServiceClient) : INotifySender
 {
-    private readonly NotifyServiceClient _notifyServiceClient;
-
-    public NotifyServiceSender(NotifyServiceClient notifyServiceClient)
-    {
-        _notifyServiceClient = notifyServiceClient;
-    }
-
     public void Init(IDictionary<string, string> properties) { }
 
     public Task<NoticeSendResult> SendAsync(NotifyMessage m)
     {
-        _notifyServiceClient.SendNotifyMessage(m);
+        notifyServiceClient.SendNotifyMessage(m);
 
         return Task.FromResult(NoticeSendResult.OK);
     }

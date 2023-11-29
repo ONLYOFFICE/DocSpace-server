@@ -27,16 +27,8 @@
 namespace ASC.Core.Common.Notify.Telegram;
 
 [Scope]
-public class TelegramDao
+public class TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
 {
-    private readonly IDbContextFactory<TelegramDbContext> _dbContextFactory;
-
-
-    public TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
-    {
-        _dbContextFactory = dbContextFactory;
-    }
-
     public async Task RegisterUserAsync(Guid userId, int tenantId, long telegramId)
     {
         var user = new TelegramUser
@@ -46,34 +38,34 @@ public class TelegramDao
             TelegramUserId = telegramId
         };
 
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         await dbContext.AddOrUpdateAsync(q => q.Users, user);
         await dbContext.SaveChangesAsync();
     }
 
     public async Task<TelegramUser> GetUserAsync(Guid userId, int tenantId)
     {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.Users.FindAsync(tenantId, userId);
     }
 
     public async Task<List<TelegramUser>> GetUsersAsync(long telegramId)
     {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await Queries.TelegramUsersAsync(dbContext, telegramId).ToListAsync();
     }
 
     public async Task DeleteAsync(Guid userId, int tenantId)
     {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteTelegramUsersAsync(dbContext, tenantId, userId);
     }
 
     public async Task DeleteAsync(long telegramId)
     {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         await Queries.DeleteTelegramUsersByTelegramIdAsync(dbContext, telegramId);
     }

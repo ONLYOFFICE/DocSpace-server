@@ -113,7 +113,7 @@ static file class ArabicNumeralHelper
             return input.ToString("g", CultureInfo.InvariantCulture);
         }
         
-        var result = input.ToString($"g", new CultureInfo("ar"));
+        var result = input.ToString("g", new CultureInfo("ar"));
         return result
             .Replace('0', '\u06f0')
             .Replace('1', '\u06f1')
