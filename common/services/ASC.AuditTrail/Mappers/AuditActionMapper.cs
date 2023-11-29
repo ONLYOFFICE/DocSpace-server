@@ -58,7 +58,8 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
 
             var description = evt.Description
                                  .Select(t => t.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                                 .Select(split => string.Join(", ", split.Select(ToLimitedText))).ToArray();
+                                 .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                                 .ToArray();
 
 
             return string.Format(actionText, description);
@@ -89,7 +90,8 @@ public class AuditActionMapper(ILogger<AuditActionMapper> logger)
 
             var description = evt.Description
                                  .Select(t => t.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                                 .Select(split => string.Join(", ", split.Select(ToLimitedText))).ToArray();
+                                 .Select(split => string.Join(", ", split.Select(ToLimitedText)))
+                                 .ToArray();
 
             return string.Format(actionText, description);
         }

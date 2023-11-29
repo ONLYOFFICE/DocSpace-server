@@ -72,14 +72,13 @@ public class CustomExceptionFilterAttribute(ILogger<CustomExceptionFilterAttribu
             case BillingNotFoundException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
-            case CustomHttpException:
-                status = (HttpStatusCode)((CustomHttpException)exception).StatusCode;
+            case CustomHttpException httpException:
+                status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;
                 break;
         }
 
-        logger.LogCritical(exception,
-    $"error during executing {context.HttpContext.Request.Method}: {context.HttpContext.Request.Path.Value}");
+        logger.LogCritical(exception, "error during executing {RequestMethod}: {PathValue}", context.HttpContext.Request.Method, context.HttpContext.Request.Path.Value);
 
         var result = new ObjectResult(new ErrorApiResponse(status, exception, message, withStackTrace))
         {

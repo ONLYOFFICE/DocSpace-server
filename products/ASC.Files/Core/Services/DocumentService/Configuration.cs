@@ -647,12 +647,11 @@ public class FileReferenceData<T>
 #endregion Nested Classes
 
 [Transient]
-public class CustomerConfig<T>(SettingsManager settingsManager,
+public class CustomerConfig<T>(
+    SettingsManager settingsManager,
     BaseCommonLinkUtility baseCommonLinkUtility,
     TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
 {
-    private Configuration<T> _configuration;
-
     public string Address => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Address;
 
     public string Logo => baseCommonLinkUtility.GetFullAbsolutePath(tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false).Result);
@@ -665,7 +664,6 @@ public class CustomerConfig<T>(SettingsManager settingsManager,
 
     internal void SetConfiguration(Configuration<T> configuration)
     {
-        _configuration = configuration;
     }
 }
 

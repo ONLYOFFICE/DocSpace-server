@@ -266,7 +266,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
         {
                 logger.ErrorDocServiceDropFailed(usersDrop);
-            }
+        }
 
         foreach (var removeUserId in users)
         {

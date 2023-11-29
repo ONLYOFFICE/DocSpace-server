@@ -32,7 +32,7 @@ public class DbWebstudioIndex : BaseEntity
     public DateTime LastModified { get; set; }
     public override object[] GetKeys()
     {
-        return new[] { IndexName };
+        return new object[] { IndexName };
     }
 }
 

@@ -131,9 +131,11 @@ public class StudioNotifyWorker(TenantManager tenantManager,
             (NotifyAction)item.Action,
             item.ObjectId,
             item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses?.ToArray(), r.CheckActivation)).ToArray(),
-            item.SenderNames != null && item.SenderNames.Count > 0 ? item.SenderNames.ToArray() : null,
+            item.SenderNames is { Count: > 0 } ? item.SenderNames.ToArray() : null,
             item.CheckSubsciption,
-            item.Tags.Select(r => new TagValue(r.Key, r.Value)).ToArray());
+            item.Tags
+                .Select(r => (ITagValue)new TagValue(r.Key, r.Value))
+                .ToArray());
     }
 }
 

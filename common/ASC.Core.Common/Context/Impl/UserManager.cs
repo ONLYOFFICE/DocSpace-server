@@ -947,7 +947,7 @@ public class UserManager
 
     public async Task DeleteGroupAsync(Guid id)
     {
-        if (Constants.LostGroupInfo.Equals(id))
+        if (Constants.LostGroupInfo.ID.Equals(id))
         {
             return;
         }

@@ -124,8 +124,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                return AsyncEnumerable.Empty<File<string>>();
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -209,8 +207,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(UserManager use
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                yield break;
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;

@@ -685,11 +685,10 @@ public class GoogleCloudStorage(TempStream tempStream,
                                                                Convert.ToInt64(totalBytes));
 
         const int MAX_RETRIES = 100;
-        int millisecondsTimeout;
 
         for (var i = 0; i < MAX_RETRIES; i++)
         {
-            millisecondsTimeout = Math.Min(Convert.ToInt32(Math.Pow(2, i)) + RandomNumberGenerator.GetInt32(1000), 32 * 1000);
+            var millisecondsTimeout = Math.Min(Convert.ToInt32(Math.Pow(2, i)) + RandomNumberGenerator.GetInt32(1000), 32 * 1000);
 
             try
             {

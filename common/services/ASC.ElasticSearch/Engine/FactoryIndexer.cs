@@ -770,7 +770,7 @@ public class FactoryIndexer
             .Select(r => new
             {
                 r.Index,
-                Count = count.ContainsKey(r.Index) ? count[r.Index] : 0,
+                Count = count.TryGetValue(r.Index, out var value) ? value : 0,
                 DocsCount = _client.Instance.Count(new CountRequest(r.Index)).Count,
                 r.StoreSize
             })

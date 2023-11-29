@@ -59,6 +59,5 @@ static file class Queries
             (CustomDbContext ctx, string userEmail, MobileAppType? appType) =>
                 ctx.MobileAppInstall
                     .Where(r => r.UserEmail == userEmail)
-                    .Where(r => !appType.HasValue || r.AppType == (int)appType.Value)
-                    .Any());
+                    .Any(r => !appType.HasValue || r.AppType == (int)appType.Value));
 }

@@ -142,19 +142,6 @@ Herhangi bir sorunuz olursa veya yardıma ihtiyaç duyarsanız lütfen bizimle i
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı için şifre değişikliği talebi
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portalı için kullandığınız şifreyi değiştirme talebiniz ulaştı.
-
-Lütfen aşağıdaki linki takip ederek şifrenizi değiştirin:
-
-$OrangeButton
-
-*Not*: bu link 7 gün boyunca geçerlidir. Lütfen bu süre zarfında şifre değiştirme işlemini tamamlayın.
-
-Şifrenizi değiştirmek istemiyorsanız ya da bu e-postanın hatalı olduğunu düşünüyorsanız "${__VirtualRootPath}":"${__VirtualRootPath}" portalı yöneticisi ile görüşün.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Cep telefonu numarası değişikliği
 

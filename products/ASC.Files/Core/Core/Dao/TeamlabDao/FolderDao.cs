@@ -150,7 +150,17 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
+    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
+        IEnumerable<int> parentsIds, 
+        FilterType filterType, 
+        IEnumerable<string> tags, 
+        Guid subjectId, 
+        string searchText, 
+        bool withSubfolders, 
+        bool withoutTags,
+        bool excludeSubject, 
+        ProviderFilter provider,
+        SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds)
     {
         if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
@@ -181,7 +191,19 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds)
+    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
+        IEnumerable<int> roomsIds, 
+        FilterType filterType, 
+        IEnumerable<string> tags, 
+        Guid subjectId, 
+        string searchText, 
+        bool withSubfolders, 
+        bool withoutTags, 
+        bool excludeSubject, 
+        ProviderFilter provider, 
+        SubjectFilter subjectFilter, 
+        IEnumerable<string> subjectEntriesIds, 
+        IEnumerable<int> parentsIds)
     {
         if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
         {

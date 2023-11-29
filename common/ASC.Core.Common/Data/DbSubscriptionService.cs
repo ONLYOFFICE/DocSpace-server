@@ -278,8 +278,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Recipient == recipientId)
                     .Where(r => r.Unsubscribed)
-                    .Where(r => (!string.IsNullOrEmpty(objectId) && (r.Object == objectId || r.Object == string.Empty)) || (string.IsNullOrEmpty(objectId) && r.Object == string.Empty))
-                    .Any());
+                    .Any(r => (!string.IsNullOrEmpty(objectId) && (r.Object == objectId || r.Object == string.Empty)) || (string.IsNullOrEmpty(objectId) && r.Object == string.Empty)));
 
     public static readonly Func<UserDbContext, int, string, string, string, bool, IAsyncEnumerable<string>>
         ObjectsAsync = EF.CompileAsyncQuery(

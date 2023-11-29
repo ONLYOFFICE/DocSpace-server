@@ -259,7 +259,6 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                     await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
-                        null,
                         new IRecipient[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
                         new[] { Core.Configuration.Constants.NotifyEMailSenderSysName },
                         null,

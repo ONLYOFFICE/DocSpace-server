@@ -278,7 +278,7 @@ public class SetupInfo
         {
             foreach (var item in PersonalCultures)
             {
-                if (item.Value == cultureInfo)
+                if (Equals(item.Value, cultureInfo))
                 {
                     return item;
                 }

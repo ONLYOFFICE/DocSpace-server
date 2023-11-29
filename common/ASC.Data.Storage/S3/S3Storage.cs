@@ -1161,7 +1161,8 @@ public class S3Storage(TempStream tempStream,
 
         var policyBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(policyBuilder.ToString()));
         //sign = AWSSDKUtils.HMACSign(policyBase64, _secretAccessKeyId, new HMACSHA1());
-        using var algorithm = new HMACSHA1 { Key = Encoding.UTF8.GetBytes(_secretAccessKeyId) };
+        using var algorithm = new HMACSHA1();
+        algorithm.Key = Encoding.UTF8.GetBytes(_secretAccessKeyId);
         try
         {
             algorithm.Key = Encoding.UTF8.GetBytes(key);
@@ -1212,7 +1213,7 @@ public class S3Storage(TempStream tempStream,
             return s30Objects;
         }
 
-        s30Objects.Concat(await GetS3ObjectsByPathAsync(domain, GetRecyclePath(path)));
+        //s30Objects.Concat(await GetS3ObjectsByPathAsync(domain, GetRecyclePath(path)));
         return s30Objects;
     }
 

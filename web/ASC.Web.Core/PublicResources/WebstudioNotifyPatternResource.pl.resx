@@ -104,19 +104,6 @@ Jeśli masz jakieś pytania, zawsze możesz napisać do nas na adres "${__Suppor
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Password change request for "${__VirtualRootPath}":portal"${__VirtualRootPath}"
-
-Wysłano prośbę o zmianę hasła używanego do wejścia do portalu "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Aby zmienić hasło, kliknij poniższy link:
-
-$OrangeButton
-
-*Uwaga*: link ten jest ważny tylko przez 7 dni. W tym czasie zakończ proces zmiany hasła.
-
-Jeśli nie chcesz zmienić hasła lub otrzymywać tego e-maila pomyłkowo, zignoruj go lub skontaktuj się z administratorem portalu "${__VirtualRootPath}":"${__VirtualRootPath}", aby dowiedzieć się szczegółów.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Wniosek o zmianę numeru telefonu komórkowego
 

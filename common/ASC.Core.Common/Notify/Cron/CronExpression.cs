@@ -28,39 +28,38 @@ namespace ASC.Notify.Cron;
 
 public class CronExpression : ICloneable, IDeserializationCallback
 {
-    protected const int Second = 0;
-    protected const int Minute = 1;
-    protected const int Hour = 2;
-    protected const int DayOfMonth = 3;
-    protected const int Month = 4;
-    protected const int DayOfWeek = 5;
-    protected const int Year = 6;
-    protected const int AllSpecInt = 99;
-    protected const int NoSpecInt = 98;
-    protected const int AllSpec = AllSpecInt;
-    protected const int NoSpec = NoSpecInt;
+    private const int Second = 0;
+    private const int Minute = 1;
+    private const int Hour = 2;
+    private const int DayOfMonth = 3;
+    private const int Month = 4;
+    private const int DayOfWeek = 5;
+    private const int Year = 6;
+    private const int AllSpecInt = 99;
+    private const int NoSpecInt = 98;
+    private const int AllSpec = AllSpecInt;
+    private const int NoSpec = NoSpecInt;
 
     private static readonly Hashtable _monthMap = new(20);
     private static readonly Hashtable _dayMap = new(60);
-    [NonSerialized] protected bool _calendardayOfMonth;
-    [NonSerialized] protected bool _calendardayOfWeek;
+    [NonSerialized] private bool _calendardayOfMonth;
+    [NonSerialized] private bool _calendardayOfWeek;
 
-    [NonSerialized] protected TreeSet _daysOfMonth;
+    [NonSerialized] private TreeSet _daysOfMonth;
 
-    [NonSerialized] protected TreeSet _daysOfWeek;
-    [NonSerialized] protected bool _expressionParsed;
-    [NonSerialized] protected TreeSet _hours;
+    [NonSerialized] private TreeSet _daysOfWeek;
+    [NonSerialized] private TreeSet _hours;
 
-    [NonSerialized] protected bool _lastdayOfMonth;
-    [NonSerialized] protected bool _lastdayOfWeek;
-    [NonSerialized] protected TreeSet _minutes;
-    [NonSerialized] protected TreeSet _months;
+    [NonSerialized] private bool _lastdayOfMonth;
+    [NonSerialized] private bool _lastdayOfWeek;
+    [NonSerialized] private TreeSet _minutes;
+    [NonSerialized] private TreeSet _months;
 
-    [NonSerialized] protected bool _nearestWeekday;
-    [NonSerialized] protected int _nthdayOfWeek;
-    [NonSerialized] protected TreeSet _seconds;
+    [NonSerialized] private bool _nearestWeekday;
+    [NonSerialized] private int _nthdayOfWeek;
+    [NonSerialized] private TreeSet _seconds;
     private TimeZoneInfo _timeZone;
-    [NonSerialized] protected TreeSet _years;
+    [NonSerialized] private TreeSet _years;
 
     static CronExpression()
     {
@@ -95,7 +94,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         BuildExpression(cronExpression);
     }
 
-    public virtual TimeZoneInfo TimeZone
+    protected virtual TimeZoneInfo TimeZone
     {
         init { _timeZone = value; }
         get
@@ -104,7 +103,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
         }
     }
 
-    public string CronExpressionString { get; }
+    private string CronExpressionString { get; }
 
     public TimeSpan? Period()
     {
@@ -205,7 +204,6 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
     protected void BuildExpression(string expression)
     {
-        _expressionParsed = true;
         try
         {
             _seconds ??= new TreeSet();
@@ -1349,11 +1347,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     {
                         daysToAdd = dow + (7 - cDow);
                     }
-                    var dayShifted = false;
-                    if (daysToAdd > 0)
-                    {
-                        dayShifted = true;
-                    }
+                    var dayShifted = daysToAdd > 0;
                     day += daysToAdd;
                     var weekOfMonth = day / 7;
                     if (day % 7 > 0)
