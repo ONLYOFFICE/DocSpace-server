@@ -449,7 +449,7 @@ public class BackupAjaxHandler(BackupService backupService,
                 BackupPeriod.EveryDay => string.Format("0 0 {0} ? * *", Hour),
                 BackupPeriod.EveryMonth => string.Format("0 0 {0} {1} * ?", Hour, Day),
                 BackupPeriod.EveryWeek => string.Format("0 0 {0} ? * {1}", Hour, Day),
-                _ => base.ToString(),
+                _ => base.ToString()
             };
         }
     }

@@ -75,7 +75,7 @@ public class EditHistory(ILogger<EditHistory> logger,
                         Author = new EditHistoryAuthor(userManager, displayUserSettingsHelper)
                         {
                             Id = r.User.Id ?? "",
-                            Name = r.User.Name,
+                            Name = r.User.Name
                         }
                     };
 

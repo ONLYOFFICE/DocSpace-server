@@ -189,6 +189,6 @@ public class SmsKeyStorage
         Invalide,
         Empty,
         TooMuch,
-        Timeout,
+        Timeout
     }
 }

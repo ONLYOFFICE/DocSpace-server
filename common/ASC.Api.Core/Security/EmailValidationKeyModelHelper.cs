@@ -71,7 +71,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             EmplType = employeeType,
             Key = key,
             Type = cType,
-            UiD = userId,
+            UiD = userId
         };
     }
 

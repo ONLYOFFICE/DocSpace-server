@@ -52,31 +52,31 @@ public sealed class Constants(IConfiguration configuration)
     public static readonly GroupInfo GroupEveryone = new(SysGroupCategoryId)
     {
         ID = AuthConst.Everyone.ID,
-        Name = AuthConst.Everyone.Name,
+        Name = AuthConst.Everyone.Name
     };
 
     public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
         ID = AuthConst.User.ID,
-        Name = AuthConst.User.Name,
+        Name = AuthConst.User.Name
     };
 
     public static readonly GroupInfo GroupManager = new(SysGroupCategoryId)
     {
         ID = AuthConst.RoomAdmin.ID,
-        Name = AuthConst.RoomAdmin.Name,
+        Name = AuthConst.RoomAdmin.Name
     };
 
     public static readonly GroupInfo GroupAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConst.DocSpaceAdmin.ID,
-        Name = AuthConst.DocSpaceAdmin.Name,
+        Name = AuthConst.DocSpaceAdmin.Name
     };
 
     public static readonly GroupInfo GroupCollaborator = new(SysGroupCategoryId)
     {
         ID = AuthConst.Collaborator.ID, 
-        Name = AuthConst.Collaborator.Name,
+        Name = AuthConst.Collaborator.Name
     };
 
     public static readonly GroupInfo[] BuildinGroups = {
@@ -84,8 +84,8 @@ public sealed class Constants(IConfiguration configuration)
             GroupUser,
             GroupManager,
             GroupAdmin,
-            GroupCollaborator,
-        };
+            GroupCollaborator
+    };
 
     public static readonly UserInfo LostUser = new()
     {

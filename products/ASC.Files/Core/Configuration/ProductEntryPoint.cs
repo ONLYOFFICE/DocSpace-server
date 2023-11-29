@@ -105,7 +105,7 @@ public class ProductEntryPoint : Product
                 SpaceUsageStatManager = _filesSpaceUsageStatManager,
                 AdminOpportunities = AdminOpportunities,
                 UserOpportunities = UserOpportunities,
-                CanNotBeDisabled = true,
+                CanNotBeDisabled = true
             };
 
         _notifyConfiguration?.Configure();

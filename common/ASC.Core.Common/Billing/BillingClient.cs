@@ -249,7 +249,7 @@ public class BillingClient
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
-            Method = HttpMethod.Post,
+            Method = HttpMethod.Post
         };
 
         if (!string.IsNullOrEmpty(_configuration.Key))

@@ -215,7 +215,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                     TenantId = l.TenantId,
                     SourceId = newHashId,
                     LinkedId = l.LinkedId,
-                    LinkedFor = l.LinkedFor,
+                    LinkedFor = l.LinkedFor
                 });
 
                 filesDbContext.RemoveRange(filesSourceForDelete);
@@ -228,7 +228,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
                     TenantId = l.TenantId,
                     SourceId = l.SourceId,
                     LinkedId = newHashId,
-                    LinkedFor = l.LinkedFor,
+                    LinkedFor = l.LinkedFor
                 });
 
                 filesDbContext.RemoveRange(filesLinkedForDelete);

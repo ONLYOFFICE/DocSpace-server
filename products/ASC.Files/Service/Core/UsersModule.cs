@@ -73,7 +73,7 @@ public class UsersModule(TenantManager tenantManager,
             AdditionalInfo3 = u.Status.ToString(),
             AdditionalInfo4 = u.ActivationStatus.ToString(),
             Keywords = fullName,
-            Actions = u.LastModified > u.CreateDate ? FeedActions.Updated : FeedActions.Created,
+            Actions = u.LastModified > u.CreateDate ? FeedActions.Updated : FeedActions.Created
         };
 
         return feed;

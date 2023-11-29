@@ -897,7 +897,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 return c * x1.EnumerableComparer(x2);
             }
             ,
-            _ => (x, y) => c * x.Title.EnumerableComparer(y.Title),
+            _ => (x, y) => c * x.Title.EnumerableComparer(y.Title)
         };
 
         var comparer = Comparer<FileEntry>.Create(sorter);
@@ -1228,7 +1228,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 FileStatus = draft.FileStatus,
                 ConvertedType = draft.ConvertedType,
                 Comment = FilesCommonResource.CommentSubmitFillForm,
-                Encrypted = draft.Encrypted,
+                Encrypted = draft.Encrypted
             };
 
             await using (var stream = await fileDraftDao.GetFileStreamAsync(draft))

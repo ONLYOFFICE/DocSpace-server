@@ -478,7 +478,7 @@ public enum MessageKey
     SsoSettingsUserTerminated,
     SsoError,
     SsoAuthFailed,
-    SsoAttributesNotFound,
+    SsoAttributesNotFound
 }
 
 public class SSOException(string message, MessageKey messageKey) : Exception(message)

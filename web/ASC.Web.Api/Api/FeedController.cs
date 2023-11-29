@@ -138,7 +138,7 @@ public class FeedController : ControllerBase
             Author = author ?? Guid.Empty,
             SearchKeys = _apiContext.FilterValues,
             OnlyNew = onlyNew.HasValue && onlyNew.Value,
-            History = withRelated.HasValue && withRelated.Value,
+            History = withRelated.HasValue && withRelated.Value
         };
 
         if (from != null && to != null)

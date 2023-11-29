@@ -169,7 +169,7 @@ public class SettingsController : BaseSettingsController
             EnableAdmMess = studioAdminMessageSettings.Enable || await _tenantExtra.IsNotPaidAsync(),
             LegalTerms = _setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
-            UserNameRegex = _userFormatter.UserNameRegex.ToString(),
+            UserNameRegex = _userFormatter.UserNameRegex.ToString()
         };
 
         if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() != default)
@@ -209,7 +209,7 @@ public class SettingsController : BaseSettingsController
             {
                 AndroidPackageName = _configuration["deeplink:androidpackagename"] ?? "",
                 Url = _configuration["deeplink:url"] ?? "",
-                IosPackageId = _configuration["deeplink:iospackageid"] ?? "",
+                IosPackageId = _configuration["deeplink:iospackageid"] ?? ""
             };
 
             settings.HelpLink = await _commonLinkUtility.GetHelpLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper);

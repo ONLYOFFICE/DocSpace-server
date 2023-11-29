@@ -79,7 +79,7 @@ public class CustomSchemasController : BaseSettingsController
                         RegDateCaption = names.RegDateCaption,
                         GroupHeadCaption = names.GroupHeadCaption,
                         GuestCaption = names.GuestCaption,
-                        GuestsCaption = names.GuestsCaption,
+                        GuestsCaption = names.GuestsCaption
                     };
                 })
                 .ToListAsync();
@@ -156,7 +156,7 @@ public class CustomSchemasController : BaseSettingsController
             RegDateCaption = regDateCaption[..Math.Min(30, regDateCaption.Length)],
             GroupHeadCaption = grpHeadCaption[..Math.Min(30, grpHeadCaption.Length)],
             GuestCaption = guestCaption[..Math.Min(30, guestCaption.Length)],
-            GuestsCaption = guestsCaption[..Math.Min(30, guestsCaption.Length)],
+            GuestsCaption = guestsCaption[..Math.Min(30, guestsCaption.Length)]
         };
 
         await _customNamingPeople.SetPeopleNamesAsync(names);
@@ -193,7 +193,7 @@ public class CustomSchemasController : BaseSettingsController
             RegDateCaption = names.RegDateCaption,
             GroupHeadCaption = names.GroupHeadCaption,
             GuestCaption = names.GuestCaption,
-            GuestsCaption = names.GuestsCaption,
+            GuestsCaption = names.GuestsCaption
         };
         return schemaItem;
     }

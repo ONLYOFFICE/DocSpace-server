@@ -110,7 +110,7 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         {
             Id = claims.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             EMail = claims.FindFirst(ClaimTypes.Email)?.Value,
-            Provider = ProviderConstants.AppleId,
+            Provider = ProviderConstants.AppleId
         };
     }
 

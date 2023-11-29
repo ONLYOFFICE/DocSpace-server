@@ -192,7 +192,7 @@ public enum Accessibility
     WebComment,
     CoAuhtoring,
     CanConvert,
-    MustConvert,
+    MustConvert
 }
 
 [Scope]
@@ -690,8 +690,8 @@ public class FileUtility
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
-                ".pot", ".potm", ".potx",
-            }.ToImmutableList();
+                ".pot", ".potm", ".potx"
+    }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }

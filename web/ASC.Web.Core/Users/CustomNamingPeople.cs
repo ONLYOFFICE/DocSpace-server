@@ -303,7 +303,7 @@ public class CustomNamingPeople(SettingsManager settingsManager)
                     UserPostCaption = node.SelectSingleNode("names/userpost").InnerText,
                     RegDateCaption = node.SelectSingleNode("names/regdate").InnerText,
                     GuestCaption = node.SelectSingleNode("names/guest").InnerText,
-                    GuestsCaption = node.SelectSingleNode("names/guests").InnerText,
+                    GuestsCaption = node.SelectSingleNode("names/guests").InnerText
                 };
                 _items.Add(item);
             }

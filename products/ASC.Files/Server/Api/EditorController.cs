@@ -89,7 +89,7 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
                 configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
                 {
                     PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey,
+                    PublicKey = keyPair.PublicKey
                 };
             }
         }
@@ -207,7 +207,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
                 {
                     PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey,
+                    PublicKey = keyPair.PublicKey
                 };
             }
         }

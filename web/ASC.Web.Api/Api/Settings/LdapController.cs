@@ -90,12 +90,16 @@ public class LdapController : BaseSettingsController
         settings.PasswordBytes = null;
 
         if (settings.IsDefault)
+        {
             return _mapper.Map<LdapSettings, LdapSettingsDto>(settings);
+        }
 
         var defaultSettings = settings.GetDefault();
 
         if (settings.Equals(defaultSettings))
+        {
             settings.IsDefault = true;
+        }
 
         return _mapper.Map<LdapSettings, LdapSettingsDto>(settings);
     }
@@ -118,10 +122,14 @@ public class LdapController : BaseSettingsController
         var settings = await _settingsManager.LoadAsync<LdapCronSettings>();
 
         if (settings == null)
+        {
             settings = new LdapCronSettings().GetDefault();
+        }
 
         if (string.IsNullOrEmpty(settings.Cron))
+        {
             return null;
+        }
 
         return _mapper.Map<LdapCronSettings, LdapCronSettingsDto>(settings);
     }
@@ -157,7 +165,9 @@ public class LdapController : BaseSettingsController
         var settings = await _settingsManager.LoadAsync<LdapCronSettings>();
 
         if (settings == null)
+        {
             settings = new LdapCronSettings();
+        }
 
         settings.Cron = cron;
         await _settingsManager.SaveAsync(settings);

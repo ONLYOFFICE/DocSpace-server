@@ -327,7 +327,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom,
+            FolderType.PublicRoom
         };
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -1436,7 +1436,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom,
+            FolderType.PublicRoom
         };
 
         Expression<Func<DbFolder, bool>> filter = f => roomTypes.Contains(f.FolderType);
@@ -1638,7 +1638,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.CustomRoom,
+            _ => FolderType.CustomRoom
         };
     }
 
@@ -1681,7 +1681,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                                     .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
                                     .OrderBy(r => r.order.Order)
                                     .Select(r => r.folder),
-            _ => q.OrderBy(r => r.Title),
+            _ => q.OrderBy(r => r.Title)
         };
 
         if (subjectId != Guid.Empty)

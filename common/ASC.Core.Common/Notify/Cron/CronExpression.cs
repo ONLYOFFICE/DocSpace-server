@@ -964,7 +964,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 DayOfWeek => 7,
                 DayOfMonth => 31,
                 Year => throw new ArgumentException("Start year must be less than stop year"),
-                _ => throw new ArgumentException("Unexpected type encountered"),
+                _ => throw new ArgumentException("Unexpected type encountered")
             };
             stopAt += max;
         }
@@ -998,7 +998,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
             Month => _months,
             DayOfWeek => _daysOfWeek,
             Year => _years,
-            _ => null,
+            _ => null
         };
     }
 

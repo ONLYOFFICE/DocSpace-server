@@ -48,7 +48,7 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
         {
             "files" => AllModules.FirstOrDefault(m => m.ModuleName == ModuleName.Files),
             "room_logos" => RoomLogosModule,
-            _ => null,
+            _ => null
         };
     }
 }

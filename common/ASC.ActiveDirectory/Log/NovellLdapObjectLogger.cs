@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class NovellLdapObjectLogger
+internal static partial class NovellLdapObjectLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Can't get LDAPObject Sid property")]
     public static partial void ErrorCanNotGetSidProperty(this ILogger logger, Exception exception);

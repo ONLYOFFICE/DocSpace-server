@@ -299,8 +299,8 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
             {
                 UserIDColumns = new[] {"create_by"},
                 DateColumns = new Dictionary<string, bool> {{"create_on", false}}
-            },
-        };
+            }
+    };
 
     private readonly RelationInfo[] _rels = {
             new("files_tag", "id", "files_tag_link", "tag_id", typeof(FilesModuleSpecifics)),
@@ -312,8 +312,8 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
                 x => Convert.ToInt32(x["entry_type"]) == 1 && _regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
 
             new("files_thirdparty_id_mapping", "hash_id", "files_tag_link", "entry_id", typeof(FilesModuleSpecifics),
-                x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"]))),
-        };
+                x => !_regexIsInteger.IsMatch(Convert.ToString(x["entry_id"])))
+    };
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
@@ -340,7 +340,7 @@ public class FilesModuleSpecifics2(Helpers helpers) : ModuleSpecificsBase(helper
 
     private static string GetStart(string value)
     {
-        var allStarts = new[] { _tagStartMessage, _tagStartTask, _tagStartRelationshipEvent, _tagStartProject, };
+        var allStarts = new[] { _tagStartMessage, _tagStartTask, _tagStartRelationshipEvent, _tagStartProject };
 
         return allStarts.FirstOrDefault(value.StartsWith);
     }

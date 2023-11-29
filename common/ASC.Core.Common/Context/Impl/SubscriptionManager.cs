@@ -38,7 +38,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         Constants.DocSpaceAdmin.ID,
         Constants.Everyone.ID,
         Constants.RoomAdmin.ID,
-        Constants.Collaborator.ID,
+        Constants.Collaborator.ID
     };
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
@@ -46,7 +46,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
-            Subscribed = true,
+            Subscribed = true
         };
 
         if (sourceID != null)
@@ -77,7 +77,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
-            Subscribed = false,
+            Subscribed = false
         };
 
         if (sourceID != null)

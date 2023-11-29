@@ -35,7 +35,7 @@ public enum RoomType
     ReviewRoom = 3,
     ReadOnlyRoom = 4,
     CustomRoom = 5,
-    PublicRoom = 6,
+    PublicRoom = 6
 }
 
 /// <summary>

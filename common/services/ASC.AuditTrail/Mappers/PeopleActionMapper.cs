@@ -59,12 +59,12 @@ internal class UsersActionMapper : IModuleActionMapper
                             MessageAction.UserActivated, MessageAction.GuestActivated, MessageAction.UserUpdated,
                             MessageAction.UserUpdatedMobileNumber, MessageAction.UserUpdatedLanguage, MessageAction.UserAddedAvatar,
                             MessageAction.UserUpdatedAvatarThumbnails, MessageAction.UserUpdatedEmail, MessageAction.UsersUpdatedType,
-                            MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions,
+                            MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
                         }
                     },
                     { ActionType.Delete, new[] { MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving } },
                     { ActionType.Import, new[] { MessageAction.UserImported, MessageAction.GuestImported } },
-                    { ActionType.Logout, new[] { MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser } },
+                    { ActionType.Logout, new[] { MessageAction.UserLogoutActiveConnections, MessageAction.UserLogoutActiveConnection, MessageAction.UserLogoutActiveConnectionsForUser } }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {

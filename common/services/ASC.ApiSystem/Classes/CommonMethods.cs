@@ -57,7 +57,7 @@ public class CommonMethods(
             portalName = t.Alias,
             status = t.Status.ToString(),
             tenantId = t.Id,
-            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName
         };
     }
 

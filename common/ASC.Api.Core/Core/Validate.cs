@@ -55,6 +55,6 @@ public static class Validate
 
     public static T? NullIfDefault<T>(this T item) where T : struct
     {
-        return EqualityComparer<T>.Default.Equals(item, default(T)) ? default(T?) : item;
+        return EqualityComparer<T>.Default.Equals(item, default) ? default(T?) : item;
     }
 }

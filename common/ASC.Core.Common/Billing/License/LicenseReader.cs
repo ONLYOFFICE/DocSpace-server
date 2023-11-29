@@ -216,7 +216,7 @@ public class LicenseReader
         var tariff = new Tariff
         {
             Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            DueDate = license.DueDate
         };
 
         await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });

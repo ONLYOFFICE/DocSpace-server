@@ -29,5 +29,5 @@ namespace ASC.Files.Core.Core;
 public enum SubjectFilter
 {
     Owner = 0,
-    Member = 1,
+    Member = 1
 }

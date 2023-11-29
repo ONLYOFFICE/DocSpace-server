@@ -292,7 +292,7 @@ public class AuthenticationController : ControllerBase
         {
             if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
             {
-                (var urlActivation, var keyActivation) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
+                var (urlActivation, keyActivation) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaActivation);
                 await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
@@ -302,7 +302,7 @@ public class AuthenticationController : ControllerBase
                 };
             }
 
-            (var urlAuth, var keyAuth) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaAuth);
+            var (urlAuth, keyAuth) = await _commonLinkUtility.GetConfirmationUrlAndKeyAsync(user.Email, ConfirmType.TfaAuth);
             await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {
@@ -705,7 +705,7 @@ public class AuthenticationController : ControllerBase
             Title = string.Empty,
             Location = string.Empty,
             CultureName = _coreBaseSettings.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name,
-            ActivationStatus = EmployeeActivationStatus.Activated,
+            ActivationStatus = EmployeeActivationStatus.Activated
         };
 
         var gender = loginProfile.Gender;

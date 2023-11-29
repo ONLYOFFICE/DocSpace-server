@@ -386,7 +386,7 @@ public class SettingsManager(IServiceProvider serviceProvider,
     {
         var options = new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true,
+            PropertyNameCaseInsensitive = true
         };
 
         return JsonSerializer.Deserialize<T>(data, options);

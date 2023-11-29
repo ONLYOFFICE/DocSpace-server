@@ -84,7 +84,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
                 return item;
             }
         }
-        return default(T);
+        return default;
     }
 
     public virtual Stream Serialize()

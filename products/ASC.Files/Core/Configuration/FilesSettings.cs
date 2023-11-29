@@ -108,7 +108,7 @@ public class FilesSettings : ISettings<FilesSettings>
             HideTemplatesSetting = false,
             DownloadTarGzSetting = false,
             AutomaticallyCleanUpSetting = null,
-            DefaultSharingAccessRightsSetting = null,
+            DefaultSharingAccessRightsSetting = null
         };
     }
 

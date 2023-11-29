@@ -272,9 +272,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 },
             EditorConfig =
                 {
-                    ModeWrite = modeWrite,
+                    ModeWrite = modeWrite
                 },
-            ErrorMessage = strError,
+            ErrorMessage = strError
         };
 
         if (!lastVersion)

@@ -74,7 +74,10 @@ public class SecurityContext(UserManager userManager,
 
     public async Task<bool> AuthenticateMe(string cookie)
     {
-        if (string.IsNullOrEmpty(cookie)) return false;
+        if (string.IsNullOrEmpty(cookie))
+        {
+            return false;
+        }
 
         if (!cookieStorage.DecryptCookie(cookie, out var tenant, out var userid, out var indexTenant, out var expire, out var indexUser, out var loginEventId))
         {

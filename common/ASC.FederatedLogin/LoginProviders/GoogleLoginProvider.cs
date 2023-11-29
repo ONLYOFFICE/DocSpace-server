@@ -110,7 +110,7 @@ public class GoogleLoginProvider : BaseLoginProvider<GoogleLoginProvider>
         var profile = new LoginProfile(Signature, InstanceCrypto)
         {
             Id = jProfile.Value<string>("resourceName").Replace("people/", ""),
-            Provider = ProviderConstants.Google,
+            Provider = ProviderConstants.Google
         };
 
         var emailsArr = jProfile.Value<JArray>("emailAddresses");

@@ -110,7 +110,7 @@ public class SecurityController : BaseSettingsController
                 WebItemId = i.WebItemId,
                 Enabled = i.Enabled,
                 Groups = i.Groups.Select(g => new GroupSummaryDto(g, _userManager)),
-                IsSubItem = subItemList.Contains(i.WebItemId),
+                IsSubItem = subItemList.Contains(i.WebItemId)
             };
 
             s.Users = new List<EmployeeDto>();

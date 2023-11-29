@@ -40,7 +40,7 @@ public enum ProviderTypes
     SkyDrive,
     WebDav,
     kDrive,
-    Yandex,
+    Yandex
 }
 
 [Scope]

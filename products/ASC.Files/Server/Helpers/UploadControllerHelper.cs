@@ -54,7 +54,7 @@ public class UploadControllerHelper(FilesSettingsHelper filesSettingsHelper,
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
-        return await CreateUploadSessionAsync(file, false, default(ApiDateTime), true);
+        return await CreateUploadSessionAsync(file, false, default, true);
     }
 
     public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool keepVersion = false)

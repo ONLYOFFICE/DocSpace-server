@@ -52,8 +52,8 @@ public class Builder<T>(ThumbnailSettings settings,
 
     private readonly List<string> _imageFormatsCanBeCrop = new()
     {
-                ".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp",
-            };
+                ".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tga", ".webp"
+    };
 
     internal async Task BuildThumbnail(FileData<T> fileData)
     {
@@ -253,7 +253,7 @@ public class Builder<T>(ThumbnailSettings settings,
         var thumbnail = new ThumbnailData
         {
             Aspect = 2,
-            First = true,
+            First = true
             //Height = height,
             //Width = width
         };
@@ -305,9 +305,20 @@ public class Builder<T>(ThumbnailSettings settings,
     {
         var ext = FileUtility.GetFileExtension(file.Title);
 
-        if (!CanCreateThumbnail(ext) || file.Encrypted || file.RootFolderType == FolderType.TRASH) return false;
-        if (IsVideo(ext) && file.ContentLength > settings.MaxVideoFileSize) return false;
-        if (IsImage(ext) && file.ContentLength > settings.MaxImageFileSize) return false;
+        if (!CanCreateThumbnail(ext) || file.Encrypted || file.RootFolderType == FolderType.TRASH)
+        {
+            return false;
+        }
+
+        if (IsVideo(ext) && file.ContentLength > settings.MaxVideoFileSize)
+        {
+            return false;
+        }
+
+        if (IsImage(ext) && file.ContentLength > settings.MaxImageFileSize)
+        {
+            return false;
+        }
 
         return true;
     }

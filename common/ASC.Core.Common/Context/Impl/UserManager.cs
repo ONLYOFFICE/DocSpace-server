@@ -373,7 +373,7 @@ public class UserManager
                     user.FirstName ?? string.Empty,
                     user.Title ?? string.Empty,
                     user.Location ?? string.Empty,
-                    user.Email ?? string.Empty,
+                    user.Email ?? string.Empty
             };
             if (IsPropertiesContainsWords(properties, words))
             {

@@ -77,7 +77,7 @@ public class FolderContentDto<T>
 
             StartIndex = 0,
             Count = 4,
-            Total = 4,
+            Total = 4
         };
     }
 }

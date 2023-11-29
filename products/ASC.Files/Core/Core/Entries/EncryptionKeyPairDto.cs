@@ -65,7 +65,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         {
             PrivateKeyEnc = privateKeyEnc,
             PublicKey = publicKey,
-            UserId = user.Id,
+            UserId = user.Id
         };
 
         var keyPairString = JsonSerializer.Serialize(keyPair);

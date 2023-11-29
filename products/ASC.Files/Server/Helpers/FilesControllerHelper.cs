@@ -84,7 +84,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
                 OperationType = r.OperationType,
                 Processed = r.Processed,
                 Progress = r.Progress,
-                Source = r.Source,
+                Source = r.Source
             };
 
             if (!string.IsNullOrEmpty(r.Result))

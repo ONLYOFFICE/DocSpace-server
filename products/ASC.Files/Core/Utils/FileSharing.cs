@@ -577,7 +577,7 @@ public class FileSharing(Global global,
                 Id = r.Subject,
                 SubjectGroup = isgroup,
                 Access = share,
-                FileShareOptions = r.Options,
+                FileShareOptions = r.Options
             };
 
             w.CanEditAccess = authContext.CurrentAccount.ID != w.Id && w.SubjectType is SubjectType.User or SubjectType.Group && canEditAccess;
@@ -637,7 +637,7 @@ public class FileSharing(Global global,
                 SubjectGroup = false,
                 Access = FileShare.ReadWrite,
                 Owner = true,
-                CanEditAccess = false,
+                CanEditAccess = false
             };
 
             result.Add(w);
@@ -659,7 +659,7 @@ public class FileSharing(Global global,
                     SubjectGroup = true,
                     Access = FileShare.ReadWrite,
                     Owner = false,
-                    LockedRights = true,
+                    LockedRights = true
                 };
 
                 result.Add(w);
@@ -853,7 +853,7 @@ public class FileSharing(Global global,
             SubjectGroup = false,
             Access = FileShare.ReadWrite,
             Owner = true,
-            CanEditAccess = false,
+            CanEditAccess = false
         };
 
         yield return owner;

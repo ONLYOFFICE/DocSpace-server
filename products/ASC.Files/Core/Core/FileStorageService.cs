@@ -375,7 +375,7 @@ public class FileStorageService //: IFileStorageService
             RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
             RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
             RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
-            _ => await CreateCustomRoomAsync(title, parentId, @private, indexing),
+            _ => await CreateCustomRoomAsync(title, parentId, @private, indexing)
         };
 
         if (@private)
@@ -432,7 +432,7 @@ public class FileStorageService //: IFileStorageService
             RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
             RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
             RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private, indexing), FolderType.PublicRoom),
-            _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
+            _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom)
         };
 
         ErrorIf(result.Item1.Id.Equals(result.Item1.RootId), FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
@@ -604,7 +604,7 @@ public class FileStorageService //: IFileStorageService
         ErrorIf(file == null, FilesCommonResource.ErrorMassage_FileNotFound);
         ErrorIf(!await fileSecurity.CanReadAsync(file), FilesCommonResource.ErrorMassage_SecurityException_ReadFile);
 
-        var parent = await folderDao.GetFolderAsync(EqualityComparer<T>.Default.Equals(parentId, default(T)) ? file.ParentId : parentId);
+        var parent = await folderDao.GetFolderAsync(EqualityComparer<T>.Default.Equals(parentId, default) ? file.ParentId : parentId);
         ErrorIf(parent == null, FilesCommonResource.ErrorMassage_FolderNotFound);
         ErrorIf(parent.RootFolderType == FolderType.TRASH, FilesCommonResource.ErrorMassage_ViewTrashItem);
 
@@ -671,7 +671,7 @@ public class FileStorageService //: IFileStorageService
         var folderDao = GetFolderDao<T>();
 
         Folder<T> folder = null;
-        if (!EqualityComparer<T>.Default.Equals(fileWrapper.ParentId, default(T)))
+        if (!EqualityComparer<T>.Default.Equals(fileWrapper.ParentId, default))
         {
             folder = await folderDao.GetFolderAsync(fileWrapper.ParentId);
             var canCreate = await fileSecurity.CanCreateAsync(folder) && folder.FolderType != FolderType.VirtualRooms
@@ -720,7 +720,7 @@ public class FileStorageService //: IFileStorageService
                 file.ContentLength = stream.Length;
                 file = await fileDao.SaveFileAsync(file, stream);
             }
-        else if (EqualityComparer<TTemplate>.Default.Equals(fileWrapper.TemplateId, default(TTemplate)))
+        else if (EqualityComparer<TTemplate>.Default.Equals(fileWrapper.TemplateId, default))
         {
             var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
             var storeTemplate = await GetStoreTemplateAsync();
@@ -2599,7 +2599,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     Access = share,
                     Id = FileConstant.ShareLinkId,
-                    SubjectGroup = true,
+                    SubjectGroup = true
                 }
             };
 
@@ -2699,7 +2699,7 @@ public class FileStorageService //: IFileStorageService
             Url = await documentServiceConnector.ReplaceCommunityAdressAsync(await pathProvider.GetFileStreamUrlAsync(file, lastVersion: true)),
             FileType = file.ConvertedExtension.Trim('.'),
             Key = docKey,
-            Link = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)),
+            Link = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
         };
         fileReference.Token = documentServiceHelper.GetSignature(fileReference);
         return fileReference;

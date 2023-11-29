@@ -39,7 +39,7 @@ public class DocumentServiceTracker
         Closed = 4,
         MailMerge = 5,
         ForceSave = 6,
-        CorruptedForceSave = 7,
+        CorruptedForceSave = 7
     }
 
     [DebuggerDisplay("{Status} - {Key}")]
@@ -79,7 +79,7 @@ public class DocumentServiceTracker
     {
         Html = 0,
         AttachDocx = 1,
-        AttachPdf = 2,
+        AttachPdf = 2
     }
 
     [DebuggerDisplay("{From}")]
@@ -114,7 +114,7 @@ public class DocumentServiceTracker
         {
             var options = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
             return JsonSerializer.Serialize(response, options);

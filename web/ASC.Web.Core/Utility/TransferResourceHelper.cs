@@ -39,7 +39,7 @@ public static class TransferResourceHelper
             "sg" => Resource.SgServerRegion,
             "org" => Resource.OrgServerRegion,
 
-            _ => string.Empty,
+            _ => string.Empty
         };
     }
 }

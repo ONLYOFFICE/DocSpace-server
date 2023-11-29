@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapUtilsLogger
+internal static partial class LdapUtilsLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "SkipErrors() failed")]
     public static partial void ErrorSkipErrors(this ILogger logger, Exception exception);

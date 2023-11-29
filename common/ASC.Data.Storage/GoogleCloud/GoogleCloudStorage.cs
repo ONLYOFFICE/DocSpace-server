@@ -273,7 +273,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         }
     }
 
-    public async override Task DeleteFilesAsync(string domain, List<string> paths)
+    public override async Task DeleteFilesAsync(string domain, List<string> paths)
     {
         if (paths.Count == 0)
         {

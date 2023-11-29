@@ -189,7 +189,10 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         var length = endOffset - offset + 1;
 
-        if (length <= 0) throw new HttpException(HttpStatusCode.BadRequest, "Wrong Range header");
+        if (length <= 0)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Wrong Range header");
+        }
 
         if (length < fullLength)
         {
