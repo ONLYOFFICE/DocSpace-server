@@ -741,7 +741,9 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         copy.RootCreateBy = toFolder.RootCreateBy;
         copy.RootFolderType = toFolder.RootFolderType;
         copy.Title = folder.Title;
-        copy.FolderType = folder.FolderType;
+        copy.FolderType = (folder.FolderType == FolderType.ReadyFormFolder || 
+            folder.FolderType == FolderType.InProcessFormFolder ||
+            folder.FolderType == FolderType.FormFillingFolder) ? FolderType.DEFAULT : folder.FolderType;
 
         copy = await GetFolderAsync(await SaveFolderAsync(copy));
 
