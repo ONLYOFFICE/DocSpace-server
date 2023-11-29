@@ -6,7 +6,6 @@ package com.onlyoffice.authorization.api.ports.services;
 import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.entities.Client;
 import com.onlyoffice.authorization.api.core.entities.Consent;
-import com.onlyoffice.authorization.api.core.transfer.messages.ClientMessage;
 import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
 import com.onlyoffice.authorization.api.core.transfer.response.ConsentDTO;
 import com.onlyoffice.authorization.api.core.usecases.repository.consent.ConsentPersistenceMutationUsecases;
@@ -15,7 +14,6 @@ import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCle
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
 import com.onlyoffice.authorization.api.external.mappers.ConsentMapper;
-import com.onlyoffice.authorization.api.security.container.UserContextContainer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -27,7 +25,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
