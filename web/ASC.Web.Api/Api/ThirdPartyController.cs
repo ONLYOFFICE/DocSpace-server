@@ -33,15 +33,8 @@ namespace ASC.Web.Api.Controllers;
 [Scope(Additional = typeof(BaseLoginProviderExtension))]
 [DefaultRoute]
 [ApiController]
-public class ThirdPartyController : ControllerBase
+public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
-
-    public ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper)
-    {
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
-
     /// <summary>
     /// Returns a request to get the confirmation code from URL.
     /// </summary>
@@ -64,22 +57,22 @@ public class ThirdPartyController : ControllerBase
 
         return provider switch
         {
-            LoginProvider.Google => _oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
+            LoginProvider.Google => oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
                 GoogleLoginProvider.GoogleScopeDrive,
                 new Dictionary<string, string> { { "access_type", "offline" }, { "prompt", "consent" } },
                 additionalStateArgs: additionals),
-            LoginProvider.Dropbox => _oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
+            LoginProvider.Dropbox => oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
                 additionalArgs: new Dictionary<string, string>
                 {
                     { "force_reauthentication", "true" }, { "token_access_type", "offline" }
                 }, additionalStateArgs: additionals),
-            LoginProvider.Docusign => _oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
+            LoginProvider.Docusign => oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
                 DocuSignLoginProvider.DocuSignLoginProviderScopes,
                 new Dictionary<string, string> { { "prompt", "login" } }, additionalStateArgs: additionals),
-            LoginProvider.Box => _oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals),
-            LoginProvider.OneDrive => _oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(
+            LoginProvider.Box => oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.OneDrive => oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(
                 OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals),
-            LoginProvider.Wordpress => _oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
+            LoginProvider.Wordpress => oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
                 additionalStateArgs: additionals),
             _ => null
         };

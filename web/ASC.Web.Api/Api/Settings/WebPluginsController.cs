@@ -26,6 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
+[DefaultRoute("webplugins")]
 public class WebPluginsController(ApiContext apiContext,
         IMemoryCache memoryCache,
         WebItemManager webItemManager,
@@ -37,7 +38,7 @@ public class WebPluginsController(ApiContext apiContext,
         IMapper mapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
-    [HttpPost("webplugins")]
+    [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(bool system)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -65,7 +66,7 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
-    [HttpGet("webplugins")]
+    [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(bool? enabled = null)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
@@ -82,7 +83,7 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
-    [HttpGet("webplugins/{name}")]
+    [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(string name)
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
@@ -94,7 +95,7 @@ public class WebPluginsController(ApiContext apiContext,
         return outDto;
     }
 
-    [HttpPut("webplugins/{name}")]
+    [HttpPut("{name}")]
     public async Task UpdateWebPluginAsync(string name, WebPluginRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -106,7 +107,7 @@ public class WebPluginsController(ApiContext apiContext,
         await ChangeCspSettings(webPlugin, inDto.Enabled);
     }
 
-    [HttpDelete("webplugins/{name}")]
+    [HttpDelete("{name}")]
     public async Task DeleteWebPluginAsync(string name)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

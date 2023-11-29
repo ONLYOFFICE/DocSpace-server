@@ -28,6 +28,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
+[DefaultRoute("thirdparty")]
 public class ThirdpartyController(AccountLinker accountLinker,
         CookiesManager cookiesManager,
         CoreBaseSettings coreBaseSettings,
@@ -70,7 +71,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [AllowAnonymous, AllowNotPayment]
-    [HttpGet("thirdparty/providers")]
+    [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
     {
         ICollection<AccountInfoDto> infos = new List<AccountInfoDto>();
@@ -121,7 +122,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
-    [HttpPut("thirdparty/linkaccount")]
+    [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
         var profile = new LoginProfile(signature, instanceCrypto, inDto.SerializedProfile);
@@ -159,7 +160,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
-    [HttpPost("thirdparty/signup")]
+    [HttpPost("signup")]
     public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
     {
         var passwordHash = inDto.PasswordHash;
@@ -273,7 +274,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
-    [HttpDelete("thirdparty/unlinkaccount")]
+    [HttpDelete("unlinkaccount")]
     public async Task UnlinkAccountAsync(string provider)
     {
         await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), provider);

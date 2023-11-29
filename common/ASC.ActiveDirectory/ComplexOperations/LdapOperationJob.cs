@@ -49,7 +49,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private LdapSettings _ldapSettings;
     private string _source;
-    private new string _status;
+    private string _jobStatus;
     private string _error;
     private string _warning;
 
@@ -93,7 +93,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         _source = "";
         Percentage = 0;
-        _status = "";
+        _jobStatus = "";
         _error = "";
         _warning = "";
 
@@ -1168,7 +1168,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         if (currentStatus != null)
         {
-            _status = currentStatus;
+            _jobStatus = currentStatus;
         }
 
         if (currentSource != null)
@@ -1176,7 +1176,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             _source = currentSource;
         }
 
-        logger.InfoProgress(Percentage, _status, _source);
+        logger.InfoProgress(Percentage, _jobStatus, _source);
 
         PublishTaskInfo();
     }
@@ -1199,7 +1199,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         this[LdapTaskProperty.OPERATION_TYPE] = _operationType;
         this[LdapTaskProperty.OWNER] = _tenantId;
         this[LdapTaskProperty.PROGRESS] = Percentage < 100 ? Percentage : 100;
-        this[LdapTaskProperty.RESULT] = _status;
+        this[LdapTaskProperty.RESULT] = _jobStatus;
         this[LdapTaskProperty.ERROR] = _error;
         this[LdapTaskProperty.WARNING] = _warning;
         //SetProperty(PROCESSED, successProcessed);
