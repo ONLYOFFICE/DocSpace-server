@@ -1003,7 +1003,14 @@ public class FileSecurity : IFileSecurity
                 {
                     return false;
                 }
-
+                if (action == FilesSecurityActions.FillForms && file != null)
+                {
+                    var fileFolder = await _daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
+                    if (fileFolder.FolderType == FolderType.FormFillingFolder && file.CreateBy != userId)
+                    {
+                        return false;
+                    }
+                }
                 if (await HasFullAccessAsync(e, userId, isUser, isDocSpaceAdmin, isRoom, isCollaborator))
                 {
                     return true;
