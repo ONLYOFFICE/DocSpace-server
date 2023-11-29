@@ -11,12 +11,11 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @Slf4j
 public class AuthorizationSuccessResponseHandler implements AuthenticationSuccessHandler {
-    private final String DISABLE_REDIRECT_COOKIE = "disable_redirect";
+    private final String DISABLE_REDIRECT_HEADER = "X-Disable-Redirect";
     private final String REDIRECT_HEADER = "X-Redirect-URI";
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -28,7 +27,9 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
                     token.getRedirectUri(), token.getAuthorizationCode().getTokenValue()));
             if (state != null && !state.isBlank())
                 redirectUrl.append(String.format("&state=%s", state));
-            if (Arrays.stream(request.getCookies()).anyMatch(s -> s.getName().equalsIgnoreCase(DISABLE_REDIRECT_COOKIE))) {
+
+            String redirectHeader = request.getHeader(DISABLE_REDIRECT_HEADER);
+            if (redirectHeader != null) {
                 response.setStatus(HttpStatus.OK.value());
                 response.setHeader(REDIRECT_HEADER, redirectUrl.toString());
                 return;
