@@ -64,10 +64,6 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
         MDC.clear();
         var msg = toMessage(authorizationConsent);
         msg.setInvalidated(true);
-        log.info("Evicting authorization consent from distributed cache");
-        cacheManager.getCache("consent").evict(String
-                .format("%s:%s", authorizationConsent.getRegisteredClientId(),
-                        authorizationConsent.getPrincipalName()));
         log.info("Publishing an authorization consent delete message");
         this.amqpTemplate.convertAndSend(
                 configuration.getConsent().getExchange(),
@@ -86,6 +82,8 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
         if (cached != null && (cached.get() instanceof OAuth2AuthorizationConsent consent)) {
             log.info("Found authorization consent consent in the cache");
             MDC.clear();
+            cacheManager.getCache("consent").evict(String
+                    .format("%s:%s", registeredClientId, principalName));
             return consent;
         }
 
