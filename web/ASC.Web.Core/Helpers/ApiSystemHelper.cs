@@ -38,19 +38,24 @@ namespace ASC.Web.Core.Helpers;
 public class ApiSystemHelper
 {
     public string ApiSystemUrl { get; }
-    public bool ApiCacheEnable { get; }
+
+    public bool ApiCacheEnable
+    {
+        get => _dynamoDbSettings.ApiCacheEnable;
+    }
 
     private readonly byte[] _skey;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
     private readonly TenantDomainValidator _tenantDomainValidator;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IConfiguration _configuration;
+    private readonly DynamoDbSettings _dynamoDbSettings;
     private const string TenantRegionKey = "tenant_region";
     private const string TenantDomainKey = "tenant_domain";
-    private const string RegionTableName = "docspace-tenants_region";
+    private readonly string _regionTableName;
 
-    public ApiSystemHelper(IConfiguration configuration,
+    public ApiSystemHelper(
+        ConfigurationExtension configuration,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
@@ -60,17 +65,12 @@ public class ApiSystemHelper
         ApiSystemUrl = configuration["web:api-system"];
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
-        _configuration = configuration;
         _clientFactory = clientFactory;
         _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
-
-        if (!String.IsNullOrEmpty(_configuration["aws:dynamoDB:accessKeyId"]) &&
-           !String.IsNullOrEmpty(_configuration["aws:dynamoDB:secretAccessKey"])) 
-        {
-            ApiCacheEnable = true;
+        _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
+        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
         }
-    }
 
     public string CreateAuthToken(string pkey)
     {
@@ -120,7 +120,7 @@ public class ApiSystemHelper
 
         var putItemRequest = new PutItemRequest
         {
-            TableName = RegionTableName,
+            TableName = _regionTableName,
             Item = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue 
@@ -145,7 +145,7 @@ public class ApiSystemHelper
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = RegionTableName,
+            TableName = _regionTableName,
             Key = new Dictionary<string, AttributeValue>
             {
                     { TenantDomainKey, new AttributeValue { S = oldTenantDomain } }
@@ -166,7 +166,7 @@ public class ApiSystemHelper
 
         var request = new DeleteItemRequest
         {
-            TableName = RegionTableName,
+            TableName = _regionTableName,
             Key = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue { S = tenantDomain } }
@@ -184,7 +184,7 @@ public class ApiSystemHelper
 
         var getItemRequest = new GetItemRequest
         {
-            TableName = RegionTableName,
+            TableName = _regionTableName,
             Key = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue { S = tenantDomain } }
@@ -212,7 +212,7 @@ public class ApiSystemHelper
 
         var scanRequest = new ScanRequest
         {
-            TableName = RegionTableName,
+            TableName = _regionTableName,
             FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
                                                 {":v_tenant_domain", new AttributeValue { S =  portalName }} },
@@ -226,13 +226,10 @@ public class ApiSystemHelper
     }
 
     #endregion
+    
     private AmazonDynamoDBClient GetDynamoDBClient()
     {
-        var awsAccessKeyId = _configuration["aws:dynamoDB:accessKeyId"];
-        var awsSecretAccessKey = _configuration["aws:dynamoDB:secretAccessKey"];
-        var region = _configuration["aws:dynamoDB:region"];
-        
-        return new AmazonDynamoDBClient(awsAccessKeyId, awsSecretAccessKey, RegionEndpoint.GetBySystemName(region));
+        return new AmazonDynamoDBClient(_dynamoDbSettings.AccessKeyId, _dynamoDbSettings.SecretAccessKey, RegionEndpoint.GetBySystemName(_dynamoDbSettings.Region));
     }
     
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
@@ -264,4 +261,15 @@ public class ApiSystemHelper
         using var reader = new StreamReader(stream, Encoding.UTF8);
         return await reader.ReadToEndAsync();
     }
+}
+
+public class DynamoDbSettings
+{
+    public string AccessKeyId { get; set; }
+    public string SecretAccessKey { get; set; }
+    public string Region { get; set; }
+    public string TableName { get; set; }
+
+    public bool ApiCacheEnable => !String.IsNullOrEmpty(AccessKeyId) &&
+                                  !String.IsNullOrEmpty(SecretAccessKey);
 }

@@ -77,7 +77,7 @@ h3.Para um começo rápido, eis o que você pode fazer em ONLYOFFICE:
 
 - Usar vários addons para recursos de edição estendida.
 
-- Acesse facilmente sua nuvem pessoal via "Chrome extension":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Acesse facilmente sua nuvem pessoal via "Chrome extension":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=pt-BR".
 
 Você também pode editar documentos offline com nossos "editores desktop":"https://www.onlyoffice.com/download-desktop.aspx" gratuitos ou obter uma suite de edição móvel para seu dispositivo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
@@ -108,7 +108,7 @@ $TrulyYours</value>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Você solicitou o encerramento de sua conta em personal.onlyoffice.com. Siga o link para completar a solicitação (o link está ativo por um período de 7 dias): 
 
-Confirme o encerramento da conta
+$OrangeButton
 
 *Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente de acordo com nossa "Declaração de privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
