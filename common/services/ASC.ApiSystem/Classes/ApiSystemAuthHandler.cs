@@ -44,14 +44,13 @@ public class ApiSystemAuthHandler : CookieAuthHandler
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         SecurityContext securityContext,
         CookiesManager cookiesManager,
         IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
         AuthContext authContext,
         UserManager userManager)
-        : base(options, logger, encoder, clock, securityContext, cookiesManager, httpContextAccessor)
+        : base(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
     {
         _coreBaseSettings = coreBaseSettings;
         _authContext = authContext;
