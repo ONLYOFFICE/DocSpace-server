@@ -12,5 +12,8 @@
         <Root level="DEBUG">
             <AppenderRef ref="console" />
         </Root>
+        <AsyncLogger name="com.hazelcast" level="warn" includeLocation="true">
+            <AppenderRef ref="console" />
+        </AsyncLogger>
     </Loggers>
 </Configuration>
