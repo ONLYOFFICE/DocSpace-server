@@ -66,14 +66,14 @@ public static class ChannelExtension
             }
             finally
             {
-                foreach (var ch in outputs)
+                foreach (var output in outputs)
                 {
-                    ch.Writer.Complete();
+                    output.Writer.Complete();
                 }
             }
         });
 
-        return outputs.Select(ch => ch.Reader).ToArray();
+        return outputs.Select(output => output.Reader).ToArray();
     }
     
     public static ChannelReader<T> Merge<T>(this IEnumerable<ChannelReader<T>> inputs, CancellationToken cancellationToken = default)

@@ -1808,23 +1808,23 @@ public class UserController(ICache cache,
 
         _apiContext.SetCount(counter).SetTotalCount(await totalCountTask);
 
-        void FilterByUserType(EmployeeType employeeType, List<List<Guid>> includeGroups, List<Guid> excludeGroups)
+        void FilterByUserType(EmployeeType eType, List<List<Guid>> iGroups, List<Guid> eGroups)
         {
-            switch (employeeType)
+            switch (eType)
             {
                 case EmployeeType.DocSpaceAdmin:
-                    includeGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
+                    iGroups.Add(new List<Guid> { Constants.GroupAdmin.ID });
                     break;
                 case EmployeeType.RoomAdmin:
-                    excludeGroups.Add(Constants.GroupUser.ID);
-                    excludeGroups.Add(Constants.GroupAdmin.ID);
-                    excludeGroups.Add(Constants.GroupCollaborator.ID);
+                    eGroups.Add(Constants.GroupUser.ID);
+                    eGroups.Add(Constants.GroupAdmin.ID);
+                    eGroups.Add(Constants.GroupCollaborator.ID);
                     break;
                 case EmployeeType.Collaborator:
-                    includeGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
+                    iGroups.Add(new List<Guid> { Constants.GroupCollaborator.ID });
                     break;
                 case EmployeeType.User:
-                    includeGroups.Add(new List<Guid> { Constants.GroupUser.ID });
+                    iGroups.Add(new List<Guid> { Constants.GroupUser.ID });
                     break;
             }
         }

@@ -618,7 +618,17 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
 
                 var tenant = await tenantManager.GetCurrentTenantAsync();
 
-                new Task(async () =>
+                Action().Start();
+
+                if (ldapUserInfo.Item2.IsDisabled)
+                {
+                    logger.DebugTryGetAndSyncLdapUserInfo(login);
+                    return userInfo;
+                }
+
+                userInfo = portalUser;
+
+                async Task Action()
                 {
                     using var scope = serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
@@ -646,15 +656,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                             await cookiesManager.ResetUserCookieAsync(uInfo.Id);
                         }
                     }
-                }).Start();
-
-                if (ldapUserInfo.Item2.IsDisabled)
-                {
-                    logger.DebugTryGetAndSyncLdapUserInfo(login);
-                    return userInfo;
                 }
-
-                userInfo = portalUser;
             }
 
             return userInfo;

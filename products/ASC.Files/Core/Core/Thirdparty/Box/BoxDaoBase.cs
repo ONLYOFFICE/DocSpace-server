@@ -120,10 +120,10 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             return null;
         }
 
-        if (boxFolder is ErrorFolder)
+        if (boxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(boxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(boxFolder);
@@ -195,10 +195,10 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             return null;
         }
 
-        if (boxFile is ErrorFile)
+        if (boxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(boxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();

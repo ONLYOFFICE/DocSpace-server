@@ -84,7 +84,7 @@ public static class UserPhotoThumbnailManager
                                  width,
                                  height);
 
-        var result = mainImg.Clone(x => x.BackgroundColor(Color.White).Crop(rect).Resize(new ResizeOptions
+        var result = mainImg.Clone(img => img.BackgroundColor(Color.White).Crop(rect).Resize(new ResizeOptions
         {
             Size = size
         }));

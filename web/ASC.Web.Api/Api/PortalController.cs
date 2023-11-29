@@ -340,7 +340,7 @@ public class PortalController(ILogger<PortalController> logger,
         using var response = httpClient.Send(request);
         using var stream = response.Content.ReadAsStream();
         var bytes = new byte[stream.Length];
-        stream.Read(bytes, 0, (int)stream.Length);
+        _ = stream.Read(bytes, 0, (int)stream.Length);
 
         var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);

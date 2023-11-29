@@ -384,15 +384,15 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-            await using var tr = await filesDbContext.Database.BeginTransactionAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var tr = await dbContext.Database.BeginTransactionAsync();
 
             var folderId = (await GetProviderInfoAsync(linkId)).RootFolderId;
-            var entryIDs = await Queries.HashIdsAsync(filesDbContext, TenantID, folderId).ToListAsync();
+            var entryIDs = await Queries.HashIdsAsync(dbContext, TenantID, folderId).ToListAsync();
 
-            await Queries.DeleteDbFilesSecuritiesAsync(filesDbContext, TenantID, entryIDs);
-            await Queries.DeleteDbFilesTagLinksAsync(filesDbContext, TenantID, entryIDs);
-            await Queries.DeleteThirdpartyAccountsByLinkIdAsync(filesDbContext, TenantID, linkId);
+            await Queries.DeleteDbFilesSecuritiesAsync(dbContext, TenantID, entryIDs);
+            await Queries.DeleteDbFilesTagLinksAsync(dbContext, TenantID, entryIDs);
+            await Queries.DeleteThirdpartyAccountsByLinkIdAsync(dbContext, TenantID, linkId);
 
             await tr.CommitAsync();
         });

@@ -167,21 +167,21 @@ public class FeedController(FeedReadedDataProvider feedReadDataProvider,
 
         return new { feeds, readedDate };
 
-        async Task CheckAccessAsync<T>(T id, string module)
+        async Task CheckAccessAsync<T>(T entryId, string fModule)
         {
             FileEntry<T> entry = null;
 
-            switch (module)
+            switch (fModule)
             {
                 case Constants.RoomsModule:
                 case Constants.FoldersModule:
                     {
-                        entry = await daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+                        entry = await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
                         break;
                     }
                 case Constants.FilesModule:
                     {
-                        entry = await daoFactory.GetFileDao<T>().GetFileAsync(id);
+                        entry = await daoFactory.GetFileDao<T>().GetFileAsync(entryId);
                         break;
                     }
             }

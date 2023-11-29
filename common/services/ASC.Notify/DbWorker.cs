@@ -110,7 +110,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyS
                     });
 
 
-            await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(q=> q.SetProperty(p => p.State, (int)MailSendingState.Sending));
+            await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(entry=> entry.SetProperty(p => p.State, (int)MailSendingState.Sending));
 
             return messages;
         }

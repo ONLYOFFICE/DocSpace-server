@@ -118,9 +118,9 @@ public class BackupPortalTask(DbFactory dbFactory,
             {
                 var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
 
-                var command = connection.CreateCommand();
-                command.CommandText = "show tables";
-                var tables = ExecuteList(command).Select(r => Convert.ToString(r[0])).ToList();
+                var dbCommand = connection.CreateCommand();
+                dbCommand.CommandText = "show tables";
+                var tables = ExecuteList(dbCommand).Select(objects => Convert.ToString(objects[0])).ToList();
                 databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
             });
         }

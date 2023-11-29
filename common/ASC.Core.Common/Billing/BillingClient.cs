@@ -220,9 +220,9 @@ public class BillingClient
         {
             return productIds.Select(productId =>
             {
-                if (pricesPaymentSystem.TryGetValue(productId, out var prices))
+                if (pricesPaymentSystem.TryGetValue(productId, out var pricesByProduct))
                 {
-                    return new { ProductId = productId, Prices = prices };
+                    return new { ProductId = productId, Prices = pricesByProduct };
                 }
                 return new { ProductId = productId, Prices = new Dictionary<string, decimal>() };
             })

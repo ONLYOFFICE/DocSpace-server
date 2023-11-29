@@ -254,7 +254,7 @@ public class PhotoController(UserManager userManager,
                 await using var inputStream = userPhoto.OpenReadStream();
 
                 var br = new BinaryReader(inputStream);
-                br.Read(data, 0, (int)userPhoto.Length);
+                _ = br.Read(data, 0, (int)userPhoto.Length);
                 br.Close();
 
                 CheckImgFormat(data);

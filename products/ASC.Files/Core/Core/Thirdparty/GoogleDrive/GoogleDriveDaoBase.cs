@@ -135,10 +135,10 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
             return null;
         }
 
-        if (driveEntry is ErrorDriveEntry)
+        if (driveEntry is ErrorDriveEntry entry)
         {
             //Return error entry
-            return ToErrorFolder(driveEntry as ErrorDriveEntry);
+            return ToErrorFolder(entry);
         }
 
         if (driveEntry.MimeType != GoogleLoginProvider.GoogleDriveMimeTypeFolder)
@@ -218,10 +218,10 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
             return null;
         }
 
-        if (driveFile is ErrorDriveEntry)
+        if (driveFile is ErrorDriveEntry entry)
         {
             //Return error entry
-            return ToErrorFile(driveFile as ErrorDriveEntry);
+            return ToErrorFile(entry);
         }
 
         var file = GetFile();

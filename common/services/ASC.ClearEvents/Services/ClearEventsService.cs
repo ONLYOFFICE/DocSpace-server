@@ -103,7 +103,7 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
                 .Where(r => r.Date < DateTime.UtcNow.AddDays(-Convert.ToDouble(
                     ef.WebstudioSettings
                     .Where(a => a.TenantId == r.TenantId && a.Id == TenantAuditSettings.Guid)
-                    .Select(r => DbFunctionsExtension.JsonValue(nameof(r.Data).ToLower(), settings))
+                    .Select(dbWebstudioSettings => DbFunctionsExtension.JsonValue(nameof(dbWebstudioSettings.Data).ToLower(), settings))
                     .FirstOrDefault() ?? TenantAuditSettings.MaxLifeTime.ToString())))
                 .Take(1000);
 

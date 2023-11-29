@@ -718,8 +718,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
                 await using var inputStream = roomLogo.OpenReadStream();
 
                 var br = new BinaryReader(inputStream);
-
-                br.Read(data, 0, (int)roomLogo.Length);
+                _ = br.Read(data, 0, (int)roomLogo.Length);
                 br.Close();
 
                 UserPhotoThumbnailManager.CheckImgFormat(data);

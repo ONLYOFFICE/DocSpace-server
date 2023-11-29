@@ -663,7 +663,7 @@ public class TariffService : ITariffService
 
                 foreach (var q in tariffInfo.Quotas)
                 {
-                    await dbContext.AddOrUpdateAsync(q => q.TariffRows, new DbTariffRow
+                    await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = efTariff.Id,
                         Quota = q.Id,

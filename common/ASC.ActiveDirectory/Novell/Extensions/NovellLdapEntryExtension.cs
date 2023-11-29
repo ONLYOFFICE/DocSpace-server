@@ -74,7 +74,7 @@ public class NovellLdapEntryExtension(ILogger logger)
         return attribute?.StringValueArray;
     }
 
-    private string DecodeSid(IReadOnlyList<byte> sid)
+    private static string DecodeSid(IReadOnlyList<byte> sid)
     {
         var strSid = new StringBuilder("S-");
 

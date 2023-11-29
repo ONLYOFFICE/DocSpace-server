@@ -253,7 +253,7 @@ public class BackupWorker(IDistributedTaskQueueFactory queueFactory,
     {
         var buffer = new byte[count];
         sourceStream.Position = offset;
-        sourceStream.Read(buffer, 0, count);
+        _ = sourceStream.Read(buffer, 0, count);
         return buffer;
     }
 
@@ -284,11 +284,6 @@ public class BackupWorker(IDistributedTaskQueueFactory queueFactory,
     {
         var instanceTasks = _progressQueue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
 
-        if (_progressQueue.MaxThreadsCount >= instanceTasks.Count())
-        {
-            return false;
-        }
-
-        return true;
+        return _progressQueue.MaxThreadsCount < instanceTasks.Count();
     }
 }

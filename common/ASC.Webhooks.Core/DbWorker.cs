@@ -379,7 +379,7 @@ static file class Queries
                 new WebhooksConfigWithStatus
                 {
                     WebhooksConfig = it.configs,
-                    Status = it.logs.OrderBy(it => it.Delivery).LastOrDefault().Status
+                    Status = it.logs.OrderBy(webhooksLog => webhooksLog.Delivery).LastOrDefault().Status
                 }));
 
     public static readonly Func<WebhooksDbContext, int, IAsyncEnumerable<WebhooksConfig>> WebhooksConfigsAsync =

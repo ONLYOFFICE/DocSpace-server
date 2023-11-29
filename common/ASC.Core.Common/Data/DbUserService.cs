@@ -376,24 +376,24 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-            await using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var tr = await dbContext.Database.BeginTransactionAsync();
 
-            await Queries.DeleteAclsAsync(userDbContext, tenant, id);
-            await Queries.DeleteSubscriptionsAsync(userDbContext, tenant, id.ToString());
-            await Queries.DeleteDbSubscriptionMethodsAsync(userDbContext, tenant, id.ToString());
-            await Queries.DeleteUserPhotosAsync(userDbContext, tenant, id);
+            await Queries.DeleteAclsAsync(dbContext, tenant, id);
+            await Queries.DeleteSubscriptionsAsync(dbContext, tenant, id.ToString());
+            await Queries.DeleteDbSubscriptionMethodsAsync(dbContext, tenant, id.ToString());
+            await Queries.DeleteUserPhotosAsync(dbContext, tenant, id);
 
             if (immediate)
             {
-                await Queries.DeleteUserGroupsAsync(userDbContext, tenant, id);
-                await Queries.DeleteUsersAsync(userDbContext, tenant, id);
-                await Queries.DeleteUserSecuritiesAsync(userDbContext, tenant, id);
+                await Queries.DeleteUserGroupsAsync(dbContext, tenant, id);
+                await Queries.DeleteUsersAsync(dbContext, tenant, id);
+                await Queries.DeleteUserSecuritiesAsync(dbContext, tenant, id);
             }
             else
             {
-                await Queries.UpdateUserGroupsAsync(userDbContext, tenant, id);
-                await Queries.UpdateUsersAsync(userDbContext, tenant, id);
+                await Queries.UpdateUserGroupsAsync(dbContext, tenant, id);
+                await Queries.UpdateUsersAsync(dbContext, tenant, id);
             }
             await tr.CommitAsync();
         });
@@ -411,22 +411,22 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-            await using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var tr = await dbContext.Database.BeginTransactionAsync();
             if (immediate)
             {
-                await Queries.DeleteUserGroupsByGroupIdAsync(userDbContext, tenant, userId, groupId, refType);
+                await Queries.DeleteUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
             }
             else
             {
-                await Queries.UpdateUserGroupsByGroupIdAsync(userDbContext, tenant, userId, groupId, refType);
+                await Queries.UpdateUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
             }
 
-            var user = await Queries.UserAsync(userDbContext, tenant, userId);
+            var user = await Queries.UserAsync(dbContext, tenant, userId);
             user.LastModified = DateTime.UtcNow;
-            userDbContext.Update(user);
+            dbContext.Update(user);
 
-            await userDbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             await tr.CommitAsync();
         });
     }
@@ -653,7 +653,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 {
                     foreach (var ig in cgIncludeGroups)
                     {
-                        b = b.And(r => userDbContext.UserGroups.Any(a => !a.Removed && a.TenantId == r.TenantId && a.Userid == r.Id && ig.Any(r => r == a.UserGroupId)));
+                        b = b.And(r => userDbContext.UserGroups.Any(user => !user.Removed && user.TenantId == r.TenantId && user.Userid == r.Id && ig.Any(ug => ug == user.UserGroupId)));
                     }
                 }
 
@@ -661,7 +661,7 @@ public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
                 {
                     foreach (var eg in cgExcludeGroups)
                     {
-                        b = b.And(r => !userDbContext.UserGroups.Any(a => !a.Removed && a.TenantId == r.TenantId && a.Userid == r.Id && a.UserGroupId == eg));
+                        b = b.And(r => !userDbContext.UserGroups.Any(ug => !ug.Removed && ug.TenantId == r.TenantId && ug.Userid == r.Id && ug.UserGroupId == eg));
                     }
                 }
 

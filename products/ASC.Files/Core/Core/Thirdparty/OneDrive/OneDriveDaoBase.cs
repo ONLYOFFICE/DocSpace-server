@@ -124,10 +124,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFolder is ErrorItem)
+        if (onedriveFolder is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFolder(onedriveFolder as ErrorItem);
+            return ToErrorFolder(item);
         }
 
         if (onedriveFolder.Folder == null)
@@ -192,10 +192,10 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
             return null;
         }
 
-        if (onedriveFile is ErrorItem)
+        if (onedriveFile is ErrorItem item)
         {
             //Return error entry
-            return ToErrorFile(onedriveFile as ErrorItem);
+            return ToErrorFile(item);
         }
 
         if (onedriveFile.File == null)

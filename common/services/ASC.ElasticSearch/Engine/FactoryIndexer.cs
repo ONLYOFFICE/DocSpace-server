@@ -142,7 +142,7 @@ public class FactoryIndexer<T>(ILoggerProvider options,
         try
         {
             (var r, total) = await _indexer.SelectWithTotalAsync(expression, true);
-            result = r.Select(r => r.Id).ToList();
+            result = r.Select(entry => entry.Id).ToList();
         }
         catch (Exception e)
         {
