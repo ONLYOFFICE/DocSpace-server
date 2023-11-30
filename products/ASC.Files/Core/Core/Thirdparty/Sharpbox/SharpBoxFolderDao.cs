@@ -392,7 +392,7 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
 
                 if (DocSpaceHelper.IsRoom(folder.FolderType) && SharpBoxProviderInfo.FolderId != null)
                 {
-                    await DaoSelector.RenameProviderAsync(SharpBoxProviderInfo, newTitle);
+                    await DaoSelector.RenameRoomProviderAsync(SharpBoxProviderInfo, newTitle, newId);
                 }
             }
         }
