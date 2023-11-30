@@ -1,4 +1,5 @@
 server:
+  shutdown: graceful
   socket:
     host: ${SOCKET_SERVER_HOST:127.0.0.1}
     port: ${SOCKET_SERVER_PORT:8585}
@@ -97,6 +98,8 @@ springdoc:
     path: /api/2.0/oauth/info
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
   cloud:
     loadbalancer:
       ribbon:

@@ -1,15 +1,14 @@
 server:
+  shutdown: graceful
   host: ${SERVER_ADDRESS:127.0.0.1}
   port: ${SERVER_PORT:8080}
   servlet:
     session:
       tracking-modes: cookie
 
-docspace:
-  server:
-    url: ${DOCSPACE_ADDRESS:http://localhost:8092}
-
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
   application:
     name: ${SPRING_APPLICATION_NAME:ASC.Identity.Authorization}
   profiles:
