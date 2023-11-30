@@ -185,19 +185,6 @@ Link 7 gün ərzində etibarlıdır.
 
 E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı üçün parol dəyişikliyi sorğusu: 
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portalına daxil olmaq üçün istifadə edilən parolunuzu dəyişdirmək üçün sorğu olub.
-
-Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Bu müddət ərzində parol dəyişdirmə prosesini tamamlayın.
-
-Əgər parolunuzu dəyişmək və ya bu mesajı səhvən almaq istəmirsinizsə, zəhmət olmasa, ona məhəl qoymayın və ya əlavə məlumat üçün "${__VirtualRootPath}":"${__VirtualRootPath}" portal administratorunuzla əlaqə saxlayın.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Mobil telefon dəyişmə sorğusu
 
@@ -512,20 +499,6 @@ Link 7 gün ərzində etibarlıdır.
 *Bu brauzerdə ONLYOFFICE-a daxil olmamısınızsa, təsdiq üçün köhnə e-poçtunuzdan istifadə etməlisiniz.
 
 E-poçtunuzu dəyişmək istəmirsiniz? Sadəcə bu mesaja əhəmiyyət verməyin.</value>
-  </data>
-  <data name="pattern_personal_change_password" xml:space="preserve">
-    <value>"${__VirtualRootPath}":"${__VirtualRootPath}" portalına daxil olmaq üçün istifadə etdiyiniz parolu dəyişmək üçün sorğu olub.
-
-Şifrənizi dəyişmək üçün aşağıdakı linkə daxil olun:
-
-$OrangeButton
-
-*Qeyd*: bu link yalnız 7 gün ərzində etibarlıdır. Zəhmət olmasa, həmin müddət ərzində parol dəyişmə prosesini tamamlayın.
-
-Əgər parolunuzu dəyişmək istəmirsinizsə və ya bu e-poçt səhvən göndərilibsə, ona əhəmiyyə verməyin.
-
-Hörmətlə,
-ONLYOFFICE komandası</value>
   </data>
   <data name="pattern_personal_confirmation" xml:space="preserve">
     <value>Salam,
@@ -993,9 +966,6 @@ Link yalnız 7 gün üçün keçərli olacaq.</value>
   </data>
   <data name="subject_personal_after_registration1" xml:space="preserve">
     <value>ONLYOFFICE Personala xoş gəlmisiniz</value>
-  </data>
-  <data name="subject_personal_change_password" xml:space="preserve">
-    <value>ONLYOFFICE Personal parol yardımı</value>
   </data>
   <data name="subject_personal_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Personal. Zəhmət olmasa e-poçt ünvanınızı aktivləşdirin</value>

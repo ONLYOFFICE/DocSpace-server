@@ -85,7 +85,7 @@ public class BackupController(BackupAjaxHandler backupAjaxHandler,
         {
             Period = inDto.CronParams.Period == null ? BackupPeriod.EveryDay : (BackupPeriod)Int32.Parse(inDto.CronParams.Period),
             Hour = inDto.CronParams.Hour == null ? 0 : Int32.Parse(inDto.CronParams.Hour),
-            Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day),
+            Day = inDto.CronParams.Day == null ? 0 : Int32.Parse(inDto.CronParams.Day)
         };
 
         if (storageType == BackupStorageType.Documents)

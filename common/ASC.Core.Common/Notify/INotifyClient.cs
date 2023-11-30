@@ -31,11 +31,10 @@ public delegate void SendNoticeCallback(INotifyAction action, string objectID, I
 public interface INotifyClient
 {
     void AddInterceptor(ISendInterceptor interceptor);
-    void BeginSingleRecipientEvent(string name);
     Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription, params ITagValue[] args);
     Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, params ITagValue[] args);
     Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, string senderNames, params ITagValue[] args);
-    Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args);
+    Task SendNoticeToAsync(INotifyAction action, IRecipient recipients, string senderNames, params ITagValue[] args);
     Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, params ITagValue[] args);
-    Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, params ITagValue[] args);
+    Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args);
 }

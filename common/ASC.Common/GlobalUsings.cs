@@ -33,7 +33,6 @@ global using System.Net;
 global using System.Net.Mail;
 global using System.Reflection;
 global using System.Runtime.Loader;
-global using System.Runtime.Serialization;
 global using System.Security.Authentication;
 global using System.Security.Cryptography;
 global using System.Security.Principal;

@@ -27,6 +27,4 @@
 namespace ASC.Api.Core.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class WebhookDisableAttribute : Attribute
-{
-}
+public class WebhookDisableAttribute : Attribute;

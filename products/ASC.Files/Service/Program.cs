@@ -52,9 +52,9 @@ try
     logger.Info("Configuring web host ({applicationContext})...", AppName);
 
     builder.Host.ConfigureDefault();
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration, true, false, "search.json", "feed.json");
+        containerBuilder.Register(context.Configuration, true, false, "search.json", "feed.json");
     });
 
     var startup = new Startup(builder.Configuration, builder.Environment);

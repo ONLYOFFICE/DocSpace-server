@@ -28,7 +28,8 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.ActiveDirectory.Base;
 [Scope]
-public class LdapUserImporter(ILogger<LdapUserImporter> logger,
+public class LdapUserImporter(
+        ILogger<LdapUserImporter> logger,
         UserManager userManager,
         IConfiguration configuration,
         NovellLdapHelper novellLdapHelper,

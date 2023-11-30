@@ -822,7 +822,7 @@ public class FileMarker(TenantManager tenantManager,
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
                                     : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
 
-        totalTags = totalTags.Where(e => e != parentFolderTag).ToList();
+        totalTags = totalTags.Where(e => !Equals(e, parentFolderTag)).ToList();
 
         foreach (var e in entries)
         {

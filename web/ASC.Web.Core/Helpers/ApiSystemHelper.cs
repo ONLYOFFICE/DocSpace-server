@@ -170,7 +170,7 @@ public class ApiSystemHelper
             Key = new Dictionary<string, AttributeValue>
             {
                 { TenantDomainKey, new AttributeValue { S = tenantDomain } }
-            },
+            }
         };
 
         await awsDynamoDbClient.DeleteItemAsync(request);
@@ -195,7 +195,10 @@ public class ApiSystemHelper
 
         var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
-        if (getItemResponse.Item.Count == 0) return null;
+        if (getItemResponse.Item.Count == 0)
+        {
+            return null;
+        }
 
         // cut number suffix
         while (true)

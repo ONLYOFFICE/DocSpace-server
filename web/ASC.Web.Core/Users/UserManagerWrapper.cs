@@ -112,7 +112,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
             EmployeeType.User => Constants.GroupUser.ID,
             EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
             EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
-            _ => Guid.Empty,
+            _ => Guid.Empty
         };
 
         if (groupId != Guid.Empty)

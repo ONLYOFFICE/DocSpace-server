@@ -373,7 +373,7 @@ public class UserManager
                     user.FirstName ?? string.Empty,
                     user.Title ?? string.Empty,
                     user.Location ?? string.Empty,
-                    user.Email ?? string.Empty,
+                    user.Email ?? string.Empty
             };
             if (IsPropertiesContainsWords(properties, words))
             {
@@ -947,7 +947,7 @@ public class UserManager
 
     public async Task DeleteGroupAsync(Guid id)
     {
-        if (Constants.LostGroupInfo.Equals(id))
+        if (Constants.LostGroupInfo.ID.Equals(id))
         {
             return;
         }

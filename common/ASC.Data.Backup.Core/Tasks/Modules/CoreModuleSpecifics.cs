@@ -73,8 +73,8 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
                 new RelationInfo("core_user", "id", "feed_users", "user_id", typeof(CoreModuleSpecifics)),
 
                 new RelationInfo("files_folder", "id", "backup_schedule", "storage_base_path", typeof(FilesModuleSpecifics),
-                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"]))),
-            };
+                                 x => IsDocumentsStorageType(Convert.ToString(x["storage_type"])))
+        };
     }
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)

@@ -1785,9 +1785,6 @@ $TrulyYours</value>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Ваш ONLYOFFICE DocSpace будет удален</value>
   </data>
-  <data name="subject_personal_change_password" xml:space="preserve">
-    <value>ONLYOFFICE Personal. Помощь с паролем</value>
-  </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Узнайте о бизнес-подписке на ONLYOFFICE DocSpace</value>
   </data>

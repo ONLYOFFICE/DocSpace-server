@@ -302,12 +302,13 @@ public class NotifyEngine(Context context,
         {
             formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
-                noticeMessage, new[]
-                                       {
-                                               new TagValue(Context.SysRecipientId, request.Recipient.ID),
-                                               new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                                               new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
-                                       }
+                noticeMessage, 
+                new ITagValue[]
+               {
+                       new TagValue(Context.SysRecipientId, request.Recipient.ID),
+                       new TagValue(Context.SysRecipientName, request.Recipient.Name),
+                       new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
+               }
                 );
             //Do styling here
             if (!string.IsNullOrEmpty(pattern.Styler))

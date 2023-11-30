@@ -33,7 +33,7 @@ public class HyperLinkBlockModifier : BlockModifier
     public override string ModifyLine(string line)
     {
         line = Regex.Replace(line,
-                                @"(?<pre>[\s[{(]|" + Globals.PunctuationPattern + @")?" +       // $pre
+                                @"(?<pre>[\s[{(]|" + Globals.PunctuationPattern + ")?" +       // $pre
                                 "\"" +									// start
                                 Globals.BlockModifiersPattern +			// attributes
                                 "(?<text>[\\w\\W]+?)" +					// text

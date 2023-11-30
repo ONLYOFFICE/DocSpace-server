@@ -27,13 +27,7 @@
 namespace ASC.Web.Api.Routing;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class AllowNotPaymentAttribute : Attribute
-{
-
-}
+public class AllowNotPaymentAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class AllowSuspendedAttribute : Attribute
-{
-
-}
+public class AllowSuspendedAttribute : Attribute;

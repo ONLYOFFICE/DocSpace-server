@@ -168,9 +168,9 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region private methods
 
-    private async Task<(bool, int, object)> GetTenantAsync(SettingsModel model)
+    private async Task<(bool, int, object)> GetTenantAsync(IModel model)
     {
-        object error = null;
+        object error;
         var tenantId = -1;
 
         if (model == null)

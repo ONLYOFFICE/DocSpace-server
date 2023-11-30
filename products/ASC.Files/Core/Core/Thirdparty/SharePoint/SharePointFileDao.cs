@@ -112,8 +112,6 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                return AsyncEnumerable.Empty<File<string>>();
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -198,8 +196,6 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                yield break;
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -257,7 +253,7 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
             SortedByType.AZ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? files.OrderBy(x => x.ModifiedOn) : files.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? files.OrderBy(x => x.CreateOn) : files.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title)
         };
 
         await foreach (var f in files)

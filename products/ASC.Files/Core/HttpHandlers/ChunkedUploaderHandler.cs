@@ -261,7 +261,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
             if (queryValue.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
             return IdConverter.Convert<T>(queryValue[0]);
@@ -276,7 +276,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
             if (queryValue.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
             return IdConverter.Convert<T>(queryValue[0]);
@@ -325,7 +325,7 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
     private bool IsFileDataSet()
     {
-        return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default(T));
+        return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default);
     }
 }
 

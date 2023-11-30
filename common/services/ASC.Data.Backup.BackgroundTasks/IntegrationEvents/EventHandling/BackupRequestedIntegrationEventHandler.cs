@@ -29,22 +29,21 @@ using ASC.Data.Backup.EF.Model;
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRequestedIntegrationEventHandler(BackupAjaxHandler backupAjaxHandler,
-        ILogger<BackupRequestedIntegrationEventHandler> logger,
+public class BackupRequestedIntegrationEventHandler(
+        BackupAjaxHandler backupAjaxHandler,
+        ILogger logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
         AuthManager authManager,
         BackupWorker backupWorker)
     : IIntegrationEventHandler<BackupRequestIntegrationEvent>
 {
-    private readonly ILogger _logger = logger;
-
     public async Task Handle(BackupRequestIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
             if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
             {

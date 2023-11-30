@@ -31,7 +31,5 @@ public interface ITenantQuotaFeatureStat<T>
     Task<T> GetValueAsync();
 }
 
-public interface ITenantQuotaFeatureStat<T, T1> : ITenantQuotaFeatureStat<T1> where T : TenantQuotaFeature<T1>
-{
-}
+public interface ITenantQuotaFeatureStat<T, T1> : ITenantQuotaFeatureStat<T1> where T : TenantQuotaFeature<T1>;
 

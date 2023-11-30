@@ -26,6 +26,7 @@
 
 namespace ASC.Files.Api;
 
+[DefaultRoute("fileops")]
 public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
@@ -43,7 +44,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [AllowAnonymous]
-    [HttpPut("fileops/bulkdownload")]
+    [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
     {
         var folders = new Dictionary<JsonElement, string>();
@@ -80,7 +81,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <path>api/2.0/files/fileops/copy</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("fileops/copy")]
+    [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
         foreach (var e in await fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content))
@@ -99,7 +100,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <path>api/2.0/files/fileops/delete</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("fileops/delete")]
+    [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
         var tasks = await fileStorageService.DeleteItemsAsync("delete", inDto.FileIds.ToList(), inDto.FolderIds.ToList(), false, inDto.DeleteAfter, inDto.Immediately);
@@ -119,7 +120,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("fileops/emptytrash")]
+    [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
         var emptyTrash = await fileStorageService.EmptyTrashAsync();
@@ -140,7 +141,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [AllowAnonymous]
-    [HttpGet("fileops")]
+    [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses()
     {
         foreach (var e in fileStorageService.GetTasksStatuses())
@@ -159,7 +160,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("fileops/markasread")]
+    [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
         foreach (var e in await fileStorageService.MarkAsReadAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList()))
@@ -178,7 +179,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <path>api/2.0/files/fileops/move</path>
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
-    [HttpPut("fileops/move")]
+    [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
         foreach (var e in await fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content))
@@ -198,7 +199,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <path>api/2.0/files/fileops/move</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("fileops/move")]
+    [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
@@ -232,7 +233,7 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     /// <httpMethod>PUT</httpMethod>
     /// <collection>list</collection>
     [AllowAnonymous]
-    [HttpPut("fileops/terminate/{id?}")]
+    [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(string id = null)
     {
         var tasks = fileStorageService.TerminateTasks(id);

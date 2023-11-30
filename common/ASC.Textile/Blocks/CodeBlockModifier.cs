@@ -43,8 +43,8 @@ public class CodeBlockModifier : BlockModifier
         // Encode the contents of the "<code>" tags so that we don't
         // generate formatting out of it.
         line = NoTextileEncoder.EncodeNoTextileZones(line,
-                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + @")>)",
-                                @"(?=</code>)");
+                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + ")>)",
+                                "(?=</code>)");
         return line;
     }
 
@@ -52,8 +52,8 @@ public class CodeBlockModifier : BlockModifier
     {
         // Recode everything except "<" and ">";
         line = NoTextileEncoder.DecodeNoTextileZones(line,
-                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + @")>)",
-                                @"(?=</code>)",
+                                @"(?<=(^|\s)<code(" + Globals.HtmlAttributesPattern + ")>)",
+                                "(?=</code>)",
                                 new[] { "<", ">" });
         return line;
     }

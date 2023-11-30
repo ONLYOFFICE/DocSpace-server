@@ -63,7 +63,7 @@ internal class FilesActionMapper : IModuleActionMapper
                     { ActionType.Delete, new[] { MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied } },
                     { ActionType.UpdateAccess, new[] { MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated } },
                     { ActionType.Download, new[] {  MessageAction.FileDownloaded, MessageAction.FileDownloadedAs, MessageAction.FileRevisionDownloaded } },
-                    { ActionType.Send, new[] { MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner } },
+                    { ActionType.Send, new[] { MessageAction.FileSendAccessLink, MessageAction.FileChangeOwner } }
                 },
                 new Dictionary<ActionType, MessageAction>
                 {
@@ -76,9 +76,9 @@ internal class FilesActionMapper : IModuleActionMapper
                 EntryType.File, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Copy, new[] { MessageAction.FileCopied, MessageAction.FileCopiedWithOverwriting } },
-                    { ActionType.Move, new[] { MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting } },
+                    { ActionType.Move, new[] { MessageAction.FileMoved, MessageAction.FileMovedWithOverwriting } }
                 }
-            },
+            }
         };
 
         Actions.Add(MessageAction.DocumentSignComplete, new MessageMaps("FilesDocumentSigned", ActionType.Send, ProductType.Documents, Module, EntryType.File));
@@ -107,16 +107,16 @@ internal class FoldersActionMapper : IModuleActionMapper
                     { ActionType.Create, MessageAction.FolderCreated },
                     { ActionType.Move, MessageAction.FolderMovedToTrash },
                     { ActionType.Delete, MessageAction.FolderDeleted },
-                    { ActionType.Download, MessageAction.FolderDownloaded },
+                    { ActionType.Download, MessageAction.FolderDownloaded }
                 }
             },
             {
                 EntryType.Folder, EntryType.Folder, new Dictionary<ActionType, MessageAction[]>
                 {
                     { ActionType.Copy, new[] { MessageAction.FolderCopied, MessageAction.FolderCopiedWithOverwriting } },
-                    { ActionType.Move, new[] { MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting } },
+                    { ActionType.Move, new[] { MessageAction.FolderMoved, MessageAction.FolderMovedWithOverwriting } }
                 }
-            },
+            }
         };
     }
 }
@@ -187,7 +187,7 @@ internal class SettingsActionMapper : IModuleActionMapper
                 {
                     { ActionType.Create,  MessageAction.ThirdPartyCreated  },
                     { ActionType.Update, MessageAction.ThirdPartyUpdated },
-                    { ActionType.Delete, MessageAction.ThirdPartyDeleted },
+                    { ActionType.Delete, MessageAction.ThirdPartyDeleted }
                 }
             },
             {
@@ -197,7 +197,7 @@ internal class SettingsActionMapper : IModuleActionMapper
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
                     MessageAction.DocumentsExternalShareSettingsUpdated
                 }
-            },
+            }
         };
     }
 }

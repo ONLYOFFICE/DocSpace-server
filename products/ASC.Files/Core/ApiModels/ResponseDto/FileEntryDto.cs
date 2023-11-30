@@ -33,7 +33,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 [JsonSerializable(typeof(FileDto<string>[]))]
 [JsonSerializable(typeof(FolderDto<int>[]))]
 [JsonSerializable(typeof(FolderDto<string>[]))]
-public partial class FileEntryDtoContext : JsonSerializerContext { }
+public partial class FileEntryDtoContext : JsonSerializerContext;
 
 
 /// <summary>

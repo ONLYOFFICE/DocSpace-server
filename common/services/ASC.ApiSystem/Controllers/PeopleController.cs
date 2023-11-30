@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class PeopleController(ILogger<PeopleController> option,
+public class PeopleController(
+        ILogger option,
         HostedSolution hostedSolution,
         UserFormatter userFormatter,
         ICache cache,

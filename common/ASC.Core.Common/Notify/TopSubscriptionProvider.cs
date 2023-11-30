@@ -171,11 +171,11 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         foreach (var parent in parents)
         {
             direct = await _subscriptionProvider.GetSubscriptionsAsync(action, parent, checkSubscribe) ?? Array.Empty<string>();
-            if (recipient is IDirectRecipient)
+            if (recipient is IDirectRecipient directRecipient)
             {
                 foreach (var groupsubscr in direct)
                 {
-                    if (!objects.Contains(groupsubscr) && !await _subscriptionProvider.IsUnsubscribeAsync(recipient as IDirectRecipient, action, groupsubscr))
+                    if (!objects.Contains(groupsubscr) && !await _subscriptionProvider.IsUnsubscribeAsync(directRecipient, action, groupsubscr))
                     {
                         objects.Add(groupsubscr);
                     }

@@ -51,7 +51,7 @@ public class EmailSenderSink(INotifySender sender) : Sink
                 NoticeSendResult.TryOnceAgain => SendResult.Inprogress,
                 NoticeSendResult.MessageIncorrect => SendResult.IncorrectRecipient,
                 NoticeSendResult.SendingImpossible => SendResult.Impossible,
-                _ => SendResult.OK,
+                _ => SendResult.OK
             };
 
             return response;
@@ -78,7 +78,7 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
             ContentType = message.ContentType,
             Content = message.Body,
             SenderType = senderName,
-            CreationDate = DateTime.UtcNow,
+            CreationDate = DateTime.UtcNow
         };
 
         var tenant = await tenantManager.GetCurrentTenantAsync(false);

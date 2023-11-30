@@ -329,7 +329,7 @@ public class CookiesManager
             CookiesType.ShareLink => ShareLinkCookiesName,
             CookiesType.AnonymousSessionKey => AnonymousSessionKeyCookiesName,
             CookiesType.ConfirmKey => ConfirmCookiesName,
-            _ => string.Empty,
+            _ => string.Empty
         };
 
         var request = _httpContextAccessor.HttpContext?.Request;

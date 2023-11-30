@@ -139,7 +139,10 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
         _cancelationToken[channelName] = new CancellationTokenSource();
         _actions[channelName] = onchange;
 
-        async Task actionAsync()
+        Task.Run(ActionAsync);
+        return;
+
+        async Task ActionAsync()
         {
             var conf = new ConsumerConfig(_clientConfig)
             {
@@ -148,8 +151,8 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
 
 
             using (var adminClient = new AdminClientBuilder(_adminClientConfig)
-                .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
-                .Build())
+                       .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
+                       .Build())
             {
                 try
                 {
@@ -157,12 +160,12 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
                     await adminClient.CreateTopicsAsync(
                         new TopicSpecification[]
                         {
-                                new()
-                                {
-                                    Name = channelName,
-                                    NumPartitions = 1,
-                                    ReplicationFactor = 1
-                                }
+                            new()
+                            {
+                                Name = channelName,
+                                NumPartitions = 1,
+                                ReplicationFactor = 1
+                            }
                         });
                 }
                 catch (AggregateException) { }
@@ -206,8 +209,6 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
                 c.Close();
             }
         }
-
-        Task.Run(actionAsync);
     }
 
     public void Unsubscribe(CacheNotifyAction notifyAction)

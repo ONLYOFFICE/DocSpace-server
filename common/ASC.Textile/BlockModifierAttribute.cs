@@ -27,6 +27,4 @@
 namespace Textile;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public sealed class BlockModifierAttribute : Attribute
-{
-}
+public sealed class BlockModifierAttribute : Attribute;

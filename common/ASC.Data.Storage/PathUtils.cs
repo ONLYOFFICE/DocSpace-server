@@ -27,20 +27,12 @@
 namespace ASC.Data.Storage;
 
 [Singleton]
-public class PathUtils
+public class PathUtils(IConfiguration configuration, IHostEnvironment hostEnvironment)
 {
-    public IHostEnvironment HostEnvironment { get; }
+    private IHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
-    private readonly string _storageRoot;
-    private readonly IConfiguration _configuration;
+    private readonly string _storageRoot = configuration[Constants.StorageRootParam];
     private readonly IWebHostEnvironment _webHostEnvironment;
-
-    public PathUtils(IConfiguration configuration, IHostEnvironment hostEnvironment)
-    {
-        _configuration = configuration;
-        HostEnvironment = hostEnvironment;
-        _storageRoot = _configuration[Constants.StorageRootParam];
-    }
 
     public PathUtils(
         IConfiguration configuration,

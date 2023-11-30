@@ -29,7 +29,7 @@ namespace ASC.Data.Backup.Tasks.Modules;
 [Scope]
 public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, CoreSettings coreSettings)
 {
-    public List<IModuleSpecifics> AllModules { get; } = new List<IModuleSpecifics>
+    public IEnumerable<IModuleSpecifics> AllModules { get; } = new List<IModuleSpecifics>
         {
             new TenantsModuleSpecifics(coreSettings,helpers),
             new AuditModuleSpecifics(helpers),
@@ -48,7 +48,7 @@ public class ModuleProvider(ILogger<ModuleProvider> logger, Helpers helpers, Cor
         {
             "files" => AllModules.FirstOrDefault(m => m.ModuleName == ModuleName.Files),
             "room_logos" => RoomLogosModule,
-            _ => null,
+            _ => null
         };
     }
 }

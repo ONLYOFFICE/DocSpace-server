@@ -87,7 +87,7 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
         {
             var result = new TenantQuotaFeatureDto
             {
-                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}"),
+                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}")
             };
 
             if (feature.Paid)

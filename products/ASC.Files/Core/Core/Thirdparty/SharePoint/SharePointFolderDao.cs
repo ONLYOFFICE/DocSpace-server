@@ -137,7 +137,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
             SortedByType.AZ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? folders.OrderBy(x => x.ModifiedOn) : folders.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? folders.OrderBy(x => x.CreateOn) : folders.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? folders.OrderBy(x => x.Title) : folders.OrderByDescending(x => x.Title)
         };
 
         return folders;
@@ -227,26 +227,26 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-            var link = await Queries.TagLinksAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+            var link = await Queries.TagLinksAsync(dbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-            filesDbContext.TagLink.RemoveRange(link);
-            await filesDbContext.SaveChangesAsync();
+            dbContext.TagLink.RemoveRange(link);
+            await dbContext.SaveChangesAsync();
 
-            var tagsToRemove = await Queries.TagsAsync(filesDbContext).ToListAsync();
+            var tagsToRemove = await Queries.TagsAsync(dbContext).ToListAsync();
 
-            filesDbContext.Tag.RemoveRange(tagsToRemove);
+            dbContext.Tag.RemoveRange(tagsToRemove);
 
-            var securityToDelete = await Queries.SecuritiesAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            var securityToDelete = await Queries.SecuritiesAsync(dbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-            filesDbContext.Security.RemoveRange(securityToDelete);
-            await filesDbContext.SaveChangesAsync();
+            dbContext.Security.RemoveRange(securityToDelete);
+            await dbContext.SaveChangesAsync();
 
-            var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(filesDbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
+            var mappingToDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, _tenantId, folder.ServerRelativeUrl).ToListAsync();
 
-            filesDbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
-            await filesDbContext.SaveChangesAsync();
+            dbContext.ThirdpartyIdMapping.RemoveRange(mappingToDelete);
+            await dbContext.SaveChangesAsync();
 
             await tx.CommitAsync();
         });

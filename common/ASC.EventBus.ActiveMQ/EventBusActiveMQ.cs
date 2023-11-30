@@ -280,7 +280,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _subsManager.RemoveDynamicSubscription<TH>(eventName);
     }
 
-    private void PreProcessEvent(IntegrationEvent @event)
+    private static void PreProcessEvent(IntegrationEvent @event)
     {
         if (_rejectedEvents.Count == 0)
         {

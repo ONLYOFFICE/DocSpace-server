@@ -417,14 +417,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
             return;
         }
 
-        if (LdapMapping.ContainsKey(field))
-        {
-            LdapMapping[field] = value;
-        }
-        else
-        {
-            LdapMapping.Add(field, value);
-        }
+        LdapMapping[field] = value;
     }
 }
 

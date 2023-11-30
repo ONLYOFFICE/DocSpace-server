@@ -69,12 +69,12 @@ public sealed class ResizeWorkerItem : DistributedTask
             return true;
         }
 
-        if (obj is not ResizeWorkerItem)
+        if (obj is not ResizeWorkerItem item)
         {
             return false;
         }
 
-        return Equals((ResizeWorkerItem)obj);
+        return Equals(item);
     }
 
     public bool Equals(ResizeWorkerItem other)

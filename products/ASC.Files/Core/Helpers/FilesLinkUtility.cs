@@ -263,13 +263,22 @@ public class FilesLinkUtility
         get
         {
             GetUrlSetting(PublicUrlKey, out var isDefault);
-            if (!isDefault) return false;
+            if (!isDefault)
+            {
+                return false;
+            }
 
             GetUrlSetting(InternalUrlKey, out isDefault);
-            if (!isDefault) return false;
+            if (!isDefault)
+            {
+                return false;
+            }
 
             GetUrlSetting(PortalUrlKey, out isDefault);
-            if (!isDefault) return false;
+            if (!isDefault)
+            {
+                return false;
+            }
 
             return true;
         }

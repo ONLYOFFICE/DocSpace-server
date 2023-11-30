@@ -148,19 +148,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1.Запитване за промяна на парола за портал "${__VirtualRootPath}":"${__VirtualRootPath}"
-
-Има заявка за промяна на паролата, използвана за въвеждане на портал "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Моля, следвайте линка по-долу, за да промените паролата си:
-
-$OrangeButton
-
- * Забележка *: Тази връзка е валидна само за 7 дни. Моля, завършете процеса на промяна на паролата в рамките на този период.
-
-Ако не искате да променяте паролата си или сте получили този имейл по погрешка, моля, игнорирайте го или се свържете с администратора на портала "${__VirtualRootPath}":"${__VirtualRootPath}", за да разберете подробностите.</value>
-  </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Заявка за смяна на мобилен телефон
 
@@ -422,20 +409,6 @@ h3. За бърз старт, ето какво можете да правите
 Можете също така да редактирате документи офлайн с нашите безплатни "десктоп редактори":"https://www.onlyoffice.com/download-desktop.aspx" или да получите мобилен пакет за редакции за вашите "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" или "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" устройства.
 
 $TrulyYours</value>
-  </data>
-  <data name="pattern_personal_change_password" xml:space="preserve">
-    <value>Налице е заявка за промяна на паролата, използвана за въвеждане на портал "${__VirtualRootPath}":"${__VirtualRootPath}".
-
-Моля, следвайте линка по-долу, за да промените паролата си:
-
-$OrangeButton
-
-*Забележка*: Тази връзка е валидна само за 7 дни. Моля, завършете процеса на промяна на паролата в рамките на този период.
-
-Ако не искате да променяте паролата си или сте получили този имейл по погрешка, моля, игнорирайте го.
-
-С уважение,
-екип на ONLYOFFICE</value>
   </data>
   <data name="pattern_personal_confirmation" xml:space="preserve">
     <value>Здравейте,
@@ -737,9 +710,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_personal_after_registration1" xml:space="preserve">
     <value>Добре дошли в ONLYOFFICE Personal</value>
-  </data>
-  <data name="subject_personal_change_password" xml:space="preserve">
-    <value>ONLYOFFICE Лична помощ за пароли</value>
   </data>
   <data name="subject_personal_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Лични. Моля, активирайте имейл адреса си</value>

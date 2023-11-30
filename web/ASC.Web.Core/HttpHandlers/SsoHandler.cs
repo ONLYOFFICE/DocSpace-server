@@ -99,14 +99,14 @@ public class SsoHandlerService
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _tenantUtil = tenantUtil;
         _countPaidUserChecker = countPaidUserChecker;
-        _signatureResolver = signature =>
+        _signatureResolver = s =>
         {
-            int.TryParse(signature[^1..], out var lastSignChar);
-            signature = signature.Remove(signature.Length - 1);
+            int.TryParse(s[^1..], out var lastSignChar);
+            s = s.Remove(s.Length - 1);
 
             while (lastSignChar > 0)
             {
-                signature += "=";
+                s += "=";
                 lastSignChar--;
             }
         };
@@ -478,7 +478,7 @@ public enum MessageKey
     SsoSettingsUserTerminated,
     SsoError,
     SsoAuthFailed,
-    SsoAttributesNotFound,
+    SsoAttributesNotFound
 }
 
 public class SSOException(string message, MessageKey messageKey) : Exception(message)

@@ -27,7 +27,5 @@
 namespace ASC.Data.Storage.Encryption;
 
 [ProtoContract]
-public record EncryptionStop
-{
-}
+public record EncryptionStop;
 

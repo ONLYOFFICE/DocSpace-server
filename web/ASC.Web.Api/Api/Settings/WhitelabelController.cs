@@ -26,23 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class WhitelabelController : BaseSettingsController
-{
-    private readonly PermissionContext _permissionContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly TenantInfoSettingsHelper _tenantInfoSettingsHelper;
-    private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
-    private readonly TenantLogoManager _tenantLogoManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly IMapper _mapper;
-    private readonly CompanyWhiteLabelSettingsHelper _companyWhiteLabelSettingsHelper;
-    private readonly TenantManager _tenantManager;
-    private readonly TenantExtra _tenantExtra;
-    private readonly StorageFactory _storageFactory;
-
-    public WhitelabelController(
-        ApiContext apiContext,
+public class WhitelabelController(ApiContext apiContext,
         PermissionContext permissionContext,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
@@ -58,22 +42,8 @@ public class WhitelabelController : BaseSettingsController
         TenantManager tenantManager,
         TenantExtra tenantExtra,
         StorageFactory storageFactory)
-        : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _permissionContext = permissionContext;
-        _settingsManager = settingsManager;
-        _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
-        _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
-        _tenantLogoManager = tenantLogoManager;
-        _coreBaseSettings = coreBaseSettings;
-        _commonLinkUtility = commonLinkUtility;
-        _mapper = mapper;
-        _companyWhiteLabelSettingsHelper = companyWhiteLabelSettingsHelper;
-        _tenantManager = tenantManager;
-        _tenantExtra = tenantExtra;
-        _storageFactory = storageFactory;
-    }
-
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Saves the white label settings specified in the request.
     /// </summary>
@@ -90,7 +60,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpPost("whitelabel/save")]
     public async Task<bool> SaveWhiteLabelSettingsAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
         {
@@ -110,18 +80,18 @@ public class WhitelabelController : BaseSettingsController
 
     private async Task SaveWhiteLabelSettingsForCurrentTenantAsync(WhiteLabelRequestsDto inDto)
     {
-        var settings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         await SaveWhiteLabelSettingsForTenantAsync(settings, null, tenant.Id, inDto);
     }
 
     private async Task SaveWhiteLabelSettingsForDefaultTenantAsync(WhiteLabelRequestsDto inDto)
     {
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
-        var storage = await _storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
+        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         await SaveWhiteLabelSettingsForTenantAsync(settings, storage, Tenant.DefaultTenant, inDto);
     }
@@ -139,16 +109,16 @@ public class WhitelabelController : BaseSettingsController
                 logoDict.Add(key, new KeyValuePair<string, string>(l.Value.Light, l.Value.Dark));
             }
 
-            await _tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
+            await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
         }
 
         settings.SetLogoText(inDto.LogoText);
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        await _tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenant.Id, _tenantLogoManager);
+        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenant.Id, tenantLogoManager);
 
-        await _tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, _tenantLogoManager);
+        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
     }
 
     /// <summary>
@@ -166,7 +136,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpPost("whitelabel/savefromfiles")]
     public async Task<bool> SaveWhiteLabelSettingsFromFilesAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
@@ -191,18 +161,18 @@ public class WhitelabelController : BaseSettingsController
 
     private async Task SaveWhiteLabelSettingsFromFilesForCurrentTenantAsync()
     {
-        var settings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         await SaveWhiteLabelSettingsFromFilesForTenantAsync(settings, null, tenant.Id);
     }
 
     private async Task SaveWhiteLabelSettingsFromFilesForDefaultTenantAsync()
     {
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
 
-        var storage = await _storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
+        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         await SaveWhiteLabelSettingsFromFilesForTenantAsync(settings, storage, Tenant.DefaultTenant);
     }
@@ -215,17 +185,17 @@ public class WhitelabelController : BaseSettingsController
             {
                 GetParts(f.FileName, out var logoType, out var fileExt);
 
-                await _tenantWhiteLabelSettingsHelper.SetLogoFromStream(settings, logoType, fileExt, f.OpenReadStream(), true, storage);
+                await tenantWhiteLabelSettingsHelper.SetLogoFromStream(settings, logoType, fileExt, f.OpenReadStream(), true, storage);
             }
             else
             {
                 GetParts(f.FileName, out var logoType, out var fileExt);
 
-                await _tenantWhiteLabelSettingsHelper.SetLogoFromStream(settings, logoType, fileExt, f.OpenReadStream(), false, storage);
+                await tenantWhiteLabelSettingsHelper.SetLogoFromStream(settings, logoType, fileExt, f.OpenReadStream(), false, storage);
             }
         }
 
-        await _settingsManager.SaveAsync(settings, tenantId);
+        await settingsManager.SaveAsync(settings, tenantId);
     }
 
     private void GetParts(string fileName, out WhiteLabelLogoType logoType, out string fileExt)
@@ -255,7 +225,7 @@ public class WhitelabelController : BaseSettingsController
     {
         var isDefault = inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value;
 
-        var tenantWhiteLabelSettings = isDefault ? null : await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var tenantWhiteLabelSettings = isDefault ? null : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
         foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
         {
@@ -272,9 +242,9 @@ public class WhitelabelController : BaseSettingsController
 
             if (inQueryDto != null && inQueryDto.IsDark.HasValue)
             {
-                var path = _commonLinkUtility.GetFullAbsolutePath(isDefault
-                    ? await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, inQueryDto.IsDark.Value)
-                    : await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, inQueryDto.IsDark.Value));
+                var path = commonLinkUtility.GetFullAbsolutePath(isDefault
+                    ? await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, inQueryDto.IsDark.Value)
+                    : await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, inQueryDto.IsDark.Value));
 
                 if (inQueryDto.IsDark.Value)
                 {
@@ -293,13 +263,13 @@ public class WhitelabelController : BaseSettingsController
             }
             else
             {
-                var lightPath = _commonLinkUtility.GetFullAbsolutePath(isDefault
-                    ? await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, false)
-                    : await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, false));
+                var lightPath = commonLinkUtility.GetFullAbsolutePath(isDefault
+                    ? await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, false)
+                    : await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, false));
 
-                var darkPath = _commonLinkUtility.GetFullAbsolutePath(isDefault
-                    ? await _tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, true)
-                    : await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, true));
+                var darkPath = commonLinkUtility.GetFullAbsolutePath(isDefault
+                    ? await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, true)
+                    : await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, true));
 
                 if (lightPath == darkPath)
                 {
@@ -332,7 +302,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos()
     {
-        var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
         yield return new IsDefaultWhiteLabelLogosDto
         {
             Name = "logotext",
@@ -366,11 +336,11 @@ public class WhitelabelController : BaseSettingsController
     [HttpGet("whitelabel/logotext")]
     public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value
-            ? await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
-            : await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+            ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
+            : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
         return settings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText;
     }
@@ -391,7 +361,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpPut("whitelabel/restore")]
     public async Task<bool> RestoreWhiteLabelOptionsAsync(WhiteLabelQueryRequestsDto inQueryDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (inQueryDto != null && inQueryDto.IsDefault.HasValue && inQueryDto.IsDefault.Value)
         {
@@ -411,28 +381,28 @@ public class WhitelabelController : BaseSettingsController
 
     private async Task RestoreWhiteLabelOptionsForCurrentTenantAsync()
     {
-        var settings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         
 
         await RestoreWhiteLabelOptionsForTenantAsync(settings, null, tenant.Id);
 
-        var tenantInfoSettings = await _settingsManager.LoadAsync<TenantInfoSettings>();
-        await _tenantInfoSettingsHelper.RestoreDefaultLogoAsync(tenantInfoSettings, _tenantLogoManager);
-        await _settingsManager.SaveAsync(tenantInfoSettings);
+        var tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
+        await tenantInfoSettingsHelper.RestoreDefaultLogoAsync(tenantInfoSettings, tenantLogoManager);
+        await settingsManager.SaveAsync(tenantInfoSettings);
     }
 
     private async Task RestoreWhiteLabelOptionsForDefaultTenantAsync()
     {
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
-        var storage = await _storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
+        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
 
         await RestoreWhiteLabelOptionsForTenantAsync(settings, storage, Tenant.DefaultTenant);
     }
 
     private async Task RestoreWhiteLabelOptionsForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
     {
-        await _tenantWhiteLabelSettingsHelper.RestoreDefault(settings, _tenantLogoManager, tenantId, storage);
+        await tenantWhiteLabelSettingsHelper.RestoreDefault(settings, tenantLogoManager, tenantId, storage);
     }
 
     /// <summary>
@@ -450,13 +420,13 @@ public class WhitelabelController : BaseSettingsController
     {
         var result = new List<CompanyWhiteLabelSettings>();
 
-        var instance = await _companyWhiteLabelSettingsHelper.InstanceAsync();
+        var instance = await companyWhiteLabelSettingsHelper.InstanceAsync();
 
         result.Add(instance);
 
-        if (!_companyWhiteLabelSettingsHelper.IsDefault(instance) && !instance.IsLicensor)
+        if (!companyWhiteLabelSettingsHelper.IsDefault(instance) && !instance.IsLicensor)
         {
-            result.Add(_settingsManager.GetDefault<CompanyWhiteLabelSettings>());
+            result.Add(settingsManager.GetDefault<CompanyWhiteLabelSettings>());
         }
 
         return result;
@@ -475,7 +445,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpPost("rebranding/company")]
     public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper companyWhiteLabelSettingsWrapper)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
@@ -486,7 +456,7 @@ public class WhitelabelController : BaseSettingsController
 
         companyWhiteLabelSettingsWrapper.Settings.IsLicensor = false;
 
-        await _settingsManager.SaveForDefaultTenantAsync(companyWhiteLabelSettingsWrapper.Settings);
+        await settingsManager.SaveForDefaultTenantAsync(companyWhiteLabelSettingsWrapper.Settings);
 
         return true;
     }
@@ -504,9 +474,9 @@ public class WhitelabelController : BaseSettingsController
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
     {
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
 
-        return _mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
+        return mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>
@@ -521,13 +491,13 @@ public class WhitelabelController : BaseSettingsController
     [HttpDelete("rebranding/company")]
     public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        var defaultSettings = _settingsManager.GetDefault<CompanyWhiteLabelSettings>();
+        var defaultSettings = settingsManager.GetDefault<CompanyWhiteLabelSettings>();
 
-        await _settingsManager.SaveForDefaultTenantAsync(defaultSettings);
+        await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
         return defaultSettings;
     }
@@ -545,7 +515,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpPost("rebranding/additional")]
     public async Task<bool> SaveAdditionalWhiteLabelSettingsAsync(AdditionalWhiteLabelSettingsWrapper wrapper)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
@@ -554,7 +524,7 @@ public class WhitelabelController : BaseSettingsController
             throw new ArgumentNullException("settings");
         }
 
-        await _settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
+        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
         return true;
     }
@@ -572,9 +542,9 @@ public class WhitelabelController : BaseSettingsController
     [HttpGet("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettingsDto> GetAdditionalWhiteLabelSettingsAsync()
     {
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
-        return _mapper.Map<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>(settings);
+        return mapper.Map<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>
@@ -589,13 +559,13 @@ public class WhitelabelController : BaseSettingsController
     [HttpDelete("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        var defaultSettings = _settingsManager.GetDefault<AdditionalWhiteLabelSettings>();
+        var defaultSettings = settingsManager.GetDefault<AdditionalWhiteLabelSettings>();
 
-        await _settingsManager.SaveForDefaultTenantAsync(defaultSettings);
+        await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
         return defaultSettings;
     }
@@ -613,13 +583,13 @@ public class WhitelabelController : BaseSettingsController
     [HttpPost("rebranding/mail")]
     public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettings settings)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
         ArgumentNullException.ThrowIfNull(settings);
 
-        await _settingsManager.SaveForDefaultTenantAsync(settings);
+        await settingsManager.SaveForDefaultTenantAsync(settings);
 
         return true;
     }
@@ -637,15 +607,15 @@ public class WhitelabelController : BaseSettingsController
     [HttpPut("rebranding/mail")]
     public async Task<bool> UpdateMailWhiteLabelSettings(MailWhiteLabelSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
 
         settings.FooterEnabled = inDto.FooterEnabled;
 
-        await _settingsManager.SaveForDefaultTenantAsync(settings);
+        await settingsManager.SaveForDefaultTenantAsync(settings);
 
         return true;
     }
@@ -662,7 +632,7 @@ public class WhitelabelController : BaseSettingsController
     [HttpGet("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> GetMailWhiteLabelSettingsAsync()
     {
-        return await _settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
+        return await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
     }
 
     /// <summary>
@@ -677,13 +647,13 @@ public class WhitelabelController : BaseSettingsController
     [HttpDelete("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettingsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        var defaultSettings = _settingsManager.GetDefault<MailWhiteLabelSettings>();
+        var defaultSettings = settingsManager.GetDefault<MailWhiteLabelSettings>();
 
-        await _settingsManager.SaveForDefaultTenantAsync(defaultSettings);
+        await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
         return defaultSettings;
     }
@@ -700,14 +670,14 @@ public class WhitelabelController : BaseSettingsController
     [HttpGet("enableWhitelabel")]
     public async Task<bool> GetEnableWhitelabelAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return _coreBaseSettings.Standalone || _tenantLogoManager.WhiteLabelEnabled && await _tenantLogoManager.GetWhiteLabelPaidAsync();
+        return coreBaseSettings.Standalone || tenantLogoManager.WhiteLabelEnabled && await tenantLogoManager.GetWhiteLabelPaidAsync();
     }
 
     private async Task DemandWhiteLabelPermissionAsync()
     {
-        if (!_coreBaseSettings.Standalone && (!_tenantLogoManager.WhiteLabelEnabled || !await _tenantLogoManager.GetWhiteLabelPaidAsync()))
+        if (!coreBaseSettings.Standalone && (!tenantLogoManager.WhiteLabelEnabled || !await tenantLogoManager.GetWhiteLabelPaidAsync()))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "WhiteLabel");
         }
@@ -715,9 +685,9 @@ public class WhitelabelController : BaseSettingsController
 
     private async Task DemandRebrandingPermissionAsync()
     {
-        await _tenantExtra.DemandAccessSpacePermissionAsync();
+        await tenantExtra.DemandAccessSpacePermissionAsync();
 
-        if (_coreBaseSettings.CustomMode)
+        if (coreBaseSettings.CustomMode)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

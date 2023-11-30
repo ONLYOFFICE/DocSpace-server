@@ -271,7 +271,7 @@ public static class DocumentService
         var body = new CommandBody
         {
             Command = method,
-            Key = documentRevisionId,
+            Key = documentRevisionId
         };
 
         if (!string.IsNullOrEmpty(callbackUrl))
@@ -413,7 +413,7 @@ public static class DocumentService
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
 
-        string dataResponse = null;
+        string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
@@ -524,7 +524,7 @@ public static class DocumentService
             NotModify = 4,
             UnknownCommand = 5,
             Token = 6,
-            TokenExpire = 7,
+            TokenExpire = 7
         }
 
         [DebuggerDisplay("{BuildVersion}")]
@@ -836,7 +836,7 @@ public static class DocumentService
                 ErrorCode.Convert => "convertation",
                 ErrorCode.ConvertTimeout => "convertation timeout",
                 ErrorCode.Unknown => "unknown error",
-                _ => "errorCode = " + errorCode,
+                _ => "errorCode = " + errorCode
             };
             throw new DocumentServiceException(code, errorMessage);
         }

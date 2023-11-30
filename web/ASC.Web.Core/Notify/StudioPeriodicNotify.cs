@@ -336,11 +336,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     await client.SendNoticeToAsync(
                         action,
-                        new[] { u },
-                        new[] { senderName },
+                        u,
+                        senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
                         new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                            new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
+                        new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
@@ -482,11 +482,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     await client.SendNoticeToAsync(
                         action,
-                        new[] { u },
-                        new[] { senderName },
+                        u,
+                        senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
-                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                            new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
+                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()), 
+                        new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, UserControlsCommonResource.TariffPerMonth),
                         new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
@@ -563,8 +563,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         await client.SendNoticeToAsync(
                             await userManager.IsDocSpaceAdminAsync(u) ? Actions.OpensourceAdminDocsTipsV1 : Actions.OpensourceUserDocsTipsV1,
-                            new[] { u },
-                            new[] { senderName },
+                            u,
+                            senderName,
                             new TagValue(CommonTags.Culture, culture.Name),
                             new TagValue(Tags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
@@ -658,13 +658,12 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     await client.SendNoticeToAsync(
                       action,
-                      null,
-                         await studioNotifyHelper.RecipientFromEmailAsync(user.Email, true),
+                      await studioNotifyHelper.RecipientFromEmailAsync(user.Email, true),
                       new[] { senderName },
                       TagValues.PersonalHeaderStart(),
                       TagValues.PersonalHeaderEnd(),
                       TagValues.OrangeButton(orangeButtonText, orangeButtonUrl),
-                          new TagValue(CommonTags.Footer, coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"));
+                      new TagValue(CommonTags.Footer, coreBaseSettings.CustomMode ? "personalCustomMode" : "personal"));
                 }
 
                 _log.InformationTotalSendCount(sendCount);

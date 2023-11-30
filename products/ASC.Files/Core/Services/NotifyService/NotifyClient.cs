@@ -300,7 +300,7 @@ public class NotifyClient(WorkContext notifyContext,
             FileShare.Review => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_Review", cultureInfo),
             FileShare.FillForms => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_FillForms", cultureInfo),
             FileShare.Comment => FilesCommonResource.ResourceManager.GetString("AceStatusEnum_Comment", cultureInfo),
-            _ => string.Empty,
+            _ => string.Empty
         };
     }
 }

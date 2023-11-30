@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapHelperLogger
+internal static partial class LdapHelperLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "UserExistsInGroup() failed")]
     public static partial void ErrorUserExistsInGroupFailed(this ILogger<LdapHelper> logger, Exception exception);

@@ -31,7 +31,7 @@ public enum EditorType
 {
     Desktop,
     Mobile,
-    Embedded,
+    Embedded
 }
 
 /// <summary>
@@ -443,7 +443,7 @@ public class EditorConfiguration<T>
             User = new UserConfig
             {
                 Id = _userInfo.Id.ToString(),
-                Name = _userInfo.DisplayUserName(false, displayUserSettingsHelper),
+                Name = _userInfo.DisplayUserName(false, displayUserSettingsHelper)
             };
         }
     }
@@ -647,12 +647,11 @@ public class FileReferenceData<T>
 #endregion Nested Classes
 
 [Transient]
-public class CustomerConfig<T>(SettingsManager settingsManager,
+public class CustomerConfig<T>(
+    SettingsManager settingsManager,
     BaseCommonLinkUtility baseCommonLinkUtility,
     TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
 {
-    private Configuration<T> _configuration;
-
     public string Address => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Address;
 
     public string Logo => baseCommonLinkUtility.GetFullAbsolutePath(tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false).Result);
@@ -665,7 +664,6 @@ public class CustomerConfig<T>(SettingsManager settingsManager,
 
     internal void SetConfiguration(Configuration<T> configuration)
     {
-        _configuration = configuration;
     }
 }
 
@@ -745,7 +743,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
             {
                 return new GobackConfig
                 {
-                    Url = GobackUrl,
+                    Url = GobackUrl
                 };
             }
 
@@ -761,7 +759,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
                     {
                         return new GobackConfig
                         {
-                            Url = pathProvider.GetFolderUrlByIdAsync(globalFolderHelper.FolderShareAsync.Result).Result,
+                            Url = pathProvider.GetFolderUrlByIdAsync(globalFolderHelper.FolderShareAsync.Result).Result
                         };
                     }
 
@@ -777,7 +775,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
 
                 return new GobackConfig
                 {
-                    Url = pathProvider.GetFolderUrlAsync(parent).Result,
+                    Url = pathProvider.GetFolderUrlAsync(parent).Result
                 };
             }
             catch (Exception)

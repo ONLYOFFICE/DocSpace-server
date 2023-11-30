@@ -84,7 +84,7 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
                 return item;
             }
         }
-        return default(T);
+        return default;
     }
 
     public virtual Stream Serialize()
@@ -100,26 +100,24 @@ public class CommonChunkedUploadSession(long bytesTotal) : ICloneable
         {
             if (item.Value != null)
             {
-                if (item.Value is JsonElement)
+                if (item.Value is JsonElement value)
                 {
-                    var value = (JsonElement)item.Value;
-
                     switch (value.ValueKind)
                     {
                         case JsonValueKind.String:
-                            newItems.Add(item.Key, item.Value.ToString());
+                            newItems.Add(item.Key, value.ToString());
                             break;
                         case JsonValueKind.Number:
-                            newItems.Add(item.Key, Int32.Parse(item.Value.ToString()));
+                            newItems.Add(item.Key, Int32.Parse(value.ToString()));
                             break;
                         case JsonValueKind.Array:
                             newItems.Add(item.Key, value.EnumerateArray().Select(o => o.ToString()).ToList());
                             break;
                         case JsonValueKind.Object:
-                            newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(item.Value.ToString()));
+                            newItems.Add(item.Key, JsonSerializer.Deserialize<Dictionary<int, string>>(value.ToString()));
                             break;
                         default:
-                            newItems.Add(item.Key, item.Value);
+                            newItems.Add(item.Key, value);
                             break;
                     }
                 }

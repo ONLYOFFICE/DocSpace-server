@@ -281,7 +281,6 @@ public class BaseIndexer<T>(Client client,
                             doc.Document.Data = null;
                             doc.Document = null;
                         }
-                        doc = null;
                     }
 
                     portionStart = i;

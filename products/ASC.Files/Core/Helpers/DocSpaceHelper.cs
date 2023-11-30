@@ -49,7 +49,7 @@ public static class DocSpaceHelper
             FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
-            _ => null,
+            _ => null
         };
     }
 

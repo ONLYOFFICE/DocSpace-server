@@ -135,7 +135,7 @@ public class Metadata(IConfiguration configuration)
         Password = password;
 
         Prefix = Encoding.UTF8.GetBytes(prefixString);
-        Version = new byte[versionLength] { version };
+        Version = new[] { version };
         Size = LongToByteArray(fileSize);
 
         Salt = GenerateRandom(saltLength);
@@ -153,28 +153,55 @@ public class Metadata(IConfiguration configuration)
         try
         {
             var readed = stream.Read(Prefix, 0, prefixLength);
-            if (readed < prefixLength) return false;
+            if (readed < prefixLength)
+            {
+                return false;
+            }
 
-            if (Encoding.UTF8.GetString(Prefix) != prefixString) return false;
+            if (Encoding.UTF8.GetString(Prefix) != prefixString)
+            {
+                return false;
+            }
 
             readed = stream.Read(Version, 0, versionLength);
-            if (readed < versionLength) return false;
+            if (readed < versionLength)
+            {
+                return false;
+            }
 
-            if (Version[0] != cryptVersion) return false;
+            if (Version[0] != cryptVersion)
+            {
+                return false;
+            }
 
             readed = stream.Read(Size, 0, sizeLength);
-            if (readed < sizeLength) return false;
+            if (readed < sizeLength)
+            {
+                return false;
+            }
 
-            if (ByteArrayToLong(Size) < 0) return false;
+            if (ByteArrayToLong(Size) < 0)
+            {
+                return false;
+            }
 
             readed = stream.Read(Salt, 0, saltLength);
-            if (readed < saltLength) return false;
+            if (readed < saltLength)
+            {
+                return false;
+            }
 
             readed = stream.Read(HmacHash, 0, hmacHashLength);
-            if (readed < hmacHashLength) return false;
+            if (readed < hmacHashLength)
+            {
+                return false;
+            }
 
             readed = stream.Read(IV, 0, ivLength);
-            if (readed < ivLength) return false;
+            if (readed < ivLength)
+            {
+                return false;
+            }
 
             return true;
         }
@@ -289,7 +316,9 @@ public class Metadata(IConfiguration configuration)
         var result = BitConverter.GetBytes(value);
 
         if (!BitConverter.IsLittleEndian)
+        {
             Array.Reverse(result);
+        }
 
         return result;
     }
@@ -297,7 +326,9 @@ public class Metadata(IConfiguration configuration)
     private long ByteArrayToLong(byte[] value)
     {
         if (!BitConverter.IsLittleEndian)
+        {
             Array.Reverse(value);
+        }
 
         try
         {

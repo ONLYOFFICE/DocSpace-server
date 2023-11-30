@@ -353,7 +353,7 @@ internal abstract class ThirdPartyProviderDao
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT,
+            _ => FolderType.DEFAULT
         };
 
         return rooms.Where(f => f.FolderType == typeFilter);

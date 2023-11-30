@@ -34,16 +34,8 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class ModulesController : ControllerBase
+public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : ControllerBase
 {
-    private readonly WebItemManagerSecurity _webItemManagerSecurity;
-
-    public ModulesController(
-        WebItemManagerSecurity webItemManagerSecurity)
-    {
-        _webItemManagerSecurity = webItemManagerSecurity;
-    }
-
     /// <summary>
     /// Returns a list of all the portal modules.
     /// </summary>
@@ -59,7 +51,7 @@ public class ModulesController : ControllerBase
     {
         var result = new List<string>();
 
-        foreach (var a in _webItemManagerSecurity.GetItems(WebZoneType.StartProductList))
+        foreach (var a in webItemManagerSecurity.GetItems(WebZoneType.StartProductList))
         {
             result.Add(a.ApiURL);
         }
@@ -80,7 +72,7 @@ public class ModulesController : ControllerBase
     [HttpGet("info")]
     public IEnumerable<Module> GetAllWithInfo()
     {
-        foreach (var a in _webItemManagerSecurity.GetItems(WebZoneType.StartProductList))
+        foreach (var a in webItemManagerSecurity.GetItems(WebZoneType.StartProductList))
         {
             if (a is Product product)
             {

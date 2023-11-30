@@ -107,7 +107,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await userManager.GetUserByEmailAsync(email);
-                if(userInfo == Constants.LostUser || userInfo.Id != uiD)
+                if(Equals(userInfo, Constants.LostUser) || userInfo.Id != uiD)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
@@ -138,7 +138,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             case ConfirmType.ProfileRemove:
                 // validate UiD
                 var user = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (user == null || user == Constants.LostUser || user.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
+                if (user == null || Equals(user, Constants.LostUser) || user.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD)
                 {
                     return ValidationResult.Invalid;
                 }

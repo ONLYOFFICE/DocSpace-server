@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Notify.Recipients;
+
 namespace ASC.Data.Backup;
 
 [Scope]
@@ -65,8 +67,8 @@ public class NotifyHelper(UserManager userManager,
 
         await client.SendNoticeToAsync(
             Actions.BackupCreated,
-            new[] { user },
-            new[] { StudioNotifyService.EMailSenderName },
+            user,
+            StudioNotifyService.EMailSenderName,
             new TagValue(Tags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
             TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
     }
@@ -87,9 +89,9 @@ public class NotifyHelper(UserManager userManager,
             var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
 
             await client.SendNoticeToAsync(
-                Actions.RestoreStarted,
-                new[] { user },
-                new[] { StudioNotifyService.EMailSenderName },
+                Actions.RestoreStarted, 
+                user,
+                StudioNotifyService.EMailSenderName,
                 TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
         }
     }
@@ -113,8 +115,8 @@ public class NotifyHelper(UserManager userManager,
 
             await client.SendNoticeToAsync(
                 Actions.RestoreCompletedV115,
-                new[] { user },
-                new[] { StudioNotifyService.EMailSenderName },
+                user,
+                StudioNotifyService.EMailSenderName,
                 TagValues.OrangeButton(orangeButtonText, confirmationUrl));
         }
     }
@@ -134,7 +136,7 @@ public class NotifyHelper(UserManager userManager,
         if (users.Any())
         {
             var args = await CreateArgsAsync(region, url);
-            if (action == Actions.MigrationPortalSuccessV115)
+            if (action.Equals(Actions.MigrationPortalSuccessV115))
             {
                 foreach (var user in users)
                 {
@@ -153,8 +155,7 @@ public class NotifyHelper(UserManager userManager,
 
                     await client.SendNoticeToAsync(
                         action,
-                        null,
-                        new[] { user },
+                        new IRecipient[] { user },
                         new[] { StudioNotifyService.EMailSenderName },
                         currentArgs.ToArray());
                 }
@@ -163,8 +164,7 @@ public class NotifyHelper(UserManager userManager,
             {
                 await client.SendNoticeToAsync(
                     action,
-                    null,
-                    users,
+                    users.Cast<IRecipient>().ToArray(),
                     new[] { StudioNotifyService.EMailSenderName },
                     args.ToArray());
             }

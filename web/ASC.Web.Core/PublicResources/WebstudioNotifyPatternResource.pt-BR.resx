@@ -991,9 +991,6 @@ O link só é válido por 7 dias.</value>
   <data name="subject_personal_after_registration1" xml:space="preserve">
     <value>Bem vindo ao ONLYOFFICE Pessoal</value>
   </data>
-  <data name="subject_personal_change_password" xml:space="preserve">
-    <value>Assistência de senha pessoal ONLYOFFICE</value>
-  </data>
   <data name="subject_personal_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Pessoal. Por favor, ative seu email</value>
   </data>

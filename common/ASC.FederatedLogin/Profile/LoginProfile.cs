@@ -240,14 +240,7 @@ public class LoginProfile
 
         if (!string.IsNullOrEmpty(value))
         {
-            if (_fields.ContainsKey(name))
-            {
-                _fields[name] = value;
-            }
-            else
-            {
-                _fields.Add(name, value);
-            }
+            _fields[name] = value;
         }
         else
         {

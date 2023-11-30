@@ -43,7 +43,7 @@ public class PortalController(IConfiguration configuration,
         UserFormatter userFormatter,
         UserManagerWrapper userManagerWrapper,
         CommonConstants commonConstants,
-        ILogger<PortalController> option,
+        ILogger option,
         TimeZonesProvider timeZonesProvider,
         TimeZoneConverter timeZoneConverter,
         PasswordHasher passwordHasher,
@@ -490,7 +490,7 @@ public class PortalController(IConfiguration configuration,
 
     private async ValueTask<(bool, object)> CheckExistingNamePortalAsync(string portalName)
     {
-        object error = null;
+        object error;
         if (string.IsNullOrEmpty(portalName))
         {
             error = new { error = "portalNameEmpty", message = "PortalName is required" };

@@ -102,7 +102,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
                 await globalFolder.GetFolderCommonAsync(daoFactory),
                 await globalFolder.GetFolderShareAsync(daoFactory),
                 await globalFolder.GetFolderProjectsAsync(daoFactory),
-                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory),
+                await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)
             };
 
         if (await PrivacyRoomSettings.GetEnabledAsync(settingsManager))

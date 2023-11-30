@@ -134,8 +134,7 @@ static file class Queries
                     .Where(r => r.Subject == subject)
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
-                    .Where(r => r.AceType == aceType)
-                    .Any());
+                    .Any(r => r.AceType == aceType));
 
     public static readonly Func<UserDbContext, int, Guid, Guid, string, AceType, Task<Acl>> AclAsync =
         EF.CompileAsyncQuery(
@@ -145,6 +144,5 @@ static file class Queries
                     .Where(r => r.Subject == subject)
                     .Where(r => r.Action == action)
                     .Where(r => r.Object == obj)
-                    .Where(r => r.AceType == aceType)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.AceType == aceType));
 }

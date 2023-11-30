@@ -75,7 +75,7 @@ public class PreFormatterState(TextileFormatter f) : FormatterState(f)
             return true;
         }
 
-        if (Regex.IsMatch(input, @"</pre>"))
+        if (Regex.IsMatch(input, "</pre>"))
         {
             _fakeNestingDepth--;
         }

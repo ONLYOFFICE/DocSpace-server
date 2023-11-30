@@ -216,7 +216,7 @@ public class DIHelper()
             if (di.Additional != null)
             {
                 var m = di.Additional.GetMethod("Register", BindingFlags.Public | BindingFlags.Static);
-                m.Invoke(null, new[] { this });
+                m.Invoke(null, new object[] { this });
             }
 
             if (!service.IsInterface || implementation != null)

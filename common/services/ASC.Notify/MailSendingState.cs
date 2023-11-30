@@ -32,5 +32,5 @@ public enum MailSendingState
     Sending,
     Sended,
     Error,
-    FatalError,
+    FatalError
 }

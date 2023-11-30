@@ -128,10 +128,10 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
             return null;
         }
 
-        if (dropboxFolder is ErrorFolder)
+        if (dropboxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(dropboxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(dropboxFolder);
@@ -200,10 +200,10 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
             return null;
         }
 
-        if (dropboxFile is ErrorFile)
+        if (dropboxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(dropboxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();

@@ -40,6 +40,6 @@ public class TenantQuotaFeatureStatHelper(IServiceProvider serviceProvider)
             return (name, await statisticProvider.GetValueAsync());
         }
 
-        return (name, default(T1));
+        return (name, default);
     }
 }
