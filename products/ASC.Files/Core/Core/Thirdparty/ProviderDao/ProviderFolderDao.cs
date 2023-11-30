@@ -203,12 +203,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public IAsyncEnumerable<Folder<string>> GetParentFoldersAsync(string folderId)
     {
+        if (string.IsNullOrEmpty(folderId))
+        {
+            return AsyncEnumerable.Empty<Folder<string>>();
+        }
+        
         var selector = _selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
 
         return folderDao.GetParentFoldersAsync(selector.ConvertId(folderId));
     }
-
 
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
