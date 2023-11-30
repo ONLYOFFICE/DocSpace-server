@@ -163,19 +163,19 @@
             &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Need tech help?&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Sales Questions&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Order Demo&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Precisa de ajuda técnica?&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Perguntas de vendas&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Demonstração de pedido&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
-              &lt;a href="%SUPPORTURL%" target="_blank" style="color: #333;"&gt;Send your question&lt;/a&gt;
+              &lt;a href="%SUPPORTURL%" target="_blank" style="color: #333;"&gt;Envie sua pergunta&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
-              &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt;Email us&lt;/a&gt;
+              &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt;Envia-nos um email&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;Enviar um pedido&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
@@ -193,26 +193,24 @@
             &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Need tech help?&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Sales Questions&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Order Demo&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Precisa de ajuda técnica?&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Perguntas de vendas&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Demonstração de pedido&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
-              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;Ask the Community&lt;/a&gt;
+              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;Pergunte à comunidade&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
-              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Email us&lt;/a&gt;
+              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Envia-nos um email&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Enviar um pedido&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Este email foi gerado automaticamente e não precisa de responder ao mesmo.&lt;br /&gt;Recebeu este email porque é um utilizador registado do &lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Clique aqui para cancelar a subscrição aos emails de notificação do DocSpace: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; Cancelar assinatura&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>Para qualquer dúvida sobre compras, envie-nos um e-mail para&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; Em caso de problemas técnicos entre em contato com nosso &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/pt/support-contact-form.aspx"&gt;equipe de suporte&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Clique aqui para cancelar a inscrição&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

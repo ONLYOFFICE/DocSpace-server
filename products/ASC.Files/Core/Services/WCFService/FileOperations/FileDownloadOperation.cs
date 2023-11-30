@@ -1,43 +1,38 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
-internal class FileDownloadOperationData<T> : FileOperationData<T>
-{
-    public Dictionary<T, string> FilesDownload { get; }
-    public IDictionary<string, StringValues> Headers { get; }
-
-    public FileDownloadOperationData(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant, IDictionary<string, StringValues> headers,
+internal class FileDownloadOperationData<T>(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant,
+        IDictionary<string, StringValues> headers,
         ExternalShareData externalShareData, bool holdResult = true)
-        : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
-    {
-        FilesDownload = files;
-        Headers = headers;
-    }
+    : FileOperationData<T>(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
+{
+    public Dictionary<T, string> FilesDownload { get; } = files;
+    public IDictionary<string, StringValues> Headers { get; } = headers;
 }
 
 [Transient]
@@ -92,7 +87,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 }
                 else
                 {
-                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd"), archiveExtension);
+                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
             var store = await globalStore.GetStoreAsync();
@@ -315,7 +310,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, true));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true));
 
             await foreach (var file in files)
             {
@@ -460,7 +455,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path.Substring(path.LastIndexOf('/'));
+            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
             entriesPathId.Add(newtitle, ids);
         }
     }

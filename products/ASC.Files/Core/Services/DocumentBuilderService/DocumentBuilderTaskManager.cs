@@ -26,10 +26,10 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-[Singletone(Additional = typeof(DocumentBuilderTaskManagerHelperExtention))]
+[Singleton(Additional = typeof(DocumentBuilderTaskManagerHelperExtention))]
 public class DocumentBuilderTaskManager
 {
-    private readonly object _synchRoot = new object();
+    private readonly object _synchRoot = new();
 
     private readonly DistributedTaskQueue _queue;
 
@@ -71,7 +71,7 @@ public class DocumentBuilderTaskManager
         {
             var task = GetTask(newTask.Id);
 
-            if (task != null && task.IsCompleted)
+            if (task is { IsCompleted: true })
             {
                 _queue.DequeueTask(task.Id);
                 task = null;

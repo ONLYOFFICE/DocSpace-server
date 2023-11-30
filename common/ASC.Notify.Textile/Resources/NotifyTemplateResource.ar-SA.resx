@@ -131,19 +131,19 @@
             &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Need tech help?&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Sales Questions&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Order Demo&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;هل تريد مساعدة تقنية؟&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;أسئلة المبيعات&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;طلب تجريبي&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
-              &lt;a href="%SUPPORTURL%" target="_blank" style="color: #333;"&gt;Send your question&lt;/a&gt;
+              &lt;a href="%SUPPORTURL%" target="_blank" style="color: #333;"&gt; أرسل سؤالك&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
-              &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt;Email us&lt;/a&gt;
+              &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt; تواصل معنا عبر الايميل&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt; أرسل طلب&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
@@ -161,19 +161,19 @@
             &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Need tech help?&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Sales Questions&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Order Demo&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;هل تريد مساعدة تقنية؟&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;أسئلة المبيعات&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;طلب تجريبي&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
-              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;Ask the Community&lt;/a&gt;
+              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;اسأل المجتمع&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
-              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Email us&lt;/a&gt;
+              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt; تواصل معنا عبر الايميل&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;أرسل طلب&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
@@ -239,9 +239,7 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>تم ارسال هذا البريد بشكل آلي ولا يجب عليك الرد عليه..&lt;br /&gt;لقد تلقيت هذا البريد لأنك مستخدم مسجل في&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; اضغط هنا لإلغاء الاشتراك من خدمة اشعارات : &lt;a DocSpace  href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;إلغاء الاشتراك &lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>لأي استفسارات بخصوص الدفع، قم بمراسلتنا على &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; في حال واجهتك أي مشاكل تقنية تواصل مع &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;فريق الدعم&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;اضغط هنا لإلغاء الاشتراك&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

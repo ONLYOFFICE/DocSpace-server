@@ -24,71 +24,45 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Reflection;
+
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Scope]
-public class DocumentBuilderScriptHelper
+public class DocumentBuilderScriptHelper(UserManager userManager,
+    IDaoFactory daoFactory,
+    EntryManager entryManager,
+    SettingsManager settingsManager,
+    TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+    CommonLinkUtility commonLinkUtility,
+    FilesLinkUtility filesLinkUtility,
+    FileUtility fileUtility,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    PathProvider pathProvider,
+    BreadCrumbsManager breadCrumbsManager)
 {
-    private readonly UserManager _userManager;
-    private readonly IDaoFactory _daoFactory;
-    private readonly EntryManager _entryManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly TenantWhiteLabelSettingsHelper _tenantWhiteLabelSettingsHelper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly FileUtility _fileUtility;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly PathProvider _pathProvider;
-    private readonly BreadCrumbsManager _breadCrumbsManager;
-
-    public DocumentBuilderScriptHelper(
-        UserManager userManager,
-        IDaoFactory daoFactory,
-        EntryManager entryManager,
-        SettingsManager settingsManager,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        CommonLinkUtility commonLinkUtility,
-        FilesLinkUtility filesLinkUtility,
-        FileUtility fileUtility,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        PathProvider pathProvider,
-        BreadCrumbsManager breadCrumbsManager)
-    {
-        _userManager = userManager;
-        _daoFactory = daoFactory;
-        _entryManager = entryManager;
-        _settingsManager = settingsManager;
-        _tenantWhiteLabelSettingsHelper = tenantWhiteLabelSettingsHelper;
-        _commonLinkUtility = commonLinkUtility;
-        _filesLinkUtility = filesLinkUtility;
-        _fileUtility = fileUtility;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _pathProvider = pathProvider;
-        _breadCrumbsManager = breadCrumbsManager;
-    }
-
     private async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(Guid userId, T roomId)
     {
-        var user = await _userManager.GetUsersAsync(userId);
+        var user = await userManager.GetUsersAsync(userId);
 
-        var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
+        var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
 
         var outputFileName = $"{room.Title}_{FilesCommonResource.RoomIndex_Index.ToLowerInvariant()}.xlsx";
 
         //TODO: think about loop by N
-        var (entries, total) = await _entryManager.GetEntriesAsync(room, 0, -1, FilterType.None, false, Guid.Empty, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+        var (entries, _) = await entryManager.GetEntriesAsync(room, 0, -1, FilterType.None, false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
 
-        var typedEntries = entries.OfType<FileEntry<T>>();
+        var typedEntries = entries.OfType<FileEntry<T>>().ToList();
 
         var foldersIndex = await GetFoldersIndex(roomId, typedEntries);
 
-        var customColorThemesSettings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
+        var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
 
-        var tenantWhiteLabelSettings = await _settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var logoPath = await _tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoTypeEnum.LightSmall, false);
+        var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall);
 
         var items = new List<object>
         {
@@ -96,7 +70,7 @@ public class DocumentBuilderScriptHelper
             {
                 index = (string)null,
                 name = room.Title,
-                url = _commonLinkUtility.GetFullAbsolutePath(_pathProvider.GetRoomsUrl(room.Id.ToString())),
+                url = commonLinkUtility.GetFullAbsolutePath(pathProvider.GetRoomsUrl(room.Id.ToString())),
                 type = FilesCommonResource.RoomIndex_Room,
                 size = (string)null,
                 author = room.CreateByString,
@@ -109,13 +83,13 @@ public class DocumentBuilderScriptHelper
         {
             var isFolder = entry.FileEntryType == FileEntryType.Folder;
             var index = isFolder ? foldersIndex[entry.Id].Order : string.Join(".", foldersIndex[entry.ParentId].Order, foldersIndex[entry.ParentId].ChildFoldersCount + entry.Order);
-            var url = isFolder ? _pathProvider.GetRoomsUrl(entry.Id.ToString()) : _filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, entry.Title, entry.Id);
+            var url = isFolder ? pathProvider.GetRoomsUrl(entry.Id.ToString()) : filesLinkUtility.GetFileWebPreviewUrl(fileUtility, entry.Title, entry.Id);
 
             items.Add(new
             {
                 index = index.TrimStart('.'),
                 name = entry.Title,
-                url = _commonLinkUtility.GetFullAbsolutePath(url),
+                url = commonLinkUtility.GetFullAbsolutePath(url),
                 type = isFolder ? FilesCommonResource.RoomIndex_Folder : Path.GetExtension(entry.Title),
                 size = isFolder ? null : Math.Round(((File<T>)entry).ContentLength / 1024d / 1024d, 2).ToString(CultureInfo.InvariantCulture),
                 author = entry.CreateByString,
@@ -145,7 +119,7 @@ public class DocumentBuilderScriptHelper
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
             },
 
-            logoSrc = _commonLinkUtility.GetFullAbsolutePath(logoPath),
+            logoSrc = commonLinkUtility.GetFullAbsolutePath(logoPath),
 
             themeColors = new
             {
@@ -158,7 +132,7 @@ public class DocumentBuilderScriptHelper
             {
                 company = tenantWhiteLabelSettings.LogoText,
                 room = room.Title,
-                exportAuthor = user.DisplayUserName(_displayUserSettingsHelper),
+                exportAuthor = user.DisplayUserName(displayUserSettingsHelper),
                 dateGenerated = room.CreateOnString
             },
 
@@ -168,17 +142,7 @@ public class DocumentBuilderScriptHelper
         return (data, outputFileName);
     }
 
-    private class FolderIndex
-    {
-        public int ChildFoldersCount;
-        public string Order;
-
-        public FolderIndex(int childFoldersCount, string order)
-        {
-            ChildFoldersCount = childFoldersCount;
-            Order = order;
-        }
-    }
+    private record FolderIndex(int ChildFoldersCount, string Order);
 
     private async Task<Dictionary<T, FolderIndex>> GetFoldersIndex<T>(T roomId, IEnumerable<FileEntry<T>> entries)
     {
@@ -192,7 +156,7 @@ public class DocumentBuilderScriptHelper
             }
             else
             {
-                var order = await _breadCrumbsManager.GetBreadCrumbsOrderAsync(entry.ParentId);
+                var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(entry.ParentId);
                 result[entry.ParentId] = new FolderIndex(1, order);
             }
 

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,18 +29,13 @@ using ThumbnailSize = Dropbox.Api.Files.ThumbnailSize;
 namespace ASC.Files.Thirdparty.Dropbox;
 
 [Transient]
-internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>, IDisposable
+internal class DropboxStorage(TempStream tempStream) : IThirdPartyStorage<FileMetadata, FolderMetadata, Metadata>,
+    IDisposable
 {
     public bool IsOpened { get; private set; }
     private readonly long _maxChunkedUploadFileSize = 20L * 1024L * 1024L * 1024L;
 
     private DropboxClient _dropboxClient;
-    private readonly TempStream _tempStream;
-
-    public DropboxStorage(TempStream tempStream)
-    {
-        _tempStream = tempStream;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -158,10 +153,8 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         {
             return ThumbnailSize.W480h320.Instance;
         }
-        else
-        {
-            return ThumbnailSize.W256h256.Instance;
-        }
+
+        return ThumbnailSize.W256h256.Instance;
     }
 
     public async Task<Stream> DownloadStreamAsync(FileMetadata file, int offset = 0)
@@ -170,7 +163,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
         using var response = await _dropboxClient.Files.DownloadAsync(filePath);
-        var tempBuffer = _tempStream.Create();
+        var tempBuffer = tempStream.Create();
         await using var str = await response.GetContentAsStreamAsync();
         if (str != null)
         {
@@ -306,7 +299,7 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
 
         var pathLength = dropboxItem.PathDisplay.Length - dropboxItem.Name.Length;
 
-        return dropboxItem.PathDisplay.Substring(0, pathLength > 1 ? pathLength - 1 : 0);
+        return dropboxItem.PathDisplay[..(pathLength > 1 ? pathLength - 1 : 0)];
     }
 
     private bool IsRoot(FolderMetadata dropboxFolder)
@@ -322,9 +315,6 @@ internal class DropboxStorage : IThirdPartyStorage<FileMetadata, FolderMetadata,
 
     public void Dispose()
     {
-        if (_dropboxClient != null)
-        {
-            _dropboxClient.Dispose();
-        }
+        _dropboxClient?.Dispose();
     }
 }

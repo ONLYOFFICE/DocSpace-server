@@ -27,20 +27,13 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
-public class DocumentBuilderTask<T> : DistributedTaskProgress
+public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : DistributedTaskProgress
 {
-    private readonly IServiceScopeFactory _serviceProvider;
-
     private int _tenantId;
     private Guid _userId;
     private string _script;
     private string _tempFileName;
     private string _outputFileName;
-
-    public DocumentBuilderTask(IServiceScopeFactory serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
 
     public void Init(int tenantId, Guid userId, string script, string tempFileName, string outputFileName)
     {
@@ -66,12 +59,10 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            await using var scope = _serviceProvider.CreateAsyncScope();
+            await using var scope = serviceProvider.CreateAsyncScope();
 
-            var scopeClass = scope.ServiceProvider.GetService<DocumentBuilderTaskScope>();
-
-            var (tenantManager, documentServiceConnector, clientFactory, daoFactory, filesLinkUtility, log) = scopeClass;
-
+            var (tenantManager, documentServiceConnector, clientFactory, daoFactory, filesLinkUtility, log) = scope.ServiceProvider.GetService<DocumentBuilderTaskScope>();
+            
             logger = log;
 
             await tenantManager.SetCurrentTenantAsync(_tenantId);
@@ -91,7 +82,6 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = scope.ServiceProvider.GetService<File<T>>();
-
             file.ParentId = await daoFactory.GetFolderDao<T>().GetFolderIDUserAsync(false, _userId);
             file.Title = _outputFileName;
 
@@ -165,50 +155,24 @@ public class DocumentBuilderTask<T> : DistributedTaskProgress
     private static async Task<File<T>> SaveFileFromUriAsync(IHttpClientFactory clientFactory, IDaoFactory daoFactory, Uri sourceUri, File<T> destinationFile)
     {
         using var request = new HttpRequestMessage();
-
         request.RequestUri = sourceUri;
 
         using var httpClient = clientFactory.CreateClient();
-
         using var response = await httpClient.SendAsync(request);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var fileDao = daoFactory.GetFileDao<T>();
 
-        using var stream = await response.Content.ReadAsStreamAsync();
-
-        var _fileDao = daoFactory.GetFileDao<T>();
-
-        var file = await _fileDao.SaveFileAsync(destinationFile, stream);
+        var file = await fileDao.SaveFileAsync(destinationFile, stream);
 
         return file;
     }
 }
 
 [Scope]
-public class DocumentBuilderTaskScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly DocumentServiceConnector _documentServiceConnector;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly ILogger _logger;
-
-    public DocumentBuilderTaskScope(TenantManager tenantManager, DocumentServiceConnector documentServiceConnector, IHttpClientFactory clientFactory, IDaoFactory daoFactory, FilesLinkUtility filesLinkUtility, ILogger<DocumentBuilderTaskScope> logger)
-    {
-        _tenantManager = tenantManager;
-        _documentServiceConnector = documentServiceConnector;
-        _clientFactory = clientFactory;
-        _daoFactory = daoFactory;
-        _filesLinkUtility = filesLinkUtility;
-        _logger = logger;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager, out DocumentServiceConnector documentServiceConnector, out IHttpClientFactory clientFactory, out IDaoFactory daoFactory, out FilesLinkUtility filesLinkUtility, out ILogger logger)
-    {
-        tenantManager = _tenantManager;
-        documentServiceConnector = _documentServiceConnector;
-        clientFactory = _clientFactory;
-        daoFactory = _daoFactory;
-        filesLinkUtility = _filesLinkUtility;
-        logger = _logger;
-    }
-}
+public record DocumentBuilderTaskScope(
+    TenantManager TenantManager, 
+    DocumentServiceConnector DocumentServiceConnector, 
+    IHttpClientFactory ClientFactory, 
+    IDaoFactory DaoFactory, 
+    FilesLinkUtility FilesLinkUtility, 
+    ILogger<DocumentBuilderTaskScope> Logger);

@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>تعيين كلمة المرور</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>النسخ الاحتياطي أكبر من الحجم الفعلي للبوابة</value>
+  </data>
 </root>
