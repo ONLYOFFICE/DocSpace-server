@@ -315,7 +315,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, null, true));
 
             await foreach (var file in files)
             {
