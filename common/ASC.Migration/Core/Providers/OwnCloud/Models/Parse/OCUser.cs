@@ -30,8 +30,6 @@ public class OCUser
 {
     public string Uid { get; set; }
     public OCUserData Data { get; set; }
-    public OCAddressbooks Addressbooks { get; set; }
-    public List<OCCalendars> Calendars { get; set; }
     public OCStorages Storages { get; set; }
 }
 

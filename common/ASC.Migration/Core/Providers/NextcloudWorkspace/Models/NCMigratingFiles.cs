@@ -24,46 +24,56 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASCShare = ASC.Files.Core.Security.FileShare;
 using File = System.IO.File;
 
 namespace ASC.Migration.NextcloudWorkspace.Models.Parse;
 
+[Transient]
 public class NCMigratingFiles : MigratingFiles
 {
     public override int FoldersCount => _foldersCount;
-
     public override int FilesCount => _filesCount;
-
     public override long BytesTotal => _bytesTotal;
-
-    public override string ModuleName => MigrationResource.NextcloudModuleNameDocuments;
 
     private readonly GlobalFolderHelper _globalFolderHelper;
     private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
     private readonly FileStorageService _fileStorageService;
-    private readonly NCMigratingUser _user;
-    private readonly string _rootFolder;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly SecurityContext _securityContext;
+    private readonly UserManager _userManager;
+
+    private NCMigratingUser _user;
+    private string _rootFolder;
     private List<NCFileCache> _files;
     private List<NCFileCache> _folders;
     private int _foldersCount;
     private int _filesCount;
     private long _bytesTotal;
-    private readonly NCStorages _storages;
+    private NCStorages _storages;
     private Dictionary<string, NCMigratingUser> _users;
-    private Dictionary<string, NCMigratingGroups> _groups;
-    private Dictionary<object, int> _matchingFileId;
     private string _folderCreation;
-    public NCMigratingFiles(GlobalFolderHelper globalFolderHelper, IDaoFactory daoFactory, FileSecurity fileSecurity, FileStorageService fileStorageService, NCMigratingUser user, NCStorages storages, string rootFolder, Action<string, Exception> log) : base(log)
+
+    public NCMigratingFiles(GlobalFolderHelper globalFolderHelper,
+        IDaoFactory daoFactory,
+        FileStorageService fileStorageService,
+        IServiceProvider serviceProvider,
+        SecurityContext securityContext,
+        UserManager usermanager)
     {
         _globalFolderHelper = globalFolderHelper;
         _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
         _fileStorageService = fileStorageService;
-        _user = user;
+        _serviceProvider = serviceProvider;
+        _securityContext = securityContext;
+        _userManager = usermanager;
+    }
+
+    public void Init(string rootFolder, NCMigratingUser user, NCStorages storages, Action<string, Exception> log)
+    {
         _rootFolder = rootFolder;
+        _user = user;
         _storages = storages;
+        Log = log;
     }
 
     public override void Parse()
@@ -130,7 +140,6 @@ public class NCMigratingFiles : MigratingFiles
             return;
         }
 
-        _matchingFileId = new Dictionary<object, int>();
         var foldersDict = new Dictionary<string, Folder<int>>();
         if (_folders != null)
         {
@@ -150,7 +159,6 @@ public class NCMigratingFiles : MigratingFiles
                     {
                         var newFolder = await _fileStorageService.CreateNewFolderAsync(parentId, split[i]);
                         foldersDict.Add(path, newFolder);
-                        _matchingFileId.Add(newFolder.Id, folder.FileId);
                     }
                     catch (Exception ex)
                     {
@@ -174,22 +182,11 @@ public class NCMigratingFiles : MigratingFiles
                 try
                 {
                     var realPath = Path.Combine(drivePath, maskPath);
-                    using var fs = new FileStream(realPath, FileMode.Open);
                     var fileDao = _daoFactory.GetFileDao<int>();
                     var folderDao = _daoFactory.GetFolderDao<int>();
-                    {
-                        var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await _globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
 
-                        var newFile = new File<int>
-                        {
-                            ParentId = parentFolder.Id,
-                            Comment = FilesCommonResource.CommentCreate,
-                            Title = Path.GetFileName(file.Path),
-                            ContentLength = fs.Length
-                        };
-                        newFile = await fileDao.SaveFileAsync(newFile, fs);
-                        _matchingFileId.Add(newFile.Id, file.FileId);
-                    }
+                    var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await _globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
+                    await AddFileAsync(realPath, parentFolder.Id, Path.GetFileName(file.Path));
                 }
                 catch (Exception ex)
                 {
@@ -198,100 +195,130 @@ public class NCMigratingFiles : MigratingFiles
             }
         }
 
-        foreach (var item in _matchingFileId)
+        var sharedFolders = new Dictionary<string, int>();
+
+        if (ShouldImportSharedFiles && _files != null && _files.Count != 0)
         {
-            var list = new List<AceWrapper>();
-            var entryIsFile = _files.Exists(el => el.FileId == item.Value) ? true : false;
-            var entry = entryIsFile ? _files.Find(el => el.FileId == item.Value) : _folders.Find(el => el.FileId == item.Value);
-            if (entry.Share.Count == 0)
+            foreach (var file in _files)
             {
-                continue;
-            }
-
-            foreach (var shareInfo in entry.Share)
-            {
-                if (shareInfo.ShareWith == null)
+                var maskPaths = file.Path.Split('/');
+                if (maskPaths[0] == "NextCloud’s Files " + DateTime.Now.ToString("dd.MM.yyyy"))
                 {
-                    continue;
+                    maskPaths[0] = "files";
                 }
+                var maskPath = string.Join(Path.DirectorySeparatorChar.ToString(), maskPaths);
+                var parentPath = Path.GetDirectoryName(file.Path);
+                var realPath = Path.Combine(drivePath, maskPath); 
 
-                var shareType = GetPortalShare(shareInfo.Premissions, entryIsFile);
-                _users.TryGetValue(shareInfo.ShareWith, out var userToShare);
-                _groups.TryGetValue(shareInfo.ShareWith, out var groupToShare);
-
-                if (userToShare != null || groupToShare != null)
+                foreach (var shareInfo in file.Share)
                 {
-                    var entryGuid = userToShare == null ? groupToShare.Guid : userToShare.Guid;
-                    list.Add(new AceWrapper
+                    if (shareInfo.ShareWith == null)
                     {
-                        Access = shareType.Value,
-                        Id = entryGuid,
-                        SubjectGroup = false
-                    });
+                        continue;
+                    }
+
+                    _users.TryGetValue(shareInfo.ShareWith, out var userToShare);
+                    if (userToShare == null)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        var user = await _userManager.GetUserByEmailAsync(shareInfo.ShareWith);
+                        await _securityContext.AuthenticateMeAsync(user.Id);
+                        if (!sharedFolders.ContainsKey(shareInfo.ShareWith))
+                        {
+                            var parentId = await _globalFolderHelper.FolderMyAsync;
+                            var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, $"NextCloud’s files shared from {_user.Email} {_folderCreation}");
+                            sharedFolders.Add(shareInfo.ShareWith, createdFolder.Id);
+                        }
+                        await AddFileAsync(realPath, sharedFolders[shareInfo.ShareWith], Path.GetFileName(file.Path));
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Couldn't share file {parentPath}/{Path.GetFileName(file.Path)} to {shareInfo.ShareWith}", ex);
+                    }
                 }
-            }
-            if (!list.Any())
-            {
-                continue;
-            }
-
-            var aceCollection = new AceCollection<int>
-            {
-                Files = new List<int>(),
-                Folders = new List<int>(),
-                Aces = list,
-                Message = null
-            };
-
-            if (entryIsFile)
-            {
-                aceCollection.Files = new List<int>() { (int)item.Key };
-            }
-            else
-            {
-                aceCollection.Folders = new List<int>() { (int)item.Key };
-            }
-
-            try
-            {
-                await _fileStorageService.SetAceObjectAsync(aceCollection, false);
-            }
-            catch (Exception ex)
-            {
-                Log($"Couldn't change file permissions for {item.Key}", ex);
+                await _securityContext.AuthenticateMeAsync(_user.Guid);
             }
         }
+
+        if (ShouldImportSharedFiles && _folders != null && _folders.Count != 0)
+        {
+            foreach (var folder in _folders)
+            {
+                var split = folder.Path.Split('/');
+                if (split[0] == "NextCloud’s Files " + DateTime.Now.ToString("dd.MM.yyyy"))
+                {
+                    split[0] = "files";
+                }
+                var maskPath = string.Join(Path.DirectorySeparatorChar.ToString(), split);
+                var realPath = Path.Combine(drivePath, maskPath);
+
+                foreach (var shareInfo in folder.Share)
+                {
+                    if (shareInfo.ShareWith == null)
+                    {
+                        continue;
+                    }
+
+                    _users.TryGetValue(shareInfo.ShareWith, out var userToShare);
+                    if (userToShare == null)
+                    {
+                        continue;
+                    }
+                    try
+                    {
+                        var user = await _userManager.GetUserByEmailAsync(shareInfo.ShareWith);
+                        await _securityContext.AuthenticateMeAsync(user.Id);
+                        if (!sharedFolders.ContainsKey(shareInfo.ShareWith))
+                        {
+                            var parentId = await _globalFolderHelper.FolderMyAsync;
+                            var createdFolder = await _fileStorageService.CreateNewFolderAsync(parentId, $"NextCloud’s files shared from {_user.Email} {_folderCreation}");
+                            sharedFolders.Add(shareInfo.ShareWith, createdFolder.Id);
+                        }
+                        await AddFolderAsync(sharedFolders[shareInfo.ShareWith], realPath, split.Last());
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Couldn't share folder {Path.GetFileName(folder.Path)} to {shareInfo.ShareWith}", ex);
+                    }
+                }
+            }
+            await _securityContext.AuthenticateMeAsync(_user.Guid);
+        }
+    }
+
+    private async Task AddFolderAsync(int parentId, string path, string title)
+    {
+        var newFolder = await _fileStorageService.CreateNewFolderAsync(parentId, title);
+        foreach (var file in Directory.GetFiles(path))
+        {
+            await AddFileAsync(file, newFolder.Id, Path.GetFileName(file));
+        }
+
+        foreach (var innerFolder in Directory.GetDirectories(path))
+        {
+            await AddFolderAsync(newFolder.Id, innerFolder, innerFolder.Split('/').Last());
+        }
+    }
+
+    private async Task<File<int>> AddFileAsync(string realPath, int folderId, string fileTitle)
+    {
+        using var fs = new FileStream(realPath, FileMode.Open);
+        var fileDao = _daoFactory.GetFileDao<int>();
+
+        var newFile = _serviceProvider.GetService<File<int>>();
+        newFile.ParentId = folderId;
+        newFile.Comment = FilesCommonResource.CommentCreate;
+        newFile.Title = fileTitle;
+        newFile.ContentLength = fs.Length;
+        return await fileDao.SaveFileAsync(newFile, fs);
     }
 
     public void SetUsersDict(IEnumerable<NCMigratingUser> users)
     {
-        this._users = users.ToDictionary(user => user.Key, user => user);
-    }
-
-    public void SetGroupsDict(IEnumerable<NCMigratingGroups> groups)
-    {
-        this._groups = groups.ToDictionary(group => group.GroupName, group => group);
-    }
-
-    private ASCShare? GetPortalShare(int role, bool entryType)
-    {
-        if (entryType)
-        {
-            if (role == 1 || role == 17)
-            {
-                return ASCShare.Read;
-            }
-
-            return ASCShare.ReadWrite;//permission = 19 => denySharing = true, permission = 3 => denySharing = false; ASCShare.ReadWrite
-        }
-        else
-        {
-            if (Array.Exists(new int[] { 1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27 }, el => el == role))
-            {
-                return ASCShare.Read;
-            }
-
-            return ASCShare.ReadWrite;//permission = 19||23 => denySharing = true, permission = 7||15 => denySharing = false; ASCShare.ReadWrite
-        }
+        _users = users.ToDictionary(user => user.Key, user => user);
     }
 }

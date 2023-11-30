@@ -28,6 +28,12 @@ namespace ASC.Data.Storage.DataOperators;
 public abstract class BaseReadOperator: IDataReadOperator
 {
     internal string _tmpdir;
+
+    public string GetFolder()
+    {
+        return _tmpdir;
+    }
+
     public Stream GetEntry(string key)
     {
         var filePath = Path.Combine(_tmpdir, key);

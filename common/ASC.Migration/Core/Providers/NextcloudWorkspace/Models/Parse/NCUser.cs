@@ -30,8 +30,6 @@ public class NCUser
 {
     public string Uid { get; set; }
     public NCUserData Data { get; set; }
-    public NCAddressbooks Addressbooks { get; set; }
-    public List<NCCalendars> Calendars { get; set; }
     public NCStorages Storages { get; set; }
 }
 

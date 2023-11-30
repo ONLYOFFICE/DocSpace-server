@@ -26,11 +26,30 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
+[ProtoContract]
 public class MigrationApiInfo
 {
-    public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
+    [ProtoMember(1)]
     public string MigratorName { get; set; }
-    public List<MigrationModules> Modules { get; set; } = new List<MigrationModules>();
+
+    [ProtoMember(2)]
     public List<string> FailedArchives { get; set; } = new List<string>();
-    public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
+
+    [ProtoMember(3)]
+    public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
+
+    [ProtoMember(5)]
+    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
+
+    [ProtoMember(6)]
+    public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
+
+    [ProtoMember(7)]
+    public bool ImportPersonalFiles { get; set; } = true;
+    [ProtoMember(8)]
+    public bool ImportSharedFiles { get; set; } = true;
+    [ProtoMember(9)]
+    public int SuccessedUsers { get; set; }
+    [ProtoMember(10)]
+    public int FailedUsers { get; set; }
 }

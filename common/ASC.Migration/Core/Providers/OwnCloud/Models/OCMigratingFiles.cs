@@ -29,45 +29,52 @@ using File = System.IO.File;
 
 namespace ASC.Migration.OwnCloud.Models;
 
+[Transient]
 public class OCMigratingFiles : MigratingFiles
 {
     public override int FoldersCount => _foldersCount;
-
     public override int FilesCount => _filesCount;
-
     public override long BytesTotal => _bytesTotal;
-
-    public override string ModuleName => MigrationResource.NextcloudModuleNameDocuments;
 
     private readonly GlobalFolderHelper _globalFolderHelper;
     private readonly IDaoFactory _daoFactory;
+    private readonly IServiceProvider _serviceProvider;
     private readonly FileStorageService _fileStorageService;
-    private readonly OCMigratingUser _user;
-    private readonly string _rootFolder;
+    private OCMigratingUser _user;
+    private string _rootFolder;
     private List<OCFileCache> _files;
     private List<OCFileCache> _folders;
     private int _foldersCount;
     private int _filesCount;
     private long _bytesTotal;
-    private readonly OCStorages _storages;
+    private OCStorages _storages;
     private Dictionary<string, OCMigratingUser> _users;
-    private Dictionary<string, OCMigratingGroups> _groups;
     private Dictionary<object, int> _matchingFileId;
     private string _folderCreation;
-    public OCMigratingFiles(GlobalFolderHelper globalFolderHelper, IDaoFactory daoFactory, FileStorageService fileStorageService, OCMigratingUser user, OCStorages storages, string rootFolder, Action<string, Exception> log) : base(log)
+    public OCMigratingFiles(GlobalFolderHelper globalFolderHelper,
+        IDaoFactory daoFactory,
+        FileStorageService fileStorageService,
+        IServiceProvider serviceProvider)
     {
         _globalFolderHelper = globalFolderHelper;
         _daoFactory = daoFactory;
         _fileStorageService = fileStorageService;
+        _serviceProvider = serviceProvider;
+    }
+
+    public void Init(OCMigratingUser user, OCStorages storages, string rootFolder, Action<string, Exception> log)
+    {
         _user = user;
         _rootFolder = rootFolder;
         _storages = storages;
+        Log = log;
     }
 
     public override void Parse()
     {
         var drivePath = Directory.Exists(Path.Combine(_rootFolder, "data", _user.Key, "files")) ?
             Path.Combine(_rootFolder, "data", _user.Key, "files") : null;
+
         if (drivePath == null)
         {
             return;
@@ -177,14 +184,13 @@ public class OCMigratingFiles : MigratingFiles
                     var folderDao = _daoFactory.GetFolderDao<int>();
 
                     var parentFolder = string.IsNullOrWhiteSpace(parentPath) ? await folderDao.GetFolderAsync(await _globalFolderHelper.FolderMyAsync) : foldersDict[parentPath];
+                    
+                    var newFile = _serviceProvider.GetService<File<int>>();
+                    newFile.ParentId = parentFolder.Id;
+                    newFile.Comment = FilesCommonResource.CommentCreate;
+                    newFile.Title = Path.GetFileName(file.Path);
+                    newFile.ContentLength = fs.Length;
 
-                    var newFile = new File<int>
-                    {
-                        ParentId = parentFolder.Id,
-                        Comment = FilesCommonResource.CommentCreate,
-                        Title = Path.GetFileName(file.Path),
-                        ContentLength = fs.Length
-                    };
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                     _matchingFileId.Add(newFile.Id, file.FileId);
 
@@ -215,11 +221,10 @@ public class OCMigratingFiles : MigratingFiles
 
                 var shareType = GetPortalShare(shareInfo.Premissions, entryIsFile);
                 _users.TryGetValue(shareInfo.ShareWith, out var userToShare);
-                _groups.TryGetValue(shareInfo.ShareWith, out var groupToShare);
 
-                if (userToShare != null || groupToShare != null)
+                if (userToShare != null)
                 {
-                    var entryGuid = userToShare == null ? groupToShare.Guid : userToShare.Guid;
+                    var entryGuid = userToShare.Guid;
                     list.Add(new AceWrapper
                     {
                         Access = shareType.Value,
@@ -235,20 +240,11 @@ public class OCMigratingFiles : MigratingFiles
 
             var aceCollection = new AceCollection<int>
             {
-                Files = new List<int>(),
-                Folders = new List<int>(),
+                Files = entryIsFile ? new List<int>() { (int)item.Key } : new List<int>(),
+                Folders = entryIsFile ? new List<int>() : new List<int>() { (int)item.Key },
                 Aces = list,
                 Message = null
             };
-
-            if (entryIsFile)
-            {
-                aceCollection.Files = new List<int>() { (int)item.Key };
-            }
-            else
-            {
-                aceCollection.Folders = new List<int>() { (int)item.Key };
-            }
 
             try
             {
@@ -266,10 +262,6 @@ public class OCMigratingFiles : MigratingFiles
         _users = users.ToDictionary(user => user.Key, user => user);
     }
 
-    public void SetGroupsDict(IEnumerable<OCMigratingGroups> groups)
-    {
-        _groups = groups.ToDictionary(group => group.GroupName, group => group);
-    }
     private ASCShare? GetPortalShare(int role, bool entryType)
     {
         if (entryType)

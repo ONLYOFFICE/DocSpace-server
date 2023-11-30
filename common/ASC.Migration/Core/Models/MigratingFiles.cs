@@ -31,7 +31,6 @@ public abstract class MigratingFiles : ImportableEntity
     public abstract int FoldersCount { get; }
     public abstract int FilesCount { get; }
     public abstract long BytesTotal { get; }
-    public abstract string ModuleName { get; }
 
     public virtual MigratingApiFiles ToApiInfo()
     {
@@ -39,9 +38,13 @@ public abstract class MigratingFiles : ImportableEntity
         {
             BytesTotal = BytesTotal,
             FilesCount = FilesCount,
-            FoldersCount = FoldersCount,
-            ModuleName = ModuleName
+            FoldersCount = FoldersCount
         };
+    }
+
+    public MigratingFiles()
+    {
+
     }
 
     protected MigratingFiles(Action<string, Exception> log) : base(log) { }

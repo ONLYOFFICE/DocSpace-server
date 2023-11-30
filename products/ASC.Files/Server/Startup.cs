@@ -57,17 +57,7 @@ public class Startup : BaseStartup
         NotifyConfigurationExtension.Register(DIHelper);
 
         services.AddBaseDbContextPool<FilesDbContext>();
-
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
-
-        services.AddScoped<UsersInRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
-        services.AddScoped<UsersInRoomStatistic>();
+        services.RegisterQuotaFeature();
     }
 
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)

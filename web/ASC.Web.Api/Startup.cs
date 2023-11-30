@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Core;
+using ASC.Migration.Core.Core;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -52,11 +53,8 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
 
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
+        services.RegisterQuotaFeature();
+        MigrationCore.Register(DIHelper);
 
         DIHelper.TryAdd<AdditionalWhiteLabelSettingsConverter>();
 
@@ -87,6 +85,13 @@ public class Startup : BaseStartup
             appBranch =>
             {
                 appBranch.UseUrlShortRewriter();
+            });
+
+        app.MapWhen(
+            context => context.Request.Path.ToString().EndsWith("migrationFileUpload.ashx"),
+            appBranch =>
+            {
+                appBranch.UseMigrationFileUploadHandler();
             });
     }
 }

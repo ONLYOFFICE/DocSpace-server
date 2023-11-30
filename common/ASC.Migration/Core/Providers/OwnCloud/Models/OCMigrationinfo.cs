@@ -26,6 +26,6 @@
 
 namespace ASC.Migration.OwnCloud.Models;
 
-public class OCMigrationInfo : MigrationInfo<OCMigratingUser, OCMigratingContacts, OCMigratingCalendar, OCMigratingFiles, OCMigratingMail, OCMigratingGroups>
+public class OCMigrationInfo : MigrationInfo<OCMigratingUser, OCMigratingFiles>
 {
 }

@@ -37,6 +37,7 @@ public interface IDataWriteOperator : IAsyncDisposable
 
 public interface IDataReadOperator : IDisposable
 {
+    string GetFolder();
     Stream GetEntry(string key);
     IEnumerable<string> GetEntries(string key);
     IEnumerable<string> GetDirectories(string key);

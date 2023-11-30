@@ -26,55 +26,49 @@
 
 namespace ASC.Migration.OwnCloud.Models;
 
-public class OCMigratingUser : MigratingUser<OCMigratingContacts, OCMigratingCalendar, OCMigratingFiles, OCMigratingMail>
+[Transient]
+public class OCMigratingUser : MigratingUser<OCMigratingFiles>
 {
     public override string Email => _userInfo.Email;
 
     public override string DisplayName => _userInfo.ToString();
 
-    public List<MigrationModules> ModulesList = new List<MigrationModules>();
-
     public Guid Guid => _userInfo.Id;
 
-    public override string ModuleName => MigrationResource.ModuleNameUsers;
-
     public string ConnectionString { get; set; }
-    private readonly string _rootFolder;
+    private string _rootFolder;
     private bool _hasPhoto;
     private string _pathToPhoto;
     private UserInfo _userInfo;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileStorageService _fileStorageService;
-    private readonly TenantManager _tenantManager;
     private readonly UserManager _userManager;
-    private readonly OCUser _user;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
+    private readonly QuotaSocketManager _quotaSocketManager;
+    private OCUser _user;
     private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
 
     public OCMigratingUser(
-        GlobalFolderHelper globalFolderHelper,
-        IDaoFactory daoFactory,
-        FileStorageService fileStorageService,
-        TenantManager tenantManager,
         UserManager userManager,
-        string key,
-        OCUser userData,
-        string rootFolder,
-        Action<string, Exception> log) : base(log)
+        IServiceProvider serviceProvider,
+        QuotaSocketManager quotaSocketManager,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
     {
-        Key = key;
-        _globalFolderHelper = globalFolderHelper;
-        _daoFactory = daoFactory;
-        _fileStorageService = fileStorageService;
-        _tenantManager = tenantManager;
         _userManager = userManager;
-        _user = userData;
+        _serviceProvider = serviceProvider;
+        _quotaSocketManager = quotaSocketManager;
+        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
+    }
+
+    public void Init(OCUser user, string rootFolder, Action<string, Exception> log)
+    {
+        _user = user;
+        Key = user.Uid;
         _rootFolder = rootFolder;
+        Log = log;
     }
 
     public override void Parse()
     {
-        ModulesList.Add(new MigrationModules(ModuleName, MigrationResource.OnlyofficeModuleNamePeople));
         _userInfo = new UserInfo()
         {
             Id = Guid.NewGuid()
@@ -109,31 +103,12 @@ public class OCMigratingUser : MigratingUser<OCMigratingContacts, OCMigratingCal
         _userInfo.ActivationStatus = EmployeeActivationStatus.Pending;
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
-        MigratingContacts = new OCMigratingContacts(_tenantManager, this, _user.Addressbooks, log);
-        MigratingContacts.Parse();
-        if (MigratingContacts.ContactsCount != 0)
-        {
-            ModulesList.Add(new MigrationModules(MigratingContacts.ModuleName, MigrationResource.OnlyofficeModuleNameMail));
-        }
-
-        MigratingCalendar = new OCMigratingCalendar(_user.Calendars, log);
-        //MigratingCalendar.Parse();
-        if (MigratingCalendar.CalendarsCount != 0)
-        {
-            ModulesList.Add(new MigrationModules(MigratingCalendar.ModuleName, MigrationResource.OnlyofficeModuleNameCalendar));
-        }
-
-        MigratingFiles = new OCMigratingFiles(_globalFolderHelper, _daoFactory, _fileStorageService, this, _user.Storages, _rootFolder, log);
+        MigratingFiles = _serviceProvider.GetService<OCMigratingFiles>();
+        MigratingFiles.Init(this, _user.Storages, _rootFolder, log);
         MigratingFiles.Parse();
-        if (MigratingFiles.FoldersCount != 0 || MigratingFiles.FilesCount != 0)
-        {
-            ModulesList.Add(new MigrationModules(MigratingFiles.ModuleName, MigrationResource.OnlyofficeModuleNameDocuments));
-        }
-
-        MigratingMail = new OCMigratingMail(log);
     }
 
-    public void dataСhange(MigratingApiUser frontUser)
+    public void DataСhange(MigratingApiUser frontUser)
     {
         if (_userInfo.Email == null)
         {
@@ -151,34 +126,46 @@ public class OCMigratingUser : MigratingUser<OCMigratingContacts, OCMigratingCal
 
     public override async Task MigrateAsync()
     {
-        if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
-        {
-            _userInfo.FirstName = FilesCommonResource.UnknownFirstName;
-        }
-        if (string.IsNullOrWhiteSpace(_userInfo.LastName))
-        {
-            _userInfo.LastName = FilesCommonResource.UnknownLastName;
-        }
-
         var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
-        if (saved != Constants.LostUser)
+        if (saved == ASC.Core.Users.Constants.LostUser)
         {
-            saved.ContactsList = saved.ContactsList.Union(_userInfo.ContactsList).ToList();
-            _userInfo.Id = saved.Id;
-        }
-        else
-        {
-            saved = await _userManager.SaveUserInfo(_userInfo);
-        }
-        if (_hasPhoto)
-        {
-            using (var ms = new MemoryStream())
+            if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
             {
-                using (var fs = File.OpenRead(_pathToPhoto))
+                _userInfo.FirstName = FilesCommonResource.UnknownFirstName;
+            }
+            if (string.IsNullOrWhiteSpace(_userInfo.LastName))
+            {
+                _userInfo.LastName = FilesCommonResource.UnknownLastName;
+            }
+            saved = await _userManager.SaveUserInfo(_userInfo, UserType);
+            var groupId = UserType switch
+            {
+                EmployeeType.User => ASC.Core.Users.Constants.GroupUser.ID,
+                EmployeeType.DocSpaceAdmin => ASC.Core.Users.Constants.GroupAdmin.ID,
+                EmployeeType.Collaborator => ASC.Core.Users.Constants.GroupCollaborator.ID,
+                _ => Guid.Empty,
+            };
+
+            if (groupId != Guid.Empty)
+            {
+                await _userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
+            }
+            else if (UserType == EmployeeType.RoomAdmin)
+            {
+                var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            }
+
+            if (_hasPhoto)
+            {
+                using (var ms = new MemoryStream())
                 {
-                    fs.CopyTo(ms);
+                    using (var fs = File.OpenRead(_pathToPhoto))
+                    {
+                        fs.CopyTo(ms);
+                    }
+                    await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
                 }
-                await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
             }
         }
     }

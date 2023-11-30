@@ -26,38 +26,52 @@
 
 namespace ASC.Migration.GoogleWorkspace.Models;
 
-public class GwsMigratingUser : MigratingUser<GwsMigratingContacts, GwsMigratingCalendar, GwsMigratingFiles, GwsMigratingMail>
+[Transient]
+public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
 {
     public override string Email => _userInfo.Email;
     public Guid Guid => _userInfo.Id;
-    public List<MigrationModules> ModulesList = new List<MigrationModules>();
-    public override string ModuleName => MigrationResource.ModuleNameUsers;
 
     public override string DisplayName => $"{_userInfo.FirstName} {_userInfo.LastName}".Trim();
 
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly FileStorageService _fileStorageService;
     private readonly UserManager _userManager;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly QuotaSocketManager _quotaSocketManager;
+    private readonly TenantQuotaFeatureStatHelper _tenantQuotaFeatureStatHelper;
+    private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
+    private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
+
+    private string _rootFolder;
+    private UserInfo _userInfo;
+    private bool _hasPhoto;
 
     public GwsMigratingUser(
-        GlobalFolderHelper globalFolderHelper,
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        FileStorageService fileStorageService,
-        UserManager userManager)
+        UserManager userManager,
+        IServiceProvider serviceProvider,
+        QuotaSocketManager quotaSocketManager,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper)
     {
-        _globalFolderHelper = globalFolderHelper;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _fileStorageService = fileStorageService;
         _userManager = userManager;
+        _serviceProvider = serviceProvider;
+        _quotaSocketManager = quotaSocketManager;
+        _tenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
+    }
+
+    public void Init(string key, string rootFolder, Action<string, Exception> log)
+    {
+        Key = key;
+        _rootFolder = rootFolder;
+        Log = log;
+    }
+
+    public void Init(GwsMigratingUser user)
+    {
+        Key = user.Key;
+        _userInfo = user._userInfo;
     }
 
     public override void Parse()
     {
-        ModulesList.Add(new MigrationModules(ModuleName, MigrationResource.OnlyofficeModuleNamePeople));
         _userInfo = new UserInfo()
         {
             Id = Guid.NewGuid()
@@ -69,29 +83,9 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingContacts, GwsMigrating
 
         Action<string, Exception> log = (m, e) => { Log($"{DisplayName} ({Email}): {m}", e); };
 
-        MigratingContacts = new GwsMigratingContacts(_rootFolder, this, log);
-        MigratingContacts.Parse();
-        if (MigratingContacts.ContactsCount != 0)
-        {
-            ModulesList.Add(new MigrationModules(MigratingContacts.ModuleName, MigrationResource.OnlyofficeModuleNameMail));
-        }
-
-        MigratingCalendar = new GwsMigratingCalendar(_rootFolder, log);
-        //MigratingCalendar.Parse();
-        if (MigratingCalendar.CalendarsCount != 0)
-        {
-            ModulesList.Add(new MigrationModules(MigratingCalendar.ModuleName, MigrationResource.OnlyofficeModuleNameCalendar));
-        }
-
-        MigratingFiles = new GwsMigratingFiles(_globalFolderHelper, _daoFactory, _fileSecurity, _fileStorageService, _rootFolder, this, log);
+        MigratingFiles = _serviceProvider.GetService<GwsMigratingFiles>();
+        MigratingFiles.Init(_rootFolder, this, log);
         MigratingFiles.Parse();
-        if (MigratingFiles.FoldersCount != 0 || MigratingFiles.FilesCount != 0)
-        {
-            ModulesList.Add(new MigrationModules(MigratingFiles.ModuleName, MigrationResource.OnlyofficeModuleNameDocuments));
-        }
-
-        MigratingMail = new GwsMigratingMail(_rootFolder, this, log);
-        //MigratingMail.Parse();
 
         _userInfo.UserName = _userInfo.Email.Split('@').First();
         if (_userInfo.FirstName == null || _userInfo.FirstName == "")
@@ -111,56 +105,56 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingContacts, GwsMigrating
 
     public override async Task MigrateAsync()
     {
-        if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
-        {
-            _userInfo.FirstName = FilesCommonResource.UnknownFirstName;
-        }
-        if (string.IsNullOrWhiteSpace(_userInfo.LastName))
-        {
-            _userInfo.LastName = FilesCommonResource.UnknownLastName;
-        }
-
         var saved = await _userManager.GetUserByEmailAsync(_userInfo.Email);
-        if (saved != Constants.LostUser)
+        if (saved == ASC.Core.Users.Constants.LostUser)
         {
-            saved.ContactsList = saved.ContactsList.Union(_userInfo.ContactsList).ToList();
-            _userInfo.Id = saved.Id;
-        }
-        else
-        {
-            saved = await _userManager.SaveUserInfo(_userInfo);
-        }
-        if (_hasPhoto)
-        {
-            using (var fs = File.OpenRead(Key))
+            if (string.IsNullOrWhiteSpace(_userInfo.FirstName))
             {
-                using (var zip = new ZipArchive(fs))
+                _userInfo.FirstName = FilesCommonResource.UnknownFirstName;
+            }
+            if (string.IsNullOrWhiteSpace(_userInfo.LastName))
+            {
+                _userInfo.LastName = FilesCommonResource.UnknownLastName;
+            }
+            saved = await _userManager.SaveUserInfo(_userInfo, UserType);
+
+            var groupId = UserType switch
+            {
+                EmployeeType.User => ASC.Core.Users.Constants.GroupUser.ID,
+                EmployeeType.DocSpaceAdmin => ASC.Core.Users.Constants.GroupAdmin.ID,
+                EmployeeType.Collaborator => ASC.Core.Users.Constants.GroupCollaborator.ID,
+                _ => Guid.Empty,
+            };
+
+            if (groupId != Guid.Empty)
+            {
+                await _userManager.AddUserIntoGroupAsync(saved.Id, groupId, true);
+            }
+            else if (UserType == EmployeeType.RoomAdmin)
+            {
+                var (name, value) = await _tenantQuotaFeatureStatHelper.GetStatAsync<CountPaidUserFeature, int>();
+                _ = _quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+            }
+
+            if (_hasPhoto)
+            {
+                using (var fs = File.OpenRead(Key))
                 {
-                    using (var ms = new MemoryStream())
+                    using (var zip = new ZipArchive(fs))
                     {
-                        using (var imageStream = zip.GetEntry(string.Join("/", "Takeout", "Profile", "ProfilePhoto.jpg")).Open())
+                        using (var ms = new MemoryStream())
                         {
-                            imageStream.CopyTo(ms);
+                            using (var imageStream = zip.GetEntry(string.Join("/", "Takeout", "Profile", "ProfilePhoto.jpg")).Open())
+                            {
+                                imageStream.CopyTo(ms);
+                            }
+                            await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
                         }
-                        await _userManager.SaveUserPhotoAsync(saved.Id, ms.ToArray());
                     }
                 }
             }
         }
     }
-
-    public GwsMigratingUser(string key, string rootFolder, Action<string, Exception> log) : base(log)
-    {
-        Key = key;
-        this._rootFolder = rootFolder;
-    }
-
-    private readonly Regex _emailRegex = new Regex(@"(\S*@\S*\.\S*)");
-    private readonly Regex _phoneRegex = new Regex(@"(\+?\d+)");
-
-    private readonly string _rootFolder;
-    private UserInfo _userInfo;
-    private bool _hasPhoto;
 
     private void ParseRootHtml()
     {

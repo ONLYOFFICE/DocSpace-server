@@ -30,6 +30,8 @@ global using System.Net;
 global using System.Net.Mail;
 global using System.Net.Sockets;
 global using System.Security;
+global using ASC.Migration.Core.Models.Api;
+global using ASC.Web.Core.Files;
 global using System.ServiceModel.Security;
 global using System.Text;
 global using System.Text.Json;

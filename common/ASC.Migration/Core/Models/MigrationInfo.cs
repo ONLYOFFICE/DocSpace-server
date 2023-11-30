@@ -26,29 +26,31 @@
 
 namespace ASC.Migration.Core.Models;
 
-public abstract class MigrationInfo<TUser, TContacts, TCalendar, TFiles, TMail, TGroup> : IMigrationInfo
-    where TUser : MigratingUser<TContacts, TCalendar, TFiles, TMail>
-    where TContacts : MigratingContacts
-    where TCalendar : MigratingCalendar
+public abstract class MigrationInfo<TUser, TFiles> : IMigrationInfo
+    where TUser : MigratingUser<TFiles>
     where TFiles : MigratingFiles
-    where TMail : MigratingMail
-    where TGroup : MigratingGroup
 {
     public Dictionary<string, TUser> Users = new Dictionary<string, TUser>();
+    public Dictionary<string, TUser> WithoutEmailUsers = new Dictionary<string, TUser>();
+    public Dictionary<string, TUser> ExistUsers = new Dictionary<string, TUser>();
+    public string Path { get; set; }
     public string MigratorName { get; set; }
-    public List<MigrationModules> Modules = new List<MigrationModules>();
-    public List<string> failedArchives = new List<string>();
-    public List<TGroup> Groups = new List<TGroup>();
+    public List<string> FailedArchives = new List<string>();
+
+    public int SuccessedUsers { get; set; }
+    public int FailedUsers { get; set; }
 
     public virtual MigrationApiInfo ToApiInfo()
     {
         return new MigrationApiInfo()
         {
             Users = Users.Values.Select(u => u.ToApiInfo()).ToList(),
+            ExistUsers = ExistUsers.Values.Select(u => u.ToApiInfo()).ToList(),
+            WithoutEmailUsers = WithoutEmailUsers.Values.Select(u => u.ToApiInfo()).ToList(),
             MigratorName = MigratorName,
-            Modules = Modules,
-            FailedArchives = failedArchives,
-            Groups = Groups.Select(g => g.ToApiInfo()).ToList()
+            FailedArchives = FailedArchives,
+            SuccessedUsers = SuccessedUsers,
+            FailedUsers = FailedUsers
         };
     }
 
@@ -60,24 +62,10 @@ public abstract class MigrationInfo<TUser, TContacts, TCalendar, TFiles, TMail, 
             {
                 continue;
             }
-
             var user = Users[apiUser.Key];
             user.ShouldImport = apiUser.ShouldImport;
-
-            user.MigratingCalendar.ShouldImport = apiUser.MigratingCalendar.ShouldImport;
-            user.MigratingContacts.ShouldImport = apiUser.MigratingContacts.ShouldImport;
-            user.MigratingFiles.ShouldImport = apiUser.MigratingFiles.ShouldImport;
-            user.MigratingMail.ShouldImport = apiUser.MigratingMail.ShouldImport;
-        }
-        foreach (var apiGroup in apiInfo.Groups)
-        {
-            if (!Groups.Exists(g => apiGroup.GroupName == g.GroupName))
-            {
-                continue;
-            }
-
-            var group = Groups.Find(g => apiGroup.GroupName == g.GroupName);
-            group.ShouldImport = apiGroup.ShouldImport;
+            user.MigratingFiles.ShouldImport = apiUser.ShouldImport && apiInfo.ImportPersonalFiles;
+            user.MigratingFiles.ShouldImportSharedFiles = false;
         }
     }
 }

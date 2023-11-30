@@ -26,42 +26,79 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
-public static class MigrationCore
+[Scope]
+public class MigrationCore
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IEventBus _eventBus;
+    private readonly AuthContext _authContext;
+    private readonly TenantManager _tenantManager;
+    private readonly MigrationWorker _migrationWorker;
 
-    private static Dictionary<string, MigratorMeta> _migrators;
-    private static Dictionary<string, MigratorMeta> Migrators
+    public MigrationCore(IServiceProvider serviceProvider,
+        IEventBus eventBus,
+        AuthContext authContext,
+        TenantManager tenantManager,
+        MigrationWorker migrationWorker)
     {
-        get
-        {
-            if (_migrators != null)
-            {
-                return _migrators;
-            }
-
-            _migrators = new Dictionary<string, MigratorMeta>(StringComparer.OrdinalIgnoreCase);
-
-            var migratorTypes = Assembly.GetExecutingAssembly()
-                .GetExportedTypes()
-                .Where(t => !t.IsAbstract && !t.IsInterface
-                    && typeof(IMigration).IsAssignableFrom(t));
-
-            foreach (var type in migratorTypes)
-            {
-                var attr = type.GetCustomAttribute<ApiMigratorAttribute>();
-                if (attr == null)
-                {
-                    continue;
-                }
-
-                _migrators.Add(attr.Name, new MigratorMeta(type));
-            }
-
-            return _migrators;
-        }
+        _serviceProvider = serviceProvider;
+        _eventBus = eventBus;
+        _authContext = authContext;
+        _tenantManager = tenantManager;
+        _migrationWorker = migrationWorker;
     }
 
-    public static string[] GetAvailableMigrations() => Migrators.Keys.ToArray();
+    public string[] GetAvailableMigrations() => _serviceProvider.GetService<IEnumerable<IMigration>>().Select(r => r.Meta.Name).ToArray();
 
-    public static MigratorMeta GetMigrator(string migrator) => Migrators.TryGetValue(migrator, out var meta) ? meta : null;
+    public IMigration GetMigrator(string migrator)
+    {
+        return _serviceProvider.GetService<IEnumerable<IMigration>>().FirstOrDefault(r => r.Meta.Name.Equals(migrator, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task StartParse(string migrationName)
+    {
+        _eventBus.Publish(new MigrationParseIntegrationEvent(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantIdAsync())
+        {
+            MigratorName = migrationName
+        });
+    }
+
+    public async Task Start(MigrationApiInfo info)
+    {
+        _eventBus.Publish(new MigrationIntegrationEvent(_authContext.CurrentAccount.ID, await _tenantManager.GetCurrentTenantIdAsync())
+        {
+            ApiInfo = info
+        });
+    }
+
+    public async Task Stop()
+    {
+        _migrationWorker.Stop(await _tenantManager.GetCurrentTenantIdAsync());
+    }
+
+    public async Task<MigrationOperation> GetStatus()
+    {
+        return _migrationWorker.GetStatus(await _tenantManager.GetCurrentTenantIdAsync());
+    }
+
+    public static void Register(DIHelper services)
+    {
+        services.TryAdd<MigrationCore>();
+
+        services.TryAdd<IMigration, GoogleWorkspaceMigration>();
+        services.TryAdd<GwsMigratingUser>();
+        services.TryAdd<GwsMigratingFiles>();
+
+        services.TryAdd<IMigration, NextcloudWorkspaceMigration>();
+        services.TryAdd<NCMigratingUser>();
+        services.TryAdd<NCMigratingFiles>();
+
+        services.TryAdd<IMigration, OwnCloudMigration>();
+        services.TryAdd<OCMigratingUser>();
+        services.TryAdd<OCMigratingFiles>();
+
+        services.TryAdd<IMigration, WorkspaceMigration>();
+        services.TryAdd<WorkspaceMigratingUser>();
+        services.TryAdd<WorkspaceMigratingFiles>();
+    }
 }

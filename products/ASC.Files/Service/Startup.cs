@@ -84,24 +84,12 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
 
-        services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
-        services.AddScoped<CountRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
-        services.AddScoped<CountRoomCheckerStatistic>();
-
-        services.AddScoped<UsersInRoomChecker>();
-
-        services.AddScoped<ITenantQuotaFeatureStat<UsersInRoomFeature, int>, UsersInRoomStatistic>();
-
-        services.AddScoped<UsersInRoomStatistic>();
-
+        services.RegisterQuotaFeature();
 
         services.AddBaseDbContextPool<FilesDbContext>();
 
         services.AddSingleton(Channel.CreateUnbounded<FileData<int>>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<FileData<int>>>().Writer);
-        }
-
     }
+}

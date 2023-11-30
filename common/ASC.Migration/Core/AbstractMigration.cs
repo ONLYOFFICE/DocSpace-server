@@ -26,15 +26,17 @@
 
 namespace ASC.Migration.Core;
 
-public abstract class AbstractMigration<TMigrationInfo, TUser, TContacts, TCalendar, TFiles, TMail> : IMigration
+[Scope]
+public abstract class AbstractMigration<TMigrationInfo, TUser, TFiles> : IMigration
     where TMigrationInfo : IMigrationInfo
 {
-    private readonly MigrationLogger _logger;
+    protected readonly MigrationLogger _logger;
     protected CancellationToken _cancellationToken;
     protected TMigrationInfo _migrationInfo;
     private double _lastProgressUpdate;
     private string _lastStatusUpdate;
     protected List<Guid> _importedUsers;
+    public abstract MigratorMeta Meta { get; }
 
     public event Action<double, string> OnProgressUpdate;
 
@@ -54,9 +56,11 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TContacts, TCalen
     public double GetProgress() => _lastProgressUpdate;
     public string GetProgressStatus() => _lastStatusUpdate;
 
+    public MigrationApiInfo ApiInfo { get => _migrationInfo?.ToApiInfo(); }
+
     public abstract void Init(string path, CancellationToken cancellationToken);
 
-    public abstract Task<MigrationApiInfo> Parse();
+    public abstract Task<MigrationApiInfo> Parse(bool reportProgress = true);
 
     public abstract Task Migrate(MigrationApiInfo migrationInfo);
 
@@ -69,9 +73,9 @@ public abstract class AbstractMigration<TMigrationInfo, TUser, TContacts, TCalen
         _logger.Dispose();
     }
 
-    public Stream GetLogs()
+    public string GetLogName()
     {
-        return _logger.GetStream();
+        return _logger.GetLogName();
     }
 
     public virtual List<Guid> GetGuidImportedUsers()
