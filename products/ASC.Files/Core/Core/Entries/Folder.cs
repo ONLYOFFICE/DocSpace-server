@@ -97,7 +97,8 @@ public class Folder<T> : FileEntry<T>, IFolder
 
     public Folder(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global,
+        SecurityContext securityContext) : base(fileHelper, global, securityContext)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;

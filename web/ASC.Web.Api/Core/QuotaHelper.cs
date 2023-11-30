@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings)
+public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings, SettingsManager settingsManager)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
     {
@@ -66,8 +66,8 @@ public class QuotaHelper(TenantManager tenantManager, IServiceProvider servicePr
             },
 
             Features = features,
-            UsersQuota = await _settingsManager.LoadAsync<TenantUserQuotaSettings>(),
-            RoomsQuota = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>()
+            UsersQuota = await settingsManager.LoadAsync<TenantUserQuotaSettings>(),
+            RoomsQuota = await settingsManager.LoadAsync<TenantRoomQuotaSettings>()
         };
     }
 

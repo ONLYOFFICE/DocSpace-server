@@ -121,7 +121,8 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         BadgesSettingsHelper badgesSettingsHelper,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime)
+        FileDateTime fileDateTime,
+        SettingsManager settingsManager)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<Tuple<FileEntry<T>, bool>> folders = null, string order = null)
@@ -156,7 +157,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 result.Mute = roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
             }
 
-            var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             result.UsedSpace = folder.Counter;
 
             if (quotaRoomSettings.EnableQuota)

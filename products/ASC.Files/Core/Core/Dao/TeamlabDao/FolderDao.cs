@@ -713,7 +713,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
                     var origin = Tag.Origin(folderId, FileEntryType.Folder, oldParentId, _authContext.CurrentAccount.ID);
                     tagList.Add(origin);
-                    await tagDao.SaveTags(tagList);
+                    await tagDao.SaveTagsAsync(tagList);
                 }
                 else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
                 {
@@ -895,14 +895,16 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     }
     public async Task<int> ChangeTreeFolderSizeAsync(int folderId, long size)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        await Queries.UpdateTreeFolderCounterAsync(filesDbContext, TenantID, folderId, size);
+        await Queries.UpdateTreeFolderCounterAsync(filesDbContext, tenantId, folderId, size);
         return folderId;
     }
     public async Task<int> ChangeFolderSizeAsync(Folder<int> folder, long size)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, TenantID, folder.Id);
+        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
 
         toUpdate.Counter = size;
 
@@ -917,8 +919,9 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     }
     public async Task<int> ChangeFolderQuotaAsync(Folder<int> folder, long quota)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, TenantID, folder.Id);
+        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
 
         toUpdate.Quota = quota >= -1 ? quota : -2;
         toUpdate.ModifiedOn = DateTime.UtcNow;
@@ -934,8 +937,9 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota)
     {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = _dbContextFactory.CreateDbContext();
-        var toUpdate = await Queries.FolderAsync(filesDbContext, TenantID, folder.Id);
+        var toUpdate = await Queries.FolderAsync(filesDbContext, tenantId, folder.Id);
 
         toUpdate.Quota = newQuota >= -1 ? newQuota : -2;
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);

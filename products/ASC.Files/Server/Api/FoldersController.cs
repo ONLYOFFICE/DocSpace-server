@@ -231,7 +231,7 @@ public abstract class FoldersController<T>(EntryManager entryManager,
     [HttpGet("filesusedspace")]
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        return await _fileStorageService.GetFilesUsedSpace();
+        return await fileStorageService.GetFilesUsedSpace();
     }
 }
 

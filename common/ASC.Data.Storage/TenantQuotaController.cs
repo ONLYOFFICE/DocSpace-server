@@ -67,7 +67,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
             CurrentSize += size;
         }
-        await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : _authContext.CurrentAccount.ID);
+        await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
         
     }
     public async Task QuotaUsedAddAsync(string module, string domain, string dataTag, long size, bool quotaCheckFileSize = true)
@@ -86,7 +86,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, Guid.Empty);
         if (ownerId != Core.Configuration.Constants.CoreSystem.ID)
         {
-            await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : _authContext.CurrentAccount.ID);
+            await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
         }
     }
     public async Task QuotaUsedDeleteAsync(string module, string domain, string dataTag, long size)
@@ -105,7 +105,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, Guid.Empty);
         if (ownerId != Core.Configuration.Constants.CoreSystem.ID)
         {
-            await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : _authContext.CurrentAccount.ID);
+            await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
         }
     }
 
@@ -116,7 +116,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         {
             CurrentSize += size;
         }
-        await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : _authContext.CurrentAccount.ID);
+        await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
 
     }
 

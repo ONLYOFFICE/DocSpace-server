@@ -112,6 +112,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
            await using var scope = serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
@@ -151,15 +152,15 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
                 }
             }
 
-            var userQuotaSettings = _settingsManager.Load<TenantUserQuotaSettings>();
+            var userQuotaSettings = settingsManager.Load<TenantUserQuotaSettings>();
             userQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
-            _settingsManager.Save(userQuotaSettings);
+            settingsManager.Save(userQuotaSettings);
 
             await _filesSpaceUsageStatManager.RecalculateFoldersUsedSpace(TenantId);
 
-            var roomQuotaSettings = _settingsManager.Load<TenantRoomQuotaSettings>();
+            var roomQuotaSettings = settingsManager.Load<TenantRoomQuotaSettings>();
             roomQuotaSettings.LastRecalculateDate = DateTime.UtcNow;
-            _settingsManager.Save(roomQuotaSettings);
+            settingsManager.Save(roomQuotaSettings);
 
         }
         catch (Exception ex)

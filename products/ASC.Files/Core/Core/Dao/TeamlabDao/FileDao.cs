@@ -902,7 +902,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
 
                     var origin = Tag.Origin(fileId, FileEntryType.File, oldParentId.Value, _authContext.CurrentAccount.ID);
                     tagList.Add(origin);
-                    await tagDao.SaveTags(tagList);
+                    await tagDao.SaveTagsAsync(tagList);
                 }
                 else if (oldParentId == trashId || roomId != -1 || toFolderRoomId != -1)
                 {

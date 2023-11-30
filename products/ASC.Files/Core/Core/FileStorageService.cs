@@ -466,9 +466,9 @@ public class FileStorageService //: IFileStorageService
         var parent = await folderDao.GetFolderAsync(parentId);
         var isRoom = DocSpaceHelper.IsRoom(folderType);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(tenantId);
+        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
         var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
 
         ErrorIf(maxTotalSize < quota, Resource.QuotaGreaterPortalError);
@@ -516,9 +516,9 @@ public class FileStorageService //: IFileStorageService
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
     {
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(tenantId);
+        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
         var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
 
         ErrorIf(maxTotalSize < quota, Resource.QuotaGreaterPortalError);
@@ -527,11 +527,11 @@ public class FileStorageService //: IFileStorageService
         var folder = await folderDao.GetFolderAsync(folderId);
         ErrorIf(folder == null, FilesCommonResource.ErrorMassage_FolderNotFound);
 
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) ? folder.RootFolderType != FolderType.Archive && await _fileSecurity.CanEditRoomAsync(folder)
-            : await _fileSecurity.CanRenameAsync(folder);
+        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
+            : await fileSecurity.CanRenameAsync(folder);
 
         ErrorIf(!canEdit, FilesCommonResource.ErrorMassage_SecurityException_RenameFolder);
-        if (!canEdit && await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (!canEdit && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_RenameFolder);
         }
@@ -548,15 +548,15 @@ public class FileStorageService //: IFileStorageService
             folder.Access = folderAccess;
         }
 
-        await _socketManager.UpdateFolderAsync(folder);
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
     public async Task<Folder<T>> UpdateRoomAsync<T>(T folderId, UpdateRoomRequestDto updateData)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-        var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(tenantId);
+        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
         var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
 
         if (updateData.Quota != null)
@@ -569,11 +569,11 @@ public class FileStorageService //: IFileStorageService
         var folder = await folderDao.GetFolderAsync(folderId);
         ErrorIf(folder == null, FilesCommonResource.ErrorMassage_FolderNotFound);
 
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) ? folder.RootFolderType != FolderType.Archive && await _fileSecurity.CanEditRoomAsync(folder)
-            : await _fileSecurity.CanRenameAsync(folder);
+        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType) ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
+            : await fileSecurity.CanRenameAsync(folder);
 
         ErrorIf(!canEdit, FilesCommonResource.ErrorMassage_SecurityException_RenameFolder);
-        if (!canEdit && await _userManager.IsUserAsync(_authContext.CurrentAccount.ID))
+        if (!canEdit && await userManager.IsUserAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_RenameFolder);
         }
@@ -596,16 +596,16 @@ public class FileStorageService //: IFileStorageService
                 var oldTitle = folder.Title;
                 if (DocSpaceHelper.IsRoom(folder.FolderType))
                 {
-                    _ = _filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
+                    _ = filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, folder, folder.Title);
                 }
                 else
                 {
-                    _ = _filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
+                    _ = filesMessageService.SendAsync(MessageAction.FolderRenamed, folder, folder.Title);
                 }
             }
         }
 
-        var newTags = tagDao.GetNewTagsAsync(_authContext.CurrentAccount.ID, folder);
+        var newTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, folder);
         var tag = await newTags.FirstOrDefaultAsync();
         if (tag != null)
         {
@@ -613,15 +613,15 @@ public class FileStorageService //: IFileStorageService
         }
 
         if (folder.RootFolderType == FolderType.USER
-            && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID)
-            && !await _fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(folder.ParentId)))
+            && !Equals(folder.RootCreateBy, authContext.CurrentAccount.ID)
+            && !await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(folder.ParentId)))
         {
-            folder.FolderIdDisplay = await _globalFolderHelper.GetFolderShareAsync<T>();
+            folder.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
         }
 
-        await _entryStatusManager.SetIsFavoriteFolderAsync(folder);
+        await entryStatusManager.SetIsFavoriteFolderAsync(folder);
 
-        await _socketManager.UpdateFolderAsync(folder);
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
@@ -1505,7 +1505,7 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var folderDao = _daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
         return await folderDao.GetFilesUsedSpace();
     }
 

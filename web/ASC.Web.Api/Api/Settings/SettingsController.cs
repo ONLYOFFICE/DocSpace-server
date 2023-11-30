@@ -274,8 +274,8 @@ public class SettingsController(MessageService messageService,
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(Tenant.Id);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
 
         if (maxTotalSize < inDto.DefaultQuota)
@@ -283,11 +283,11 @@ public class SettingsController(MessageService messageService,
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
 
-        var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
         quotaSettings.DefaultQuota = inDto.DefaultQuota;
 
-        await _settingsManager.SaveAsync(quotaSettings);
+        await settingsManager.SaveAsync(quotaSettings);
 
         return quotaSettings;
     }
@@ -295,7 +295,7 @@ public class SettingsController(MessageService messageService,
     [HttpGet("userquotasettings")]
     public object GetUserQuotaSettings()
     {
-        return _settingsManager.Load<TenantUserQuotaSettings>();
+        return settingsManager.Load<TenantUserQuotaSettings>();
     }
 
     /// <summary>
@@ -312,9 +312,9 @@ public class SettingsController(MessageService messageService,
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
-
-        var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(Tenant.Id);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenanSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
         var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
 
         if (maxTotalSize < inDto.DefaultQuota)
@@ -322,11 +322,11 @@ public class SettingsController(MessageService messageService,
             throw new Exception(Resource.QuotaGreaterPortalError);
         }
 
-        var quotaSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+        var quotaSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
         quotaSettings.EnableQuota = inDto.EnableQuota;
         quotaSettings.DefaultQuota = inDto.DefaultQuota;
 
-        await _settingsManager.SaveAsync(quotaSettings);
+        await settingsManager.SaveAsync(quotaSettings);
 
         return quotaSettings;
     }
@@ -345,17 +345,17 @@ public class SettingsController(MessageService messageService,
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID) || !_coreBaseSettings.Standalone)
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || !coreBaseSettings.Standalone)
         {
             throw new NotSupportedException("Not available.");
         }
 
-        var tenantQuotaSetting = await _settingsManager.LoadAsync<TenantQuotaSettings>();
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         tenantQuotaSetting.DisableQuota = !inDto.EnableQuota;
 
-        await _settingsManager.SaveAsync(tenantQuotaSetting);
+        await settingsManager.SaveAsync(tenantQuotaSetting);
 
         return tenantQuotaSetting;
     }

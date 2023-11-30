@@ -1638,7 +1638,7 @@ public class UserController(ICache cache,
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
@@ -1656,9 +1656,9 @@ public class UserController(ICache cache,
 
         foreach (var user in users)
         {
-            await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
+            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = inDto.Quota }, user);
 
-            yield return await _employeeFullDtoHelper.GetFullAsync(user);
+            yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
 
@@ -1688,7 +1688,7 @@ public class UserController(ICache cache,
                 throw new SecurityException();
             }
 
-            await _settingsManager.SaveAsync(_settingsManager.GetDefault<UserQuotaSettings>(), user);
+            await settingsManager.SaveAsync(settingsManager.GetDefault<UserQuotaSettings>(), user);
 
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }

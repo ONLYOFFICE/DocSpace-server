@@ -57,9 +57,9 @@ public class CommonMethods(
             portalName = t.Alias,
             status = t.Status.ToString(),
             tenantId = t.Id,
-            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName
-            quota = !_hostedSolution.GetTenantQuotaSettings(t.Id).Result.DisableQuota ? _hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize : -1,
-            usedSize = _hostedSolution.FindTenantQuotaRowsAsync(t.Id).Result
+            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            quota = !hostedSolution.GetTenantQuotaSettings(t.Id).Result.DisableQuota ? hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize : -1,
+            usedSize = hostedSolution.FindTenantQuotaRowsAsync(t.Id).Result
                             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
                             .Sum(q => q.Counter)
         };

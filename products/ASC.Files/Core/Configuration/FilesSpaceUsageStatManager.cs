@@ -104,7 +104,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
     public async Task RecalculateFoldersUsedSpace(int TenantId)
     {
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = dbContextFactory.CreateDbContext();
 
         var queryGroup = filesDbContext.Folders
                     .Join(filesDbContext.Tree, r => r.Id, a => a.ParentId, (folder, tree) => new { folder, tree })
@@ -137,6 +137,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
     }
     public async Task RecalculateUserQuota(int TenantId, Guid userId)
     {
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         await tenantManager.SetCurrentTenantAsync(tenantId);
 
         var size = await GetUserSpaceUsageAsync(userId);

@@ -298,7 +298,7 @@ public class EmployeeFullDtoHelper(
         await InitAsync(result, userInfo);
 
         var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-        result.UsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(_context.Tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+        result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
 
         if (quotaSettings.EnableQuota)
         {

@@ -144,14 +144,16 @@ public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     private T _folderIdDisplay;
-
+    private readonly SecurityContext _securityContext;
 
     protected FileEntry() { }
 
     protected FileEntry(
         FileHelper fileHelper,
-        Global global) : base(fileHelper, global)
+        Global global,
+        SecurityContext securityContext) : base(fileHelper, global)
     {
+        _securityContext = securityContext;
     }
 
     public T FolderIdDisplay

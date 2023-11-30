@@ -150,7 +150,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
 
     public async Task QuotaUsedAddAsync(int? tenant, string module, string domain, string dataTag, long size, Guid ownerId)
     {
-        var tenantQuotaController = _serviceProvider.GetService<TenantQuotaController>();
+        var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
         tenantQuotaController.Init(tenant.GetValueOrDefault());
 
         await tenantQuotaController.QuotaUserUsedAddAsync(module, domain, dataTag, size, ownerId);
@@ -158,7 +158,7 @@ public class StorageFactory(IServiceProvider serviceProvider,
 
     public async Task QuotaUsedDeleteAsync(int? tenant, string module, string domain, string dataTag, long size, Guid ownerId)
     {
-        var tenantQuotaController = _serviceProvider.GetService<TenantQuotaController>();
+        var tenantQuotaController = serviceProvider.GetService<TenantQuotaController>();
         tenantQuotaController.Init(tenant.GetValueOrDefault());
 
         await tenantQuotaController.QuotaUserUsedDeleteAsync(module, domain, dataTag, size, ownerId);
