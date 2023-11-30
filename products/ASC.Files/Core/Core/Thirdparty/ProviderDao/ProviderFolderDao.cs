@@ -519,6 +519,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.SettingsHasLogo = providerInfo.HasLogo;
         folder.ModifiedBy = providerInfo.Owner;
         folder.ModifiedOn = providerInfo.CreateOn;
+        folder.MutableId = providerInfo.MutableEntityId;
 
         return folder;
     }

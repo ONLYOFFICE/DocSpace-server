@@ -140,6 +140,7 @@ public abstract class FileEntry<T> : FileEntry, IFileEntry, IEquatable<FileEntry
     public T ParentId { get; set; }
     public T OriginId { get; set; }
     public T OriginRoomId { get; set; }
+    public bool MutableId { get; set; }
 
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 

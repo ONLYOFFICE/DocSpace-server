@@ -509,6 +509,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
         fileEntry.ProviderKey = ProviderInfo.ProviderKey;
         fileEntry.RootCreateBy = ProviderInfo.Owner;
         fileEntry.RootFolderType = ProviderInfo.RootFolderType;
+        fileEntry.MutableId = ProviderInfo.MutableEntityId;
         fileEntry.RootId = MakeId();
     }
 

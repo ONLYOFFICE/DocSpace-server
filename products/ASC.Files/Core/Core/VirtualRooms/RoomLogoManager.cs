@@ -243,12 +243,12 @@ public class RoomLogoManager(StorageFactory storageFactory,
         using (var stream = new MemoryStream(imageData))
         {
             await store.SaveAsync(fileName, stream);
-    }
+        }
 
         var sizes = new[] { _mediumLogoSize, _smallLogoSize, _largeLogoSize};
 
         if (imageData is not { Length: > 0 })
-    {
+        {
             throw new UnknownImageFormatException();
         }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
@@ -262,21 +262,21 @@ public class RoomLogoManager(StorageFactory storageFactory,
             using var img = await Image.LoadAsync(imageStream);
             foreach (var size in sizes)
             {
-            if (size.Item2 != img.Size)
-            {
-                using var img2 = UserPhotoThumbnailManager.GetImage(img, size.Item2, new UserPhotoThumbnailSettings(position, cropSize));
+                if (size.Item2 != img.Size)
+                {
+                    using var img2 = UserPhotoThumbnailManager.GetImage(img, size.Item2, new UserPhotoThumbnailSettings(position, cropSize));
                     imageData = CommonPhotoManager.SaveToBytes(img2);
-            }
-            else
-            {
+                }
+                else
+                {
                     imageData = CommonPhotoManager.SaveToBytes(img);
-            }
+                }
 
                 var imageFileName = string.Format(LogosPath, ProcessFolderId(id), size.Item1.ToStringLowerFast());
 
                 using var stream2 = new MemoryStream(imageData);
                 await store.SaveAsync(imageFileName, stream2);
-        }
+            }
         }
         catch (ArgumentException error)
         {
@@ -322,27 +322,19 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         return id.GetType() != typeof(string)
             ? id.ToString()
-            : id.ToString()?.Replace("-", "").Replace("|", "");
+            : id.ToString()?.Replace("|", "");
     }
 
     private static string GetId<T>(Folder<T> room)
     {
-        if (!room.ProviderEntry)
+        if (!room.MutableId)
         {
             return room.Id.ToString();
         }
 
-        if (room.Id.ToString()!.Contains(Selectors.SharpBox.Id))
-        {
-            return $"{Selectors.SharpBox.Id}-{room.ProviderId}";
-        }
+        var match = Selectors.Pattern.Match(room.Id.ToString()!);
 
-        if (room.Id.ToString()!.Contains(Selectors.SharePoint.Id))
-        {
-            return $"{Selectors.SharePoint.Id}-{room.ProviderId}";
-        }
-
-        return room.Id.ToString();
+        return $"{match.Groups["selector"]}-{match.Groups["id"]}";
     }
 }
 
