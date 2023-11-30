@@ -93,7 +93,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         if (room.ProviderEntry)
         {
-            await daoFactory.ProviderDao.UpdateProviderInfoAsync(room.ProviderId, true);
+            await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(room.ProviderId, hasLogo: true);
         }
         else
         {
@@ -128,7 +128,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
             if (room.ProviderEntry)
             {
-                await daoFactory.ProviderDao.UpdateProviderInfoAsync(room.ProviderId, false);
+                await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(room.ProviderId, hasLogo: false);
             }
             else
             {

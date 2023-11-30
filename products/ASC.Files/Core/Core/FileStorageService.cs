@@ -427,7 +427,7 @@ public class FileStorageService //: IFileStorageService
             await CheckEncryptionKeysAsync(aces);
         }
 
-        var result = roomType switch
+        var (room, folderType) = roomType switch
         {
             RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
             RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
@@ -435,16 +435,16 @@ public class FileStorageService //: IFileStorageService
             _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
         };
 
-        ErrorIf(result.Item1.Id.Equals(result.Item1.RootId), FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+        ErrorIf(room.Id.Equals(room.RootId), FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
 
         if (@private)
         {
-            await SetAcesForPrivateRoomAsync(result.Item1, aces, notify, sharingMessage);
+            await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
         }
 
-        await providerDao.UpdateProviderInfoAsync(providerInfo.ProviderId, title, result.Item1.Id.ToString(), result.Item2, @private);
+        await providerDao.UpdateRoomProviderInfoAsync(providerInfo.ProviderId, title, room.Id.ToString(), folderType, @private: @private);
 
-        return result.Item1;
+        return room;
     }
 
     private async Task<Folder<T>> CreateCustomRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)

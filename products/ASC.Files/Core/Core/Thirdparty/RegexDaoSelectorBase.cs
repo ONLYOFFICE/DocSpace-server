@@ -146,11 +146,12 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         provider.UpdateTitle(newTitle); //This will update cached version too
     }
 
-    public async Task UpdateProviderFolderId(IProviderInfo<TFile, TFolder, TItem> provider, string id)
+    public async Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId)
     {
         var dbDao = _serviceProvider.GetService<ProviderAccountDao>();
-        await dbDao.UpdateProviderInfoAsync(provider.ProviderId, provider.CustomerTitle, id, provider.FolderType, provider.Private);
-        provider.FolderId = id;
+        await dbDao.UpdateRoomProviderInfoAsync(provider.ProviderId, newTitle, folderId);
+        provider.FolderId = folderId;
+        provider.CustomerTitle = newTitle;
     }
 
     protected virtual IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)

@@ -174,62 +174,50 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         return providerInfo != null && await providerInfo.CheckAccessAsync();
     }
 
-    public async Task<bool> UpdateProviderInfoAsync(int linkId, FolderType rootFolderType)
+    public async Task<bool> UpdateRoomProviderInfoAsync(int id, string title = null, string folderId = null, FolderType? roomType = null, FolderType? rootFolderType = null,
+        bool? @private = null, bool? hasLogo = null)
     {
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
+        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, id);
 
         if (forUpdate == null)
         {
             return false;
         }
 
-        forUpdate.FolderType = rootFolderType;
-        filesDbContext.Update(forUpdate);
-
-        await filesDbContext.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task<bool> UpdateProviderInfoAsync(int linkId, bool hasLogo)
-    {
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
-
-        if (forUpdate == null)
+        if (!string.IsNullOrEmpty(title))
         {
-            return false;
+            forUpdate.Title = title;
         }
 
-        forUpdate.HasLogo = hasLogo;
-        filesDbContext.Update(forUpdate);
-
-        await filesDbContext.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task<bool> UpdateProviderInfoAsync(int linkId, string title, string folderId, FolderType roomType, bool @private)
-    {
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, linkId);
-
-        if (forUpdate == null)
+        if (!string.IsNullOrEmpty(folderId))
         {
-            return false;
+            forUpdate.FolderId = folderId;
         }
 
-        forUpdate.RoomType = roomType;
-        forUpdate.FolderId = folderId;
-        forUpdate.FolderType = FolderType.VirtualRooms;
-        forUpdate.Private = @private;
-        forUpdate.Title = title;
+        if (roomType.HasValue)
+        {
+            forUpdate.RoomType = roomType.Value;
+        }
+
+        if (rootFolderType.HasValue)
+        {
+            forUpdate.FolderType = rootFolderType.Value;
+        }
+
+        if (@private.HasValue)
+        {
+            forUpdate.Private = rootFolderType.HasValue;
+        }
+
+        if (hasLogo.HasValue)
+        {
+            forUpdate.HasLogo = hasLogo.Value;
+        }
+        
         filesDbContext.Update(forUpdate);
-
         await filesDbContext.SaveChangesAsync();
-
+        
         return true;
     }
 
