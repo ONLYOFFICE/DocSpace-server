@@ -130,18 +130,16 @@ ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath
 
 * *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezimize":"${__HelpLink}" göz atın veya "destek ekibimize":"${__SupportLink}" sorun.
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Bulut ofis hesabınızın şifresini değiştirmek mi istiyorsunuz? Onaylamak için aşağıdaki düğmeyi tıklayın.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -156,29 +154,28 @@ h3.Bu, arkadaşlarınıza veya meslektaşlarınıza erişim olanağı sağlayan,
 
 Hızlı bir başlangıç için, ONLYOFFICE ile yapabilecekleriniz şunlardır:
 
-- Metin belgeleri, tablolar, sunumlar oluşturma, görüntüleme ve düzenleme
+- Metin belgeleri, tablolar, sunumlar oluşturma, görüntüleme ve düzenleme.
 
 - Tüm popüler formatlarla çalışma. MS Office dosyaları ile en yüksek uyumluluk.
 
-- "Doldurmaya hazır şablonlar":"https://www.onlyoffice.com/form-creator.aspx" oluşturma ve birlikte düzenleme
+- "Doldurmaya hazır şablonlar":"https://www.onlyoffice.com/form-creator.aspx" oluşturma ve birlikte düzenleme.
 
-- Çevrimiçi olarak belgeler paylaşma ve belgeler üzerinde birlikte çalışma
+- Çevrimiçi olarak belgeler paylaşma ve belgeler üzerinde birlikte çalışma.
 
-- Ekstra özellikler uygulamak için çeşitli eklentiler kullanma
+- Ekstra özellikler uygulamak için çeşitli eklentiler kullanma.
 
-- "Chrome eklentisi ile":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" Personal bulutunuza kolay erişim
+- "Chrome eklentisi ile":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=tr" Personal bulutunuza kolay erişim.
 
 Ayrıca, belgeleri ücretsiz "masaüstü düzenleyicilerimiz":"https://www.onlyoffice.com/download-desktop.aspx" ile çevrimdışı olarak da düzenleyebilir ya da "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" veya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" cihazınız için mobil düzenleme programını indirebilirsiniz.
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Bulut ofis hesabınızdaki e-postayı değiştirmek mi istiyorsunuz?
 
 Aşağıdaki düğmeye tıklayın ve bulutunuzda oturum açın*.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -193,36 +190,29 @@ ONLYOFFICE çözümünde kişisel kullanım için bir hesap oluşturdunuz. Kayd�
 
 Bağlantıyı açamıyorsanız, lütfen bağlantı adresini "$InviteLink":"$InviteLink" kopyalayın ve tarayıcınızın adres çubuğuna yapıştırın.
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com adresindeki hesabınızın sonlandırılmasını talep ettiniz. İsteği tamamlamak için bağlantıya tıklayın (bağlantı 7 günlük bir süre boyunca etkindir):
 
-Hesap sonlandırmasını onaylayın
+$OrangeButton
 
 *Not*: Silme sonrasında, hesabınız ve tüm ilişkili veriler "Gizlilik Politikası":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca kalıcı olarak silinecektir.
 
-"Hesap sonlandırma hakkında daha fazla bilgi edinin":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Hesap sonlandırma hakkında daha fazla bilgi edinin":"${__HelpLink}/administration/configuration.aspx"
 
 Devam etmek istemiyorsanız bu e-postayı dikkate almayın.
 
-Herhangi bir sorunuz varsa, lütfen "support@onlyoffice.com":"mailto:support@onlyoffice.com" adresinden bizimle iletişime geçin.
+Herhangi bir sorunuz varsa, lütfen "${__SupportEmail}":"mailto:${__SupportEmail}" adresinden bizimle iletişime geçin.
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Sayın $UserName,
 
 "$FromUserName":"$FromUserLink" kullanıcısından veri silme işlemi başarıyla tamamlandı.
 
-Aşağıdakileri boşaltmak üzere kişisel veri silinmesine izin verilmiştir: 
-
-# Belgeler - $DocsSpace
-# CRM - $CrmSpace
-# E-Posta - $MailSpace
-# Konuşma - $TalkSpace</value>
+Aşağıdakileri boşaltmak üzere kişisel veri silinmesine izin verilmiştir: $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Yeni portal kaydedildi

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,10 @@
 namespace ASC.Data.Storage;
 
 [Transient]
-public class TenantQuotaController : IQuotaController
+public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext,
+        TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker,
+        TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker)
+    : IQuotaController
 {
     private long CurrentSize
     {
@@ -44,26 +47,14 @@ public class TenantQuotaController : IQuotaController
     }
 
     private int _tenant;
-    private readonly TenantManager _tenantManager;
-    private readonly AuthContext _authContext;
-    private readonly TenantQuotaFeatureChecker<MaxFileSizeFeature, long> _maxFileSizeChecker;
-    private readonly TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> _maxTotalSizeChecker;
     private Lazy<long> _lazyCurrentSize;
     private long _currentSize;
     public string ExcludePattern { get; set; }
 
-    public TenantQuotaController(TenantManager tenantManager, AuthContext authContext, TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker, TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker)
-    {
-        _tenantManager = tenantManager;
-        _maxFileSizeChecker = maxFileSizeChecker;
-        _maxTotalSizeChecker = maxTotalSizeChecker;
-        _authContext = authContext;
-    }
-
     public void Init(int tenant, string excludePattern = null)
     {
         _tenant = tenant;
-        _lazyCurrentSize = new Lazy<long>(() => _tenantManager.FindTenantQuotaRowsAsync(tenant).Result
+        _lazyCurrentSize = new Lazy<long>(() => tenantManager.FindTenantQuotaRowsAsync(tenant).Result
             .Where(r => UsedInQuota(r.Tag))
             .Sum(r => r.Counter));
         ExcludePattern = excludePattern;
@@ -147,17 +138,17 @@ public class TenantQuotaController : IQuotaController
 
     public async Task QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
     {
-        var quota = await _tenantManager.GetTenantQuotaAsync(_tenant);
+        var quota = await tenantManager.GetTenantQuotaAsync(_tenant);
         if (quota != null)
         {
             if (quota.MaxFileSize != 0 && quotaCheckFileSize)
             {
-                await _maxFileSizeChecker.CheckAddAsync(_tenant, size);
+                await maxFileSizeChecker.CheckAddAsync(_tenant, size);
             }
 
             if (quota.MaxTotalSize != 0)
             {
-                await _maxTotalSizeChecker.CheckAddAsync(_tenant, CurrentSize + size);
+                await maxTotalSizeChecker.CheckAddAsync(_tenant, CurrentSize + size);
             }
         }
     }
@@ -165,7 +156,7 @@ public class TenantQuotaController : IQuotaController
 
     private async Task SetTenantQuotaRowAsync(string module, string domain, long size, string dataTag, bool exchange, Guid userId)
     {
-        await _tenantManager.SetTenantQuotaRowAsync(
+        await tenantManager.SetTenantQuotaRowAsync(
             new TenantQuotaRow { TenantId = _tenant, Path = $"/{module}/{domain}", Counter = size, Tag = dataTag, UserId = userId, LastModified = DateTime.UtcNow },
             exchange);
 

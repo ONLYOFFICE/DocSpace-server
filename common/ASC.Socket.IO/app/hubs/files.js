@@ -75,7 +75,12 @@
 
     socket.on("restore-backup", () => {
       const room = getRoom("backup-restore");
-      logger.info(`restore backup in room ${room}`);
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+
+      logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId} userId='${user}'|'${userId}']`);
       socket.to(room).emit("restore-backup");
     });
 
@@ -175,9 +180,11 @@
     items.forEach(markAsNewFile);
   }
 
-  function markAsNewFolder({ folderId, count, room } = {}) {
-    logger.info(`markAsNewFolder ${folderId} in room ${room}:${count}`);
-    filesIO.to(room).emit("s:markasnew-folder", { folderId, count });
+  function markAsNewFolder({ folderId, userIds, room } = {}) {
+    logger.info(`markAsNewFolder ${folderId}`);
+    userIds.forEach(({count, owner}) =>{
+      filesIO.to(`${room}-${owner}`).emit("s:markasnew-folder", { folderId, count });
+    });
   }
 
   function markAsNewFolders(items = []) {

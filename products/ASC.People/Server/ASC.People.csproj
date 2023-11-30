@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefaultItemExcludes>$(DefaultItemExcludes);</DefaultItemExcludes>
     <RazorCompileOnBuild>false</RazorCompileOnBuild>
@@ -15,6 +15,7 @@
 	  <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>false</Optimize>
@@ -111,6 +112,15 @@
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\PeopleResource.zh-CN.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.ar-SA.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.az.resx">
+      <DependentUpon>PeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PeopleResource.hy-AM.resx">
       <DependentUpon>PeopleResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,45 +26,34 @@
 
 namespace ASC.Core.ChunkedUploader;
 
-public class CommonChunkedUploadSessionHolder
+public class CommonChunkedUploadSessionHolder(TempPath tempPath,
+    IDataStore dataStore,
+    string domain,
+    long maxChunkUploadSize = 10 * 1024 * 1024)
 {
-    public IDataStore DataStore { get; set; }
+    public IDataStore DataStore { get; set; } = dataStore;
 
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
-    private readonly TempPath _tempPath;
-    public readonly string Domain;
-    public long MaxChunkUploadSize;
+    public long MaxChunkUploadSize = maxChunkUploadSize;
     public string TempDomain;
 
     public const string StoragePath = "sessions";
-    private readonly object _locker = new object();
-
-    public CommonChunkedUploadSessionHolder(
-        TempPath tempPath,
-        IDataStore dataStore,
-        string domain,
-        long maxChunkUploadSize = 10 * 1024 * 1024)
-    {
-        _tempPath = tempPath;
-        DataStore = dataStore;
-        Domain = domain;
-        MaxChunkUploadSize = maxChunkUploadSize;
-    }
+    private readonly object _locker = new();
 
     public async Task StoreAsync(CommonChunkedUploadSession s)
     {
         await using var stream = s.Serialize();
-        await DataStore.SavePrivateAsync(Domain, GetPathWithId(s.Id), stream, s.Expired);
+        await DataStore.SavePrivateAsync(domain, GetPathWithId(s.Id), stream, s.Expired);
     }
 
     public async Task RemoveAsync(CommonChunkedUploadSession s)
     {
-        await DataStore.DeleteAsync(Domain, GetPathWithId(s.Id));
+        await DataStore.DeleteAsync(domain, GetPathWithId(s.Id));
     }
 
     public async Task<Stream> GetStreamAsync(string sessionId)
     {
-        return await DataStore.GetReadStreamAsync(Domain, GetPathWithId(sessionId));
+        return await DataStore.GetReadStreamAsync(domain, GetPathWithId(sessionId));
     }
 
     public async ValueTask InitAsync(CommonChunkedUploadSession chunkedUploadSession)
@@ -76,7 +65,7 @@ public class CommonChunkedUploadSessionHolder
         }
 
         var tempPath = Guid.NewGuid().ToString();
-        var uploadId = await DataStore.InitiateChunkedUploadAsync(Domain, tempPath);
+        var uploadId = await DataStore.InitiateChunkedUploadAsync(domain, tempPath);
 
         chunkedUploadSession.TempPath = tempPath;
         chunkedUploadSession.UploadId = uploadId;
@@ -88,17 +77,18 @@ public class CommonChunkedUploadSessionHolder
         var uploadId = uploadSession.UploadId;
         var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag");
 
-        await DataStore.FinalizeChunkedUploadAsync(Domain, tempPath, uploadId, eTags);
+        await DataStore.FinalizeChunkedUploadAsync(domain, tempPath, uploadId, eTags);
         return Path.GetFileName(tempPath);
     }
 
-    public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath, bool quotaCheckFileSize = true)
+    public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath,
+        bool quotaCheckFileSize = true)
     {
         await MoveAsync(chunkedUploadSession, newPath, Guid.Empty, quotaCheckFileSize);
     }
     public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
     {
-        await DataStore.MoveAsync(Domain, chunkedUploadSession.TempPath, string.Empty, newPath, ownerId, quotaCheckFileSize);
+        await DataStore.MoveAsync(domain, chunkedUploadSession.TempPath, string.Empty, newPath, ownerId, quotaCheckFileSize);
     }
 
     public async Task AbortAsync(CommonChunkedUploadSession uploadSession)
@@ -108,7 +98,7 @@ public class CommonChunkedUploadSessionHolder
             var tempPath = uploadSession.TempPath;
             var uploadId = uploadSession.UploadId;
 
-            await DataStore.AbortChunkedUploadAsync(Domain, tempPath, uploadId);
+            await DataStore.AbortChunkedUploadAsync(domain, tempPath, uploadId);
         }
         else if (!string.IsNullOrEmpty(uploadSession.ChunksBuffer))
         {
@@ -116,7 +106,8 @@ public class CommonChunkedUploadSessionHolder
         }
     }
 
-    public virtual async Task<string> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length)
+    public virtual async Task<string> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,
+        long length)
     {
         var tempPath = uploadSession.TempPath;
         var uploadId = uploadSession.UploadId;
@@ -130,18 +121,22 @@ public class CommonChunkedUploadSessionHolder
             uploadSession.BytesUploaded += length;
         }
 
-        var eTag = await DataStore.UploadChunkAsync(Domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
+        var eTag = await DataStore.UploadChunkAsync(domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber,
+            length);
 
         lock (_locker)
         {
-            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
+            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ??
+                        new Dictionary<int, string>();
             eTags.Add(chunkNumber, eTag);
             uploadSession.Items["ETag"] = eTags;
         }
+
         return Path.GetFileName(tempPath);
     }
 
-    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long chunkLength)
+    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,
+        long chunkLength)
     {
         if (uploadSession.BytesTotal == 0)
         {
@@ -154,7 +149,7 @@ public class CommonChunkedUploadSessionHolder
 
             if (string.IsNullOrEmpty(uploadSession.ChunksBuffer))
             {
-                uploadSession.ChunksBuffer = _tempPath.GetTempFileName();
+                uploadSession.ChunksBuffer = tempPath.GetTempFileName();
             }
 
             await using (var bufferStream = new FileStream(uploadSession.ChunksBuffer, FileMode.Append))
@@ -166,7 +161,8 @@ public class CommonChunkedUploadSessionHolder
 
             if (uploadSession.BytesTotal == uploadSession.BytesUploaded)
             {
-                return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite,
+                return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite,
+                    FileShare.ReadWrite,
                     4096, FileOptions.DeleteOnClose);
             }
         }

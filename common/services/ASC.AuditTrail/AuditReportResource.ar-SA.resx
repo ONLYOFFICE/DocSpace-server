@@ -558,13 +558,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>تم حذف الغرفة</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>تم انشاء الرابط. المسمى: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>تم حذف الرابط</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>تم تحديث الرابط. المسمى: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -776,5 +776,20 @@
   </data>
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>تم تحديث كلمة المرور</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>تم انشاء الرابط الخارجي: {0}. المسمى: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>تم حذف الرابط الخارجي: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>تم تحديث الرابط الخارجي: {0}. المسمى: {1}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>المدينة</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>الدولة</value>
   </data>
 </root>

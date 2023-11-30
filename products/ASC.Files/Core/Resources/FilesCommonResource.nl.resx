@@ -417,6 +417,15 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
     <value>Het bestand is niet langer een concept om het formulier in te vullen.</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Externe koppeling</value>
+    <value>Gedeelde link</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Uitnodiging link</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Het maximum aantal links mag niet groter zijn dan {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>U hebt te vaak geprobeerd uw wachtwoord in te voeren. Probeer het later opnieuw</value>
   </data>
 </root>

@@ -417,6 +417,15 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
     <value>Vous ne pouvez pas épingler une salle</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Lien externe</value>
+    <value>Lien partagé</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Lien d'invitation</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Le nombre maximum de liens ne peut pas excéder {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Vous avez essayé à plusieurs reprises de saisir votre mot de passe. Veuillez réessayer plus tard</value>
   </data>
 </root>

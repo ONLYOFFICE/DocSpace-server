@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using HttpMethod = JSIStudios.SimpleRESTServices.Client.HttpMethod;
+
 namespace ASC.Data.Storage.RackspaceCloud;
 
 [Scope]
-public class RackspaceCloudStorage : BaseStorage
+public class RackspaceCloudStorage(TempPath tempPath,
+        TempStream tempStream,
+        TenantManager tenantManager,
+        PathUtils pathUtils,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        IHttpContextAccessor httpContextAccessor,
+        ILoggerProvider options,
+        ILogger<RackspaceCloudStorage> logger,
+        IHttpClientFactory httpClient,
+        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+        QuotaSocketManager quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
 {
     public override bool IsSupportChunking => true;
-    public TempPath TempPath { get; }
+    public TempPath TempPath { get; } = tempPath;
 
     private string _region;
     private string _private_container;
@@ -43,28 +56,9 @@ public class RackspaceCloudStorage : BaseStorage
     private bool _lowerCasing = true;
     private Uri _cname;
     private Uri _cnameSSL;
-    private readonly List<string> _domains = new List<string>();
-    private readonly ILogger<RackspaceCloudStorage> _logger;
+    private readonly List<string> _domains = new();
 
-    public RackspaceCloudStorage(
-        TempPath tempPath,
-        TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<RackspaceCloudStorage> logger,
-        IHttpClientFactory httpClient,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager)
-    {
-        _logger = logger;
-        TempPath = tempPath;
-    }
-
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -120,6 +114,8 @@ public class RackspaceCloudStorage : BaseStorage
                              ? new Uri(props["cnamessl"], UriKind.Absolute)
                              : new Uri(cdnHeaders.CDNSslUri);
 
+        DataStoreValidator = dataStoreValidator;
+        
         return this;
     }
 
@@ -138,8 +134,7 @@ public class RackspaceCloudStorage : BaseStorage
         var client = GetClient();
 
         var accounMetaData = client.GetAccountMetaData(_region);
-        string secretKey;
-        if (accounMetaData.TryGetValue("Temp-Url-Key", out secretKey))
+        if (accounMetaData.TryGetValue("Temp-Url-Key", out var secretKey))
         {
 
         }
@@ -151,7 +146,7 @@ public class RackspaceCloudStorage : BaseStorage
         }
 
         return Task.FromResult(client.CreateTemporaryPublicUri(
-                                                JSIStudios.SimpleRESTServices.Client.HttpMethod.GET,
+                                                HttpMethod.GET,
                                                 _private_container,
                                                 MakePath(domain, path),
                                                 secretKey,
@@ -283,7 +278,7 @@ public class RackspaceCloudStorage : BaseStorage
             }
             catch (Exception exp)
             {
-                _logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
+                logger.ErrorInvalidationFailed(_public_container + "/" + MakePath(domain, path), exp);
             }
         }
 
@@ -411,11 +406,11 @@ public class RackspaceCloudStorage : BaseStorage
         }
     }
 
-    public override Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir)
+    public override Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir)
     {
         var client = GetClient();
-        var srckey = MakePath(srcdomain, srcdir);
-        var dstkey = MakePath(newdomain, newdir);
+        var srckey = MakePath(srcDomain, srcDir);
+        var dstkey = MakePath(newDomain, newDir);
 
         var paths = client.ListObjects(_private_container, null, null, srckey, _region).Select(x => x.Name);
 
@@ -428,26 +423,26 @@ public class RackspaceCloudStorage : BaseStorage
         return Task.CompletedTask;
     }
 
-    public override async Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true)
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
-        return await MoveAsync(srcdomain, srcpath, newdomain, newpath, Guid.Empty, quotaCheckFileSize);
+        return await MoveAsync(srcDomain, srcPath, newDomain, newPath, Guid.Empty, quotaCheckFileSize);
     }
-    public override async Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true)
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, Guid ownerId, bool quotaCheckFileSize = true)
     {
-        var srcKey = MakePath(srcdomain, srcpath);
-        var dstKey = MakePath(newdomain, newpath);
-        var size = await GetFileSizeAsync(srcdomain, srcpath);
+        var srcKey = MakePath(srcDomain, srcPath);
+        var dstKey = MakePath(newDomain, newPath);
+        var size = await GetFileSizeAsync(srcDomain, srcPath);
 
         var client = GetClient();
 
         client.CopyObject(_private_container, srcKey, _private_container, dstKey);
 
-        await DeleteAsync(srcdomain, srcpath);
+        await DeleteAsync(srcDomain, srcPath);
 
-        await QuotaUsedDeleteAsync(srcdomain, size);
-        await QuotaUsedAddAsync(newdomain, size, ownerId, quotaCheckFileSize);
+        await QuotaUsedDeleteAsync(srcDomain, size);
+        await QuotaUsedAddAsync(newDomain, size, ownerId, quotaCheckFileSize);
 
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
     public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
@@ -462,7 +457,7 @@ public class RackspaceCloudStorage : BaseStorage
         var client = GetClient();
 
         return client.ListObjects(_private_container, null, null, null, MakePath(domain, path), _region)
-                  .Select(x => x.Name.Substring(MakePath(domain, path + "/").Length)).ToAsyncEnumerable();
+                  .Select(x => x.Name[MakePath(domain, path + "/").Length..]).ToAsyncEnumerable();
     }
 
     public override IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
@@ -473,7 +468,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         return paths
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x)))
-                .Select(x => x.Substring(MakePath(domain, path + "/").Length).TrimStart('/')).ToAsyncEnumerable();
+                .Select(x => x[MakePath(domain, path + "/").Length..].TrimStart('/')).ToAsyncEnumerable();
     }
 
     public override Task<bool> IsFileAsync(string domain, string path)
@@ -588,24 +583,24 @@ public class RackspaceCloudStorage : BaseStorage
         return Task.FromResult(result);
     }
 
-    public override async Task<Uri> CopyAsync(string srcdomain, string path, string newdomain, string newpath)
+    public override async Task<Uri> CopyAsync(string srcDomain, string path, string newDomain, string newPath)
     {
-        var srcKey = MakePath(srcdomain, path);
-        var dstKey = MakePath(newdomain, newpath);
-        var size = await GetFileSizeAsync(srcdomain, path);
+        var srcKey = MakePath(srcDomain, path);
+        var dstKey = MakePath(newDomain, newPath);
+        var size = await GetFileSizeAsync(srcDomain, path);
         var client = GetClient();
 
         client.CopyObject(_private_container, srcKey, _private_container, dstKey);
 
-        await QuotaUsedAddAsync(newdomain, size);
+        await QuotaUsedAddAsync(newDomain, size);
 
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task CopyDirectoryAsync(string srcdomain, string dir, string newdomain, string newdir)
+    public override async Task CopyDirectoryAsync(string srcDomain, string dir, string newDomain, string newDir)
     {
-        var srckey = MakePath(srcdomain, dir);
-        var dstkey = MakePath(newdomain, newdir);
+        var srckey = MakePath(srcDomain, dir);
+        var dstkey = MakePath(newDomain, newDir);
         var client = GetClient();
 
         var files = client.ListObjects(_private_container, null, null, null, srckey, _region);
@@ -614,7 +609,7 @@ public class RackspaceCloudStorage : BaseStorage
         {
             client.CopyObject(_private_container, file.Name, _private_container, file.Name.Replace(srckey, dstkey));
 
-            await QuotaUsedAddAsync(newdomain, file.Bytes);
+            await QuotaUsedAddAsync(newDomain, file.Bytes);
         }
     }
 
@@ -752,7 +747,7 @@ public class RackspaceCloudStorage : BaseStorage
 
     private CloudFilesProvider GetClient()
     {
-        var cloudIdentity = new CloudIdentity()
+        var cloudIdentity = new CloudIdentity
         {
             Username = _username,
             APIKey = _apiKey

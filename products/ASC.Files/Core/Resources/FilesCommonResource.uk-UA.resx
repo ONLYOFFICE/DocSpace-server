@@ -417,6 +417,15 @@
     <value>Переглядайте і завантажуйте спільні документи. Завантажуйте файли до спільних папок. Гарантована максимальна сумісність із форматами docx, xlsx і pptx.</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Зовнішнє посилання</value>
+    <value>Спільне посилання</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Посилання-запрошення</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Максимальна кількість посилань не може перевищувати {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Ви намагалися ввести свій пароль забагато разів. Повторіть спробу пізніше</value>
   </data>
 </root>

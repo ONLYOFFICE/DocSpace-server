@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,10 +27,8 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class EditorControllerInternal : EditorController<int>
-{
-    public EditorControllerInternal(
-        FileStorageService fileStorageService,
+[DefaultRoute("file")]
+public class EditorControllerInternal(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
@@ -41,17 +39,9 @@ public class EditorControllerInternal : EditorController<int>
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-        : base(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
-    {
-    }
-}
+    : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper);
 
-public class EditorControllerThirdparty : EditorController<string>
-{
-    private readonly ThirdPartySelector _thirdPartySelector;
-
-    public EditorControllerThirdparty(
-        FileStorageService fileStorageService,
+public class EditorControllerThirdparty(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
@@ -63,11 +53,8 @@ public class EditorControllerThirdparty : EditorController<string>
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-        : base(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
-    {
-        _thirdPartySelector = thirdPartySelector;
-    }
-
+    : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, mapper, commonLinkUtility, filesLinkUtility, folderDtoHelper, fileDtoHelper)
+{
     /// <summary>
     /// Opens a third-party file with the ID specified in the request for editing.
     /// </summary>
@@ -82,18 +69,18 @@ public class EditorControllerThirdparty : EditorController<string>
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [AllowNotPayment]
-    [HttpGet("file/app-{fileId}/openedit")]
+    [HttpGet("app-{fileId}/openedit")]
     public async Task<Configuration<string>> OpenEditThirdPartyAsync(string fileId)
     {
         fileId = "app-" + fileId;
-        var app = _thirdPartySelector.GetAppByFileId(fileId?.ToString());
-        (var file, var editable) = await app.GetFileAsync(fileId?.ToString());
+        var app = thirdPartySelector.GetAppByFileId(fileId);
+        var (file, editable) = await app.GetFileAsync(fileId);
         var docParams = await _documentServiceHelper.GetParamsAsync(file, true, editable ? FileShare.ReadWrite : FileShare.Read, false, editable, editable, editable, false);
         var configuration = docParams.Configuration;
         configuration.Document.Url = app.GetFileStreamUrl(file);
         configuration.Document.Info.Favorite = null;
         configuration.EditorConfig.Customization.GobackUrl = string.Empty;
-        configuration.EditorType = EditorType.External;
+        configuration.EditorType = EditorType.Desktop;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -103,7 +90,7 @@ public class EditorControllerThirdparty : EditorController<string>
                 configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
                 {
                     PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey,
+                    PublicKey = keyPair.PublicKey
                 };
             }
         }
@@ -119,20 +106,7 @@ public class EditorControllerThirdparty : EditorController<string>
     }
 }
 
-public abstract class EditorController<T> : ApiControllerBase
-{
-    protected readonly FileStorageService _fileStorageService;
-    protected readonly DocumentServiceHelper _documentServiceHelper;
-    protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper;
-    protected readonly SettingsManager _settingsManager;
-    protected readonly EntryManager _entryManager;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMapper _mapper;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly FilesLinkUtility _filesLinkUtility;
-
-    public EditorController(
-        FileStorageService fileStorageService,
+public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
@@ -142,18 +116,13 @@ public abstract class EditorController<T> : ApiControllerBase
         CommonLinkUtility commonLinkUtility,
         FilesLinkUtility filesLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
-    {
-        _fileStorageService = fileStorageService;
-        _documentServiceHelper = documentServiceHelper;
-        _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
-        _settingsManager = settingsManager;
-        _entryManager = entryManager;
-        _httpContextAccessor = httpContextAccessor;
-        _mapper = mapper;
-        _commonLinkUtility = commonLinkUtility;
-        _filesLinkUtility = filesLinkUtility;
-    }
+        FileDtoHelper fileDtoHelper)
+    : ApiControllerBase(folderDtoHelper, fileDtoHelper)
+{
+    protected readonly DocumentServiceHelper _documentServiceHelper = documentServiceHelper;
+    protected readonly EncryptionKeyPairDtoHelper _encryptionKeyPairDtoHelper = encryptionKeyPairDtoHelper;
+    protected readonly SettingsManager _settingsManager = settingsManager;
+    protected readonly EntryManager _entryManager = entryManager;
 
     /// <summary>
     /// Saves edits to a file with the ID specified in the request.
@@ -165,12 +134,12 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core">Saved file parameters</returns>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("file/{fileId}/saveediting")]
+    [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(T fileId, [FromForm] SaveEditingRequestDto inDto)
     {
-        await using var stream = _httpContextAccessor.HttpContext.Request.Body;
+        await using var stream = httpContextAccessor.HttpContext.Request.Body;
 
-        return await _fileDtoHelper.GetAsync(await _fileStorageService.SaveEditingAsync(fileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Doc, inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(fileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Doc, inDto.Forcesave));
     }
 
     /// <summary>
@@ -183,10 +152,10 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <returns type="System.Object, System">File key for Document Service</returns>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("file/{fileId}/startedit")]
+    [HttpPost("{fileId}/startedit")]
     public async Task<object> StartEditAsync(T fileId, StartEditRequestDto inDto)
     {
-        return await _fileStorageService.StartEditAsync(fileId, inDto.EditingAlone, inDto.Doc);
+        return await fileStorageService.StartEditAsync(fileId, inDto.EditingAlone, inDto.Doc);
     }
 
     /// <summary>
@@ -202,10 +171,10 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <returns type="System.Collections.Generic.KeyValuePair{System.Boolean, System.String}, System.Collections.Generic">File changes</returns>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/{fileId}/trackeditfile")]
+    [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(T fileId, Guid tabId, string docKeyForTrack, string doc, bool isFinish)
     {
-        return await _fileStorageService.TrackEditFileAsync(fileId, tabId, docKeyForTrack, doc, isFinish);
+        return await fileStorageService.TrackEditFileAsync(fileId, tabId, docKeyForTrack, doc, isFinish);
     }
 
     /// <summary>
@@ -223,13 +192,13 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <httpMethod>GET</httpMethod>
     [AllowAnonymous]
     [AllowNotPayment]
-    [HttpGet("file/{fileId}/openedit")]
+    [HttpGet("{fileId}/openedit")]
     public async Task<ConfigurationDto<T>> OpenEditAsync(T fileId, int version, string doc, bool view)
     {
         var docParams = await _documentServiceHelper.GetParamsAsync(fileId, version, doc, true, !view, true);
         var configuration = docParams.Configuration;
         var file = docParams.File;
-        configuration.EditorType = EditorType.External;
+        configuration.EditorType = EditorType.Desktop;
 
         if (file.RootFolderType == FolderType.Privacy && await PrivacyRoomSettings.GetEnabledAsync(_settingsManager) || docParams.LocatedInPrivateRoom)
         {
@@ -239,7 +208,7 @@ public abstract class EditorController<T> : ApiControllerBase
                 configuration.EditorConfig.EncryptionKeys = new EncryptionKeysConfig
                 {
                     PrivateKeyEnc = keyPair.PrivateKeyEnc,
-                    PublicKey = keyPair.PublicKey,
+                    PublicKey = keyPair.PublicKey
                 };
             }
         }
@@ -251,8 +220,8 @@ public abstract class EditorController<T> : ApiControllerBase
 
         configuration.Token = _documentServiceHelper.GetSignature(configuration);
 
-        var result = _mapper.Map<Configuration<T>, ConfigurationDto<T>>(configuration);
-        result.EditorUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.DocServiceApiUrl);
+        var result = mapper.Map<Configuration<T>, ConfigurationDto<T>>(configuration);
+        result.EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
         result.File = await _fileDtoHelper.GetAsync(file);
         return result;
     }
@@ -266,10 +235,10 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <returns type="ASC.Files.Core.Helpers.DocumentService.FileLink, ASC.Files.Core">File download link</returns>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/{fileId}/presigned")]
+    [HttpGet("{fileId}/presigned")]
     public async Task<DocumentService.FileLink> GetPresignedUriAsync(T fileId)
     {
-        return await _fileStorageService.GetPresignedUriAsync(fileId);
+        return await fileStorageService.GetPresignedUriAsync(fileId);
     }
 
     /// <summary>
@@ -282,10 +251,10 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("file/{fileId}/sharedusers")]
+    [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(T fileId)
     {
-        return await _fileStorageService.SharedUsersAsync(fileId);
+        return await fileStorageService.SharedUsersAsync(fileId);
     }
 
     /// <summary>
@@ -297,50 +266,37 @@ public abstract class EditorController<T> : ApiControllerBase
     /// <returns type="ASC.Web.Files.Services.DocumentService.FileReference, ASC.Files.Core">File reference data</returns>
     /// <path>api/2.0/files/file/referencedata</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("file/referencedata")]
+    [HttpPost("referencedata")]
     public async Task<FileReference<T>> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
     {
-        return await _fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path);
+        return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path);
     }
 
     /// <summary>
-    /// 
+    /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
-    /// <short>Get protect users</short>
+    /// <short>Get users with the access to the protected file</short>
     /// <category>Files</category>
-    /// <param type="System.Int32, System" name="fileId"></param>
-    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users</returns>
+    /// <param type="System.Int32, System" name="fileId">File ID</param>
+    /// <returns type="ASC.Web.Files.Services.WCFService.MentionWrapper, ASC.Files.Core">List of users with their access rights to the protected file</returns>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("file/{fileId}/protectusers")]
+    /// <collection>list</collection>
+    [HttpGet("{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> ProtectUsers(T fileId)
     {
-        return await _fileStorageService.ProtectUsersAsync(fileId);
+        return await fileStorageService.ProtectUsersAsync(fileId);
     }
 }
 
-public class EditorController : ApiControllerBase
-{
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly MessageService _messageService;
-    private readonly DocumentServiceConnector _documentServiceConnector;
-    private readonly CommonLinkUtility _commonLinkUtility;
-
-    public EditorController(
-        FilesLinkUtility filesLinkUtility,
+public class EditorController(FilesLinkUtility filesLinkUtility,
         MessageService messageService,
         DocumentServiceConnector documentServiceConnector,
         CommonLinkUtility commonLinkUtility,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper) : base(folderDtoHelper, fileDtoHelper)
-    {
-        _filesLinkUtility = filesLinkUtility;
-        _messageService = messageService;
-        _documentServiceConnector = documentServiceConnector;
-        _commonLinkUtility = commonLinkUtility;
-    }
-
-
+        FileDtoHelper fileDtoHelper)
+    : ApiControllerBase(folderDtoHelper, fileDtoHelper)
+{
     /// <summary>
     /// Checks the document service location.
     /// </summary>
@@ -354,26 +310,26 @@ public class EditorController : ApiControllerBase
     [HttpPut("docservice")]
     public async Task<IEnumerable<string>> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
-        _filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
-        _filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
-        _filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
+        filesLinkUtility.DocServiceUrl = inDto.DocServiceUrl;
+        filesLinkUtility.DocServiceUrlInternal = inDto.DocServiceUrlInternal;
+        filesLinkUtility.DocServicePortalUrl = inDto.DocServiceUrlPortal;
 
-        await _messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
+        await messageService.SendAsync(MessageAction.DocumentServiceLocationSetting);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
-        if (https.IsMatch(_commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(_filesLinkUtility.DocServiceUrl))
+        if (https.IsMatch(commonLinkUtility.GetFullAbsolutePath("")) && http.IsMatch(filesLinkUtility.DocServiceUrl))
         {
             throw new Exception("Mixed Active Content is not allowed. HTTPS address for Document Server is required.");
         }
 
-        await _documentServiceConnector.CheckDocServiceUrlAsync();
+        await documentServiceConnector.CheckDocServiceUrlAsync();
 
         return new[]
         {
-            _filesLinkUtility.DocServiceUrl,
-            _filesLinkUtility.DocServiceUrlInternal,
-            _filesLinkUtility.DocServicePortalUrl
+            filesLinkUtility.DocServiceUrl,
+            filesLinkUtility.DocServiceUrlInternal,
+            filesLinkUtility.DocServicePortalUrl
         };
     }
 
@@ -392,23 +348,23 @@ public class EditorController : ApiControllerBase
     [HttpGet("docservice")]
     public async Task<object> GetDocServiceUrlAsync(bool version)
     {
-        var url = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.DocServiceApiUrl);
+        var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
 
         var dsVersion = "";
 
         if (version)
         {
-            dsVersion = await _documentServiceConnector.GetVersionAsync();
+            dsVersion = await documentServiceConnector.GetVersionAsync();
         }
 
         return new
         {
             version = dsVersion,
             docServiceUrlApi = url,
-            _filesLinkUtility.DocServiceUrl,
-            _filesLinkUtility.DocServiceUrlInternal,
-            _filesLinkUtility.DocServicePortalUrl,
-            _filesLinkUtility.IsDefault
+            filesLinkUtility.DocServiceUrl,
+            filesLinkUtility.DocServiceUrlInternal,
+            filesLinkUtility.DocServicePortalUrl,
+            filesLinkUtility.IsDefault
         };
     }
 }

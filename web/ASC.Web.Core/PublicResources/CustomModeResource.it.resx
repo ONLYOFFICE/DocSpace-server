@@ -65,24 +65,23 @@ Hai appena creato il tuo office in cloud personale.
 
 h3.È uno spazio di lavoro virtuale in cui è possibile modificare e archiviare documenti, lavorare con loro da qualsiasi luogo fornendo accesso ai tuoi amici o colleghi.
 
-ONLYOFFICE è compatibile con i formati di documenti Microsoft Office ™ e non garantisce alcuna perdita di formattazione o qualità degli oggetti creati. Ci impegniamo ad alleviarti dalla formattazione del mal di testa fedele e ti forniremo un set completo di strumenti di editing professionale.
+h3.Per un rapido avvio, ecco cosa puoi fare in ONLYOFFICE:
 
-h3.Per iniziare, ecco cosa puoi fare in ONLYOFFICE:
+- Crea, visualizza e modifica documenti di testo, fogli di calcolo e presentazioni.
 
-- Carica file dal tuo computer o creane di nuovi;
+- Lavora con tutti i formati di file più diffusi. Massima compatibilità con i formati di documenti MS Office.
 
-- Lavora con tutti i formati di file più diffusi;
+- Crea e collabora su "moduli compilabili":"https://www.onlyoffice.com/form-creator.aspx".
 
-- Modifica forme, grafici, tabelle, equazioni e altri oggetti;
+- Condividi e collabora su documenti office in tempo reale.
 
-- Utilizzare vari componenti aggiuntivi per funzionalità di modifica estese;
+- Utilizza vari componenti aggiuntivi per funzioni di modifica estese.
 
-- Accedi facilmente al tuo personal cloud tramite "Estensione di Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Accedi facilmente al tuo personal cloud tramite "Estensione di Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=it".
 
-Puoi anche modificare i documenti offline con i nostri "editor desktop" gratuiti: "https://www.onlyoffice.com/download-desktop.aspx" o ottenere una "suite di editing mobile": "https://www.onlyoffice.com /mobile.aspx "per il tuo dispositivo iOS o Android.
+Puoi anche modificare i documenti offline col nostro "desktop editor":"https://www.onlyoffice.com/download-desktop.aspx" gratuito o ottenere una suite di editing mobile per il tuo dispositivo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" o "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-Cordiali saluti,
-il team ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>Salve,
@@ -91,22 +90,22 @@ Hai appena registrato un account presso la soluzione ONLYOFFICE per uso personal
 
 Se non riesci ad aprire il link, copia il seguente "$InviteLink":"$InviteLink" e incollalo nella barra degli indirizzi del browser.
 
-Cordiali saluti,
-il team ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Hai richiesto la chiusura del tuo account su personal.onlyoffice.com. Segui il collegamento per completare la richiesta (il collegamento è attivo per un periodo di 7 giorni):
 
-$GreenButton
+$OrangeButton
 
-* Nota *: dopo la cancellazione, il tuo account e tutti i dati ad esso associati verranno cancellati in modo permanente in conformità con la nostra "Dichiarazione sulla privacy":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+* Nota *: dopo la cancellazione, il tuo account e tutti i dati ad esso associati verranno cancellati in modo permanente in conformità con la nostra "Dichiarazione sulla privacy":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+
+"Maggiori dettagli sulla chiusura account":"${__HelpLink}/administration/configuration.aspx"
 
 Ignora questa e-mail se non vuoi procedere.
 
-In caso di domande, contattaci all'indirizzo "support@onlyoffice.com":"mailto: support@onlyoffice.com"
+In caso di domande, contattaci all'indirizzo "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Cordiali saluti,
-il team ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Gentile $UserName,
@@ -149,7 +148,7 @@ L'eliminazione dei dati personali ha permesso di liberare $DocsSpace</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>‎Vuoi cambiare la password del tuo account cloud office? Fai clic sul pulsante qui sotto per confermare.
 
-$GreenButton
+$OrangeButton
 
 ‎Il link è valido per 7 giorni.
 
@@ -168,20 +167,18 @@ Benvenuto in ONLYOFFICE DocSpace! Il tuo profilo utente è stato aggiunto con su
 
 * *Collegare qualsiasi archivio cloud* e lavorare senza passare da un'app all'altra.
 
-$GreenButton
+$OrangeButton
 
-Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"https://helpcenter.onlyoffice.com/" o chiedi al nostro "team di supporto":"https://www.onlyoffice.com/it/support-contact-form.aspx".
+Se hai bisogno di aiuto, consulta il nostro "Centro assistenza":"${__HelpLink}" o chiedi al nostro "team di supporto":"${__SupportLink}".
 
-Distinti saluti,
-Team di ONLYOFFICE
-"www.onlyoffice.com":"http://onlyoffice.com/it"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Vuoi cambiare l'e-mail del tuo account dell'ufficio nel cloud?
 
 Fai clic sul pulsante in basso e accedi* al tuo cloud.
 
-$GreenButton
+$OrangeButton
 
 Il collegamento è valido per 7 giorni.
 

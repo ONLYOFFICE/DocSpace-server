@@ -125,7 +125,7 @@ Merhaba!
 
 "${__VirtualRootPath}":"$InviteLink" portalına katılmak için e-posta adresinizi aktifleştirmeniz gerekmektedir. Bu işlem güvenlik için yapılmaktadır.
 
-$GreenButton
+$OrangeButton
 
 Bu link 7 gün boyunca geçerli olacaktır. Lütfen bu dönem içerisinde e-posta aktivasyonunuzu tamamlayın.</value>
   </data>
@@ -136,26 +136,11 @@ Değerli $OwnerName,
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portalınızın verilerini içeren bir yedekleme tamamlandı.
 
-Daha fazla bilgi edinmek için lütfen "Veri yedekleme" bölümümüze göz atın:"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block" kullanıcı kılavuzu.
+Daha fazla bilgi edinmek için lütfen "Veri yedekleme":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block" bölümümüze göz atın kullanıcı kılavuzu.
 
-Herhangi bir sorunuz olursa veya yardıma ihtiyaç duyarsanız lütfen bizimle irtibata geçin "support.onlyoffice.com":"http://support.onlyoffice.com"
+Herhangi bir sorunuz olursa veya yardıma ihtiyaç duyarsanız lütfen bizimle irtibata geçin "${__SupportLink}":"${__SupportLink}"
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
-  </data>
-  <data name="pattern_change_password" xml:space="preserve">
-    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı için şifre değişikliği talebi
-
-"${__VirtualRootPath}":"${__VirtualRootPath}" portalı için kullandığınız şifreyi değiştirme talebiniz ulaştı.
-
-Lütfen aşağıdaki linki takip ederek şifrenizi değiştirin:
-
-$GreenButton
-
-*Not*: bu link 7 gün boyunca geçerlidir. Lütfen bu süre zarfında şifre değiştirme işlemini tamamlayın.
-
-Şifrenizi değiştirmek istemiyorsanız ya da bu e-postanın hatalı olduğunu düşünüyorsanız "${__VirtualRootPath}":"${__VirtualRootPath}" portalı yöneticisi ile görüşün.</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_change_phone" xml:space="preserve">
     <value>h1.Cep telefonu numarası değişikliği
@@ -164,7 +149,7 @@ ${LetterLogoText} portalındaki cep telefonu numaranızı değiştirme talebinde
 
 Lütfen aşağıdaki linke tıklayarak cep telefonu numaranızı değiştirin:
 
-$GreenButton
+$OrangeButton
 
 Cep telefonu numaranızı değiştirmek istemiyorsanız veya bu e-postanın hatalı olduğunu düşünüyorsanız lütfen dikkate almayın veya portal yöneticiniz ile görüşün.</value>
   </data>
@@ -177,7 +162,7 @@ Değerli $OwnerName,
 
 Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal sahibi değişikliğini bu sürede tamamlayın.</value>
   </data>
@@ -190,93 +175,97 @@ Değerli $OwnerName,
 
 Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal adresi değişikliğini bu sürede tamamlayın.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: *gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışın*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Truly yours, 
-ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: *gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışın*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Truly yours, 
-ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: *gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışın*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Truly yours, 
-ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: *gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışın*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlayın* ve uygulamalar arasında geçiş yapmadan çalışın. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezi":"https://helpcenter.onlyoffice.com/" mize göz atın veya "destek ekibi":"https://www.onlyoffice.com/support-contact-form.aspx" mize sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Truly yours, 
-ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı mesajları
@@ -294,7 +283,7 @@ ${LetterLogoText} bünyesindeki "${__VirtualRootPath}":"$InviteLink" portalına 
 
 Daveti kabul etmek için adınızı ve şifrenizi aşağıdaki linke tıklayarak girin:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 48 saat boyunca geçerli olacaktır. Lütfen işlemi bu sürede tamamlayın.</value>
   </data>
@@ -304,13 +293,11 @@ $GreenButton
 Portal başka bir bölgeye taşınırken hata oluştur. Lütfen daha sonra tekrar deneyin.
 Portalınız eski adresinde kullanılabilir "$PortalUrl":"$PortalUrl"
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
-^Bu bildirimleri almak istemiyorsanız lütfen "abonelik ayarlarınızı" değiştirin:"$RecipientSubscriptionConfigURL".^</value>
+^Bu bildirimleri almak istemiyorsanız lütfen "abonelik ayarlarınızı":"$RecipientSubscriptionConfigURL" değiştirin.^</value>
   </data>
   <data name="pattern_migration_server_failure" xml:space="preserve">
     <value>h1.Portal başka bölgeye taşıma hatası
@@ -318,13 +305,11 @@ ONLYOFFICE™ Destek Ekibi
 Portal başka bir bölgeye taşınırken hata oluştur. Lütfen daha sonra tekrar deneyin.
 Portalınız eski adresinde kullanılabilir "$PortalUrl":"$PortalUrl"
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
-^Bu bildirimleri almak istemiyorsanız lütfen "abonelik ayarlarınızı" değiştirin:"$RecipientSubscriptionConfigURL".^</value>
+^Bu bildirimleri almak istemiyorsanız lütfen "abonelik ayarlarınızı":"$RecipientSubscriptionConfigURL" değiştirin.^</value>
   </data>
   <data name="pattern_migration_start" xml:space="preserve">
     <value>h1.Portal başka bölgeye taşıma başlatıldı
@@ -333,11 +318,9 @@ $RegionName bölgesine mortal taşıma işlemi başladı. Veri miktarınıza ba�
 
 *Not*: portal taşıma sürecinde kullanılamayacaktır. Taşıma tamamlandıktan sonra portal URL'si değişecek olup paylaşılan tüm belge linkleri erişilemez olacaktır.
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı devre dışı bırakma
@@ -346,18 +329,16 @@ Değerli $OwnerName,
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portalını geçici olarak deaktive etme talebinde bulundunuz. Lütfen aşağıdaki linki onaylayarak işlemi tamamlayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal sahibi değişikliğini bu sürede tamamlayın.
 
 Portalınızı dilediğiniz zaman aşağıdaki linke tıklayarak aktifleştirebilirsiniz:
 p=. "Portal Aktivasyonu":"$ActivateUrl" (bu link sınırsız süre geçerlidir)
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı silinmesi
@@ -369,20 +350,18 @@ Değerli $OwnerName,
 *Önemli! Portalınızdaki tüm veriler, kayıt bilgileri kaybolacak ve kurtarılamayacaktır.*
 
 #if($AutoRenew == "True")
-Portalınızı silmeden önce otomatik faturalandırmanın kapalı olduğundan emin olun. Otomatik faturalandırma statüsünü kontrol etmek için "Avangate hesabı" bölümüne gidebilirsiniz:"https://secure.avangate.com/myaccount/".
+Portalınızı silmeden önce otomatik faturalandırmanın kapalı olduğundan emin olun. Otomatik faturalandırma statüsünü kontrol etmek için "Avangate hesabı":"https://secure.avangate.com/myaccount/" bölümüne gidebilirsiniz.
 #end
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" portalınızı kesinlikle silmek istiyorsanız lütfen aşağıdaki linke tıklayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen portal silinmesi işlemini bu sürede tamamlayın.
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Portal adresi değişikliği
@@ -394,13 +373,13 @@ $PortalUrl portal adresiniz "${__VirtualRootPath}":"${__VirtualRootPath}" olarak
 *Not*: Paylaşılan tüm belgeler artık erişilemezdir, ayrıca DNS ayarları ve tek giriş seçenekleri değiştirilene kadar durdurulmuştur. Üçüncü parti iCal linkleri siz yeniden yükleyene dek takviminize eklenmiş olup güncellenmeyecektir.</value>
   </data>
   <data name="pattern_profile_delete" xml:space="preserve">
-    <value>h1.Profilin "${__VirtualRootPath}":"${__VirtualRootPath}" portalından kaldırılması 
+    <value>h1.Profilin "${__VirtualRootPath}":"${__VirtualRootPath}" portalından kaldırılması
 
 Profilinizi kalıcı olarak "${__VirtualRootPath}":"${__VirtualRootPath}" portalından silme talebinde bulundunuz.
 
 Profilinizi silmek istiyorsanız aşağıdaki linki takip edin:
 
-$GreenButton
+$OrangeButton
 
 *Not*: bu link 7 gün boyunca geçerli olacaktır. Lütfen bu süre zarfında profil silme işlemini tamamlayın.</value>
   </data>
@@ -459,11 +438,11 @@ Portal geri yükleme başladı. Veri miktarına bağlı olarak biraz zaman alabi
 
 *Not*: geri yükleme sürecinde portal devre dışı olacaktır.
 
-Yardıma ihtiyacınız varsa ya da sorularınız varsa "support@onlyoffice.com":"mailto:support@onlyoffice.com" adresinden bizimle irtibata geçebilirsiniz.
+Yardıma ihtiyacınız varsa ya da sorularınız varsa "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden bizimle irtibata geçebilirsiniz.
 
-Saygılarımızla,
-ONLYOFFICE™ Destek Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours
+
+^Bu bildirimleri almak istemiyorsanız lütfen "abonelik ayarlarınızı":"$RecipientSubscriptionConfigURL" değiştirin.^</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portal profil değişikliği bildirimi
@@ -471,7 +450,7 @@ ONLYOFFICE™ Destek Ekibi
 "$__AuthorName":"$__AuthorUrl" kullanıcısı "${__VirtualRootPath}":"${__VirtualRootPath}" portalında yer alan profilindeki bilgileri değiştirdi.
 
 
-^Profil güncellemeleri hakkında bildirim almak istemiyorsanız, lütfen "abonelik ayarlarınızı" değiştirin:"$RecipientSubscriptionConfigURL".^</value>
+^Profil güncellemeleri hakkında bildirim almak istemiyorsanız, lütfen "abonelik ayarlarınızı":"$RecipientSubscriptionConfigURL" değiştirin.^</value>
   </data>
   <data name="pattern_send_whats_new" xml:space="preserve">
     <value>h1.$Date tarihinde DocSpace'inizdeki yenilikler burada
@@ -487,8 +466,7 @@ $activity
 Bu mesaj otomatik olarak SMTP ayarlarınızı test etmek için oluşturulmuştur. Bu mesajı aldıysanız ayarlarınız doğru demektir ve portalda kullanılabilirdir.
 
 
-Saygılarımızla,
-ONLYOFFICE Ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalına yeni kişi eklendi
@@ -496,7 +474,7 @@ ONLYOFFICE Ekibi</value>
 "$__AuthorName":"$__AuthorUrl" "${__VirtualRootPath}":"${__VirtualRootPath}" adresindeki portalınıza katıldı.
 
 
-^Yeni kullanıcılar ile ilgili bildirimler almak istemiyorsanız lütfen "abonelik ayarları" bölümüne gidin:"$RecipientSubscriptionConfigURL".^</value>
+^Yeni kullanıcılar ile ilgili bildirimler almak istemiyorsanız lütfen "abonelik ayarları":"$RecipientSubscriptionConfigURL" bölümüne gidin.^</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Lütfen e-posta adresinizi etkinleştirin</value>
@@ -630,381 +608,409 @@ ONLYOFFICE Ekibi</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE hesabınızın şifresini değiştirmek mi istiyorsunuz? Onaylamak için aşağıdaki düğmeyi tıklayın.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
 Şifrenizi değiştirmek istemiyorsanız bu mesajı yoksayın</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliğini artırabileceğiniz bir belge merkezi olan ONLYOFFICE DocSpace'i oluşturdunuz. Adresi "${__VirtualRootPath}":"${__VirtualRootPath}" şeklindedir.
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
-Yeni bir belge iş birliği yönteminin keyfini çıkarın!
+*Yeni bir belge iş birliği yönteminin keyfini çıkarın!*
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliğini artırabileceğiniz bir belge merkezi olan ONLYOFFICE DocSpace'i oluşturdunuz. Adresi "${__VirtualRootPath}":"${__VirtualRootPath}" şeklindedir.
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
-Yeni bir belge iş birliği yönteminin keyfini çıkarın!
+*Yeni bir belge iş birliği yönteminin keyfini çıkarın!*
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliğini artırabileceğiniz bir belge merkezi olan ONLYOFFICE DocSpace'i oluşturdunuz. Adresi "${__VirtualRootPath}":"${__VirtualRootPath}" şeklindedir.
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
-
-$GreenButton
+$OrangeButton
 
 Mevcut tarife planınız STARTUP. Tamamen ücretsizdir ve şunları içerir:
 
-* 1 yönetici, 2 uzman kullanıcı
-* 12 odaya kadar
-* Her odada sınırsız sayıda kullanıcı
-* 2 GB disk alanı
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 yönetici, 2 uzman kullanıcı&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;12 odaya kadar&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Her odada sınırsız sayıda kullanıcı&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2 GB disk alanı&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
-Yeni bir belge iş birliği yönteminin keyfini çıkarın!
+*Yeni bir belge iş birliği yönteminin keyfini çıkarın!*
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliğini artırabileceğiniz bir belge merkezi olan ONLYOFFICE DocSpace'i oluşturdunuz. Adresi "${__VirtualRootPath}":"${__VirtualRootPath}" şeklindedir.
 
 Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):
 
-$GreenButton
+$OrangeButton
 
-Yeni bir belge iş birliği yönteminin keyfini çıkarın!
+*Yeni bir belge iş birliği yönteminin keyfini çıkarın!*
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;Ücretsiz&lt;/span&gt; ONLYOFFICE uygulamalarını edinin
+
+
+Merhaba, $UserName!
 
 Belgeler üzerinde herhangi bir cihazınızdan çalışmak için ücretsiz ONLYOFFICE uygulamalarını edinin.
 
-# Windows, Linux ve Mac'te belgeler üzerinde çevrimdışı çalışmak için "ONLYOFFICE Masaüstü Editörleri":"https://www.onlyoffice.com/download-desktop.aspx" ni indirin.
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Belgeler üzerinde çevrimdışı çalışmak için ONLYOFFICE Masaüstü Editörleri&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Mobil cihazlarda doküman düzenlemek için "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" veya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Mobil cihazlarda doküman düzenlemek için&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. Belgeleriniz üzerinde etkin çalışmanız için &lt;span style="color:#FF6F3D;"&gt;5 ipucu&lt;/span&gt;
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler üzerinde çalışmayı nasıl daha etkili hale getireceğinize dair bazı ipuçlarını burada bulabilirsiniz.
 
-*#1. Çalışma şeklinizi seçin.* Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Çalışma şeklinizi seçin.&lt;/b&gt; &lt;br/&gt;Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Sahip olduğunuz herhangi bir içerikle çalışın.* Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Sahip olduğunuz herhangi bir içerikle çalışın.&lt;/b&gt;Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Etkin bir şekilde birlikte yazın.* İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Etkin bir şekilde birlikte yazın.&lt;/b&gt; &lt;br/&gt;İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Güvenli bir şekilde işbirliği yapın.&lt;/b&gt; &lt;br/&gt;Esnek izinler ve kullanıcı rolleriyle tüm alana veya ayrı odalara erişime ince ayar yapın. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Yapay zeka yardımcı eklentisinden yararlanın.&lt;/b&gt;&lt;br/&gt; Metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. Belgeleriniz üzerinde etkin çalışmanız için &lt;span style="color:#FF6F3D;"&gt;5 ipucu&lt;/span&gt;
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler üzerinde çalışmayı nasıl daha etkili hale getireceğinize dair bazı ipuçlarını burada bulabilirsiniz.
 
-*#1. Çalışma şeklinizi seçin.* Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Çalışma şeklinizi seçin.&lt;/b&gt; &lt;br/&gt;Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Sahip olduğunuz herhangi bir içerikle çalışın.* Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Sahip olduğunuz herhangi bir içerikle çalışın.&lt;/b&gt;Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Etkin bir şekilde birlikte yazın.* İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Etkin bir şekilde birlikte yazın.&lt;/b&gt; &lt;br/&gt;İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Güvenli bir şekilde işbirliği yapın.&lt;/b&gt; &lt;br/&gt;Esnek izinler ve kullanıcı rolleriyle tüm alana veya ayrı odalara erişime ince ayar yapın. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Yapay zeka yardımcı eklentisinden yararlanın.&lt;/b&gt;&lt;br/&gt; Metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. Belgeleriniz üzerinde etkin çalışmanız için &lt;span style="color:#FF6F3D;"&gt;5 ipucu&lt;/span&gt;
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler üzerinde çalışmayı nasıl daha etkili hale getireceğinize dair bazı ipuçlarını burada bulabilirsiniz.
 
-*#1. Çalışma şeklinizi seçin.* Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Çalışma şeklinizi seçin.&lt;/b&gt; &lt;br/&gt;Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Sahip olduğunuz herhangi bir içerikle çalışın.* Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Sahip olduğunuz herhangi bir içerikle çalışın.&lt;/b&gt;Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Etkin bir şekilde birlikte yazın.* İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Etkin bir şekilde birlikte yazın.&lt;/b&gt; &lt;br/&gt;İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Güvenli bir şekilde işbirliği yapın.&lt;/b&gt; &lt;br/&gt;Esnek izinler ve kullanıcı rolleriyle tüm alana veya ayrı odalara erişime ince ayar yapın. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Yapay zeka yardımcı eklentisinden yararlanın.&lt;/b&gt;&lt;br/&gt; Metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. Belgeleriniz üzerinde etkin çalışmanız için &lt;span style="color:#FF6F3D;"&gt;5 ipucu&lt;/span&gt;
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'inizi kullanmaktan umarız memnun kalırsınız. Belgeler üzerinde çalışmayı nasıl daha etkili hale getireceğinize dair bazı ipuçlarını burada bulabilirsiniz.
 
-*#1. Çalışma şeklinizi seçin.* Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Çalışma şeklinizi seçin.&lt;/b&gt; &lt;br/&gt;Gerçek zamanlı birlikte yazma için iş birliği odaları veya her amaca yönelik esnek ayarlara sahip özel odalar oluşturarak iş akışınızı ihtiyacınıza göre düzenleyin.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#2. Sahip olduğunuz herhangi bir içerikle çalışın.* Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Sahip olduğunuz herhangi bir içerikle çalışın.&lt;/b&gt;Odalarınızda farklı biçimlerdeki dosyaları depolayın ve bunlarla çalışın: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#3. Etkin bir şekilde birlikte yazın.* İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Etkin bir şekilde birlikte yazın.&lt;/b&gt; &lt;br/&gt;İki birlikte düzenleme moduyla belgeler üzerinde iş birliği yapın: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-*#4. 3. taraf bulutları bağlayın.* Herhangi bir bulut depolama birimini bağlayın ve uygulamalar arasında geçiş yapmadan çalışın.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Güvenli bir şekilde işbirliği yapın.&lt;/b&gt; &lt;br/&gt;Esnek izinler ve kullanıcı rolleriyle tüm alana veya ayrı odalara erişime ince ayar yapın. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Yapay zeka yardımcı eklentisinden yararlanın.&lt;/b&gt;&lt;br/&gt; Metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb. &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’in işletme aboneliğini keşfedin
+
+
+Merhaba, $UserName!
 
 Burada, kullanıcı deneyiminizi daha da konforlu hâle getirmemize yardımcı olabilecek üç basit soru bulunmaktadır.
 
-* ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 En az bir 'evet' cevabınız varsa, ONLYOFFICE DocSpace'inize istediğiniz sayıda yönetici eklemenize ve markalama seçeneklerini uygulamanıza olanak tanıyan BUSINESS planını seçin.
 
-Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz.
+Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz. 
 
-_Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’in işletme aboneliğini keşfedin
+
+
+Merhaba, $UserName!
 
 Burada, kullanıcı deneyiminizi daha da konforlu hâle getirmemize yardımcı olabilecek üç basit soru bulunmaktadır.
 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?
 
 En az bir 'evet' cevabınız varsa, ONLYOFFICE DocSpace'inize istediğiniz sayıda yönetici eklemenize ve markalama seçeneklerini uygulamanıza olanak tanıyan BUSINESS planını seçin.
 
-Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz.
+Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz. 
 
-_Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’in işletme aboneliğini keşfedin
+
+
+Merhaba, $UserName!
 
 Burada, kullanıcı deneyiminizi daha da konforlu hâle getirmemize yardımcı olabilecek üç basit soru bulunmaktadır.
 
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?
 
 En az bir 'evet' cevabınız varsa, ONLYOFFICE DocSpace'inize istediğiniz sayıda yönetici eklemenize ve markalama seçeneklerini uygulamanıza olanak tanıyan BUSINESS planını seçin.
 
-Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz.
+Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz. 
 
-_Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’in işletme aboneliğini keşfedin
+
+
+Merhaba, $UserName!
 
 Burada, kullanıcı deneyiminizi daha da konforlu hâle getirmemize yardımcı olabilecek üç basit soru bulunmaktadır.
 
-* ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'inizde iş birliği yapabileceğiniz büyük bir ekibiniz veya çok sayıda müşteri ve ortağınız mı var? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Çok sayıda belge ile çalışmak için herhangi bir sayıda oda oluşturmak ister misiniz? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;ONLYOFFICE DocSpace'i kendi markanız altında kullanmak ister misiniz?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 En az bir 'evet' cevabınız varsa, ONLYOFFICE DocSpace'inize istediğiniz sayıda yönetici eklemenize ve markalama seçeneklerini uygulamanıza olanak tanıyan BUSINESS planını seçin.
 
-Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz.
+Bunu yapmak için lütfen ONLYOFFICE DocSpace'inizin "Ödemeler bölümü":"$PricingPage" kısmına bakın. Burada, tüm ödeme ayrıntılarını kolayca işleyebileceğiniz Stripe Müşteri Portalı'na giden bireysel bir bağlantı göreceksiniz. 
 
-_Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir. _
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Lütfen dikkat: Aboneliğe ödeme yapan kişi ödeyen olur. Yalnızca ödeyen kişi abonelikte değişiklik (yönetici sayısını ayarlama) yapabilir. Kullanıcıların ödeme ayrıntılarına erişimi yoktur. ONLYOFFICE DocSpace hesabının sahibi, ödeyeni daha sonra istediği zaman yeniden atayabilir.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Merhaba!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+
+Merhaba!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Merhaba!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>Merhaba!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Hello!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>Merhaba!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odadaki diğer kullanıcılarla birlikte çalışmak*: gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışmak*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapmak*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odadaki diğer kullanıcılarla birlikte çalışmak*: gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışmak*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapmak*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odadaki diğer kullanıcılarla birlikte çalışmak*: gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışmak*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapmak*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
-* Davet edildiğiniz odadaki diğer kullanıcılarla birlikte çalışmak*: gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt; Davet edildiğiniz odada diğer kullanıcılarla birlikte çalışın: &lt;b&gt;gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar &lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Farklı biçimlerdeki dosyalarla çalışmak*: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Farklı biçimlerdeki dosyalarla çalışın&lt;/b&gt;: metin belgeleri, elektronik tablolar, sunumlar, dijital formlar, PDF'ler, e-kitaplar, multimedya.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapmak*: gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;İki ortak düzenleme moduyla belgeler üzerinde iş birliği yapın&lt;/b&gt; gerçek zamanlı veya paragraf kilitleme. Değişiklikleri takip edin, yerleşik sohbeti kullanarak veya sesli ve görüntülü aramalar yaparak gerçek zamanlı olarak iletişim kurun.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Herhangi bir bulut depolama alanını bağlamak* ve uygulamalar arasında geçiş yapmadan çalışmak.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Yapay zeka yardımcı eklentisinden yararlanın:&lt;/b&gt; metinleri özetleyin ve çevirin, resimler ve anahtar kelimeler oluşturun, kelimeleri analiz edin vb.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Yardıma ihtiyacınız varsa "Yardım Merkezimize":"https://helpcenter.onlyoffice.com/" göz atın veya "destek ekibimize":"https://www.onlyoffice.com/support-contact-form.aspx" sorun.
+Yardıma ihtiyacınız varsa "Yardım Merkezi":"${__HelpLink}" mize göz atın veya "destek ekibi":"${__SupportLink}".
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalından gelen mesaj
@@ -1016,30 +1022,32 @@ E-posta: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;Ücretsiz&lt;/span&gt; ONLYOFFICE uygulamalarını edinin
+
+
+Merhaba, $UserName!
 
 Belgeler üzerinde herhangi bir cihazınızdan çalışmak için ücretsiz ONLYOFFICE uygulamalarını edinin.
 
-# Windows, Linux ve Mac'te belgeler üzerinde çevrimdışı çalışmak için "ONLYOFFICE Masaüstü Editörleri"ni indirin:"https://www.onlyoffice.com/download-desktop.aspx".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Belgeler üzerinde çevrimdışı çalışmak için ONLYOFFICE Masaüstü Editörleri&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Mobil cihazlarda doküman düzenlemek için "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" veya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Mobil cihazlarda doküman düzenlemek için&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;Ücretsiz&lt;/span&gt; ONLYOFFICE uygulamalarını edinin
+
+
+Merhaba, $UserName!
 
 Belgeler üzerinde herhangi bir cihazınızdan çalışmak için ücretsiz ONLYOFFICE uygulamalarını edinin.
 
-# Windows, Linux ve Mac'te belgeler üzerinde çevrimdışı çalışmak için "ONLYOFFICE Masaüstü Editörleri"ni indirin:"https://www.onlyoffice.com/download-desktop.aspx".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Belgeler üzerinde çevrimdışı çalışmak için ONLYOFFICE Masaüstü Editörleri&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-#Mobil cihazlarda doküman düzenlemek için "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" veya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Mobil cihazlarda doküman düzenlemek için&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Merhaba!
@@ -1053,79 +1061,67 @@ ONLYOFFICE ekibi</value>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>ONLYOFFICE Kişisel hesabınızın şifresini değiştirmek mi istiyorsunuz? Onaylamak için aşağıdaki düğmeyi tıklayın.
 
-$GreenButton 
+$OrangeButton 
 
 Bağlantı 7 gün boyunca geçerlidir.
 
 Şifrenizi değiştirmek istemiyorsanız bu mesajı yoksayın.</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace'iniz başarıyla devre dışı bırakıldı. Tüm verilerinizin "Gizlilik Politikamız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca silineceğini lütfen unutmayın.
+    <value>h1. ONLYOFFICE DocSpace &lt;span style="color:#FF6F3D;"&gt;devre dışı bırakıldı &lt;/span&gt;
 
-Neden ayrılmaya karar verdiniz? Deneyiminizi bizimle paylaşın.
- 
-$GreenButton
 
-Teşekkürler ve iyi şanslar!
+ONLYOFFICE DocSpace'iniz başarıyla devre dışı bırakıldı. Tüm verilerinizin "Gizlilik Politikamız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca silineceğini lütfen unutmayın. 
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Neden ayrılmaya karar verdiniz? Deneyiminizi bizimle paylaşın&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
+
+*Teşekkürler ve iyi şanslar!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>Merhaba, $UserName!
+    <value>h1. Configure your &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Merhaba, $UserName!
 
 ONLYOFFICE DocSpace'inizi daha güvenli hale getirmek için güvenlik ayarlarını düzenleyin:
 
-* Şifre gücünü ayarlayın.
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Şifre gücünü ayarlayın&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;İki faktörlü kimlik doğrulamayı ve Tek Oturum Açma’yı etkinleştirin&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Güvenilir posta alan adlarını ve oturum ömrünü belirleyin&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Belirli IP adreslerinden erişimi kısıtlayın&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Yönetici mesajlarına izin verin veya kısıtlayın&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt; Yönetici erişim haklarını yönetin&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Veri yedeklemeleri yapın&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
-* İki faktörlü kimlik doğrulamayı ve Tek Oturum Açma’yı etkinleştirin.
+$OrangeButton
 
-* Güvenilir posta alan adlarını ve oturum ömrünü belirleyin.
+ONLYOFFICE DocSpace'inizi yapılandırma ve yönetme hakkında daha fazla bilgi edinmek için "Yardım Merkezimizi":"${__HelpLink}" ziyaret edin. İşlevsellik hakkında sorularınız olduğunda da buraya başvurabilirsiniz.
 
-* Belirli IP adreslerinden erişimi kısıtlayın.
-
-* Yönetici mesajlarına izin verin veya kısıtlayın.
-
-* Yönetici erişim haklarını yönetin.
-
-* Veri yedeklemeleri yapın.
-
-$GreenButton
-
-ONLYOFFICE DocSpace'inizi yapılandırma ve yönetme hakkında daha fazla bilgi edinmek için "Yardım Merkezimizi":"https://helpcenter.onlyoffice.com/" ziyaret edin. İşlevsellik hakkında sorularınız olduğunda da buraya başvurabilirsiniz.
-
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna yarım yıldan fazla bir süredir giriş yapmadınız.
+    <value>h1. ONLYOFFICE DocSpace’iniz &lt;span style="color:#FF6F3D;"&gt;silinecektir&lt;/span&gt;
 
-Artık kullanmamaya karar verdiğiniz için ONLYOFFICE DocSpace'iniz ve tüm veriler "Gizlilik Politikamız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca silinecektir.
 
-Geri bildirim almaktan memnun oluruz. Niçin ONLYOFFICE DocSpace'i kullanmayı bırakmaya karar verdiniz?
+ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna yarım yıldan fazla bir süredir giriş yapmadınız. 
 
-$GreenButton
+Artık kullanmamaya karar verdiğiniz için ONLYOFFICE DocSpace'iniz ve tüm veriler "Gizlilik Politikamız":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca silinecektir. 
 
-Bunun bir hata olduğunu düşünüyorsanız ve ONLYOFFICE DocSpace'i kullanmaya devam etmek istiyorsanız, lütfen "destek ekibimiz":"https://www.onlyoffice.com/support-contact-form.aspx" ile iletişime geçin.
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Geri bildirim almaktan memnun oluruz. Niçin ONLYOFFICE DocSpace'i kullanmayı bırakmaya karar verdiniz?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-Saygılarımızla, 
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+Bunun bir hata olduğunu düşünüyorsanız ve ONLYOFFICE DocSpace'i kullanmaya devam etmek istiyorsanız, lütfen "destek ekibimiz":"${__SupportLink}". 
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>Merhaba!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumunda ONLYOFFICE DocSpace'e katılmaya davetlisiniz. Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Davet linkine tıkladıktan sonra hesabınız için lütfen yeni bir şifre belirleyiniz.
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
@@ -1134,11 +1130,9 @@ Lütfen ONLYOFFICE DocSpace'iniz için $PaymentDelay‎ günlük ek sürenin etk
 
 Business aboneliğinizin ödemesini, ödemesiz dönem sona ermeden önce yaptığınızdan emin olun. Bu sayede ONLYOFFICE DocSpace'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Merhaba, $UserName!
@@ -1147,11 +1141,9 @@ Lütfen ONLYOFFICE DocSpace aboneliğinizin üç gün içinde sona ereceğini di
 
 Business aboneliğinizi şimdi ödemenizi ve ONLYOFFICE DocSpace'inizin tüm avantajlarını kullanmaya devam etmenizi tavsiye ederiz.
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Merhaba, $UserName!
@@ -1160,11 +1152,9 @@ ONLYOFFICE DocSpace'iniz için $PaymentDelay günlük ödemesiz sürenin sona er
 
 Business aboneliğinizin ödemesini mümkün olan en kısa sürede yaptığınızdan emin olun. Böylece ONLYOFFICE DocSpace'inizin tüm avantajlarını eskisi gibi kullanabileceksiniz.
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Merhaba, $UserName!
@@ -1173,24 +1163,20 @@ ONLYOFFICE DocSpace'iniz için $PaymentDelay günlük ek sürenin yarın sona er
 
 Business aboneliğinizin ödemesini bugün yaptığınızdan emin olun. Böylece ONLYOFFICE DocSpace'inizin tüm avantajlarından daha fazla yararlanabileceksiniz.
 
-$GreenButton
+$OrangeButton
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Merhaba!
 
 "${__VirtualRootPath}":"${__VirtualRootPath}" konumundaki $Message odasına katılmaya davet edildiniz. Bağlantıyı tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Davet bağlantısına tıkladıktan sonra lütfen hesabınız için yeni bir şifre belirleyiniz.
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"https://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>$Date gününde portalda neler var?</value>
@@ -1238,20 +1224,20 @@ Sayın $OwnerName,
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalınızdaki verileri içeren bir yedekleme dosyası oluşturuldu.
 
-Yedekleme prosedürü hakkında daha fazla bilgi almak için lütfen [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx) kullanıcı kılavuzumuza başvurun.
+Yedekleme prosedürü hakkında daha fazla bilgi almak için lütfen [Veri Yedeği](${__HelpLink}/tipstricks/data-backup-restore.aspx) kullanıcı kılavuzumuza başvurun.
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [support.onlyoffice.com](http://support.onlyoffice.com) adresinden bizimle iletişime geçin.
+Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SupportLink}](${__SupportLink}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
 ONLYOFFICE™ Destek Ekibi
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>${LetterLogoText} hesabınızdaki e-postayı değiştirmek mi istiyorsunuz?
 
 Aşağıdaki butona tıklayın ve bulutunuzda giriş yapın*.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -1266,25 +1252,31 @@ ${LetterLogoText} portalına girmek için kullandığınız kimlik doğrulama uy
 
 Portal oturum açma sayfasına gitmek ve kimlik doğrulayıcı uygulamasını yapılandırmak için lütfen aşağıdaki butona tıklayın:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Merhaba $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba, $UserName!
 
 Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Bağlantı yalnızca 7 gün boyunca geçerlidir.
 
 Web ofisinizi nasıl kullanacağınıza dair daha fazla ipucu göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsiniz.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Merhaba $UserName!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba $UserName!
 
 $__AuthorName size konuk kullanıcı olarak davet ediyor: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
 Bağlantı yalnızca 7 gün boyunca geçerlidir.
 
@@ -1340,14 +1332,17 @@ h1."$PortalUrl":"$PortalUrl"
 Portalınız yeni bir alana taşındı. Lütfen oturum açmak için kullanılacak şifreyi belirleyerek portala erişiminizi yeniden etkin hale getirin.
 
 Hesap şifrenizi belirlemek üzere lütfen aşağıdaki bağlantıyı takip edin:
-$GreenButton
+$OrangeButton
 
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen erişimi yeniden etkin hale getirme işlemini bu süre zarfında tamamlayın.
 
 Bu e-postayı yanlışlıkla aldıysanız, lütfen dikkate almayın veya daha fazla bilgi almak için "$PortalUrl":"$PortalUrl" portal yöneticinizle iletişime geçin.</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Merhaba,
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba!
 
 Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
@@ -1367,41 +1362,39 @@ Belgeleriniz için her yerden erişilebilen tek bir çalışma alanı oluşturma
 
 Burada olmanızdan çok mutluyuz. Bizi izlemeye devam edin!
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_after_registration1" xml:space="preserve">
     <value>h1.ONLYOFFICE Personal'a Hoş Geldiniz
 
-An itibariyle, bulut üzerinde kişisel ofisinizi oluşturdunuz.
+Buluttaki kişisel ofisinizi oluşturmuş bulunuyorsunuz.
 
-h3. Bu, dosyaları düzenleyip saklayabileceğiniz ve arkadaşlarınız veya iş ekibinize erişim vererek, nerede olurlarsa olsunlar onlarla birlikte çalışabileceğiniz sanal bir çalışma alanıdır.  
+h3.Bu, arkadaşlarınıza veya meslektaşlarınıza erişim olanağı sağlayan, belgeleri düzenleyebileceğiniz ve saklayabileceğiniz, onlarla her yerden çalışabileceğiniz sanal bir çalışma alanıdır.
 
-h3. Hızlı bir başlangıç için, ONLYOFFICE ile yapabilecekleriniz şunlardır:
+Hızlı bir başlangıç için, ONLYOFFICE ile yapabilecekleriniz şunlardır:
 
-- Metin belgeleri, tablolar, sunumlar oluşturma, görüntüleme ve düzenleme
+- Metin belgeleri, tablolar, sunumlar oluşturma, görüntüleme ve düzenleme.
 
 - Tüm popüler formatlarla çalışma. MS Office dosyaları ile en yüksek uyumluluk.
 
-- "Doldurmaya hazır şablonlar ":"https://www.onlyoffice.com/form-creator.aspx" oluşturma ve birlikte düzenleme
+- "Doldurmaya hazır şablonlar":"https://www.onlyoffice.com/form-creator.aspx" oluşturma ve birlikte düzenleme.
 
-- Çevrimiçi olarak belgeler paylaşma ve belgeler üzerinde birlikte çalışma
+- Çevrimiçi olarak belgeler paylaşma ve belgeler üzerinde birlikte çalışma.
 
-- Ekstra özellikler uygulamak için çeşitli eklentiler kullanma
+- Ekstra özellikler uygulamak için çeşitli eklentiler kullanma.
 
-- "Chrome eklentisi ile":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" Personal bulutunuza kolay erişim
+- "Chrome eklentisi ile":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=tr" Personal bulutunuza kolay erişim.
 
 Ayrıca, belgeleri ücretsiz "masaüstü düzenleyicilerimiz":"https://www.onlyoffice.com/download-desktop.aspx" ile çevrimdışı olarak da düzenleyebilir ya da "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" veya "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" cihazınız için mobil düzenleme programını indirebilirsiniz.
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_change_email_v115" xml:space="preserve">
     <value>ONLYOFFICE hesabınızdaki e-postayı değiştirmek mi istiyorsunuz?
 
 Aşağıdaki butona tıklayın ve bulutunuzda giriş yapın*.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı 7 gün boyunca geçerlidir.
 
@@ -1416,24 +1409,22 @@ Kişisel kullanım için ONLYOFFICE çözümünde bir oluşturdunuz. Kaydı doğ
 
 Bağlantıyı açamıyorsanız, lütfen bağlantı adresini "$InviteLink":"$InviteLink" kopyalayın ve tarayıcınızın adres çubuğuna yapıştırın.
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Personal.onlyoffice.com adresindeki hesabınızın sonlandırılmasını talep ettiniz. İsteği tamamlamak için bağlantıya tıklayın (bağlantı 7 günlük bir süre boyunca etkindir):
 
-$GreenButton
+$OrangeButton
 
 *Not*: Silme sonrasında, hesabınız ve tüm ilişkili veriler "Gizlilik Politikası":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" uyarınca kalıcı olarak silinecektir.
 
-"Hesap sonlandırma hakkında daha fazla bilgi edinin":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Hesap sonlandırma hakkında daha fazla bilgi edinin":"${__HelpLink}/administration/configuration.aspx"
 
 Devam etmek istemiyorsanız bu e-postayı dikkate almayın.
 
-Herhangi bir sorunuz varsa, lütfen "support@onlyoffice.com":"mailto:support@onlyoffice.com" adresinden bizimle iletişime geçin.
+Herhangi bir sorunuz varsa, lütfen "${__SalesEmail}":"mailto:${__SalesEmail}" adresinden bizimle iletişime geçin.
 
-Saygılarımızla,
-ONLYOFFICE ekibi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portalının devre dışı bırakılması
@@ -1442,18 +1433,18 @@ Sayın $OwnerName,
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalınızın geçici olarak devre dışı bırakılmasını talep ettiniz. Lütfen işlemi onaylamak için aşağıdaki bağlantıya tıklayın:
 
-$GreenButton
+$OrangeButton
 
 _Not_: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen portal devre dışı bırakma işlemini bu süre zarfında tamamlayın.
 
 Aşağıdaki bağlantıya tıklayarak portalınızı istediğiniz zaman yeniden etkinleştirebilirsiniz:
 [Portalı Yeniden Etkinleştir]($ActivateUrl) (bu bağlantının ise zaman sınırı yoktur)
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [support.onlyoffice.com](http://support.onlyoffice.com) adresinden bizimle iletişime geçin.
+Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
 ONLYOFFICE™ Destek Ekibi
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portalının silinmesi
@@ -1470,15 +1461,15 @@ Portalı silmeden önce, lütfen otomatik faturalamanın kapalı olduğundan emi
 
 [${__VirtualRootPath}](${__VirtualRootPath}) portalınızı silmeye devam etmek istiyorsanız, lütfen işlemi onaylamak için aşağıdaki bağlantıya tıklayın:
 
-$GreenButton
+$OrangeButton
 
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir. Lütfen portal silme işlemini bu süre zarfında tamamlayın.
 
-Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [support.onlyoffice.com](http://support.onlyoffice.com) adresinden bizimle iletişime geçin.
+Herhangi bir sorunuz veya yardıma ihtiyacınız olması halinde lütfen [${__SalesEmail}](mailto:${__SalesEmail}) adresinden bizimle iletişime geçin.
 
 Saygılarımızla,
 ONLYOFFICE™ Destek Ekibi
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
     <value>"$FromUserName":"$FromUserLink" kullanıcısı profilini sildi ve bu profil artık bloke edilmiştir. Kullanıcıya tüm dosyaları hâlâ kendisine atanmış durumdadır ve disk alanı kaplamaktadır.
@@ -1500,7 +1491,7 @@ Profilinizi görüntülemek için aşağıdaki bağlantıya tıklayın:
   <data name="pattern_reassigns_failed" xml:space="preserve">
     <value>Sayın $UserName,
 
-Verilerin "$FromUserName":"$FromUserLink" kullanıcısından, "$ToUserName":"$ToUserLink kullanıcısına yeniden atanması işlemi başarısız oldu. 
+Verilerin "$FromUserName":"$FromUserLink" kullanıcısından, "$ToUserName":"$ToUserLink" kullanıcısına yeniden atanması işlemi başarısız oldu. 
 
 İstisna mesajı: $Message</value>
   </data>
@@ -1509,12 +1500,7 @@ Verilerin "$FromUserName":"$FromUserLink" kullanıcısından, "$ToUserName":"$To
 
 "$FromUserName":"$FromUserLink" kullanıcısından veri silme işlemi başarıyla tamamlandı.
 
-Aşağıdakileri boşaltmak üzere kişisel veri silinmesine izin verilmiştir: 
-
-# Belgeler - $DocsSpace
-# CRM - $CrmSpace
-# E-Posta - $MailSpace
-# Konuşma - $TalkSpace</value>
+Aşağıdakileri boşaltmak üzere kişisel veri silinmesine izin verilmiştir: $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Sayın $UserName,
@@ -1559,25 +1545,25 @@ h1."${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Portalınız geri yüklendi. Erişmek için yeni bir şifre belirlemeniz gerekmektedir.
 
-$GreenButton
+$OrangeButton
 
-s
 *Not*: Bu bağlantı yalnızca 7 gün boyunca geçerlidir.
 
 Bu e-postayı yanlışlıkla aldıysanız, lütfen dikkate almayın veya daha fazla bilgi almak için "${__VirtualRootPath}":"${__VirtualRootPath}" portal yöneticinizle iletişime geçin.</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>Merhaba!
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace’e katılın
+
+
+Merhaba!
 
 Konuk kullanıcı olarak davetlisiniz: "${__VirtualRootPath}":"${__VirtualRootPath}". Bağlantıya tıklayarak daveti kabul edin:
 
-$GreenButton
+$OrangeButton
 
-Aralıklarla size kullanışlı ipuçları ve güncel ONLYOFFICE haberlerini de göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsiniz.
+Aralıklarla size kullanışlı ipuçları ve güncel ONLYOFFICE haberlerini de göndereceğiz. Profil sayfanızdaki abonelikleri her an iptal edebileceğiniz gibi yeniden etkinleştirebilirsini.
 
-Saygılarımızla,
-ONLYOFFICE Ekibi
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_self_profile_updated_tg" xml:space="preserve">
     <value>[${__VirtualRootPath}](${__VirtualRootPath}) portal profili değişim bildirimi
@@ -1637,7 +1623,7 @@ Portalınız yeniden kullanılabilir.</value>
 
 Aşağıdaki bağlantıya tıklayarak daveti kabul edin ve oturum açmak için kurumsal hesap kullanıcı adınızı ve şifrenizi kullanın.
 
-$GreenButton
+$OrangeButton
 
 Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
   </data>
@@ -1699,16 +1685,16 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>Kişisel kullanım için ONLYOFFICE’e hoşgeldiniz!</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Belgeleriniz üzerinde etkin çalışmanız için pek çok ipucu</value>
+    <value>Belgeleriniz üzerinde etkin çalışmanız için 5 ipucu</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Belgeleriniz üzerinde etkin çalışmanız için pek çok ipucu</value>
+    <value>Belgeleriniz üzerinde etkin çalışmanız için 5 ipucu</value>
   </data>
   <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Belgeleriniz üzerinde etkin çalışmanız için pek çok ipucu</value>
+    <value>Belgeleriniz üzerinde etkin çalışmanız için 5 ipucu</value>
   </data>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Belgeleriniz üzerinde etkin çalışmanız için pek çok ipucu</value>
+    <value>Belgeleriniz üzerinde etkin çalışmanız için 5 ipucu</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>ONLYOFFICE DocSpace’in işletme aboneliğini keşfedin</value>
@@ -1808,5 +1794,37 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Davetlisiniz: ${__VirtualRootPath}</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Video kılavuzlarıyla ONLYOFFICE DocSpace'de ustalaşın</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Saygılarımızla, ONLYOFFICE Ekibi</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>OYNATMA LİSTESİNİN TAMAMINI İZLEYİN</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Saygılarımızla, ONLYOFFICE Destek Ekibi</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;Video kılavuzları&lt;/span&gt; ONLYOFFICE DocSpace'de ustalaşın
+
+
+Merhaba, $UserName!
+
+Size kolaylık sağlamak için, ONLYOFFICE DocSpace'de hızlıca ustalaşabilmeniz için video eğitimleri hazırladık. Video kılavuzlarını izleyin ve sorunsuz ve etkili çalışmayı garantileyin.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;ONLYOFFICE DocSpace nedir?&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;DocSpace: Uygulamalı tur&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Ana aktiviteler&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;Oda oluşturma&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;Dosya oluşturma ve yükleme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;Dosyaları kopyalama, taşıma, yeniden adlandırma, silme, indirme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Dosyaları sıralama ve filtreleme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;Dosya sürümlerini geri yükle&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;Kısayol tuşlarını kullanma&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;Arşiv odaları&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Kullanıcı ve profil yönetimi&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;Kullanıcıları davet etme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;Kullanıcı rollerini yönetme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;Profilinizi yönetme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;Aktif oturumlardan çıkış yapma&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Yönetim&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Güvenlik ayarlarını yönetme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Yedekleme ve yeniden yükleme&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

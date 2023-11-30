@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -44,11 +44,11 @@ public class IntegrationEventLogService : IIntegrationEventLogService
     {
         var tid = transactionId.ToString();
 
-        await using var integrationEventLogContext = _dbContextFactory.CreateDbContext();
+        await using var integrationEventLogContext = await _dbContextFactory.CreateDbContextAsync();
 
         var result = await Queries.IntegrationEventLogEntriesAsync(integrationEventLogContext, tid).ToListAsync();
 
-        if (result != null && result.Any())
+        if (result.Any())
         {
             return result
                 .OrderBy(o => o.CreateOn)
@@ -68,8 +68,8 @@ public class IntegrationEventLogService : IIntegrationEventLogService
 
         var eventLogEntry = new IntegrationEventLogEntry(@event, transaction.TransactionId);
 
-        await using var integrationEventLogContext = _dbContextFactory.CreateDbContext();
-        integrationEventLogContext.Database.UseTransaction(transaction.GetDbTransaction());
+        await using var integrationEventLogContext = await _dbContextFactory.CreateDbContextAsync();
+        await integrationEventLogContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
         integrationEventLogContext.IntegrationEventLogs.Add(eventLogEntry);
 
         await integrationEventLogContext.SaveChangesAsync();
@@ -77,26 +77,26 @@ public class IntegrationEventLogService : IIntegrationEventLogService
 
     public async Task MarkEventAsPublishedAsync(Guid eventId)
     {
-        await UpdateEventStatusAsync(eventId, EventStateEnum.Published);
+        await UpdateEventStatusAsync(eventId, EventState.Published);
     }
 
     public async Task MarkEventAsInProgressAsync(Guid eventId)
     {
-        await UpdateEventStatusAsync(eventId, EventStateEnum.InProgress);
+        await UpdateEventStatusAsync(eventId, EventState.InProgress);
     }
 
     public async Task MarkEventAsFailedAsync(Guid eventId)
     {
-        await UpdateEventStatusAsync(eventId, EventStateEnum.PublishedFailed);
+        await UpdateEventStatusAsync(eventId, EventState.PublishedFailed);
     }
 
-    private async Task UpdateEventStatusAsync(Guid eventId, EventStateEnum status)
+    private async Task UpdateEventStatusAsync(Guid eventId, EventState status)
     {
-        await using var integrationEventLogContext = _dbContextFactory.CreateDbContext();
+        await using var integrationEventLogContext = await _dbContextFactory.CreateDbContextAsync();
         var eventLogEntry = await Queries.IntegrationEventLogEntryAsync(integrationEventLogContext, eventId);
         eventLogEntry.State = status;
 
-        if (status == EventStateEnum.InProgress)
+        if (status == EventState.InProgress)
         {
             eventLogEntry.TimesSent++;
         }
@@ -113,7 +113,7 @@ static file class Queries
         IntegrationEventLogEntriesAsync = EF.CompileAsyncQuery(
             (IntegrationEventLogContext ctx, string tid) =>
                 ctx.IntegrationEventLogs
-                    .Where(e => e.TransactionId == tid && e.State == EventStateEnum.NotPublished));
+                    .Where(e => e.TransactionId == tid && e.State == EventState.NotPublished));
 
     public static readonly Func<IntegrationEventLogContext, Guid, Task<IntegrationEventLogEntry>>
         IntegrationEventLogEntryAsync = EF.CompileAsyncQuery(

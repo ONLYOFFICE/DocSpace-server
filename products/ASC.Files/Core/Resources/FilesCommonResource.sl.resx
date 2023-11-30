@@ -417,6 +417,15 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
     <value>Ogled in prenos dokumentov v skupni rabi. Naložite datoteke v mape v skupni rabi. Zagotovljena maksimalna združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Zunanja povezava</value>
+    <value>Povezava v skupni rabi</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Povezava za povabilo</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksimalno število povezav ne sme preseči {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Prevečkrat ste poskušali vnesti geslo. Prosimo, poskusite kasneje</value>
   </data>
 </root>

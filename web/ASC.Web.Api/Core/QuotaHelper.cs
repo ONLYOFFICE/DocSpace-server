@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,11 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class QuotaHelper
+public class QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings)
 {
-    private readonly TenantManager _tenantManager;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly SettingsManager _settingsManager;
-
-    public QuotaHelper(TenantManager tenantManager, IServiceProvider serviceProvider, CoreBaseSettings coreBaseSettings, SettingsManager settingsManager)
-    {
-        _tenantManager = tenantManager;
-        _serviceProvider = serviceProvider;
-        _coreBaseSettings = coreBaseSettings;
-        _settingsManager = settingsManager;
-    }
-
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
     {
-        var quotaList = await _tenantManager.GetTenantQuotasAsync(false);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false);
 
         foreach (var quota in quotaList)
         {
@@ -54,7 +41,7 @@ public class QuotaHelper
 
     public async Task<QuotaDto> GetCurrentQuotaAsync(bool refresh = false)
     {
-        var quota = await _tenantManager.GetCurrentTenantQuotaAsync(refresh);
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
 
         return await ToQuotaDto(quota, true);
     }
@@ -88,14 +75,12 @@ public class QuotaHelper
     {
         var assembly = GetType().Assembly;
 
-        var features = quota.Features.Split(' ', ',', ';');
-
         foreach (var feature in quota.TenantQuotaFeatures.
             Where(r =>
              {
                  if (r.Standalone)
                  {
-                     return _coreBaseSettings.Standalone;
+                             return coreBaseSettings.Standalone;
                  }
 
                  return r.Visible;
@@ -104,7 +89,7 @@ public class QuotaHelper
         {
             var result = new TenantQuotaFeatureDto
             {
-                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}"),
+                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}")
             };
 
             if (feature.Paid)
@@ -157,7 +142,7 @@ public class QuotaHelper
                     try
                     {
                         using var memoryStream = new MemoryStream();
-                        img.CopyTo(memoryStream);
+                        await img.CopyToAsync(memoryStream);
                         result.Image = Encoding.UTF8.GetString(memoryStream.ToArray());
                     }
                     catch (Exception)
@@ -171,7 +156,7 @@ public class QuotaHelper
 
             async Task GetStat<T>()
             {
-                var statisticProvider = (ITenantQuotaFeatureStat<T>)_serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(feature.GetType(), typeof(T)));
+                var statisticProvider = (ITenantQuotaFeatureStat<T>)serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(feature.GetType(), typeof(T)));
 
                 if (statisticProvider != null)
                 {

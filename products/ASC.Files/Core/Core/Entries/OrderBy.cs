@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,21 +39,16 @@ public enum SortedByType
     RoomType,
     Tags,
     Room,
+    CustomOrder,
     UsedSpace
 }
 
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
-public class OrderBy
+public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
     [JsonPropertyName("is_asc")]
-    public bool IsAsc { get; set; }
+    public bool IsAsc { get; init; } = isAsc;
 
     [JsonPropertyName("property")]
-    public SortedByType SortedBy { get; set; }
-
-    public OrderBy(SortedByType sortedByType, bool isAsc)
-    {
-        SortedBy = sortedByType;
-        IsAsc = isAsc;
+    public SortedByType SortedBy { get; set; } = sortedByType;
     }
-}

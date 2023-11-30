@@ -417,6 +417,15 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
     <value>Sie können einen Raum nicht anheften</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Externer Link</value>
+    <value>Gemeinsamer Link</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Einladungs-Link</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Die maximale Anzahl von Links darf {0} nicht überschreiten</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Sie haben zu oft versucht, Ihr Passwort einzugeben. Bitte versuchen Sie es später noch einmal</value>
   </data>
 </root>

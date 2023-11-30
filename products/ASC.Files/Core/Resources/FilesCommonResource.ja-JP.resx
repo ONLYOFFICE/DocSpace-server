@@ -417,6 +417,15 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>このファイルは、もはや記入用の下書きではありません。</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>外部のリンク</value>
+    <value>共有リンク</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>招待リンク</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>リンクの最大数は {0} を超えることはできません</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>パスワードの入力を何度も試行しすぎました。後で再試行してください</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,48 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class SettingsController : BaseSettingsController
-{
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
-    private readonly MessageService _messageService;
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly TimeZoneConverter _timeZoneConverter;
-    private readonly CustomNamingPeople _customNamingPeople;
-    private readonly ProviderManager _providerManager;
-    private readonly FirstTimeTenantSettings _firstTimeTenantSettings;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly TenantExtra _tenantExtra;
-    private readonly AuthContext _authContext;
-    private readonly PermissionContext _permissionContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly WebItemManagerSecurity _webItemManagerSecurity;
-    private readonly TenantInfoSettingsHelper _tenantInfoSettingsHelper;
-    private readonly TenantUtil _tenantUtil;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly IConfiguration _configuration;
-    private readonly SetupInfo _setupInfo;
-    private readonly StatisticManager _statisticManager;
-    private readonly PasswordHasher _passwordHasher;
-    private readonly ILogger _log;
-    private readonly TelegramHelper _telegramHelper;
-    private readonly DnsSettings _dnsSettings;
-    private readonly AdditionalWhiteLabelSettingsHelperInit _additionalWhiteLabelSettingsHelper;
-    private readonly CustomColorThemesSettingsHelper _customColorThemesSettingsHelper;
-    private readonly QuotaUsageManager _quotaUsageManager;
-    private readonly TenantDomainValidator _tenantDomainValidator;
-    private readonly QuotaSyncOperation _quotaSyncOperation;
-    private readonly ExternalShare _externalShare;
-    private readonly IQuotaService _quotaService;
-    private readonly ConfigurationExtension _configurationExtension;
-    private readonly IMapper _mapper;
-
-    public SettingsController(
-        ILoggerProvider option,
-        MessageService messageService,
+public class SettingsController(MessageService messageService,
         ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
@@ -102,43 +61,10 @@ public class SettingsController : BaseSettingsController
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
-        IQuotaService quotaService
-        ) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        UserFormatter userFormatter)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
-        _log = option.CreateLogger("ASC.Api");
-        _consumerFactory = consumerFactory;
-        _timeZoneConverter = timeZoneConverter;
-        _customNamingPeople = customNamingPeople;
-        _providerManager = providerManager;
-        _firstTimeTenantSettings = firstTimeTenantSettings;
-        _messageService = messageService;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _tenantExtra = tenantExtra;
-        _authContext = authContext;
-        _permissionContext = permissionContext;
-        _settingsManager = settingsManager;
-        _webItemManagerSecurity = webItemManagerSecurity;
-        _tenantInfoSettingsHelper = tenantInfoSettingsHelper;
-        _tenantUtil = tenantUtil;
-        _coreBaseSettings = coreBaseSettings;
-        _commonLinkUtility = commonLinkUtility;
-        _configuration = configuration;
-        _setupInfo = setupInfo;
-        _statisticManager = statisticManager;
-        _passwordHasher = passwordHasher;
-        _telegramHelper = telegramHelper;
-        _dnsSettings = dnsSettings;
-        _additionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelper;
-        _quotaSyncOperation = quotaSyncOperation;
-        _customColorThemesSettingsHelper = customColorThemesSettingsHelper;
-        _quotaUsageManager = quotaUsageManager;
-        _tenantDomainValidator = tenantDomainValidator;
-        _externalShare = externalShare;
-        _quotaService = quotaService;
-        _configurationExtension = configurationExtension;
-        _mapper = mapper;
-    }
+    private static readonly SemaphoreSlim _semaphore = new(1);
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -156,113 +82,113 @@ public class SettingsController : BaseSettingsController
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetSettingsAsync(bool? withpassword)
     {
-        var studioAdminMessageSettings = await _settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var tenantCookieSettings = _settingsManager.Load<TenantCookieSettings>();
+        var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
+        var tenantCookieSettings = settingsManager.Load<TenantCookieSettings>();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var settings = new SettingsDto
         {
-            Culture = Tenant.GetCulture().ToString(),
-            GreetingSettings = Tenant.Name == "" ? Resource.PortalName : Tenant.Name,
-            Personal = _coreBaseSettings.Personal,
-            DocSpace = !_coreBaseSettings.DisableDocSpace,
-            Standalone = _coreBaseSettings.Standalone,
-            BaseDomain = _coreBaseSettings.Basedomain,
-            Version = _configuration["version:number"] ?? "",
-            TenantStatus = (await _tenantManager.GetCurrentTenantAsync()).Status,
-            TenantAlias = Tenant.Alias,
-            EnableAdmMess = studioAdminMessageSettings.Enable || await _tenantExtra.IsNotPaidAsync(),
-            LegalTerms = _setupInfo.LegalTerms,
-            CookieSettingsEnabled = tenantCookieSettings.Enabled
+            Culture = tenant.GetCulture().ToString(),
+            GreetingSettings = tenant.Name == "" ? Resource.PortalName : tenant.Name,
+            Personal = coreBaseSettings.Personal,
+            DocSpace = !coreBaseSettings.DisableDocSpace,
+            Standalone = coreBaseSettings.Standalone,
+            BaseDomain = coreBaseSettings.Basedomain,
+            Version = configuration["version:number"] ?? "",
+            TenantStatus = tenant.Status,
+            TenantAlias = tenant.Alias,
+            EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
+            LegalTerms = setupInfo.LegalTerms,
+            CookieSettingsEnabled = tenantCookieSettings.Enabled,
+            UserNameRegex = userFormatter.UserNameRegex.ToString()
         };
 
-        if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() != default)
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
         {
-            settings.SocketUrl = _configuration["web:hub:url"] ?? "";
+            settings.SocketUrl = configuration["web:hub:url"] ?? "";
         }
 
-        if (_authContext.IsAuthenticated)
+        if (authContext.IsAuthenticated)
         {
-            settings.TrustedDomains = Tenant.TrustedDomains;
-            settings.TrustedDomainsType = Tenant.TrustedDomainsType;
-            var timeZone = Tenant.TimeZone;
+            settings.TrustedDomains = tenant.TrustedDomains;
+            settings.TrustedDomainsType = tenant.TrustedDomainsType;
+            var timeZone = tenant.TimeZone;
             settings.Timezone = timeZone;
-            settings.UtcOffset = _timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
+            settings.UtcOffset = timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
-            settings.OwnerId = Tenant.OwnerId;
-            settings.NameSchemaId = _customNamingPeople.Current.Id;
-            settings.DomainValidator = _tenantDomainValidator;
-            settings.ZendeskKey = _setupInfo.ZendeskKey;
-            settings.BookTrainingEmail = _setupInfo.BookTrainingEmail;
-            settings.DocumentationEmail = _setupInfo.DocumentationEmail;
-            settings.SocketUrl = _configuration["web:hub:url"] ?? "";
+            settings.OwnerId = tenant.OwnerId;
+            settings.NameSchemaId = customNamingPeople.Current.Id;
+            settings.DomainValidator = tenantDomainValidator;
+            settings.ZendeskKey = setupInfo.ZendeskKey;
+            settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
+            settings.DocumentationEmail = setupInfo.DocumentationEmail;
+            settings.SocketUrl = configuration["web:hub:url"] ?? "";
 
             settings.Firebase = new FirebaseDto
             {
-                ApiKey = _configuration["firebase:apiKey"] ?? "",
-                AuthDomain = _configuration["firebase:authDomain"] ?? "",
-                ProjectId = _configuration["firebase:projectId"] ?? "",
-                StorageBucket = _configuration["firebase:storageBucket"] ?? "",
-                MessagingSenderId = _configuration["firebase:messagingSenderId"] ?? "",
-                AppId = _configuration["firebase:appId"] ?? "",
-                MeasurementId = _configuration["firebase:measurementId"] ?? "",
-                DatabaseURL = _configuration["firebase:databaseURL"] ?? ""
+                ApiKey = configuration["firebase:apiKey"] ?? "",
+                AuthDomain = configuration["firebase:authDomain"] ?? "",
+                ProjectId = configuration["firebase:projectId"] ?? "",
+                StorageBucket = configuration["firebase:storageBucket"] ?? "",
+                MessagingSenderId = configuration["firebase:messagingSenderId"] ?? "",
+                AppId = configuration["firebase:appId"] ?? "",
+                MeasurementId = configuration["firebase:measurementId"] ?? "",
+                DatabaseURL = configuration["firebase:databaseURL"] ?? ""
             };
 
             settings.DeepLink = new DeepLinkDto
             {
-                AndroidPackageName = _configuration["deeplink:androidpackagename"] ?? "",
-                Url = _configuration["deeplink:url"] ?? "",
-                IosPackageId = _configuration["deeplink:iospackageid"] ?? "",
+                AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
+                Url = configuration["deeplink:url"] ?? "",
+                IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             };
 
-            settings.HelpLink = await _commonLinkUtility.GetHelpLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, true);
-            settings.ApiDocsLink = _configuration["web:api-docs"];
+            settings.HelpLink = await commonLinkUtility.GetHelpLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper);
+            settings.ApiDocsLink = configuration["web:api-docs"];
 
-            bool debugInfo;
-            if (bool.TryParse(_configuration["debug-info:enabled"], out debugInfo))
+            if (bool.TryParse(configuration["debug-info:enabled"], out var debugInfo))
             {
                 settings.DebugInfo = debugInfo;
             }
 
             settings.Plugins = new PluginsDto();
 
-            bool pluginsEnabled;
-            if (bool.TryParse(_configuration["plugins:enabled"], out pluginsEnabled))
+            if (bool.TryParse(configuration["plugins:enabled"], out var pluginsEnabled))
             {
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = _configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            settings.Plugins.Allow = configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
 
-            var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
-            settings.FormGallery = _mapper.Map<FormGalleryDto>(formGallerySettings);
+            var formGallerySettings = configurationExtension.GetSetting<OFormSettings>("files:oform");
+            settings.FormGallery = mapper.Map<FormGalleryDto>(formGallerySettings);
         }
         else
         {
-            if (!(await _settingsManager.LoadAsync<WizardSettings>()).Completed)
+            if (!(await settingsManager.LoadAsync<WizardSettings>()).Completed)
             {
-                settings.WizardToken = _commonLinkUtility.GetToken(Tenant.Id, "", ConfirmType.Wizard, userId: Tenant.OwnerId);
+                settings.WizardToken = commonLinkUtility.GetToken(tenant.Id, "", ConfirmType.Wizard, userId: tenant.OwnerId);
             }
 
             settings.EnabledJoin =
-                (Tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
-                Tenant.TrustedDomains.Count > 0) ||
-                Tenant.TrustedDomainsType == TenantTrustedDomainsType.All;
+                (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
+                tenant.TrustedDomains.Count > 0) ||
+                tenant.TrustedDomainsType == TenantTrustedDomainsType.All;
 
             if (settings.EnabledJoin.GetValueOrDefault(false))
             {
-                settings.TrustedDomainsType = Tenant.TrustedDomainsType;
-                settings.TrustedDomains = Tenant.TrustedDomains;
+                settings.TrustedDomainsType = tenant.TrustedDomainsType;
+                settings.TrustedDomains = tenant.TrustedDomains;
             }
 
-            settings.ThirdpartyEnable = _setupInfo.ThirdPartyAuthEnabled && _providerManager.IsNotEmpty;
+            settings.ThirdpartyEnable = setupInfo.ThirdPartyAuthEnabled && providerManager.IsNotEmpty;
 
-            settings.RecaptchaPublicKey = _setupInfo.RecaptchaPublicKey;
+            settings.RecaptchaPublicKey = setupInfo.RecaptchaPublicKey;
         }
 
-        if (!_authContext.IsAuthenticated || (withpassword.HasValue && withpassword.Value))
+        if (!authContext.IsAuthenticated || (withpassword.HasValue && withpassword.Value))
         {
-            settings.PasswordHash = _passwordHasher;
+            settings.PasswordHash = passwordHasher;
         }
 
         return settings;
@@ -282,12 +208,14 @@ public class SettingsController : BaseSettingsController
     [HttpPost("maildomainsettings")]
     public async Task<object> SaveMailDomainSettingsAsync(MailDomainSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        
         if (inDto.Type == TenantTrustedDomainsType.Custom)
         {
-            Tenant.TrustedDomainsRaw = "";
-            Tenant.TrustedDomains.Clear();
+            tenant.TrustedDomainsRaw = "";
+            tenant.TrustedDomains.Clear();
             foreach (var d in inDto.Domains.Select(domain => (domain ?? "").Trim().ToLower()))
             {
                 if (!(!string.IsNullOrEmpty(d) && new Regex("^[a-z0-9]([a-z0-9-.]){1,98}[a-z0-9]$").IsMatch(d)))
@@ -295,22 +223,22 @@ public class SettingsController : BaseSettingsController
                     return Resource.ErrorNotCorrectTrustedDomain;
                 }
 
-                Tenant.TrustedDomains.Add(d);
+                tenant.TrustedDomains.Add(d);
             }
 
-            if (Tenant.TrustedDomains.Count == 0)
+            if (tenant.TrustedDomains.Count == 0)
             {
                 inDto.Type = TenantTrustedDomainsType.None;
             }
         }
 
-        Tenant.TrustedDomainsType = inDto.Type;
+        tenant.TrustedDomainsType = inDto.Type;
 
-        await _settingsManager.SaveAsync(new StudioTrustedDomainSettings { InviteAsUsers = inDto.InviteAsUsers });
+        await settingsManager.SaveAsync(new StudioTrustedDomainSettings { InviteAsUsers = inDto.InviteUsersAsVisitors });
 
-        await _tenantManager.SaveTenantAsync(Tenant);
+        await tenantManager.SaveTenantAsync(tenant);
 
-        await _messageService.SendAsync(MessageAction.TrustedMailDomainSettingsUpdated);
+        await messageService.SendAsync(MessageAction.TrustedMailDomainSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -328,7 +256,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("quota")]
     public async Task<QuotaUsageDto> GetQuotaUsed()
     {
-        return await _quotaUsageManager.Get();
+        return await quotaUsageManager.Get();
     }
 
     /// <summary>
@@ -345,7 +273,7 @@ public class SettingsController : BaseSettingsController
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettingsAsync(QuotaSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenanSpaceQuota = await _tenantManager.GetTenantQuotaAsync(Tenant.Id);
         var maxTotalSize = tenanSpaceQuota != null ? tenanSpaceQuota.MaxTotalSize : -1;
@@ -447,7 +375,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("cultures")]
     public IEnumerable<object> GetSupportedCultures()
     {
-        return _setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
     }
 
     /// <summary>
@@ -479,7 +407,7 @@ public class SettingsController : BaseSettingsController
             listOfTimezones.Add(new TimezonesRequestsDto
             {
                 Id = tz.Id,
-                DisplayName = _timeZoneConverter.GetTimeZoneDisplayName(tz)
+                DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
 
@@ -514,7 +442,7 @@ public class SettingsController : BaseSettingsController
     [HttpPut("dns")]
     public async Task<object> SaveDnsSettingsAsync(DnsSettingsRequestsDto inDto)
     {
-        return await _dnsSettings.SaveDnsSettingsAsync(inDto.DnsName, inDto.Enable);
+        return await dnsSettings.SaveDnsSettingsAsync(inDto.DnsName, inDto.Enable);
     }
 
     /// <summary>
@@ -530,8 +458,8 @@ public class SettingsController : BaseSettingsController
     [HttpGet("recalculatequota")]
     public async Task RecalculateQuotaAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
-        _quotaSyncOperation.RecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        quotaSyncOperation.RecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -547,8 +475,8 @@ public class SettingsController : BaseSettingsController
     [HttpGet("checkrecalculatequota")]
     public async Task<bool> CheckRecalculateQuotaAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
-        return _quotaSyncOperation.CheckRecalculateQuota(await _tenantManager.GetCurrentTenantAsync());
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        return quotaSyncOperation.CheckRecalculateQuota(await tenantManager.GetCurrentTenantAsync());
     }
 
     /// <summary>
@@ -564,7 +492,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("logo")]
     public async Task<object> GetLogoAsync()
     {
-        return await _tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(await _settingsManager.LoadAsync<TenantInfoSettings>());
+        return await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(await settingsManager.LoadAsync<TenantInfoSettings>());
     }
 
     /// <summary>
@@ -583,9 +511,9 @@ public class SettingsController : BaseSettingsController
     {
         await ApiContext.AuthByClaimAsync();
 
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await _firstTimeTenantSettings.SaveDataAsync(inDto);
+        return await firstTimeTenantSettings.SaveDataAsync(inDto);
     }
 
     /// <summary>
@@ -600,17 +528,17 @@ public class SettingsController : BaseSettingsController
     [HttpPut("welcome/close")]
     public async Task CloseWelcomePopupAsync()
     {
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        var collaboratorPopupSettings = await _settingsManager.LoadForCurrentUserAsync<CollaboratorSettings>();
+        var collaboratorPopupSettings = await settingsManager.LoadForCurrentUserAsync<CollaboratorSettings>();
 
-        if (!(await _userManager.IsUserAsync(currentUser) && collaboratorPopupSettings.FirstVisit && !await _userManager.IsOutsiderAsync(currentUser)))
+        if (!(await userManager.IsUserAsync(currentUser) && collaboratorPopupSettings.FirstVisit && !await userManager.IsOutsiderAsync(currentUser)))
         {
             throw new NotSupportedException("Not available.");
         }
 
         collaboratorPopupSettings.FirstVisit = false;
-        await _settingsManager.SaveForCurrentUserAsync(collaboratorPopupSettings);
+        await settingsManager.SaveForCurrentUserAsync(collaboratorPopupSettings);
     }
 
     /// <summary>
@@ -626,7 +554,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
     {
-        return new CustomColorThemesSettingsDto(await _settingsManager.LoadAsync<CustomColorThemesSettings>(), _customColorThemesSettingsHelper.Limit);
+        return new CustomColorThemesSettingsDto(await settingsManager.LoadAsync<CustomColorThemesSettings>(), customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>
@@ -641,8 +569,8 @@ public class SettingsController : BaseSettingsController
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
-        var settings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         if (inDto.Theme != null)
         {
@@ -651,7 +579,7 @@ public class SettingsController : BaseSettingsController
                 await _semaphore.WaitAsync();
                 var theme = inDto.Theme;
 
-                if (CustomColorThemesSettingsItem.Default.Any(r => r.Id == theme.Id))
+                if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
                 {
                     theme.Id = 0;
                 }
@@ -678,7 +606,7 @@ public class SettingsController : BaseSettingsController
                 }
                 else
                 {
-                    if (_customColorThemesSettingsHelper.Limit == 0 || settings.Themes.Count < _customColorThemesSettingsHelper.Limit)
+                    if (customColorThemesSettingsHelper.Limit == 0 || settings.Themes.Count < customColorThemesSettingsHelper.Limit)
                     {
                         if (theme.Id == 0)
                         {
@@ -691,26 +619,22 @@ public class SettingsController : BaseSettingsController
                 }
 
 
-                await _settingsManager.SaveAsync(settings);
+                await settingsManager.SaveAsync(settings);
             }
-            catch
-            {
-                throw;
-        }
             finally
             {
                 _semaphore.Release();
             }
         }
 
-        if (inDto.Selected.HasValue && settings.Themes.Any(r => r.Id == inDto.Selected.Value))
+        if (inDto.Selected.HasValue && settings.Themes.Exists(r => r.Id == inDto.Selected.Value))
         {
             settings.Selected = inDto.Selected.Value;
-            await _settingsManager.SaveAsync(settings);
-            await _messageService.SendAsync(MessageAction.ColorThemeChanged);
+            await settingsManager.SaveAsync(settings);
+            await messageService.SendAsync(MessageAction.ColorThemeChanged);
         }
 
-        return new CustomColorThemesSettingsDto(settings, _customColorThemesSettingsHelper.Limit);
+        return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>
@@ -725,13 +649,13 @@ public class SettingsController : BaseSettingsController
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(int id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = await _settingsManager.LoadAsync<CustomColorThemesSettings>();
+        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         if (CustomColorThemesSettingsItem.Default.Any(r => r.Id == id))
         {
-            return new CustomColorThemesSettingsDto(settings, _customColorThemesSettingsHelper.Limit);
+            return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
         }
 
         settings.Themes = settings.Themes.Where(r => r.Id != id).ToList();
@@ -739,12 +663,12 @@ public class SettingsController : BaseSettingsController
         if (settings.Selected == id)
         {
             settings.Selected = settings.Themes.Min(r => r.Id);
-           await _messageService.SendAsync(MessageAction.ColorThemeChanged);
+            await messageService.SendAsync(MessageAction.ColorThemeChanged);
         }
 
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
 
-        return new CustomColorThemesSettingsDto(settings, _customColorThemesSettingsHelper.Limit);
+        return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>
@@ -758,14 +682,14 @@ public class SettingsController : BaseSettingsController
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelperAsync()
     {
-        if (!await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID) || _coreBaseSettings.CustomMode || !_coreBaseSettings.Standalone)
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || coreBaseSettings.CustomMode || !coreBaseSettings.Standalone)
         {
             throw new NotSupportedException("Not available.");
         }
 
-        var adminHelperSettings = await _settingsManager.LoadForCurrentUserAsync<AdminHelperSettings>();
+        var adminHelperSettings = await settingsManager.LoadForCurrentUserAsync<AdminHelperSettings>();
         adminHelperSettings.Viewed = true;
-        await _settingsManager.SaveForCurrentUserAsync(adminHelperSettings);
+        await settingsManager.SaveForCurrentUserAsync(adminHelperSettings);
     }
 
     /// <summary>
@@ -781,39 +705,37 @@ public class SettingsController : BaseSettingsController
     [HttpPut("timeandlanguage")]
     public async Task<object> TimaAndLanguageAsync(SettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var culture = CultureInfo.GetCultureInfo(inDto.Lng);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
         var changelng = false;
-        if (_setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null)
+        if (setupInfo.EnabledCultures.Find(c => string.Equals(c.Name, culture.Name, StringComparison.InvariantCultureIgnoreCase)) != null && !string.Equals(tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
         {
-            if (!string.Equals(Tenant.Language, culture.Name, StringComparison.InvariantCultureIgnoreCase))
-            {
-                Tenant.Language = culture.Name;
+            tenant.Language = culture.Name;
                 changelng = true;
             }
-        }
 
-        var oldTimeZone = Tenant.TimeZone;
+        var oldTimeZone = tenant.TimeZone;
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
         if (timeZones.All(tz => tz.Id != "UTC"))
         {
             timeZones.Add(TimeZoneInfo.Utc);
         }
-        Tenant.TimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID)?.Id ?? TimeZoneInfo.Utc.Id;
+        tenant.TimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID)?.Id ?? TimeZoneInfo.Utc.Id;
 
-        await _tenantManager.SaveTenantAsync(Tenant);
+        await tenantManager.SaveTenantAsync(tenant);
 
-        if (!Tenant.TimeZone.Equals(oldTimeZone) || changelng)
+        if (!tenant.TimeZone.Equals(oldTimeZone) || changelng)
         {
-            if (!Tenant.TimeZone.Equals(oldTimeZone))
+            if (!tenant.TimeZone.Equals(oldTimeZone))
             {
-                await _messageService.SendAsync(MessageAction.TimeZoneSettingsUpdated);
+                await messageService.SendAsync(MessageAction.TimeZoneSettingsUpdated);
             }
             if (changelng)
             {
-                await _messageService.SendAsync(MessageAction.LanguageSettingsUpdated);
+                await messageService.SendAsync(MessageAction.LanguageSettingsUpdated);
             }
         }
 
@@ -833,11 +755,11 @@ public class SettingsController : BaseSettingsController
     [HttpPut("defaultpage")]
     public async Task<object> SaveDefaultPageSettingAsync(SettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _settingsManager.SaveAsync(new StudioDefaultPageSettings { DefaultProductID = inDto.DefaultProductID });
+        await settingsManager.SaveAsync(new StudioDefaultPageSettings { DefaultProductID = inDto.DefaultProductID });
 
-        await _messageService.SendAsync(MessageAction.DefaultStartPageSettingsUpdated);
+        await messageService.SendAsync(MessageAction.DefaultStartPageSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -854,7 +776,7 @@ public class SettingsController : BaseSettingsController
     [HttpPut("emailactivation")]
     public async Task<EmailActivationSettings> UpdateEmailActivationSettingsAsync(EmailActivationSettings inDto)
     {
-        await _settingsManager.SaveForCurrentUserAsync(inDto);
+        await settingsManager.SaveForCurrentUserAsync(inDto);
         return inDto;
     }
 
@@ -871,14 +793,13 @@ public class SettingsController : BaseSettingsController
     [HttpGet("statistics/spaceusage/{id}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var webitem = _webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All)
+        var webitem = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All)
                                    .FirstOrDefault(item =>
                                                    item != null &&
                                                    item.ID == id &&
-                                                   item.Context != null &&
-                                                   item.Context.SpaceUsageStatManager != null);
+                                                   item.Context is { SpaceUsageStatManager: not null });
 
         if (webitem == null)
         {
@@ -911,10 +832,10 @@ public class SettingsController : BaseSettingsController
     [HttpGet("statistics/visit")]
     public async Task<List<ChartPointDto>> GetVisitStatisticsAsync(ApiDateTime fromDate, ApiDateTime toDate)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var from = _tenantUtil.DateTimeFromUtc(fromDate);
-        var to = _tenantUtil.DateTimeFromUtc(toDate);
+        var from = tenantUtil.DateTimeFromUtc(fromDate);
+        var to = tenantUtil.DateTimeFromUtc(toDate);
 
         var points = new List<ChartPointDto>();
 
@@ -934,8 +855,9 @@ public class SettingsController : BaseSettingsController
             });
         }
 
-        var hits = await _statisticManager.GetHitsByPeriodAsync(Tenant.Id, from, to);
-        var hosts = await _statisticManager.GetHostsByPeriodAsync(Tenant.Id, from, to);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var hits = await statisticManager.GetHitsByPeriodAsync(tenant.Id, from, to);
+        var hosts = await statisticManager.GetHostsByPeriodAsync(tenant.Id, from, to);
 
         if (hits.Count == 0 || hosts.Count == 0)
         {
@@ -973,7 +895,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("socket")]
     public object GetSocketSettings()
     {
-        var hubUrl = _configuration["web:hub"] ?? string.Empty;
+        var hubUrl = configuration["web:hub"] ?? string.Empty;
         if (hubUrl.Length != 0)
         {
             if (!hubUrl.EndsWith('/'))
@@ -1012,7 +934,7 @@ public class SettingsController : BaseSettingsController
     [HttpGet("authservice")]
     public IEnumerable<AuthServiceRequestsDto> GetAuthServices()
     {
-        return _consumerFactory.GetAll<Consumer>()
+        return consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
             .Select(r => new AuthServiceRequestsDto(r))
@@ -1031,9 +953,9 @@ public class SettingsController : BaseSettingsController
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var saveAvailable = _coreBaseSettings.Standalone || (await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync())).ThirdParty;
+        var saveAvailable = coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).ThirdParty;
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.ThirdPartyAuthorization))
             || !saveAvailable)
         {
@@ -1041,7 +963,7 @@ public class SettingsController : BaseSettingsController
         }
 
         var changed = false;
-        var consumer = _consumerFactory.GetByKey<Consumer>(inDto.Name);
+        var consumer = consumerFactory.GetByKey<Consumer>(inDto.Name);
 
         var validateKeyProvider = consumer as IValidateKeysProvider;
 
@@ -1072,7 +994,7 @@ public class SettingsController : BaseSettingsController
 
         if (changed)
         {
-            await _messageService.SendAsync(MessageAction.AuthorizationKeysSetting);
+            await messageService.SendAsync(MessageAction.AuthorizationKeysSetting);
         }
 
         return changed;
@@ -1090,11 +1012,11 @@ public class SettingsController : BaseSettingsController
     [HttpGet("payment")]
     public async Task<object> PaymentSettingsAsync()
     {
-        var settings = await _settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-        var currentQuota = await _tenantManager.GetCurrentTenantQuotaAsync();
-        var currentTariff = await _tenantExtra.GetCurrentTariffAsync();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
+        var currentTariff = await tenantExtra.GetCurrentTariffAsync();
 
-        if (!int.TryParse(_configuration["core:payment:max-quantity"], out var maxQuotaQuantity))
+        if (!int.TryParse(configuration["core:payment:max-quantity"], out var maxQuotaQuantity))
         {
             maxQuotaQuantity = 999;
         }
@@ -1105,7 +1027,7 @@ public class SettingsController : BaseSettingsController
                 settings.SalesEmail,
                 settings.FeedbackAndSupportUrl,
                 settings.BuyUrl,
-                _coreBaseSettings.Standalone,
+                coreBaseSettings.Standalone,
                 currentLicense = new
                 {
                     currentQuota.Trial,
@@ -1125,20 +1047,19 @@ public class SettingsController : BaseSettingsController
     /// <returns type="System.Object, System">Telegram link</returns>
     /// <visible>false</visible>
     [HttpGet("telegramlink")]
-    public object TelegramLink()
+    public async Task<object> TelegramLink()
     {
-        var currentLink = _telegramHelper.CurrentRegistrationLink(_authContext.CurrentAccount.ID, Tenant.Id);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var currentLink = telegramHelper.CurrentRegistrationLink(authContext.CurrentAccount.ID, tenant.Id);
 
         if (string.IsNullOrEmpty(currentLink))
         {
-            var url = _telegramHelper.RegisterUser(_authContext.CurrentAccount.ID, Tenant.Id);
+            var url = telegramHelper.RegisterUser(authContext.CurrentAccount.ID, tenant.Id);
             return url;
         }
-        else
-        {
+
             return currentLink;
         }
-    }
 
     /// <summary>
     /// Checks if the user has connected to TelegramBot.
@@ -1151,7 +1072,8 @@ public class SettingsController : BaseSettingsController
     [HttpGet("telegramisconnected")]
     public async Task<object> TelegramIsConnectedAsync()
     {
-        return (int) await _telegramHelper.UserIsConnectedAsync(_authContext.CurrentAccount.ID, Tenant.Id);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return (int)await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 
     /// <summary>
@@ -1165,6 +1087,7 @@ public class SettingsController : BaseSettingsController
     [HttpDelete("telegramdisconnect")]
     public async Task TelegramDisconnectAsync()
     {
-        await _telegramHelper.DisconnectAsync(_authContext.CurrentAccount.ID, Tenant.Id);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
     }
 }

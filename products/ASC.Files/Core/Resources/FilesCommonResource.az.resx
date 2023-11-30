@@ -417,6 +417,15 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
     <value>Otağı sabitləyə bilməzsiniz</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Xarici Keçid</value>
+    <value>Paylaşılan keçid</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Dəvət keçidi</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Bağlantıların maksimum sayı {0}-dan çox ola bilməz</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Siz şifrənizi bir neçə dəfə daxil etməyə çalışmısınız. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
   </data>
 </root>

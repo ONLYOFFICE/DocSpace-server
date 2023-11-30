@@ -417,6 +417,15 @@ Massima compatibilità con docx, xlsx, pptx.</value>
     <value>Non puoi fissare una stanza</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Collegamento esterno</value>
+    <value>Link condiviso</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link di invito</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Il numero massimo di link non può superare {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Hai tentato troppe volte di inserire la tua password. Ti preghiamo di riprovare più tardi</value>
   </data>
 </root>

@@ -140,7 +140,7 @@ Olá!
 
 Para começar a participar na vida do portal "${__VirtualRootPath}":"$InviteLink", você precisa ativar o seu endereço de e-mail. Isso é feito por razões de segurança.
 
-$GreenButton
+$OrangeButton
 
 Este link é válido apenas por 7 dias. Por favor, complete a ativação de seu e-mail dentro deste período.</value>
   </data>
@@ -151,14 +151,12 @@ Caro(a) $OwnerName,
 
 Um arquivo de backup contendo dados do seu portal "${__VirtualRootPath}":"${__VirtualRootPath}" foi criado.
 
-Para saber mais sobre o procedimento de backup, por favor, consulte nosso guia de usuário "Backup de dados":"https://helpcenter.onlyoffice.com/administration/docspace-settings.aspx#CreatingBackup_block".
+Para saber mais sobre o procedimento de backup, por favor, consulte nosso guia de usuário "Backup de dados":"${__HelpLink}/administration/docspace-settings.aspx#CreatingBackup_block".
 
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support.onlyoffice.com":"http://support.onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SupportLink}":"${__SupportLink}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created_tg" xml:space="preserve">
     <value>(${__VirtualRootPath}](${__VirtualRootPath}) portal de backup criado
@@ -169,18 +167,18 @@ Um arquivo de backup contendo dados de seu portal [${__VirtualRootPath}](${__Vir
 
 Para saber mais sobre o procedimento de backup, consulte nosso guia do usuário [Data backup](${__HelpLink}/tipstricks/data-backup-restore.aspx).
 
-Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para nos contatar em [support.onlyoffice.com](http://support.onlyoffice.com)
+Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para nos contatar em [${__SupportLink}](${__SupportLink})
 
 Com os melhores cumprimentos,
 ONLYOFFICE™ Equipe de suporte
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Deseja alterar o e-mail em sua conta ${LetterLogoText}?
 
 Clique no botão abaixo e faça o login* em sua nuvem.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -195,7 +193,7 @@ Houve uma solicitação de alteração da senha usada para entrar no portal "${_
 
 Por favor, clique no link abaixo para alterar a senha:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de alteração de senha dentro do período.
 
@@ -208,7 +206,7 @@ Você solicitou a alteração do celular usado para entrar no portal ${LetterLog
 
 Por favor, clique no link abaixo para alterar o seu celular:
 
-$GreenButton
+$OrangeButton
 
 Se você não quiser alterar o seu celular ou recebeu este e-mail por engano, por favor, ignore-o ou entre em contato com o administrador do seu portal para descobrir mais informações.</value>
   </data>
@@ -219,7 +217,7 @@ A configuração do aplicativo autenticador que você usa para entrar no portal 
 
 Clique no botão abaixo para ir para a página de login do portal e configurar o aplicativo autenticador:
 
-$GreenButton</value>
+$OrangeButton</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Alteração do proprietário do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -230,7 +228,7 @@ Houve uma solicitação para alterar o proprietário do portal "${__VirtualRootP
 
 Por favor, clique no link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de alteração do proprietário do portal dentro do período.</value>
   </data>
@@ -243,115 +241,125 @@ Houve uma solicitação para alterar o endereço do portal "${__VirtualRootPath}
 
 Por favor, clique no link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de alteração do endereço do portal dentro do período.</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
-    <value>Olá, $UserName!
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
 
-$__AuthorName o convidou como usuário convidado para "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
 
-$GreenButton
+Olá, $UserName!
+
+Você está convidado a participar de "${__VirtualRootPath}":"${__VirtualRootPath}" como um usuário convidado. Aceite o convite clicando no link:
+
+$OrangeButton
 
 O link só é válido por 7 dias.
 
 Você receberá mais dicas sobre como usar seu web-office. Você pode cancelar as assinaturas em sua página de Perfil a qualquer momento, assim como reativá-las.</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
-    <value>Olá, $UserName!
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá, $UserName!
 
 $__AuthorName o convidou como usuário convidado para "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
 
-$GreenButton
+$OrangeButton
 
 O link só é válido por 7 dias.
 
 Você receberá mais dicas sobre como usar seu web-office. Você pode cancelar as assinaturas em sua página de Perfil a qualquer momento, assim como reativá-las.</value>
   </data>
   <data name="pattern_enterprise_guest_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
 
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
 
-* Trabalhe com outros usuários na sala para a qual você foi convidado: *salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
 
-Sinceramente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://onlyoffice.com/pt"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
 
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
 
-* Trabalhe com outros usuários na sala para a qual você foi convidado: *salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
 
-Sinceramente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://onlyoffice.com/pt"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_guest_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
 
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
 
-* Trabalhe com outros usuários na sala para a qual você foi convidado: *salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
 
-Sinceramente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://onlyoffice.com/pt"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_saas_guest_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
 
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
 
-* Trabalhe com outros usuários na sala para a qual você foi convidado: *salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-$GreenButton
+$OrangeButton
 
-Se precisar de ajuda, navegue em nosso "Help Center":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
 
-Sinceramente, 
-ONLYOFFICE Team
-"www.onlyoffice.com/pt":"http://onlyoffice.com/pt"</value>
+$TrulyYours</value>
  </data>
   <data name="pattern_for_admin_notify" xml:space="preserve">
     <value>h1.Mensagem do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -376,7 +384,7 @@ Você solicitou se juntar ao portal "${__VirtualRootPath}":"$InviteLink" em ${Le
 
 Para aceitar o convite, por favor, insira o seu nome e senha clicando neste link:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 48 horas. Por favor, complete a operação dentro deste período.</value>
   </data>
@@ -413,7 +421,7 @@ $GreenButton
   <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
     <value>Prezado $UserName,
 
-      O administrador criou uma nova &lt;b&gt;$Adress&lt;/b&gt; caixa postal para você no  "${__VirtualRootPath}":"${__VirtualRootPath}" portal.
+      O administrador criou uma nova &lt;b&gt;$Adress&lt;/b&gt; caixa postal para você no "${__VirtualRootPath}":"${__VirtualRootPath}" portal.
 
       Se você recebeu este e-mail por engano, por favor, ignore-o ou entre em contato com o administrador de seu portal para saber os detalhes.</value>
   </data>
@@ -423,11 +431,9 @@ $GreenButton
 Ocorreu um erro ao migrar a região do $RegionName. Por favor, tente novamente mais tarde.
 Seu portal está agora disponível no antigo endereço "$PortalUrl":"$PortalUrl"
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
 ^Para alterar o tipo de notificação, por favor, gerencia as suas "configurações de assinatura":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -437,11 +443,9 @@ Equipe de suporte do ONLYOFFICE™
 Ocorreu um erro ao migrar para outra região. Por favor, tente novamente mais tarde.
 Seu portal está agora disponível no antigo endereço "$PortalUrl":"$PortalUrl"
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
 ^Para alterar o tipo de notificação, por favor, gerencia as suas "configurações de assinatura":"$RecipientSubscriptionConfigURL".^</value>
   </data>
@@ -452,31 +456,32 @@ A migração do portal para a região $RegionName começou. Pode levar algum tem
 
 *Observe*: o portal não estará disponível durante o processo de migração. Após a migração ser concluída, a URL do portal será alterada e todos os links dos documentos compartilhados ficarão inacessíveis.
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_migration_success_v115" xml:space="preserve">
     <value>h1.Migração de portal
-h1. "$PortalUrl": "$PortalUrl": 
+h1."$PortalUrl":"$PortalUrl"
 
 Seu portal foi migrado para um novo domínio. Por favor, restabeleça seu acesso ao portal especificando a senha que será usada para fazer o login.
 
 Por favor, siga o link abaixo para definir sua senha para a conta:
-$GreenButton
+$OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias. Favor completar o processo de restauração de acesso dentro desse período.
 
-Se você recebeu este e-mail por engano, por favor ignore-o ou contate seu administrador do portal "$PortalUrl": "$PortalUrl" para saber os detalhes.</value>
+Se você recebeu este e-mail por engano, por favor ignore-o ou contate seu administrador do portal "$PortalUrl":"$PortalUrl" para saber os detalhes.</value>
   </data>
   <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
-    <value>Olá!
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
 
 Você está convidado a participar de "${__VirtualRootPath}":"${__VirtualRootPath}" como um usuário convidado. Aceite o convite clicando no link:
 
-"$ActivateUrl":"$ActivateUrl":"$ActivateUrl":"$ActivateUrl":"$ActivateUrl
+"$ActivateUrl":"$ActivateUrl"
 
 O link só é válido por 7 dias.
 
@@ -492,41 +497,39 @@ Saiba mais sobre ONLYOFFICE Personal em "nosso blog":"$TagBlogLink".
 
 Estamos felizes por você estar aqui. Fique atento!
 
-Atenciosamente,
-Equipe ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_after_registration1" xml:space="preserve">
-    <value>h1.Welcome to ONLYOFFICE Personal
+    <value>h1.Bem-vindo à ONLYOFFICE Personal
 
 Você acabou de criar seu escritório pessoal na nuvem.
 
-h3. É um espaço de trabalho virtual onde você pode editar e armazenar documentos, trabalhar com eles de qualquer lugar dando acesso a seus amigos ou colegas.
+h3.É um espaço de trabalho virtual onde você pode editar e armazenar documentos, trabalhar com eles de qualquer lugar dando acesso a seus amigos ou colegas.
 
-ONLYOFFICE é compatível com os formatos de documentos da Microsoft Office™ e garante que não haja perda de formatação ou qualidade dos objetos criados. Prometemos aliviar-lhe a dor de cabeça da fidelidade à formatação e dar em suas mãos um conjunto completo de ferramentas de edição profissional.
+h3.Para um começo rápido, eis o que você pode fazer em ONLYOFFICE:
 
-h3.para um começo rápido, eis o que você pode fazer em ONLYOFFICE:
+- Criar, visualizar e editar documentos de texto, planilhas, apresentações.
 
-- Carregar arquivos de seu computador ou criar novos;
+- Trabalhar com todos os formatos populares. Maior compatibilidade com arquivos do MS Office.
 
-- Trabalhar com todos os formatos de arquivos populares;
+- Criar e coeditar "formulários prontos para preenchimento":"https://www.onlyoffice.com/pt/form-creator.aspx".
 
-- Editar autoshapes, gráficos, tabelas, equações e outros objetos;
+- Compartilhe e colabore em documentos online.
 
-- Usar vários addons para recursos de edição estendida;
+- Usar vários addons para recursos de edição estendida.
 
-- Acesse facilmente sua nuvem pessoal via "Chrome extension": "https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Acesse facilmente sua nuvem pessoal via "Chrome extension":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=pt-BR".
 
-Você também pode editar documentos offline com nossos "editores desktop" gratuitos: "https://www.onlyoffice.com/download-desktop.aspx" ou obter uma "suite de edição móvel": "https://www.onlyoffice.com/mobile.aspx" para seu dispositivo iOS ou Android.
+Você também pode editar documentos offline com nossos "editores desktop":"https://www.onlyoffice.com/download-desktop.aspx" gratuitos ou obter uma suite de edição móvel para seu dispositivo "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-Atenciosamente,
-Equipe ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_change_email_v115" xml:space="preserve">
     <value>Deseja alterar o e-mail em sua conta ONLYOFFICE?
 
 Clique no botão abaixo e faça o login* em sua nuvem.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -539,7 +542,7 @@ Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
 
 Por favor, siga o link abaixo para alterar sua senha:
 
-$GreenButton
+$OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias. Favor completar o processo de mudança de senha dentro desse período.
 
@@ -561,16 +564,17 @@ Equipe ONLYOFFICE</value>
   <data name="pattern_personal_profile_delete" xml:space="preserve">
     <value>Você solicitou o encerramento de sua conta em personal.onlyoffice.com. Siga o link para completar a solicitação (o link está ativo por um período de 7 dias): 
 
-$GreenButton
+$OrangeButton
 
-*Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente, de acordo com nossa "Declaração de privacidade": "https://help.onlyoffice.com/Products/Files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+*Nota*: Após a exclusão, sua conta e todos os dados associados a ela serão apagados permanentemente, de acordo com nossa "Declaração de privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
+
+"Leia mais sobre encerramento de conta":"${__HelpLink}/administration/configuration.aspx"
 
 Ignore este e-mail se você não quiser prosseguir. 
 
-Se tiver alguma dúvida, entre em contato conosco em "support@onlyoffice.com": "mailto:support@onlyoffice.com".
+Se tiver alguma dúvida, entre em contato conosco em "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Sinceramente,
-Equipe ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Desativação do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -579,18 +583,16 @@ Caro(a) $OwnerName,
 
 Você solicitou uma desativação temporária de seu portal "${__VirtualRootPath}":"${__VirtualRootPath}". Por favor, clique no link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de desativação do portal dentro do período.
 
 Você pode reativar o seu portal em qualquer momento clicando no seguinte link:
 p=. "Reativar portal":"$ActivateUrl" (este link não expirará)
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_deactivate_tg" xml:space="preserve">
     <value>Desativação do portal [${__VirtualRootPath}](${__VirtualRootPath})
@@ -599,25 +601,25 @@ Prezado $OwnerName,
 
 Você solicitou uma desativação temporária de seu portal [${__VirtualRootPath}](${__VirtualRootPath}). Por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 _Nota_: este link é válido por apenas 7 dias. Favor completar o processo de desativação do portal dentro desse período.
 
 Você pode reativar seu portal a qualquer momento, clicando no link a seguir:
 [Reativar Portal]($ActivateUrl) (este link não tem limite de tempo)
 
-Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para entrar em contato conosco [support@onlyoffice.com](mailto:support@onlyoffice.com)
+Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para entrar em contato conosco [${__SalesEmail}](mailto:${__SalesEmail})
 
 Com os melhores cumprimentos,
 ONLYOFFICE™ Equipe de suporte
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1.Exclusão do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Exclusão do espaço "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Caro(a) $OwnerName,
 
-Você solicitou a exclusão permanente de seu portal "${__VirtualRootPath}":"${__VirtualRootPath}".
+Você solicitou a exclusão permanente do espaço "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 *Importante! Todos dados armazenados no seu portal, bem como suas informações de registro serão perdidos e não poderão ser recuperados.*
 
@@ -627,15 +629,13 @@ Antes de excluir o seu portal, por favor, certifique-se de que o faturamento aut
 
 Se você ainda assim quiser excluir o seu portal "${__VirtualRootPath}":"${__VirtualRootPath}", por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de exclusão do portal dentro do período.
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
     <value>Deleção do portal [${__VirtualRootPath}](${__VirtualRootPath})
@@ -644,7 +644,7 @@ Prezado $OwnerName,
 
 Você solicitou a eliminação permanente de seu portal [${__VirtualRootPath}](${__VirtualRootPath}).
 
-IMPORTANTE! Todos os dados armazenados em seu portal, assim como seus dados de registro serão perdidos e não poderão ser recuperados._
+_Importante! Todos os dados armazenados em seu portal, assim como seus dados de registro serão perdidos e não poderão ser recuperados._
 
 #if($AutoRenovar == "Verdadeiro")
 Antes de excluir o portal, certifique-se de que o faturamento automático esteja desligado. Você pode verificar o status da cobrança automática em sua [conta Avangate](https://secure.avangate.com/myaccount/").
@@ -652,15 +652,15 @@ Antes de excluir o portal, certifique-se de que o faturamento automático esteja
 
 Se você ainda quiser excluir seu portal [${__VirtualRootPath}](${__VirtualRootPath}), por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 _Nota_: este link é válido por apenas 7 dias. Favor completar o processo de exclusão do portal dentro desse período.
 
-Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para entrar em contato conosco [support@onlyoffice.com](mailto:support@onlyoffice.com)
+Se você tiver alguma dúvida ou precisar de assistência, sinta-se à vontade para entrar em contato conosco [${__SalesEmail}](mailto:${__SalesEmail})
 
 Com os melhores cumprimentos,
 ONLYOFFICE™ Equipe de suporte
-[www.onlyoffice.com](http://onlyoffice.com/)</value>
+[www.onlyoffice.com](https://onlyoffice.com/)</value>
   </data>
   <data name="pattern_portal_rename" xml:space="preserve">
     <value>h1.Alterar o endereço do portal
@@ -678,12 +678,12 @@ Você solicitou a exclusão permanente do seu perfil no portal "${__VirtualRootP
 
 Se você ainda assim quiser excluir o seu perfil, por favor, siga o link abaixo para confirmar a operação:
 
-$GreenButton
+$OrangeButton
 
 *Observe*: este link é válido apenas por 7 dias. Por favor, complete o processo de exclusão do perfil dentro do período.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
-    <value>Usuário "$FromUserName": "$FromUserLink" eliminou seu perfil, e este perfil está agora bloqueado. Todos os arquivos do usuário ainda estão atribuídos a ele/ela e ocupam espaço em disco. 
+    <value>Usuário "$FromUserName":"$FromUserLink" eliminou seu perfil, e este perfil está agora bloqueado. Todos os arquivos do usuário ainda estão atribuídos a ele/ela e ocupam espaço em disco. 
 
 Você pode reatribuir os documentos do usuário compartilhados com outros usuários a outro usuário ativo ou removê-los para liberar o espaço em disco do portal.
 
@@ -719,19 +719,19 @@ O processo de reatribuição de dados do usuário "$FromUserName":"$FromUserLink
 
 O processo de reatribuição de dados do usuário "$FromUserName":"$FromUserLink" para o usuário "$ToUserName":"$ToUserLink" falhou.
 
-Mensagem de exceção: $Mensagem</value>
+Mensagem de exceção: $Message</value>
   </data>
   <data name="pattern_remove_user_data_completed" xml:space="preserve">
     <value>Prezado $UserName,
 
-O processo de remoção de dados do usuário "$FromUserName": "$FromUserLink" foi concluído com sucesso.
+O processo de remoção de dados do usuário "$FromUserName":"$FromUserLink" foi concluído com sucesso.
 
 A exclusão de dados pessoais é permitida para liberar $DocsSpace</value>
   </data>
   <data name="pattern_remove_user_data_failed" xml:space="preserve">
     <value>Prezado $UserName,
 
-O processo de remoção de dados para o usuário "$FromUserName": "$FromUserLink" falhou.
+O processo de remoção de dados para o usuário "$FromUserName":"$FromUserLink" falhou.
 
 Mensagem de exceção: $Message</value>
   </data>
@@ -784,7 +784,7 @@ h3.Email
 "$UserEmail":"mailto:$UserEmail"
 
 h3.Telefone
-$Phone 
+$Phone
 
 h3.Site da empresa
 $Site
@@ -800,11 +800,11 @@ $ Body</value>
   </data>
   <data name="pattern_restore_completed_v115" xml:space="preserve">
     <value>h1.Restauração de portal
-h1. "${__VirtualRootPath}": "${__VirtualRootPath}"
+h1. "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Seu portal foi restaurado. Para acessá-lo, você precisa definir uma nova senha:
 
-$GreenButton
+$OrangeButton
 
 *Nota*: este link é válido por apenas 7 dias.
 
@@ -817,26 +817,25 @@ A restauração do portal começou. Pode levar algum tempo dependendo da quantid
 
 *Observe*: o portal não estará disponível durante o processo de restauração.
 
-Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Se você tiver perguntas ou precisar de assistência, por favor, entre em contato conosco pelo "${__SalesEmail}":"mailto:${__SalesEmail}"
 
-Cumprimentos,
-Equipe de suporte do ONLYOFFICE™
-"www.onlyoffice.com":"http://onlyoffice.com/"
+$TrulyYours
 
 ^Para alterar o tipo de notificação, por favor, gerencia as suas "configurações de assinatura":"$RecipientSubscriptionConfigURL".^</value>
   </data>
   <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
-    <value>Olá!
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
 
 Você está convidado a participar de "${__VirtualRootPath}":"${__VirtualRootPath}" como um usuário convidado. Aceite o convite clicando no link:
 
-$GreenButton
+$OrangeButton
 
 Também lhe enviaremos dicas úteis e as últimas notícias da ONLYOFFICE de vez em quando. Você pode cancelar as assinaturas em sua página de Perfil a qualquer momento, assim como reativá-las.
 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com": "http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_self_profile_updated" xml:space="preserve">
     <value>h1.Notificação de alteração de perfil do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -865,8 +864,7 @@ $activity
 Esta mensagem foi gerada automaticamente para testar as configurações de seu SMTP. Se você estiver vendo isto, significa que as configurações estão corretas e você pode usá-las em seu portal.
 
 
-Cumprimentos,
-Equipe ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_storage_decryption_error" xml:space="preserve">
     <value>Olá, $UserName!
@@ -929,7 +927,7 @@ Você foi convidado a juntar-se ao escritório seguro e protegido de sua empresa
 
 Aceite o convite seguindo o link abaixo e use seu login e senha da conta corporativa para fazer o login. 
 
-$GreenButton
+$OrangeButton
 
 O link só é válido por 7 dias.</value>
   </data>
@@ -992,9 +990,6 @@ O link só é válido por 7 dias.</value>
   </data>
   <data name="subject_personal_after_registration1" xml:space="preserve">
     <value>Bem vindo ao ONLYOFFICE Pessoal</value>
-  </data>
-  <data name="subject_personal_change_password" xml:space="preserve">
-    <value>Assistência de senha pessoal ONLYOFFICE</value>
   </data>
   <data name="subject_personal_confirmation" xml:space="preserve">
     <value>ONLYOFFICE Pessoal. Por favor, ative seu email</value>
@@ -1132,80 +1127,78 @@ O link só é válido por 7 dias.</value>
     <value>Usuário do DocSpace atualizado: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="pattern_enterprise_admin_activation_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
 Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pode aumentar a colaboração com sua equipe, clientes, parceiros e muito mais. Seu endereço é "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirme seu e-mail (o link é válido por 7 dias):
- 
-$GreenButton
- 
-Desfrute de uma nova forma de colaboração de documentos!
- 
-Atenciosamente,
- 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com/":"http://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+*Desfrute de uma nova forma de colaboração de documentos!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
+
 Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pode aumentar a colaboração com sua equipe, clientes, parceiros e muito mais. Seu endereço é "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirme seu e-mail (o link é válido por 7 dias):
- 
-$GreenButton
- 
-Desfrute de uma nova forma de colaboração de documentos!
- 
-Atenciosamente,
- 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+*Desfrute de uma nova forma de colaboração de documentos!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_activation_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
+
 Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pode aumentar a colaboração com sua equipe, clientes, parceiros e muito mais. Seu endereço é "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirme seu e-mail (o link é válido por 7 dias):
- 
-$GreenButton
- 
-Desfrute de uma nova forma de colaboração de documentos!
- 
-Atenciosamente,
- 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+*Desfrute de uma nova forma de colaboração de documentos!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_activation_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
 Você acabou de criar o ONLYOFFICE DocSpace, um hub de documentos onde você pode aumentar a colaboração com sua equipe, clientes, parceiros e muito mais. Seu endereço é "${__VirtualRootPath}":"${__VirtualRootPath}".
- 
+
 Confirme seu e-mail (o link é válido por 7 dias):
- 
-$GreenButton
- 
+$OrangeButton
+
 O seu tarifário atual é STARTUP. É totalmente gratuito e inclui:
- 
-* 1 administrador, 2 usuários avançados
-* Até 12 salas
-* Número ilimitado de usuários em cada sala
-* 2GB de espaço em disco
- 
-Desfrute de uma nova forma de colaboração de documentos!
- 
-Atenciosamente,
- 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://onlyoffice.com/pt"</value>
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;1 administrador, 2 usuários avançados&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Até 12 salas&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Número ilimitado de usuários em cada sala&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;2GB de espaço em disco&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+*Desfrute de uma nova forma de colaboração de documentos!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_change_password_v115" xml:space="preserve">
     <value>Quer mudar a senha em sua conta pessoal ONLYOFFICE? Clique no botão abaixo para confirmar.
 
-$GreenButton
+$OrangeButton
 
 O link é válido por 7 dias.
 
@@ -1226,347 +1219,378 @@ Não deseja alterar sua senha? Simplesmente ignore esta mensagem.</value>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Deseja alterar a senha da sua conta do ONLYOFFICE? Clique no botão abaixo para confirmar.
  
-$GreenButton
+$OrangeButton
  
 O link é válido por 7 dias.
 
 Não quer mudar sua senha? Apenas ignore esta mensagem</value>
   </data>
   <data name="pattern_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Obtenha aplicativos &lt;span style="color:#FF6F3D;"&gt;gratuitos&lt;/span&gt; do ONLYOFFICE
+
+
+Olá, $UserName!
+
 Obtenha aplicativos gratuitos do ONLYOFFICE para trabalhar em documentos de qualquer um dos seus dispositivos.
- 
-# Para trabalhar em documentos offline no Windows, Linux e Mac, obtenha "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/pt//pt/download-desktop.aspx".
- 
-#Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para trabalhar em documentos offline, obtenha ONLYOFFICE Desktop Editors para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 dicas &lt;/span&gt; para um trabalho eficaz em seus documentos
+
+
+Olá, $UserName!
+
 Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas dicas sobre como tornar o trabalho em documentos mais eficaz.
- 
-*#1. Escolha a maneira como você trabalha.* Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.
- 
-*#2. Trabalhe com qualquer conteúdo que você tiver.* Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
- 
-*#3. Coautor de forma eficaz.* Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
- 
-*#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
- 
-$GreenButton
- 
-Atenciosamente, 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Escolha a maneira como você trabalha.&lt;/b&gt; &lt;br/&gt;Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Trabalhe com qualquer conteúdo que você tiver.&lt;/b&gt;Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Coautor de forma eficaz.&lt;/b&gt; &lt;br/&gt;Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colabore com segurança.&lt;/b&gt; &lt;br/&gt;Ajuste o acesso a todo o espaço ou salas separadas com permissões e funções de usuário flexíveis. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilize o plugin auxiliar de IA.&lt;/b&gt;&lt;br/&gt;Resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 dicas &lt;/span&gt; para um trabalho eficaz em seus documentos
+
+
+Olá, $UserName!
+
 Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas dicas sobre como tornar o trabalho em documentos mais eficaz.
- 
-*#1. Escolha a maneira como você trabalha.* Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.
- 
-*#2. Trabalhe com qualquer conteúdo que você tiver.* Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
- 
-*#3. Coautor de forma eficaz.* Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
- 
-*#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
- 
-$GreenButton
- 
-Atenciosamente, 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Escolha a maneira como você trabalha.&lt;/b&gt; &lt;br/&gt;Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Trabalhe com qualquer conteúdo que você tiver.&lt;/b&gt;Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Coautor de forma eficaz.&lt;/b&gt; &lt;br/&gt;Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colabore com segurança.&lt;/b&gt; &lt;br/&gt;Ajuste o acesso a todo o espaço ou salas separadas com permissões e funções de usuário flexíveis. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilize o plugin auxiliar de IA.&lt;/b&gt;&lt;br/&gt;Resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 dicas &lt;/span&gt; para um trabalho eficaz em seus documentos
+
+
+Olá, $UserName!
+
 Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas dicas sobre como tornar o trabalho em documentos mais eficaz.
- 
-*#1. Escolha a maneira como você trabalha.* Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.
- 
-*#2. Trabalhe com qualquer conteúdo que você tiver.* Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
- 
-*#3. Coautor de forma eficaz.* Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
- 
-*#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
- 
-$GreenButton
- 
-Atenciosamente, 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Escolha a maneira como você trabalha.&lt;/b&gt; &lt;br/&gt;Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Trabalhe com qualquer conteúdo que você tiver.&lt;/b&gt;Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Coautor de forma eficaz.&lt;/b&gt; &lt;br/&gt;Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colabore com segurança.&lt;/b&gt; &lt;br/&gt;Ajuste o acesso a todo o espaço ou salas separadas com permissões e funções de usuário flexíveis. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilize o plugin auxiliar de IA.&lt;/b&gt;&lt;br/&gt;Resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. &lt;span style="color:#FF6F3D;"&gt;5 dicas &lt;/span&gt; para um trabalho eficaz em seus documentos
+
+
+Olá, $UserName!
+
 Esperamos que você goste de usar seu ONLYOFFICE DocSpace. Aqui estão algumas dicas sobre como tornar o trabalho em documentos mais eficaz.
- 
-*#1. Escolha a maneira como você trabalha.* Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.
- 
-*#2. Trabalhe com qualquer conteúdo que você tiver.* Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
- 
-*#3. Coautor de forma eficaz.* Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
- 
-*#4. Conecte nuvens de terceiros.* Conecte qualquer armazenamento em nuvem e trabalhe sem alternar entre aplicativos.
- 
-$GreenButton
- 
-Atenciosamente, 
-Equipe ONLYOFFICE 
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG1" alt="work pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#1. Escolha a maneira como você trabalha.&lt;/b&gt; &lt;br/&gt;Organize seu fluxo de trabalho conforme necessário, criando salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#2. Trabalhe com qualquer conteúdo que você tiver.&lt;/b&gt;Armazene e trabalhe com arquivos de diferentes formatos em suas salas: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG2" alt="doc pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG3" alt="authors pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#3. Coautor de forma eficaz.&lt;/b&gt; &lt;br/&gt;Colabore em documentos com dois modos de coedição: em tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;br/&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 8px; padding-bottom: 0px;"&gt;&lt;b&gt;#4. Colabore com segurança.&lt;/b&gt; &lt;br/&gt;Ajuste o acesso a todo o espaço ou salas separadas com permissões e funções de usuário flexíveis. &lt;br/&gt;&lt;/td&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 8px; padding-right: 0px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG4" alt="security pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 156px; margin:0 auto; padding-left: 0px; padding-right: 8px; vertical-align: top; width: 252px;"&gt;&lt;img width="252" src="$IMG5" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 8px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;b&gt;#5. Utilize o plugin auxiliar de IA.&lt;/b&gt;&lt;br/&gt;Resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Descubra a assinatura comercial do &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá, $UserName!
+
 Aqui estão três perguntas simples para você que podem nos ajudar a tornar sua experiência de usuário ainda mais confortável.
- 
-* Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace?
 
-* Você gostaria de criar qualquer número de salas para trabalhar com vários documentos?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Deseja usar o ONLYOFFICE DocSpace com sua própria marca?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você gostaria de criar qualquer número de salas para trabalhar com vários documentos? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Deseja usar o ONLYOFFICE DocSpace com sua própria marca?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Se você tiver pelo menos uma resposta 'sim', opte pelo plano tarifário BUSINESS, que permite adicionar qualquer número desejado de gerentes ao seu ONLYOFFICE DocSpace, bem como aplicar opções de marca.
- 
-Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento.
- 
-_Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento. _
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Descubra a assinatura comercial do &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá, $UserName!
+
 Aqui estão três perguntas simples para você que podem nos ajudar a tornar sua experiência de usuário ainda mais confortável.
- 
-* Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace?
 
-* Você gostaria de criar qualquer número de salas para trabalhar com vários documentos?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Deseja usar o ONLYOFFICE DocSpace com sua própria marca?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você gostaria de criar qualquer número de salas para trabalhar com vários documentos? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Deseja usar o ONLYOFFICE DocSpace com sua própria marca?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Se você tiver pelo menos uma resposta 'sim', opte pelo plano tarifário BUSINESS, que permite adicionar qualquer número desejado de gerentes ao seu ONLYOFFICE DocSpace, bem como aplicar opções de marca.
- 
-Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento.
- 
-_Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento. _
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_admin_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Descubra a assinatura comercial do &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá, $UserName!
+
 Aqui estão três perguntas simples para você que podem nos ajudar a tornar sua experiência de usuário ainda mais confortável.
- 
-* Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace?
 
-* Você gostaria de criar qualquer número de salas para trabalhar com vários documentos?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Deseja usar o ONLYOFFICE DocSpace com sua própria marca?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você gostaria de criar qualquer número de salas para trabalhar com vários documentos? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Deseja usar o ONLYOFFICE DocSpace com sua própria marca?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Se você tiver pelo menos uma resposta 'sim', opte pelo plano tarifário BUSINESS, que permite adicionar qualquer número desejado de gerentes ao seu ONLYOFFICE DocSpace, bem como aplicar opções de marca.
- 
-Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento.
- 
-_Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento. _
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Descubra a assinatura comercial do &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá, $UserName!
+
 Aqui estão três perguntas simples para você que podem nos ajudar a tornar sua experiência de usuário ainda mais confortável.
- 
-* Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace?
 
-* Você gostaria de criar qualquer número de salas para trabalhar com vários documentos?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você tem uma equipe grande ou muitos clientes e parceiros para colaborar em seu ONLYOFFICE DocSpace? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* Deseja usar o ONLYOFFICE DocSpace com sua própria marca?
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Você gostaria de criar qualquer número de salas para trabalhar com vários documentos? &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-style: italic; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Deseja usar o ONLYOFFICE DocSpace com sua própria marca?&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
 
 Se você tiver pelo menos uma resposta 'sim', opte pelo plano tarifário BUSINESS, que permite adicionar qualquer número desejado de gerentes ao seu ONLYOFFICE DocSpace, bem como aplicar opções de marca.
- 
-Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento.
- 
-_Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento. _
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+Para fazer isso, consulte a "seção de pagamentos":"$PricingPage" do seu ONLYOFFICE DocSpace. Lá, você encontrará um link individual para o Portal do Cliente Stripe, onde poderá lidar facilmente com todos os detalhes de pagamento. 
+
+&lt;table bgcolor="#f5f5f5" cellspacing="0" cellpadding="0" style="background: #f5f5f5; order: 0 none; border-spacing: 0; -moz-border-radius: 4px; -webkit-border-radius: 4px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border-radius: 4px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #808080; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px; text-align: center;"&gt;Observação: A pessoa que paga a assinatura torna-se o pagador. Apenas o pagador pode fazer alterações na assinatura (ajustar o número de gerentes). Os usuários não têm acesso aos detalhes de pagamento. O proprietário da conta do ONLYOFFICE DocSpace pode reatribuir o pagador a qualquer momento.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_activation_v1" xml:space="preserve">
-    <value>Olá!
- 
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
+
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
-    <value>Olá!
- 
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
+
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_activation_v1" xml:space="preserve">
-    <value>Olá!
- 
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
+
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_activation_v1" xml:space="preserve">
-    <value>Olá!
- 
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
+
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_user_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
- 
-* Trabalhe com outros usuários na sala para a qual você foi convidado*: salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
- 
-$GreenButton
- 
-Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://www.onlyoffice.com/pt"</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
- 
-* Trabalhe com outros usuários na sala para a qual você foi convidado*: salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
- 
-$GreenButton
- 
-Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://www.onlyoffice.com/pt"</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_opensource_user_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
- 
-* Trabalhe com outros usuários na sala para a qual você foi convidado*: salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
- 
-$GreenButton
- 
-Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://www.onlyoffice.com/pt"</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_user_welcome_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace!
+
+
+Olá, $UserName!
+
 Bem-vindo ao ONLYOFFICE DocSpace! Seu perfil de usuário foi adicionado com sucesso a "${__VirtualRootPath}":"${__VirtualRootPath}". Agora você pode:
- 
-* Trabalhe com outros usuários na sala para a qual você foi convidado*: salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade*.
 
-* *Trabalhe com arquivos de diferentes formatos*: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG1" alt="users pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;Trabalhe com outros usuários na sala para a qual você foi convidado: &lt;b&gt;salas de colaboração para coautoria em tempo real ou salas personalizadas com configurações flexíveis para qualquer finalidade&lt;/b&gt;.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Colabore em documentos* com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG2" alt="files pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Trabalhe com arquivos de diferentes formatos&lt;/b&gt;: documentos de texto, planilhas, apresentações, formulários digitais, PDFs, e-books, multimídia.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
-* *Conecte qualquer armazenamento em nuvem* e trabalhe sem alternar entre aplicativos. 
- 
-$GreenButton
- 
-Se precisar de ajuda, navegue em nossa "Central de Ajuda":"https://helpcenter.onlyoffice.com/" ou pergunte à nossa "Equipe de Suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://www.onlyoffice.com/pt"</value>
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="collaborate pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Colabore em documentos&lt;/b&gt; com dois modos de coedição: tempo real ou bloqueio de parágrafo. Acompanhe as alterações, comunique-se em tempo real usando o bate-papo integrado ou fazendo chamadas de áudio e vídeo.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 24px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="chatgpt pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px;"&gt;&lt;b&gt;Utilize o plugin auxiliar de IA:&lt;/b&gt; resuma e traduza textos, gere imagens e palavras-chave, analise palavras, etc.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+Se precisar de ajuda, navegue em nosso "Help Center":"${__HelpLink}" ou pergunte à nossa "equipe de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
     <value>h1.Mensagem do "${__VirtualRootPath}":"${__VirtualRootPath}" portal
- 
+
 Nome: $UserName
- 
+
 Email: $UserEmail
- 
+
 $Body</value>
   </data>
   <data name="pattern_personal_after_registration14_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Obtenha aplicativos &lt;span style="color:#FF6F3D;"&gt;gratuitos&lt;/span&gt; do ONLYOFFICE
+
+
+Olá, $UserName!
+
 Obtenha aplicativos gratuitos do ONLYOFFICE para trabalhar em documentos de qualquer um dos seus dispositivos.
- 
-# Para trabalhar em documentos offline no Windows, Linux e Mac, baixe "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/pt/download-desktop.aspx".
- 
-#Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para trabalhar em documentos offline, obtenha ONLYOFFICE Desktop Editors para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Obtenha aplicativos &lt;span style="color:#FF6F3D;"&gt;gratuitos&lt;/span&gt; do ONLYOFFICE
+
+
+Olá, $UserName!
+
 Obtenha aplicativos gratuitos do ONLYOFFICE para trabalhar em documentos de qualquer um dos seus dispositivos.
- 
-# Para trabalhar em documentos offline no Windows, Linux e Mac, baixe "ONLYOFFICE Desktop Editors":"https://www.onlyoffice.com/pt/download-desktop.aspx".
- 
-#Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para "iOS":"https://apps.apple.com/us/app/onlyoffice-documents/id944896972" ou "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para trabalhar em documentos offline, obtenha ONLYOFFICE Desktop Editors para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 155px; padding-right: 155px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG1" alt="Windows" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="macOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG3" alt="Linux" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table bgcolor="#FF6F3D" cellspacing="0" cellpadding="0" background="linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%)" style="background: linear-gradient(136.1deg, #FF8E3D -1.99%, #FF6F3D 100%); order: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Para editar documentos em dispositivos móveis, obtenha o aplicativo ONLYOFFICE Documents para&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 190px; padding-right: 190px; padding-top: 0px; padding-bottom: 40px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 28px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 29px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="29" height="32" src="$IMG4" alt="Android" style="color: #333333; font-size: 14px; text-align: center; "&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="height: 32px; margin:0 auto; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px; vertical-align: top; width: 32px;"&gt;&lt;a href="https://www.onlyoffice.com/download-desktop.aspx#mobile" style="color: #333333; display: block;" target="_blank"&gt;&lt;img width="32" height="32" src="$IMG2" alt="iOS" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_already_exist" xml:space="preserve">
     <value>Olá!
@@ -1578,137 +1602,115 @@ Tenha um bom dia!
 Equipe ONLYOFFICE</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>Seu ONLYOFFICE DocSpace foi desativado com sucesso. Observe que todos os seus dados serão excluídos de acordo com nossa "Política de Privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
- 
-Por que você decidiu sair? Compartilhe sua experiência conosco.
+    <value>h1. O ONLYOFFICE DocSpace foi &lt;span style="color:#FF6F3D;"&gt;desativado&lt;/span&gt;
 
-$GreenButton
 
-Obrigado e boa sorte!
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+Seu ONLYOFFICE DocSpace foi desativado com sucesso. Observe que todos os seus dados serão excluídos de acordo com nossa "Política de Privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Por que você decidiu sair? Compartilhe sua experiência conosco.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt; 
+
+*Obrigado e boa sorte!*
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_modules_v1" xml:space="preserve">
-    <value>Olá, $UserName!
- 
+    <value>h1. Configure seu &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá, $UserName!
+
 Ajuste as configurações de segurança do seu ONLYOFFICE DocSpace para torná-lo mais seguro:
 
-* Defina a força da senha.
+&lt;table cellspacing="0" cellpadding="0" background="" style="background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spacing: 0; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 342px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Defina a força da senha&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Ative a autenticação de dois fatores e o logon único&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Determine domínios de e-mail confiáveis e duração da sessão&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Restrinja o acesso de endereços IP específicos&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Permita ou restrinja mensagens administrativas&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 16px; vertical-align: top;"&gt;Gerencie os direitos de acesso do administrador&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; padding-right: 16px; width: 5%;vertical-align: top;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;bull;&lt;/td&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-bottom: 32px; vertical-align: top;"&gt;Faça backups de dados&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
 
-* Ative a autenticação de dois fatores e o logon único.
+$OrangeButton
 
-* Determine domínios de e-mail confiáveis e duração da sessão.
+Visite nosso "Centro de Ajuda":"${__HelpLink}" para saber mais sobre como configurar e gerenciar seu ONLYOFFICE DocSpace. Você também pode consultá-lo quando tiver dúvidas sobre a funcionalidade.
 
-* Restrinja o acesso de endereços IP específicos.
-
-* Permita ou restrinja mensagens administrativas. 
- 
-* Gerencie os direitos de acesso do administrador.
-
-* Faça backups de dados.
- 
-$GreenButton
- 
-Visite nosso "Centro de Ajuda":"https://helpcenter.onlyoffice.com/" para saber mais sobre como configurar e gerenciar seu ONLYOFFICE DocSpace. Você também pode consultá-lo quando tiver dúvidas sobre a funcionalidade.
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>Você não insere seu ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" há mais de meio ano. 
- 
+    <value>h1. Seu ONLYOFFICE DocSpace será &lt;span style="color:#FF6F3D;"&gt;excluído&lt;/span&gt;
+
+
+Você não insere seu ONLYOFFICE DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" há mais de meio ano. 
+
 Como você decidiu não usá-lo mais, seu ONLYOFFICE DocSpace e todos os dados serão excluídos de acordo com nossa "Política de Privacidade":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
- 
-Agradecemos o seu feedback. Por que você decidiu parar de usar o ONLYOFFICE DocSpace?
- 
-$GreenButton
- 
-Se você acha que isso é um erro e deseja continuar usando o ONLYOFFICE DocSpace, entre em contato com nossa "Equipe de suporte":"https://www.onlyoffice.com/pt/support-contact-form.aspx". 
- 
-Atenciosamente, 
-Equipe ONLYOFFICE
-"www.onlyoffice.com":"http://www.onlyoffice.com/pt"</value>
+
+&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; color: #333333; empty-cells: show; height: 0px; margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 18px; line-height: 29px; margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 24px; text-align: center;"&gt;Agradecemos o seu feedback. Por que você decidiu parar de usar o ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; margin: 0; padding-bottom: 40px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+Se você acha que isso é um erro e deseja continuar usando o ONLYOFFICE DocSpace, entre em contato com nossa "Equipe de suporte":"${__SupportLink}". 
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_docspace_invite" xml:space="preserve">
-    <value>Olá!
- 
+    <value>h1. Junte-se ao &lt;span style="color:#FF6F3D;"&gt;ONLYOFFICE&lt;/span&gt; DocSpace
+
+
+Olá!
+
 Você está convidado a participar do ONLYOFFICE DocSpace em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
- 
-$GreenButton
- 
+
+$OrangeButton
+
 Depois de clicar no link de convite, defina uma nova senha para sua conta.
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://www.onlyoffice.com/pt"</value>
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Olá, $UserName!
- 
+
 Leve em consideração que o período de carência de $PaymentDelay‎ dias para o seu ONLYOFFICE DocSpace está ativado.
 
 Certifique-se de pagar sua assinatura Business antes do vencimento do período de carência. Assim, você poderá aproveitar ainda mais todos os benefícios do seu ONLYOFFICE DocSpace.
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"https://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Olá, $UserName!
- 
+
 Leve em consideração que sua assinatura do ONLYOFFICE DocSpace expira em três dias. Depois disso, o período de carência de $PaymentDelay dias será ativado.
 
 Recomendamos pagar sua assinatura Business agora e continuar a usar todos os benefícios de seu ONLYOFFICE DocSpace.
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"https://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Olá, $UserName!
- 
+
 Leve em consideração que o período de carência de $PaymentDelay dias para o seu ONLYOFFICE DocSpace acabou.
 
 Certifique-se de pagar sua assinatura Business o mais rápido possível. Assim, você poderá usar todos os benefícios do seu ONLYOFFICE DocSpace como antes.
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"https://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Olá, $UserName!
- 
+
 Leve em consideração que o período de tolerância de $PaymentDelay dias para o seu ONLYOFFICE DocSpace expirará amanhã.
 
 Certifique-se de pagar sua assinatura Business hoje. Assim, você poderá aproveitar ainda mais todos os benefícios do seu ONLYOFFICE DocSpace.
- 
-$GreenButton
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"https://onlyoffice.com/pt"</value>
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
   <data name="pattern_saas_room_invite" xml:space="preserve">
     <value>Olá!
- 
+
 Você está convidado a entrar na sala $Message em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
- 
-$GreenButton
- 
+
+$OrangeButton
+
 Depois de clicar no link de convite, defina uma nova senha para sua conta.
- 
-Atenciosamente,
-Equipe ONLYOFFICE
-"www.onlyoffice.com/pt":"http://www.onlyoffice.com/pt"</value>
+
+$TrulyYours</value>
   </data>
   <data name="ButtonConfirmEmail" xml:space="preserve">
     <value>CONFIRMAR</value>
@@ -1756,16 +1758,16 @@ Equipe ONLYOFFICE
     <value>Obtenha aplicativos gratuitos do ONLYOFFICE</value>
   </data>
   <data name="subject_enterprise_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Várias dicas para um trabalho eficaz em seus documentos</value>
+    <value>5 dicas para um trabalho eficaz em seus documentos</value>
   </data>
   <data name="subject_opensource_admin_docs_tips_v1" xml:space="preserve">
-    <value>Várias dicas para um trabalho eficaz em seus documentos</value>
+    <value>5 dicas para um trabalho eficaz em seus documentos</value>
   </data>
   <data name="subject_opensource_user_docs_tips_v1" xml:space="preserve">
-    <value>Várias dicas para um trabalho eficaz em seus documentos</value>
+    <value>5 dicas para um trabalho eficaz em seus documentos</value>
   </data>
   <data name="subject_saas_admin_user_docs_tips_v1" xml:space="preserve">
-    <value>Várias dicas para um trabalho eficaz em seus documentos</value>
+    <value>5 dicas para um trabalho eficaz em seus documentos</value>
   </data>
   <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>Descubra a assinatura comercial do ONLYOFFICE DocSpace</value>
@@ -1823,5 +1825,37 @@ Equipe ONLYOFFICE
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>O período de carência para o seu ONLYOFFICE DocSpace expira amanhã</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Atenciosamente, Equipe de suporte do ONLYOFFICE</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>ASSISTA A PLAYLIST COMPLETA</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Domine o ONLYOFFICE DocSpace com guias de vídeo</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>Atenciosamente, equipe ONLYOFFICE</value>
+  </data>
+  <data name="pattern_saas_video_guides_v1" xml:space="preserve">
+    <value>h1. Domine o ONLYOFFICE DocSpace com &lt;span style="color:#FF6F3D;"&gt;guias de vídeo&lt;/span&gt;
+
+
+Olá, $UserName!
+
+Para sua comodidade, preparamos tutoriais em vídeo para que você possa dominar facilmente o ONLYOFFICE DocSpace. Assista aos guias em vídeo e garanta um trabalho contínuo e eficaz.
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/T8_hGjQR1Kk" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG1" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;O que é ONLYOFFICE DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 32px;"&gt;&lt;/td&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: center; width: 224px;"&gt;&lt;a href="https://youtu.be/rEurv8Mss0o" style="color: #FF6F3D; display: block; text-decoration: none;" target="_blank"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="margin:0 auto; vertical-align: top; text-align: left;"&gt;&lt;img height="137" width="244" src="$IMG2" alt="cover"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #FF6F3D; font-size: 16px; margin:0 auto; padding-top: 16px; vertical-align: top; text-align: left; text-decoration: underline;"&gt;DocSpace: passeio prático&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG3" alt="settings pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Atividades principais&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/XBY2H9BaYDk"&gt;Criar salas&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/1f9sl4u94v4"&gt;Criar e fazer upload de arquivos&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/E96rEIgDO8M"&gt;Copie, mova, renomeie, exclua, baixe arquivos&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/zy5mPrf1DqY"&gt;Classifique e filtre arquivo&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/_Br4aGP7f3c"&gt;Restaurar versões de arquivos&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/jclhTh5TXp0"&gt;Use teclas de atalho&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/WX-SN_nB4cI"&gt;Arquivar salas&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG4" alt="management pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Gerenciamento de usuários e perfis&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/cxSs031w3m8"&gt;Convidar usuários&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/5tzRL9Kxj1Y"&gt;Gerenciar funções de usuário&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/eJNHyjoc3lQ"&gt;Gerencie seu perfil&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/QxrRtMDj2ZM"&gt;Sair das sessões ativas&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 56px; margin:0 auto; padding-left: 48px; padding-right: 32px; vertical-align: top; width: 56px;"&gt;&lt;img width="56" src="$IMG5" alt="administration pic" style="color: #333333; font-size: 14px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 40px; padding-bottom: 0px; width: 424px;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; font-weight: 700; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;Administração&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 16px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/psxZ0fDXiUo"&gt;Gerenciar configurações de segurança&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; margin: 0; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;"&gt;&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://youtu.be/2ed2iSxLCwk"&gt;Faça backup e restaure&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public enum FileStatus
 
 [Transient]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
-public class File<T> : FileEntry<T>, IFileEntry<T>
+public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
 
@@ -55,11 +55,7 @@ public class File<T> : FileEntry<T>, IFileEntry<T>
 
     public File(
         FileHelper fileHelper,
-        Global global,
-        SecurityContext securityContext,
-        GlobalFolderHelper globalFolderHelper,
-        FilesSettingsHelper filesSettingsHelper,
-        FileDateTime fileDateTime) : base(fileHelper, global, securityContext, globalFolderHelper, filesSettingsHelper, fileDateTime)
+        Global global) : base(fileHelper, global)
     {
         Version = 1;
         VersionGroup = 1;
@@ -200,7 +196,7 @@ public class File<T> : FileEntry<T>, IFileEntry<T>
                 FileType.Image => ConvertedType.Trim('.') == "zip" ? ".pptt" : ConvertedType,
                 FileType.Spreadsheet => ConvertedType.Trim('.') != "xlsx" ? ".xlst" : ConvertedType,
                 FileType.Document => ConvertedType.Trim('.') == "zip" ? ".doct" : ConvertedType,
-                _ => ConvertedType,
+                _ => ConvertedType
             };
         }
     }

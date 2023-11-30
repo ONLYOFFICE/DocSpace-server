@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,12 +43,9 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int TenantId { get; set; }
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
-    public bool Private { get; set; }
-    public bool HasLogo { get; set; }
-    public string Color { get; set; }
     public long Quota { get; set; }
     public long Counter { get; set; }
-
+    public DbRoomSettings Settings { get; set; }
     public DbTenant Tenant { get; set; }
 
     [Ignore]
@@ -56,7 +53,7 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
 
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
     {
-        return (a) => new[] { Title };
+        return a => new[] { Title };
     }
 }
 
@@ -143,18 +140,6 @@ public static class DbFolderExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Private)
-                .HasColumnName("private")
-                .HasDefaultValueSql("'0'");
-
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
-
-            entity.Property(e => e.Color)
-                .HasColumnName("color")
-                .HasColumnType("char(6)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")
                 .HasDefaultValueSql("'-2'");
@@ -214,10 +199,6 @@ public static class DbFolderExtension
                 .IsRequired()
                 .HasColumnName("title")
                 .HasMaxLength(400);
-
-            entity.Property(e => e.Private).HasColumnName("private");
-
-            entity.Property(e => e.HasLogo).HasColumnName("has_logo");
 
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")

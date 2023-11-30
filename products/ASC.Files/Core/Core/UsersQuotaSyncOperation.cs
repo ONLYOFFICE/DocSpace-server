@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,22 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WebZones;
+
 namespace ASC.Web.Files;
 
-[Singletone(Additional = typeof(UsersQuotaOperationExtension))]
-public class UsersQuotaSyncOperation
+[Singleton(Additional = typeof(UsersQuotaOperationExtension))]
+public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "userQuotaOperation";
 
-    private readonly DistributedTaskQueue _progressQueue;
-
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
 
     public void RecalculateQuota(Tenant tenant)
     {
         var item = _progressQueue.GetAllTasks<UsersQuotaSyncJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             item = null;
@@ -47,7 +47,7 @@ public class UsersQuotaSyncOperation
 
         if (item == null)
         {
-            item = _serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
+            item = serviceProvider.GetRequiredService<UsersQuotaSyncJob>();
             item.InitJob(tenant);
             _progressQueue.EnqueueTask(item.RunJobAsync, item);
         }
@@ -75,14 +75,6 @@ public class UsersQuotaSyncOperation
     }
 
 
-    public UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
-    {
-        _serviceProvider = serviceProvider;
-        _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
-
-
     public static class UsersQuotaOperationExtension
     {
         public static void Register(DIHelper services)
@@ -92,11 +84,8 @@ public class UsersQuotaSyncOperation
     }
 }
 
-public class UsersQuotaSyncJob : DistributedTaskProgress
+public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly SettingsManager _settingsManager;
-
     private int? _tenantId;
     public int TenantId
     {
@@ -111,13 +100,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
         }
     }
 
-    public UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory, SettingsManager settingsManager)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _settingsManager = settingsManager;
-
-    }
-
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
@@ -127,19 +109,19 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
     {
         try
         {
-           await using var scope = _serviceScopeFactory.CreateAsyncScope();
+           await using var scope = serviceScopeFactory.CreateAsyncScope();
 
-            var _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            var _userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var _authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
-            var _securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-            var _webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            var authentication = scope.ServiceProvider.GetRequiredService<AuthManager>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            var webItemManagerSecurity = scope.ServiceProvider.GetRequiredService<WebItemManagerSecurity>();
             var _filesSpaceUsageStatManager = scope.ServiceProvider.GetRequiredService<FilesSpaceUsageStatManager>();
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            await tenantManager.SetCurrentTenantAsync(TenantId);
 
-            var users = await _userManager.GetUsersAsync();
-            var webItems = _webItemManagerSecurity.GetItems(Web.Core.WebZones.WebZoneType.All, ItemAvailableState.All);
+            var users = await userManager.GetUsersAsync();
+            var webItems = webItemManagerSecurity.GetItems(WebZoneType.All, ItemAvailableState.All);
 
             foreach (var user in users)
             {
@@ -152,8 +134,8 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
                 Percentage += 1.0 * 100 / users.Length;
                 PublishChanges();
 
-                var account = await _authentication.GetAccountByIDAsync(TenantId, user.Id);
-                await _securityContext.AuthenticateMeAsync(account);
+                var account = await authentication.GetAccountByIDAsync(TenantId, user.Id);
+                await securityContext.AuthenticateMeAsync(account);
 
                 foreach (var item in webItems)
                 {

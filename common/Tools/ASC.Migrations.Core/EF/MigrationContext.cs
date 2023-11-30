@@ -37,7 +37,6 @@ public class MigrationContext : DbContext
 
     public DbSet<MobileAppInstall> MobileAppInstall { get; set; }
     public DbSet<DbIPLookup> DbIPLookup { get; set; }
-    public DbSet<DbWebPlugin> WebPlugins { get; set; }
 
     public DbSet<Regions> Regions { get; set; }
 
@@ -100,6 +99,8 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesLink> FilesLink { get; set; }
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
     public DbSet<FilesConverts> FilesConverts { get; set; }
+    public DbSet<DbFileOrder> FileOrder { get; set; }
+    public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -114,7 +115,6 @@ public class MigrationContext : DbContext
             .AddDbTariffRow()
             .AddMobileAppInstall()
             .AddDbIPLookup()
-            .AddDbWebPlugins()
             .AddRegions()
             .AddFireBaseUsers()
             .AddNotifyInfo()
@@ -164,6 +164,8 @@ public class MigrationContext : DbContext
             .AddWebhooksConfig()
             .AddWebhooksLog()
             .AddShortLinks()
+            .AddDbFileOrder()
+            .AddDbRoomSettings()
             .AddDbFunctions();
     }
 }

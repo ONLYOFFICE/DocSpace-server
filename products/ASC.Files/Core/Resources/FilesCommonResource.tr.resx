@@ -417,6 +417,15 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
     <value>Oda Yöneticisi</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Harici Bağlantı</value>
+    <value>Paylaşılan bağlantı</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Davetiye bağlantısı</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksimum bağlantı sayısı {0} sayısını aşamaz</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Çok defa şifre girmeyi denediniz. Lütfen daha sonra tekrar deneyin</value>
   </data>
 </root>

@@ -8,10 +8,15 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Resources;
+using System.Runtime.CompilerServices;
+
 namespace ASC.Notify.Textile.Resources {
-    using System;
-    
-    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -19,27 +24,27 @@ namespace ASC.Notify.Textile.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [DebuggerNonUserCode()]
+    [CompilerGenerated()]
     public class NotifyTemplateResource {
         
-        private static global::System.Resources.ResourceManager resourceMan;
+        private static ResourceManager resourceMan;
         
-        private static global::System.Globalization.CultureInfo resourceCulture;
+        private static CultureInfo resourceCulture;
         
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal NotifyTemplateResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static ResourceManager ResourceManager {
             get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.Notify.Textile.Resources.NotifyTemplateResource", typeof(NotifyTemplateResource).Assembly);
+                if (ReferenceEquals(resourceMan, null)) {
+                    ResourceManager temp = new ResourceManager("ASC.Notify.Textile.Resources.NotifyTemplateResource", typeof(NotifyTemplateResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -50,8 +55,8 @@ namespace ASC.Notify.Textile.Resources {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -85,11 +90,9 @@ namespace ASC.Notify.Textile.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;body style=&quot;margin: 0; padding: 0; text-align: center; width: 100%; font-family: Arial, sans-serif; font-size: 14px; color: #333;&quot;&gt;
-        ///&lt;div style=&quot;background-color: #fff; width: 600px; margin: 0 auto; text-align: left;&quot;&gt;
-        ///    &lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border: 0 none; border-collapse: collapse; empty-cells: show; border-spacing: 0;&quot;&gt;
-        ///      &lt;tbody&gt;
-        ///        &lt;tr border=&quot;0 [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to &lt;body style=&quot;background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff; margin: 0; padding: 0; text-align: center; width: 100%; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; color: #333; font-size: 18px;&quot;&gt;
+        ///&lt;div style=&quot;background-color: #fff; width: 600px; margin: 0 auto; text-align: center;&quot;&gt;
+        ///    &lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; style=&quot;font-family: Arial; font-size: 14px; color: #333; background: #fff; text-align: center; width: 600px; margin: 0; padding: 0; border:  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string HtmlMaster {
             get {
@@ -99,27 +102,52 @@ namespace ASC.Notify.Textile.Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
-        ///          &lt;td style=&quot;width: 40px; vertical-align: top; margin: 0; padding: 22px 5px 0 155px;&quot;&gt;
-        ///              &lt;a href=&quot;https://www.facebook.com/pages/OnlyOffice/833032526736775&quot; style=&quot;width: 40px; height: 40px; display: block; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
-        ///                  &lt;img src=&quot;%IMAGEPATH%/social-fb-40.png&quot; alt=&quot;Facebook&quot; style=&quot;width: 40px; height: 40px;&quot; /&gt;
+        ///          &lt;td style=&quot;width: 24px; vertical-align: top; margin: 0; padding: 32px 0 32px 208px;&quot;&gt;
+        ///              &lt;a href=&quot;https://www.facebook.com/pages/OnlyOffice/833032526736775&quot; style=&quot;width: 24px; height: 24px; display: block; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
+        ///                  &lt;img src=&quot;%IMAGEPATH%/social-facebook-24.png&quot; alt=&quot;Facebook&quot; style=&quot;width: 24px; height: 24px;&quot; /&gt;
         ///              &lt;/a&gt;
         ///          &lt;/td&gt;
-        ///          &lt;td style=&quot;width: 40px; vertical-a [rest of string was truncated]&quot;;.
+        ///          &lt;td style=&quot;width: 24px; ver [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string SocialNetworksFooterV10 {
+        public static string SocialNetworksFooter {
             get {
-                return ResourceManager.GetString("SocialNetworksFooterV10", resourceCulture);
+                return ResourceManager.GetString("SocialNetworksFooter", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This email is generated automatically and you do not need to answer it.&lt;br /&gt;You received this email because you are a registered user of&lt;a href=&quot;{0}&quot; target=&quot;_blank&quot;&gt; DocSpace&lt;/a&gt;.
-        ///&lt;br /&gt; Click here to unsubscribe from the DocSpace notification emails: &lt;a href=&quot;{1}&quot;  target=&quot;_blank&quot;&gt;Unsubscribe&lt;/a&gt;
-        ///&lt;br /&gt;.
+        ///   Looks up a localized string similar to For any purchase questions, email us at &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;mailto:sales@onlyoffice.com&quot;&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; In case of technical problems please contact our &lt;a style=&quot;color: #FF6F3D; text-decoration: underline;&quot; target=&quot;_blank&quot; href=&quot;https://www.onlyoffice.com/support-contact-form.aspx&quot;&gt;support team&lt;/a&gt;.&lt;br /&gt; &lt;a href=&quot;{1}&quot; style=&quot;color: #FF6F3D; text-decoration: underline; white-space: nowrap;&quot; target=&quot;_blank&quot;&gt;Click here to unsubscribe&lt;/ [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TextForFooterUnsubsribeDocSpace {
             get {
                 return ResourceManager.GetString("TextForFooterUnsubsribeDocSpace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///          &lt;td colspan=&quot;3&quot; style=&quot;margin: 0; padding: 0; background-color: #fff; &quot;&gt;
+        ///            &lt;div style=&quot;text-align: left; width: 600px; margin: 0; padding: 0;&quot;&gt;
+        ///                &lt;a href=&quot;%SITEURL%&quot; style=&quot;text-decoration: none; display: inline-block; width: 600px; height: 360px; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
+        ///                    &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0px none; width: 600px; margin: 0; padding: 0;&quot; alt=&quot;ONLYOFFICE&quot; /&gt;
+        ///                [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string TopGif {
+            get {
+                return ResourceManager.GetString("TopGif", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+        ///          &lt;td colspan=&quot;3&quot; style=&quot;margin: 0; padding: 0; background-color: #f6f6f6; height: 65px; padding: 20px 0 0 30px;&quot;&gt;
+        ///            &lt;div style=&quot;text-align: left; height: 65px; width: 570px; margin: 0; padding: 0;&quot;&gt;
+        ///                &lt;a href=&quot;%SITEURL%&quot; style=&quot;text-decoration: none; display: inline-block; width: 386px; height: 44px; margin: 0; padding: 0;&quot; target=&quot;_blank&quot;&gt;
+        ///                    &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0px none; width: 386px; height: [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string TopLogo {
+            get {
+                return ResourceManager.GetString("TopLogo", resourceCulture);
             }
         }
     }

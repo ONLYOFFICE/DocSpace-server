@@ -741,7 +741,7 @@
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0} appointed: {1}</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Link updated. Role: {1}</value>
   </data>
   <data name="RoomDeleted" xml:space="preserve">
@@ -765,10 +765,10 @@
   <data name="RoomRemoveUser" xml:space="preserve">
     <value>Deleted user: {0}</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Link created. Role: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Link deleted</value>
   </data>
   <data name="RoomsModule" xml:space="preserve">
@@ -782,5 +782,14 @@
   </data>
   <data name="CountryCol" xml:space="preserve">
     <value>Country</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>External link created: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>External link deleted: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>External link updated: {0}. Role: {1}</value>
   </data>
 </root>

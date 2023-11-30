@@ -1,28 +1,30 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
@@ -33,47 +35,7 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class PortalController : ControllerBase
-{
-    protected Tenant Tenant { get { return _apiContext.Tenant; } }
-
-    private readonly ApiContext _apiContext;
-    protected readonly UserManager _userManager;
-    protected readonly TenantManager _tenantManager;
-    protected readonly ITariffService _tariffService;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly IUrlShortener _urlShortener;
-    private readonly AuthContext _authContext;
-    protected readonly SecurityContext _securityContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly IMobileAppInstallRegistrator _mobileAppInstallRegistrator;
-    private readonly IConfiguration _configuration;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReader _licenseReader;
-    private readonly SetupInfo _setupInfo;
-    private readonly DocumentServiceLicense _documentServiceLicense;
-    private readonly TenantExtra _tenantExtra;
-    private readonly ILogger<PortalController> _log;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly ApiSystemHelper _apiSystemHelper;
-    private readonly CoreSettings _coreSettings;
-    private readonly PermissionContext _permissionContext;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly MessageService _messageService;
-    private readonly MessageTarget _messageTarget;
-    private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-    private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
-    private readonly StudioSmsNotificationSettingsHelper _studioSmsNotificationSettingsHelper;
-    private readonly TfaAppAuthSettingsHelper _tfaAppAuthSettingsHelper;
-    private readonly IMapper _mapper;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly QuotaHelper _quotaHelper;
-    private readonly CspSettingsHelper _cspSettingsHelper;
-    private readonly IEventBus _eventBus;
-
-    public PortalController(
-        ILogger<PortalController> logger,
-        ApiContext apiContext,
+public class PortalController(ILogger<PortalController> logger,
         UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
@@ -105,42 +67,8 @@ public class PortalController : ControllerBase
         QuotaHelper quotaHelper,
         IEventBus eventBus,
         CspSettingsHelper cspSettingsHelper)
-    {
-        _log = logger;
-        _apiContext = apiContext;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _tariffService = tariffService;
-        _commonLinkUtility = commonLinkUtility;
-        _urlShortener = urlShortener;
-        _authContext = authContext;
-        _securityContext = securityContext;
-        _settingsManager = settingsManager;
-        _mobileAppInstallRegistrator = mobileAppInstallRegistrator;
-        _configuration = configuration;
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReader = licenseReader;
-        _setupInfo = setupInfo;
-        _documentServiceLicense = documentServiceLicense;
-        _tenantExtra = tenantExtra;
-        _clientFactory = clientFactory;
-        _apiSystemHelper = apiSystemHelper;
-        _coreSettings = coreSettings;
-        _permissionContext = permissionContext;
-        _studioNotifyService = studioNotifyService;
-        _messageService = messageService;
-        _messageTarget = messageTarget;
-        _displayUserSettingsHelper = displayUserSettingsHelper;
-        _emailValidationKeyProvider = emailValidationKeyProvider;
-        _studioSmsNotificationSettingsHelper = studioSmsNotificationSettingsHelper;
-        _tfaAppAuthSettingsHelper = tfaAppAuthSettingsHelper;
-        _mapper = mapper;
-        _httpContextAccessor = httpContextAccessor;
-        _quotaHelper = quotaHelper;
-        _cspSettingsHelper = cspSettingsHelper;
-        _eventBus = eventBus;
-    }
-
+    : ControllerBase
+{
     /// <summary>
     /// Returns the current portal.
     /// </summary>
@@ -153,9 +81,10 @@ public class PortalController : ControllerBase
     /// <httpMethod>GET</httpMethod>
     [AllowNotPayment]
     [HttpGet("")]
-    public TenantDto Get()
+    public async Task<TenantDto> Get()
     {
-        return _mapper.Map<TenantDto>(Tenant);
+        var tenant = await tenantManager.GetCurrentTenantAsync();   
+        return mapper.Map<TenantDto>(tenant);
     }
 
     /// <summary>
@@ -172,7 +101,7 @@ public class PortalController : ControllerBase
     [HttpGet("users/{userID}")]
     public async Task<UserInfo> GetUserAsync(Guid userID)
     {
-        return await _userManager.GetUsersAsync(userID);
+        return await userManager.GetUsersAsync(userID);
     }
 
     /// <summary>
@@ -189,18 +118,18 @@ public class PortalController : ControllerBase
     [HttpGet("users/invite/{employeeType}")]
     public async Task<object> GeInviteLinkAsync(EmployeeType employeeType)
     {
-        var currentUser = await _userManager.GetUsersAsync(_authContext.CurrentAccount.ID);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
-        if ((employeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await _tenantManager.GetCurrentTenantAsync()))
-            || !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, employeeType), ASC.Core.Users.Constants.Action_AddRemoveUser))
+        if ((employeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(await tenantManager.GetCurrentTenantAsync()))
+            || !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, employeeType), Constants.Action_AddRemoveUser))
         {
             return string.Empty;
         }
 
-        var link = await _commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType, _authContext.CurrentAccount.ID)
+        var link = await commonLinkUtility.GetConfirmationEmailUrlAsync(string.Empty, ConfirmType.LinkInvite, (int)employeeType, authContext.CurrentAccount.ID)
                 + $"&emplType={employeeType:d}";
 
-        return await _urlShortener.GetShortenLinkAsync(link);
+        return await urlShortener.GetShortenLinkAsync(link);
     }
 
     /// <summary>
@@ -217,11 +146,11 @@ public class PortalController : ControllerBase
     {
         try
         {
-            return await _urlShortener.GetShortenLinkAsync(inDto.Link);
+            return await urlShortener.GetShortenLinkAsync(inDto.Link);
         }
         catch (Exception ex)
         {
-            _log.ErrorGetShortenLink(ex);
+            logger.ErrorGetShortenLink(ex);
             return inDto.Link;
         }
     }
@@ -237,32 +166,30 @@ public class PortalController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModels.ResponseDto, ASC.Web.Api">Extra tenant license information</returns>
     /// <path>api/2.0/portal/tenantextra</path>
     /// <httpMethod>GET</httpMethod>
-    [AllowNotPayment, AllowAnonymous]
+    [AllowNotPayment]
     [HttpGet("tenantextra")]
     public async Task<TenantExtraDto> GetTenantExtra(bool refresh)
     {
+        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var quota = await quotaHelper.GetCurrentQuotaAsync(refresh);
+        var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
+        
         var result = new TenantExtraDto
         {
-            CustomMode = _coreBaseSettings.CustomMode,
-            Opensource = _tenantExtra.Opensource,
-            Enterprise = _tenantExtra.Enterprise,
-            EnableTariffPage = //TenantExtra.EnableTarrifSettings - think about hide-settings for opensource
-                (!_coreBaseSettings.Standalone || !string.IsNullOrEmpty(_licenseReader.LicensePath))
-                && string.IsNullOrEmpty(_setupInfo.AmiMetaUrl)
-                && !_coreBaseSettings.CustomMode
+            CustomMode = coreBaseSettings.CustomMode,
+            Opensource = tenantExtra.Opensource,
+            Enterprise = tenantExtra.Enterprise,
+            EnableTariffPage = 
+                (!coreBaseSettings.Standalone || !string.IsNullOrEmpty(licenseReader.LicensePath))
+                && string.IsNullOrEmpty(setupInfo.AmiMetaUrl)
+                && !coreBaseSettings.CustomMode,
+            Tariff = await tenantExtra.GetCurrentTariffAsync(),
+            Quota = quota,
+            NotPaid = await tenantExtra.IsNotPaidAsync(),
+            LicenseAccept = (await settingsManager.LoadForDefaultTenantAsync<TariffSettings>()).LicenseAcceptSetting,
+            DocServerUserQuota = docServiceQuota.Item1,
+            DocServerLicense = docServiceQuota.Item2
         };
-
-
-
-        if (_authContext.IsAuthenticated)
-        {
-            result.Tariff = await _tenantExtra.GetCurrentTariffAsync(refresh);
-            result.Quota = await _quotaHelper.GetCurrentQuotaAsync(refresh);
-            result.NotPaid = await _tenantExtra.IsNotPaidAsync();
-            result.LicenseAccept = _settingsManager.LoadForDefaultTenant<TariffSettings>().LicenseAcceptSetting;
-            result.DocServerUserQuota = await _documentServiceLicense.GetLicenseQuotaAsync();
-            result.DocServerLicense = await _documentServiceLicense.GetLicenseAsync();
-        }
 
         return result;
     }
@@ -281,8 +208,9 @@ public class PortalController : ControllerBase
     [HttpGet("usedspace")]
     public async Task<double> GetUsedSpaceAsync()
     {
+        var tenant = await tenantManager.GetCurrentTenantAsync();
         return Math.Round(
-            (await _tenantManager.FindTenantQuotaRowsAsync(Tenant.Id))
+            (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
                         .Where(q => !string.IsNullOrEmpty(q.Tag) && new Guid(q.Tag) != Guid.Empty)
                         .Sum(q => q.Counter) / 1024f / 1024f / 1024f, 2);
     }
@@ -301,7 +229,7 @@ public class PortalController : ControllerBase
     [HttpGet("userscount")]
     public async Task<long> GetUsersCountAsync()
     {
-        return _coreBaseSettings.Personal ? 1 : (await _userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
+        return coreBaseSettings.Personal ? 1 : (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
     /// <summary>
@@ -319,7 +247,8 @@ public class PortalController : ControllerBase
     [HttpGet("tariff")]
     public async Task<Tariff> GetTariffAsync(bool refresh)
     {
-        return await _tariffService.GetTariffAsync(Tenant.Id, refresh: refresh);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return await tariffService.GetTariffAsync(tenant.Id, refresh: refresh);
     }
 
     /// <summary>
@@ -336,7 +265,8 @@ public class PortalController : ControllerBase
     [HttpGet("quota")]
     public async Task<TenantQuota> GetQuotaAsync()
     {
-        return await _tenantManager.GetTenantQuotaAsync(Tenant.Id);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        return await tenantManager.GetTenantQuotaAsync(tenant.Id);
     }
 
     /// <summary>
@@ -355,7 +285,7 @@ public class PortalController : ControllerBase
         var usedSpace = await GetUsedSpaceAsync();
         var needUsersCount = await GetUsersCountAsync();
 
-        return (await _tenantManager.GetTenantQuotasAsync()).OrderBy(r => r.Price)
+        return (await tenantManager.GetTenantQuotasAsync()).OrderBy(r => r.Price)
                             .FirstOrDefault(quota =>
                                             quota.CountUser > needUsersCount
                                             && quota.MaxTotalSize > usedSpace);
@@ -376,7 +306,7 @@ public class PortalController : ControllerBase
     [HttpGet("path")]
     public object GetFullAbsolutePath(string virtualPath)
     {
-        return _commonLinkUtility.GetFullAbsolutePath(virtualPath);
+        return commonLinkUtility.GetFullAbsolutePath(virtualPath);
     }
 
     /// <summary>
@@ -393,7 +323,7 @@ public class PortalController : ControllerBase
     [HttpGet("thumb")]
     public FileResult GetThumb(string url)
     {
-        if (!_securityContext.IsAuthenticated || _configuration["bookmarking:thumbnail-url"] == null)
+        if (!securityContext.IsAuthenticated || configuration["bookmarking:thumbnail-url"] == null)
         {
             return null;
         }
@@ -403,24 +333,16 @@ public class PortalController : ControllerBase
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(string.Format(_configuration["bookmarking:thumbnail-url"], url))
+            RequestUri = new Uri(string.Format(configuration["bookmarking:thumbnail-url"], url))
         };
 
-        var httpClient = _clientFactory.CreateClient();
+        var httpClient = clientFactory.CreateClient();
         using var response = httpClient.Send(request);
         using var stream = response.Content.ReadAsStream();
         var bytes = new byte[stream.Length];
-        stream.Read(bytes, 0, (int)stream.Length);
+        _ = stream.Read(bytes, 0, (int)stream.Length);
 
-        string type;
-        if (response.Headers.TryGetValues("Content-Type", out var values))
-        {
-            type = values.First();
-        }
-        else
-        {
-            type = "image/png";
-        }
+        var type = response.Headers.TryGetValues("Content-Type", out var values) ? values.First() : "image/png";
         return File(bytes, type);
     }
 
@@ -439,13 +361,13 @@ public class PortalController : ControllerBase
     {
         try
         {
-            var settings = await _settingsManager.LoadForCurrentUserAsync<OpensourceGiftSettings>();
+            var settings = await settingsManager.LoadForCurrentUserAsync<OpensourceGiftSettings>();
             settings.Readed = true;
-            await _settingsManager.SaveForCurrentUserAsync(settings);
+            await settingsManager.SaveForCurrentUserAsync(settings);
         }
         catch (Exception ex)
         {
-            _log.ErrorMarkPresentAsReaded(ex);
+            logger.ErrorMarkPresentAsReaded(ex);
         }
     }
 
@@ -463,8 +385,8 @@ public class PortalController : ControllerBase
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
     {
-        var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        await _mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
     }
 
     /// <summary>
@@ -482,8 +404,8 @@ public class PortalController : ControllerBase
     [HttpPost("mobile/registration")]
     public async Task RegisterMobileAppInstallAsync(MobileAppType type)
     {
-        var currentUser = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
-        await _mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, type);
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, type);
     }
 
     /// <summary>
@@ -504,12 +426,12 @@ public class PortalController : ControllerBase
             throw new BillingException(Resource.ErrorNotAllowedOption, "PortalRename");
         }
 
-        if (_coreBaseSettings.Personal)
+        if (coreBaseSettings.Personal)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
         if (string.IsNullOrEmpty(alias))
@@ -517,47 +439,41 @@ public class PortalController : ControllerBase
             throw new ArgumentException(nameof(alias));
         }
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
-        var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
 
-        var localhost = _coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
+        var localhost = coreSettings.BaseDomain == "localhost" || tenant.Alias == "localhost";
 
         var newAlias = alias.ToLowerInvariant();
         var oldAlias = tenant.Alias;
-        var oldVirtualRootPath = _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
+        var oldVirtualRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiSystemUrl))
+            if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
             {
-                await _apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
             }
             else
             {
-                await _tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
             }
 
-
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
-            {
-                await _apiSystemHelper.AddTenantToCacheAsync(newAlias, user.Id);
-            }
-
-            var oldDomain = tenant.GetTenantDomain(_coreSettings);
+            var oldDomain = tenant.GetTenantDomain(coreSettings);
             tenant.Alias = alias;
-            tenant = await _tenantManager.SaveTenantAsync(tenant);
-            _tenantManager.SetCurrentTenant(tenant);
+            tenant = await tenantManager.SaveTenantAsync(tenant);
+            tenantManager.SetCurrentTenant(tenant);
 
-            await _cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(_coreSettings));
+            await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
 
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
-                await _apiSystemHelper.RemoveTenantFromCacheAsync(oldAlias, user.Id);
+                await apiSystemHelper.UpdateTenantToCacheAsync(oldDomain, tenant.GetTenantDomain(coreSettings));
             }
 
             if (!localhost || string.IsNullOrEmpty(tenant.MappedDomain))
             {
-                await _studioNotifyService.PortalRenameNotifyAsync(tenant, oldVirtualRootPath, oldAlias);
+                await studioNotifyService.PortalRenameNotifyAsync(tenant, oldVirtualRootPath, oldAlias);
             }
         }
         else
@@ -565,13 +481,13 @@ public class PortalController : ControllerBase
             return string.Empty;
         }
 
-        var rewriter = _httpContextAccessor.HttpContext.Request.Url();
+        var rewriter = httpContextAccessor.HttpContext.Request.Url();
         return string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
-                                tenant.GetTenantDomain(_coreSettings),
+                                tenant.GetTenantDomain(coreSettings),
                                 rewriter != null && !rewriter.IsDefaultPort ? $":{rewriter.Port}" : "",
-                                _commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
+                                commonLinkUtility.GetConfirmationUrlRelative(tenant.Id, user.Email, ConfirmType.Auth)
                );
     }
 
@@ -586,31 +502,31 @@ public class PortalController : ControllerBase
     [HttpDelete("deleteportalimmediately")]
     public async Task DeletePortalImmediatelyAsync()
     {
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        if (_securityContext.CurrentAccount.ID != tenant.OwnerId)
+        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        await _tenantManager.RemoveTenantAsync(tenant.Id);
+        await tenantManager.RemoveTenantAsync(tenant.Id);
 
-        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+        if (!coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(tenant.Alias, _securityContext.CurrentAccount.ID);
+            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
         }
 
         try
         {
-            if (!_securityContext.IsAuthenticated)
+            if (!securityContext.IsAuthenticated)
             {
-                await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
             }
-            await _messageService.SendAsync(MessageAction.PortalDeleted);
+            await messageService.SendAsync(MessageAction.PortalDeleted);
         }
         finally
         {
-            _securityContext.Logout();
+            securityContext.Logout();
         }
     }
 
@@ -626,20 +542,21 @@ public class PortalController : ControllerBase
     [HttpPost("suspend")]
     public async Task SendSuspendInstructionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (_securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        var owner = await _userManager.GetUsersAsync(Tenant.OwnerId);
-        var suspendUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
-        var continueUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
+        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+        var suspendUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalSuspend);
+        var continueUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalContinue);
 
-        await _studioNotifyService.SendMsgPortalDeactivationAsync(Tenant, suspendUrl, continueUrl);
+        await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, suspendUrl, continueUrl);
 
-        await _messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentPortalDeactivationInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -654,22 +571,24 @@ public class PortalController : ControllerBase
     [HttpPost("delete")]
     public async Task SendDeleteInstructionsAsync()
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (_securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        
+        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        var owner = await _userManager.GetUsersAsync(Tenant.OwnerId);
+        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
-        var showAutoRenewText = !_coreBaseSettings.Standalone &&
-                        (await _tariffService.GetPaymentsAsync(Tenant.Id)).Any() &&
-                        !(await _tenantManager.GetCurrentTenantQuotaAsync()).Trial;
+        var showAutoRenewText = !coreBaseSettings.Standalone &&
+                        (await tariffService.GetPaymentsAsync(tenant.Id)).Any() &&
+                        !(await tenantManager.GetCurrentTenantQuotaAsync()).Trial;
 
-        await _studioNotifyService.SendMsgPortalDeletionAsync(Tenant, await _commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
+        await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalRemove), showAutoRenewText);
 
-        await _messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, _messageTarget.Create(owner.Id), owner.DisplayUserName(false, _displayUserSettingsHelper));
+        await messageService.SendAsync(MessageAction.OwnerSentPortalDeleteInstructions, messageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -685,8 +604,9 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
     public async Task ContinuePortalAsync()
     {
-        Tenant.SetStatus(TenantStatus.Active);
-        await _tenantManager.SaveTenantAsync(Tenant);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        tenant.SetStatus(TenantStatus.Active);
+        await tenantManager.SaveTenantAsync(tenant);
     }
 
     /// <summary>
@@ -701,9 +621,10 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortalAsync()
     {
-        Tenant.SetStatus(TenantStatus.Suspended);
-        await _tenantManager.SaveTenantAsync(Tenant);
-        await _messageService.SendAsync(MessageAction.PortalDeactivated);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        tenant.SetStatus(TenantStatus.Suspended);
+        await tenantManager.SaveTenantAsync(tenant);
+        await messageService.SendAsync(MessageAction.PortalDeactivated);
     }
 
     /// <summary>
@@ -719,23 +640,24 @@ public class PortalController : ControllerBase
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
     public async Task<object> DeletePortalAsync()
     {
-        if (_securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        await _tenantManager.RemoveTenantAsync(Tenant.Id);
+        await tenantManager.RemoveTenantAsync(tenant.Id);
 
-        if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+        if (!coreBaseSettings.Standalone)
         {
-            await _apiSystemHelper.RemoveTenantFromCacheAsync(Tenant.Alias, _securityContext.CurrentAccount.ID);
+            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
         }
 
-        var owner = await _userManager.GetUsersAsync(Tenant.OwnerId);
-        var redirectLink = _setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#";
+        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+        var redirectLink = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#";
         var parameters = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
                                                                                 "\",\"lastname\":\"" + owner.LastName +
-                                                                                "\",\"alias\":\"" + Tenant.Alias +
+                                                                                "\",\"alias\":\"" + tenant.Alias +
                                                                                 "\",\"email\":\"" + owner.Email + "\"}"));
 
         redirectLink += HttpUtility.UrlEncode(parameters);
@@ -743,26 +665,26 @@ public class PortalController : ControllerBase
         var authed = false;
         try
         {
-            if (!_securityContext.IsAuthenticated)
+            if (!securityContext.IsAuthenticated)
             {
-                await _securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
+                await securityContext.AuthenticateMeAsync(ASC.Core.Configuration.Constants.CoreSystem);
                 authed = true;
             }
 
-            await _messageService.SendAsync(MessageAction.PortalDeleted);
+            await messageService.SendAsync(MessageAction.PortalDeleted);
 
         }
         finally
         {
             if (authed)
             {
-                _securityContext.Logout();
+                securityContext.Logout();
             }
         }
 
-        _eventBus.Publish(new RemovePortalIntegrationEvent(_securityContext.CurrentAccount.ID, Tenant.Id));
+        eventBus.Publish(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
 
-        await _studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
+        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
         return redirectLink;
     }
@@ -781,25 +703,25 @@ public class PortalController : ControllerBase
     public async Task SendCongratulationsAsync([FromQuery] SendCongratulationsDto inDto)
     {
         var authInterval = TimeSpan.FromHours(1);
-        var checkKeyResult = await _emailValidationKeyProvider.ValidateEmailKeyAsync(inDto.Userid.ToString() + ConfirmType.Auth, inDto.Key, authInterval);
+        var checkKeyResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(inDto.Userid.ToString() + ConfirmType.Auth, inDto.Key, authInterval);
 
         switch (checkKeyResult)
         {
             case ValidationResult.Ok:
-                var currentUser = await _userManager.GetUsersAsync(inDto.Userid);
+                var currentUser = await userManager.GetUsersAsync(inDto.Userid);
 
-                await _studioNotifyService.SendCongratulationsAsync(currentUser);
-                await _studioNotifyService.SendRegDataAsync(currentUser);
+                await studioNotifyService.SendCongratulationsAsync(currentUser);
+                await studioNotifyService.SendRegDataAsync(currentUser);
 
                 if (!SetupInfo.IsSecretEmail(currentUser.Email))
                 {
-                    if (_setupInfo.TfaRegistration == "sms")
+                    if (setupInfo.TfaRegistration == "sms")
                     {
-                        _studioSmsNotificationSettingsHelper.Enable = true;
+                        studioSmsNotificationSettingsHelper.Enable = true;
                     }
-                    else if (_setupInfo.TfaRegistration == "code")
+                    else if (setupInfo.TfaRegistration == "code")
                     {
-                        _tfaAppAuthSettingsHelper.Enable = true;
+                        tfaAppAuthSettingsHelper.Enable = true;
                     }
                 }
                 break;

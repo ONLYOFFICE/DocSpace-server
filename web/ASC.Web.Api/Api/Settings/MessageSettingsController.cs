@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,25 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class MessageSettingsController : BaseSettingsController
-{
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
-    private readonly MessageService _messageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly CustomNamingPeople _customNamingPeople;
-    private readonly IPSecurity.IPSecurity _ipSecurity;
-    private readonly TenantManager _tenantManager;
-    private readonly CookiesManager _cookiesManager;
-    private readonly CountPaidUserChecker _countPaidUserChecker;
-    private readonly UserManager _userManager;
-    private readonly TenantExtra _tenantExtra;
-    private readonly PermissionContext _permissionContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-
-    public MessageSettingsController(
-        MessageService messageService,
+public class MessageSettingsController(MessageService messageService,
         StudioNotifyService studioNotifyService,
         ApiContext apiContext,
         UserManager userManager,
@@ -56,27 +38,13 @@ public class MessageSettingsController : BaseSettingsController
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
         CustomNamingPeople customNamingPeople,
-        IPSecurity.IPSecurity ipSecurity,
         IMemoryCache memoryCache,
         IHttpContextAccessor httpContextAccessor,
         TenantManager tenantManager,
         CookiesManager cookiesManager,
-        CountPaidUserChecker countPaidUserChecker) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
-    {
-        _customNamingPeople = customNamingPeople;
-        _ipSecurity = ipSecurity;
-        _tenantManager = tenantManager;
-        _cookiesManager = cookiesManager;
-        _countPaidUserChecker = countPaidUserChecker;
-        _messageService = messageService;
-        _studioNotifyService = studioNotifyService;
-        _userManager = userManager;
-        _tenantExtra = tenantExtra;
-        _permissionContext = permissionContext;
-        _settingsManager = settingsManager;
-        _coreBaseSettings = coreBaseSettings;
-    }
-
+        CountPaidUserChecker countPaidUserChecker)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
     /// <summary>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.
     /// </summary>
@@ -91,11 +59,11 @@ public class MessageSettingsController : BaseSettingsController
     [HttpPost("messagesettings")]
     public async Task<object> EnableAdminMessageSettingsAsync(AdminMessageSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await _settingsManager.SaveAsync(new StudioAdminMessageSettings { Enable = inDto.TurnOn });
+        await settingsManager.SaveAsync(new StudioAdminMessageSettings { Enable = inDto.TurnOn });
 
-        await _messageService.SendAsync(MessageAction.AdministratorMessageSettingsUpdated);
+        await messageService.SendAsync(MessageAction.AdministratorMessageSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -113,7 +81,7 @@ public class MessageSettingsController : BaseSettingsController
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
     {
-        var result = await _cookiesManager.GetLifeTimeAsync(await _tenantManager.GetCurrentTenantIdAsync());
+        var result = await cookiesManager.GetLifeTimeAsync(await tenantManager.GetCurrentTenantIdAsync());
         return new CookieSettingsDto
         {
             Enabled = result.Enabled,
@@ -135,16 +103,16 @@ public class MessageSettingsController : BaseSettingsController
     [HttpPut("cookiesettings")]
     public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!SetupInfo.IsVisibleSettings("CookieSettings"))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "CookieSettings");
         }
 
-        await _cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
+        await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
 
-        await _messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+        await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -165,8 +133,8 @@ public class MessageSettingsController : BaseSettingsController
     [HttpPost("sendadmmail")]
     public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
     {
-        var studioAdminMessageSettings = await _settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var enableAdmMess = studioAdminMessageSettings.Enable || (await _tenantExtra.IsNotPaidAsync());
+        var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
+        var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());
 
         if (!enableAdmMess)
         {
@@ -178,15 +146,17 @@ public class MessageSettingsController : BaseSettingsController
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
 
-        if (string.IsNullOrEmpty(inDto.Message))
+        var message = HtmlUtil.ToPlainText(inDto.Message);
+
+        if (string.IsNullOrEmpty(message))
         {
             throw new Exception(Resource.ErrorEmptyMessage);
         }
 
         CheckCache("sendadmmail");
 
-        await _studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, inDto.Message);
-        await _messageService.SendAsync(MessageAction.ContactAdminMailSent);
+        await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message);
+        await messageService.SendAsync(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;
     }
@@ -209,11 +179,12 @@ public class MessageSettingsController : BaseSettingsController
     {
         try
         {
+            var tenant = await tenantManager.GetCurrentTenantAsync();
             var email = inDto.Email;
             if (!(
-                (Tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
-                Tenant.TrustedDomains.Count > 0) ||
-                Tenant.TrustedDomainsType == TenantTrustedDomainsType.All))
+                (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
+                tenant.TrustedDomains.Count > 0) ||
+                tenant.TrustedDomainsType == TenantTrustedDomainsType.All))
             {
                 throw new MethodAccessException("Method not available");
             }
@@ -225,20 +196,20 @@ public class MessageSettingsController : BaseSettingsController
 
             CheckCache("sendjoininvite");
 
-            var user = await _userManager.GetUserByEmailAsync(email);
+            var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
             {
-                throw new Exception(_customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+                throw new Exception(customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
             }
 
-            var trustedDomainSettings = await _settingsManager.LoadAsync<StudioTrustedDomainSettings>();
+            var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
             var emplType = trustedDomainSettings.InviteAsUsers ? EmployeeType.User : EmployeeType.RoomAdmin;
-            if (!_coreBaseSettings.Personal)
+            if (!coreBaseSettings.Personal)
             {
                 var enableInviteUsers = true;
                 try
                 {
-                    await _countPaidUserChecker.CheckAppend();
+                    await countPaidUserChecker.CheckAppend();
                 }
                 catch (Exception)
                 {
@@ -251,15 +222,15 @@ public class MessageSettingsController : BaseSettingsController
                 }
             }
 
-            switch (Tenant.TrustedDomainsType)
+            switch (tenant.TrustedDomainsType)
             {
                 case TenantTrustedDomainsType.Custom:
                     {
                         var address = new MailAddress(email);
-                        if (Tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
+                        if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            await _studioNotifyService.SendJoinMsgAsync(email, emplType);
-                            await _messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                            await studioNotifyService.SendJoinMsgAsync(email, emplType);
+                            await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
@@ -267,8 +238,8 @@ public class MessageSettingsController : BaseSettingsController
                     }
                 case TenantTrustedDomainsType.All:
                     {
-                        await _studioNotifyService.SendJoinMsgAsync(email, emplType);
-                        await _messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                        await studioNotifyService.SendJoinMsgAsync(email, emplType);
+                        await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:

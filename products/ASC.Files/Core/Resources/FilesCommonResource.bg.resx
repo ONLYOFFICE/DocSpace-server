@@ -417,6 +417,15 @@
     <value>Файлът вече не е чернова за попълване на формуляра.</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Външен линк</value>
+    <value>Споделен линк</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Линк за покана</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Максималният брой линкове не трябва да надвишава {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Опитахте твърде много пъти да въведете паролата си. Молим да опитате отново по-късно</value>
   </data>
 </root>

@@ -386,9 +386,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="ErrorMassage_SaveUrlLost" xml:space="preserve">
     <value>저장할 파일을 가져오지 못했습니다</value>
   </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>외부 링크</value>
-  </data>
   <data name="ErrorMassage_DocServiceException" xml:space="preserve">
     <value>문서 서비스에서 오류가 발생했습니다</value>
   </data>
@@ -418,5 +415,17 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   </data>
   <data name="ErrorMassage_SecurityException_Auth" xml:space="preserve">
     <value>제공된 자격 증명으로 {0} 제공자에서 인증할 수 없습니다.</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>공유 링크</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>초대 링크</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>최대 링크 수는 {0}개를 초과할 수 없습니다</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>비밀번호를 입력하려는 시도가 너무 많았습니다. 나중에 다시 시도해 주세요</value>
   </data>
 </root>
