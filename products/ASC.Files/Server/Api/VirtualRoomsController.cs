@@ -802,7 +802,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         }
     }
 
-    [HttpPost("rooms/indexexport/{id}")]
+    [HttpPost("rooms/{id}/indexexport")]
     public async Task StartRoomIndexExportAsync(int id)
     {
         ErrorIfNotDocSpace();

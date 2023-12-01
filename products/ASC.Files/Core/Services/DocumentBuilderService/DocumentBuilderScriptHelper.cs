@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,6 +41,45 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
     PathProvider pathProvider,
     BreadCrumbsManager breadCrumbsManager)
 {
+    private record FolderIndex(int ChildFoldersCount, string Order);
+    
+    public async Task<(string script, string tempFileName, string outputFileName)> GetRoomIndexExportScript<T>(Guid userId, T roomId)
+    {
+        var script = await ReadTemplateFromEmbeddedResource("RoomIndexExport.docbuilder") ?? throw new Exception("Template not found");
+
+        var tempFileName = GetTempFileName();
+
+        var (data, outputFileName) = await GetRoomIndexExportData(userId, roomId);
+
+        script = script
+            .Replace("${tempFileName}", tempFileName)
+            .Replace("${inputData}", JsonConvert.SerializeObject(data));
+
+        return (script, tempFileName, outputFileName);
+    }
+    
+    private static string GetTempFileName()
+    {
+        return $"temp{DateTime.UtcNow.Ticks}.xlsx";
+    }
+    
+    private static async Task<string> ReadTemplateFromEmbeddedResource(string templateFileName)
+    {
+        var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
+        var resourceName = $"{templateNamespace}.ScriptTemplates.{templateFileName}";
+        
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream = assembly.GetManifestResourceStream(resourceName);
+
+        if (stream == null)
+        {
+            return null;
+        }
+
+        using var streamReader = new StreamReader(stream);
+        return await streamReader.ReadToEndAsync();
+    }
+    
     private async Task<(object data, string outputFileName)> GetRoomIndexExportData<T>(Guid userId, T roomId)
     {
         var user = await userManager.GetUsersAsync(userId);
@@ -115,7 +154,7 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
                 modified = FilesCommonResource.RoomIndex_Modified,
                 total = FilesCommonResource.RoomIndex_Total,
                 sheetName = FilesCommonResource.RoomIndex_SheetName,
-                numberFormat = $"0.00",
+                numberFormat = "0.00",
                 dateFormat = $"{CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern} {CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern}"
             },
 
@@ -142,11 +181,9 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         return (data, outputFileName);
     }
 
-    private record FolderIndex(int ChildFoldersCount, string Order);
-
     private async Task<Dictionary<T, FolderIndex>> GetFoldersIndex<T>(T roomId, IEnumerable<FileEntry<T>> entries)
     {
-        var result = new Dictionary<T, FolderIndex>() { { roomId, new FolderIndex(0, string.Empty) } };
+        var result = new Dictionary<T, FolderIndex> { { roomId, new FolderIndex(0, string.Empty) } };
 
         foreach (var entry in entries.Where(x => x.FileEntryType == FileEntryType.Folder))
         {
@@ -187,44 +224,5 @@ public class DocumentBuilderScriptHelper(UserManager userManager,
         {
             return (int)((1 - opacity) * background + opacity * overlay);
         }
-    }
-
-    private static string GetTempFileName()
-    {
-        return $"temp{DateTime.UtcNow.Ticks}.xlsx";
-    }
-
-    private static string ReadTemplateFromEmbeddedResource(string templateFileName)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-
-        var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
-
-        var resourceName = $"{templateNamespace}.ScriptTemplates.{templateFileName}";
-
-        using var stream = assembly.GetManifestResourceStream(resourceName);
-
-        if (stream == null)
-        {
-            return null;
-        }
-
-        using var streamReader = new StreamReader(stream);
-
-        return streamReader.ReadToEnd();
-    }
-
-    public async Task<(string script, string tempFileName, string outputFileName)> GetRoomIndexExportScript<T>(Guid userId, T roomId)
-    {
-        var script = ReadTemplateFromEmbeddedResource("RoomIndexExport.docbuilder") ?? throw new Exception("Template not found");
-
-        var tempFileName = GetTempFileName();
-
-        var (data, outputFileName) = await GetRoomIndexExportData(userId, roomId);
-
-        script = script.Replace("${tempFileName}", tempFileName)
-                     .Replace("${inputData}", JsonConvert.SerializeObject(data));
-
-        return (script, tempFileName, outputFileName);
     }
 }

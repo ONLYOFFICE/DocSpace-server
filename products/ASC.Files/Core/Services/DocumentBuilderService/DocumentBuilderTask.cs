@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,19 +61,20 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             await using var scope = serviceProvider.CreateAsyncScope();
 
-            var (tenantManager, documentServiceConnector, clientFactory, daoFactory, filesLinkUtility, log) = scope.ServiceProvider.GetService<DocumentBuilderTaskScope>();
-            
-            logger = log;
-
+            var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
-
+            var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
+            logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<T>>>();
+            
+            var documentBuilderTask = scope.ServiceProvider.GetService<DocumentBuilderTask>();
+            
             CancellationToken.ThrowIfCancellationRequested();
 
             Percentage = 30;
 
             PublishChanges();
 
-            var fileUri = await BuildFileAsync(documentServiceConnector, CancellationToken, _script, _tempFileName);
+            var fileUri = await documentBuilderTask.BuildFileAsync(CancellationToken, _script, _tempFileName);
 
             Percentage = 60;
 
@@ -82,11 +83,8 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = scope.ServiceProvider.GetService<File<T>>();
-            file.ParentId = await daoFactory.GetFolderDao<T>().GetFolderIDUserAsync(false, _userId);
-            file.Title = _outputFileName;
-
-            file = await SaveFileFromUriAsync(clientFactory, daoFactory, new Uri(fileUri), file);
-
+            file = await documentBuilderTask.SaveFileFromUriAsync<T>(file, new Uri(fileUri), _userId, _outputFileName);
+            
             this["ResultFileId"] = file.Id;
             this["ResultFileName"] = file.Title;
             this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
@@ -112,8 +110,16 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             PublishChanges();
         }
     }
+}
 
-    private static async Task<string> BuildFileAsync(DocumentServiceConnector documentServiceConnector, CancellationToken cancellationToken, string script, string fileName)
+[Scope]
+public class DocumentBuilderTask(
+    DocumentServiceConnector documentServiceConnector,
+    IHttpClientFactory clientFactory,
+    IDaoFactory daoFactory,
+    SocketManager socketManager)
+{
+    internal async Task<string> BuildFileAsync(CancellationToken cancellationToken, string script, string fileName)
     {
         var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, script, true);
 
@@ -152,27 +158,22 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
         return resultTuple.Urls[fileName];
     }
 
-    private static async Task<File<T>> SaveFileFromUriAsync(IHttpClientFactory clientFactory, IDaoFactory daoFactory, Uri sourceUri, File<T> destinationFile)
-    {
+    internal async Task<File<T>> SaveFileFromUriAsync<T>(File<T> file, Uri sourceUri, Guid userId, string title)
+    {            
+        file.ParentId = await daoFactory.GetFolderDao<T>().GetFolderIDUserAsync(false, userId);
+        file.Title = title;
+        
         using var request = new HttpRequestMessage();
         request.RequestUri = sourceUri;
 
         using var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
+        
         var fileDao = daoFactory.GetFileDao<T>();
 
-        var file = await fileDao.SaveFileAsync(destinationFile, stream);
-
+        file = await fileDao.SaveFileAsync(file, stream);
+        await socketManager.CreateFileAsync(file);
         return file;
     }
 }
-
-[Scope]
-public record DocumentBuilderTaskScope(
-    TenantManager TenantManager, 
-    DocumentServiceConnector DocumentServiceConnector, 
-    IHttpClientFactory ClientFactory, 
-    IDaoFactory DaoFactory, 
-    FilesLinkUtility FilesLinkUtility, 
-    ILogger<DocumentBuilderTaskScope> Logger);
