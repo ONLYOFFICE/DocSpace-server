@@ -85,6 +85,12 @@ ALTER TABLE identity_consents
 	REFERENCES identity_authorizations (principal_name, registered_client_id)
 	ON DELETE CASCADE;
 
+ALTER TABLE identity_authorizations
+	ADD CONSTRAINT FK_authorization_client_id
+	FOREIGN KEY (registered_client_id)
+	REFERENCES identity_clients (client_id)
+	ON DELETE CASCADE;
+
 CREATE EVENT IF NOT EXISTS identity_delete_invalidated_clients
 ON SCHEDULE EVERY 1 hour
 ON COMPLETION PRESERVE
