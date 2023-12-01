@@ -18,7 +18,7 @@ import java.util.Optional;
 public interface ConsentRepository extends Repository<Consent, Consent.ConsentId>,
         ConsentPersistenceQueryUsecases {
     @Query(value = """
-            SELECT * FROM identity_consents c WHERE c.registered_client_id=:registeredClientId AND c.principal_name=:principalName AND c.invalidated IS NULL
+            SELECT * FROM identity_consents c WHERE c.registered_client_id=:registeredClientId AND c.principal_name=:principalName AND c.invalidated=0
             """, nativeQuery = true)
     Optional<Consent> findByRegisteredClientIdAndPrincipalName(@Param("registeredClientId") String registeredClientId,
                                                                @Param("principalName") String principalName);
