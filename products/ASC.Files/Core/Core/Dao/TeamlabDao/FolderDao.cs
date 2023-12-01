@@ -2208,15 +2208,6 @@ static file class Queries
             .Where(r => r.RoomId == roomId)
             .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteRoomWaterMarkAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int roomId) =>
-            ctx.RoomSettings
-            .Where(r => r.TenantId == tenantId)
-            .Where(r => r.RoomId == roomId)
-            .Select(r => r.Watermark)
-            .ExecuteDelete());
-
     public static readonly Func<FilesDbContext, int, Task<int>> CountTreesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int parentId) =>
