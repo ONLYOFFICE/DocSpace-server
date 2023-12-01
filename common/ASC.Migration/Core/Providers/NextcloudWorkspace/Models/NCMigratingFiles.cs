@@ -51,6 +51,7 @@ public class NCMigratingFiles : MigratingFiles
     private long _bytesTotal;
     private NCStorages _storages;
     private Dictionary<string, NCMigratingUser> _users;
+    private Dictionary<string, NCMigratingGroups> _groups;
     private string _folderCreation;
 
     public NCMigratingFiles(GlobalFolderHelper globalFolderHelper,
@@ -320,5 +321,9 @@ public class NCMigratingFiles : MigratingFiles
     public void SetUsersDict(IEnumerable<NCMigratingUser> users)
     {
         _users = users.ToDictionary(user => user.Key, user => user);
+    }
+    public void SetGroupsDict(IEnumerable<NCMigratingGroups> groups)
+    {
+        _groups = groups.ToDictionary(group => group.GroupName, group => group);
     }
 }

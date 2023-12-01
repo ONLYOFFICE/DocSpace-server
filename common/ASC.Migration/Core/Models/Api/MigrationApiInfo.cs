@@ -43,13 +43,16 @@ public class MigrationApiInfo
 
     [ProtoMember(6)]
     public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
-
+    
     [ProtoMember(7)]
-    public bool ImportPersonalFiles { get; set; } = true;
+    public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
+
     [ProtoMember(8)]
-    public bool ImportSharedFiles { get; set; } = true;
+    public bool ImportPersonalFiles { get; set; } = true;
     [ProtoMember(9)]
-    public int SuccessedUsers { get; set; }
+    public bool ImportSharedFiles { get; set; } = true;
     [ProtoMember(10)]
+    public int SuccessedUsers { get; set; }
+    [ProtoMember(11)]
     public int FailedUsers { get; set; }
 }

@@ -29,7 +29,7 @@
 namespace ASC.Migration.GoogleWorkspace;
 
 [Scope]
-public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsMigratingUser, GwsMigratingFiles>
+public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsMigratingUser, GwsMigratingFiles, GWSMigratingGroups>
 {
     private string[] _takeouts;
     private readonly SecurityContext _securityContext;
@@ -117,14 +117,23 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
                     throw new Exception("Takeout zip does not contain root 'Takeout' folder.");
                 }
                 var directories = Directory.GetDirectories(rootFolder);
-                var user = _serviceProvider.GetService<GwsMigratingUser>();
+                if (directories.Length == 1 && directories[0].Split(Path.DirectorySeparatorChar).Last() == "Groups")
+                {
+                    var group = _serviceProvider.GetService<GWSMigratingGroups>();
+                    group.Init(rootFolder, Log);
+                    group.Parse();
+                    _migrationInfo.Groups.Add(group);
+                }
+                else
+                {
+                    var user = _serviceProvider.GetService<GwsMigratingUser>();
                     user.Init(key, rootFolder, Log);
                     user.Parse();
-                    if (user.Email.IsNullOrEmpty()) 
+                    if (user.Email.IsNullOrEmpty())
                     {
                         _migrationInfo.WithoutEmailUsers.Add(key, user);
                     }
-                    else if((await _userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
+                    else if ((await _userManager.GetUserByEmailAsync(user.Email)) != ASC.Core.Users.Constants.LostUser)
                     {
                         _migrationInfo.ExistUsers.Add(key, user);
                     }
@@ -132,6 +141,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
                     {
                         _migrationInfo.Users.Add(key, user);
                     }
+                }
             }
             catch (Exception ex)
             {
@@ -180,7 +190,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
             try
             {
                 var elem = migrationApiInfo.Users.Find(element => element.Key == user.Key);
-                user.DataСhange(elem);
+                user.DataСhange();
                 user.UserType = elem.UserType;
 
                 await user.MigrateAsync();
@@ -190,6 +200,30 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
             {
                 failedUsers.Add(user);
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email})", ex);
+            }
+        }
+
+        var groupsForImport = _migrationInfo.Groups
+                .Where(g => g.ShouldImport)
+                .Select(g => g);
+        var groupsCount = groupsForImport.Count();
+        if (groupsCount != 0)
+        {
+            progressStep = 25 / groupsForImport.Count();
+            //Create all groups
+            i = 1;
+            foreach (var group in groupsForImport)
+            {
+                if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
+                try
+                {
+                    await group.MigrateAsync();
+                }
+                catch (Exception ex)
+                {
+                    Log($"Couldn't migrate group {group.GroupName} ", ex);
+                }
             }
         }
 
@@ -217,6 +251,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
                     await _securityContext.AuthenticateMeAsync(user.Guid);
                     user.MigratingFiles.Init(_path, user, Log);
                     user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
+                    user.MigratingFiles.SetGroupsDict(groupsForImport);
                     await user.MigratingFiles.MigrateAsync();
                     await _securityContext.AuthenticateMeAsync(currentUser.ID);
                 }

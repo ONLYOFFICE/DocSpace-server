@@ -26,6 +26,6 @@
 
 namespace ASC.Migration.GoogleWorkspace.Models;
 
-public class GwsMigrationInfo : MigrationInfo<GwsMigratingUser, GwsMigratingFiles>
+public class GwsMigrationInfo : MigrationInfo<GwsMigratingUser, GwsMigratingFiles, GWSMigratingGroups>
 {
 }

@@ -49,6 +49,7 @@ public class OCMigratingFiles : MigratingFiles
     private long _bytesTotal;
     private OCStorages _storages;
     private Dictionary<string, OCMigratingUser> _users;
+    private Dictionary<string, OCMigratingGroups> _groups;
     private Dictionary<object, int> _matchingFileId;
     private string _folderCreation;
     public OCMigratingFiles(GlobalFolderHelper globalFolderHelper,
@@ -260,6 +261,10 @@ public class OCMigratingFiles : MigratingFiles
     public void SetUsersDict(IEnumerable<OCMigratingUser> users)
     {
         _users = users.ToDictionary(user => user.Key, user => user);
+    }
+    public void SetGroupsDict(IEnumerable<OCMigratingGroups> groups)
+    {
+        _groups = groups.ToDictionary(group => group.GroupName, group => group);
     }
 
     private ASCShare? GetPortalShare(int role, bool entryType)

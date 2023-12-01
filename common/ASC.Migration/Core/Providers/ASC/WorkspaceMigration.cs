@@ -24,10 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Migration.Core.Core.Providers.ASC.Models;
+using ASC.Migration.Core.Core.Providers.ASC.Models.Parse;
+
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Migration.Core.Core.Providers;
 
 [Scope]
-public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, WorkspaceMigratingUser, WorkspaceMigratingFiles>
+public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, WorkspaceMigratingUser, WorkspaceMigratingFiles, WorkspaceMigrationGroups>
 {
     private string _backup;
     private string _tmpFolder;
@@ -74,7 +79,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             using var stream = _dataReader.GetEntry("databases/core/core_user");
             var data = new DataTable();
             data.ReadXml(stream);
-            var progressStep = 90 / data.Rows.Count;
+            var progressStep = 70 / data.Rows.Count;
             var i = 1;
             foreach (var row in data.Rows.Cast<DataRow>())
             {
@@ -107,7 +112,7 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 var user = _serviceProvider.GetService<WorkspaceMigratingUser>();
                 user.Init(u.Id, u, _tmpFolder, _dataReader, Log);
                 user.Parse();
-                if ((await _userManager.GetUserByEmailAsync(u.Info.Email)) != ASC.Core.Users.Constants.LostUser)
+                if ((await _userManager.GetUserByEmailAsync(u.Info.Email)) != Constants.LostUser)
                 {
                     _migrationInfo.ExistUsers.Add(u.Id, user);
                 }
@@ -115,6 +120,18 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
                 {
                     _migrationInfo.Users.Add(u.Id, user);
                 }
+            }
+
+            var groups = DBExtractGroup();
+            var progress = 80;
+            foreach (var item in groups)
+            {
+                ReportProgress(progress, MigrationResource.DataProcessing);
+                progress += 10 / groups.Count;
+                var group = _serviceProvider.GetService<WorkspaceMigrationGroups>();
+                group.Init(item, Log);
+                group.Parse();
+                _migrationInfo.Groups.Add(group);
             }
         }
         catch (Exception ex)
@@ -127,6 +144,50 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             ReportProgress(100, MigrationResource.DataProcessingCompleted);
         }
         return _migrationInfo.ToApiInfo();
+    }
+
+    public List<WorkspaceGroup> DBExtractGroup()
+    {
+        var groups = new List<WorkspaceGroup>();
+
+        using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
+        var dataGroup = new DataTable();
+        dataGroup.ReadXml(streamGroup);
+
+        foreach (var row in dataGroup.Rows.Cast<DataRow>())
+        {
+            if (int.Parse(row["removed"].ToString()) == 0)
+            {
+                var group = new WorkspaceGroup()
+                {
+                    Id = Guid.Parse(row["id"].ToString()),
+                    Name = row["name"].ToString(),
+                    Categoryid = Guid.Parse(row["categoryid"].ToString()),
+                    Parentid = Guid.Parse(row["parentid"].ToString()),
+                    Sid = row["sid"].ToString(),
+                    UsersUid = new List<string>()
+                };
+                groups.Add(group);
+            }
+        }
+
+        using var streamUserGroup = _dataReader.GetEntry("databases/core/core_usergroup");
+        var dataUserGroup = new DataTable();
+        dataGroup.ReadXml(streamUserGroup);
+
+        foreach (var row in dataUserGroup.Rows.Cast<DataRow>())
+        {
+            if (int.Parse(row["removed"].ToString()) == 0)
+            {
+                var groupId = Guid.Parse(row["groupid"].ToString());
+                var g = groups.FirstOrDefault(g => g.Id == groupId);
+                if(g != null)
+                {
+                    g.UsersUid.Add(row["userid"].ToString());
+                }
+            }
+        }
+        return groups;
     }
 
     public override async Task Migrate(MigrationApiInfo migrationInfo)
@@ -178,6 +239,34 @@ public class WorkspaceMigration : AbstractMigration<WorkspaceMigrationInfo, Work
             {
                 failedUsers.Add(user);
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email}) files", ex);
+            }
+        }
+
+        var groupsForImport = _migrationInfo.Groups
+            .Where(g => g.ShouldImport)
+            .Select(g => g);
+        var groupsCount = groupsForImport.Count();
+        if (groupsCount != 0)
+        {
+            progressStep = 25 / groupsForImport.Count();
+            //Create all groups
+            i = 1;
+            foreach (var group in groupsForImport)
+            {
+                if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
+                try
+                {
+                    group.UsersGuidList = _migrationInfo.Users
+                    .Where(user => group.UserGuidList.Exists(u => user.Key == u))
+                    .Select(u => u)
+                    .ToDictionary(k => k.Key, v => v.Value.Guid);
+                    await group.MigrateAsync();
+                }
+                catch (Exception ex)
+                {
+                    Log($"Couldn't migrate group {group.GroupName} ", ex);
+                }
             }
         }
 

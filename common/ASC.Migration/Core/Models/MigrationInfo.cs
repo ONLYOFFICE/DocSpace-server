@@ -26,9 +26,10 @@
 
 namespace ASC.Migration.Core.Models;
 
-public abstract class MigrationInfo<TUser, TFiles> : IMigrationInfo
+public abstract class MigrationInfo<TUser, TFiles, TGroup> : IMigrationInfo
     where TUser : MigratingUser<TFiles>
     where TFiles : MigratingFiles
+    where TGroup : MigratingGroup
 {
     public Dictionary<string, TUser> Users = new Dictionary<string, TUser>();
     public Dictionary<string, TUser> WithoutEmailUsers = new Dictionary<string, TUser>();
@@ -36,6 +37,7 @@ public abstract class MigrationInfo<TUser, TFiles> : IMigrationInfo
     public string Path { get; set; }
     public string MigratorName { get; set; }
     public List<string> FailedArchives = new List<string>();
+    public List<TGroup> Groups = new List<TGroup>();
 
     public int SuccessedUsers { get; set; }
     public int FailedUsers { get; set; }
@@ -50,7 +52,8 @@ public abstract class MigrationInfo<TUser, TFiles> : IMigrationInfo
             MigratorName = MigratorName,
             FailedArchives = FailedArchives,
             SuccessedUsers = SuccessedUsers,
-            FailedUsers = FailedUsers
+            FailedUsers = FailedUsers,
+            Groups = Groups.Select(g => g.ToApiInfo()).ToList()
         };
     }
 
@@ -66,6 +69,17 @@ public abstract class MigrationInfo<TUser, TFiles> : IMigrationInfo
             user.ShouldImport = apiUser.ShouldImport;
             user.MigratingFiles.ShouldImport = apiUser.ShouldImport && apiInfo.ImportPersonalFiles;
             user.MigratingFiles.ShouldImportSharedFiles = false;
+        }
+
+        foreach (var apiGroup in apiInfo.Groups)
+        {
+            if (!Groups.Exists(g => apiGroup.GroupName == g.GroupName))
+            {
+                continue;
+            }
+
+            var group = Groups.Find(g => apiGroup.GroupName == g.GroupName);
+            group.ShouldImport = apiGroup.ShouldImport;
         }
     }
 }

@@ -88,14 +88,17 @@ public class MigrationCore
         services.TryAdd<IMigration, GoogleWorkspaceMigration>();
         services.TryAdd<GwsMigratingUser>();
         services.TryAdd<GwsMigratingFiles>();
+        services.TryAdd<GWSMigratingGroups>();
 
         services.TryAdd<IMigration, NextcloudWorkspaceMigration>();
         services.TryAdd<NCMigratingUser>();
         services.TryAdd<NCMigratingFiles>();
+        services.TryAdd<NCMigratingGroups>();
 
         services.TryAdd<IMigration, OwnCloudMigration>();
         services.TryAdd<OCMigratingUser>();
         services.TryAdd<OCMigratingFiles>();
+        services.TryAdd<OCMigratingGroups>();
 
         services.TryAdd<IMigration, WorkspaceMigration>();
         services.TryAdd<WorkspaceMigratingUser>();

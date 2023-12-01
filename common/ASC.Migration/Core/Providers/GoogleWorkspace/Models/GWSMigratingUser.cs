@@ -95,7 +95,7 @@ public class GwsMigratingUser : MigratingUser<GwsMigratingFiles>
         _userInfo.ActivationStatus = EmployeeActivationStatus.Pending;
     }
 
-    public void DataСhange(MigratingApiUser frontUser)
+    public void DataСhange()
     {
         if (_userInfo.LastName == null)
         {

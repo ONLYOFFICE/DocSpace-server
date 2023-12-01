@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Extensions;
+
 namespace ASC.Migration.Core;
 
 [Transient]
@@ -119,6 +121,7 @@ public class MigrationOperation : DistributedTaskProgress
         try
         {
             var onlyParse = _migrationApiInfo == null;
+            var copyInfo = _migrationApiInfo.Clone();
             if (onlyParse)
             {
                 MigrationApiInfo = new MigrationApiInfo();
@@ -142,7 +145,7 @@ public class MigrationOperation : DistributedTaskProgress
             await migrator.Parse(onlyParse);
             if (!onlyParse)
             {
-                await migrator.Migrate(_migrationApiInfo);
+                await migrator.Migrate(copyInfo);
             }
         }
         catch (Exception e)

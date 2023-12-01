@@ -56,6 +56,7 @@ public class GwsMigratingFiles : MigratingFiles
     private long _bytesTotal;
     private GwsMigratingUser _user;
     private Dictionary<string, GwsMigratingUser> _users;
+    private Dictionary<string, GWSMigratingGroups> _groups;
     private string _folderCreation;
     private readonly SecurityContext _securityContext;
     private readonly UserManager _userManager;
@@ -135,6 +136,10 @@ public class GwsMigratingFiles : MigratingFiles
     public void SetUsersDict(IEnumerable<GwsMigratingUser> users)
     {
         _users = users.ToDictionary(user => user.Email, user => user);
+    }
+    public void SetGroupsDict(IEnumerable<GWSMigratingGroups> groups)
+    {
+        _groups = groups.ToDictionary(group => group.GroupName, group => group);
     }
 
     public override async Task MigrateAsync()

@@ -26,6 +26,6 @@
 
 namespace ASC.Migration.NextcloudWorkspace.Models.Parse;
 
-public class NCMigrationInfo : MigrationInfo<NCMigratingUser, NCMigratingFiles>
+public class NCMigrationInfo : MigrationInfo<NCMigratingUser, NCMigratingFiles, NCMigratingGroups>
 {
 }

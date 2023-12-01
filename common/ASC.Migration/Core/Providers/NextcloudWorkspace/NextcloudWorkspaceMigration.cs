@@ -27,7 +27,7 @@
 namespace ASC.Migration.NextcloudWorkspace;
 
 [Scope]
-public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NCMigratingUser, NCMigratingFiles>
+public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NCMigratingUser, NCMigratingFiles, NCMigratingGroups>
 {
     private string _takeouts;
     public string[] TempParse;
@@ -155,6 +155,18 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
                     }
                 }
             }
+
+            var groups = DBExtractGroup(bdFile);
+            progress = 80;
+            foreach (var item in groups)
+            {
+                ReportProgress(progress, MigrationResource.DataProcessing);
+                progress += 10 / groups.Count;
+                var group = _serviceProvider.GetService<NCMigratingGroups>();
+                group.Init(item, Log);
+                group.Parse();
+                _migrationInfo.Groups.Add(group);
+            }
         }
         catch (Exception ex)
         {
@@ -166,6 +178,38 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
             ReportProgress(100, MigrationResource.DataProcessingCompleted);
         }
         return _migrationInfo.ToApiInfo();
+    }
+
+    public List<NCGroup> DBExtractGroup(string dbFile)
+    {
+        var groups = new List<NCGroup>();
+
+        var sqlFile = File.ReadAllText(dbFile);
+
+        var groupList = GetDumpChunk("oc_groups", sqlFile);
+        if (groupList == null)
+        {
+            return groups;
+        }
+
+        foreach (var group in groupList)
+        {
+            groups.Add(new NCGroup
+            {
+                GroupGid = group.Split(',').First().Trim('\''),
+                UsersUid = new List<string>()
+            });
+        }
+
+        var usersInGroups = GetDumpChunk("oc_group_user", sqlFile);
+        foreach (var user in usersInGroups)
+        {
+            var userGroupGid = user.Split(',').First().Trim('\'');
+            var userUid = user.Split(',').Last().Trim('\'');
+            groups.Find(ggid => userGroupGid == ggid.GroupGid).UsersUid.Add(userUid);
+        }
+
+        return groups;
     }
 
     public List<NCUser> DBExtractUser(string dbFile)
@@ -329,6 +373,34 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
             {
                 failedUsers.Add(user);
                 Log($"Couldn't migrate user {user.DisplayName} ({user.Email})", ex);
+            }
+        }
+
+        var groupsForImport = _migrationInfo.Groups
+            .Where(g => g.ShouldImport)
+            .Select(g => g);
+        var groupsCount = groupsForImport.Count();
+        if (groupsCount != 0)
+        {
+            progressStep = 25 / groupsForImport.Count();
+            //Create all groups
+            i = 1;
+            foreach (var group in groupsForImport)
+            {
+                if (_cancellationToken.IsCancellationRequested) { ReportProgress(100, MigrationResource.MigrationCanceled); return; }
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.GroupMigration, group.GroupName, i++, groupsCount));
+                try
+                {
+                    group.UsersGuidList = _migrationInfo.Users
+                    .Where(user => group.UserGuidList.Exists(u => user.Key == u))
+                    .Select(u => u)
+                    .ToDictionary(k => k.Key, v => v.Value.Guid);
+                    await group.MigrateAsync();
+                }
+                catch (Exception ex)
+                {
+                    Log($"Couldn't migrate group {group.GroupName} ", ex);
+                }
             }
         }
 

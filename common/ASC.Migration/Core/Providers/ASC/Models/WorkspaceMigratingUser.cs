@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Migration.Core.Core.Providers.Models;
 
 [Transient]
@@ -87,14 +89,14 @@ public class WorkspaceMigratingUser : MigratingUser<WorkspaceMigratingFiles>
     public override async Task MigrateAsync()
     {
         var saved = await _userManager.GetUserByEmailAsync(_user.Info.Email);
-        if (saved == ASC.Core.Users.Constants.LostUser)
+        if (saved == Constants.LostUser)
         {
             saved = await _userManager.SaveUserInfo(_user.Info, UserType);
             var groupId = UserType switch
             {
-                EmployeeType.User => ASC.Core.Users.Constants.GroupUser.ID,
-                EmployeeType.DocSpaceAdmin => ASC.Core.Users.Constants.GroupAdmin.ID,
-                EmployeeType.Collaborator => ASC.Core.Users.Constants.GroupCollaborator.ID,
+                EmployeeType.User => Constants.GroupUser.ID,
+                EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
+                EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
                 _ => Guid.Empty,
             };
 
