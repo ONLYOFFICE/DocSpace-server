@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Країна</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Зовнішнє посилання створено: {0}. Роль: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Зовнішнє посилання видалено: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Зовнішнє посилання оновлено: {0}. Роль: {1}</value>
+  </data>
 </root>

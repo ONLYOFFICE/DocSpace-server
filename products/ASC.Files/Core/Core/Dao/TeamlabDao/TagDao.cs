@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -503,8 +503,8 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
             await strategy.ExecuteAsync(async () =>
             {
-                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-                await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+                await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await dbContext.Database.BeginTransactionAsync();
                 await RemoveTagInDbAsync(tag);
 
                 await tx.CommitAsync();
@@ -661,10 +661,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
 
 [Scope]
-internal class TagDao : BaseTagDao<int>
-{
-    public TagDao(
-        UserManager userManager,
+internal class TagDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -677,22 +674,20 @@ internal class TagDao : BaseTagDao<int>
         IServiceProvider serviceProvider,
         ICache cache,
         IMapper mapper)
-        : base(userManager,
-              dbContextManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider,
-              cache,
-              mapper)
-    {
-    }
-
+    : BaseTagDao<int>(userManager,
+    dbContextManager,
+    tenantManager,
+    tenantUtil,
+    setupInfo,
+    maxTotalSizeStatistic,
+    coreBaseSettings,
+    coreConfiguration,
+    settingsManager,
+    authContext,
+    serviceProvider,
+    cache,
+    mapper)
+{
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
         if (parentFolder == null || EqualityComparer<int>.Default.Equals(parentFolder.Id, 0))
@@ -798,11 +793,7 @@ internal class TagDao : BaseTagDao<int>
 }
 
 [Scope]
-internal class ThirdPartyTagDao : BaseTagDao<string>
-{
-    private readonly IThirdPartyTagDao _thirdPartyTagDao;
-    public ThirdPartyTagDao(
-        UserManager userManager,
+internal class ThirdPartyTagDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -816,26 +807,23 @@ internal class ThirdPartyTagDao : BaseTagDao<string>
         ICache cache,
         IMapper mapper,
         IThirdPartyTagDao thirdPartyTagDao)
-        : base(userManager,
-              dbContextManager,
-              tenantManager,
-              tenantUtil,
-              setupInfo,
-              maxTotalSizeStatistic,
-              coreBaseSettings,
-              coreConfiguration,
-              settingsManager,
-              authContext,
-              serviceProvider,
-              cache,
-              mapper)
-    {
-        _thirdPartyTagDao = thirdPartyTagDao;
-    }
-
+    : BaseTagDao<string>(userManager,
+    dbContextManager,
+    tenantManager,
+    tenantUtil,
+    setupInfo,
+    maxTotalSizeStatistic,
+    coreBaseSettings,
+    coreConfiguration,
+    settingsManager,
+    authContext,
+    serviceProvider,
+    cache,
+    mapper)
+{
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {
-        return _thirdPartyTagDao.GetNewTagsAsync(subject, parentFolder, deepSearch);
+        return thirdPartyTagDao.GetNewTagsAsync(subject, parentFolder, deepSearch);
     }
 }
 
@@ -905,8 +893,8 @@ static file class Queries
                         root = ctx.Folders
                             .Join(ctx.Tree, a => a.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
                             .Where(x => x.folder.TenantId == tenantId && x.tree.FolderId == r.file.ParentId)
-                            .OrderByDescending(r => r.tree.Level)
-                            .Select(r => r.folder)
+                            .OrderByDescending(r1 => r1.tree.Level)
+                            .Select(r1 => r1.folder)
                             .Take(1)
                             .FirstOrDefault()
                     })
@@ -939,8 +927,8 @@ static file class Queries
                             .Join(ctx.Tree, a => a.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
                             .Where(x => x.folder.TenantId == tenantId)
                             .Where(x => x.tree.FolderId == r.folder.ParentId)
-                            .OrderByDescending(r => r.tree.Level)
-                            .Select(r => r.folder)
+                            .OrderByDescending(r1 => r1.tree.Level)
+                            .Select(r1 => r1.folder)
                             .Take(1)
                             .FirstOrDefault()
                     })

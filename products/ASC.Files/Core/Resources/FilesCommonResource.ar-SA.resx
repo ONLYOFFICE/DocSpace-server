@@ -475,4 +475,16 @@
   <data name="UnlockComment" xml:space="preserve">
     <value>الملف غير مقفل</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>رابط المشاركة</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>رابط الدعوة</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>الحد الأقصى من عدد الروابط من الممكن قد لا يتجاوز {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>فشلت محاولات إدخال كلمة المرور الخاصة بك، الرجاء المحاولة مرة أخرى لاحقاً</value>
+  </data>
 </root>

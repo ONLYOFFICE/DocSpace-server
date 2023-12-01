@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,6 @@ public static class HttpRequestExtensions
 
             if (url != rewrittenUri)
             {
-                var requestUri = url;
                 try
                 {
                     //Push it
@@ -69,7 +68,7 @@ public static class HttpRequestExtensions
                     else
                     {
                         request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host + ":" + requestUri.Port);
+                                                    rewrittenUri.Host + ":" + url.Port);
                     }
                     //Hack:
                     typeof(HttpRequest).InvokeMember("_url",
@@ -77,7 +76,7 @@ public static class HttpRequestExtensions
                                                       BindingFlags.Instance,
                                                       null, request,
                                                       new object[] { null });
-                    oldUri = requestUri;
+                    oldUri = url;
                     context.Items["oldUri"] = oldUri;
 
                 }
@@ -132,19 +131,19 @@ public static class HttpRequestExtensions
         const StringComparison cmp = StringComparison.OrdinalIgnoreCase;
         if (0 < s.Length && s.StartsWith('0'))
         {
-            s = Uri.UriSchemeHttp + s.Substring(1);
+            s = Uri.UriSchemeHttp + s[1..];
         }
         else if (3 < s.Length && s.StartsWith("OFF", cmp))
         {
-            s = Uri.UriSchemeHttp + s.Substring(3);
+            s = Uri.UriSchemeHttp + s[3..];
         }
         else if (0 < s.Length && s.StartsWith('1'))
         {
-            s = Uri.UriSchemeHttps + s.Substring(1);
+            s = Uri.UriSchemeHttps + s[1..];
         }
         else if (2 < s.Length && s.StartsWith("ON", cmp))
         {
-            s = Uri.UriSchemeHttps + s.Substring(2);
+            s = Uri.UriSchemeHttps + s[2..];
         }
         else if (s.StartsWith(Uri.UriSchemeHttp + "%3A%2F%2F", cmp) || s.StartsWith(Uri.UriSchemeHttps + "%3A%2F%2F", cmp))
         {

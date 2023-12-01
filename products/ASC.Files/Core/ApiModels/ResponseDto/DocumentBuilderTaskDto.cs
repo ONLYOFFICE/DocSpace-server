@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,22 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common.EF.Context;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class WebPluginDbContext : DbContext
+public class DocumentBuilderTaskDto
 {
-    public DbSet<DbWebPlugin> WebPlugins { get; set; }
+    public string Id { get; set; }
+    public string Error { get; set; }
+    public int Percentage { get; set; }
+    public bool IsCompleted { get; set; }
+    public DistributedTaskStatus Status { get; set; }
+    public object ResultFileId { get; set; }
+    public string ResultFileName { get; set; }
+    public string ResultFileUrl { get; set; }
 
-    public WebPluginDbContext(DbContextOptions<WebPluginDbContext> options) : base(options)
+    public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)
     {
-
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbWebPlugins()
-            .AddDbTenant();
+        return task == null
+            ? null
+            : new DocumentBuilderTaskDto
+            {
+                Id = task.Id,
+                Error = task.Exception?.Message,
+                Percentage = (int)task.Percentage,
+                IsCompleted = task.IsCompleted,
+                Status = task.Status,
+                ResultFileId = task["ResultFileId"],
+                ResultFileName = task["ResultFileName"],
+                ResultFileUrl = task["ResultFileUrl"]
+            };
     }
 }

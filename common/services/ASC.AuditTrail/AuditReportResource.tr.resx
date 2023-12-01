@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Ülke</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Harici bağlantı oluşturuldu: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Harici bağlantı silindi: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Harici bağlantı güncellendi: {0}. Rol: {1}</value>
+  </data>
 </root>
