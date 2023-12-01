@@ -28,7 +28,7 @@
 namespace ASC.ApiSystem.Classes;
 
 [Singleton]
-public class TimeZonesProvider(ILogger logger, CommonConstants commonConstants)
+public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstants commonConstants)
 {
     #region Private
 
