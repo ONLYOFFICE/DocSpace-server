@@ -35,10 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -149,6 +146,10 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             var now = Timestamp.from(Instant.now());
             var me = UserContextContainer.context.get()
                     .getResponse();
+            var authenticationMethods = new HashSet<String>();
+            authenticationMethods.add("client_secret_post");
+            if (clientDTO.isAllowPkce())
+                authenticationMethods.add("none");
 
             client.setClientId(UUID.randomUUID().toString());
             client.setClientSecret(cipher.encrypt(secret));
@@ -158,6 +159,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             client.setModifiedOn(now);
             client.setCreatedBy(me.getEmail());
             client.setModifiedBy(me.getEmail());
+            client.setAuthenticationMethods(authenticationMethods);
 
             this.amqpTemplate.convertAndSend(configuration.getClient().getExchange(),
                     configuration.getClient().getRouting(),
@@ -186,6 +188,11 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
                 .orElseThrow(() -> new ClientNotFoundException(String
                         .format("could not find client with client id %s for %d", clientId, tenant)));
         ClientMapper.INSTANCE.update(c, clientDTO);
+        var authenticationMethods = "client_secret_post";
+        if (clientDTO.isAllowPkce())
+            authenticationMethods = String
+                    .join(",", "client_secret_post", "none");
+        c.setAuthenticationMethod(authenticationMethods);
         c.setModifiedBy(UserContextContainer.context.get()
                 .getResponse().getEmail());
         return ClientMapper.INSTANCE.fromEntityToQuery(c);

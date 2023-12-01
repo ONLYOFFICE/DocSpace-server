@@ -32,9 +32,8 @@ public class CreateClientDTO implements Serializable {
     @Pattern(regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
     message = "client logo is expected to be passed as base64")
     private String logo;
-    @JsonProperty("authentication_method")
-    @EqualsAnySupportedAuthenticationMethod
-    private String authenticationMethod;
+    @JsonProperty("allow_pkce")
+    private boolean allowPkce;
     @JsonProperty("website_url")
     @Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
             message = "website url is expected to be passed as url")

@@ -58,20 +58,15 @@ public interface ClientMapper {
     ClientInfoDTO fromClientToInfoDTO(ClientDTO client);
     @Mappings({
             @Mapping(
-                    source = "authenticationMethod",
+                    source = "authenticationMethods",
                     target = "authenticationMethod"
             )
     })
     ClientMessage fromQueryToMessage(ClientDTO client);
-    @Mappings({
-            @Mapping(
-                    source = "authenticationMethod",
-                    target = "authenticationMethod"
-            )
-    })
     ClientDTO fromCommandToQuery(CreateClientDTO client);
     @Mappings({
             @Mapping(source = "enabled", target = "enabled"),
+            @Mapping(source = "authenticationMethod", target = "authenticationMethods")
     })
     ClientDTO fromEntityToQuery(Client client);
     @Mappings({

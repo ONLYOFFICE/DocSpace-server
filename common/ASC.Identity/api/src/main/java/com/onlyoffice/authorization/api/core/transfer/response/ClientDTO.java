@@ -37,8 +37,8 @@ public class ClientDTO extends RepresentationModel<ClientDTO> implements Seriali
     private String policyUrl;
     @JsonProperty("logo")
     private String logo;
-    @JsonProperty("authentication_method")
-    private String authenticationMethod;
+    @JsonProperty("authentication_methods")
+    private Set<String> authenticationMethods;
     private int tenant;
     @JsonProperty("tenant_url")
     private String tenantUrl;

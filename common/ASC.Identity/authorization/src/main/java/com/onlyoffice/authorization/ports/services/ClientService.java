@@ -66,7 +66,10 @@ public class ClientService implements ClientRetrieveUsecases {
                 .clientIdIssuedAt(client.getClientIssuedAt().toInstant())
                 .clientSecret(client.getClientSecret())
                 .clientName(client.getName())
-                .clientAuthenticationMethod(new ClientAuthenticationMethod(client.getAuthenticationMethod()))
+                .clientAuthenticationMethods((methods) -> {
+                    for (String method : client.getAuthenticationMethod().split(","))
+                        methods.add(new ClientAuthenticationMethod(method));
+                })
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUris((uris) -> uris.addAll(Arrays.stream(client

@@ -23,7 +23,6 @@ public class UpdateClientDTO implements Serializable {
     private String description;
     @JsonProperty("logo")
     private String logo;
-    @JsonProperty("authentication_method")
-    @EqualsAnySupportedAuthenticationMethod
-    private String authenticationMethod;
+    @JsonProperty("allow_pkce")
+    private boolean allowPkce;
 }
