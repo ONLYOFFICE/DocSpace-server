@@ -405,7 +405,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         return ToProviderInfo(dbFilesThirdpartyAccount);
     }
 
-    private IProviderInfo ToProviderInfo(DbFilesThirdpartyAccount input)
+    public IProviderInfo ToProviderInfo(DbFilesThirdpartyAccount input)
     {
         if (!ProviderTypesExtensions.TryParse(input.Provider, true, out var key))
         {

@@ -40,4 +40,5 @@ public interface IProviderDao
     Task<bool> UpdateRoomProviderInfoAsync(int id, string title = null, string folderId = null, FolderType? roomType = null, FolderType? rootFolderType = null, 
         bool? @private = null, bool? hasLogo = null);
     Task RemoveProviderInfoAsync(int linkId);
+    IProviderInfo ToProviderInfo(DbFilesThirdpartyAccount input);
 }
