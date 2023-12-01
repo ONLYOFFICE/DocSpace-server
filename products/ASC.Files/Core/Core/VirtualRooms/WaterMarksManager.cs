@@ -77,6 +77,7 @@ public class WaterMarksManager
         var textArray = GetWaterMarkText(watermarksRequestDto);
         var watermarkSetings = new WatermarkJson()
         {
+            Enabled = watermarksRequestDto.Enabled,
             Text = textArray,
             Rotate = watermarksRequestDto.Rotate,
             Height = watermarksRequestDto.Height,
@@ -95,27 +96,27 @@ public class WaterMarksManager
         var text = new List<string> ();
         if (watermarksRequestDto.UserName)
         {
-            text.Add(("${UserName}"));
+            text.Add("${UserName}");
         }
 
         if (watermarksRequestDto.UserEmail)
         {
-            text.Add(("${UserEmail}"));
+            text.Add("${UserEmail}");
         }
 
         if (watermarksRequestDto.UserIpAdress)
         {
-            text.Add(("${UserIpAdress}"));
+            text.Add("${UserIpAdress}");
         }
 
         if (watermarksRequestDto.CurrentDate)
         {
-            text.Add(("${CurrentDate}"));
+            text.Add("${CurrentDate}");
         }
 
         if (watermarksRequestDto.RoomName)
         {
-            text.Add(("${RoomName}"));
+            text.Add("${RoomName}");
         }
         if (watermarksRequestDto.Text != string.Empty)
         {
@@ -200,7 +201,6 @@ public class WaterMarksManager
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
 
-        await _roomLogoManager.DeleteWatermarkImageAsync(room);
         if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
@@ -215,7 +215,10 @@ public class WaterMarksManager
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
+
         await folderDao.DeleteWatermarkFromDbAsync(room);
+
+        await _roomLogoManager.DeleteWatermarkImageAsync(room);
 
         return room;
     }
