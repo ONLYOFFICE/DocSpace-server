@@ -515,7 +515,7 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
-    /// <path>api/2.0/files/rooms/{id}/tags</path>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("rooms/{id}/watermark")]
     public async Task<FolderDto<T>> DeleteWatermarkAsync(T id)
