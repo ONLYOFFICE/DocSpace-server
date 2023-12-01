@@ -24,10 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Files.Core.VirtualRooms;
 
 public class WatermarkJson
 {
+    public bool Enabled { get; set; }      
     public List<string> Text { get; set; }
     public int Rotate { get; set; }
     public double Width { get; set; }
@@ -41,12 +43,15 @@ public class WaterMarksManager
 {
     private readonly IDaoFactory _daoFactory;
     private readonly FileSecurity _fileSecurity;
+    private readonly RoomLogoManager _roomLogoManager;
     public WaterMarksManager(
         IDaoFactory daoFactory,
-        FileSecurity fileSecurity)
+        FileSecurity fileSecurity,
+        RoomLogoManager roomLogoManager)
     {
         _daoFactory = daoFactory;
         _fileSecurity = fileSecurity;
+        _roomLogoManager = roomLogoManager;
     }
 
     public async Task<Folder<T>> AddRoomWaterMarksAsync<T>(T roomId, WatermarksRequestDto watermarksRequestDto)
@@ -131,7 +136,7 @@ public class WaterMarksManager
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
         {
-            throw new ItemNotFoundException();
+            throw new ItemNotFoundException();  
         }
 
         if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
@@ -141,6 +146,8 @@ public class WaterMarksManager
 
         var watermarkData  = await folderDao.GetWatermarkInfo(room);
         var watermarkRequestDto = new WatermarksRequestDto();
+
+        watermarkRequestDto.Enabled = watermarkData.Enabled;
 
         var userName = @"\${UserName}";
         var userEmail = @"\${UserEmail}";
@@ -193,6 +200,7 @@ public class WaterMarksManager
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
 
+        await _roomLogoManager.DeleteWatermarkImageAsync(room);
         if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);

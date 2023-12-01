@@ -28,6 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class WatermarksRequestDto
 {
+    public bool Enabled { get; set; }
     public bool UserName { get; set; }
     public bool UserEmail { get; set; }
     public bool UserIpAdress { get; set; }
@@ -39,4 +40,19 @@ public class WatermarksRequestDto
     public string UrlImage { get; set; }
     public double Height { get; set; }
     public double Width { get; set; }
+}
+
+public class WatermarksImageRequestDto
+{
+    /// <summary>The path to the temporary image file</summary>
+    /// <type>System.String, System</type>
+    public string TmpFile { get; set; }
+
+    /// <summary>The rectangle width</summary>
+    /// <type>System.Int32, System</type>
+    public int Width { get; set; }
+
+    /// <summary>The rectangle height</summary>
+    /// <type>System.Int32, System</type>
+    public int Height { get; set; }
 }

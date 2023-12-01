@@ -514,7 +514,6 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
     /// <short>Remove room watermarks</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.BatchTagsRequestDto, ASC.Files.Core" name="inDto">Request parameters for removing watermarks</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     /// <httpMethod>DELETE</httpMethod>
@@ -527,7 +526,25 @@ public abstract class VirtualRoomsController<T> : ApiControllerBase
 
         return await _folderDtoHelper.GetAsync(room);
     }
+    /// <summary>
+    /// Creates a watermark image for a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Create a watermark image</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.LogoRequestDto, ASC.Files.Core" name="inDto">Watermark image request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("rooms/{id}/watermark")]
+    public async Task<FolderDto<T>> CreateWatermarkImageAsync(T id, WatermarksImageRequestDto inDto)
+    {
+        ErrorIfNotDocSpace();
 
+        var room = await _roomLogoManager.CreateWatermarkImageAsync(id, inDto.TmpFile, inDto.Width, inDto.Height);
+
+        return await _folderDtoHelper.GetAsync(room);
+    }
     /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.ApiModels.RequestDto;
+
 using Image = SixLabors.ImageSharp.Image;
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
@@ -34,6 +36,7 @@ public class RoomLogoManager
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
+    private const string ImageWatermarkPath = $"watermark{LogosPathSplitter}{{0}}.png";
     private const string ModuleName = "room_logos";
     private const string TempDomainPath = "logos_temp";
 
@@ -52,7 +55,7 @@ public class RoomLogoManager
     private readonly EmailValidationKeyProvider _emailValidationKeyProvider;
     private readonly SecurityContext _securityContext;
     private readonly FileUtilityConfiguration _fileUtilityConfiguration;
-
+    private readonly CommonLinkUtility _commonLinkUtility;
     public RoomLogoManager(
         StorageFactory storageFactory,
         TenantManager tenantManager,
@@ -62,7 +65,8 @@ public class RoomLogoManager
         FilesMessageService filesMessageService,
         EmailValidationKeyProvider emailValidationKeyProvider,
         SecurityContext securityContext,
-        FileUtilityConfiguration fileUtilityConfiguration)
+        FileUtilityConfiguration fileUtilityConfiguration,
+        CommonLinkUtility commonLinkUtility)
     {
         _storageFactory = storageFactory;
         _tenantManager = tenantManager;
@@ -73,6 +77,7 @@ public class RoomLogoManager
         _emailValidationKeyProvider = emailValidationKeyProvider;
         _securityContext = securityContext;
         _fileUtilityConfiguration = fileUtilityConfiguration;
+        _commonLinkUtility = commonLinkUtility;
     }
 
     public bool EnableAudit { get; set; } = true;
@@ -130,7 +135,60 @@ public class RoomLogoManager
 
         return room;
     }
+    public async Task<Folder<T>> CreateWatermarkImageAsync<T>(T id, string tempFile, int width, int height)
+    {
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFolderAsync(id);
 
+        if (string.IsNullOrEmpty(tempFile))
+        {
+            return room;
+        }
+
+        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+        }
+
+        var store = await GetDataStoreAsync();
+        var fileName = Path.GetFileName(tempFile);
+        var data = await GetTempAsync(store, fileName);
+
+        var stringId = GetId(room);
+
+        await SaveWatermarkImageWithProcessAsync(store, stringId, data, -1);
+        await RemoveTempAsync(store, fileName);
+
+        var uri = await GetWatermarkImageAsync(room);
+        var watermarkData = await folderDao.GetWatermarkInfo(room); 
+        watermarkData.Height = watermarkData.Scale == 0 ? height : (watermarkData.Scale * height) / 100;
+        watermarkData.Width = watermarkData.Scale == 0 ? width : (watermarkData.Scale * width) / 100;
+        watermarkData.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
+
+        await folderDao.WatermarksSaveToDbAsync(watermarkData, room);
+        return room;
+    }
+    public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
+    {
+        var stringId = GetId(room);
+
+        try
+        {
+            var store = await GetDataStoreAsync();
+            await store.DeleteFilesAsync(string.Empty, string.Format(ImageWatermarkPath, ProcessFolderId(stringId)), false);
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorRemoveRoomLogo(e);
+        }
+
+        return room;
+    }
     public async Task<Folder<T>> DeleteAsync<T>(T id, bool checkPermissions = true)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -205,6 +263,15 @@ public class RoomLogoManager
             Medium = await GetLogoPathAsync(id, SizeName.Medium, cacheKey, secure),
             Small = await GetLogoPathAsync(id, SizeName.Small, cacheKey, secure)
         };
+    }
+    public async ValueTask<string> GetWatermarkImageAsync<T>(Folder<T> room)
+    {
+        var id = GetId(room);
+
+        var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
+        var secure = !_securityContext.IsAuthenticated;
+
+        return await GetWatermarkImagePathAsync(id, cacheKey, secure);
     }
 
     public async Task<string> SaveTempAsync(byte[] data, long maxFileSize)
@@ -306,7 +373,59 @@ public class RoomLogoManager
             throw new UnknownImageFormatException(error);
         }
     }
+    private async Task SaveWatermarkImageWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize)
+    {
+        imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 
+        var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+
+        if (imageData == null || imageData.Length == 0)
+        {
+            return;
+        }
+
+        using (var stream = new MemoryStream(imageData))
+        {
+            await store.SaveAsync(fileName, stream);
+        }
+
+
+        if (imageData is not { Length: > 0 })
+        {
+            throw new UnknownImageFormatException();
+        }
+        if (maxFileSize != -1 && imageData.Length > maxFileSize)
+        {
+            throw new ImageWeightLimitException();
+        }
+
+        try
+        {
+            using var imageStream = new MemoryStream(imageData);
+            using var img = await Image.LoadAsync(imageStream);
+            imageData = CommonPhotoManager.SaveToBytes(img);
+            var imageFileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+
+            using var stream2 = new MemoryStream(imageData);
+            await store.SaveAsync(imageFileName, stream2);
+            
+        }
+        catch (ArgumentException error)
+        {
+            throw new UnknownImageFormatException(error);
+        }
+    }
+    private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)
+    {
+        var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, _emailValidationKeyProvider) } : null;
+
+        var store = await GetDataStoreAsync();
+
+        var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
+
+        return uri + (secure ? "&" : "?") + $"hash={hash}";
+    }
     private async ValueTask<string> GetLogoPathAsync<T>(T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = string.Format(LogosPath, ProcessFolderId(id), size.ToStringLowerFast());

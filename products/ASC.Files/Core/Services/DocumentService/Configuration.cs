@@ -663,11 +663,11 @@ public class WatermarkOnDraw
 {
     public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraphs> paragraphs)
     {
-        Width = width; 
-        Height = height;
+        Width = width == 0 ? 200 : width; 
+        Height = height == 0 ? 240 : height;
         Fill = fill;
         Rotate = rotate;
-        Transparent = 0.3;
+        Transparent = 0.4;
         Paragraphs = paragraphs;
     }
 	public double Width { get; set; }
@@ -692,7 +692,7 @@ public class Runs
     public Runs(string text)
     {
         FontSize = "42";
-        Fill = new int[3]{ 182, 182, 182 };
+        Fill = new int[3]{ 124, 124, 124 };
         Text = text;
     }
     public int[] Fill { get; set; }
