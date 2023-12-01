@@ -617,7 +617,10 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         InvitationLinkService invitationLinkService,
-        AuthContext authContext)
+        AuthContext authContext,
+        DocumentBuilderTaskManager documentBuilderTaskManager,
+        TenantManager tenantManager,
+        IEventBus eventBus)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -848,6 +851,52 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
             await fileStorageService.SetAceObjectAsync(aceCollection, false);
         }
+    }
+
+    [HttpPost("rooms/{id}/indexexport")]
+    public async Task StartRoomIndexExportAsync(int id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+
+        if (!room.SettingsIndexing)
+        {
+            throw new NotSupportedException("Folder indexing is turned off");
+        }
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id);
+
+        eventBus.Publish(evt);
+    }
+
+    [HttpGet("rooms/indexexport")]
+    public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+
+        var task = documentBuilderTaskManager.GetTask(tenantId, userId);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    [HttpDelete("rooms/indexexport")]
+    public async Task TerminateRoomIndexExport()
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, true);
+
+        eventBus.Publish(evt);
     }
 
     private void ErrorIfNotDocSpace()

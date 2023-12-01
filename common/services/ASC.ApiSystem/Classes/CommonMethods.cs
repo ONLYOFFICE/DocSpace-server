@@ -31,7 +31,7 @@ namespace ASC.ApiSystem.Controllers;
 public class CommonMethods(
         IHttpContextAccessor httpContextAccessor,
         IConfiguration configuration,
-    ILogger log,
+    ILogger<CommonMethods> log,
         CoreSettings coreSettings,
         CommonLinkUtility commonLinkUtility,
         EmailValidationKeyProvider emailValidationKeyProvider,

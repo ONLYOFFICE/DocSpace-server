@@ -31,7 +31,7 @@ namespace ASC.ApiSystem.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class PeopleController(
-        ILogger option,
+        ILogger<PeopleController> option,
         HostedSolution hostedSolution,
         UserFormatter userFormatter,
         ICache cache,
