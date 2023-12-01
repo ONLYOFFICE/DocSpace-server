@@ -133,7 +133,7 @@ Bun venit în spaţiu ONLYOFFICE DocSpace! Profilul dvs. de utilizator a fost ad
 $OrangeButton
 
 Dacă aveți nevoie de ajutor, navigați la "Centru de ajutor":"${__HelpLink}" sau contactați echipa "noastră de asistență":"${__SupportLink}".
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
@@ -175,18 +175,17 @@ h3.Pentru un start rapid, iată ce puteți face cu ONLYOFFICE:
 
 - Lucru cu formate de fișiere cele mai uzuale. Compatibilitatea maximă cu fișiere MS Office.
 
-- Creare și co-editare formularelor gata de completare:"https://www.onlyoffice.com/form-creator.aspx".
+- Creare și co-editare "formularelor gata de completare":"https://www.onlyoffice.com/form-creator.aspx".
 
 - Partajare și colaborare online pe documente.
 
 - Utilizarea diferitor pluginuri pentru a încorpora noile funcții.
 
-- Un acces ușor la cloud Personal utilizând Extensia Chrome:"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Un acces ușor la cloud Personal utilizând "Extensia Chrome":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ro".
 
-De asemenea, puteți edita documente offline cu ajutorul editorului de birou gratuit:"https://www.onlyoffice.com/download-desktop.aspx" sau instalați aplicația de editare pentru dispozitivul iOS:"https://apps.apple.com/app/onlyoffice-documents/id944896972" sau "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
+De asemenea, puteți edita documente offline cu ajutorul "editorului de birou":"https://www.onlyoffice.com/download-desktop.aspx" gratuit sau instalați aplicația de editare pentru dispozitivul "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" sau "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-Cu stimă,
-Echipa ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
     <value>Faceţi aceleaşi lucruri în calitate de utilizator|Conectați Dropbox, Box și alte conturi în secțiunea Comun |Configurați drepturi de acces la documente și dosare în secțiunea Comun</value>
@@ -208,8 +207,7 @@ Tocmai v-ați înregistrat contul în cadrul soluției personale ONLYOFFICE. Fac
 
 Dacă nu puteți deschide linkul, copiați acest link "$InviteLink":"$InviteLink" și lipiți-l în bara de adrese a browserului.
 
-Cu stimă,
-Echipa ONLYOFFICE</value>
+$TrulyYours</value>
   </data>
   <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
     <value>A fost înregistrat un portal nou</value>
@@ -236,7 +234,7 @@ Nu doriți să modificați adresa de e-mail? Atunci ignorați acest mesaj.</valu
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Referitor la solicitarea dumneavoastră de închiderea contului pe personal.onlyoffice.com. Urmăriţi linkul pentru a finaliza solicitarea (link-ul este valabil timp de 7 zile): 
 
-Confirmare închidere cont
+$OrangeButton
 
 *Mențiune*: După demararea procesului de ştergere, contul dvs și toate datele asociate vor fi şterse definitiv conform "Declaraţiei de Confidențialitate":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 

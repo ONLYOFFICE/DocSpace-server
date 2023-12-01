@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FooterCommonV10" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt; &lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt; &lt;/td&gt;&lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 210px; height: 108px; background: #f6f6f6; -moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;"&gt;
               &lt;img src="%IMAGEPATH%/tech-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
@@ -72,19 +72,19 @@
             &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Need tech help?&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Sales Questions&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Order Demo&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Potrebujete technickú pomoc?&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Otázky ohľadom predaja&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Objednajte si ukážku&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
-              &lt;a href="%SUPPORTURL%" target="_blank" style="color: #333;"&gt;Send your question&lt;/a&gt;
+              &lt;a href="%SUPPORTURL%" target="_blank" style="color: #333;"&gt;Pošlite svoju otázku&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
-              &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt;Email us&lt;/a&gt;
+              &lt;a href="mailto:%SALESEMAIL%" style="color: #333;"&gt;Pošlite nám e-mail&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="%DEMOURL%" target="_blank" style="color: #333;"&gt;Pošlite žiadosť&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
@@ -134,26 +134,24 @@
             &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Need tech help?&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Sales Questions&lt;/td&gt;
-            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Order Demo&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Potrebujete technickú pomoc?&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 180px; height: 16px; background: #f6f6f6;"&gt;Otázky ohľadom predaja&lt;/td&gt;
+            &lt;td style="vertical-align: top; margin: 0; padding: 0; width: 210px; height: 16px; background: #f6f6f6;"&gt;Objednajte si ukážku&lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;"&gt;
-              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;Ask the Community&lt;/a&gt;
+              &lt;a href="http://dev.onlyoffice.org/" target="_blank" style="color: #333;"&gt;Spýtajte sa v skupine&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 180px; background: #f6f6f6;"&gt;
-              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Email us&lt;/a&gt;
+              &lt;a href="mailto:sales@onlyoffice.com" style="color: #333;"&gt;Pošlite nám e-mail&lt;/a&gt;
             &lt;/td&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 0 0 30px; width: 210px; background: #f6f6f6;-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;"&gt;
-              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Send a request&lt;/a&gt;
+              &lt;a href="https://www.onlyoffice.com/demo-order.aspx" target="_blank" style="color: #333;"&gt;Pošlite žiadosť&lt;/a&gt;
             &lt;/td&gt;
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Tento e-mail je generovaný automaticky a nemusíte na to odpovedať. &lt;br /&gt;Tento e-mail dostanete pretože ste registrovaným používateľom&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;
-&lt;br /&gt; Ak sa chcete odhlásiť z odberu notifikačných e-mailov DocSpace, kliknite sem: &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Odhlásiť sa&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>V prípade akýchkoľvek otázok o kúpe nám pošlite e-mail na adresu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; V prípade technických problémov kontaktujte náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;tím podpory&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Kliknite sem, aby ste sa odhlásili z odberu&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;

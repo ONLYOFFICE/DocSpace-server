@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,28 +27,15 @@
 namespace ASC.Data.Backup.Services;
 
 [Scope]
-public class BackupService
-{
-    private readonly ILogger<BackupService> _logger;
-    private readonly BackupStorageFactory _backupStorageFactory;
-    private readonly BackupWorker _backupWorker;
-    private readonly BackupRepository _backupRepository;
-
-    public BackupService(
+public class BackupService(
         ILogger<BackupService> logger,
         BackupStorageFactory backupStorageFactory,
         BackupWorker backupWorker,
         BackupRepository backupRepository)
     {
-        _logger = logger;
-        _backupStorageFactory = backupStorageFactory;
-        _backupWorker = backupWorker;
-        _backupRepository = backupRepository;
-    }
-
     public string StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
-        var progress = _backupWorker.StartBackup(request, enqueueTask, taskId);
+        var progress = backupWorker.StartBackup(request, enqueueTask, taskId);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -58,10 +45,10 @@ public class BackupService
 
     public async Task DeleteBackupAsync(Guid backupId)
     {
-        var backupRecord = await _backupRepository.GetBackupRecordAsync(backupId);
-        await _backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
+        var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
+        await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
 
-        var storage = await _backupStorageFactory.GetBackupStorageAsync(backupRecord);
+        var storage = await backupStorageFactory.GetBackupStorageAsync(backupRecord);
         if (storage == null)
         {
             return;
@@ -72,12 +59,12 @@ public class BackupService
 
     public async Task DeleteAllBackupsAsync(int tenantId)
     {
-        foreach (var backupRecord in await _backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
+        foreach (var backupRecord in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
             try
             {
-                await _backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
-                var storage = await _backupStorageFactory.GetBackupStorageAsync(backupRecord);
+                await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
+                var storage = await backupStorageFactory.GetBackupStorageAsync(backupRecord);
                 if (storage == null)
                 {
                     continue;
@@ -87,7 +74,7 @@ public class BackupService
             }
             catch (Exception error)
             {
-                _logger.WarningErrorWhileBackupRecord(error);
+                logger.WarningErrorWhileBackupRecord(error);
             }
         }
     }
@@ -95,9 +82,9 @@ public class BackupService
     public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(int tenantId)
     {
         var backupHistory = new List<BackupHistoryRecord>();
-        foreach (var record in await _backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
+        foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
-            var storage = await _backupStorageFactory.GetBackupStorageAsync(record);
+            var storage = await backupStorageFactory.GetBackupStorageAsync(record);
             if (storage == null)
             {
                 continue;
@@ -116,7 +103,7 @@ public class BackupService
             }
             else
             {
-                await _backupRepository.DeleteBackupRecordAsync(record.Id);
+                await backupRepository.DeleteBackupRecordAsync(record.Id);
             }
         }
         return backupHistory;
@@ -124,7 +111,7 @@ public class BackupService
 
     public void StartTransfer(StartTransferRequest request)
     {
-        var progress = _backupWorker.StartTransfer(request.TenantId, request.TargetRegion, request.NotifyUsers);
+        var progress = backupWorker.StartTransfer(request.TenantId, request.TargetRegion, request.NotifyUsers);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -140,7 +127,7 @@ public class BackupService
 
         if (!request.BackupId.Equals(Guid.Empty))
         {
-            var backupRecord = await _backupRepository.GetBackupRecordAsync(request.BackupId);
+            var backupRecord = await backupRepository.GetBackupRecordAsync(request.BackupId);
             if (backupRecord == null)
             {
                 throw new FileNotFoundException();
@@ -151,7 +138,7 @@ public class BackupService
             request.StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(backupRecord.StorageParams);
         }
 
-        var progress = _backupWorker.StartRestore(request);
+        var progress = backupWorker.StartRestore(request);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -160,28 +147,28 @@ public class BackupService
 
     public BackupProgress GetBackupProgress(int tenantId)
     {
-        return _backupWorker.GetBackupProgress(tenantId);
+        return backupWorker.GetBackupProgress(tenantId);
     }
 
     public BackupProgress GetTransferProgress(int tenantId)
     {
-        return _backupWorker.GetTransferProgress(tenantId);
+        return backupWorker.GetTransferProgress(tenantId);
     }
 
     public BackupProgress GetRestoreProgress(int tenantId)
     {
-        return _backupWorker.GetRestoreProgress(tenantId);
+        return backupWorker.GetRestoreProgress(tenantId);
     }
 
     public string GetTmpFolder()
     {
-        return _backupWorker.TempFolder;
+        return backupWorker.TempFolder;
     }
 
     public async Task CreateScheduleAsync(CreateScheduleRequest request)
     {
-        await _backupRepository.SaveBackupScheduleAsync(
-            new BackupSchedule()
+        await backupRepository.SaveBackupScheduleAsync(
+            new BackupSchedule
             {
                 TenantId = request.TenantId,
                 Cron = request.Cron,
@@ -194,12 +181,12 @@ public class BackupService
 
     public async Task DeleteScheduleAsync(int tenantId)
     {
-        await _backupRepository.DeleteBackupScheduleAsync(tenantId);
+        await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
     public async Task<ScheduleResponse> GetScheduleAsync(int tenantId)
     {
-        var schedule = await _backupRepository.GetBackupScheduleAsync(tenantId);
+        var schedule = await backupRepository.GetBackupScheduleAsync(tenantId);
         if (schedule != null)
         {
             var tmp = new ScheduleResponse

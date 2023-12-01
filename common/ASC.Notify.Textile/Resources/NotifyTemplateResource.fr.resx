@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FooterCommonV10" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt; &lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 210px; height: 108px; background: #f6f6f6; -moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;"&gt;
               &lt;img src="%IMAGEPATH%/tech-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
@@ -89,7 +89,7 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="FooterOpensourceV10" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt; &lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td colspan="3" style="height: 10px; line-height: 10px; background: #fff; padding: 0; margin: 0;"&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;
         &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
             &lt;td style="vertical-align: top; margin: 0; padding: 34px 0 0 0; width: 210px; height: 108px; background: #f6f6f6; -moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;"&gt;
               &lt;img src="%IMAGEPATH%/tech-100.png" style="width: 100px; height: 100px;margin: 0 auto;" /&gt;
@@ -180,9 +180,7 @@
         &lt;/tr&gt;</value>
   </data>
   <data name="TextForFooterUnsubsribeDocSpace" xml:space="preserve">
-    <value>Cet e-mail est généré automatiquement et vous n'avez pas besoin d'y répondre. &lt;br /&gt;Vous recevez cet e-mail parce que vous êtes un utilisateur enregistré de&lt;a href="{0}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt; DocSpace&lt;/a&gt;.
-&lt;br /&gt; Cliquez ici pour vous désabonner des notifications : &lt;a href="{1}" style="color: #FF6F3D !important; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Se désabonner&lt;/a&gt;
-&lt;br /&gt;</value>
+    <value>Pour toute question relative à l'achat, contactez-nous à l'adresse suivante &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="mailto:sales@onlyoffice.com"&gt;sales@onlyoffice.com&lt;/a&gt;.&lt;br /&gt; En cas de problèmes techniques, veuillez contacter notre &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="https://www.onlyoffice.com/support-contact-form.aspx"&gt;équipe de support&lt;/a&gt;.&lt;br /&gt; &lt;a href="{1}" style="color: #FF6F3D; text-decoration: underline; white-space: nowrap;" target="_blank"&gt;Cliquez ici pour vous désabonner&lt;/a&gt;&lt;br /&gt;</value>
   </data>
   <data name="TopGif" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;
