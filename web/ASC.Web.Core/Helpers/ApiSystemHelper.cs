@@ -67,7 +67,7 @@ public class ApiSystemHelper
         _tenantDomainValidator = tenantDomainValidator;
         _coreBaseSettings = coreBaseSettings;
         _dynamoDbSettings = configuration.GetSetting<DynamoDbSettings>("aws:dynamoDB");
-        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
+        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName : "docspace-tenants_region";
     }
 
     public string CreateAuthToken(string pkey)
@@ -121,12 +121,12 @@ public class ApiSystemHelper
             TableName = _regionTableName,
             Item = new Dictionary<string, AttributeValue>
             {
-                { TenantDomainKey, new AttributeValue 
+                { TenantDomainKey, new AttributeValue
                     {
                         S = tenantDomain
                     }
                 },
-                { TenantRegionKey, new AttributeValue 
+                { TenantRegionKey, new AttributeValue
                     {
                         S = tenantRegion
                     }
@@ -195,41 +195,42 @@ public class ApiSystemHelper
 
         if (getItemResponse.Item.Count == 0) return null;
 
-        // cut number suffix
-        while (true)
-        {
-            if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
-            {
-                portalName = portalName[0..^1];
-            }
-            else
-            {
-                break;
-            }
-        }
+        //// cut number suffix
+        //while (true)
+        //{
+        //    if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
+        //    {
+        //        portalName = portalName[0..^1];
+        //    }
+        //    else
+        //    {
+        //        break;
+        //    }
+        //}
 
-        var scanRequest = new ScanRequest
-        {
-            TableName = _regionTableName,
-            FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
-            ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
-                                                {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = TenantDomainKey,
-            ConsistentRead = true
-        };
+        //var scanRequest = new ScanRequest
+        //{
+        //    TableName = _regionTableName,
+        //    FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
+        //    ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+        //                                        {":v_tenant_domain", new AttributeValue { S =  portalName }} },
+        //    ProjectionExpression = TenantDomainKey,
+        //    ConsistentRead = true
+        //};
 
-        var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
-        var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
-        return result;
+        //var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
+        //var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
+
+        return new List<string> { portalName };
     }
 
     #endregion
-    
+
     private AmazonDynamoDBClient GetDynamoDBClient()
     {
         return new AmazonDynamoDBClient(_dynamoDbSettings.AccessKeyId, _dynamoDbSettings.SecretAccessKey, RegionEndpoint.GetBySystemName(_dynamoDbSettings.Region));
     }
-    
+
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
         if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))
