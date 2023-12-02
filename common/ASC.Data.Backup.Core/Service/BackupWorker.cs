@@ -82,7 +82,7 @@ public class BackupWorker(IDistributedTaskQueueFactory queueFactory,
                 _progressQueue.DequeueTask(item.Id);
                 item = null;
             }
-            if (item == null)
+            if (item == null || (enqueueTask && item.Id == taskId && item.Status == DistributedTaskStatus.Created))
             {
 
                 item = serviceProvider.GetService<BackupProgressItem>();
