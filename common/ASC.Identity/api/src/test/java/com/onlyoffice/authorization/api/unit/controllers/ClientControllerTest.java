@@ -212,7 +212,6 @@ public class ClientControllerTest {
                                                 .policyUrl("https://example.com")
                                                 .logo("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik03IDEySDE3TTggOC41QzggOC41IDkgOSAxMCA5QzExLjUgOSAxMi41IDggMTQgOEMxNSA4IDE2IDguNSAxNiA4LjVNOCAxNS41QzggMTUuNSA5IDE2IDEwIDE2QzExLjUgMTYgMTIuNSAxNSAxNCAxNUMxNSAxNSAxNiAxNS41IDE2IDE1LjVNMjEgMTJDMjEgMTYuOTcwNiAxNi45NzA2IDIxIDEyIDIxQzcuMDI5NDQgMjEgMyAxNi45NzA2IDMgMTJDMyA3LjAyOTQ0IDcuMDI5NDQgMyAxMiAzQzE2Ljk3MDYgMyAyMSA3LjAyOTQ0IDIxIDEyWiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPC9zdmc+")
                                                 .websiteUrl("https://example.com")
-                                                .authenticationMethod("mock")
                                                 .redirectUris(Set.of("https://example.com"))
                                                 .logoutRedirectUri("https://example.com")
                                                 .scopes(Set.of("accounts:read"))
