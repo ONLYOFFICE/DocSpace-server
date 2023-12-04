@@ -1,0 +1,11 @@
+<service>
+    <id>Identity-Authorization</id>
+    <name>IdentityAuthorization</name>
+    <description>Run Identity Authorization as a Service</description>
+    <env name="AUTHORIZATION_HOME" value="%BASE%"/>
+    <env name="AUTHORIZATION_JAR" value="%BASE%\target\authorization-0.0.1.jar" />
+    <executable>java</executable>
+    <arguments>-Xmx256m -jar "%AUTHORIZATION_JAR%"</arguments>
+    <logmode>rotate</logmode>
+    <onfailure action="restart" delay="10 sec"/>
+</service>

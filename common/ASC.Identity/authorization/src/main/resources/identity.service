@@ -1,0 +1,19 @@
+[Unit]
+Description=${SERVICE_DESCRIPTION}
+After=syslog.target
+
+[Service]
+User=root
+EnvironmentFile=
+ExecStart=java -jar ${SERVICE_JAR}
+ExecStop=/bin/kill -15 $MAINPID
+ExecStartPost=/usr/bin/timeout 30 sh -c 'while ! ss -H -t -l -n sport = :${SERVICE_PORT} | grep -q "^LISTEN.*:${SERVICE_PORT}"; do sleep 1; done'
+SuccessExitStatus=143
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=${SERVICE_ID}
+RestartSec=5s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
