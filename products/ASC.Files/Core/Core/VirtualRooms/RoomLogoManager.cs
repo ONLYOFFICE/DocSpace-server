@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.ApiModels.RequestDto;
-
 using Image = SixLabors.ImageSharp.Image;
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
@@ -112,7 +110,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
     }
     public async Task<Folder<T>> CreateWatermarkImageAsync<T>(T id, string tempFile, int width, int height)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
         if (string.IsNullOrEmpty(tempFile))
@@ -125,7 +123,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -159,7 +157,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
         }
         catch (Exception e)
         {
-            _logger.ErrorRemoveRoomLogo(e);
+            logger.ErrorRemoveRoomLogo(e);
         }
 
         return room;
@@ -244,7 +242,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
         var id = GetId(room);
 
         var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
-        var secure = !_securityContext.IsAuthenticated;
+        var secure = !securityContext.IsAuthenticated;
 
         return await GetWatermarkImagePathAsync(id, cacheKey, secure);
     }
@@ -393,7 +391,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
     private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)
     {
         var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
-        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, _emailValidationKeyProvider) } : null;
+        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
 
         var store = await GetDataStoreAsync();
 

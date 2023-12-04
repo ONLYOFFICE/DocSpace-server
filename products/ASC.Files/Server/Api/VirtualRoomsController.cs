@@ -449,7 +449,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var room = await _waterMarksManager.AddRoomWaterMarksAsync(id, inDto);
+        var room = await waterMarksManager.AddRoomWaterMarksAsync(id, inDto);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -471,7 +471,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
 
         var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
-        return await _waterMarksManager.GetWatermarkInformation(room);
+        return await waterMarksManager.GetWatermarkInformation(room);
     }
 
     /// <summary>
@@ -488,7 +488,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var room = await _waterMarksManager.RemoveRoomWaterMarksAsync(id);
+        var room = await waterMarksManager.RemoveRoomWaterMarksAsync(id);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -507,7 +507,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var room = await _roomLogoManager.CreateWatermarkImageAsync(id, inDto.TmpFile, inDto.Width, inDto.Height);
+        var room = await roomLogoManager.CreateWatermarkImageAsync(id, inDto.TmpFile, inDto.Width, inDto.Height);
 
         return await _folderDtoHelper.GetAsync(room);
     }
