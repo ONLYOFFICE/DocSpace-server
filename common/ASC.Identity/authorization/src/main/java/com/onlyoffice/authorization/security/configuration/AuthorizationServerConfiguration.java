@@ -123,7 +123,7 @@ public class AuthorizationServerConfiguration {
                         .subject(principal.getDetails().toString());
             if (authority != null)
                 context.getClaims()
-                        .issuer(authority.getAuthority())
+                        .issuer(String.format("%s/oauth2", authority.getAuthority()))
                         .audience(List.of(authority.getAuthority()));
             context
                     .getJwsHeader()
