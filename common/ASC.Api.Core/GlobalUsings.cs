@@ -83,7 +83,6 @@ global using ASC.EventBus.ActiveMQ;
 global using ASC.EventBus.Extensions.Logger;
 global using ASC.EventBus.RabbitMQ;
 global using ASC.Feed.Context;
-global using ASC.IPSecurity;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;

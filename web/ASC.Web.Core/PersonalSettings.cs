@@ -46,7 +46,7 @@ public class PersonalSettings : ISettings<PersonalSettings>
         return new PersonalSettings
         {
             IsNewUserSetting = false,
-            IsNotActivatedSetting = false,
+            IsNotActivatedSetting = false
         };
     }
 }

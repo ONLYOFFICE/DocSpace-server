@@ -487,4 +487,46 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
     <value>Shared link</value>
   </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Date Generated</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Export Author</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Room index</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Size (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
 </root>

@@ -24,15 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Security.Cryptography;
-global using System.Text;
-
 global using ASC.Common;
 global using ASC.Common.Threading;
 global using ASC.Core;
 global using ASC.Core.Users;
 global using ASC.Data.Reassigns.Log;
-global using ASC.Data.Storage;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Core;

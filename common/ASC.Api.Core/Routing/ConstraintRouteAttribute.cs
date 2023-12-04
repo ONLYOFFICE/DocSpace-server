@@ -30,12 +30,10 @@ public class ConstraintRouteAttribute(string constraint) : Attribute
 {
     public IRouteConstraint GetRouteConstraint()
     {
-        switch (constraint)
+        return constraint switch
         {
-            case "int":
-                return new IntRouteConstraint();
-        }
-
-        return null;
+            "int" => new IntRouteConstraint(),
+            _ => null
+        };
     }
 }

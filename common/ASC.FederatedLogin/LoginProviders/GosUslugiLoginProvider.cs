@@ -112,7 +112,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
             FirstName = userInfo.Value<string>("firstName"),
             LastName = userInfo.Value<string>("lastName"),
 
-            Provider = ProviderConstants.GosUslugi,
+            Provider = ProviderConstants.GosUslugi
         };
 
         var userContactsString = _requestHelper.PerformRequest(GosUslugiProfileUrl + oid + "/ctts", "application/x-www-form-urlencoded", headers: new Dictionary<string, string> { { "Authorization", "Bearer " + accessToken } });

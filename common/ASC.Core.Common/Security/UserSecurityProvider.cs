@@ -69,7 +69,7 @@ public class UserSecurityProvider : SecurityObject
             EmployeeType.RoomAdmin => new[] { AuthConstants.RoomAdmin },
             EmployeeType.Collaborator => new[] { AuthConstants.Collaborator },
             EmployeeType.User => new[] { AuthConstants.User },
-            _ => Array.Empty<IRole>(),
+            _ => Array.Empty<IRole>()
         };
     }
 

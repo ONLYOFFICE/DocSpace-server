@@ -95,7 +95,7 @@ public class Startup : BaseStartup
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(settings.RepeatCount.HasValue ? settings.RepeatCount.Value : 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+                .WaitAndRetryAsync(settings.RepeatCount ?? 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         };
 
         services.AddHttpClient(WebhookSender.WEBHOOK)

@@ -58,9 +58,9 @@ try
 
     builder.Services.AddClearEventsServices(builder.Configuration);
 
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration, false, false);
+        containerBuilder.Register(context.Configuration, false, false);
     });
 
     var app = builder.Build();

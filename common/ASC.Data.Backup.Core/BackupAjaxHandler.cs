@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,24 +34,24 @@ namespace ASC.Data.Backup;
 
 [Scope]
 public class BackupAjaxHandler(BackupService backupService,
-    TenantManager tenantManager,
-    MessageService messageService,
-    CoreBaseSettings coreBaseSettings,
-    CoreConfiguration coreConfiguration,
-    PermissionContext permissionContext,
-    SecurityContext securityContext,
-    UserManager userManager,
-    ConsumerFactory consumerFactory,
-    StorageFactory storageFactory,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
-{
+        TenantManager tenantManager,
+        MessageService messageService,
+        CoreBaseSettings coreBaseSettings,
+        CoreConfiguration coreConfiguration,
+        PermissionContext permissionContext,
+        SecurityContext securityContext,
+        UserManager userManager,
+        ConsumerFactory consumerFactory,
+        StorageFactory storageFactory,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity)
+    {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
 
-    #region backup
+    #region Backup
 
-    public async Task StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, bool enqueueTask = true, string taskId = null)
     {
         await DemandPermissionsBackupAsync();
 
@@ -81,7 +81,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
         await messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        backupService.StartBackup(backupRequest);
+        return backupService.StartBackup(backupRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()
@@ -215,7 +215,7 @@ public class BackupAjaxHandler(BackupService backupService,
             {
                 TenantId = await tenantManager.GetCurrentTenantIdAsync(),
                 Cron = schedule.CronParams.ToString(),
-                NumberOfBackupsStored = schedule.BackupsStored == null ? 0 : (int)schedule.BackupsStored,
+                NumberOfBackupsStored = schedule.BackupsStored ?? 0,
                 StorageType = schedule.StorageType,
                 StorageParams = schedule.StorageParams
             };
@@ -449,7 +449,7 @@ public class BackupAjaxHandler(BackupService backupService,
                 BackupPeriod.EveryDay => string.Format("0 0 {0} ? * *", Hour),
                 BackupPeriod.EveryMonth => string.Format("0 0 {0} {1} * ?", Hour, Day),
                 BackupPeriod.EveryWeek => string.Format("0 0 {0} ? * {1}", Hour, Day),
-                _ => base.ToString(),
+                _ => base.ToString()
             };
         }
     }

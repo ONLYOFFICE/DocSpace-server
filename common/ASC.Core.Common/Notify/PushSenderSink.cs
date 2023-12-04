@@ -105,7 +105,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
                 Id = folderId is { Value: not null } ? folderId.Value.ToString() : "",
                 ParentId = rootFolderId is { Value: not null } ? rootFolderId.Value.ToString() : "",
                 RootFolderType = rootFolderType is { Value: not null } ? (int)rootFolderType.Value : 0
-            },
+            }
         };
 
         var msg = (NoticeMessage)message;

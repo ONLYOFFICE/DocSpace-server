@@ -112,7 +112,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
             EmployeeType.User => Constants.GroupUser.ID,
             EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
             EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
-            _ => Guid.Empty,
+            _ => Guid.Empty
         };
 
         if (groupId != Guid.Empty)
@@ -147,10 +147,8 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
         {
             userInfo.UserName = await MakeUniqueNameAsync(userInfo);
         }
-        if (!userInfo.WorkFromDate.HasValue)
-        {
-            userInfo.WorkFromDate = tenantUtil.DateTimeNow();
-        }
+        
+        userInfo.WorkFromDate ??= tenantUtil.DateTimeNow();
 
         if (!coreBaseSettings.Personal && (!fromInviteLink || updateExising))
         {
@@ -408,24 +406,24 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
     {
         var text = new StringBuilder();
 
-        text.AppendFormat("{0} ", Resource.ErrorPasswordMessage);
+        text.Append($"{Resource.ErrorPasswordMessage} ");
         text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettings.MaxLength);
-        text.AppendFormat(", {0}", Resource.ErrorPasswordOnlyLatinLetters);
-        text.AppendFormat(", {0}", Resource.ErrorPasswordNoSpaces);
+        text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
+        text.Append($", {Resource.ErrorPasswordNoSpaces}");
 
         if (passwordSettings.UpperCase)
         {
-            text.AppendFormat(", {0}", Resource.ErrorPasswordNoUpperCase);
+            text.Append($", {Resource.ErrorPasswordNoUpperCase}");
         }
 
         if (passwordSettings.Digits)
         {
-            text.AppendFormat(", {0}", Resource.ErrorPasswordNoDigits);
+            text.Append($", {Resource.ErrorPasswordNoDigits}");
         }
 
         if (passwordSettings.SpecSymbols)
         {
-            text.AppendFormat(", {0}", Resource.ErrorPasswordNoSpecialSymbols);
+            text.Append($", {Resource.ErrorPasswordNoSpecialSymbols}");
         }
 
         return text.ToString();

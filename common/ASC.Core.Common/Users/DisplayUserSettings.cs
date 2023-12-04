@@ -37,7 +37,7 @@ public class DisplayUserSettings : ISettings<DisplayUserSettings>
     {
         return new DisplayUserSettings
         {
-            IsDisableGettingStarted = false,
+            IsDisableGettingStarted = false
         };
     }
 }

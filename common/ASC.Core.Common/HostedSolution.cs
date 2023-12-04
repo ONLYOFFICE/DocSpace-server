@@ -210,7 +210,7 @@ public class HostedSolution(ITenantService tenantService,
         var quota = (await QuotaService.GetTenantQuotasAsync()).FirstOrDefault(q => paid ? q.NonProfit : q.Trial);
         if (quota != null)
         {
-            await TariffService.SetTariffAsync(tenant, new Tariff { Quotas = new List<Quota> { new(quota.TenantId, 1) }, DueDate = DateTime.MaxValue, });
+            await TariffService.SetTariffAsync(tenant, new Tariff { Quotas = new List<Quota> { new(quota.TenantId, 1) }, DueDate = DateTime.MaxValue });
         }
     }
 

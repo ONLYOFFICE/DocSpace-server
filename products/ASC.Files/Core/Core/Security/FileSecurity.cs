@@ -752,7 +752,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             FileShare.RoomAdmin => EmployeeType.RoomAdmin,
             FileShare.Collaborator => EmployeeType.Collaborator,
-            _ => EmployeeType.User,
+            _ => EmployeeType.User
         };
     }
 
@@ -1218,7 +1218,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             Owner = authContext.CurrentAccount.ID,
             Share = share,
             SubjectType = subjectType,
-            Options = options,
+            Options = options
         };
 
         await securityDao.SetShareAsync(r);

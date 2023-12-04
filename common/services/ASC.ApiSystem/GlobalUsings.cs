@@ -82,3 +82,5 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Newtonsoft.Json.Linq;
 
 global using NLog;
+
+global using ILogger = Microsoft.Extensions.Logging.ILogger;

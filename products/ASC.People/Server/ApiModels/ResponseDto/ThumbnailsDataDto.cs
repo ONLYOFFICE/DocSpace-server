@@ -80,7 +80,7 @@ public class ThumbnailsDataDto
             Max = "default_user_photo_size_200-200.png",
             Big = "default_user_photo_size_82-82.png",
             Medium = "default_user_photo_size_48-48.png",
-            Small = "default_user_photo_size_32-32.png",
+            Small = "default_user_photo_size_32-32.png"
         };
     }
 }

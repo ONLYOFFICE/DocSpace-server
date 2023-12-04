@@ -192,7 +192,7 @@ public enum Accessibility
     WebComment,
     CoAuhtoring,
     CanConvert,
-    MustConvert,
+    MustConvert
 }
 
 [Scope]
@@ -333,44 +333,21 @@ public class FileUtility
 
         foreach (var r in Enum.GetValues<Accessibility>())
         {
-            var val = false;
-
-            switch (r)
+            var val = r switch
             {
-                case Accessibility.ImageView:
-                    val = CanImageView(fileName);
-                    break;
-                case Accessibility.MediaView:
-                    val = CanMediaView(fileName);
-                    break;
-                case Accessibility.WebView:
-                    val = CanWebView(fileName);
-                    break;
-                case Accessibility.WebEdit:
-                    val = CanWebEdit(fileName);
-                    break;
-                case Accessibility.WebReview:
-                    val = CanWebReview(fileName);
-                    break;
-                case Accessibility.WebCustomFilterEditing:
-                    val = CanWebCustomFilterEditing(fileName);
-                    break;
-                case Accessibility.WebRestrictedEditing:
-                    val = CanWebRestrictedEditing(fileName);
-                    break;
-                case Accessibility.WebComment:
-                    val = CanWebComment(fileName);
-                    break;
-                case Accessibility.CoAuhtoring:
-                    val = CanCoAuthoring(fileName);
-                    break;
-                case Accessibility.CanConvert:
-                    val = await CanConvert(file);
-                    break;
-                case Accessibility.MustConvert:
-                    val = MustConvert(fileName);
-                    break;
-            }
+                Accessibility.ImageView => CanImageView(fileName),
+                Accessibility.MediaView => CanMediaView(fileName),
+                Accessibility.WebView => CanWebView(fileName),
+                Accessibility.WebEdit => CanWebEdit(fileName),
+                Accessibility.WebReview => CanWebReview(fileName),
+                Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
+                Accessibility.WebRestrictedEditing => CanWebRestrictedEditing(fileName),
+                Accessibility.WebComment => CanWebComment(fileName),
+                Accessibility.CoAuhtoring => CanCoAuthoring(fileName),
+                Accessibility.CanConvert => await CanConvert(file),
+                Accessibility.MustConvert => MustConvert(fileName),
+                _ => false
+            };
 
             result.Add(r, val);
         }
@@ -713,8 +690,8 @@ public class FileUtility
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
-                ".pot", ".potm", ".potx",
-            }.ToImmutableList();
+                ".pot", ".potm", ".potx"
+    }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }

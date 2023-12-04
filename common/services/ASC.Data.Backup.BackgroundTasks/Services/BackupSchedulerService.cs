@@ -44,7 +44,7 @@ public sealed class BackupSchedulerService(ILogger<BackupSchedulerService> logge
     {
         logger.DebugBackupSchedulerServiceStarting();
 
-        stoppingToken.Register(() => logger.DebugBackupSchedulerServiceStopping());
+        stoppingToken.Register(logger.DebugBackupSchedulerServiceStopping);
 
         while (!stoppingToken.IsCancellationRequested)
         {

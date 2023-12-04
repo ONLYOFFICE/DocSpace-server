@@ -135,10 +135,10 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
             return null;
         }
 
-        if (driveEntry is ErrorDriveEntry)
+        if (driveEntry is ErrorDriveEntry entry)
         {
             //Return error entry
-            return ToErrorFolder(driveEntry as ErrorDriveEntry);
+            return ToErrorFolder(entry);
         }
 
         if (driveEntry.MimeType != GoogleLoginProvider.GoogleDriveMimeTypeFolder)
@@ -218,16 +218,16 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
             return null;
         }
 
-        if (driveFile is ErrorDriveEntry)
+        if (driveFile is ErrorDriveEntry entry)
         {
             //Return error entry
-            return ToErrorFile(driveFile as ErrorDriveEntry);
+            return ToErrorFile(entry);
         }
 
         var file = GetFile();
 
         file.Id = MakeId(driveFile.Id);
-        file.ContentLength = driveFile.Size.HasValue ? (long)driveFile.Size : 0;
+        file.ContentLength = driveFile.Size ?? 0;
         file.CreateOn = driveFile.CreatedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.CreatedTimeDateTimeOffset.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(driveFile));
         file.ModifiedOn = driveFile.ModifiedTimeDateTimeOffset.HasValue ? _tenantUtil.DateTimeFromUtc(driveFile.ModifiedTimeDateTimeOffset.Value.UtcDateTime) : default;

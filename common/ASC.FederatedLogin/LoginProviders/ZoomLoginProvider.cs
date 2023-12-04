@@ -168,7 +168,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
             Locale = jsonProfile.Language,
             TimeZone = jsonProfile.Timezone,
             DisplayName = jsonProfile.DisplayName,
-            Provider = ProviderConstants.Zoom,
+            Provider = ProviderConstants.Zoom
         };
 
         return (profile, jsonProfile);

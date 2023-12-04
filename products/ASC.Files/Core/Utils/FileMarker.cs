@@ -641,7 +641,7 @@ public class FileMarker(TenantManager tenantManager,
             var folderDao = daoFactory.GetFolderDao<T>();
             var requestTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(rootId));
             var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(rootId));
-            var count = requestTag == null ? 0 : requestTag.Count;
+            var count = requestTag?.Count ?? 0;
             InsertToCache(rootId, count);
 
             return count;
@@ -822,7 +822,7 @@ public class FileMarker(TenantManager tenantManager,
                                     ? await tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(shareFolder)).FirstOrDefaultAsync()
                                     : totalTags.Find(tag => tag.EntryType == FileEntryType.Folder && Equals(tag.EntryId, parent.Id));
 
-        totalTags = totalTags.Where(e => e != parentFolderTag).ToList();
+        totalTags = totalTags.Where(e => !Equals(e, parentFolderTag)).ToList();
 
         foreach (var e in entries)
         {

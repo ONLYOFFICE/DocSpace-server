@@ -38,7 +38,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         Constants.DocSpaceAdmin.ID,
         Constants.Everyone.ID,
         Constants.RoomAdmin.ID,
-        Constants.Collaborator.ID,
+        Constants.Collaborator.ID
     };
 
     public async Task SubscribeAsync(string sourceID, string actionID, string objectID, string recipientID)
@@ -46,7 +46,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
-            Subscribed = true,
+            Subscribed = true
         };
 
         if (sourceID != null)
@@ -77,7 +77,7 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
         var s = new SubscriptionRecord
         {
             Tenant = await GetTenantAsync(),
-            Subscribed = false,
+            Subscribed = false
         };
 
         if (sourceID != null)
@@ -126,13 +126,8 @@ public class SubscriptionManager(CachedSubscriptionService service, TenantManage
             methods = await _service.GetSubscriptionMethodsAsync(await GetTenantAsync(), sourceID, actionID, recipientID);
         }
 
-        var m = methods
-            .FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase));
-
-        if (m == null)
-        {
-            m = methods.FirstOrDefault();
-        }
+        var m = methods.FirstOrDefault(x => x.Action.Equals(actionID, StringComparison.OrdinalIgnoreCase)) ?? 
+                methods.FirstOrDefault();
 
         return m != null ? m.Methods : Array.Empty<string>();
     }

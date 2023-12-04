@@ -149,8 +149,7 @@ public class BaseIndexer<T>(Client client,
                         }
 
                         var charFilters = new List<string> { nameof(CharFilter.io), c };
-                        var c1 = c;
-                        b.Custom(c1 + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
+                        b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
                     }
 
                     if (data is ISearchItemDocument)
@@ -282,7 +281,6 @@ public class BaseIndexer<T>(Client client,
                             doc.Document.Data = null;
                             doc.Document = null;
                         }
-                        doc = null;
                     }
 
                     portionStart = i;

@@ -52,7 +52,10 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
     }
     public async Task Register(string instanceId)
     {
-        if (_isSingletoneMode) return;
+        if (_isSingletoneMode)
+        {
+            return;
+        }
 
         var instances = await _registerInstanceRepository.GetAllAsync();
         var registeredInstance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
@@ -85,7 +88,10 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
 
     public async Task<bool> IsActive(string instanceId)
     {
-        if (_isSingletoneMode) return await Task.FromResult(true);
+        if (_isSingletoneMode)
+        {
+            return await Task.FromResult(true);
+        }
 
         var instances = await _registerInstanceRepository.GetAllAsync();
         var instance = instances.FirstOrDefault(x => x.InstanceRegistrationId == instanceId);
@@ -95,7 +101,10 @@ public class RegisterInstanceManager<T> : IRegisterInstanceManager<T> where T : 
 
     public async Task<List<string>> DeleteOrphanInstances()
     {
-        if (_isSingletoneMode) return await Task.FromResult(new List<string>());
+        if (_isSingletoneMode)
+        {
+            return await Task.FromResult(new List<string>());
+        }
 
         var instances = await _registerInstanceRepository.GetAllAsync();
         var oldRegistrations = instances.Where(IsOrphanInstance).ToList();

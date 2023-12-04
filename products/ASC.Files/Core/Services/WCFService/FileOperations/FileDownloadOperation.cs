@@ -455,7 +455,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var ids = entriesPathId[path];
             entriesPathId.Remove(path);
 
-            var newtitle = "LONG_FOLDER_NAME" + path.Substring(path.LastIndexOf('/'));
+            var newtitle = "LONG_FOLDER_NAME" + path[path.LastIndexOf('/')..];
             entriesPathId.Add(newtitle, ids);
         }
     }

@@ -134,8 +134,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var client = GetClient();
 
         var accounMetaData = client.GetAccountMetaData(_region);
-        string secretKey;
-        if (accounMetaData.TryGetValue("Temp-Url-Key", out secretKey))
+        if (accounMetaData.TryGetValue("Temp-Url-Key", out var secretKey))
         {
 
         }

@@ -150,7 +150,17 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return GetFoldersAsync(parentId, default, FilterType.None, false, default, string.Empty);
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
+    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
+        IEnumerable<int> parentsIds, 
+        FilterType filterType, 
+        IEnumerable<string> tags, 
+        Guid subjectId, 
+        string searchText, 
+        bool withSubfolders, 
+        bool withoutTags,
+        bool excludeSubject, 
+        ProviderFilter provider,
+        SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds)
     {
         if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
@@ -181,7 +191,19 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         }
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(IEnumerable<int> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds)
+    public async IAsyncEnumerable<Folder<int>> GetRoomsAsync(
+        IEnumerable<int> roomsIds, 
+        FilterType filterType, 
+        IEnumerable<string> tags, 
+        Guid subjectId, 
+        string searchText, 
+        bool withSubfolders, 
+        bool withoutTags, 
+        bool excludeSubject, 
+        ProviderFilter provider, 
+        SubjectFilter subjectFilter, 
+        IEnumerable<string> subjectEntriesIds, 
+        IEnumerable<int> parentsIds)
     {
         if (CheckInvalidFilter(filterType) || provider != ProviderFilter.None)
         {
@@ -327,7 +349,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom,
+            FolderType.PublicRoom
         };
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -359,8 +381,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
             await strategy.ExecuteAsync(async () =>
             {
-                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-                await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+                await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await dbContext.Database.BeginTransactionAsync();
 
                 folderId = await InternalSaveFolderToDbAsync(folder);
 
@@ -1031,8 +1053,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
                 await strategy.ExecuteAsync(async () =>
                 {
-                    await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-                    await using var tx = await filesDbContext.Database.BeginTransactionAsync();//NOTE: Maybe we shouldn't start transaction here at all
+                    await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+                    await using var tx = await dbContext.Database.BeginTransactionAsync();//NOTE: Maybe we shouldn't start transaction here at all
 
                     newFolderId = await SaveFolderAsync(folder, tx); //Save using our db manager
 
@@ -1043,8 +1065,8 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                         TenantId = tenantId
                     };
 
-                    await filesDbContext.AddOrUpdateAsync(r => r.BunchObjects, newBunch);
-                    await filesDbContext.SaveChangesAsync();
+                    await dbContext.AddOrUpdateAsync(r => r.BunchObjects, newBunch);
+                    await dbContext.SaveChangesAsync();
 
                     await tx.CommitAsync(); //Commit changes
                 });
@@ -1436,7 +1458,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FolderType.FillingFormsRoom,
             FolderType.EditingRoom,
             FolderType.ReadOnlyRoom,
-            FolderType.PublicRoom,
+            FolderType.PublicRoom
         };
 
         Expression<Func<DbFolder, bool>> filter = f => roomTypes.Contains(f.FolderType);
@@ -1638,7 +1660,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.CustomRoom,
+            _ => FolderType.CustomRoom
         };
     }
 
@@ -1681,7 +1703,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
                                     .Where(r => r.order.EntryType == FileEntryType.Folder && r.order.TenantId == r.folder.TenantId)
                                     .OrderBy(r => r.order.Order)
                                     .Select(r => r.folder),
-            _ => q.OrderBy(r => r.Title),
+            _ => q.OrderBy(r => r.Title)
         };
 
         if (subjectId != Guid.Empty)
@@ -1827,7 +1849,10 @@ static file class Queries
                                          s.TenantId == tenantId && 
                                          s.EntryId == r.Id.ToString() && 
                                          s.EntryType == FileEntryType.Folder && 
-                                         s.SubjectType == SubjectType.PrimaryExternalLink)
+                                         s.SubjectType == SubjectType.PrimaryExternalLink),
+                            Settings = (from f in ctx.RoomSettings 
+                                where f.TenantId == r.TenantId && f.RoomId == r.Id 
+                                select f).FirstOrDefault()
                         }
                     ).SingleOrDefault());
 
@@ -2079,12 +2104,10 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int folderId, int parentId) =>
                 ctx.Folders
-
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Title.ToLower() == ctx.Folders
+                    .Where(a => a.Title.ToLower() == ctx.Folders
                         .Where(r => r.TenantId == tenantId)
                         .Where(r => r.Id == folderId)
-
                         .Select(r => r.Title.ToLower())
                         .FirstOrDefault()
                     )

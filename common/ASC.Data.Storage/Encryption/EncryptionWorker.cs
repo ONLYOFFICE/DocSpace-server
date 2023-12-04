@@ -36,8 +36,6 @@ public class EncryptionWorker(IDistributedTaskQueueFactory queueFactory,
 
     public void Start(EncryptionSettings encryptionSettings, string serverRootPath)
     {
-        EncryptionOperation encryptionOperation;
-
         lock (_locker)
         {
             var item = _queue.GetAllTasks<EncryptionOperation>().SingleOrDefault();
@@ -51,7 +49,7 @@ public class EncryptionWorker(IDistributedTaskQueueFactory queueFactory,
             if (item == null)
             {
 
-                encryptionOperation = serviceProvider.GetService<EncryptionOperation>();
+                var encryptionOperation = serviceProvider.GetService<EncryptionOperation>();
                 encryptionOperation.Init(encryptionSettings, GetCacheId(), serverRootPath);
 
                 _queue.EnqueueTask(encryptionOperation);

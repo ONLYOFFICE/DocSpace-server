@@ -43,6 +43,4 @@ public class WebZoneAttribute(WebZoneType type) : Attribute
     public WebZoneType Type { get; private set; } = type;
 }
 
-public interface IRenderWebItem
-{
-}
+public interface IRenderWebItem;

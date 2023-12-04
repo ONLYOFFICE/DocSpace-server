@@ -139,13 +139,11 @@ public class TfaManager(SettingsManager settingsManager,
 
         const string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_";
 
-        byte[] data;
-
         var list = new List<BackupCode>();
 
         for (var i = 0; i < count; i++)
         {
-            data = RandomNumberGenerator.GetBytes(length);
+            var data = RandomNumberGenerator.GetBytes(length);
 
             var result = new StringBuilder(length);
             foreach (var b in data)

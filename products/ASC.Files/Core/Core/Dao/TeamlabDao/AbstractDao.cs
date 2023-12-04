@@ -161,7 +161,7 @@ public class AbstractDao
             SearchType.Start => query.Where(r => r.Title.ToLower().StartsWith(lowerText)),
             SearchType.End => query.Where(r => r.Title.ToLower().EndsWith(lowerText)),
             SearchType.Any => query.Where(r => r.Title.ToLower().Contains(lowerText)),
-            _ => query,
+            _ => query
         };
     }
 

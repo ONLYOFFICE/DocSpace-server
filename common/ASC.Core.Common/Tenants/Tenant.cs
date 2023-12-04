@@ -173,7 +173,7 @@ public class Tenant : IMapFrom<DbTenant>
 
     internal string GetTrustedDomains()
     {
-        TrustedDomains.RemoveAll(d => string.IsNullOrEmpty(d));
+        TrustedDomains.RemoveAll(string.IsNullOrEmpty);
         if (TrustedDomains.Count == 0)
         {
             return null;

@@ -136,9 +136,9 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
                 _connection.ConnectionInterruptedListener += OnConnectionInterruptedListener;
                 _connection.ConnectionResumedListener += OnConnectionResumedListener;
 
-                if (_connection is NmsConnection)
+                if (_connection is NmsConnection connection)
                 {
-                    var hostname = ((NmsConnection)_connection).ConnectionInfo.ConfiguredUri.Host;
+                    var hostname = connection.ConnectionInfo.ConfiguredUri.Host;
 
                     _logger.InformationActiveMQAcquiredPersistentConnection(hostname);
 

@@ -118,9 +118,9 @@ public class BackupPortalTask(DbFactory dbFactory,
             {
                 var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
 
-                var command = connection.CreateCommand();
-                command.CommandText = "show tables";
-                var tables = ExecuteList(command).Select(r => Convert.ToString(r[0])).ToList();
+                var dbCommand = connection.CreateCommand();
+                dbCommand.CommandText = "show tables";
+                var tables = ExecuteList(dbCommand).Select(objects => Convert.ToString(objects[0])).ToList();
                 databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), tables);
             });
         }
@@ -431,7 +431,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
     private ConnectionStringSettings GetConnectionString(int id, string connectionString)
     {
-        connectionString = connectionString + ";convert zero datetime=True";
+        connectionString += ";convert zero datetime=True";
         return new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
     }
 
@@ -467,8 +467,7 @@ public class BackupPortalTask(DbFactory dbFactory,
                         }
                         else
                         {
-                            var s = obj[i] as string;
-                            if (s != null)
+                            if (obj[i] is string s)
                             {
                                 sw.Write("'" + s.Replace("\r", "\\r").Replace("\n", "\\n") + "'");
                             }
@@ -486,14 +485,7 @@ public class BackupPortalTask(DbFactory dbFactory,
 
                     sw.Write(")");
 
-                    if (j != portion.Count - 1)
-                    {
-                        sw.Write(",");
-                    }
-                    else
-                    {
-                        sw.Write(";");
-                    }
+                    sw.Write(j != portion.Count - 1 ? "," : ";");
 
                     sw.WriteLine();
                 }
@@ -644,8 +636,8 @@ public class BackupPortalTask(DbFactory dbFactory,
                         },
                         table,
                         maxAttempts: 5,
-                        onFailure: error => { throw ThrowHelper.CantBackupTable(table.Name, error); },
-                        onAttemptFailure: error => logger.WarningBackupAttemptFailure(error));
+                        onFailure: error => throw ThrowHelper.CantBackupTable(table.Name, error),
+                        onAttemptFailure: logger.WarningBackupAttemptFailure);
 
                     foreach (var col in data.Columns.Cast<DataColumn>().Where(col => col.DataType == typeof(DateTime)))
                     {

@@ -81,7 +81,7 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
 
         var pathLength = dropboxItem.PathDisplay.Length - dropboxItem.Name.Length;
 
-        return dropboxItem.PathDisplay.Substring(0, pathLength > 1 ? pathLength - 1 : 0);
+        return dropboxItem.PathDisplay[..(pathLength > 1 ? pathLength - 1 : 0)];
     }
 
     public string MakeThirdId(object entryId)
@@ -145,10 +145,10 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
             return null;
         }
 
-        if (dropboxFolder is ErrorFolder)
+        if (dropboxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(dropboxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(dropboxFolder);
@@ -217,10 +217,10 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
             return null;
         }
 
-        if (dropboxFile is ErrorFile)
+        if (dropboxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(dropboxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();
@@ -357,7 +357,7 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

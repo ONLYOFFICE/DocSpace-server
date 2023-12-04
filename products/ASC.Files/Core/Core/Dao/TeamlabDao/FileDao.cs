@@ -358,7 +358,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await SaveFileAsync(file, fileStream, true);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota = true, ChunkedUploadSession<int> uploadSession = null)
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, ChunkedUploadSession<int> uploadSession = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 

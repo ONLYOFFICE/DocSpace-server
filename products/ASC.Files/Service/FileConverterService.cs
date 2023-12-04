@@ -150,21 +150,19 @@ internal class FileConverterService<T>(
 
                     logger.ErrorConvertFileWithUrl(file.Id.ToString(), fileUri, exception);
 
-                    var operationResult = converter;
-
-                    if (operationResult.Delete)
+                    if (converter.Delete)
                     {
-                        conversionQueue.Remove(operationResult);
+                        conversionQueue.Remove(converter);
                     }
                     else
                     {
-                        operationResult.Progress = 100;
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Error = exception.Message;
+                        converter.Progress = 100;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Error = exception.Message;
 
                         if (password1)
                         {
-                            operationResult.Result = "password";
+                            converter.Result = "password";
                         }
                     }
 
@@ -175,21 +173,19 @@ internal class FileConverterService<T>(
 
                 if (operationResultProgress < 100)
                 {
-                    var operationResult = converter;
-
-                    if (DateTime.UtcNow - operationResult.StartDateTime > TimeSpan.FromMinutes(10))
+                    if (DateTime.UtcNow - converter.StartDateTime > TimeSpan.FromMinutes(10))
                     {
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Error = FilesCommonResource.ErrorMassage_ConvertTimeout;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Error = FilesCommonResource.ErrorMassage_ConvertTimeout;
 
                         logger.ErrorCheckConvertFilesStatus(file.Id.ToString(), file.ContentLength);
                     }
                     else
                     {
-                        operationResult.Processed = "";
+                        converter.Processed = "";
                     }
 
-                    operationResult.Progress = operationResultProgress;
+                    converter.Progress = operationResultProgress;
 
                     logger.DebugCheckConvertFilesStatusIterationContinue();
 
@@ -214,11 +210,9 @@ internal class FileConverterService<T>(
                 }
                 finally
                 {
-                    var operationResult = converter;
-
-                    if (operationResult.Delete)
+                    if (converter.Delete)
                     {
-                        conversionQueue.Remove(operationResult);
+                        conversionQueue.Remove(converter);
                     }
                     else
                     {
@@ -228,16 +222,16 @@ internal class FileConverterService<T>(
                             var folder = await folderDao.GetFolderAsync(newFile.ParentId);
                             var folderTitle = await fileSecurity.CanReadAsync(folder) ? folder.Title : null;
 
-                            operationResult.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
+                            converter.Result = fileConverterQueue.FileJsonSerializerAsync(entryManager, newFile, folderTitle).Result;
                         }
 
-                        operationResult.Progress = 100;
-                        operationResult.StopDateTime = DateTime.UtcNow;
-                        operationResult.Processed = "1";
+                        converter.Progress = 100;
+                        converter.StopDateTime = DateTime.UtcNow;
+                        converter.Processed = "1";
 
                         if (!string.IsNullOrEmpty(operationResultError))
                         {
-                            operationResult.Error = operationResultError;
+                            converter.Error = operationResultError;
                         }
                     }
                 }

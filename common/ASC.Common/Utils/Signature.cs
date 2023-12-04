@@ -41,12 +41,7 @@ public class Signature(MachinePseudoKeys machinePseudoKeys)
 
         return WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(payload));
     }
-
-    public T Read<T>(string signature)
-    {
-        return Read<T>(signature, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()));
-    }
-
+    
     public T Read<T>(string signature, Action<string> signatureResolver = null)
     {
         return Read<T>(signature, Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), signatureResolver);

@@ -33,7 +33,6 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
     private readonly ConnectionFactory _factory;
 
     private IModel _consumerChannel;
-    private readonly Guid _instanceId;
     private readonly string _exchangeName;
     private readonly string _queueName;
 
@@ -46,9 +45,9 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
     public RabbitMQCache(IConfiguration configuration, ILogger<RabbitMQCache<T>> logger)
     {
         _logger = logger;
-        _instanceId = Guid.NewGuid();
+        var instanceId = Guid.NewGuid();
         _exchangeName = $"asc:cache_notify:event_bus:{typeof(T).FullName}";
-        _queueName = $"asc:cache_notify:queue:{typeof(T).FullName}:{_instanceId}";
+        _queueName = $"asc:cache_notify:queue:{typeof(T).FullName}:{instanceId}";
         _actions = new ConcurrentDictionary<string, List<Action<T>>>();
 
         var rabbitMQConfiguration = configuration.GetSection("rabbitmq").Get<RabbitMQSettings>();

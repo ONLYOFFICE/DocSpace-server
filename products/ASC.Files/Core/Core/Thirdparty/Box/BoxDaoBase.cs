@@ -120,10 +120,10 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             return null;
         }
 
-        if (boxFolder is ErrorFolder)
+        if (boxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(boxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(boxFolder);
@@ -195,16 +195,16 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
             return null;
         }
 
-        if (boxFile is ErrorFile)
+        if (boxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(boxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();
 
         file.Id = MakeId(boxFile.Id);
-        file.ContentLength = boxFile.Size.HasValue ? (long)boxFile.Size : 0;
+        file.ContentLength = boxFile.Size ?? 0;
         file.CreateOn = boxFile.CreatedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.CreatedAt.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(boxFile));
         file.ModifiedOn = boxFile.ModifiedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.ModifiedAt.Value.UtcDateTime) : default;
@@ -338,7 +338,7 @@ internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, 
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

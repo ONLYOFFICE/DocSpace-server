@@ -104,8 +104,6 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                return AsyncEnumerable.Empty<File<string>>();
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -189,8 +187,6 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                yield break;
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -248,7 +244,7 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
             SortedByType.AZ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? files.OrderBy(x => x.ModifiedOn) : files.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? files.OrderBy(x => x.CreateOn) : files.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title)
         };
 
         //hack
@@ -380,12 +376,12 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
 
         await strategy.ExecuteAsync(async () =>
         {
-            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
-                await Queries.DeleteTagLinksAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteTagsAsync(filesDbContext);
-                await Queries.DeleteSecuritiesAsync(filesDbContext, _tenantId, id);
-                await Queries.DeleteThirdpartyIdMappingsAsync(filesDbContext, _tenantId, id);
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await dbContext.Database.BeginTransactionAsync();
+                await Queries.DeleteTagLinksAsync(dbContext, _tenantId, id);
+                await Queries.DeleteTagsAsync(dbContext);
+                await Queries.DeleteSecuritiesAsync(dbContext, _tenantId, id);
+                await Queries.DeleteThirdpartyIdMappingsAsync(dbContext, _tenantId, id);
                 await tx.CommitAsync();
         });
 

@@ -53,8 +53,8 @@ public class ProviderManager(Signature signature, InstanceCrypto instanceCrypto,
     public static readonly List<string> InviteExceptProviders = new()
     {
                 ProviderConstants.Twitter,
-                ProviderConstants.AppleId,
-            };
+                ProviderConstants.AppleId
+    };
 
     public ILoginProvider GetLoginProvider(string providerType)
     {

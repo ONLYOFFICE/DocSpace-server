@@ -476,7 +476,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             ProviderFilter.Yandex => ProviderTypes.Yandex.ToStringFast(),
             ProviderFilter.WebDav => ProviderTypes.WebDav.ToStringFast(),
             ProviderFilter.kDrive => ProviderTypes.kDrive.ToStringFast(),
-            _ => throw new NotImplementedException(),
+            _ => throw new NotImplementedException()
         };
 
         return folders.Where(x => providerKey == x.ProviderKey);

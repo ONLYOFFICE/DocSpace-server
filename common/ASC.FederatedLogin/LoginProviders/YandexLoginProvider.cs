@@ -121,7 +121,7 @@ public class YandexLoginProvider : BaseLoginProvider<YandexLoginProvider>
             DisplayName = jProfile.Value<string>("display_name"),
             Gender = jProfile.Value<string>("sex"),
 
-            Provider = ProviderConstants.Yandex,
+            Provider = ProviderConstants.Yandex
         };
 
         return profile;

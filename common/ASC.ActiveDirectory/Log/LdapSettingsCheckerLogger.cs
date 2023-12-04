@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.Log;
-static internal partial class LdapSettingsCheckerLogger
+internal static partial class LdapSettingsCheckerLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "CheckSettings(acceptCertificate={acceptCertificate}): NovellLdapTlsCertificateRequestedException")]
     public static partial void ErrorNovellLdapTlsCertificateRequestedException(this ILogger<LdapSettingsChecker> logger, bool acceptCertificate, Exception exception);

@@ -341,7 +341,7 @@ internal class OneDriveStorage(ConsumerFactory consumerFactory, IHttpClientFacto
         {
             var url = thumbnails[0].Medium.Url;
             url = url[..url.IndexOf("?width")];
-            url = url + $"?width={width}&height={height}&cropmode=none";
+            url += $"?width={width}&height={height}&cropmode=none";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(url),

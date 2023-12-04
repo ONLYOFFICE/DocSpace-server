@@ -991,4 +991,22 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>サードパーティの統合</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ZoomクライアントID</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoomクライアントのシクレット</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>ユーザーがZoomアカウントを使ってONLYOFFICEにサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリONLYOFFICE統合を作成します。以下に受け取ったデータを挿入してください：</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>ログイン試行回数が多すぎます。後で再試行してください</value>
+  </data>
 </root>

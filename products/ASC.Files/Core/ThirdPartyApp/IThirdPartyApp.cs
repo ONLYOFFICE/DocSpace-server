@@ -69,7 +69,7 @@ public class ThirdPartySelector(ConsumerFactory consumerFactory)
         {
             GoogleDriveApp.AppAttr => consumerFactory.Get<GoogleDriveApp>(),
             BoxApp.AppAttr => consumerFactory.Get<BoxApp>(),
-            _ => consumerFactory.Get<GoogleDriveApp>(),
+            _ => consumerFactory.Get<GoogleDriveApp>()
         };
     }
 }

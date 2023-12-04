@@ -82,14 +82,9 @@ public class LoginEventsRepository(TenantManager tenantManager,
         {
             if (hasFromFilter)
             {
-                if (hasToFilter)
-                {
-                    query = query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value);
-                }
-                else
-                {
-                    query = query.Where(q => q.Event.Date >= fromDate.Value);
-                }
+                query = hasToFilter ? 
+                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) : 
+                    query.Where(q => q.Event.Date >= fromDate.Value);
             }
             else
             {

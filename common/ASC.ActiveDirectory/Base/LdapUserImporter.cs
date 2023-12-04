@@ -28,7 +28,8 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.ActiveDirectory.Base;
 [Scope]
-public class LdapUserImporter(ILogger<LdapUserImporter> logger,
+public class LdapUserImporter(
+        ILogger<LdapUserImporter> logger,
         UserManager userManager,
         IConfiguration configuration,
         NovellLdapHelper novellLdapHelper,
@@ -241,7 +242,7 @@ public class LdapUserImporter(ILogger<LdapUserImporter> logger,
             }
 
             var userGroups = ldapObjectExtension.GetAttributes(ldapUser, LdapConstants.ADSchemaAttributes.MEMBER_OF)
-                .Select(s => LdapUtils.UnescapeLdapString(s))
+                .Select(LdapUtils.UnescapeLdapString)
                 .ToList();
 
             if (!userGroups.Any())

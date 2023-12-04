@@ -81,7 +81,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeDtoHelper emplo
         {
             Id = group.ID,
             Category = group.CategoryID,
-            Parent = group.Parent != null ? group.Parent.ID : Guid.Empty,
+            Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
             Manager = await employeeWraperHelper.GetAsync(await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID)))
         };

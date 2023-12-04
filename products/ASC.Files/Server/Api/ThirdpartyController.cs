@@ -259,7 +259,7 @@ public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
             RoomsStorage = !inDto.IsCorporate && inDto.IsRoomsStorage,
             CustomerTitle = inDto.CustomerTitle,
             ProviderId = inDto.ProviderId,
-            ProviderKey = inDto.ProviderKey,
+            ProviderKey = inDto.ProviderKey
         };
 
         var folder = await fileStorageService.SaveThirdPartyAsync(thirdPartyParams);
@@ -290,7 +290,7 @@ public class ThirdpartyController(CoreBaseSettings coreBaseSettings,
         {
             AuthData = new AuthData(inDto.Url, inDto.Login, inDto.Password, inDto.Token),
             CustomerTitle = inDto.CustomerTitle,
-            ProviderKey = inDto.ProviderKey,
+            ProviderKey = inDto.ProviderKey
         };
 
         var folder = await fileStorageService.SaveThirdPartyBackupAsync(thirdPartyParams);

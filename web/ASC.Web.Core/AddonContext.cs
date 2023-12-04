@@ -26,6 +26,4 @@
 
 namespace ASC.Web.Core;
 
-public class AddonContext : WebItemContext
-{
-}
+public class AddonContext : WebItemContext;

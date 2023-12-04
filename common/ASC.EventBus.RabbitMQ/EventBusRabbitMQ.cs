@@ -379,8 +379,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         {
             if (subscription.IsDynamic)
             {
-                var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
-                if (handler == null)
+                if (scope.ResolveOptional(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
                 {
                     continue;
                 }

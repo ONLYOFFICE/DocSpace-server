@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.ApiSystem.Controllers;
 
 [Scope]
@@ -175,7 +176,6 @@ public class CalDavController(CommonMethods commonMethods,
 
     private async Task<(bool, Tenant, object)> GetTenantAsync(string calendarParam)
     {
-        Tenant tenant = null;
         object error;
 
         if (string.IsNullOrEmpty(calendarParam))
@@ -195,16 +195,14 @@ public class CalDavController(CommonMethods commonMethods,
         logger.LogInformation($"CalDav calendarParam: {calendarParam}");
 
         var userParam = calendarParam.Split('/')[0];
-        (var succ, _, tenant, error) = await GetUserDataAsync(userParam);
+        (var succ, _, var tenant, error) = await GetUserDataAsync(userParam);
 
         return (succ, tenant, error);
     }
 
     private async Task<(bool, string, Tenant, object)> GetUserDataAsync(string userParam)
     {
-        string email = null;
-        Tenant tenant = null;
-        object error = null;
+        object error;
 
         if (string.IsNullOrEmpty(userParam))
         {
@@ -236,7 +234,7 @@ public class CalDavController(CommonMethods commonMethods,
             return (false, null, null, error);
         }
 
-        email = string.Join("@", userData[0], userData[1]);
+        var email = string.Join("@", userData[0], userData[1]);
 
         var tenantName = userData[2];
 
@@ -251,7 +249,7 @@ public class CalDavController(CommonMethods commonMethods,
 
         var tenantModel = new TenantModel { PortalName = tenantName };
 
-        (var succ, tenant) = await commonMethods.TryGetTenantAsync(tenantModel);
+        var (succ, tenant) = await commonMethods.TryGetTenantAsync(tenantModel);
         if (!succ)
         {
             logger.LogError("Model without tenant");

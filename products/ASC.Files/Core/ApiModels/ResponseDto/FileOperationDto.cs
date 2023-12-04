@@ -111,7 +111,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             var arr = o.Result.Split(':');
             var folders = arr
                 .Where(s => s.StartsWith("folder_"))
-                .Select(s => s.Substring(7))
+                .Select(s => s[7..])
                 .ToList();
 
             if (folders.Count > 0)
@@ -143,7 +143,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
 
             var files = arr
                 .Where(s => s.StartsWith("file_"))
-                .Select(s => s.Substring(5))
+                .Select(s => s[5..])
                 .ToList();
 
             if (files.Count > 0)

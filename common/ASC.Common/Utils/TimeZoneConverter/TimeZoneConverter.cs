@@ -269,7 +269,7 @@ public class TimeZoneConverter
                                 FileName = "/bin/bash",
                                 Arguments = "date +%Z",
                                 RedirectStandardOutput = true,
-                                UseShellExecute = false,
+                                UseShellExecute = false
                             };
 
                             using var p = Process.Start(psi);

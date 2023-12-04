@@ -491,7 +491,7 @@ public class PortalController(IConfiguration configuration,
 
     private async ValueTask<(bool, object)> CheckExistingNamePortalAsync(string portalName)
     {
-        object error = null;
+        object error;
         if (string.IsNullOrEmpty(portalName))
         {
             error = new { error = "portalNameEmpty", message = "PortalName is required" };

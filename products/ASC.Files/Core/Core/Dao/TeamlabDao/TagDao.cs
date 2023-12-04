@@ -503,8 +503,8 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
 
             await strategy.ExecuteAsync(async () =>
             {
-                await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-                await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+                await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await dbContext.Database.BeginTransactionAsync();
                 await RemoveTagInDbAsync(tag);
 
                 await tx.CommitAsync();
@@ -893,8 +893,8 @@ static file class Queries
                         root = ctx.Folders
                             .Join(ctx.Tree, a => a.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
                             .Where(x => x.folder.TenantId == tenantId && x.tree.FolderId == r.file.ParentId)
-                            .OrderByDescending(r => r.tree.Level)
-                            .Select(r => r.folder)
+                            .OrderByDescending(r1 => r1.tree.Level)
+                            .Select(r1 => r1.folder)
                             .Take(1)
                             .FirstOrDefault()
                     })
@@ -927,8 +927,8 @@ static file class Queries
                             .Join(ctx.Tree, a => a.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
                             .Where(x => x.folder.TenantId == tenantId)
                             .Where(x => x.tree.FolderId == r.folder.ParentId)
-                            .OrderByDescending(r => r.tree.Level)
-                            .Select(r => r.folder)
+                            .OrderByDescending(r1 => r1.tree.Level)
+                            .Select(r1 => r1.folder)
                             .Take(1)
                             .FirstOrDefault()
                     })

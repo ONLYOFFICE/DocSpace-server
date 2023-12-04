@@ -150,7 +150,10 @@ public class S3Storage(TempStream tempStream,
 
     public override Task<Uri> GetCdnPreSignedUriAsync(string domain, string path, TimeSpan expire, IEnumerable<string> headers)
     {
-        if (!_cdnEnabled) return GetInternalUriAsync(domain, path, expire, headers);
+        if (!_cdnEnabled)
+        {
+            return GetInternalUriAsync(domain, path, expire, headers);
+        }
 
         var proto = SecureHelper.IsSecure(_httpContextAccessor?.HttpContext, _options) ? "https" : "http";
 
@@ -290,10 +293,9 @@ public class S3Storage(TempStream tempStream,
             AutoCloseStream = false
         };
 
-        if (!(client is IAmazonS3Encryption))
+        if (client is not IAmazonS3Encryption)
         {
-            string kmsKeyId;
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
             request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
         }
 
@@ -358,10 +360,9 @@ public class S3Storage(TempStream tempStream,
         };
 
         using var s3 = GetClient();
-        if (!(s3 is IAmazonS3Encryption))
+        if (s3 is not IAmazonS3Encryption)
         {
-            string kmsKeyId;
-            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+            request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
             request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
         }
         var response = await s3.InitiateMultipartUploadAsync(request);
@@ -677,7 +678,7 @@ public class S3Storage(TempStream tempStream,
                     {
                         CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds),
                         ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
-                        ContentDisposition = "attachment",
+                        ContentDisposition = "attachment"
                     }
         };
 
@@ -796,7 +797,7 @@ public class S3Storage(TempStream tempStream,
             formBuilder.Append($"<input type=\"hidden\" name=\"success_action_redirect\" value=\"{redirectTo}\" />");
         }
 
-        formBuilder.AppendFormat("<input type=\"hidden\" name=\"success_action_status\" value=\"{0}\" />", 201);
+        formBuilder.Append($"<input type=\"hidden\" name=\"success_action_status\" value=\"{201}\" />");
 
         if (!string.IsNullOrEmpty(contentType))
         {
@@ -1020,7 +1021,7 @@ public class S3Storage(TempStream tempStream,
                 "aes256" => EncryptionMethod.ServerS3,
                 "awskms" => EncryptionMethod.ServerKms,
                 "clientawskms" => EncryptionMethod.ClientKms,
-                _ => EncryptionMethod.None,
+                _ => EncryptionMethod.None
             };
         }
 
@@ -1090,7 +1091,7 @@ public class S3Storage(TempStream tempStream,
         {
             ACL.Read => S3CannedACL.PublicRead,
             ACL.Private => S3CannedACL.Private,
-            _ => S3CannedACL.PublicRead,
+            _ => S3CannedACL.PublicRead
         };
     }
 
@@ -1122,7 +1123,7 @@ public class S3Storage(TempStream tempStream,
                 Paths = new Paths
                 {
                     Items = paths.ToList(),
-                    Quantity = paths.Count()
+                    Quantity = paths.Length
                 }
             }
         };
@@ -1160,7 +1161,8 @@ public class S3Storage(TempStream tempStream,
 
         var policyBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(policyBuilder.ToString()));
         //sign = AWSSDKUtils.HMACSign(policyBase64, _secretAccessKeyId, new HMACSHA1());
-        using var algorithm = new HMACSHA1 { Key = Encoding.UTF8.GetBytes(_secretAccessKeyId) };
+        using var algorithm = new HMACSHA1();
+        algorithm.Key = Encoding.UTF8.GetBytes(_secretAccessKeyId);
         try
         {
             algorithm.Key = Encoding.UTF8.GetBytes(key);
@@ -1211,7 +1213,7 @@ public class S3Storage(TempStream tempStream,
             return s30Objects;
         }
 
-        s30Objects.Concat(await GetS3ObjectsByPathAsync(domain, GetRecyclePath(path)));
+        //s30Objects.Concat(await GetS3ObjectsByPathAsync(domain, GetRecyclePath(path)));
         return s30Objects;
     }
 
@@ -1285,10 +1287,9 @@ public class S3Storage(TempStream tempStream,
                     CannedACL = GetDomainACL(newdomain)
                 };
 
-            if (!(client is IAmazonS3Encryption))
+            if (client is not IAmazonS3Encryption)
             {
-                string kmsKeyId;
-                initiateRequest.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+                initiateRequest.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
                 initiateRequest.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
@@ -1347,13 +1348,12 @@ public class S3Storage(TempStream tempStream,
                 DestinationBucket = _bucket,
                 DestinationKey = destinationKey,
                 CannedACL = GetDomainACL(newdomain),
-                MetadataDirective = metadataDirective,
+                MetadataDirective = metadataDirective
             };
 
-            if (!(client is IAmazonS3Encryption))
+            if (client is not IAmazonS3Encryption)
             {
-                string kmsKeyId;
-                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out kmsKeyId);
+                request.ServerSideEncryptionMethod = GetServerSideEncryptionMethod(out var kmsKeyId);
                 request.ServerSideEncryptionKeyManagementServiceKeyId = kmsKeyId;
             }
 
@@ -1447,8 +1447,6 @@ public class S3Storage(TempStream tempStream,
         }
         stream.Write(header);
         stream.Position = 0;
-
-        prevFileSize = objFile.ContentLength;
 
         var uploadRequest = new UploadPartRequest
         {
@@ -1797,7 +1795,7 @@ public class S3Storage(TempStream tempStream,
         None,
         ServerS3,
         ServerKms,
-        ClientKms,
+        ClientKms
         //ClientAes,
         //ClientRsa
     }

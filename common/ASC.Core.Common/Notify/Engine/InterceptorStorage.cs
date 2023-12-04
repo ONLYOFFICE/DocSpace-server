@@ -74,11 +74,8 @@ class InterceptorStorage
             throw new ArgumentException("empty name", nameof(name));
         }
 
-        var result = GetInternal(name, CallInterceptors);
-        if (result == null)
-        {
-            result = GetInternal(name, _globalInterceptors);
-        }
+        var result = GetInternal(name, CallInterceptors) ?? 
+                     GetInternal(name, _globalInterceptors);
 
         return result;
     }

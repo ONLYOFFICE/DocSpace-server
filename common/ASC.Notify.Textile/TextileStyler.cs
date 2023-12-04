@@ -158,7 +158,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
     {
         var mailWhiteLabelTag = message.GetArgument("MailWhiteLabelSettings");
 
-        return mailWhiteLabelTag == null ? null : mailWhiteLabelTag.Value as MailWhiteLabelSettings;
+        return mailWhiteLabelTag?.Value as MailWhiteLabelSettings;
     }
 
     private void InitFooter(NoticeMessage message, MailWhiteLabelSettings settings, out string footerContent, out string footerSocialContent)

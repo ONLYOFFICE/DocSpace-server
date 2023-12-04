@@ -121,7 +121,7 @@ public class RadicaleClient(ILogger<RadicaleClient> logger)
             return new DavResponse
             {
                 Completed = true,
-                Data = response.IsSuccessStatusCode ? response.RequestMessage.RequestUri.ToString() : response.ReasonPhrase,
+                Data = response.IsSuccessStatusCode ? response.RequestMessage.RequestUri.ToString() : response.ReasonPhrase
             };
 
         }

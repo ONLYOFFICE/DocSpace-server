@@ -31,5 +31,5 @@ public enum TariffState
     Trial,
     Paid,
     Delay,
-    NotPaid,
+    NotPaid
 }

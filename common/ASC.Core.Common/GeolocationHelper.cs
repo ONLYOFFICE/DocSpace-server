@@ -77,7 +77,10 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
             var cacheKey = $"ip_geolocation_info_${address}";
             var fromCache = cache.Get<IPGeolocationInfo>(cacheKey);
 
-            if (fromCache != null) return fromCache;
+            if (fromCache != null)
+            {
+                return fromCache;
+            }
 
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 

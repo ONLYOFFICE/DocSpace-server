@@ -34,7 +34,9 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute]
 [ApiController]
 [ControllerName("settings")]
-public class BaseSettingsController : ControllerBase
+public class BaseSettingsController(ApiContext apiContext, IMemoryCache memoryCache, WebItemManager webItemManager,
+        IHttpContextAccessor httpContextAccessor)
+    : ControllerBase
 {
     //private const int ONE_THREAD = 1;
 
@@ -42,30 +44,21 @@ public class BaseSettingsController : ControllerBase
     //private static DistributedTaskQueue LDAPTasks { get; } = new DistributedTaskQueue("ldapOperations");
     //private static DistributedTaskQueue SMTPTasks { get; } = new DistributedTaskQueue("smtpOperations");
 
-    internal readonly ApiContext ApiContext;
-    private readonly IMemoryCache _memoryCache;
-    internal readonly WebItemManager WebItemManager;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
+    internal readonly ApiContext ApiContext = apiContext;
+    internal readonly WebItemManager WebItemManager = webItemManager;
+    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
-
-    public BaseSettingsController(ApiContext apiContext, IMemoryCache memoryCache, WebItemManager webItemManager, IHttpContextAccessor httpContextAccessor)
-    {
-        ApiContext = apiContext;
-        _memoryCache = memoryCache;
-        WebItemManager = webItemManager;
-        _httpContextAccessor = httpContextAccessor;
-    }
 
     internal void CheckCache(string baseKey)
     {
         var key = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
-        if (_memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
+        if (memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
         {
             throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        _memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
     internal string GetProductName(Guid productId)

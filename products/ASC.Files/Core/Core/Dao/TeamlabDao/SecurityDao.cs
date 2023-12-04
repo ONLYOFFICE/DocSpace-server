@@ -145,7 +145,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             toInsert.EntryId = (await MappingIDAsync(r.EntryId, true)).ToString();
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await filesDbContext.AddOrUpdateAsync(r => r.Security, toInsert);
+            await filesDbContext.AddOrUpdateAsync(context => context.Security, toInsert);
             await filesDbContext.SaveChangesAsync();
         }
     }

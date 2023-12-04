@@ -77,7 +77,7 @@ public class WebImageSupplier(WebItemManager webItemManager, WebPath webPath, IC
         }
 
         var dir = webitem.StartURL.Contains('.') ?
-                      webitem.StartURL.Substring(0, webitem.StartURL.LastIndexOf('/')) :
+                      webitem.StartURL[..webitem.StartURL.LastIndexOf('/')] :
                       webitem.StartURL.TrimEnd('/');
         return dir + "/App_Themes";
     }

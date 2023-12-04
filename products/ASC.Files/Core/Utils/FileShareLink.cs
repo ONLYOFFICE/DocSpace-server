@@ -92,7 +92,7 @@ public class FileShareLink(FileUtility fileUtility,
 
         File<T> file = null;
 
-        if (!EqualityComparer<T>.Default.Equals(fileId, default(T)))
+        if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
             file = await fileDao.GetFileAsync(fileId);
         }

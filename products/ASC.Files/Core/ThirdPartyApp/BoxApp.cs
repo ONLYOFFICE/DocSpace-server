@@ -496,7 +496,7 @@ public class BoxApp : Consumer, IThirdPartyApp, IOAuthProvider
             {
                 FirstName = boxUserInfo.Value<string>("name"),
                 Email = email,
-                MobilePhone = boxUserInfo.Value<string>("phone"),
+                MobilePhone = boxUserInfo.Value<string>("phone")
             };
 
             var cultureName = boxUserInfo.Value<string>("language");

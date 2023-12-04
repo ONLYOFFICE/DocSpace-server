@@ -31,7 +31,7 @@ public enum EditorType
 {
     Desktop,
     Mobile,
-    Embedded,
+    Embedded
 }
 
 /// <summary>
@@ -187,16 +187,11 @@ public class DocumentConfig<T>(DocumentServiceConnector documentServiceConnector
     {
         get 
         {
-            if(_referenceData == null)
+            return _referenceData ??= new FileReferenceData<T>
             {
-                _referenceData = new FileReferenceData<T>
-                {
-                    FileKey = Info.GetFile().Id,
-                    InstanceId = tenantManager.GetCurrentTenant().Id.ToString()
-                };
-            }
-
-            return _referenceData;
+                FileKey = Info.GetFile().Id, 
+                InstanceId = tenantManager.GetCurrentTenant().Id.ToString()
+            };
         }
     }
 
@@ -340,29 +335,15 @@ public class EditorConfiguration<T>
                 return null;
             }
 
-            var filter = FilterType.FilesOnly;
-            switch (_configuration.GetFileType)
+            var filter = _configuration.GetFileType switch
             {
-                case FileType.Document:
-                    filter = FilterType.DocumentsOnly;
-                    break;
-
-                case FileType.OForm:
-                    filter = FilterType.OFormOnly;
-                    break;
-
-                case FileType.OFormTemplate:
-                    filter = FilterType.OFormTemplateOnly;
-                    break;
-
-                case FileType.Spreadsheet:
-                    filter = FilterType.SpreadsheetsOnly;
-                    break;
-
-                case FileType.Presentation:
-                    filter = FilterType.PresentationsOnly;
-                    break;
-            }
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.OForm => FilterType.OFormOnly,
+                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                _ => FilterType.FilesOnly
+            };
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var files = _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, string.Empty, false).Result.Cast<File<int>>();
@@ -401,29 +382,15 @@ public class EditorConfiguration<T>
             }
 
             var extension = _fileUtility.GetInternalExtension(_configuration.Document.Title).TrimStart('.');
-            var filter = FilterType.FilesOnly;
-            switch (_configuration.GetFileType)
+            var filter = _configuration.GetFileType switch
             {
-                case FileType.Document:
-                    filter = FilterType.DocumentsOnly;
-                    break;
-
-                case FileType.OForm:
-                    filter = FilterType.OFormOnly;
-                    break;
-
-                case FileType.OFormTemplate:
-                    filter = FilterType.OFormTemplateOnly;
-                    break;
-
-                case FileType.Spreadsheet:
-                    filter = FilterType.SpreadsheetsOnly;
-                    break;
-
-                case FileType.Presentation:
-                    filter = FilterType.PresentationsOnly;
-                    break;
-            }
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.OForm => FilterType.OFormOnly,
+                FileType.OFormTemplate => FilterType.OFormTemplateOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                _ => FilterType.FilesOnly
+            };
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var fileDao = _daoFactory.GetFileDao<int>();
@@ -476,7 +443,7 @@ public class EditorConfiguration<T>
             User = new UserConfig
             {
                 Id = _userInfo.Id.ToString(),
-                Name = _userInfo.DisplayUserName(false, displayUserSettingsHelper),
+                Name = _userInfo.DisplayUserName(false, displayUserSettingsHelper)
             };
         }
     }
@@ -680,12 +647,11 @@ public class FileReferenceData<T>
 #endregion Nested Classes
 
 [Transient]
-public class CustomerConfig<T>(SettingsManager settingsManager,
+public class CustomerConfig<T>(
+    SettingsManager settingsManager,
     BaseCommonLinkUtility baseCommonLinkUtility,
     TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
 {
-    private Configuration<T> _configuration;
-
     public string Address => settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Address;
 
     public string Logo => baseCommonLinkUtility.GetFullAbsolutePath(tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false).Result);
@@ -698,7 +664,6 @@ public class CustomerConfig<T>(SettingsManager settingsManager,
 
     internal void SetConfiguration(Configuration<T> configuration)
     {
-        _configuration = configuration;
     }
 }
 
@@ -778,7 +743,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
             {
                 return new GobackConfig
                 {
-                    Url = GobackUrl,
+                    Url = GobackUrl
                 };
             }
 
@@ -794,7 +759,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
                     {
                         return new GobackConfig
                         {
-                            Url = pathProvider.GetFolderUrlByIdAsync(globalFolderHelper.FolderShareAsync.Result).Result,
+                            Url = pathProvider.GetFolderUrlByIdAsync(globalFolderHelper.FolderShareAsync.Result).Result
                         };
                     }
 
@@ -810,7 +775,7 @@ public class CustomizationConfig<T>(CoreBaseSettings coreBaseSettings,
 
                 return new GobackConfig
                 {
-                    Url = pathProvider.GetFolderUrlAsync(parent).Result,
+                    Url = pathProvider.GetFolderUrlAsync(parent).Result
                 };
             }
             catch (Exception)

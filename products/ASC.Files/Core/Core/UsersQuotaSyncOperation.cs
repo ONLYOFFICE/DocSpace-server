@@ -140,8 +140,7 @@ public class UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : Distr
                 {
                     if (item.ID == WebItemManager.DocumentsProductID)
                     {
-                        var manager = item.Context.SpaceUsageStatManager as IUserSpaceUsage;
-                        if (manager == null)
+                        if (item.Context.SpaceUsageStatManager is not IUserSpaceUsage manager)
                         {
                             continue;
                         }

@@ -87,7 +87,7 @@ public class TariffController(CommonMethods commonMethods,
             Features = model.Features ?? "",
             MaxFileSize = 1024 * 1024 * 1024,
             MaxTotalSize = 1024L * 1024 * 1024 * 1024 - 1,
-            Name = "api",
+            Name = "api"
         };
 
         if (model.ActiveUsers != default)
@@ -110,7 +110,7 @@ public class TariffController(CommonMethods commonMethods,
         var tariff = new Tariff
         {
             Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1),
+            DueDate = model.DueDate != default ? model.DueDate : DateTime.MaxValue.AddSeconds(-1)
         };
 
         await HostedSolution.SetTariffAsync(tenant.Id, tariff);
@@ -178,7 +178,7 @@ public class TariffController(CommonMethods commonMethods,
         return Ok(new
         {
             tenant = CommonMethods.ToTenantWrapper(tenant),
-            tariff = ToTariffWrapper(tariff, quota),
+            tariff = ToTariffWrapper(tariff, quota)
         });
     }
 
@@ -187,11 +187,11 @@ public class TariffController(CommonMethods commonMethods,
         return new
         {
             countManager = q.CountRoomAdmin,
-            dueDate = t == null ? DateTime.MaxValue : t.DueDate,
+            dueDate = t?.DueDate ?? DateTime.MaxValue,
             features = q.Features,
             maxFileSize = q.MaxFileSize,
             maxTotalSize = q.MaxTotalSize,
-            state = t == null ? TariffState.Paid : t.State,
+            state = t?.State ?? TariffState.Paid
         };
     }
 

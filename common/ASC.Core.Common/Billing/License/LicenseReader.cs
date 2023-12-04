@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -41,7 +39,6 @@ public class LicenseReader
     private readonly ITariffService _tariffService;
     private readonly CoreSettings _coreSettings;
     private readonly ILogger<LicenseReader> _logger;
-    private readonly Constants _constants;
     public readonly string LicensePath;
     private readonly string _licensePathTemp;
 
@@ -52,8 +49,7 @@ public class LicenseReader
         ITariffService tariffService,
         CoreSettings coreSettings,
         LicenseReaderConfig licenseReaderConfig,
-        ILogger<LicenseReader> logger,
-        Constants constants)
+        ILogger<LicenseReader> logger)
     {
         _tenantManager = tenantManager;
         _tariffService = tariffService;
@@ -61,7 +57,6 @@ public class LicenseReader
         LicensePath = licenseReaderConfig.LicensePath;
         _licensePathTemp = LicensePath + ".tmp";
         _logger = logger;
-        _constants = constants;
     }
 
     public async Task SetCustomerIdAsync(string value)
@@ -216,7 +211,7 @@ public class LicenseReader
         var tariff = new Tariff
         {
             Quotas = new List<Quota> { new(quota.TenantId, 1) },
-            DueDate = license.DueDate,
+            DueDate = license.DueDate
         };
 
         await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota> { quota });

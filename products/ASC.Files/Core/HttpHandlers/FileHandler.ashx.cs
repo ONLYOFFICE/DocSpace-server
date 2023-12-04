@@ -311,7 +311,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //context.Response.Headers.Charset = "utf-8";
 
             var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split('=', '-');
-            var isNeedSendAction = range.Count() < 2 || Convert.ToInt64(range[1]) == 0;
+            var isNeedSendAction = range.Length < 2 || Convert.ToInt64(range[1]) == 0;
 
             if (isNeedSendAction)
             {

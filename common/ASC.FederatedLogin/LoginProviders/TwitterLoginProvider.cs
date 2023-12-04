@@ -154,7 +154,10 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
     internal LoginProfile ProfileFromTwitter(string twitterProfile)
     {
         var jProfile = JObject.Parse(twitterProfile);
-        if (jProfile == null) throw new Exception("Failed to correctly process the response");
+        if (jProfile == null)
+        {
+            throw new Exception("Failed to correctly process the response");
+        }
 
         return new LoginProfile(Signature, InstanceCrypto)
         {

@@ -183,7 +183,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
 
     protected string MakeTitle(ICloudFileSystemEntry fsEntry)
     {
-        if (fsEntry is ICloudDirectoryEntry && IsRoot(fsEntry as ICloudDirectoryEntry))
+        if (fsEntry is ICloudDirectoryEntry entry && IsRoot(entry))
         {
             return ProviderInfo.CustomerTitle;
         }
@@ -213,10 +213,10 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
             return null;
         }
 
-        if (fsEntry is ErrorEntry)
+        if (fsEntry is ErrorEntry entry)
         {
             //Return error entry
-            return ToErrorFolder(fsEntry as ErrorEntry);
+            return ToErrorFolder(entry);
         }
 
         //var childFoldersCount = fsEntry.OfType<ICloudDirectoryEntry>().Count();//NOTE: Removed due to performance isssues
@@ -303,11 +303,11 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
             return null;
         }
 
-        if (fsEntry is ErrorEntry)
+        if (fsEntry is ErrorEntry entry)
         {
             //Return error entry
 
-            return ToErrorFile(fsEntry as ErrorEntry);
+            return ToErrorFile(entry);
         }
 
         var file = GetFile();
@@ -465,8 +465,8 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
 
     public override Task<IEnumerable<string>> GetChildrenAsync(string folderId)
     {
-        var subFolders = GetFolderSubfolders(folderId).Select(x => MakeId(x));
-        var files = GetFolderFiles(folderId).Select(x => MakeId(x));
+        var subFolders = GetFolderSubfolders(folderId).Select(MakeId);
+        var files = GetFolderFiles(folderId).Select(MakeId);
 
         return Task.FromResult(subFolders.Concat(files));
     }
