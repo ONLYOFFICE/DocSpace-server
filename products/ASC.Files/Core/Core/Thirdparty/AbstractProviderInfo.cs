@@ -53,6 +53,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
     public string RootFolderId => $"{Selector.Id}-" + ProviderId;
     public FolderType RootFolderType { get; set; }
     public OAuth20Token Token { get; set; }
+    public string Color { get; set; }
     public bool StorageOpened => wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
     public Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync

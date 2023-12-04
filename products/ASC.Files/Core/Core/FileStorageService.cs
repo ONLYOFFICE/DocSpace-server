@@ -442,7 +442,14 @@ public class FileStorageService //: IFileStorageService
             await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
         }
 
-        await providerDao.UpdateRoomProviderInfoAsync(providerInfo.ProviderId, title, room.Id.ToString(), folderType, @private: @private);
+        await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+        {
+            Id = providerInfo.ProviderId,
+            Title = title,
+            FolderId = room.Id.ToString(),
+            FolderType = folderType,
+            Private = @private
+        });
 
         return room;
     }

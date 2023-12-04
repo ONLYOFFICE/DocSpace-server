@@ -156,6 +156,7 @@ internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, 
         folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         folder.Title = MakeFolderTitle(driveEntry);

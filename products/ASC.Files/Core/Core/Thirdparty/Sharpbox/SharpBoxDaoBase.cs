@@ -235,6 +235,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
         folder.FoldersCount = 0; /*childFoldersCount NOTE: Removed due to performance isssues*/
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)

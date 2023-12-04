@@ -145,6 +145,7 @@ internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBa
         folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.LastModifiedDateTime.HasValue ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         folder.Title = MakeFolderTitle(onedriveFolder);

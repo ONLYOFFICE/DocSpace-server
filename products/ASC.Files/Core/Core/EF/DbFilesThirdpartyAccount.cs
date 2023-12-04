@@ -43,6 +43,7 @@ public class DbFilesThirdpartyAccount : BaseEntity, IDbFile, IDbSearch
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    public string Color { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -144,6 +145,12 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Private).HasColumnName("private");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+            
+            entity.Property(e => e.Color)
+                .HasColumnName("color")
+                .HasColumnType("char(6)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
     public static void PgSqlAddDbFilesThirdpartyAccount(this ModelBuilder modelBuilder)
@@ -198,6 +205,10 @@ public static class DbFilesThirdpartyAccountExtension
             entity.Property(e => e.Private).HasColumnName("private");
 
             entity.Property(e => e.HasLogo).HasColumnName("has_logo");
+
+            entity.Property(e => e.Color)
+                .HasColumnName("color")
+                .HasMaxLength(6);
         });
     }
 }

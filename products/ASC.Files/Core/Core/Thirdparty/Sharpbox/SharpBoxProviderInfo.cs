@@ -42,6 +42,7 @@ internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisp
     public int ProviderId { get; set; }
     public string CustomerTitle { get; set; }
     public string FolderId { get; set; }
+    public string Color { get; set; }
 
     public string ProviderKey
     {

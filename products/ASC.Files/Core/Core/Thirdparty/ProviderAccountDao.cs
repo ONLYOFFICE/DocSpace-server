@@ -173,46 +173,50 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
     {
         return providerInfo != null && await providerInfo.CheckAccessAsync();
     }
-
-    public async Task<bool> UpdateRoomProviderInfoAsync(int id, string title = null, string folderId = null, FolderType? roomType = null, FolderType? rootFolderType = null,
-        bool? @private = null, bool? hasLogo = null)
+    
+    public async Task<bool> UpdateRoomProviderInfoAsync(ProviderData data)
     {
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, id);
+        var forUpdate = await Queries.ThirdpartyAccountAsync(filesDbContext, TenantID, data.Id);
 
         if (forUpdate == null)
         {
             return false;
         }
 
-        if (!string.IsNullOrEmpty(title))
+        if (!string.IsNullOrEmpty(data.Title))
         {
-            forUpdate.Title = title;
+            forUpdate.Title = data.Title;
         }
 
-        if (!string.IsNullOrEmpty(folderId))
+        if (!string.IsNullOrEmpty(data.FolderId))
         {
-            forUpdate.FolderId = folderId;
+            forUpdate.FolderId = data.FolderId;
         }
 
-        if (roomType.HasValue)
+        if (data.FolderType.HasValue)
         {
-            forUpdate.RoomType = roomType.Value;
+            forUpdate.RoomType = data.FolderType.Value;
         }
 
-        if (rootFolderType.HasValue)
+        if (data.RootFolderType.HasValue)
         {
-            forUpdate.FolderType = rootFolderType.Value;
+            forUpdate.FolderType = data.RootFolderType.Value;
         }
 
-        if (@private.HasValue)
+        if (data.Private.HasValue)
         {
-            forUpdate.Private = rootFolderType.HasValue;
+            forUpdate.Private = data.Private.HasValue;
         }
 
-        if (hasLogo.HasValue)
+        if (data.HasLogo.HasValue)
         {
-            forUpdate.HasLogo = hasLogo.Value;
+            forUpdate.HasLogo = data.HasLogo.Value;
+        }
+
+        if (!string.IsNullOrEmpty(data.Color))
+        {
+            forUpdate.Color = data.Color;
         }
         
         filesDbContext.Update(forUpdate);
@@ -423,6 +427,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         var createOn = tenantUtil.DateTimeFromUtc(input.CreateOn);
         var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token);
         var hasLogo = input.HasLogo;
+        var color = input.Color;
 
         if (key == ProviderTypes.Box)
         {
@@ -443,6 +448,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             box.FolderId = folderId;
             box.Private = privateRoom;
             box.HasLogo = hasLogo;
+            box.Color = color;
 
             return box;
         }
@@ -466,6 +472,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             drop.FolderId = folderId;
             drop.Private = privateRoom;
             drop.HasLogo = hasLogo;
+            drop.Color = color;
 
             return drop;
         }
@@ -489,6 +496,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             sh.FolderId = folderId;
             sh.Private = privateRoom;
             sh.HasLogo = hasLogo;
+            sh.Color = color;
 
             return sh;
         }
@@ -512,6 +520,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             gd.FolderId = folderId;
             gd.Private = privateRoom;
             gd.HasLogo = hasLogo;
+            gd.Color = color;
 
             return gd;
         }
@@ -535,6 +544,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
             od.FolderId = folderId;
             od.Private = privateRoom;
             od.HasLogo = hasLogo;
+            od.Color = color;
 
             return od;
         }
@@ -566,6 +576,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         sharpBoxProviderInfo.FolderId = folderId;
         sharpBoxProviderInfo.Private = privateRoom;
         sharpBoxProviderInfo.HasLogo = hasLogo;
+        sharpBoxProviderInfo.Color = color;
 
         return sharpBoxProviderInfo;
     }
@@ -716,6 +727,17 @@ public static class ProviderAccountDaoExtension
     }
 }
 
+public class ProviderData
+{
+    public int Id { get; init; }
+    public string Title { get; init; }
+    public string FolderId { get; init; }
+    public FolderType? FolderType { get; init; }
+    public FolderType? RootFolderType { get; init; }
+    public bool? Private { get; init; }
+    public bool? HasLogo { get; init; }
+    public string Color { get; init; }
+}
 
 static file class Queries
 {
@@ -745,8 +767,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
                     .Where(r => r.Id == linkId)
-                    .Where(r => r.TenantId == tenantId)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.TenantId == tenantId));
 
     public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>>
         UpdateThirdpartyAccountsAsync = EF.CompileAsyncQuery(
@@ -765,8 +786,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == linkId)
-                    .Single());
+                    .Single(r => r.Id == linkId));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesThirdpartyAccount>>
         ThirdpartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
@@ -790,8 +810,7 @@ static file class Queries
             (FilesDbContext ctx, int tenantId) =>
                 ctx.ThirdpartyAccount
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.FolderType == FolderType.ThirdpartyBackup)
-                    .Single());
+                    .Single(r => r.FolderType == FolderType.ThirdpartyBackup));
 
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> HashIdsAsync =
         EF.CompileAsyncQuery(

@@ -162,6 +162,7 @@ internal class DropboxDaoBase : ThirdPartyProviderDao<FileMetadata, FolderMetada
         folder.Title = MakeFolderTitle(dropboxFolder);
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
+        folder.SettingsColor = ProviderInfo.Color;
         SetFolderType(folder, isRoot);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)

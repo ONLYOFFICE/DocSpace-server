@@ -148,7 +148,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
     public async Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId)
     {
         var dbDao = _serviceProvider.GetService<ProviderAccountDao>();
-        await dbDao.UpdateRoomProviderInfoAsync(provider.ProviderId, newTitle, folderId);
+        await dbDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = provider.ProviderId, Title = newTitle, FolderId = folderId });
         provider.FolderId = folderId;
         provider.CustomerTitle = newTitle;
     }

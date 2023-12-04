@@ -51,6 +51,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public string FolderId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    public string Color { get; set; }
 
     public Selector Selector { get; } = Selectors.SharePoint;
     public ProviderFilter ProviderFilter { get; } = ProviderFilter.SharePoint;
@@ -567,6 +568,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             result.Error = errorFolder.Error;
             result.SettingsPrivate = Private;
             result.SettingsHasLogo = HasLogo;
+            result.SettingsColor = Color;
 
             return result;
         }

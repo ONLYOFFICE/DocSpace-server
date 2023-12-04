@@ -585,6 +585,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         folder.ModifiedOn = providerInfo.CreateOn;
         folder.MutableId = providerInfo.MutableEntityId;
         folder.Shared = shared;
+        folder.SettingsColor = providerInfo.Color;
 
         return folder;
     }

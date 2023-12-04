@@ -458,7 +458,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                             if (isThirdPartyRoom)
                             {
-                                await ProviderDao.UpdateRoomProviderInfoAsync(folder.ProviderId, rootFolderType: toFolder.FolderType);
+                                await ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData
+                                {
+                                    Id = folder.ProviderId,
+                                    RootFolderType = toFolder.FolderType
+                                });
                             }
                             else
                             {

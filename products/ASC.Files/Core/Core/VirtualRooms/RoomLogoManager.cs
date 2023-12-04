@@ -93,7 +93,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         if (room.ProviderEntry)
         {
-            await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(room.ProviderId, hasLogo: true);
+            await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = room.ProviderId, HasLogo = true });
         }
         else
         {
@@ -128,7 +128,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
             if (room.ProviderEntry)
             {
-                await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(room.ProviderId, hasLogo: false);
+                await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = room.ProviderId, HasLogo = false });
             }
             else
             {
@@ -155,9 +155,16 @@ public class RoomLogoManager(StorageFactory storageFactory,
             if (string.IsNullOrEmpty(room.SettingsColor))
             {
                 room.SettingsColor = GetRandomColour();
-
-                var folderDao = daoFactory.GetFolderDao<T>();
-                await folderDao.SaveFolderAsync(room);
+                
+                if (room.ProviderEntry)
+                {
+                    await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = room.ProviderId, Color = room.SettingsColor });
+                }
+                else
+                {
+                    var folderDao = daoFactory.GetFolderDao<T>();
+                    await folderDao.SaveFolderAsync(room);
+                }
             }
 
             return new Logo
