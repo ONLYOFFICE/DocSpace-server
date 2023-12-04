@@ -68,6 +68,11 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
 
         DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
         DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
+        DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+        DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
+        DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+        DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+        DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
         services.AddHostedService<Launcher>();
         DIHelper.TryAdd<Launcher>();

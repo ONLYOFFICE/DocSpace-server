@@ -1,25 +1,25 @@
 // (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -682,7 +682,7 @@ public class FileStorageService //: IFileStorageService
                 folder = null;
             }
         }
-        
+
         folder ??= await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderMyAsync<T>());
 
         var file = serviceProvider.GetService<File<T>>();
@@ -1511,15 +1511,26 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<List<FileOperationResult>> MarkAsReadAsync(List<JsonElement> foldersId, List<JsonElement> filesId)
+    public async Task<(List<FileOperationResult>, string)> MarkAsReadAsync(List<JsonElement> foldersId, List<JsonElement> filesId, bool enqueueTask = true, string taskId = null)
     {
         if (foldersId.Count == 0 && filesId.Count == 0)
         {
-            return GetTasksStatuses();
+            return (GetTasksStatuses(), null);
         }
 
         return fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersId, filesId, GetHttpHeaders(),
-            await externalShare.GetCurrentShareDataAsync());
+            await externalShare.GetCurrentShareDataAsync(), enqueueTask, taskId);
+    }
+
+    public async Task<(List<FileOperationResult>, string)> MarkAsReadAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, bool enqueueTask = true, string taskId = null)
+    {
+        if (foldersIdString == null && filesIdString == null && foldersIdInt == null && filesIdInt == null)
+        {
+            return (GetTasksStatuses(), null);
+        }
+
+        return fileOperationsManager.MarkAsRead(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt,  GetHttpHeaders(),
+            await externalShare.GetCurrentShareDataAsync(), enqueueTask, taskId);
     }
 
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAsync()
@@ -1566,8 +1577,8 @@ public class FileStorageService //: IFileStorageService
             return folder;
         }
 
-        return null;
-    }
+            return null;
+        }
 
     public IAsyncEnumerable<FileEntry> GetThirdPartyFolderAsync(int folderType = 0)
     {
@@ -1825,12 +1836,12 @@ public class FileStorageService //: IFileStorageService
         return fileOperationsManager.CancelOperations(authContext.CurrentAccount.ID, id);
     }
 
-    public async Task<List<FileOperationResult>> BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files)
+    public async Task<(List<FileOperationResult>, string)> BulkDownloadAsync(Dictionary<JsonElement, string> folders, Dictionary<JsonElement, string> files, bool enqueueTask = true, string taskId = null)
     {
         ErrorIf(folders.Count == 0 && files.Count == 0, FilesCommonResource.ErrorMassage_BadRequest);
 
         return fileOperationsManager.Download(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, GetHttpHeaders(),
-            await externalShare.GetCurrentShareDataAsync());
+            await externalShare.GetCurrentShareDataAsync(), enqueueTask, taskId);
     }
 
     public async Task<(List<object>, List<object>)> MoveOrCopyFilesCheckAsync<T1>(List<JsonElement> filesId, List<JsonElement> foldersId, T1 destFolderId)
@@ -1927,15 +1938,14 @@ public class FileStorageService //: IFileStorageService
         return (checkedFiles, checkedFolders);
     }
 
-    public async Task<List<FileOperationResult>> MoveOrCopyItemsAsync(List<JsonElement> foldersId, List<JsonElement> filesId, JsonElement destFolderId, FileConflictResolveType resolve, bool ic, bool deleteAfter = false, bool content = false)
+    public async Task<(List<FileOperationResult>, string)> MoveOrCopyItemsAsync(List<JsonElement> foldersId, List<JsonElement> filesId, JsonElement destFolderId, FileConflictResolveType resolve, bool ic, bool deleteAfter = false, bool content = false, bool enqueueTask = true, string taskId = null)
     {
         ErrorIf(resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID), FilesCommonResource.ErrorMassage_SecurityException);
 
-        List<FileOperationResult> result;
         if (foldersId.Count > 0 || filesId.Count > 0)
         {
-            result = await fileOperationsManager.MoveOrCopy(
-                authContext.CurrentAccount.ID,
+            return await fileOperationsManager.MoveOrCopy(
+                authContext.CurrentAccount.ID, 
                 await tenantManager.GetCurrentTenantAsync(), 
                 foldersId, 
                 filesId, 
@@ -1944,41 +1954,58 @@ public class FileStorageService //: IFileStorageService
                 resolve,
                 !deleteAfter,
                 GetHttpHeaders(), 
-                await externalShare.GetCurrentShareDataAsync(),
-                content);
+                await externalShare.GetCurrentShareDataAsync(), 
+                content, 
+                enqueueTask, 
+                taskId);
         }
-        else
+
+        return (fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID), null);
+    }
+
+    public async Task<(List<FileOperationResult>, string)> MoveOrCopyItemsAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, JsonElement destFolderId, FileConflictResolveType resolve, bool ic, bool deleteAfter = false, bool content = false, bool enqueueTask = true, string taskId = null)
+    {
+        ErrorIf(resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID), FilesCommonResource.ErrorMassage_SecurityException);
+
+        if (filesIdString != null || foldersIdString != null || filesIdInt != null || foldersIdInt != null)
         {
-            result = fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID);
+            return await fileOperationsManager.MoveOrCopy(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, destFolderId, ic, resolve,
+                !deleteAfter, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), content, enqueueTask, taskId);
         }
 
-        return result;
+        return (fileOperationsManager.GetOperationResults(authContext.CurrentAccount.ID), null);
     }
 
-    public async Task<List<FileOperationResult>> DeleteFileAsync<T>(string action, T fileId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
+    public async Task<(List<FileOperationResult>, string)> DeleteFileAsync<T>(string action, T fileId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false, bool enqueueTask = true, string taskId = null)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T> { fileId }, ignoreException,
-            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
+        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>(), new List<T>() { fileId }, ignoreException,
+            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask, taskId);
     }
-    public async Task<List<FileOperationResult>> DeleteFolderAsync<T>(string action, T folderId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
+    public async Task<(List<FileOperationResult>, string)> DeleteFolderAsync<T>(string action, T folderId, bool ignoreException = false, bool deleteAfter = false, bool immediately = false, bool enqueueTask = true, string taskId = null)
     {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T> { folderId }, new List<T>(), ignoreException,
-            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
-    }
-
-    public async Task<List<FileOperationResult>> DeleteItemsAsync(string action, List<JsonElement> files, List<JsonElement> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
-    {
-        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, ignoreException, !deleteAfter, immediately,
-            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
+        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), new List<T>() { folderId }, new List<T>(), ignoreException,
+            !deleteAfter, immediately, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask, taskId);
     }
 
-    public async Task<List<FileOperationResult>> DeleteItemsAsync<T>(string action, List<T> files, List<T> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false)
+    public async Task<(List<FileOperationResult>, string)> DeleteItemsAsync(string action, List<JsonElement> files, List<JsonElement> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false, bool enqueueTask = true, string taskId = null)
     {
         return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, ignoreException, !deleteAfter, immediately,
-            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync());
+            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask, taskId);
     }
 
-    public async Task<List<FileOperationResult>> EmptyTrashAsync()
+    public async Task<(List<FileOperationResult>, string)> DeleteItemsAsync(string action, List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, bool ignoreException = false, bool deleteAfter = false, bool immediately = false, bool enqueueTask = true, string taskId = null)
+    {
+        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdString, filesIdString, foldersIdInt, filesIdInt, ignoreException, !deleteAfter, immediately,
+            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask, taskId);
+    }
+
+    public async Task<(List<FileOperationResult>, string)> DeleteItemsAsync<T>(string action, List<T> files, List<T> folders, bool ignoreException = false, bool deleteAfter = false, bool immediately = false, bool enqueueTask = true, string taskId = null)
+    {
+        return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), folders, files, ignoreException, !deleteAfter, immediately,
+            GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), false, enqueueTask, taskId);
+    }
+
+    public async Task<(List<FileOperationResult>, string)> EmptyTrashAsync(bool enqueueTask = true, string taskId = null)
     {
         var folderDao = GetFolderDao<int>();
         var fileDao = GetFileDao<int>();
@@ -1987,7 +2014,7 @@ public class FileStorageService //: IFileStorageService
         var filesIdTask = await fileDao.GetFilesAsync(trashId).ToListAsync();
 
         return fileOperationsManager.Delete(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantAsync(), foldersIdTask, filesIdTask, false, true,
-            false, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), true);
+            false, GetHttpHeaders(), await externalShare.GetCurrentShareDataAsync(), true, enqueueTask, taskId);
     }
 
     public async IAsyncEnumerable<FileOperationResult> CheckConversionAsync<T>(List<CheckConversionRequestDto<T>> filesInfoJSON, bool sync = false)

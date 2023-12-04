@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2010-2022
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,39 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Contracts;
-
-public enum BackupProgressEnum
-{
-    Backup,
-    Restore,
-    Transfer
-}
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
 [ProtoContract]
-public record BackupProgress
+public record EmptyTrashIntegrationEvent : IntegrationEvent
 {
+    private EmptyTrashIntegrationEvent() : base() { }
+
+    public EmptyTrashIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    {
+
+    }
+
     [ProtoMember(1)]
-    public bool IsCompleted { get; set; }
-
-    [ProtoMember(2)]
-    public int Progress { get; set; }
-
-    [ProtoMember(3)]
-    public string Error { get; set; }
-
-    [ProtoMember(4)]
-    public string Link { get; set; }
-
-    [ProtoMember(5)]
-    public int TenantId { get; set; }
-
-    [ProtoMember(6)]
-    public BackupProgressEnum BackupProgressEnum { get; set;}
-    
-    [ProtoMember(7)]
     public string TaskId { get; set; }
 }
-
-
-
