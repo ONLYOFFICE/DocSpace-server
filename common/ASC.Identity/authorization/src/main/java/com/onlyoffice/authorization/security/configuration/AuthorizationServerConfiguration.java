@@ -19,6 +19,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -37,6 +38,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  *
@@ -112,9 +114,21 @@ public class AuthorizationServerConfiguration {
 
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-        return context -> context
-                .getJwsHeader()
-                .algorithm(SignatureAlgorithm.ES256);
+        return context -> {
+            Authentication principal = context.getPrincipal();
+            var authority = principal.getAuthorities().stream().findFirst()
+                    .orElse(null);
+            if (principal.getDetails() != null)
+                context.getClaims()
+                        .subject(principal.getDetails().toString());
+            if (authority != null)
+                context.getClaims()
+                        .issuer(authority.getAuthority())
+                        .audience(List.of(authority.getAuthority()));
+            context
+                    .getJwsHeader()
+                    .algorithm(SignatureAlgorithm.ES256);
+        };
     }
 
     @Bean

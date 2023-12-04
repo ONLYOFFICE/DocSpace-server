@@ -5,6 +5,7 @@ package com.onlyoffice.authorization.security.oauth.providers;
 
 import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistenceQueryUsecases;
 import com.onlyoffice.authorization.external.clients.DocspaceClient;
+import com.onlyoffice.authorization.security.oauth.authorities.TenantAuthority;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -20,7 +21,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.UUID;
+import java.util.List;
 
 /**
  *
@@ -75,8 +76,10 @@ public class DocspaceAuthenticationProvider implements AuthenticationProvider {
         var me = docspaceClient.getMe(URI.create(client.getTenantUrl()), cookie);
         if (me.getStatusCode() == HttpStatus.OK.value() && !me.getResponse().getIsAdmin())
             throw new BadCredentialsException("Invalid docspace authorization");
-
-        return new UsernamePasswordAuthenticationToken(me.getResponse().getEmail(), UUID.randomUUID().toString(), null);
+        var authenticationToken = new UsernamePasswordAuthenticationToken(me.getResponse()
+                .getEmail(), null, List.of(new TenantAuthority(client.getTenantUrl())));
+        authenticationToken.setDetails(me.getResponse().getId());
+        return authenticationToken;
     }
 
     public boolean supports(Class<?> authentication) {
