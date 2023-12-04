@@ -49,7 +49,17 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
 {
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
-        return SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
+        var folder = SharePointProviderInfo.ToFolder(await SharePointProviderInfo.GetFolderByIdAsync(folderId));
+        
+        if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+        {
+            return folder;
+        }
+        
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        folder.Shared = await Queries.SharedAsync(filesDbContext, _tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+
+        return folder;
     }
 
     public async Task<Folder<string>> GetFolderAsync(string title, string parentId)
@@ -481,4 +491,14 @@ static file class Queries
                     ctx.ThirdpartyIdMapping
                         .Where(r => r.TenantId == tenantId)
                         .Where(m => m.Id.StartsWith(idStart)));
+    
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, SubjectType, Task<bool>>
+        SharedAsync =
+            EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, SubjectType subjectType) =>
+                    ctx.Security
+                        .Where(t => t.TenantId == tenantId && t.EntryType == entryType && t.SubjectType == subjectType)
+                        .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId, 
+                            (s, m) => new { s, m.Id })
+                        .Any(r => r.Id == entryId));
 }

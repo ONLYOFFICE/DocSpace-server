@@ -45,9 +45,19 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
         fileUtility, tempPath, authContext, regexDaoSelectorBase), IFolderDao<string>
 {
-    public Task<Folder<string>> GetFolderAsync(string folderId)
+    public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
-        return Task.FromResult(ToFolder(GetFolderById(folderId)));
+        var folder = ToFolder(GetFolderById(folderId));
+        
+        if (folder.FolderType is not (FolderType.CustomRoom or FolderType.PublicRoom))
+        {
+            return folder;
+        }
+        
+        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        folder.Shared = await Queries.SharedAsync(filesDbContext, _tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
+
+        return folder;
     }
 
     public Task<Folder<string>> GetFolderAsync(string title, string parentId)
@@ -521,4 +531,14 @@ static file class Queries
                         .Where(r => r.TenantId == tenantId)
                         .Where(m => m.Id.StartsWith(idStart))
                         .ExecuteDelete());
+    
+    public static readonly Func<FilesDbContext, int, string, FileEntryType, SubjectType, Task<bool>>
+        SharedAsync =
+            EF.CompileAsyncQuery(
+                (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, SubjectType subjectType) =>
+                    ctx.Security
+                        .Where(t => t.TenantId == tenantId && t.EntryType == entryType && t.SubjectType == subjectType)
+                        .Join(ctx.ThirdpartyIdMapping, s => s.EntryId, m => m.HashId, 
+                            (s, m) => new { s, m.Id })
+                        .Any(r => r.Id == entryId));
 }
