@@ -604,7 +604,9 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(IServicePro
                     Share = s.Share,
                     Subject = s.Subject,
                     EntryType = s.EntryType,
-                    Owner = s.Owner
+                    Owner = s.Owner,
+                    SubjectType = s.SubjectType,
+                    Options = s.Options
                 });
 
                 dbContext.RemoveRange(securityForDelete);
