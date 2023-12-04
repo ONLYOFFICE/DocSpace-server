@@ -496,34 +496,14 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         if (provider != ProviderFilter.None)
         {
-            var providers = provider switch
-            {
-                ProviderFilter.WebDav => new[] { ProviderTypes.WebDav.ToStringFast() },
-                ProviderFilter.GoogleDrive => new[] { ProviderTypes.GoogleDrive.ToStringFast() },
-                ProviderFilter.OneDrive => new[] { ProviderTypes.OneDrive.ToStringFast() },
-                ProviderFilter.DropBox => new[] { ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast() },
-                ProviderFilter.kDrive => new[] { ProviderTypes.kDrive.ToStringFast() },
-                ProviderFilter.Yandex => new[] { ProviderTypes.Yandex.ToStringFast() },
-                ProviderFilter.SharePoint => new[] { ProviderTypes.SharePoint.ToStringFast() },
-                ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
-                _ => throw new NotImplementedException()
-            };
+            var providers = GetProviderTypes(provider);
 
             q = q.Where(a => providers.Contains(a.Provider));
         }
 
         if (filterType is not (FilterType.None or FilterType.FoldersOnly))
         {
-            var roomType = filterType switch
-            {
-                FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-                FilterType.EditingRooms => FolderType.EditingRoom,
-                FilterType.ReviewRooms => FolderType.ReviewRoom,
-                FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-                FilterType.CustomRooms => FolderType.CustomRoom,
-                FilterType.PublicRooms => FolderType.PublicRoom,
-                _ => throw new NotImplementedException()
-            };
+            var roomType = GetRoomFolderType(filterType);
 
             q = q.Where(a => a.RoomType == roomType);
         }

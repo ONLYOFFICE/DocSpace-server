@@ -322,18 +322,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var filter = providerFilter switch
-        {
-            ProviderFilter.WebDav => new[] { ProviderTypes.WebDav.ToStringFast() },
-            ProviderFilter.GoogleDrive => new[] { ProviderTypes.GoogleDrive.ToStringFast() },
-            ProviderFilter.OneDrive => new[] { ProviderTypes.OneDrive.ToStringFast() },
-            ProviderFilter.DropBox => new[] { ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast() },
-            ProviderFilter.kDrive => new[] { ProviderTypes.kDrive.ToStringFast() },
-            ProviderFilter.Yandex => new[] { ProviderTypes.Yandex.ToStringFast() },
-            ProviderFilter.SharePoint => new[] { ProviderTypes.SharePoint.ToStringFast() },
-            ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
-            _ => throw new NotImplementedException()
-        };
+        var filter = GetProviderTypes(providerFilter);
 
         return rooms.Where(f => filter.Contains(f.ProviderKey));
     }
@@ -345,16 +334,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        var typeFilter = filterType switch
-        {
-            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
-            FilterType.EditingRooms => FolderType.EditingRoom,
-            FilterType.ReviewRooms => FolderType.ReviewRoom,
-            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
-            FilterType.CustomRooms => FolderType.CustomRoom,
-            FilterType.PublicRooms => FolderType.PublicRoom,
-            _ => FolderType.DEFAULT,
-        };
+        var typeFilter = GetRoomFolderType(filterType);
 
         return rooms.Where(f => f.FolderType == typeFilter);
     }
@@ -388,6 +368,38 @@ internal abstract class ThirdPartyProviderDao
         }
 
         return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
+    }
+    
+    internal static string[] GetProviderTypes(ProviderFilter providerFilter)
+    {
+        var filter = providerFilter switch
+        {
+            ProviderFilter.WebDav => new[] { ProviderTypes.WebDav.ToStringFast() },
+            ProviderFilter.GoogleDrive => new[] { ProviderTypes.GoogleDrive.ToStringFast() },
+            ProviderFilter.OneDrive => new[] { ProviderTypes.OneDrive.ToStringFast() },
+            ProviderFilter.DropBox => new[] { ProviderTypes.DropBox.ToStringFast(), ProviderTypes.DropboxV2.ToStringFast() },
+            ProviderFilter.kDrive => new[] { ProviderTypes.kDrive.ToStringFast() },
+            ProviderFilter.Yandex => new[] { ProviderTypes.Yandex.ToStringFast() },
+            ProviderFilter.SharePoint => new[] { ProviderTypes.SharePoint.ToStringFast() },
+            ProviderFilter.Box => new[] { ProviderTypes.Box.ToStringFast() },
+            _ => throw new NotImplementedException()
+        };
+        return filter;
+    }
+    
+    internal static FolderType GetRoomFolderType(FilterType filterType)
+    {
+        var typeFilter = filterType switch
+        {
+            FilterType.FillingFormsRooms => FolderType.FillingFormsRoom,
+            FilterType.EditingRooms => FolderType.EditingRoom,
+            FilterType.ReviewRooms => FolderType.ReviewRoom,
+            FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
+            FilterType.CustomRooms => FolderType.CustomRoom,
+            FilterType.PublicRooms => FolderType.PublicRoom,
+            _ => FolderType.DEFAULT,
+        };
+        return typeFilter;
     }
 
     #endregion
