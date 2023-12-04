@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,7 @@
 
 namespace ASC.Files.Helpers;
 
-public class SecurityControllerHelper : FilesHelperBase
-{
-    private readonly FileShareDtoHelper _fileShareDtoHelper;
-    private readonly FileShareParamsHelper _fileShareParamsHelper;
-
-    public SecurityControllerHelper(
-        FilesSettingsHelper filesSettingsHelper,
+public class SecurityControllerHelper(FilesSettingsHelper filesSettingsHelper,
         FileUploader fileUploader,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
@@ -43,8 +37,7 @@ public class SecurityControllerHelper : FilesHelperBase
         FolderDtoHelper folderDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
         FileShareParamsHelper fileShareParamsHelper)
-        : base(
-            filesSettingsHelper,
+    : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
@@ -54,10 +47,6 @@ public class SecurityControllerHelper : FilesHelperBase
             httpContextAccessor,
             folderDtoHelper)
     {
-        _fileShareDtoHelper = fileShareDtoHelper;
-        _fileShareParamsHelper = fileShareParamsHelper;
-    }
-
     public async Task<string> GenerateSharedLinkAsync<T>(T fileId, FileShare share)
     {
         await GetFileInfoAsync(fileId);
@@ -109,7 +98,7 @@ public class SecurityControllerHelper : FilesHelperBase
 
         foreach (var fileShareDto in fileShares)
         {
-            yield return await _fileShareDtoHelper.Get(fileShareDto);
+            yield return await fileShareDtoHelper.Get(fileShareDto);
         }
     }
 
@@ -129,7 +118,7 @@ public class SecurityControllerHelper : FilesHelperBase
     {
         if (share != null && share.Any())
         {
-            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await _fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
 
             var aceCollection = new AceCollection<T>
             {

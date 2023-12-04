@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,32 +27,17 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class ChunkedUploadSessionHolder
-{
-    public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
-
-    private readonly GlobalStore _globalStore;
-    private readonly SetupInfo _setupInfo;
-    private readonly TempPath _tempPath;
-    private CommonChunkedUploadSessionHolder _holder;
-    private CommonChunkedUploadSessionHolder _currentHolder;
-    private readonly ICache _cache;
-
-    public ChunkedUploadSessionHolder(
-        GlobalStore globalStore,
+public class ChunkedUploadSessionHolder(GlobalStore globalStore,
         SetupInfo setupInfo,
         TempPath tempPath,
         ICache cache)
-    {
-        _globalStore = globalStore;
-        _setupInfo = setupInfo;
-        _tempPath = tempPath;
-        _cache = cache;
-    }
-
+{
+    public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
+    private CommonChunkedUploadSessionHolder _holder;
+    private CommonChunkedUploadSessionHolder _currentHolder;
     public void StoreSession<T>(ChunkedUploadSession<T> s)
     {
-        _cache.Insert(s.Id, s, SlidingExpiration);
+        cache.Insert(s.Id, s, SlidingExpiration);
     }
 
     public void StoreChunk<T>(ChunkedUploadSession<T> s, int number, string eTag, long size)
@@ -63,18 +48,18 @@ public class ChunkedUploadSessionHolder
             Size = size
         };
 
-        _cache.Insert($"{s.Id} - {number}", chunk, SlidingExpiration);
+        cache.Insert($"{s.Id} - {number}", chunk, SlidingExpiration);
     }
 
     public Dictionary<int, Chunk> GetChunks<T>(ChunkedUploadSession<T> s)
     {
-        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
-        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
+        var count = s.BytesTotal / setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
 
         var dict = new Dictionary<int, Chunk>();
         for (var i = 1; i <= count; i++)
         {
-            dict.Add(i, _cache.Get<Chunk>($"{s.Id} - {i}"));
+            dict.Add(i, cache.Get<Chunk>($"{s.Id} - {i}"));
         }
 
         return dict;
@@ -82,19 +67,19 @@ public class ChunkedUploadSessionHolder
 
     public void RemoveSession<T>(ChunkedUploadSession<T> s)
     {
-        _cache.Remove(s.Id);
+        cache.Remove(s.Id);
 
-        var count = s.BytesTotal / _setupInfo.ChunkUploadSize;
-        count += s.BytesTotal % _setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
+        var count = s.BytesTotal / setupInfo.ChunkUploadSize;
+        count += s.BytesTotal % setupInfo.ChunkUploadSize > 0 ? 1L : 0L;
         for (var i = 1; i <= count; i++)
         {
-            _cache.Remove($"{s.Id} - {i}");
+            cache.Remove($"{s.Id} - {i}");
         }
     }
 
     public ChunkedUploadSession<T> GetSession<T>(string sessionId)
     {
-        return _cache.Get<ChunkedUploadSession<T>>(sessionId);
+        return cache.Get<ChunkedUploadSession<T>>(sessionId);
     }
 
     public async Task<ChunkedUploadSession<T>> CreateUploadSessionAsync<T>(File<T> file, long contentLength)
@@ -146,19 +131,13 @@ public class ChunkedUploadSessionHolder
     {
         if (currentTenant)
         {
-            if (_currentHolder == null)
-            {
-                _currentHolder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
-            }
-            return _currentHolder;
+            return _currentHolder ??= 
+                new CommonChunkedUploadSessionHolder(tempPath,
+                await globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp,
+                setupInfo.ChunkUploadSize);
         }
-        else
-        {
-            if (_holder == null)
-            {
-                _holder = new CommonChunkedUploadSessionHolder(_tempPath, await _globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, _setupInfo.ChunkUploadSize);
-            }
-            return _holder;
-        }
+
+        return _holder ??= new CommonChunkedUploadSessionHolder(tempPath,
+            await globalStore.GetStoreAsync(currentTenant), FileConstant.StorageDomainTmp, setupInfo.ChunkUploadSize);
     }
 }

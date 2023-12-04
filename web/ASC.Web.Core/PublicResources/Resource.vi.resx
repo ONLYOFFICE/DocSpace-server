@@ -524,7 +524,7 @@
     <value>Số điện thoại từ Twilio (được yêu cầu để cho phép gửi SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Twitter và tìm kiếm địa chỉ liên hệ.</value>
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Twitter.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Bật ứng dụng cho phép nhập liên hệ từ Yahoo.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TfaTooMuchError" xml:space="preserve">
     <value>Bạn đã gửi quá nhiều tin nhắn văn bản. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>id Zoom khách</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom client secret</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Quá nhiều lần đăng nhập. Xin vui lòng thử lại sau</value>
   </data>
 </root>

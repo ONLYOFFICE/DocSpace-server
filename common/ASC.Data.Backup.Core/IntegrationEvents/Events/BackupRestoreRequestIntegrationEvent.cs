@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,11 @@ namespace ASC.Data.Backup.Core.IntegrationEvents.Events;
 [ProtoContract]
 public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
 {
+    private BackupRestoreRequestIntegrationEvent()
+    {
+        StorageParams = new Dictionary<string, string>();
+    }
+    
     public BackupRestoreRequestIntegrationEvent(BackupStorageType storageType,
                                   int tenantId,
                                   Guid createBy,

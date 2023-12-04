@@ -416,4 +416,16 @@
     <value>Edytuj dokumenty, udostępniaj je i współpracuj nad nimi w czasie rzeczywistym. Twórz współdzielone dokumenty i zarządzaj nimi, aby cały zespół miał do nich dostęp.
 Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Udostępniony link</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link z zaproszeniem</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksymalna liczba linków: {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Przekroczono maksymalną liczbę prób wpisania hasła. Spróbuj ponownie później</value>
+  </data>
 </root>

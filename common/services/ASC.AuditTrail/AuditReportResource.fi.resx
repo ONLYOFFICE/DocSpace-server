@@ -721,4 +721,16 @@
   <data name="CityCol" xml:space="preserve">
     <value>Kaupunki</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Maa</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Ulkoinen linkki luotu: {0}. Rooli: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Ulkoinen linkki poistettu: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Ulkoinen linkki päivitetty: {0}. Rooli: {1}</value>
+  </data>
 </root>

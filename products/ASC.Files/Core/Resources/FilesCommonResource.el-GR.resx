@@ -416,4 +416,16 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Δημιουργήστε και επεξεργαστείτε τα δικά σας έγγραφα καθώς και τα κοινόχρηστα έγγραφα με τα κατάλληλα δικαιώματα πρόσβασης|Δώστε πρόσβαση ανάγνωσης/επεξεργασίας σε άλλους χρήστες στα έγγραφα και τους φακέλους|Συνδεθείτε σε Dropbox, Box και άλλους λογαριασμούς στην ενότητα «Τα έγγραφά μου»</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Κοινόχρηστος σύνδεσμος</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Σύνδεσμος πρόσκλησης</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Ο μέγιστος αριθμός συνδέσμων δεν μπορεί να υπερβαίνει το {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Προσπαθήσατε πάρα πολλές φορές να εισαγάγετε τον κωδικό πρόσβασής σας. Προσπαθήστε ξανά αργότερα</value>
+  </data>
 </root>

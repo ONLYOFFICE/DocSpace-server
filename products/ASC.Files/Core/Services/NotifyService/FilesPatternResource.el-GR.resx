@@ -73,7 +73,7 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" σας παραχωρεί την πρ
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1.$__DateTime User "$__AuthorName ":"$__AuthorUrl"
+    <value>h1.$__DateTime User "$__AuthorName":"$__AuthorUrl"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" σας παραχωρεί την πρόσβαση στο φάκελο "$DocumentTitle":"$DocumentURL" με δικαιώματα πρόσβασης: "$AccessRights". 
 

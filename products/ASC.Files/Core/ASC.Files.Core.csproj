@@ -2,20 +2,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Library</OutputType>
     <NoWarn>NU1701;1591</NoWarn>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="proto\box_cache_item.proto" />
-    <None Remove="proto\dropbox_cache_item.proto" />
-    <None Remove="proto\file_marker_cache_item.proto" />
-    <None Remove="proto\google_drive_cache_item.proto" />
-    <None Remove="proto\one_drive_cache_item.proto" />
-    <None Remove="proto\provider_account_cache_item.proto" />
-    <None Remove="proto\share_point_provider_cache_item.proto" />
+
+    <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
@@ -23,10 +19,6 @@
     <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
     <PackageReference Include="Dropbox.Api" Version="6.37.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3120" />
-    <PackageReference Include="Grpc.Tools" Version="2.57.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
@@ -36,15 +28,6 @@
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\..\common\services\ASC.ElasticSearch\ASC.ElasticSearch.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Protobuf Include="proto\box_cache_item.proto" />
-    <Protobuf Include="proto\dropbox_cache_item.proto" />
-    <Protobuf Include="proto\file_marker_cache_item.proto" />
-    <Protobuf Include="proto\google_drive_cache_item.proto" />
-    <Protobuf Include="proto\one_drive_cache_item.proto" />
-    <Protobuf Include="proto\provider_account_cache_item.proto" />
-    <Protobuf Include="proto\share_point_provider_cache_item.proto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\FilesCommonResource.Designer.cs">
@@ -180,6 +163,7 @@
     <None Remove="Services\NotifyService\patterns.xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
     <EmbeddedResource Include="Services\NotifyService\patterns.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -427,6 +411,12 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.az.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.ar-SA.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.hy-AM.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

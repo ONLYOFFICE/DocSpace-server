@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,11 @@ public class MarkDownStyler : IPatternStyler
             body += _velocityArguments.Replace(message.Subject, ArgMatchReplace) + Environment.NewLine;
             message.Subject = string.Empty;
         }
-        if (string.IsNullOrEmpty(message.Body)) return;
+        if (string.IsNullOrEmpty(message.Body))
+        {
+            return;
+        }
+
         var lines = message.Body.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
         for (var i = 0; i < lines.Length - 1; i++)
         {

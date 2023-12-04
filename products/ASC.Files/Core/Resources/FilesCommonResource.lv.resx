@@ -416,4 +416,16 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>Skatiet un lejupielādējiet kopīgotos dokumentus. Augšupielādējiet failus koplietotajās mapēs. Visaugstākā saderība ar docx, xlsx, pptx garantēta.</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Koplietotā saite</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Ielūguma saite</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksimālais saišu skaits nedrīkst pārsniegt {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Jūs pārāk daudz reižu mēģinājāt ievadīt savu paroli. Mēģiniet vēlreiz vēlāk</value>
+  </data>
 </root>

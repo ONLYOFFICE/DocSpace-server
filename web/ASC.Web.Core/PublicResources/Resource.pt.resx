@@ -647,7 +647,7 @@
     <value>Segredo do Cliente</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Ative esta aplicação para iniciar sessão no portal através de uma conta Twitter e procure por contactos.</value>
+    <value>Ative esta aplicação para iniciar sessão no portal através de uma conta Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na ONLYOFFICE utilizando o seu Twitter, e para que liguem as contas Twitter dos seus clientes ao módulo CRM. {0}Aceda ao Portal de Programadores do Twitter e crie uma nova aplicação de integração para a ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Região Oeste dos EUA (Oregon)</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Segredo do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ative este aplicativo para permitir que seus usuários façam login no ONLYOFFICE usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o ONLYOFFICE. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
   </data>
 </root>

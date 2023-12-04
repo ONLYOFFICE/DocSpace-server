@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Users;
+
 namespace ASC.IPSecurity;
 
 [Scope]
 public class IPSecurity
 {
-    public bool IpSecurityEnabled { get; }
-
+    private readonly bool _ipSecurityEnabled;
     private readonly ILogger<IPSecurity> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AuthContext _authContext;
@@ -39,6 +40,7 @@ public class IPSecurity
     private readonly string _currentIpForTest;
     private readonly string _myNetworks;
     private readonly UserManager _userManager;
+    private readonly SettingsManager _settingsManager;
 
     public IPSecurity(
         IConfiguration configuration,
@@ -47,6 +49,7 @@ public class IPSecurity
         TenantManager tenantManager,
         IPRestrictionsService iPRestrictionsService,
         UserManager userManager,
+        SettingsManager settingsManager,
         ILogger<IPSecurity> logger)
     {
         _logger = logger;
@@ -55,27 +58,35 @@ public class IPSecurity
         _tenantManager = tenantManager;
         _ipRestrictionsService = iPRestrictionsService;
         _userManager = userManager;
+        _settingsManager = settingsManager;
         _currentIpForTest = configuration["ipsecurity:test"];
         _myNetworks = configuration["ipsecurity:mynetworks"];
         var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
-        IpSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
+        _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
     }
 
     public async Task<bool> VerifyAsync()
     {
         var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        if (!IpSecurityEnabled)
+        if (!_ipSecurityEnabled)
         {
             return true;
         }
 
+        var enable = (await _settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
+
+        if (!enable)
+        {
+            return true;
+        }
+        
         if (_httpContextAccessor?.HttpContext == null)
         {
             return true;
         }
 
-        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId)
+        if (tenant == null || _authContext.CurrentAccount.ID == tenant.OwnerId && !_authContext.IsFromInvite())
         {
             return true;
         }
@@ -101,12 +112,13 @@ public class IPSecurity
                           ? Array.Empty<string>()
                           : requestIps.Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
 
-            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Core.Users.Constants.GroupAdmin.ID);
+            var isDocSpaceAdmin = await _userManager.IsUserInGroupAsync(_authContext.CurrentAccount.ID, Constants.GroupAdmin.ID);
 
             if (ips.Any(requestIp => restrictions.Exists(restriction => (!restriction.ForAdmin || isDocSpaceAdmin) && MatchIPs(GetIpWithoutPort(requestIp), restriction.Ip))))
             {
                 return true;
             }
+            
             if (IsMyNetwork(ips))
             {
                 return true;
@@ -129,8 +141,8 @@ public class IPSecurity
         var dividerIdx = restrictionIp.IndexOf('-');
         if (dividerIdx > 0)
         {
-            var lower = IPAddress.Parse(restrictionIp.Substring(0, dividerIdx).Trim());
-            var upper = IPAddress.Parse(restrictionIp.Substring(dividerIdx + 1).Trim());
+            var lower = IPAddress.Parse(restrictionIp[..dividerIdx].Trim());
+            var upper = IPAddress.Parse(restrictionIp[(dividerIdx + 1)..].Trim());
 
             var range = new IPAddressRange(lower, upper);
 
@@ -149,7 +161,7 @@ public class IPSecurity
     {
         var portIdx = ip.IndexOf(':');
 
-        return portIdx > 0 ? ip.Substring(0, portIdx) : ip;
+        return portIdx > 0 ? ip[..portIdx] : ip;
     }
 
     private bool IsMyNetwork(string[] ips)

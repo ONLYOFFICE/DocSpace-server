@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -30,20 +30,9 @@ namespace ASC.Api.Settings;
 /// SMTP settings API.
 ///</summary>
 [Scope]
-[DefaultRoute]
 [ApiController]
-public class SmtpSettingsController : ControllerBase
-{
-    private readonly PermissionContext _permissionContext;
-    private readonly CoreConfiguration _coreConfiguration;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly SecurityContext _securityContext;
-    private readonly IMapper _mapper;
-    private readonly SmtpOperation _smtpOperation;
-    private readonly TenantManager _tenantManager;
-
-
-    public SmtpSettingsController(
+[DefaultRoute("smtp")]
+public class SmtpSettingsController(
         PermissionContext permissionContext,
         CoreConfiguration coreConfiguration,
         CoreBaseSettings coreBaseSettings,
@@ -51,17 +40,8 @@ public class SmtpSettingsController : ControllerBase
         SecurityContext securityContext,
         SmtpOperation smtpOperation,
         TenantManager tenantManager)
-    {
-        _permissionContext = permissionContext;
-        _coreConfiguration = coreConfiguration;
-        _coreBaseSettings = coreBaseSettings;
-        _mapper = mapper;
-        _securityContext = securityContext;
-        _smtpOperation = smtpOperation;
-        _tenantManager = tenantManager;
-    }
-
-
+    : ControllerBase
+{
     /// <summary>
     /// Returns the current portal SMTP settings.
     /// </summary>
@@ -72,19 +52,19 @@ public class SmtpSettingsController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("smtp")]
+    [HttpGet("")]
     public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
     {
         await CheckSmtpPermissionsAsync();
 
-        var current = await _coreConfiguration.GetDefaultSmtpSettingsAsync();
+        var current = await coreConfiguration.GetDefaultSmtpSettingsAsync();
 
-        if (current.IsDefaultSettings && !_coreBaseSettings.Standalone)
+        if (current.IsDefaultSettings && !coreBaseSettings.Standalone)
         {
             current = SmtpSettings.Empty;
         }
 
-        var settings = _mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
+        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -101,7 +81,7 @@ public class SmtpSettingsController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("smtp")]
+    [HttpPost("")]
     public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
@@ -114,9 +94,9 @@ public class SmtpSettingsController : ControllerBase
 
         var settingConfig = ToSmtpSettingsConfig(inDto);
 
-        await _coreConfiguration.SetSmtpSettingsAsync(settingConfig);
+        await coreConfiguration.SetSmtpSettingsAsync(settingConfig);
 
-        var settings = _mapper.Map<SmtpSettings, SmtpSettingsDto>(settingConfig);
+        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(settingConfig);
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -152,24 +132,24 @@ public class SmtpSettingsController : ControllerBase
     /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SmtpSettingsDto, ASC.Web.Api">Default SMTP settings</returns>
     /// <path>api/2.0/smtpsettings/smtp</path>
     /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("smtp")]
+    [HttpDelete("")]
     public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
     {
         await CheckSmtpPermissionsAsync();
 
-        if (!(await _coreConfiguration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings)
+        if (!(await coreConfiguration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings)
         {
-            await _coreConfiguration.SetSmtpSettingsAsync(null);
+            await coreConfiguration.SetSmtpSettingsAsync(null);
         }
 
-        var current = await _coreConfiguration.GetDefaultSmtpSettingsAsync();
+        var current = await coreConfiguration.GetDefaultSmtpSettingsAsync();
 
-        if (current.IsDefaultSettings && !_coreBaseSettings.Standalone)
+        if (current.IsDefaultSettings && !coreBaseSettings.Standalone)
         {
             current = SmtpSettings.Empty;
         }
 
-        var settings = _mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
+        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -185,18 +165,18 @@ public class SmtpSettingsController : ControllerBase
     // <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
     // <path>api/2.0/smtpsettings/smtp/test</path>
     // <httpMethod>GET</httpMethod>
-    [HttpGet("smtp/test")]
+    [HttpGet("test")]
     public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
     {
         await CheckSmtpPermissionsAsync();
 
-        var settings = _mapper.Map<SmtpSettings, SmtpSettingsDto>(await _coreConfiguration.GetDefaultSmtpSettingsAsync());
+        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(await coreConfiguration.GetDefaultSmtpSettingsAsync());
 
-        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var tenant = await tenantManager.GetCurrentTenantAsync();
 
-        _smtpOperation.StartSmtpJob(settings, tenant, _securityContext.CurrentAccount.ID);
+        smtpOperation.StartSmtpJob(settings, tenant, securityContext.CurrentAccount.ID);
 
-        return _smtpOperation.GetStatus(tenant);
+        return smtpOperation.GetStatus(tenant);
     }
 
     // <summary>
@@ -209,17 +189,17 @@ public class SmtpSettingsController : ControllerBase
     // <returns type="ASC.Api.Settings.Smtp.SmtpOperationStatusRequestsDto, ASC.Web.Api">SMTP operation status</returns>
     // <path>api/2.0/smtpsettings/smtp/test/status</path>
     // <httpMethod>GET</httpMethod>
-    [HttpGet("smtp/test/status")]
+    [HttpGet("test/status")]
     public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
     {
         await CheckSmtpPermissionsAsync();
 
-        return _smtpOperation.GetStatus(await _tenantManager.GetCurrentTenantAsync());
+        return smtpOperation.GetStatus(await tenantManager.GetCurrentTenantAsync());
     }
 
     private async Task CheckSmtpPermissionsAsync()
     {            
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");

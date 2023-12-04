@@ -123,4 +123,7 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>백업 파일이 유효하지 않습니다. ONLYOFFICE v11.5 이상에서 생성된 파일을 사용해주세요.</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>백업이 포털의 전체 크기보다 큽니다</value>
+  </data>
 </root>

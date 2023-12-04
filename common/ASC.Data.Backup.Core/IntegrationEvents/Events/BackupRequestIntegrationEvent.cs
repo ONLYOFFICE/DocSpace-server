@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,19 +29,26 @@ namespace ASC.Data.Backup.Core.IntegrationEvents.Events;
 [ProtoContract]
 public record BackupRequestIntegrationEvent : IntegrationEvent
 {
+    private BackupRequestIntegrationEvent()
+    {
+        StorageParams = new Dictionary<string, string>();
+    }
+    
     public BackupRequestIntegrationEvent(BackupStorageType storageType,
                                   int tenantId,
                                   Guid createBy,
                                   Dictionary<string, string> storageParams,
                                   bool isScheduled = false,
                                   int backupsStored = 0,
-                                  string storageBasePath = "") : base(createBy, tenantId)
+                                  string storageBasePath = "",
+                                  string taskId = null) : base(createBy, tenantId)
     {
         StorageType = storageType;
         StorageParams = storageParams;
         IsScheduled = isScheduled;
         BackupsStored = backupsStored;
         StorageBasePath = storageBasePath;
+        TaskId = taskId;
     }
 
     [ProtoMember(1)]
@@ -58,5 +65,8 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(6)]
     public string StorageBasePath { get; private init; }
+
+    [ProtoMember(7)]
+    public string TaskId { get; private init; }
 }
 

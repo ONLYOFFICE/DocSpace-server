@@ -991,4 +991,22 @@
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Üçüncü tərəf inteqrasiyaları</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom müştəri identifikatoru</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom müştəri sirri</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Zoom hesabından istifadə edərək portala daxil olmanı təmin edin.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>İstifadəçilərinizə Zoom hesablarından istifadə edərək ONLYOFFICE-a daxil olmaq üçün bu proqramı aktiv edin. {0}Zoom Developers veb-saytına keçin və yeni ONLYOFFICE inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıda əlavə edin:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Həddindən artıq giriş cəhdi. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
+  </data>
 </root>

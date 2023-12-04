@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,11 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Data.Backup.Services;
 
 [Transient]
-public class BackupProgressItem : BaseBackupProgressItem
+public class BackupProgressItem(ILogger<BackupProgressItem> logger,
+        IServiceScopeFactory serviceProvider,
+        CoreBaseSettings coreBaseSettings,
+        NotifyHelper notifyHelper)
+    : BaseBackupProgressItem(logger, serviceProvider)
 {
     private Dictionary<string, string> _storageParams;
     private string _tempFolder;
@@ -39,22 +42,6 @@ public class BackupProgressItem : BaseBackupProgressItem
     private string _storageBasePath;
     private int _limit;
     
-    private readonly ILogger<BackupProgressItem> _logger;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly NotifyHelper _notifyHelper;
-
-    public BackupProgressItem(
-        ILogger<BackupProgressItem> logger,
-        IServiceScopeFactory serviceProvider,
-        CoreBaseSettings coreBaseSettings,
-        NotifyHelper notifyHelper)
-        : base(logger, serviceProvider)
-    {
-        _logger = logger;
-        _coreBaseSettings = coreBaseSettings;
-        _notifyHelper = notifyHelper;
-    }
-
     public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
     {
         _userId = Guid.Empty;
@@ -89,7 +76,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
 
-        var dateTime = _coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
+        var dateTime = coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
         var tempFile = "";
         var storagePath = "";
 
@@ -128,9 +115,7 @@ public class BackupProgressItem : BaseBackupProgressItem
             }
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
-            var repo = backupRepository;
-
-            await repo.SaveBackupRecordAsync(
+            await backupRepository.SaveBackupRecordAsync(
                 new BackupRecord
                 {
                     Id = Guid.Parse(Id),
@@ -151,7 +136,7 @@ public class BackupProgressItem : BaseBackupProgressItem
 
             if (_userId != Guid.Empty && !_isScheduled)
             {
-                await _notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
+                await notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
             }
 
 
@@ -160,7 +145,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         }
         catch (Exception error)
         {
-            _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+            logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
             Exception = error;
             IsCompleted = true;
         }
@@ -172,7 +157,7 @@ public class BackupProgressItem : BaseBackupProgressItem
             }
             catch (Exception error)
             {
-                _logger.ErrorPublish(error);
+                logger.ErrorPublish(error);
             }
 
             try
@@ -184,7 +169,7 @@ public class BackupProgressItem : BaseBackupProgressItem
             }
             catch (Exception error)
             {
-                _logger.ErrorCantDeleteFile(error);
+                logger.ErrorCantDeleteFile(error);
             }
         }
     }

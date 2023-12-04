@@ -64,4 +64,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Définir un mot de passe</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>La sauvegarde est plus grande que la taille totale du portail</value>
+  </data>
 </root>

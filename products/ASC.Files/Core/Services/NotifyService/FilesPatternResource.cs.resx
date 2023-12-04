@@ -61,8 +61,7 @@
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Všichni přihlášení vyplnili $DocumentTitle
 
-Tento email Vás informuje o tom, že všichni přihlášení vyplnili
-completed "$DocumentTitle":"$DocumentURL".</value>
+Tento email Vás informuje o tom, že všichni přihlášení vyplnili "$DocumentTitle":"$DocumentURL".</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
     <value>h1.$Message: $DocumentTitle

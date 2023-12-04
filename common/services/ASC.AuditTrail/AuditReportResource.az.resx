@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Ölkə</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Xarici keçid yaradıldı: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Xarici keçid silindi: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Xarici keçid quraşdırıldı: {0}. Rol: {1}</value>
+  </data>
 </root>

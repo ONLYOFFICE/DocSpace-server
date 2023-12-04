@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Pays</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Lien externe créé : {0}. Rôle : {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Lien externe supprimé : {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Lien externe mis à jour : {0}. Rôle : {1}</value>
+  </data>
 </root>

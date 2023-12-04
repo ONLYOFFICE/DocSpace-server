@@ -64,4 +64,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Ορισμός Συνθηματικού</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Το αντίγραφο ασφαλείας είναι μεγαλύτερο από το συνολικό μέγεθος της πύλης</value>
+  </data>
 </root>

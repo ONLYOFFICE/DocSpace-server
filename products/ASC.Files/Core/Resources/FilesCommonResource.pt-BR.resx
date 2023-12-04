@@ -416,4 +416,16 @@
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Você não pode marcar uma sala</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Link compartilhado</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link de convite</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>O número máximo de links não pode exceder {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Você tentou muitas vezes inserir sua senha. Por favor, tente novamente mais tarde</value>
+  </data>
 </root>

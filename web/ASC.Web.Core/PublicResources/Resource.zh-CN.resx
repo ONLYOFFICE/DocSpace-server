@@ -626,7 +626,7 @@
     <value>来自Twilio的电话号码（需短信授权）</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>连接应用程序，以使用Twitter账户登录门户并搜索联系人。</value>
+    <value>启动应用程序，以使用推特（Twitter）账户登录门户网站。</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>启用雅虎联系人导入的应用程序。</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>第三方集成</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom 客户端 ID</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom 客户端密钥</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>启用应用，使用 Zoom 帐号登录门户。</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>启用应用，支持用户使用 Zoom 帐号登录 ONLYOFFICE。{0}前往 Zoom Developers 网站，创建一个新的应用 ONLYOFFICE 集成。插入您在下方收到的数据：</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>登录失败的次数过多。请稍后再试</value>
   </data>
 </root>

@@ -780,4 +780,16 @@
   <data name="CityCol" xml:space="preserve">
     <value>도시</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>국가</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>외부 링크가 생성되었습니다: {0}. 역할: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>외부 링크가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>외부 링크가 업데이트되었습니다: {0}. 역할: {1}</value>
+  </data>
 </root>

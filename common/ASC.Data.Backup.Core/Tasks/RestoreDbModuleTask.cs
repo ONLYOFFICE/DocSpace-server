@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,7 +81,7 @@ public class RestoreDbModuleTask : PortalTaskBase
                         RestoreTable(connection.Fix(), (TableInfo)state, ref transactionsCommited,
                             ref rowsInserted), table, 5,
                     onAttemptFailure: _ => _columnMapper.Rollback(),
-                    onFailure: error => { throw ThrowHelper.CantRestoreTable(table.Name, error); });
+                    onFailure: error => throw ThrowHelper.CantRestoreTable(table.Name, error));
 
                 SetStepCompleted();
                 _logger.DebugRowsInserted(rowsInserted, table.Name);
@@ -231,7 +231,7 @@ public class RestoreDbModuleTask : PortalTaskBase
         {
             rows = rows
                 .ToTree(x => x[selfRelation.ParentColumn], x => x[selfRelation.ChildColumn])
-                .SelectMany(x => OrderNode(x));
+                .SelectMany(OrderNode);
         }
 
         return rows;
@@ -240,7 +240,7 @@ public class RestoreDbModuleTask : PortalTaskBase
     private static IEnumerable<DataRowInfo> OrderNode(TreeNode<DataRowInfo> node)
     {
         var result = new List<DataRowInfo> { node.Entry };
-        result.AddRange(node.Children.SelectMany(x => OrderNode(x)));
+        result.AddRange(node.Children.SelectMany(OrderNode));
 
         return result;
     }

@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -35,41 +35,18 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class FeedController : ControllerBase
-{
-    private readonly FeedReadedDataProvider _feedReadDataProvider;
-    private readonly ApiContext _apiContext;
-    private readonly ICache _newFeedsCountCache;
-    private readonly FeedAggregateDataProvider _feedAggregateDataProvider;
-    private readonly TenantUtil _tenantUtil;
-    private readonly SecurityContext _securityContext;
-    private readonly IMapper _mapper;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-
-    public FeedController(
-        FeedReadedDataProvider feedReadDataProvider,
+public class FeedController(FeedReadedDataProvider feedReadDataProvider,
         ApiContext apiContext,
         ICache newFeedsCountCache,
         FeedAggregateDataProvider feedAggregateDataProvider,
         TenantUtil tenantUtil,
         SecurityContext securityContext,
-        IMapper mapper, 
-        IDaoFactory daoFactory, 
+        IMapper mapper,
+        IDaoFactory daoFactory,
         FileSecurity fileSecurity)
-    {
-        _feedReadDataProvider = feedReadDataProvider;
-        _apiContext = apiContext;
-        _newFeedsCountCache = newFeedsCountCache;
-        _feedAggregateDataProvider = feedAggregateDataProvider;
-        _tenantUtil = tenantUtil;
-        _securityContext = securityContext;
-        _mapper = mapper;
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-    }
-
-    private string Key => $"newfeedscount/{_securityContext.CurrentAccount.ID}";
+    : ControllerBase
+{
+    private string Key => $"newfeedscount/{securityContext.CurrentAccount.ID}";
 
     /// <summary>
     /// Opens feeds for reading.
@@ -83,7 +60,7 @@ public class FeedController : ControllerBase
     [HttpPut("read")]
     public async Task Read()
     {
-        await _feedReadDataProvider.SetTimeReadedAsync();
+        await feedReadDataProvider.SetTimeReadedAsync();
     }
 
     /// <summary>
@@ -133,20 +110,20 @@ public class FeedController : ControllerBase
             Id = id,
             Product = product,
             Module = module,
-            Offset = Convert.ToInt32(_apiContext.StartIndex),
-            Max = Convert.ToInt32(_apiContext.Count) - 1,
+            Offset = Convert.ToInt32(apiContext.StartIndex),
+            Max = Convert.ToInt32(apiContext.Count) - 1,
             Author = author ?? Guid.Empty,
-            SearchKeys = _apiContext.FilterValues,
+            SearchKeys = apiContext.FilterValues,
             OnlyNew = onlyNew.HasValue && onlyNew.Value,
-            History = withRelated.HasValue && withRelated.Value,
+            History = withRelated.HasValue && withRelated.Value
         };
 
         if (from != null && to != null)
         {
-            var f = _tenantUtil.DateTimeFromUtc(from.UtcTime);
+            var f = tenantUtil.DateTimeFromUtc(from.UtcTime);
             filter.From = new DateTime(f.Year, f.Month, f.Day, 0, 0, 0);
 
-            var t = _tenantUtil.DateTimeFromUtc(to.UtcTime);
+            var t = tenantUtil.DateTimeFromUtc(to.UtcTime);
             filter.To = new DateTime(t.Year, t.Month, t.Day, 23, 59, 59);
         }
         else
@@ -160,7 +137,7 @@ public class FeedController : ControllerBase
 
         if (string.IsNullOrEmpty(id))
         {
-            lastTimeReaded = await _feedReadDataProvider.GetTimeReadedAsync();
+            lastTimeReaded = await feedReadDataProvider.GetTimeReadedAsync();
             readedDate = timeReaded != null ? timeReaded.UtcTime : lastTimeReaded;
         }
 
@@ -171,14 +148,14 @@ public class FeedController : ControllerBase
         }
         else if (timeReaded == null)
         {
-            await _feedReadDataProvider.SetTimeReadedAsync();
-            _newFeedsCountCache.Remove(Key);
+            await feedReadDataProvider.SetTimeReadedAsync();
+            newFeedsCountCache.Remove(Key);
         }
 
-        var feeds = (await _feedAggregateDataProvider
+        var feeds = (await feedAggregateDataProvider
             .GetFeedsAsync(filter))
             .GroupBy(n => n.GroupId,
-                     n => _mapper.Map<FeedResultItem, FeedDto>(n),
+                     n => mapper.Map<FeedResultItem, FeedDto>(n),
                      (_, group) =>
                      {
                          var firstFeed = group.First();
@@ -190,21 +167,21 @@ public class FeedController : ControllerBase
 
         return new { feeds, readedDate };
 
-        async Task CheckAccessAsync<T>(T id, string module)
+        async Task CheckAccessAsync<T>(T entryId, string fModule)
         {
             FileEntry<T> entry = null;
 
-            switch (module)
+            switch (fModule)
             {
                 case Constants.RoomsModule:
                 case Constants.FoldersModule:
                     {
-                        entry = await _daoFactory.GetFolderDao<T>().GetFolderAsync(id);
+                        entry = await daoFactory.GetFolderDao<T>().GetFolderAsync(entryId);
                         break;
                     }
                 case Constants.FilesModule:
                     {
-                        entry = await _daoFactory.GetFileDao<T>().GetFileAsync(id);
+                        entry = await daoFactory.GetFileDao<T>().GetFileAsync(entryId);
                         break;
                     }
             }
@@ -214,7 +191,7 @@ public class FeedController : ControllerBase
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMassage_FolderNotFound);
             }
 
-            if (!await _fileSecurity.CanReadAsync(entry))
+            if (!await fileSecurity.CanReadAsync(entry))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
             }
@@ -234,13 +211,13 @@ public class FeedController : ControllerBase
     public async Task<object> GetFreshNewsCountAsync()
     {
         var cacheKey = Key;
-        var resultfromCache = _newFeedsCountCache.Get<string>(cacheKey);
+        var resultfromCache = newFeedsCountCache.Get<string>(cacheKey);
 
         if (!int.TryParse(resultfromCache, out var result))
         {
-            var lastTimeReaded = await _feedReadDataProvider.GetTimeReadedAsync();
-            result = await _feedAggregateDataProvider.GetNewFeedsCountAsync(lastTimeReaded);
-            _newFeedsCountCache.Insert(cacheKey, result.ToString(), DateTime.UtcNow.AddMinutes(3));
+            var lastTimeReaded = await feedReadDataProvider.GetTimeReadedAsync();
+            result = await feedAggregateDataProvider.GetNewFeedsCountAsync(lastTimeReaded);
+            newFeedsCountCache.Insert(cacheKey, result.ToString(), DateTime.UtcNow.AddMinutes(3));
         }
 
         return result;

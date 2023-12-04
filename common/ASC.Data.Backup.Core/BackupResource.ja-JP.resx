@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>パスワードを設定する</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>バックアップがポータルの合計サイズより大きいです</value>
+  </data>
 </root>

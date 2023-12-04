@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,11 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Common.Radicale;
 
 [Scope]
-public class CardDavAddressbook : RadicaleEntity
+public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
+        RadicaleClient radicaleClient,
+        IConfiguration configuration,
+        InstanceCrypto instanceCrypto,
+        DbRadicale dbRadicale)
+    : RadicaleEntity(configuration, instanceCrypto)
 {
     private const string StrTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" +
          "<mkcol xmlns=\"DAV:\" xmlns:C=\"urn: ietf:params:xml: ns: caldav\" xmlns:CR=\"urn: ietf:params:xml: ns: carddav\" xmlns:I=\"http://apple.com/ns/ical/\" xmlns:INF=\"http://inf-it.com/ns/ab/\">" + "" +
@@ -39,28 +43,11 @@ public class CardDavAddressbook : RadicaleEntity
          "<CR:addressbook-description>{2}</CR:addressbook-description>" +
          "</prop></set></mkcol>";
 
-    private readonly ILogger<CardDavAddressbook> _logger;
-    private readonly RadicaleClient _radicaleClient;
-    private readonly DbRadicale _dbRadicale;
-
-    public CardDavAddressbook(
-        ILogger<CardDavAddressbook> logger,
-        RadicaleClient radicaleClient,
-        IConfiguration configuration,
-        InstanceCrypto instanceCrypto,
-        DbRadicale dbRadicale)
-        : base(configuration, instanceCrypto)
-    {
-        _logger = logger;
-        _radicaleClient = radicaleClient;
-        _dbRadicale = dbRadicale;
-    }
-
     public async Task<DavResponse> Create(string name, string description, string backgroundColor, string uri, string authorization, bool isReadonly = true)
     {
         var rewriterUri = uri.StartsWith("http") ? uri : "";
 
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = uri,
             Authorization = authorization,
@@ -68,7 +55,7 @@ public class CardDavAddressbook : RadicaleEntity
             Data = GetData(StrTemplate, name, description, backgroundColor)
         };
 
-        return await _radicaleClient.CreateAsync(davRequest).ConfigureAwait(false);
+        return await radicaleClient.CreateAsync(davRequest).ConfigureAwait(false);
     }
 
     public async Task<DavResponse> Update(string name, string description, string backgroundColor, string uri, string userName, string authorization, bool isReadonly = true)
@@ -79,7 +66,7 @@ public class CardDavAddressbook : RadicaleEntity
 
         var requestUrl = _defaultRadicaleUrl + "/" + HttpUtility.UrlEncode(userName) + "/" + addbookId;
 
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = requestUrl,
             Authorization = authorization,
@@ -87,7 +74,7 @@ public class CardDavAddressbook : RadicaleEntity
             Header = header
         };
 
-        return await _radicaleClient.UpdateAsync(davRequest).ConfigureAwait(false);
+        return await radicaleClient.UpdateAsync(davRequest).ConfigureAwait(false);
     }
 
 
@@ -95,21 +82,21 @@ public class CardDavAddressbook : RadicaleEntity
     {
         var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
         var defaultUrlconn = _defaultRadicaleUrl + path;
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = defaultUrlconn,
             Authorization = authorization,
             Header = myUri
         };
 
-        return await _radicaleClient.GetAsync(davRequest).ConfigureAwait(false);
+        return await radicaleClient.GetAsync(davRequest).ConfigureAwait(false);
     }
 
     public async Task<DavResponse> UpdateItem(string url, string authorization, string data, string headerUrl = "")
     {
         var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
         var requrl = _defaultRadicaleUrl + path;
-        var davRequest = new DavRequest()
+        var davRequest = new DavRequest
         {
             Url = requrl,
             Authorization = authorization,
@@ -117,7 +104,7 @@ public class CardDavAddressbook : RadicaleEntity
             Data = data
         };
 
-        return await _radicaleClient.UpdateItemAsync(davRequest).ConfigureAwait(false);
+        return await radicaleClient.UpdateItemAsync(davRequest).ConfigureAwait(false);
     }
 
     public string GetUserSerialization(CardDavItem user)
@@ -155,12 +142,12 @@ public class CardDavAddressbook : RadicaleEntity
         };
         try
         {
-            await _radicaleClient.RemoveAsync(davRequest);
-            await _dbRadicale.RemoveCardDavUserAsync(tenantId, userID);
+            await radicaleClient.RemoveAsync(davRequest);
+            await dbRadicale.RemoveCardDavUserAsync(tenantId, userID);
         }
         catch (Exception ex)
         {
-            _logger.ErrorWithException(ex);
+            logger.ErrorWithException(ex);
         }
     }
 
@@ -170,21 +157,21 @@ public class CardDavAddressbook : RadicaleEntity
         if (changedEmail != null)
         {
             var deleteUrlBook = GetRadicaleUrl(uri, changedEmail.ToLower(), true, true);
-            var davRequest = new DavRequest()
+            var davRequest = new DavRequest
             {
                 Url = deleteUrlBook,
                 Authorization = authorization
             };
 
-            await _radicaleClient.RemoveAsync(davRequest);
+            await radicaleClient.RemoveAsync(davRequest);
 
             try
             {
-                await _dbRadicale.RemoveCardDavUserAsync(tenantId, user.ID);
+                await dbRadicale.RemoveCardDavUserAsync(tenantId, user.ID);
             }
             catch (Exception ex)
             {
-                _logger.ErrorWithException(ex);
+                logger.ErrorWithException(ex);
             }
         }
 
@@ -199,7 +186,7 @@ public class CardDavAddressbook : RadicaleEntity
             }
             catch (Exception ex)
             {
-                _logger.ErrorWithException(ex);
+                logger.ErrorWithException(ex);
             }
         }
     }

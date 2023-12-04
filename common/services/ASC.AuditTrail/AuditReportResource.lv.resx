@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Valsts</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Izveidota ārējā saite: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Izdzēsta ārējā saite: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Atjaunināta ārējā saite: {0}. Loma: {1}</value>
+  </data>
 </root>

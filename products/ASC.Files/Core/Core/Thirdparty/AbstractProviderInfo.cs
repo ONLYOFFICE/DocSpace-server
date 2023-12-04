@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,7 +28,9 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Core.Core.Thirdparty;
 
-internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> : IProviderInfo<TFile, TFolder, TItem>
+internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(DisposableWrapper wrapper,
+        ProviderInfoHelper providerInfoHelper)
+    : IProviderInfo<TFile, TFolder, TItem>
     where TFile : class, TItem
     where TFolder : class, TItem
     where TItem : class
@@ -36,14 +38,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
 {
     public abstract Selector Selector { get; }
     public abstract ProviderFilter ProviderFilter { get; }
-    private readonly DisposableWrapper _wrapper;
-    internal readonly ProviderInfoHelper ProviderInfoHelper;
-
-    protected AbstractProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
-    {
-        _wrapper = wrapper;
-        ProviderInfoHelper = providerInfoHelper;
-    }
+    internal readonly ProviderInfoHelper ProviderInfoHelper = providerInfoHelper;
 
     public DateTime CreateOn { get; set; }
     public string CustomerTitle { get; set; }
@@ -57,15 +52,15 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
     public string RootFolderId => $"{Selector.Id}-" + ProviderId;
     public FolderType RootFolderType { get; set; }
     public OAuth20Token Token { get; set; }
-    public bool StorageOpened => _wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
+    public bool StorageOpened => wrapper.TryGetStorage(ProviderId, out var storage) && storage.IsOpened;
 
     public Task<IThirdPartyStorage<TFile, TFolder, TItem>> StorageAsync
     {
         get
         {
-            if (!_wrapper.TryGetStorage<IThirdPartyStorage<TFile, TFolder, TItem>>(ProviderId, out var storage) || !storage.IsOpened)
+            if (!wrapper.TryGetStorage<IThirdPartyStorage<TFile, TFolder, TItem>>(ProviderId, out var storage) || !storage.IsOpened)
             {
-                return _wrapper.CreateStorageAsync<IThirdPartyStorage<TFile, TFolder, TItem>, TProvider>(Token, ProviderId);
+                return wrapper.CreateStorageAsync<IThirdPartyStorage<TFile, TFolder, TItem>, TProvider>(Token, ProviderId);
             }
 
             return Task.FromResult(storage);
@@ -89,10 +84,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider> :
 
     public Task InvalidateStorageAsync()
     {
-        if (_wrapper != null)
-        {
-            _wrapper.Dispose();
-        }
+        wrapper?.Dispose();
 
         return CacheResetAsync();
     }
@@ -145,7 +137,7 @@ public class ProviderInfoHelper
         _cacheNotify = cacheNotify;
         foreach (var selector in _selectors)
         {
-            _cacheNotify.Subscribe((i) =>
+            _cacheNotify.Subscribe(i =>
             {
                 if (i.ResetAll)
                 {
@@ -253,19 +245,11 @@ public class ProviderInfoHelper
 }
 
 [Transient(Additional = typeof(DisposableWrapperExtension))]
-public class DisposableWrapper : IDisposable
+public class DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider,
+        OAuth20TokenHelper oAuth20TokenHelper)
+    : IDisposable
 {
-    private readonly ConsumerFactory _consumerFactory;
-    private readonly OAuth20TokenHelper _oAuth20TokenHelper;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<int, IThirdPartyStorage> _storages = new();
-
-    public DisposableWrapper(ConsumerFactory consumerFactory, IServiceProvider serviceProvider, OAuth20TokenHelper oAuth20TokenHelper)
-    {
-        _consumerFactory = consumerFactory;
-        _serviceProvider = serviceProvider;
-        _oAuth20TokenHelper = oAuth20TokenHelper;
-    }
 
     public void Dispose()
     {
@@ -309,9 +293,9 @@ public class DisposableWrapper : IDisposable
 
         if (token.IsExpired)
         {
-            token = _oAuth20TokenHelper.RefreshToken<T>(_consumerFactory, token);
+            token = oAuth20TokenHelper.RefreshToken<T>(consumerFactory, token);
 
-            var dbDao = _serviceProvider.GetService<ProviderAccountDao>();
+            var dbDao = serviceProvider.GetService<ProviderAccountDao>();
             await dbDao.UpdateProviderInfoAsync(id, new AuthData(token: token.ToJson()));
         }
     }
@@ -320,7 +304,7 @@ public class DisposableWrapper : IDisposable
         where T : IThirdPartyStorage
         where T1 : Consumer, IOAuthProvider, new()
     {
-        var storage = _serviceProvider.GetService<T>();
+        var storage = serviceProvider.GetService<T>();
         await CheckTokenAsync<T1>(token, id);
 
         storage.Open(token);

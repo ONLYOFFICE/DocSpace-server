@@ -59,19 +59,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
-    <value>h1. Всички подписващи лица завършиха $DocumentTitle 
+    <value>h1. Всички подписващи лица завършиха $DocumentTitle
+
 Това е известие по имейл, за да Ви уведомим, че всички подписващи лица са завършили "$DocumentTitle":"$DocumentURL".</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
-    <value>h1. $Message: $DocumentTitle 
+    <value>h1. $Message: $DocumentTitle
 
 Влезте в своя DocuSign акаунт за повече информация.</value>
   </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
-    <value>h1. Изпращане на поща 
+    <value>h1. Изпращане на поща
 
-Това е известие по имейл, което ви информира, че сте поискали изпращането на съобщения $MailsCount и процесът е завършен.
-$Message
+Това е известие по имейл, което ви информира, че сте поискали изпращането на съобщения $MailsCount и процесът е завършен. $Message
 
 Успешно изпратените пощенски съобщения могат да бъдат намерени в папката "Изпратени":"$__VirtualRootPath/ addons/ mail/#sent" на модула Поща.</value>
   </data>

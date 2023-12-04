@@ -761,7 +761,7 @@
     <value>Número de telefone do Twilio (exigido para autorização SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para entrar no portal usando uma conta do Twitter e pesquisar por contatos.</value>
+    <value>Conecte o aplicativo para entrar no portal usando uma conta do Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Habilite este aplicativo para permitir que seus usuários acessem a ONLYOFFICE usando seu Twitter e vinculem as contas de seus clientes no Twitter ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do Twitter e crie um novo aplicativo de integração ONLYOFFICE. Insira os dados que você recebeu abaixo:</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integrações de terceiros</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Senha do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ative este aplicativo para permitir que seus usuários façam login no ONLYOFFICE usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o ONLYOFFICE. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
   </data>
 </root>

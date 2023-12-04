@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Web.Files.HttpHandlers;
 
 public class ChunkedUploaderHandler
 {
-    public ChunkedUploaderHandler(RequestDelegate next)
+    public ChunkedUploaderHandler(RequestDelegate _)
     {
     }
 
@@ -39,20 +39,7 @@ public class ChunkedUploaderHandler
 }
 
 [Scope]
-public class ChunkedUploaderHandlerService
-{
-    private readonly TenantManager _tenantManager;
-    private readonly FileUploader _fileUploader;
-    private readonly FilesMessageService _filesMessageService;
-    private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
-    private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
-    private readonly SocketManager _socketManager;
-    private readonly FileDtoHelper _filesWrapperHelper;
-    private readonly ILogger<ChunkedUploaderHandlerService> _logger;
-    private readonly AuthContext _authContext;
-
-    public ChunkedUploaderHandlerService(
-        ILogger<ChunkedUploaderHandlerService> logger,
+public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService> logger,
         TenantManager tenantManager,
         FileUploader fileUploader,
         FilesMessageService filesMessageService,
@@ -62,17 +49,6 @@ public class ChunkedUploaderHandlerService
         FileDtoHelper filesWrapperHelper,
         AuthContext authContext)
     {
-        _tenantManager = tenantManager;
-        _fileUploader = fileUploader;
-        _filesMessageService = filesMessageService;
-        _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
-        _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
-        _socketManager = socketManager;
-        _filesWrapperHelper = filesWrapperHelper;
-        _logger = logger;
-        _authContext = authContext;
-    }
-
     public async Task Invoke(HttpContext context)
     {
         try
@@ -105,7 +81,7 @@ public class ChunkedUploaderHandlerService
                 return;
             }
 
-            if ((await _tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
+            if ((await tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
             {
                 await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
@@ -115,51 +91,51 @@ public class ChunkedUploaderHandlerService
             switch (request.Type())
             {
                 case ChunkedRequestType.Abort:
-                    await _fileUploader.AbortUploadAsync<T>(request.UploadId);
+                    await fileUploader.AbortUploadAsync<T>(request.UploadId);
                     await WriteSuccess(context, null);
 
                     return;
 
                 case ChunkedRequestType.Initiate:
-                    var createdSession = await _fileUploader.InitiateUploadAsync(request.FolderId, request.FileId, request.FileName, request.FileSize, request.Encrypted);
-                    await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true));
+                    var createdSession = await fileUploader.InitiateUploadAsync(request.FolderId, request.FileId, request.FileName, request.FileSize, request.Encrypted);
+                    await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true));
 
                     return;
 
                 case ChunkedRequestType.Upload:
                     {
-                        var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize);
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize);
 
-                        var chunks = _chunkedUploadSessionHolder.GetChunks(resumedSession);
-                        var bytesUploaded = chunks.Sum(c => c.Value == null ? 0 : c.Value.Size);
+                        var chunks = chunkedUploadSessionHolder.GetChunks(resumedSession);
+                        var bytesUploaded = chunks.Sum(c => c.Value?.Size ?? 0);
                         if (bytesUploaded == resumedSession.BytesTotal)
                         {
-                            resumedSession = await _fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                            resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                             await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                            _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
+                            _ = filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
-                            await _socketManager.CreateFileAsync(resumedSession.File);
+                            await socketManager.CreateFileAsync(resumedSession.File);
                         }
                         else
                         {
-                            await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                            await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
                         }
 
                         return;
                     }
                 case ChunkedRequestType.UploadAsync:
                     {
-                        var resumedSession = await _fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize, request.ChunkNumber);
-                        await WriteSuccess(context, await _chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, request.ChunkStream, request.ChunkSize, request.ChunkNumber);
+                        await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
                         return;
                     }
                 case ChunkedRequestType.Finalize:
-                    var session = await _fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                    var session = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
 
                     await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
-                    _ = _filesMessageService.SendAsync(MessageAction.FileUploaded, session.File, session.File.Title);
+                    _ = filesMessageService.SendAsync(MessageAction.FileUploaded, session.File, session.File.Title);
 
-                    await _socketManager.CreateFileAsync(session.File);
+                    await socketManager.CreateFileAsync(session.File);
                     return;
                 default:
                     await WriteError(context, "Unknown request type.");
@@ -168,19 +144,19 @@ public class ChunkedUploaderHandlerService
         }
         catch (FileNotFoundException error)
         {
-            _logger.ErrorChunkedUploaderHandlerService(error);
+            logger.ErrorChunkedUploaderHandlerService(error);
             await WriteError(context, FilesCommonResource.ErrorMassage_FileNotFound);
         }
         catch (Exception error)
         {
-            _logger.ErrorChunkedUploaderHandlerService(error);
+            logger.ErrorChunkedUploaderHandlerService(error);
             await WriteError(context, error.Message);
         }
     }
 
     private bool TryAuthorize<T>(ChunkedRequestHelper<T> request)
     {
-        if (!_authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated)
         {
             return false;
         }
@@ -192,8 +168,8 @@ public class ChunkedUploaderHandlerService
 
         if (!string.IsNullOrEmpty(request.UploadId))
         {
-            var uploadSession = _chunkedUploadSessionHolder.GetSession<T>(request.UploadId);
-            if (uploadSession != null && _authContext.CurrentAccount.ID == uploadSession.UserId)
+            var uploadSession = chunkedUploadSessionHolder.GetSession<T>(request.UploadId);
+            if (uploadSession != null && authContext.CurrentAccount.ID == uploadSession.UserId)
             {
                 return true;
             }
@@ -217,7 +193,7 @@ public class ChunkedUploaderHandlerService
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions()
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions
         {
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -235,7 +211,7 @@ public class ChunkedUploaderHandlerService
             title = file.Title,
             provider_key = file.ProviderKey,
             uploaded = true,
-            file = await _filesWrapperHelper.GetAsync(file)
+            file = await filesWrapperHelper.GetAsync(file)
         };
     }
 }
@@ -251,11 +227,10 @@ public enum ChunkedRequestType
 }
 
 [DebuggerDisplay("{Type} ({UploadId})")]
-public class ChunkedRequestHelper<T>
+public class ChunkedRequestHelper<T>(HttpRequest request)
 {
-    private readonly HttpRequest _request;
+    private readonly HttpRequest _request = request ?? throw new ArgumentNullException(nameof(request));
     private IFormFile _file;
-    private int? _tenantId;
     private long? _fileContentLength;
 
     public ChunkedRequestType Type()
@@ -287,26 +262,6 @@ public class ChunkedRequestHelper<T>
 
     public string UploadId => _request.Query["uid"];
 
-    public int TenantId
-    {
-        get
-        {
-            if (!_tenantId.HasValue)
-            {
-                if (int.TryParse(_request.Query["tid"], out var v))
-                {
-                    _tenantId = v;
-                }
-                else
-                {
-                    _tenantId = -1;
-                }
-            }
-
-            return _tenantId.Value;
-        }
-    }
-
     public T FolderId
     {
         get
@@ -315,7 +270,7 @@ public class ChunkedRequestHelper<T>
 
             if (queryValue.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
             return IdConverter.Convert<T>(queryValue[0]);
@@ -330,7 +285,7 @@ public class ChunkedRequestHelper<T>
 
             if (queryValue.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
             return IdConverter.Convert<T>(queryValue[0]);
@@ -393,18 +348,13 @@ public class ChunkedRequestHelper<T>
         }
     }
 
-    public ChunkedRequestHelper(HttpRequest request)
-    {
-        _request = request ?? throw new ArgumentNullException(nameof(request));
-    }
-
     private bool IsFileDataSet()
     {
-        return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default(T));
+        return !string.IsNullOrEmpty(FileName) && !EqualityComparer<T>.Default.Equals(FolderId, default);
     }
 }
 
-public static class ChunkedUploaderHandlerExtention
+public static class ChunkedUploaderHandlerExtension
 {
     public static IApplicationBuilder UseChunkedUploaderHandler(this IApplicationBuilder builder)
     {

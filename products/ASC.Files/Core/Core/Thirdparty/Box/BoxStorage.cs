@@ -1,49 +1,45 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Box.V2.Exceptions;
 
 using BoxSDK = Box.V2;
 
 namespace ASC.Files.Thirdparty.Box;
 
 [Transient]
-internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
+internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 {
     private BoxClient _boxClient;
 
     private readonly List<string> _boxFields = new() { "created_at", "modified_at", "name", "parent", "size" };
 
     public bool IsOpened { get; private set; }
-    private readonly TempStream _tempStream;
 
     private readonly long _maxChunkedUploadFileSize = 250L * 1024L * 1024L;
-
-    public BoxStorage(TempStream tempStream)
-    {
-        _tempStream = tempStream;
-    }
 
     public void Open(OAuth20Token token)
     {
@@ -72,7 +68,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         }
         catch (Exception ex)
         {
-            if (ex.InnerException is BoxSDK.Exceptions.BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            if (ex.InnerException is BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
             {
                 return null;
             }
@@ -102,7 +98,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
         }
         catch (Exception ex)
         {
-            if (ex.InnerException is BoxSDK.Exceptions.BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            if (ex.InnerException is BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
             {
                 return Task.FromResult<BoxFile>(null);
             }
@@ -132,7 +128,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
             return str;
         }
 
-        var tempBuffer = _tempStream.Create();
+        var tempBuffer = tempStream.Create();
         if (str != null)
         {
             await str.CopyToAsync(tempBuffer);
@@ -266,7 +262,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
 
     public async Task<long> GetMaxUploadSizeAsync()
     {
-        var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string>() { "max_upload_size" });
+        var boxUser = await _boxClient.UsersManager.GetCurrentUserInformationAsync(new List<string> { "max_upload_size" });
         var max = boxUser.MaxUploadSize ?? _maxChunkedUploadFileSize;
 
         //todo: without chunked uploader:
@@ -277,7 +273,7 @@ internal class BoxStorage : IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>
     {
         var boxRepresentation = new BoxRepresentationRequest();
         boxRepresentation.FileId = fileId;
-        boxRepresentation.XRepHints = $"[jpg?dimensions=320x320]";
+        boxRepresentation.XRepHints = "[jpg?dimensions=320x320]";
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);
     }
 }

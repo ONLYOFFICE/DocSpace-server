@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,14 +53,14 @@
 namespace ASC.Data.Encryption;
 
 [Transient]
-public class Crypt : ICrypt
+public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 {
     private string Storage { get; set; }
     private EncryptionSettings Settings { get; set; }
     private string TempDir { get; set; }
 
-    private IConfiguration Configuration { get; set; }
-    public TempPath TempPath { get; }
+    private IConfiguration Configuration { get; set; } = configuration;
+    public TempPath TempPath { get; } = tempPath;
 
     public void Init(string storageName, EncryptionSettings encryptionSettings)
     {
@@ -69,17 +69,14 @@ public class Crypt : ICrypt
         TempDir = TempPath.GetTempPath();
     }
 
-    public Crypt(IConfiguration configuration, TempPath tempPath)
-    {
-        Configuration = configuration;
-        TempPath = tempPath;
-    }
-
     public byte Version { get { return 1; } }
 
     public void EncryptFile(string filePath)
     {
-        if (string.IsNullOrEmpty(Settings.Password)) return;
+        if (string.IsNullOrEmpty(Settings.Password))
+        {
+            return;
+        }
 
         var metadata = new Metadata(Configuration);
 
@@ -199,7 +196,10 @@ public class Crypt : ICrypt
 
             using (var fileStream = File.OpenRead(filePath))
             {
-                if (!metadata.TryReadFromStream(fileStream, Version)) return;
+                if (!metadata.TryReadFromStream(fileStream, Version))
+                {
+                    return;
+                }
 
                 metadata.ComputeAndValidateHmacHash(fileStream);
 
@@ -266,11 +266,9 @@ public class Crypt : ICrypt
         {
             return metadata.GetFileSize();
         }
-        else
-        {
+
             return new FileInfo(filePath).Length;
         }
-    }
 
 
     private string GetUniqFileName(string filePath, string ext)

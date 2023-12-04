@@ -25,5 +25,10 @@
     "winston": "^3.8.2",
     "winston-cloudwatch": "^6.1.1",
     "winston-daily-rotate-file": "^4.5.5"
-  }
+  },
+  "engines": {
+    "node": ">=18",
+    "yarn": ">=3"
+  },
+  "packageManager": "yarn@3.2.4"
 }

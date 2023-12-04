@@ -253,7 +253,7 @@
     <value>Հաճախորդի գաղտնիք</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Միացրեք հավելվածին պորտալ մուտք գործելու համար՝ օգտագործելով Twitter հաշիվ և որոնել կոնտակտներ.</value>
+    <value>Միացրեք հավելվածին պորտալ մուտք գործելու համար՝ օգտագործելով Twitter-ի օգտահաշիվը</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Միացրեք այս հավելվածը՝ թույլ տալու ձեր օգտատերերին մուտք գործել ONLYOFFICE՝ օգտագործելով իրենց Twitter-ը և կապել իրենց հաճախորդների Twitter հաշիվները CRM մոդուլին: {0}Գնացեք Twitter Developers Portal և ստեղծեք նոր հավելված ONLYOFFICE ինտեգրում: Տեղադրեք ստորև ստացված տվյալները՝</value>
@@ -1049,5 +1049,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Երրորդ կողմի ինտեգրումներ</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Մեծացնել</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Մեծացնել հաճախորդի ID-ին</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Մեծացնել հաճախորդի գաղտնիությունը</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Ակտիվացրեք հավելվածին մուտք գործել պորտալ՝ օգտագործելով Մեծացնել հաշիվը:</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Միացրեք այս հավելվածը, որպեսզի ձեր օգտատերերին թույլ տա մուտք գործել ONLYOFFICE՝ օգտագործելով իրենց Մեծացնել  հաշիվները:{0}Գնացեք Մեծացնել ծրագրավորողների կայք և ստեղծեք նոր հավելված ONLYOFFICE ինտեգրում: Տեղադրեք ստորև ստացված տվյալները.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Չափից շատ մուտք գործելու փորձեր: Խնդրում ենք փորձել մի փոքր ուշ։</value>
   </data>
 </root>

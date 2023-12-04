@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -29,7 +29,7 @@ namespace ASC.Web.Files.Configuration;
 [Scope]
 public class ProductEntryPoint : Product
 {
-    internal const string ProductPath = "/";
+    private const string ProductPath = "/";
 
     private readonly FilesSpaceUsageStatManager _filesSpaceUsageStatManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -94,14 +94,6 @@ public class ProductEntryPoint : Product
 
     public override void Init()
     {
-        List<string> adminOpportunities() => (_coreBaseSettings.CustomMode
-                                                           ? CustomModeResource.ProductAdminOpportunitiesCustomMode
-                                                           : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
-
-        List<string> userOpportunities() => (_coreBaseSettings.CustomMode
-                                     ? CustomModeResource.ProductUserOpportunitiesCustomMode
-                                     : FilesCommonResource.ProductUserOpportunities).Split('|').ToList();
-
         _productContext =
             new ProductContext
             {
@@ -111,33 +103,22 @@ public class ProductEntryPoint : Product
                 DefaultSortOrder = 10,
                 //SubscriptionManager = SubscriptionManager,
                 SpaceUsageStatManager = _filesSpaceUsageStatManager,
-                AdminOpportunities = adminOpportunities,
-                UserOpportunities = userOpportunities,
-                CanNotBeDisabled = true,
+                AdminOpportunities = AdminOpportunities,
+                UserOpportunities = UserOpportunities,
+                CanNotBeDisabled = true
             };
 
-        if (_notifyConfiguration != null)
-        {
-            _notifyConfiguration.Configure();
-        }
+        _notifyConfiguration?.Configure();
+        return;
+
+        List<string> UserOpportunities() => (_coreBaseSettings.CustomMode
+            ? CustomModeResource.ProductUserOpportunitiesCustomMode
+            : FilesCommonResource.ProductUserOpportunities).Split('|').ToList();
+
         //SearchHandlerManager.Registry(new SearchHandler());
-    }
-
-    public string GetModuleResource(string ResourceClassTypeName, string ResourseKey)
-    {
-        if (string.IsNullOrEmpty(ResourseKey))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            return (string)Type.GetType(ResourceClassTypeName).GetProperty(ResourseKey, BindingFlags.Static | BindingFlags.Public).GetValue(null, null);
-        }
-        catch (Exception)
-        {
-            return string.Empty;
-        }
+        List<string> AdminOpportunities() => (_coreBaseSettings.CustomMode
+            ? CustomModeResource.ProductAdminOpportunitiesCustomMode
+            : FilesCommonResource.ProductAdminOpportunities).Split('|').ToList();
     }
 
     public override async Task<IEnumerable<ActivityInfo>> GetAuditEventsAsync(DateTime scheduleDate, Guid userId, Tenant tenant, WhatsNewType whatsNewType)
@@ -184,23 +165,15 @@ public class ProductEntryPoint : Product
                 Data = e.Date
             };
 
-            if (e.Action != (int)MessageAction.UserFileUpdated)
-            {
-                activityInfo.FileTitle = e.Description[0];
-            }
-            else
-            {
-                activityInfo.FileTitle = e.Description[1];
-            }
+            activityInfo.FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1];
 
-            if (e.Action == (int)MessageAction.RoomCreated && !docSpaceAdmin)
+            switch (e.Action)
             {
-                continue;
-            }
-
-            if (e.Action is (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated)
-            {
-                activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                case (int)MessageAction.RoomCreated when !docSpaceAdmin:
+                    continue;
+                case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
+                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                    break;
             }
 
             var obj = e.Description.LastOrDefault();
@@ -208,24 +181,26 @@ public class ProductEntryPoint : Product
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
 
-            if (e.Action is (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated)
+            switch (e.Action)
             {
-                if (docSpaceAdmin)
-                {
-                    result.Add(activityInfo);
-                }
+                case (int)MessageAction.UserCreated or (int)MessageAction.UserUpdated:
+                    {
+                        if (docSpaceAdmin)
+                        {
+                            result.Add(activityInfo);
+                        }
 
-                continue;
-            }
-
-            if (e.Action == (int)MessageAction.UsersUpdatedType)
-            {
-                if (docSpaceAdmin)
-                {
-                    activityInfo.UserRole = GetDocSpaceRoleString((EmployeeType)additionalInfo.UserRole);
-                    result.Add(activityInfo);
-                }
-                continue;
+                        continue;
+                    }
+                case (int)MessageAction.UsersUpdatedType:
+                    {
+                        if (docSpaceAdmin)
+                        {
+                            activityInfo.UserRole = GetDocSpaceRoleString((EmployeeType)additionalInfo.UserRole);
+                            result.Add(activityInfo);
+                        }
+                        continue;
+                    }
             }
 
             var roomId = additionalInfo.RoomId;
@@ -336,11 +311,13 @@ public class ProductEntryPoint : Product
         {
             return true;
         }
-        else if (IsRoomAdminAction())
+
+        if (IsRoomAdminAction())
         {
             return false;
         }
-        else if (targetUsers != null
+
+        if (targetUsers != null
             && !targetUsers.Contains(userId)
             && IsRoomAdminOrTargetUserAction())
         {

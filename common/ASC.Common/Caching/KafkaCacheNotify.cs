@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessage<T>, new()
+public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
 {
     private IProducer<AscCacheItem, T> _producer;
 
@@ -60,14 +60,11 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
     {
         try
         {
-            if (_producer == null)
-            {
-                _producer = new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
+            _producer ??= new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
                 .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
                 .SetKeySerializer(_keySerializer)
                 .SetValueSerializer(_valueSerializer)
                 .Build();
-            }
 
             var channelName = GetChannelName(notifyAction);
 
@@ -101,14 +98,11 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
     {
         try
         {
-            if (_producer == null)
-            {
-                _producer = new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
+            _producer ??= new ProducerBuilder<AscCacheItem, T>(new ProducerConfig(_clientConfig))
                 .SetErrorHandler((_, e) => _logger.Error(e.ToString()))
                 .SetKeySerializer(_keySerializer)
                 .SetValueSerializer(_valueSerializer)
                 .Build();
-            }
 
             var channelName = GetChannelName(cacheNotifyAction);
 
@@ -145,7 +139,10 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
         _cancelationToken[channelName] = new CancellationTokenSource();
         _actions[channelName] = onchange;
 
-        async Task actionAsync()
+        Task.Run(ActionAsync);
+        return;
+
+        async Task ActionAsync()
         {
             var conf = new ConsumerConfig(_clientConfig)
             {
@@ -212,19 +209,14 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : IMessa
                 c.Close();
             }
         }
-
-        Task.Run(actionAsync);
     }
 
     public void Unsubscribe(CacheNotifyAction notifyAction)
     {
         _cancelationToken.TryGetValue(GetChannelName(notifyAction), out var source);
 
-        if (source != null)
-        {
-            source.Cancel();
+        source?.Cancel();
         }
-    }
 
     public void Dispose()
     {

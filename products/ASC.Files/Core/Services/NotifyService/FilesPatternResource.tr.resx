@@ -76,14 +76,14 @@ Bu e-posta bildirimi $MailsCount mesajlarının postalanmasına yönelik talebin
 Başarıyla gönderilen e-posta mesajlarına E-posta modülündeki "Gönderilen":"$__VirtualRootPath/addons/mail/#sent" klasöründen erişebilirsiniz.</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1.$__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı "$DocumentTitle":"$DocumentURL" dosyasına erişiminize şu erişim haklarıyla: "$AccessRights" izin verdi.
+    <value>h1. $__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı "$DocumentTitle":"$DocumentURL" dosyasına erişiminize şu erişim haklarıyla: "$AccessRights" izin verdi.
 
 Portal adresiniz: "$__VirtualRootPath":"$__VirtualRootPath"
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1.$__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı
+    <value>h1. $__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı
 
 "$DocumentTitle":"$DocumentURL" klasörüne erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
 

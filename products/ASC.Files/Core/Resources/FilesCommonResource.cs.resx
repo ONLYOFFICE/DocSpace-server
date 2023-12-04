@@ -416,4 +416,16 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>Zobrazení a stažení sdílených dokumentů. Nahrávání souborů do sdílených složek. Zaručena nejvyšší kompatibilita s formáty docx, xlsx, pptx.</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Sdílený odkaz</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Odkaz na pozvánku</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maximální počet odkazů nesmí překročit {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Heslo jste se pokoušeli zadat příliš mnohokrát. Zkuste to prosím později</value>
+  </data>
 </root>

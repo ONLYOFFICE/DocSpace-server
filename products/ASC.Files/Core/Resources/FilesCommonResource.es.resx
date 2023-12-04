@@ -416,4 +416,16 @@
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>No puede editar salas archivadas</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Enlace compartido</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Enlace de invitación</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>El número máximo de enlaces no puede superar {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Ha intentado introducir su contraseña demasiadas veces. Vuelva a intentarlo más tarde</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,3 +82,5 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Newtonsoft.Json.Linq;
 
 global using NLog;
+
+global using ILogger = Microsoft.Extensions.Logging.ILogger;

@@ -123,4 +123,7 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>El archivo de copia de seguridad no es válido. Por favor, utilice un archivo creado en ONLYOFFICE v11.5 o superior.</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>La copia de seguridad es mayor que el tamaño total del portal</value>
+  </data>
 </root>

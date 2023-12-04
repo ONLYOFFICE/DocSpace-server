@@ -527,7 +527,7 @@
     <value>Tālruņa numurs no Twilio (nepieciešams SMS autorizācijai)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar Twitter kontu un meklētu lietotājus.</value>
+    <value>Pievienojiet lietotni, lai ieietu portālā ar Twitter kontu.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Iespējot lietotni Yahoo kontaktu importēšanai.</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TfaAppNotAvailable" xml:space="preserve">
     <value>TFA lietojumprogrammas iestatījumi nav pieejami</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Tālummaiņa</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Tālummaiņas klienta ID</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Tālummaiņas klienta noslēpums</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot tālummaiņas kontu.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Iespējojiet šo lietotni, lai jūsu lietotāji varētu pierakstīties pakalpojumā ONLYOFFICE, izmantojot savus tālummaiņas kontus. {0}Dodieties uz Zoom Developers tīmekļa vietni un izveidojiet jaunu lietotnes ONLYOFFICE integrāciju. Tālāk ievietojiet saņemtos datus:</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Pārāk daudz pieteikšanās mēģinājumu. Mēģiniet vēlreiz vēlāk</value>
   </data>
 </root>

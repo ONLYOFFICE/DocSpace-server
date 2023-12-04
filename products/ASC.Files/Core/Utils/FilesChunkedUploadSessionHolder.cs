@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,11 +42,9 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
         {
             return ((await InternalUploadChunkAsync<int>(uploadSession, stream, length, chunkNumber)).ToString(), null);
         }
-        else
-        {
+
             return (await InternalUploadChunkAsync<string>(uploadSession, stream, length, chunkNumber), null);
         }
-    }
 
     private async Task<T> InternalUploadChunkAsync<T>(CommonChunkedUploadSession uploadSession, Stream stream, long length, int chunkNumber)
     {
@@ -63,11 +61,9 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
         {
             return (await InternalFinalizeAsync<int>(uploadSession)).ToString();
         }
-        else
-        {
+
             return await InternalFinalizeAsync<string>(uploadSession);
         }
-    }
 
     private async Task<T> InternalFinalizeAsync<T>(CommonChunkedUploadSession commonChunkedUploadSession)
     {

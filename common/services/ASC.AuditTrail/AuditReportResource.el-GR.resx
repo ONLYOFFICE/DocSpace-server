@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Χώρα</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Δημιουργήθηκε εξωτερικός σύνδεσμος: {0}. Ρόλος: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Ο εξωτερικός σύνδεσμος διαγράφηκε: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Ο εξωτερικός σύνδεσμος ενημερώθηκε: {0}. Ρόλος: {1}</value>
+  </data>
 </root>

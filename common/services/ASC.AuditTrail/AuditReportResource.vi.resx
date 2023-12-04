@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>Quốc gia</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Đã tạo liên kết bên ngoài: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Đã xóa liên kết bên ngoài: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Đã cập nhật liên kết bên ngoài: {0}. Vai trò: {1}</value>
+  </data>
 </root>

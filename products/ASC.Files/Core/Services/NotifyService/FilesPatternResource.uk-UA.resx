@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
-    <value>H1 Всі підписувачі заповнили $DocumentTitle
+    <value>h1. Всі підписувачі заповнили $DocumentTitle
 
 Це повідомлення електронної пошти, інформує вас, що всі підписувачі заповнили "$DocumentTitle":"$DocumentURL".</value>
   </data>
@@ -69,21 +69,21 @@
 Увійдіть у свій обліковий запис DocuSign для отримання додаткової інформації.</value>
   </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
-    <value>h1.Розсилка завершена
+    <value>h1. Розсилка завершена
 
 Це повідомлення електронної пошти інформує вас про те, що ви надіслали запит на розсилку повідомлень $MailsCount, і процес було завершено. $Message
 
 Успішно відправлені повідомлення електронної пошти можна знайти в папці "Надіслані":"$__VirtualRootPath/addons/mail/#sent" в модулі Mail.</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1.Надано доступ до документу: "$DocumentTitle":"$DocumentURL"
+    <value>h1. Надано доступ до документу: "$DocumentTitle":"$DocumentURL"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" надав Вам доступ до документу "$DocumentTitle":"$DocumentURL" з правами доступу: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1.Надано доступ до папки:"$DocumentTitle":"$DocumentURL"
+    <value>h1. Надано доступ до папки:"$DocumentTitle":"$DocumentURL"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" надав вам доступ до "$DocumentTitle":"$DocumentURL" папки з наступними правами доступу: "$AccessRights". 
 

@@ -120,7 +120,7 @@
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. العنوان الرئيسي. تم اكتمال المسجلين $DocumentTitle
 
-تم ارسال هذا الاشعار البريدي لاعلامك أنه تم اكمال التوقيع للجميع .$DocumentTitle":"$DocumentURL".</value>
+تم ارسال هذا الاشعار البريدي لاعلامك أنه تم اكمال التوقيع للجميع ."$DocumentTitle":"$DocumentURL".</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
     <value>h1. العنوان الرئيسي. $Message: $DocumentTitle

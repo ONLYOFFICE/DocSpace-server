@@ -105,9 +105,9 @@ $Message</value>
     <value>Tài liệu. Đã cấp quyền truy cập cho thư mục: $DocumentTitle</value>
   </data>
   <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__ AuthorName đã nhắc đến bạn trong nhận xét tài liệu
+    <value>h1. $__AuthorName đã nhắc đến bạn trong nhận xét tài liệu
 
-$__AuthorName đã nhắc đến bạn trong nhận xét trong tài liệu "$DocumentTitle":"$DocumentURL"  trong phòng "$RoomTitle":"$RoomURL":
+$__AuthorName đã nhắc đến bạn trong nhận xét trong tài liệu "$DocumentTitle":"$DocumentURL" trong phòng "$RoomTitle":"$RoomURL":
 
 $Message</value>
   </data>
