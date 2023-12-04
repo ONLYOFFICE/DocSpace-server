@@ -1373,7 +1373,7 @@ public class EntryManager
             throw new FileNotFoundException(FilesCommonResource.ErrorMassage_FileNotFound);
         }
 
-        if (checkRight && !editLink && (!await _fileSecurity.CanFillFormsAsync(file) || await _userManager.IsUserAsync(_authContext.CurrentAccount.ID)))
+        if (checkRight && !editLink && (!await _fileSecurity.CanFillFormsAsync(file) || !await _fileSecurity.CanEditAsync(file)))
         {
             throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_EditFile);
         }
