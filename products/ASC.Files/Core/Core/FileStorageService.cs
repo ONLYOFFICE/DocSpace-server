@@ -533,9 +533,15 @@ public class FileStorageService //: IFileStorageService
         if (!string.Equals(folder.Title, title, StringComparison.OrdinalIgnoreCase))
         {
             var oldTitle = folder.Title;
-            var newFolderID = await folderDao.RenameFolderAsync(folder, title);
-            folder = await folderDao.GetFolderAsync(newFolderID);
+            var oldId = folder.Id;
+            var newFolderId = await folderDao.RenameFolderAsync(folder, title);
+            folder = await folderDao.GetFolderAsync(newFolderId);
             folder.Access = folderAccess;
+
+            if (folder.MutableId)
+            {
+                folder.PreviousId = oldId;
+            }
 
             if (DocSpaceHelper.IsRoom(folder.FolderType))
             {
