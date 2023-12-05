@@ -353,6 +353,7 @@ internal abstract class ThirdPartyProviderDao
             FilterType.ReadOnlyRooms => FolderType.ReadOnlyRoom,
             FilterType.CustomRooms => FolderType.CustomRoom,
             FilterType.PublicRooms => FolderType.PublicRoom,
+            FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
             _ => FolderType.DEFAULT
         };
 

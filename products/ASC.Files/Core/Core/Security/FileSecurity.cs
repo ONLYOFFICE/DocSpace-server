@@ -185,6 +185,23 @@ public class FileSecurity(IDaoFactory daoFactory,
                     }
                 }
             }
+        },
+        {
+            FolderType.VirtualDataRoom, new Dictionary<SubjectType, HashSet<FileShare>>
+            {
+                {
+                    SubjectType.User, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                    }
+                },
+                {
+                    SubjectType.InvitationLink, new HashSet<FileShare>
+                    {
+                        FileShare.RoomAdmin, FileShare.Collaborator, FileShare.Read, FileShare.None
+                    }
+                }
+            }
         }
     }.ToImmutableDictionary();
 
@@ -742,6 +759,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             FolderType.EditingRoom => FileShare.Editing,
             FolderType.ReviewRoom => FileShare.Review,
             FolderType.ReadOnlyRoom => FileShare.Read,
+            FolderType.VirtualDataRoom => FileShare.Read,
             _ => FileShare.None
         };
     }

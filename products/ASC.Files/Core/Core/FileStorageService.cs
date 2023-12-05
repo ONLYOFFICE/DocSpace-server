@@ -230,7 +230,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
                 }
-            }
+        }
 
         parent.Shareable =
             parent.FolderType == FolderType.SHARE ||
@@ -353,51 +353,43 @@ public class FileStorageService //: IFileStorageService
             await _semaphore.WaitAsync();
             ArgumentNullException.ThrowIfNull(title);
 
-        await countRoomChecker.CheckAppend();
+            await countRoomChecker.CheckAppend();
 
-        if (@private && (share == null || !share.Any()))
-        {
-            throw new ArgumentNullException(nameof(share));
+            if (@private && (share == null || !share.Any()))
+            {
+                throw new ArgumentNullException(nameof(share));
+            }
+
+            List<AceWrapper> aces = null;
+
+            if (@private)
+            {
+                aces = await GetFullAceWrappersAsync(share);
+                await CheckEncryptionKeysAsync(aces);
+            }
+
+            var parentId = await globalFolderHelper.GetFolderVirtualRooms();
+
+            var room = roomType switch
+            {
+                RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
+                RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
+                RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
+                RoomType.VirtualDataRoom => await CreateVirtualDataRoomAsync(title, parentId, @private, indexing),
+                _ => await CreateCustomRoomAsync(title, parentId, @private, indexing)
+            };
+
+            if (@private)
+            {
+                await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
+            }
+
+            return room;
         }
-
-        List<AceWrapper> aces = null;
-
-        if (@private)
-        {
-            aces = await GetFullAceWrappersAsync(share);
-            await CheckEncryptionKeysAsync(aces);
-        }
-
-        var parentId = await globalFolderHelper.GetFolderVirtualRooms();
-
-        var room = roomType switch
-        {
-            RoomType.CustomRoom => await CreateCustomRoomAsync(title, parentId, @private, indexing),
-            RoomType.EditingRoom => await CreateEditingRoomAsync(title, parentId, @private, indexing),
-            RoomType.PublicRoom => await CreatePublicRoomAsync(title, parentId, @private, indexing),
-            _ => await CreateCustomRoomAsync(title, parentId, @private, indexing)
-        };
-
-        if (@private)
-        {
-            await SetAcesForPrivateRoomAsync(room, aces, notify, sharingMessage);
-        }
-
-        return room;
-    }
         finally
         {
             _semaphore.Release();
         }
-    }
-
-    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
-    {
-        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private, indexing);
-
-        _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
-        
-        return room;
     }
 
     public async Task<Folder<T>> CreateThirdPartyRoomAsync<T>(string title, RoomType roomType, T parentId, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
@@ -432,6 +424,7 @@ public class FileStorageService //: IFileStorageService
             RoomType.CustomRoom => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom),
             RoomType.EditingRoom => (await CreateEditingRoomAsync(title, parentId, @private, indexing), FolderType.EditingRoom),
             RoomType.PublicRoom => (await CreatePublicRoomAsync(title, parentId, @private, indexing), FolderType.PublicRoom),
+            RoomType.VirtualDataRoom => (await CreateVirtualDataRoomAsync(title, parentId, @private, indexing), FolderType.VirtualDataRoom),
             _ => (await CreateCustomRoomAsync(title, parentId, @private, indexing), FolderType.CustomRoom)
         };
 
@@ -455,6 +448,22 @@ public class FileStorageService //: IFileStorageService
     private async Task<Folder<T>> CreateEditingRoomAsync<T>(string title, T parentId, bool privacy, bool indexing)
     {
         return await InternalCreateNewFolderAsync(parentId, title, FolderType.EditingRoom, privacy, indexing);
+    }
+    
+    private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
+    {
+        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.PublicRoom, @private, indexing);
+
+        _ = await SetExternalLinkAsync(room, Guid.NewGuid(), FileShare.Read, FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+        
+        return room;
+    }
+
+    private async Task<Folder<T>> CreateVirtualDataRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
+    {
+        var room = await InternalCreateNewFolderAsync(parentId, title, FolderType.VirtualDataRoom, @private, indexing);
+
+        return room;
     }
 
     private async ValueTask<Folder<T>> InternalCreateNewFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool indexing = false)

@@ -36,7 +36,8 @@ public static class DocSpaceHelper
             FolderType.ReviewRoom or 
             FolderType.ReadOnlyRoom or 
             FolderType.FillingFormsRoom or
-            FolderType.PublicRoom;
+            FolderType.PublicRoom or 
+            FolderType.VirtualDataRoom;
     }
 
     public static RoomType? GetRoomType(FolderType folderType)
@@ -49,6 +50,7 @@ public static class DocSpaceHelper
             FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
             FolderType.CustomRoom => RoomType.CustomRoom,
             FolderType.PublicRoom => RoomType.PublicRoom,
+            FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
             _ => null
         };
     }
