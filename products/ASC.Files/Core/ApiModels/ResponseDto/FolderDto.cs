@@ -77,6 +77,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>Specifies if a folder is private or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
+    public bool Indexing { get; set; }
 
     public bool? InRoom { get; set; }
 
@@ -205,6 +206,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         result.New = newBadges;
         result.Pinned = folder.Pinned;
         result.Private = folder.SettingsPrivate;
+        result.Indexing = folder.SettingsIndexing;
 
         return result;
     }
