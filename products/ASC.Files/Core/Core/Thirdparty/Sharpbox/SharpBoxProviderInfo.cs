@@ -37,6 +37,7 @@ internal class SharpBoxProviderInfo(SharpBoxStorageDisposableWrapper storageDisp
     public bool HasLogo { get; set; }
     public bool Private { get; set; }
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public FolderType FolderType { get; set; }
     public Guid Owner { get; set; }
     public int ProviderId { get; set; }

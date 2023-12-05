@@ -227,7 +227,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
         folder.Id = MakeId(fsEntry);
         folder.ParentId = isRoot ? null : MakeId(fsEntry.Parent);
         folder.CreateOn = isRoot ? ProviderInfo.CreateOn : fsEntry.Modified;
-        folder.ModifiedOn = isRoot ? ProviderInfo.CreateOn : fsEntry.Modified;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : fsEntry.Modified;
         folder.RootId = RootFolderMakeId();
 
         folder.Title = MakeTitle(fsEntry);

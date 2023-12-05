@@ -37,7 +37,7 @@ public interface IProviderDao
     Task<int> SaveProviderInfoAsync(string providerKey, string customerTitle, AuthData authData, FolderType folderType);
     Task<int> UpdateProviderInfoAsync(int linkId, string customerTitle, AuthData authData, FolderType folderType, Guid? userId = null);
     Task<int> UpdateBackupProviderInfoAsync(string providerKey, string customerTitle, AuthData authData);
-    Task<bool> UpdateRoomProviderInfoAsync(ProviderData data);
+    Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data);
     Task RemoveProviderInfoAsync(int linkId);
     IProviderInfo ToProviderInfo(DbFilesThirdpartyAccount input);
 }

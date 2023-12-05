@@ -42,6 +42,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
     internal readonly ProviderInfoHelper ProviderInfoHelper = providerInfoHelper;
 
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public string CustomerTitle { get; set; }
     public string FolderId { get; set; }
     public FolderType FolderType { get; set; }

@@ -45,6 +45,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public FolderType RootFolderType { get; set; }
     public FolderType FolderType { get; set; }
     public DateTime CreateOn { get; set; }
+    public DateTime ModifiedOn { get; set; }
     public string CustomerTitle { get; set; }
     public string RootFolderId => $"{Selector.Id}-{ID}";
     public string SpRootFolderId { get; set; } = "/Shared Documents";
@@ -581,7 +582,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.CreateOn = CreateOn;
         result.FolderType = FolderType.DEFAULT;
         result.ModifiedBy = Owner;
-        result.ModifiedOn = CreateOn;
+        result.ModifiedOn = ModifiedOn;
         result.ProviderId = ID;
         result.ProviderKey = ProviderKey;
         result.RootCreateBy = Owner;
@@ -593,7 +594,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.FoldersCount = 0;
         result.SettingsPrivate = Private;
         result.SettingsHasLogo = HasLogo;
-
+        
         SetFolderType(result, isRoot);
 
         return result;

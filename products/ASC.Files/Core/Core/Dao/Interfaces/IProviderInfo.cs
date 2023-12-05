@@ -34,6 +34,7 @@ public interface IProviderInfo : IDisposable
     FolderType RootFolderType { get; }
     FolderType FolderType { get; }
     DateTime CreateOn { get; }
+    DateTime ModifiedOn { get; }
     string CustomerTitle { get; internal set; }
     string RootFolderId { get; }
     string FolderId { get; set; }

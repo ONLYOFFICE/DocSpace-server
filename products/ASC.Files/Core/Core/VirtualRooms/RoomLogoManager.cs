@@ -91,14 +91,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         room.SettingsHasLogo = true;
 
-        if (room.ProviderEntry)
-        {
-            await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = room.ProviderId, HasLogo = true });
-        }
-        else
-        {
-            await folderDao.SaveFolderAsync(room);
-        }
+        await SaveRoomAsync(folderDao, room);
 
         if (EnableAudit)
         {
@@ -126,14 +119,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
             await store.DeleteFilesAsync(string.Empty, $"{ProcessFolderId(stringId)}*.*", false);
             room.SettingsHasLogo = false;
 
-            if (room.ProviderEntry)
-            {
-                await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = room.ProviderId, HasLogo = false });
-            }
-            else
-            {
-                await folderDao.SaveFolderAsync(room);
-            }
+            await SaveRoomAsync(folderDao, room);
 
             if (EnableAudit)
             {
@@ -154,17 +140,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
         {
             if (string.IsNullOrEmpty(room.SettingsColor))
             {
-                room.SettingsColor = GetRandomColour();
-                
-                if (room.ProviderEntry)
-                {
-                    await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = room.ProviderId, Color = room.SettingsColor });
-                }
-                else
-                {
-                    var folderDao = daoFactory.GetFolderDao<T>();
-                    await folderDao.SaveFolderAsync(room);
-                }
+                await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
             return new Logo
@@ -321,6 +297,25 @@ public class RoomLogoManager(StorageFactory storageFactory,
         }
 
         return data.ToArray();
+    }
+    
+    private async Task SaveRoomAsync<T>(IFolderDao<T> folderDao, Folder<T> room)
+    {
+        if (room.ProviderEntry)
+        {
+            var provider = await daoFactory.ProviderDao.UpdateRoomProviderInfoAsync(new ProviderData
+            {
+                Id = room.ProviderId,
+                HasLogo = room.SettingsHasLogo,
+                Color = room.SettingsColor
+            });
+            
+            room.ModifiedOn = provider.ModifiedOn;
+        }
+        else
+        {
+            await folderDao.SaveFolderAsync(room);
+        }
     }
 
     private static string ProcessFolderId<T>(T id)
