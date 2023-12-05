@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,15 @@ public class ScopeController {
                         .group(s.getGroup())
                         .build()
                 )
-                .collect(Collectors.toSet());
+                .sorted((o1, o2)-> {
+                    if (o1.getName().equalsIgnoreCase("openid"))
+                        return 1;
+                    if (o2.getName().equalsIgnoreCase("openid"))
+                        return -1;
+                    return o1.getName().
+                            compareToIgnoreCase(o2.getName());
+                })
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @GetMapping
