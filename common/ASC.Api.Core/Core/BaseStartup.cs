@@ -242,6 +242,7 @@ public abstract class BaseStartup
         DIHelper.TryAdd<ConfirmAuthHandler>();
         DIHelper.TryAdd<BasicAuthHandler>();
         DIHelper.TryAdd<CookieAuthHandler>();
+        DIHelper.TryAdd<JwtBearerAuthHandler>();
         DIHelper.TryAdd<WebhooksGlobalFilterAttribute>();
 
 

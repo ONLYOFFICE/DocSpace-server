@@ -26,9 +26,6 @@
 
 using System.Collections.Specialized;
 
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-
 namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
@@ -77,101 +74,7 @@ public static class AuthorizationExtension
         services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
         services.AddAuthentication()
-                          .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                          {
-#if DEBUG
-
-                              options.IncludeErrorDetails = true;
-#endif
-                              options.Configuration = new OpenIdConnectConfiguration();
-
-                              IdentityModelEventSource.ShowPII = true;
-                              options.MapInboundClaims = false;
-
-                              options.TokenValidationParameters.RoleClaimType = "role";
-                              options.TokenValidationParameters.NameClaimType = "name";
-
-                              options.TokenValidationParameters = new TokenValidationParameters
-                              {
-                                  // Clock skew compensates for server time drift.
-                                  // We recommend 5 minutes or less:
-                                  ClockSkew = TimeSpan.FromMinutes(5),
-                                  // Specify the key used to sign the token:
-                                  //   IssuerSigningKey = signingKey,
-                                  RequireSignedTokens = false,
-                                  RequireAudience = false,
-                                  // Ensure the token hasn't expired:
-                                  RequireExpirationTime = false,
-                                  ValidateLifetime = false,
-                                  // Ensure the token audience matches our audience value (default true):
-                                  ValidateAudience = false,
-                                  ValidAudience = "4testing",
-                                  // Ensure the token was issued by a trusted authorization server (default true):
-                                  ValidateIssuer = false,
-                                  //  ValidIssuer = "https://{yourOktaDomain}/oauth2/default",
-                                  ValidateIssuerSigningKey = false,
-                                  SignatureValidator = delegate (string token, TokenValidationParameters parameters)
-                                  {
-                                      var jwt = new JwtSecurityToken(token);
-
-                                      return jwt;
-                                  }
-                              };
-
-                              options.Events = new JwtBearerEvents
-                              {                                  
-                                  OnTokenValidated = async ctx =>
-                                  {
-                                      using var scope = ctx.HttpContext.RequestServices.CreateScope();
-
-                                      var securityContext = scope.ServiceProvider.GetService<ASC.Core.SecurityContext>();
-
-                                      var logger = scope.ServiceProvider.GetService<ILogger<BaseStartup>>();
-
-                                      logger.DebugOnTokenValidatedCallback();
-
-                                      if (ctx?.Principal != null)
-                                      {
-                                          foreach (var claim in ctx.Principal.Claims)
-                                          {
-                                              logger.DebugOnTokenValidatedCallback(claim.Type, claim.Value);
-                                          }
-                                      }
-
-                                      var claimSid = ctx.Principal.Claims.FirstOrDefault(x => x.Type == "userId");
-
-                                      if (claimSid == null || !Guid.TryParse(claimSid.Value, out var userId))
-                                      {
-                                          throw new AuthenticationException($"Claim 'Sid' is not present in JWT");
-                                      }
-
-                                      await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
-                                  },
-                                  OnMessageReceived = msg =>
-                                  {
-                                      using var scope = msg?.HttpContext.RequestServices.CreateScope();
-
-                                      var logger = scope?.ServiceProvider.GetService<ILogger<BaseStartup>>();
-
-                                      var token = msg?.Request.Headers.Authorization.ToString();
-                                      string path = msg?.Request.Path ?? "";
-
-                                      logger.DebugOnMessageReceivedCallback(path);
-
-                                      if (!string.IsNullOrEmpty(token))
-                                      {
-                                          logger.DebugOnMessageReceivedCallbackAccessToken(token);
-                                      }
-                                      else
-                                      {
-                                          logger.DebugOnMessageReceivedCallbackNoAccessToken();
-                                      }
-
-                                      return Task.CompletedTask;
-                                  }
-                              };
-                          });
-
+                .AddScheme<AuthenticationSchemeOptions, JwtBearerAuthHandler>(JwtBearerDefaults.AuthenticationScheme, _ => { });
 
         return services;
 
@@ -198,3 +101,5 @@ public static class AuthorizationExtension
         return builder;
     }
 }
+
+

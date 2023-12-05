@@ -89,6 +89,8 @@ public class Startup
         _diHelper.TryAdd<ConfirmAuthHandler>();
         _diHelper.TryAdd<BasicAuthHandler>();
         _diHelper.TryAdd<CookieAuthHandler>();
+        _diHelper.TryAdd<JwtBearerAuthHandler>();
+
         _diHelper.TryAdd<WebhooksGlobalFilterAttribute>();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
