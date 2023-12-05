@@ -466,7 +466,7 @@ public class S3Storage : BaseStorage
         }
         else
         {
-            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder);
+            return new S3TarWriteOperator(chunkedUploadSession, sessionHolder, _tempStream);
         }
     }
 
@@ -1377,8 +1377,9 @@ public class S3Storage : BaseStorage
         }
     }
 
-    public async Task ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey)
+    public async Task<int> ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey, int ext)
     {
+        destinationKey += ext;
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
 
         using var s3 = GetClient();
@@ -1429,10 +1430,55 @@ public class S3Storage : BaseStorage
             PartETags = eTags
         };
         await s3.CompleteMultipartUploadAsync(completeRequest);
+        stream.Dispose();
+        return ext;
     }
 
-    public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey)
+    public async Task ConcatFileAsync(string pathFile, string destinationDomain, string destinationKey)
     {
+        var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
+
+        using var s3 = GetClient();
+        var obj = await s3.GetObjectMetadataAsync(_bucket, pathFile);
+
+        destinationKey = MakePath(destinationDomain, destinationKey);
+
+        var objectSize = obj.ContentLength;
+
+        var partSize = ChunkSize;
+        long bytePosition = 0;
+
+        for (var i = 1; bytePosition < objectSize; i++)
+        {
+            var copyRequest = new CopyPartRequest
+            {
+                DestinationBucket = _bucket,
+                DestinationKey = destinationKey,
+                SourceBucket = _bucket,
+                SourceKey = pathFile,
+                UploadId = uploadId,
+                FirstByte = bytePosition,
+                LastByte = bytePosition + partSize - 1 >= objectSize ? objectSize - 1 : bytePosition + partSize - 1,
+                PartNumber = partNumber
+            };
+            bytePosition += partSize;
+            eTags.Add(new PartETag(partNumber, (await s3.CopyPartAsync(copyRequest)).ETag));
+            partNumber++;
+        }
+
+        var completeRequest = new CompleteMultipartUploadRequest
+        {
+            BucketName = _bucket,
+            Key = destinationKey,
+            UploadId = uploadId,
+            PartETags = eTags
+        };
+         await s3.CompleteMultipartUploadAsync(completeRequest);
+    }
+
+    public async Task<int> ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, int ext)
+    {
+        destinationKey += ext;
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
         using var s3 = GetClient();
         var destinationPath = MakePath(destinationDomain, destinationKey);
@@ -1503,9 +1549,11 @@ public class S3Storage : BaseStorage
             PartETags = eTags
         };
         await s3.CompleteMultipartUploadAsync(completeRequest);
+
+        return ext;
     }
 
-    public async Task AddEndAsync(string domain, string key)
+    public async Task AddEndAsync(string domain, string key, bool last = false)
     {
         using var s3 = GetClient();
         var path = MakePath(domain, key);
@@ -1514,8 +1562,19 @@ public class S3Storage : BaseStorage
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(domain, key);
 
         var obj = await s3.GetObjectMetadataAsync(_bucket, path);
+        byte[] buffer = null;
 
-        var buffer = new byte[blockSize - obj.ContentLength % blockSize + blockSize * 2];
+        if (last)
+        {
+            buffer = new byte[blockSize - obj.ContentLength % blockSize + blockSize * 2];
+        }
+        else
+        {
+            if (obj.ContentLength % blockSize != 0)
+            {
+                buffer = new byte[blockSize - obj.ContentLength % blockSize];
+            }
+        }
         var stream = new MemoryStream();
         stream.Write(buffer);
         stream.Position = 0;
@@ -1541,12 +1600,12 @@ public class S3Storage : BaseStorage
         await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
-    public async Task RemoveFirstBlockAsync(string domain, string key)
+    public async Task ReloadFileAsync(string domain, string key, bool removeFirstBlock, bool last = false)
     {
         using var s3 = GetClient();
         var path = MakePath(domain, key);
 
-        var (uploadId, eTags, _) = await InitiateConcatAsync(domain, key, true, true);
+        var (uploadId, eTags, _) = await InitiateConcatAsync(domain, key, removeFirstBlock, last);
         var completeRequest = new CompleteMultipartUploadRequest
         {
             BucketName = _bucket,
@@ -1625,7 +1684,6 @@ public class S3Storage : BaseStorage
                 InputStream = stream
             };
             eTags.Add(new PartETag(1, (await s3.UploadPartAsync(uploadRequest)).ETag));
-
             return (initResponse.UploadId, eTags, 2);
         }
     }

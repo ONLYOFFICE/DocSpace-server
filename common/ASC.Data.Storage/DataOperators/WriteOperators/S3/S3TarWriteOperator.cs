@@ -29,15 +29,19 @@ public class S3TarWriteOperator : IDataWriteOperator
 {
     private readonly CommonChunkedUploadSession _chunkedUploadSession;
     private readonly CommonChunkedUploadSessionHolder _sessionHolder;
+    private readonly TempStream _tempStream;
     private readonly S3Storage _store;
     private readonly string _domain;
     private readonly string _key;
+    private const int LimitTask = 10;
+    private readonly HashSet<int> _set = new HashSet<int>(LimitTask) { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private readonly List<Task<int>> _tasks = new(LimitTask);
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload => false;
 
-    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
+    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream)
     {
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
@@ -45,16 +49,35 @@ public class S3TarWriteOperator : IDataWriteOperator
 
         _key = _chunkedUploadSession.TempPath;
         _domain = _sessionHolder.TempDomain;
+        _tempStream = tempStream;
     }
+
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
         if (store is S3Storage) 
         {
+            if(_tasks.Count == LimitTask)
+            {
+                Task.WaitAny(_tasks.ToArray());
+                for (var i = 0; i < _tasks.Count; i++)
+                {
+                    if (_tasks[i].Exception != null)
+                    {
+                        throw _tasks[i].Exception;
+                    }
+                    if (_tasks[i].IsCompleted)
+                    {
+                        _set.Add(_tasks[i].Result);
+                        _tasks.RemoveAt(i);
+                    }
+                }
+            }
             var s3Store = store as S3Storage;
             var fullPath = s3Store.MakePath(domain, path);
-
-            await _store.ConcatFileAsync(fullPath, tarKey, _domain, _key);
+            var min = _set.Min();
+            _set.Remove(min);
+            _tasks.Add(_store.ConcatFileAsync(fullPath, tarKey, _domain, _key, min));
         }
         else
         {
@@ -68,15 +91,57 @@ public class S3TarWriteOperator : IDataWriteOperator
         }
     }
 
-    public async Task WriteEntryAsync(string tarKey, Stream stream)
+    public Task WriteEntryAsync(string tarKey, Stream stream)
     {
-        await _store.ConcatFileStreamAsync(stream, tarKey, _domain, _key);
+        if (_tasks.Count == LimitTask)
+        {
+            Task.WaitAny(_tasks.ToArray());
+            for (var i = 0; i < _tasks.Count; i++)
+            {
+                if (_tasks[i].IsCompleted)
+                {
+                    if (_tasks[i].Exception != null)
+                    {
+                        throw _tasks[i].Exception;
+                    }
+                    _set.Add(_tasks[i].Result);
+                    _tasks.RemoveAt(i);
+                }
+            }
+        }
+        var min = _set.Min();
+        _set.Remove(min);
+        var tStream = _tempStream.Create();
+        stream.Position = 0;
+        stream.CopyTo(tStream);
+        _tasks.Add(_store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, min));
+        
+        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _store.AddEndAsync(_domain ,_key);
-        await _store.RemoveFirstBlockAsync(_domain ,_key);
+        if (_tasks.Count != 0)
+        {
+            Task.WaitAll(_tasks.ToArray());
+            foreach (var task in _tasks)
+            {
+                if(task.Exception != null)
+                {
+                    throw task.Exception;
+                }
+            }
+        }
+        for (var i = 1; i <= 10; i++)
+        {
+            var fullKey = _store.MakePath(_domain, _key + i);
+            await _store.AddEndAsync(_domain, _key + i, i == 10);
+            await _store.ReloadFileAsync(_domain, _key + i, true);
+            await _store.ConcatFileAsync(fullKey, _domain, _key);
+            await _store.DeleteAsync(_domain, _key + i);
+        }
+        await _store.ReloadFileAsync(_domain, _key, true, true);
+        await _store.ReloadFileAsync(_domain, _key, false, true);
 
         var contentLength = await _store.GetFileSizeAsync(_domain, _key);
         Hash = (await _store.GetFileEtagAsync(_domain, _key)).Trim('\"');
@@ -90,5 +155,6 @@ public class S3TarWriteOperator : IDataWriteOperator
         _chunkedUploadSession.Items["ChunksUploaded"] = (partNumber - 1).ToString();
 
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
+        
     }
 }
