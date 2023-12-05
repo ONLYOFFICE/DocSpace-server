@@ -403,17 +403,18 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        if (await fileConverter.EnableConvertAsync(file, convertToExt))
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt) ?
+                            await fileConverter.ExecAsync(file, convertToExt) :
+                            await fileDao.GetFileStreamAsync(file);
+                        
+                        var t = Task.Run(async () => await compressTo.PutStream(readStream));
+                            
+                        while (!t.IsCompleted)
                         {
-                            //Take from converter
-                            await using var readStream = await fileConverter.ExecAsync(file, convertToExt);
-                            await compressTo.PutStream(readStream);
+                            PublishChanges();
+                            await Task.Delay(100);
                         }
-                        else
-                        {
-                            await using var readStream = await fileDao.GetFileStreamAsync(file);
-                            await compressTo.PutStream(readStream);
-                        }
+                        
                         compressTo.CloseEntry();
                     }
                     catch (Exception ex)
