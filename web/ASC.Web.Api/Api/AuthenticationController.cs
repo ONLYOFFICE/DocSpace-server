@@ -261,7 +261,7 @@ public class AuthenticationController : ControllerBase
         var user = wrapper.UserInfo;
         var session = inDto.Session;
 
-        if (user == null || Equals(user, Constants.LostUser))
+        if (user == null || Equals(user, Constants.LostUser) || user.Status != EmployeeStatus.Active)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
