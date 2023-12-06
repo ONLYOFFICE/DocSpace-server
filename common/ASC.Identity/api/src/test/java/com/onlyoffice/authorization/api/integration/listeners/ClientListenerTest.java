@@ -74,7 +74,7 @@ public class ClientListenerTest extends ContainerBase {
     @Test
     @SneakyThrows
     void shouldCreateClientAsync() {
-        clientService.clientAsyncCreationTask(CreateClientDTO
+        clientService.createClientAsync(CreateClientDTO
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
@@ -91,7 +91,7 @@ public class ClientListenerTest extends ContainerBase {
     @Test
     @SneakyThrows
     void shouldCreateDeleteClientAsyncTask() {
-        var c = clientService.clientAsyncCreationTask(CreateClientDTO
+        var c = clientService.createClientAsync(CreateClientDTO
                 .builder()
                 .name("mock")
                 .scopes(Set.of("mock"))
@@ -103,7 +103,7 @@ public class ClientListenerTest extends ContainerBase {
                 .build(), 1, "http://127.0.0.1");
         Thread.sleep(1000);
         assertEquals(1, clientListener.getLastBatchSize());
-        clientService.clientAsyncDeletionTask(c.getClientId(), 1);
+        clientService.deleteClientAsync(c.getClientId(), 1);
         Thread.sleep(1000);
         assertEquals(1, clientListener.getLastBatchSize());
     }

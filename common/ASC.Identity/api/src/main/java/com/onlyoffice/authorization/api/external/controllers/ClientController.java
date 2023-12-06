@@ -285,7 +285,7 @@ public class ClientController {
         }
 
         log.debug("Generating a new client's credentials");
-        var client = creationUsecases.clientAsyncCreationTask(body, tenantContext
+        var client = creationUsecases.createClientAsync(body, tenantContext
                 .getResponse().getTenantId(), address);
         log.debug("Successfully submitted a new client broker message", client);
 
@@ -469,7 +469,7 @@ public class ClientController {
         MDC.put("clientId", clientId);
         log.info("Received a new delete client request for tenant");
         MDC.clear();
-        cleanupUsecases.clientAsyncDeletionTask(clientId, tenantContext.getResponse().getTenantId());
+        cleanupUsecases.deleteClientAsync(clientId, tenantContext.getResponse().getTenantId());
         amqpTemplate.convertAndSend(
                 configuration.getAudit().getExchange(),
                 configuration.getAudit().getRouting(),

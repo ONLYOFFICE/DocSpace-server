@@ -18,7 +18,7 @@ import java.util.List;
 public interface ClientCreationUsecases {
     ClientDTO saveClient(ClientMessage message);
     List<String> saveClients(Iterable<ClientMessage> messages);
-    ClientDTO clientAsyncCreationTask(CreateClientDTO clientDTO, int tenant, String tenantUrl);
+    ClientDTO createClientAsync(CreateClientDTO clientDTO, int tenant, String tenantUrl);
     @CacheEvict(cacheNames = "clients", key = "#clientId")
     ClientDTO updateClient(UpdateClientDTO clientDTO, String clientId, int tenant);
 }

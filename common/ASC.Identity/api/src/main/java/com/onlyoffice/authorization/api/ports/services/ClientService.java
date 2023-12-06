@@ -54,7 +54,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     private final AmqpTemplate amqpTemplate;
     private final Cipher cipher;
 
-    public void clientAsyncDeletionTask(String clientId, int tenant) {
+    public void deleteClientAsync(String clientId, int tenant) {
         var context = TenantContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
@@ -134,7 +134,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         return ids;
     }
 
-    public ClientDTO clientAsyncCreationTask(CreateClientDTO clientDTO, int tenant, String tenantUrl) {
+    public ClientDTO createClientAsync(CreateClientDTO clientDTO, int tenant, String tenantUrl) {
         var context = TenantContextContainer.context.get();
         MDC.put("tenantId", String.valueOf(context.getResponse().getTenantId()));
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
