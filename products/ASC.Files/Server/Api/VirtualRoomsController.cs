@@ -567,7 +567,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         AuthContext authContext,
         DocumentBuilderTaskManager documentBuilderTaskManager,
         TenantManager tenantManager,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -620,7 +621,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, string.Empty,
+        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, new string[] { },
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 
@@ -800,7 +801,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     [HttpPost("rooms/{id}/indexexport")]
-    public async Task StartRoomIndexExportAsync(int id)
+    public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(int id)
     {
         ErrorIfNotDocSpace();
 
@@ -814,9 +815,17 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         var userId = authContext.CurrentAccount.ID;
 
+        var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
+
+        task.Init(tenantId, userId, null, null, null);
+
+        var taskProgress = documentBuilderTaskManager.StartTask(task, false);
+
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id);
 
         eventBus.Publish(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
     }
 
     [HttpGet("rooms/indexexport")]

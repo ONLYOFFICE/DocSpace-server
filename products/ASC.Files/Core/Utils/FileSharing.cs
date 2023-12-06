@@ -78,7 +78,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == currentUserId && w.Id == currentUserId)
+            if (entry.CreateBy == currentUserId && w.Id == currentUserId && w.Access != FileShare.RoomAdmin)
             {
                 continue;
             }

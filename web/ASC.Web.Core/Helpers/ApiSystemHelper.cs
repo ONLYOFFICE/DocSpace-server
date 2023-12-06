@@ -200,32 +200,33 @@ public class ApiSystemHelper
             return null;
         }
 
-        // cut number suffix
-        while (true)
-        {
-            if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
-            {
-                portalName = portalName[..^1];
-            }
-            else
-            {
-                break;
-            }
-        }
+        //// cut number suffix
+        //while (true)
+        //{
+        //    if (_tenantDomainValidator.MinLength < portalName.Length && char.IsNumber(portalName, portalName.Length - 1))
+        //    {
+        //        portalName = portalName[0..^1];
+        //    }
+        //    else
+        //    {
+        //        break;
+        //    }
+        //}
 
-        var scanRequest = new ScanRequest
-        {
-            TableName = _regionTableName,
-            FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
-            ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
-                                                {":v_tenant_domain", new AttributeValue { S =  portalName }} },
-            ProjectionExpression = TenantDomainKey,
-            ConsistentRead = true
-        };
+        //var scanRequest = new ScanRequest
+        //{
+        //    TableName = _regionTableName,
+        //    FilterExpression = "begins_with(tenant_domain, :v_tenant_domain)",
+        //    ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+        //                                        {":v_tenant_domain", new AttributeValue { S =  portalName }} },
+        //    ProjectionExpression = TenantDomainKey,
+        //    ConsistentRead = true
+        //};
 
-        var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
-        var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
-        return result;
+        //var scanResponse = await awsDynamoDbClient.ScanAsync(scanRequest);
+        //var result = scanResponse.Items.Select(x => x.Values.First().S.Split('.')[0]);
+
+        return new List<string> { portalName };
     }
 
     #endregion

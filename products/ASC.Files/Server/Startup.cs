@@ -54,6 +54,7 @@ public class Startup : BaseStartup
         DIHelper.TryAdd<DocuSignHandlerService>();
         DIHelper.TryAdd<ThirdPartyAppHandlerService>();
         DIHelper.TryAdd<DistributedTaskProgress>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         NotifyConfigurationExtension.Register(DIHelper);
 
