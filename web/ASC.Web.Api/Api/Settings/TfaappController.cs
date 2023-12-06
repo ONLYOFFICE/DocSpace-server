@@ -113,6 +113,7 @@ public class TfaappController(MessageService messageService,
     ///<path>api/2.0/settings/tfaapp/validate</path>
     ///<httpMethod>POST</httpMethod>
     [HttpPost("tfaapp/validate")]
+    [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
     public async Task<bool> TfaValidateAuthCodeAsync(TfaValidateRequestsDto inDto)
     {

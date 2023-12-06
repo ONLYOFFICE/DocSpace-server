@@ -41,7 +41,8 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
                                   bool isScheduled = false,
                                   int backupsStored = 0,
                                   string storageBasePath = "",
-                                  bool dump = false) : base(createBy, tenantId)
+                                  bool dump = false,
+                                  string taskId = null) : base(createBy, tenantId)
     {
         StorageType = storageType;
         StorageParams = storageParams;
@@ -49,6 +50,7 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
         BackupsStored = backupsStored;
         StorageBasePath = storageBasePath;
         Dump = dump;
+        TaskId = taskId;
     }
 
     [ProtoMember(1)]
@@ -65,8 +67,11 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(6)]
     public string StorageBasePath { get; private init; }
-    
+
     [ProtoMember(7)]
     public bool Dump { get; private init; }
+
+    [ProtoMember(8)]
+    public string TaskId { get; private init; }
 }
 
