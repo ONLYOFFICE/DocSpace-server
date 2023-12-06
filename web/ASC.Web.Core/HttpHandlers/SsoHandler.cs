@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.Web.Core.HttpHandlers;
 public class SsoHandler
 {
-    public SsoHandler(RequestDelegate next)
+    public SsoHandler(RequestDelegate _)
     {
     }
 
@@ -101,14 +101,14 @@ public class SsoHandlerService
         _tenantUtil = tenantUtil;
         _countPaidUserChecker = countPaidUserChecker;
         _distributedLockProvider = distributedLockProvider;
-        _signatureResolver = signature =>
+        _signatureResolver = s =>
         {
-            int.TryParse(signature.Substring(signature.Length - 1), out var lastSignChar);
-            signature = signature.Remove(signature.Length - 1);
+            int.TryParse(s[^1..], out var lastSignChar);
+            s = s.Remove(s.Length - 1);
 
             while (lastSignChar > 0)
             {
-                signature = signature + "=";
+                s += "=";
                 lastSignChar--;
             }
         };
@@ -386,7 +386,7 @@ public class SsoHandlerService
             userInfo.Location = location;
             userInfo.Title = title;
 
-            var portalUserContacts = userInfo.ContactsList == null ? new List<string>() : userInfo.ContactsList;
+            var portalUserContacts = userInfo.ContactsList ?? new List<string>();
 
             var newContacts = new List<string>();
             var phones = new List<string>();
@@ -451,7 +451,7 @@ public class SsoHandlerService
         var newStr = str.Trim();
 
         return newStr.Length > limit
-                ? newStr.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? newStr[..MAX_NUMBER_OF_SYMBOLS]
                 : newStr;
     }
 }
@@ -476,18 +476,13 @@ public enum MessageKey
     SsoSettingsUserTerminated,
     SsoError,
     SsoAuthFailed,
-    SsoAttributesNotFound,
+    SsoAttributesNotFound
 }
 
-public class SSOException : Exception
+public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
-    public MessageKey MessageKey { get; }
-
-    public SSOException(string message, MessageKey messageKey) : base(message)
-    {
-        MessageKey = messageKey;
+    public MessageKey MessageKey { get; } = messageKey;
     }
-}
 
 public static class SsoHandlerExtensions
 {

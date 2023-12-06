@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -199,7 +199,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
@@ -211,13 +211,28 @@ internal class FileDao : AbstractDao, IFileDao<int>
         var query = await GetFileQuery(filesDbContext, r => fileIds.Contains(r.Id) && r.CurrentVersion);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
-        var searchByExtension = !string.IsNullOrEmpty(extension);
-        
+        var searchByExtension = !extension.IsNullOrEmpty();
+
+        if (extension.IsNullOrEmpty())
+        {
+            extension = new string[] { "" };
+        }
+
         if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var searchIds = new List<int>();
+            var success = false;
+            foreach (var e in extension)
+            {
+                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
+                (success, var result) = await _factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
+                if(!success)
+                {
+                    break;
+                }
+                searchIds = searchIds.Concat(result).ToList();
+            }
 
             if (success)
             {
@@ -288,7 +303,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
@@ -362,7 +377,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await SaveFileAsync(file, fileStream, true);
     }
 
-    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota = true, ChunkedUploadSession<int> uploadSession = null)
+    public async Task<File<int>> SaveFileAsync(File<int> file, Stream fileStream, bool checkQuota, ChunkedUploadSession<int> uploadSession = null)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -528,7 +543,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return await GetFileAsync(file.Id);
     }
 
-    public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, 
+    public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -969,7 +984,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         comment ??= string.Empty;
-        comment = comment.Substring(0, Math.Min(comment.Length, 255));
+        comment = comment[..Math.Min(comment.Length, 255)];
 
         await Queries.UpdateDbFilesCommentAsync(filesDbContext, tenantId, fileId, fileVersion, comment);
 
@@ -1138,7 +1153,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
     }
 
-    public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, bool searchInContent)
+    public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         if (parentIds == null || !parentIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -1148,7 +1163,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         return InternalGetFilesAsync(parentIds, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
     }
 
-    private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension,
+    private async IAsyncEnumerable<File<int>> InternalGetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1159,13 +1174,28 @@ internal class FileDao : AbstractDao, IFileDao<int>
             .Select(r => r.file);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
-        var searchByExtension = !string.IsNullOrEmpty(extension);
-        
+        var searchByExtension = !extension.IsNullOrEmpty();
+
+        if (extension.IsNullOrEmpty())
+        {
+            extension = new string[] { "" };
+        }
+
         if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var searchIds = new List<int>();
+            var success = false;
+            foreach (var e in extension)
+            {
+                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(s => func(s));
+                (success, var result) = await _factoryIndexer.TrySelectIdsAsync(s => func(s));
+                if (!success)
+                {
+                    break;
+                }
+                searchIds = searchIds.Concat(result).ToList();
+            }
 
             if (success)
             {
@@ -1612,7 +1642,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
     }
 
     private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent,
-        bool withSubfolders, bool excludeSubject, int roomId, string extension, FilesDbContext filesDbContext)
+        bool withSubfolders, bool excludeSubject, int roomId, string[] extension, FilesDbContext filesDbContext)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
         var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
@@ -1626,15 +1656,30 @@ internal class FileDao : AbstractDao, IFileDao<int>
         }
 
         var searchByText = !string.IsNullOrEmpty(searchText);
-        var searchByExtension = !string.IsNullOrEmpty(extension);
+        var searchByExtension = !extension.IsNullOrEmpty();
+
+        if (extension.IsNullOrEmpty())
+        {
+            extension = new string[] { "" };
+        }
 
         if (searchByText || searchByExtension)
         {
-            var func = GetFuncForSearch(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders);
+            var searchIds = new List<int>();
+            var success = false;
+            foreach (var e in extension)
+            {
+                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
-            Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
+                Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
-            var (success, searchIds) = await _factoryIndexer.TrySelectIdsAsync(expression);
+                (success, var result) = await _factoryIndexer.TrySelectIdsAsync(expression);
+                if (!success)
+                {
+                    break;
+                }
+                searchIds = searchIds.Concat(result).ToList();
+            }
 
             if (success)
             {
@@ -2188,7 +2233,7 @@ static file class Queries
                                 select f
                             ).FirstOrDefault()
                     })
-                    .Select(r => new DbFileQueryWithSecurity() { DbFileQuery = r, Security = null }));
+                    .Select(r => new DbFileQueryWithSecurity { DbFileQuery = r, Security = null }));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFileQueryWithSecurity>>
         DbFileQueryWithSecurityAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

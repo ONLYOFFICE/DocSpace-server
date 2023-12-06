@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,30 +27,21 @@
 namespace ASC.Core.Billing;
 
 [Singleton]
-public class TenantExtraConfig
+public class TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
 {
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReaderConfig _licenseReaderConfig;
-
-    public TenantExtraConfig(CoreBaseSettings coreBaseSettings, LicenseReaderConfig licenseReaderConfig)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReaderConfig = licenseReaderConfig;
-    }
-
     public bool Saas
     {
-        get { return !_coreBaseSettings.Standalone; }
+        get { return !coreBaseSettings.Standalone; }
     }
 
     public bool Enterprise
     {
-        get { return _coreBaseSettings.Standalone && !string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && !string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 
     public bool Opensource
     {
-        get { return _coreBaseSettings.Standalone && string.IsNullOrEmpty(_licenseReaderConfig.LicensePath); }
+        get { return coreBaseSettings.Standalone && string.IsNullOrEmpty(licenseReaderConfig.LicensePath); }
     }
 }
 
@@ -61,7 +52,6 @@ public class TariffServiceStorage
     private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
     internal readonly ICache Cache;
     private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly IServiceProvider _serviceProvider;
     internal readonly ICacheNotify<TariffCacheItem> Notify;
     private TimeSpan _cacheExpiration;
 
@@ -71,9 +61,8 @@ public class TariffServiceStorage
 
         Cache = cache;
         _coreBaseSettings = coreBaseSettings;
-        _serviceProvider = serviceProvider;
         Notify = notify;
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
             Cache.Insert(TariffService.GetTariffNeedToUpdateCacheKey(i.TenantId), "update", _cacheExpiration);
 
@@ -82,9 +71,9 @@ public class TariffServiceStorage
             Cache.Remove(TariffService.GetBillingPaymentCacheKey(i.TenantId)); // clear all payments
         }, CacheNotifyAction.Remove);
 
-        Notify.Subscribe((i) =>
+        Notify.Subscribe(i =>
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var tariffService = scope.ServiceProvider.GetService<ITariffService>();
             var tariff = tariffService.GetBillingInfoAsync(i.TenantId, i.TariffId).Result;
             if (tariff != null)
@@ -669,16 +658,12 @@ public class TariffService : ITariffService
                     tariffInfo.Id = efTariff.Id;
                 }
 
-                if (efTariff.CustomerId == default)
-                {
-                    efTariff.CustomerId = "";
-                }
-
+                efTariff.CustomerId ??= "";
                 efTariff = await dbContext.AddOrUpdateAsync(q => q.Tariffs, efTariff);
 
                 foreach (var q in tariffInfo.Quotas)
                 {
-                    await dbContext.AddOrUpdateAsync(q => q.TariffRows, new DbTariffRow
+                    await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = efTariff.Id,
                         Quota = q.Id,
@@ -811,7 +796,7 @@ public class TariffService : ITariffService
                 var unlimTariff = await CreateDefaultAsync();
                 unlimTariff.LicenseDate = tariff.DueDate;
                 unlimTariff.DueDate = tariff.DueDate;
-                unlimTariff.Quotas = new List<Quota>()
+                unlimTariff.Quotas = new List<Quota>
                 {
                     new(defaultQuota.TenantId, 1)
                 };

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -145,7 +145,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
             toInsert.EntryId = (await MappingIDAsync(r.EntryId, true)).ToString();
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-            await filesDbContext.AddOrUpdateAsync(r => r.Security, toInsert);
+            await filesDbContext.AddOrUpdateAsync(context => context.Security, toInsert);
             await filesDbContext.SaveChangesAsync();
         }
     }
@@ -447,19 +447,13 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
         }
 
         var mappedId = folderId is int fid ? MappingIDAsync(fid) : await MappingIDAsync(folderId);
-        if (folders != null)
-        {
-            folders.Add(mappedId.ToString());
-        }
+        folders?.Add(mappedId.ToString());
     }
 
     internal async Task<IQueryable<DbFilesSecurity>> GetQuery(FilesDbContext filesDbContext, Expression<Func<DbFilesSecurity, bool>> where = null)
     {
         var q = await Query(filesDbContext.Security);
-        if (q != null)
-        {
-            q = q.Where(where);
-        }
+        q = q?.Where(where);
         return q;
     }
 
@@ -519,9 +513,7 @@ internal abstract class SecurityBaseDao<T> : AbstractDao
 }
 
 [Scope]
-internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
-{
-    public SecurityDao(UserManager userManager,
+internal class SecurityDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -533,10 +525,10 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
         AuthContext authContext,
         IServiceProvider serviceProvider,
         ICache cache,
-        IMapper mapper) : base(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper)
-    {
-    }
-
+        IMapper mapper)
+    : SecurityBaseDao<int>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic,
+        coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper), ISecurityDao<int>
+{
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<int> entry, IEnumerable<Guid> subjects = null)
     {
         if (entry == null)
@@ -636,11 +628,7 @@ internal class SecurityDao : SecurityBaseDao<int>, ISecurityDao<int>
 }
 
 [Scope]
-internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<string>
-{
-    private readonly SelectorFactory _selectorFactory;
-
-    public ThirdPartySecurityDao(UserManager userManager,
+internal class ThirdPartySecurityDao(UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextFactory,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
@@ -653,11 +641,11 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
         IServiceProvider serviceProvider,
         ICache cache,
         IMapper mapper,
-        SelectorFactory selectorFactory) : base(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider, cache, mapper)
-    {
-        _selectorFactory = selectorFactory;
-    }
-
+        SelectorFactory selectorFactory)
+    : SecurityBaseDao<string>(userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo,
+        maxTotalSizeStatistic, coreBaseSettings, coreConfiguration, settingsManager, authContext, serviceProvider,
+        cache, mapper), ISecurityDao<string>
+{
     public async Task<IEnumerable<FileShareRecord>> GetSharesAsync(FileEntry<string> entry, IEnumerable<Guid> subjects = null)
     {
         var result = new List<FileShareRecord>();
@@ -697,7 +685,7 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
 
     private async ValueTask GetFoldersForShareAsync(string folderId, ICollection<FileEntry<string>> folders)
     {
-        var selector = _selectorFactory.GetSelector(folderId);
+        var selector = selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
         if (folderDao == null)
         {
@@ -716,7 +704,7 @@ internal class ThirdPartySecurityDao : SecurityBaseDao<string>, ISecurityDao<str
     {
         foreach (var folder in folders)
         {
-            var selector = _selectorFactory.GetSelector(folder.Id);
+            var selector = selectorFactory.GetSelector(folder.Id);
             var folderDao = selector.GetFolderDao(folder.Id);
             if (folderDao == null)
             {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,17 @@
 namespace ASC.Data.Storage.Encryption;
 
 [Singleton]
-public class EncryptionWorker
+public class EncryptionWorker(
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
 {
-    private readonly object _locker;
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "encryption";
-    private readonly IDistributedLockProvider _distributedLockProvider;
-
-    public EncryptionWorker(IDistributedTaskQueueFactory queueFactory,
-        IServiceProvider serviceProvider,
-        IDistributedLockProvider distributedLockProvider)
-    {
-        _locker = new object();
-        _serviceProvider = serviceProvider;
-        _distributedLockProvider = distributedLockProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {
-        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
         {
             var item = _queue.GetAllTasks<EncryptionOperation>().SingleOrDefault();
 
@@ -59,7 +49,7 @@ public class EncryptionWorker
 
             if (item == null)
             {
-                var encryptionOperation = _serviceProvider.GetService<EncryptionOperation>();
+                var encryptionOperation = serviceProvider.GetService<EncryptionOperation>();
                 encryptionOperation.Init(encryptionSettings, GetCacheId(), serverRootPath);
 
                 _queue.EnqueueTask(encryptionOperation);

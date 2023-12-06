@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,25 +27,18 @@
 namespace ASC.Web.Core.RemovePortal;
 
 [Singleton(Additional = typeof(RemovePortalWorkerExtension))]
-public class RemovePortalWorker
+public class RemovePortalWorker(
+    IDistributedTaskQueueFactory queueFactory,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue _queue;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IDistributedLockProvider _distributedLockProvider;
+    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
 
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "removePortal";
 
-    public RemovePortalWorker(IDistributedTaskQueueFactory queueFactory,
-                            IServiceProvider serviceProvider, IDistributedLockProvider distributedLockProvider)
-    {
-        _serviceProvider = serviceProvider;
-        _distributedLockProvider = distributedLockProvider;
-        _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    }
-
     public async Task StartAsync(int tenantId)
     {
-        await using (await _distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
         {
             var item = _queue.GetAllTasks<RemovePortalOperation>().FirstOrDefault(t => t.TenantId == tenantId);
 
@@ -56,7 +49,7 @@ public class RemovePortalWorker
             }
             if (item == null)
             {
-                item = _serviceProvider.GetService<RemovePortalOperation>();
+                item = serviceProvider.GetService<RemovePortalOperation>();
 
                 item.Init(tenantId);
 

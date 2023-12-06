@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,49 +29,33 @@ using ASC.Data.Backup.EF.Model;
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<BackupRequestIntegrationEvent>
-{
-    private readonly BackupAjaxHandler _backupAjaxHandler;
-    private readonly ILogger _logger;
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
-    private readonly AuthManager _authManager;
-    private readonly BackupWorker _backupWorker;
-
-    public BackupRequestedIntegrationEventHandler(
+public class BackupRequestedIntegrationEventHandler(
         BackupAjaxHandler backupAjaxHandler,
         ILogger<BackupRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
         AuthManager authManager,
         BackupWorker backupWorker)
+    : IIntegrationEventHandler<BackupRequestIntegrationEvent>
     {
-        _tenantManager = tenantManager;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _backupAjaxHandler = backupAjaxHandler;
-        _logger = logger;
-        _backupWorker = backupWorker;
-    }
-
     public async Task Handle(BackupRequestIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && _backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && backupWorker.IsInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
 
-            await _tenantManager.SetCurrentTenantAsync(@event.TenantId);
-            await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy));
 
             if (@event.IsScheduled)
             {
-                await _backupWorker.StartScheduledBackupAsync(new BackupSchedule
+                await backupWorker.StartScheduledBackupAsync(new BackupSchedule
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,
@@ -82,7 +66,7 @@ public class BackupRequestedIntegrationEventHandler : IIntegrationEventHandler<B
             }
             else
             {
-                await _backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams);
+                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, true, @event.TaskId);
             }
         }
     }

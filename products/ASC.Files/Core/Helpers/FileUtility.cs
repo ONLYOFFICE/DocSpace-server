@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,30 +27,23 @@
 namespace ASC.Files.Core.Helpers;
 
 [Singleton]
-public class FileUtilityConfiguration
+public class FileUtilityConfiguration(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public FileUtilityConfiguration(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     private List<string> _extsIndexing;
-    public List<string> ExtsIndexing { get => _extsIndexing ??= _configuration.GetSection("files:index").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsIndexing { get => _extsIndexing ??= configuration.GetSection("files:index").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsImagePreviewed;
-    public List<string> ExtsImagePreviewed { get => _extsImagePreviewed ??= _configuration.GetSection("files:viewed-images").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsImagePreviewed { get => _extsImagePreviewed ??= configuration.GetSection("files:viewed-images").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsMediaPreviewed;
-    public List<string> ExtsMediaPreviewed { get => _extsMediaPreviewed ??= _configuration.GetSection("files:viewed-media").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsMediaPreviewed { get => _extsMediaPreviewed ??= configuration.GetSection("files:viewed-media").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsWebPreviewed;
     public List<string> ExtsWebPreviewed
     {
         get
         {
-            return _extsWebPreviewed ??= _configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebPreviewed ??= configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -59,19 +52,19 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebEdited ??= _configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebEdited ??= configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
     private List<string> _extsWebEncrypt;
-    public List<string> ExtsWebEncrypt { get => _extsWebEncrypt ??= _configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? new List<string>(); }
+    public List<string> ExtsWebEncrypt { get => _extsWebEncrypt ??= configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? new List<string>(); }
 
     private List<string> _extsWebReviewed;
     public List<string> ExtsWebReviewed
     {
         get
         {
-            return _extsWebReviewed ??= _configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebReviewed ??= configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -80,7 +73,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebCustomFilterEditing ??= _configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebCustomFilterEditing ??= configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -89,7 +82,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebRestrictedEditing ??= _configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebRestrictedEditing ??= configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -98,7 +91,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebCommented ??= _configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebCommented ??= configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -107,7 +100,7 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsWebTemplate ??= _configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? new List<string>();
+            return _extsWebTemplate ??= configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
@@ -116,41 +109,41 @@ public class FileUtilityConfiguration
     {
         get
         {
-            return _extsMustConvert ??= _configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? new List<string>();
+            return _extsMustConvert ??= configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? new List<string>();
         }
     }
 
     private List<string> _extsCoAuthoring;
     public List<string> ExtsCoAuthoring
     {
-        get => _extsCoAuthoring ??= _configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? new List<string>();
+        get => _extsCoAuthoring ??= configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? new List<string>();
     }
 
     private string _masterFormExtension;
     public string MasterFormExtension
     {
-        get => _masterFormExtension ??= _configuration["files:docservice:internal-form"] ?? ".docxf";
+        get => _masterFormExtension ??= configuration["files:docservice:internal-form"] ?? ".docxf";
     }
 
     private List<LogoColor> _logoColors;
     public List<LogoColor> LogoColors
     {
-        get => _logoColors ??= _configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
+        get => _logoColors ??= configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
     }
 
     public Dictionary<FileType, string> InternalExtension
     {
         get => new()
         {
-                { FileType.Document, _configuration["files:docservice:internal-doc"] ?? ".docx" },
-                { FileType.Spreadsheet, _configuration["files:docservice:internal-xls"] ?? ".xlsx" },
-                { FileType.Presentation, _configuration["files:docservice:internal-ppt"] ?? ".pptx" }
+                { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
+                { FileType.Spreadsheet, configuration["files:docservice:internal-xls"] ?? ".xlsx" },
+                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" }
             };
     }
 
     internal string GetSignatureSecret()
     {
-        var result = _configuration["files:docservice:secret:value"] ?? "";
+        var result = configuration["files:docservice:secret:value"] ?? "";
 
         var regex = new Regex(@"^\s+$");
 
@@ -164,7 +157,7 @@ public class FileUtilityConfiguration
 
     internal string GetSignatureHeader()
     {
-        var result = (_configuration["files:docservice:secret:header"] ?? "").Trim();
+        var result = (configuration["files:docservice:secret:header"] ?? "").Trim();
         if (string.IsNullOrEmpty(result))
         {
             result = "Authorization";
@@ -176,7 +169,7 @@ public class FileUtilityConfiguration
 
     internal bool GetCanForcesave()
     {
-        return !bool.TryParse(_configuration["files:docservice:forcesave"] ?? "", out var canForcesave) || canForcesave;
+        return !bool.TryParse(configuration["files:docservice:forcesave"] ?? "", out var canForcesave) || canForcesave;
     }
 }
 
@@ -199,7 +192,7 @@ public enum Accessibility
     WebComment,
     CoAuhtoring,
     CanConvert,
-    MustConvert,
+    MustConvert
 }
 
 [Scope]
@@ -238,7 +231,7 @@ public class FileUtility
             var position = fileName.LastIndexOf('.');
             if (0 <= position)
             {
-                extension = fileName.Substring(position).Trim().ToLower();
+                extension = fileName[position..].Trim().ToLower();
             }
         }
         return extension == null ? string.Empty : extension.Trim().ToLower();
@@ -340,44 +333,21 @@ public class FileUtility
 
         foreach (var r in Enum.GetValues<Accessibility>())
         {
-            var val = false;
-
-            switch (r)
+            var val = r switch
             {
-                case Accessibility.ImageView:
-                    val = CanImageView(fileName);
-                    break;
-                case Accessibility.MediaView:
-                    val = CanMediaView(fileName);
-                    break;
-                case Accessibility.WebView:
-                    val = CanWebView(fileName);
-                    break;
-                case Accessibility.WebEdit:
-                    val = CanWebEdit(fileName);
-                    break;
-                case Accessibility.WebReview:
-                    val = CanWebReview(fileName);
-                    break;
-                case Accessibility.WebCustomFilterEditing:
-                    val = CanWebCustomFilterEditing(fileName);
-                    break;
-                case Accessibility.WebRestrictedEditing:
-                    val = CanWebRestrictedEditing(fileName);
-                    break;
-                case Accessibility.WebComment:
-                    val = CanWebComment(fileName);
-                    break;
-                case Accessibility.CoAuhtoring:
-                    val = CanCoAuthoring(fileName);
-                    break;
-                case Accessibility.CanConvert:
-                    val = await CanConvert(file);
-                    break;
-                case Accessibility.MustConvert:
-                    val = MustConvert(fileName);
-                    break;
-            }
+                Accessibility.ImageView => CanImageView(fileName),
+                Accessibility.MediaView => CanMediaView(fileName),
+                Accessibility.WebView => CanWebView(fileName),
+                Accessibility.WebEdit => CanWebEdit(fileName),
+                Accessibility.WebReview => CanWebReview(fileName),
+                Accessibility.WebCustomFilterEditing => CanWebCustomFilterEditing(fileName),
+                Accessibility.WebRestrictedEditing => CanWebRestrictedEditing(fileName),
+                Accessibility.WebComment => CanWebComment(fileName),
+                Accessibility.CoAuhtoring => CanCoAuthoring(fileName),
+                Accessibility.CanConvert => await CanConvert(file),
+                Accessibility.MustConvert => MustConvert(fileName),
+                _ => false
+            };
 
             result.Add(r, val);
         }
@@ -637,7 +607,7 @@ public class FileUtility
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
     private readonly SetupInfo _setupInfo;
 
-    public static readonly ImmutableList<string> ExtsArchive =  new List<string>()
+    public static readonly ImmutableList<string> ExtsArchive =  new List<string>
     {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
@@ -646,7 +616,7 @@ public class FileUtility
                 ".z", ".zoo"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsVideo =  new List<string>()
+    public static readonly ImmutableList<string> ExtsVideo =  new List<string>
     {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
@@ -655,7 +625,7 @@ public class FileUtility
                 ".vob", ".webm", ".wmv"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsAudio =  new List<string>()
+    public static readonly ImmutableList<string> ExtsAudio =  new List<string>
     {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
@@ -664,7 +634,7 @@ public class FileUtility
                 ".raw", ".wav", ".wma"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsImage =  new List<string>()
+    public static readonly ImmutableList<string> ExtsImage =  new List<string>
     {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
@@ -672,7 +642,7 @@ public class FileUtility
                 ".svgt", ".svgy", ".gdraw", ".webp"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>()
+    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>
     {
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
@@ -682,7 +652,7 @@ public class FileUtility
                 ".gsheet"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsPresentation = new List<string>()
+    public static readonly ImmutableList<string> ExtsPresentation = new List<string>
     {
                 ".pps", ".ppsx", ".ppsm",
                 ".ppt", ".pptx", ".pptm",
@@ -693,7 +663,7 @@ public class FileUtility
                 ".gslides"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsDocument = new List<string>()
+    public static readonly ImmutableList<string> ExtsDocument = new List<string>
     {
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
@@ -705,23 +675,23 @@ public class FileUtility
                 ".gdoc"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>()
+    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>
     {
                 ".docxf"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsOForm = new List<string>()
+    public static readonly ImmutableList<string> ExtsOForm = new List<string>
     {
                 ".oform"
             }.ToImmutableList();
 
-    public static readonly ImmutableList<string> ExtsTemplate = new List<string>()
+    public static readonly ImmutableList<string> ExtsTemplate = new List<string>
     {
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
-                ".pot", ".potm", ".potx",
-            }.ToImmutableList();
+                ".pot", ".potm", ".potx"
+    }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }

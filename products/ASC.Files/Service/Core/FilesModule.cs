@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,14 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 using ASC.Feed.Aggregator.Modules;
 
 using Constants = ASC.Feed.Constants;
 
 namespace ASC.Files.Service.Core;
 
-public class FilesModule : FeedModule
+public class FilesModule(TenantManager tenantManager,
+        UserManager userManager,
+        WebItemSecurity webItemSecurity,
+        FileSecurity fileSecurity,
+        IDaoFactory daoFactory,
+        TenantUtil tenantUtil)
+    : FeedModule(tenantManager, webItemSecurity)
 {
     public override Guid ProductID => WebItemManager.DocumentsProductID;
     public override string Name => Constants.FilesModule;
@@ -41,27 +46,8 @@ public class FilesModule : FeedModule
     private const string FileItem = Constants.FileItem;
     private const string SharedFileItem = Constants.SharedFileItem;
 
-    private readonly FileSecurity _fileSecurity;
-    private readonly IFileDao<int> _fileDao;
-    private readonly IFolderDao<int> _folderDao;
-    private readonly UserManager _userManager;
-    private readonly TenantUtil _tenantUtil;
-
-    public FilesModule(
-        TenantManager tenantManager,
-        UserManager userManager,
-        WebItemSecurity webItemSecurity,
-        FileSecurity fileSecurity,
-        IDaoFactory daoFactory,
-        TenantUtil tenantUtil)
-        : base(tenantManager, webItemSecurity)
-    {
-        _fileDao = daoFactory.GetFileDao<int>();
-        _folderDao = daoFactory.GetFolderDao<int>();
-        _userManager = userManager;
-        _fileSecurity = fileSecurity;
-        _tenantUtil = tenantUtil;
-    }
+    private readonly IFileDao<int> _fileDao = daoFactory.GetFileDao<int>();
+    private readonly IFolderDao<int> _folderDao = daoFactory.GetFolderDao<int>();
 
     public override async Task<bool> VisibleForAsync(Feed.Aggregator.Feed feed, object data, Guid userId)
     {
@@ -83,7 +69,7 @@ public class FilesModule : FeedModule
             }
 
             var owner = (Guid)feed.Target;
-            var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
+            var groupUsers = (await userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
             if (groupUsers.Count == 0)
             {
                 groupUsers.Add(owner);
@@ -96,7 +82,7 @@ public class FilesModule : FeedModule
             targetCond = true;
         }
 
-        return targetCond && await _fileSecurity.CanReadAsync(file, userId);
+        return targetCond && await fileSecurity.CanReadAsync(file, userId);
     }
 
     public override async Task VisibleForAsync(List<Tuple<FeedRow, object>> feed, Guid userId)
@@ -125,7 +111,7 @@ public class FilesModule : FeedModule
             }
         }
 
-        var canRead = await _fileSecurity.CanReadAsync(files.ToAsyncEnumerable(), userId).Where(r => r.Item2).ToListAsync();
+        var canRead = await fileSecurity.CanReadAsync(files.ToAsyncEnumerable(), userId).Where(r => r.Item2).ToListAsync();
 
         foreach (var f in feed1)
         {
@@ -185,7 +171,7 @@ public class FilesModule : FeedModule
         }
 
         var updated = file.Version != 1;
-        var fileModifiedUtc = _tenantUtil.DateTimeToUtc(file.ModifiedOn);
+        var fileModifiedUtc = tenantUtil.DateTimeToUtc(file.ModifiedOn);
 
         return new Feed.Aggregator.Feed(file.ModifiedBy, fileModifiedUtc)
         {
@@ -213,7 +199,7 @@ public class FilesModule : FeedModule
         }
 
         var owner = (Guid)target;
-        var groupUsers = (await _userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
+        var groupUsers = (await userManager.GetUsersByGroupAsync(owner)).Select(x => x.Id).ToList();
         if (groupUsers.Count == 0)
         {
             groupUsers.Add(owner);
