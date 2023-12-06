@@ -97,24 +97,22 @@ internal class ComposeFileOperation<T1, T2> : FileOperation
 
     public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
     {
-        if (ThirdPartyOperation.Files.Any() || ThirdPartyOperation.Folders.Any())
-        {
-            ThirdPartyOperation.Publication = PublishChanges;
-            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
-        }
-        else
-        {
-            ThirdPartyOperation[Finish] = true;
-        }
+        var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
+        var thirdPartyOperation = ThirdPartyOperation.Files.Count != 0 || ThirdPartyOperation.Folders.Count != 0;
 
-        if (DaoOperation.Files.Any() || DaoOperation.Folders.Any())
+        DaoOperation[Finish] = !daoOperation;
+        ThirdPartyOperation[Finish] = !thirdPartyOperation;
+        
+        if (daoOperation)
         {
             DaoOperation.Publication = PublishChanges;
             await DaoOperation.RunJob(distributedTask, cancellationToken);
         }
-        else
+        
+        if (thirdPartyOperation)
         {
-            DaoOperation[Finish] = true;
+            ThirdPartyOperation.Publication = PublishChanges;
+            await ThirdPartyOperation.RunJob(distributedTask, cancellationToken);
         }
     }
 
