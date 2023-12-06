@@ -77,7 +77,7 @@ public class BackupAjaxHandler
         _fileSecurity = fileSecurity;
     }
 
-    public async Task StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams)
+    public async Task StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri)
     {
         await DemandPermissionsBackupAsync();
 
@@ -86,7 +86,8 @@ public class BackupAjaxHandler
             TenantId = await GetCurrentTenantIdAsync(),
             UserId = _securityContext.CurrentAccount.ID,
             StorageType = storageType,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri
         };
 
         switch (storageType)
@@ -278,7 +279,7 @@ public class BackupAjaxHandler
 
     #region restore
 
-    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify)
+    public async Task StartRestoreAsync(string backupId, BackupStorageType storageType, Dictionary<string, string> storageParams, bool notify, string serverBaseUri)
     {
         await DemandPermissionsRestoreAsync();
         var tenantId = await GetCurrentTenantIdAsync();
@@ -286,7 +287,8 @@ public class BackupAjaxHandler
         {
             TenantId = tenantId,
             NotifyAfterCompletion = notify,
-            StorageParams = storageParams
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri
         };
 
         if (Guid.TryParse(backupId, out var guidBackupId))
