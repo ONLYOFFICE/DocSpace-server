@@ -621,7 +621,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, string.Empty,
+        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, new string[] { },
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 

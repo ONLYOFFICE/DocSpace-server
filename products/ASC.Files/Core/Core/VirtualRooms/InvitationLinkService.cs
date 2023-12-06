@@ -36,7 +36,8 @@ public class InvitationLinkService(CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager, 
     CountPaidUserChecker countPaidUserChecker, 
     FileSecurity fileSecurity, 
-    UserManager userManager)
+        UserManager userManager,
+        IPSecurity.IPSecurity iPSecurity)
 {
     public string GetInvitationLink(Guid linkId, Guid createdBy)
     {
@@ -75,6 +76,11 @@ public class InvitationLinkService(CommonLinkUtility commonLinkUtility,
 
     public async Task<Validation> ValidateAsync(string key, string email, EmployeeType employeeType, string roomId = default)
     {
+        if (!await iPSecurity.VerifyAsync())
+        {
+            throw new SecurityException();
+        }
+
         var linkData = await GetProcessedLinkDataAsync(key, email, employeeType);
         var result = new Validation { Result = linkData.Result };
 
