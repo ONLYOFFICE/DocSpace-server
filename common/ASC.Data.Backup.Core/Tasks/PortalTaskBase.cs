@@ -133,7 +133,8 @@ public abstract class PortalTaskBase
                     "whitelabel",
                     "customnavigation",
                     "userPhotos",
-                    "room_logos"
+                    "room_logos",
+                    "webplugins"
                 };
 
         if (!allowedStorageModules.Contains(storageModuleName))
