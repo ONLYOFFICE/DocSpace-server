@@ -31,7 +31,6 @@ internal class CrossDao //Additional SharpBox
 (IServiceProvider serviceProvider,
         SetupInfo setupInfo,
         FileConverter fileConverter,
-        ThumbnailSettings thumbnailSettings,
         SocketManager socketManager)
 {
     public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
