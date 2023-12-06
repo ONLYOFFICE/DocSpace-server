@@ -1430,7 +1430,7 @@ public class S3Storage : BaseStorage
             PartETags = eTags
         };
         await s3.CompleteMultipartUploadAsync(completeRequest);
-        stream.Dispose();
+        await stream.DisposeAsync();
         return ext;
     }
 
