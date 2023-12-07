@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -31,7 +31,7 @@ public class SearchSettings : ISettings<SearchSettings>
     public string Data { get; set; }
 
     [JsonIgnore]
-    public Guid ID => new Guid("{93784AB2-10B5-4C2F-9B36-F2662CCCF316}");
+    public Guid ID => new("{93784AB2-10B5-4C2F-9B36-F2662CCCF316}");
     internal List<SearchSettingsItem> Items
     {
         get
@@ -62,48 +62,32 @@ public class SearchSettings : ISettings<SearchSettings>
     {
         var wrapper = Items.FirstOrDefault(r => r.ID == name);
 
-        return wrapper != null && wrapper.Enabled;
+        return wrapper is { Enabled: true };
     }
 }
 
 [Scope]
-public class SearchSettingsHelper
+public class SearchSettingsHelper(TenantManager tenantManager,
+    SettingsManager settingsManager,
+    CoreBaseSettings coreBaseSettings,
+    ICacheNotify<ReIndexAction> cacheNotify,
+    IServiceProvider serviceProvider,
+    IConfiguration configuration)
 {
     internal IEnumerable<IFactoryIndexer> AllItems =>
-        _allItems ??= _serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
+        _allItems ??= serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
 
-    private readonly IConfiguration _configuration;
-    private readonly TenantManager _tenantManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly ICacheNotify<ReIndexAction> _cacheNotify;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IConfiguration _configuration = configuration;
     private IEnumerable<IFactoryIndexer> _allItems;
-
-    public SearchSettingsHelper(
-        TenantManager tenantManager,
-        SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
-        ICacheNotify<ReIndexAction> cacheNotify,
-        IServiceProvider serviceProvider,
-        IConfiguration configuration)
-    {
-        _tenantManager = tenantManager;
-        _settingsManager = settingsManager;
-        _coreBaseSettings = coreBaseSettings;
-        _cacheNotify = cacheNotify;
-        _serviceProvider = serviceProvider;
-        _configuration = configuration;
-    }
 
     public async Task<List<SearchSettingsItem>> GetAllItemsAsync()
     {
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return new List<SearchSettingsItem>();
         }
 
-        var settings = await _settingsManager.LoadAsync<SearchSettings>();
+        var settings = await settingsManager.LoadAsync<SearchSettings>();
 
         return AllItems.Select(r => new SearchSettingsItem
         {
@@ -115,24 +99,24 @@ public class SearchSettingsHelper
 
     public async Task SetAsync(List<SearchSettingsItem> items)
     {
-        if (!_coreBaseSettings.Standalone)
+        if (!coreBaseSettings.Standalone)
         {
             return;
         }
 
-        var settings = await _settingsManager.LoadAsync<SearchSettings>();
+        var settings = await settingsManager.LoadAsync<SearchSettings>();
 
         var settingsItems = settings.Items;
         var toReIndex = settingsItems.Count == 0 ? items.Where(r => r.Enabled).ToList() : items.Where(item => settingsItems.Any(r => r.ID == item.ID && r.Enabled != item.Enabled)).ToList();
 
         settings.Items = items;
         settings.Data = JsonConvert.SerializeObject(items);
-        await _settingsManager.SaveAsync(settings);
+        await settingsManager.SaveAsync(settings);
 
-        var action = new ReIndexAction() { Tenant = await _tenantManager.GetCurrentTenantIdAsync() };
+        var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
-        _cacheNotify.Publish(action, CacheNotifyAction.Any);
+        await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
     }
 
     public async Task<bool> CanIndexByContentAsync<T>() where T : class, ISearchItem
@@ -171,24 +155,24 @@ public class SearchSettingsHelper
 
     public async Task<bool> CanSearchByContentAsync(Type t)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         if (!await CanIndexByContentAsync(t))
         {
             return false;
         }
 
-        if (_coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone)
         {
             return true;
         }
 
-        return (await _tenantManager.GetTenantQuotaAsync(tenantId)).ContentSearch;
+        return (await tenantManager.GetTenantQuotaAsync(tenantId)).ContentSearch;
     }
 }
 
 public class SearchSettingsItem
 {
-    public string ID { get; set; }
-    public bool Enabled { get; set; }
+    public string ID { get; init; }
+    public bool Enabled { get; init; }
     public string Title { get; set; }
 }

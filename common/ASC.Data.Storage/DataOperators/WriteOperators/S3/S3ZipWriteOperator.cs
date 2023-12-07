@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -35,8 +35,8 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly SHA256 _sha;
     private Stream _fileStream;
     protected const int TasksLimit = 10;
-    private readonly List<Task> _tasks = new List<Task>(TasksLimit);
-    private readonly List<Stream> _streams = new List<Stream>(TasksLimit);
+    private readonly List<Task> _tasks = new(TasksLimit);
+    private readonly List<Stream> _streams = new(TasksLimit);
     private readonly TempStream _tempStream;
 
     public string Hash { get; private set; }
@@ -56,7 +56,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _tempStream = tempStream;
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
-
+        _sessionHolder.MaxChunkUploadSize *= 5;
 
         _fileStream = _tempStream.Create();
         _gZipOutputStream = new GZipOutputStream(_fileStream)
@@ -69,15 +69,12 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        Stream fileStream = null;
-        await ActionInvoker.TryAsync(async () =>
-        {
-            fileStream = await store.GetReadStreamAsync(domain, path);
-        }, 5, error => throw error);
+        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream);
-            fileStream.Dispose();
+            await fileStream.DisposeAsync();
         }
     }
 
@@ -182,7 +179,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     public async ValueTask DisposeAsync()
     {
         _tarOutputStream.Close();
-        _tarOutputStream.Dispose();
+        await _tarOutputStream.DisposeAsync();
 
         SplitAndUpload(_fileStream, true);
 

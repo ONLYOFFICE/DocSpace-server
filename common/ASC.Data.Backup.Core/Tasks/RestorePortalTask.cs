@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,26 +27,7 @@
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
-public class RestorePortalTask : PortalTaskBase
-{
-    public bool ReplaceDate { get; set; }
-    public bool Dump { get; set; }
-    public string BackupFilePath { get; private set; }
-    public string UpgradesPath { get; private set; }
-    public bool UnblockPortalAfterCompleted { get; set; }
-
-    private ColumnMapper _columnMapper;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly LicenseReader _licenseReader;
-    private readonly TenantManager _tenantManager;
-    private readonly AscCacheNotify _ascCacheNotify;
-    private readonly BackupRepository _backupRepository;
-    private readonly ILogger<RestorePortalTask> _options;
-    private readonly ILogger<RestoreDbModuleTask> _logger;
-    private string _region;
-
-    public RestorePortalTask(
-        DbFactory dbFactory,
+public class RestorePortalTask(DbFactory dbFactory,
         ILogger<RestorePortalTask> options,
         ILogger<RestoreDbModuleTask> logger,
         StorageFactory storageFactory,
@@ -57,20 +38,20 @@ public class RestorePortalTask : PortalTaskBase
         AscCacheNotify ascCacheNotify,
         ModuleProvider moduleProvider,
         BackupRepository backupRepository)
-        : base(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _licenseReader = licenseReader;
-        _tenantManager = tenantManager;
-        _ascCacheNotify = ascCacheNotify;
-        _options = options;
-        _logger = logger;
-        _backupRepository = backupRepository;
-    }
+    : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
+{
+    public bool ReplaceDate { get; set; }
+    public bool Dump { get; set; }
+    public string BackupFilePath { get; private set; }
+    public string UpgradesPath { get; private set; }
+    public bool UnblockPortalAfterCompleted { get; set; }
+
+    private ColumnMapper _columnMapper;
+    private string _region;
 
     public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(fromFilePath);
+        ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
         if (!File.Exists(fromFilePath))
         {
@@ -86,15 +67,15 @@ public class RestorePortalTask : PortalTaskBase
 
     public override async Task RunJob()
     {
-        _options.DebugBeginRestorePortal();
+        options.DebugBeginRestorePortal();
 
-        _options.DebugBeginRestoreData();
+        options.DebugBeginRestoreData();
 
         using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath))
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
-                Dump = entry != null && _coreBaseSettings.Standalone;
+                Dump = entry != null && coreBaseSettings.Standalone;
             }
 
             if (Dump)
@@ -108,8 +89,8 @@ public class RestorePortalTask : PortalTaskBase
 
                 foreach (var module in modulesToProcess)
                 {
-                    var restoreTask = new RestoreDbModuleTask(_logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider);
-                    restoreTask.ProgressChanged += (sender, args) => SetCurrentStepProgress(args.Progress);
+                    var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider);
+                    restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
 
                     foreach (var tableName in _ignoredTables)
                     {
@@ -118,17 +99,17 @@ public class RestorePortalTask : PortalTaskBase
 
                     await restoreTask.RunJob();
                 }
-                await _backupRepository.MigrationBackupRecordsAsync(TenantId, _columnMapper.GetTenantMapping(), _region);
+                await backupRepository.MigrationBackupRecordsAsync(TenantId, _columnMapper.GetTenantMapping(), _region);
             }
 
-            _options.DebugEndRestoreData();
+            options.DebugEndRestoreData();
 
             if (ProcessStorage)
             {
-                if (_coreBaseSettings.Standalone)
+                if (coreBaseSettings.Standalone)
                 {
-                    _options.DebugClearCache();
-                    _ascCacheNotify.ClearCache();
+                    options.DebugClearCache();
+                    ascCacheNotify.ClearCache();
                 }
 
                 await DoRestoreStorage(dataReader);
@@ -140,30 +121,30 @@ public class RestorePortalTask : PortalTaskBase
             }
         }
 
-        if (_coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone)
         {
-            _options.DebugRefreshLicense();
+            options.DebugRefreshLicense();
             try
             {
-                await _licenseReader.RejectLicenseAsync();
+                await licenseReader.RejectLicenseAsync();
             }
             catch (Exception ex)
             {
-                _options.ErrorRunJob(ex);
+                options.ErrorRunJob(ex);
             }
 
-            _options.DebugClearCache();
-            _ascCacheNotify.ClearCache();
+            options.DebugClearCache();
+            ascCacheNotify.ClearCache();
         }
 
-        _options.DebugEndRestorePortal();
+        options.DebugEndRestorePortal();
     }
 
     private async Task RestoreFromDump(IDataReadOperator dataReader)
     {
         var keyBase = KeyHelper.GetDatabaseSchema();
-        var keys = dataReader.GetEntries(keyBase).Select(r => Path.GetFileName(r)).ToList();
-        var dbs = dataReader.GetDirectories("").Where(r => Path.GetFileName(r).StartsWith("mailservice")).Select(r => Path.GetFileName(r)).ToList();
+        var keys = dataReader.GetEntries(keyBase).Select(Path.GetFileName).ToList();
+        var dbs = dataReader.GetDirectories("").Where(r => Path.GetFileName(r).StartsWith("mailservice")).Select(Path.GetFileName).ToList();
         var upgrades = new List<string>();
 
         if (!string.IsNullOrEmpty(UpgradesPath) && Directory.Exists(UpgradesPath))
@@ -177,8 +158,8 @@ public class RestorePortalTask : PortalTaskBase
         var databases = new Dictionary<Tuple<string, string>, List<string>>();
         foreach (var db in dbs)
         {
-            var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(k => Path.GetFileName(k)).ToList();
-            stepscount += keys1.Count() * 2;
+            var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(Path.GetFileName).ToList();
+            stepscount += keys1.Count * 2;
             databasesFromDirs.Add(db, keys1);
         }
 
@@ -187,7 +168,7 @@ public class RestorePortalTask : PortalTaskBase
         if (ProcessStorage)
         {
             var storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed);
-            var tenants = await _tenantManager.GetTenantsAsync(false);
+            var tenants = await tenantManager.GetTenantsAsync(false);
 
             stepscount += storageModules.Count() * tenants.Count;
 
@@ -215,20 +196,18 @@ public class RestorePortalTask : PortalTaskBase
         }
         try
         {
-            await using (var connection = DbFactory.OpenConnection())
+            await using var connection = DbFactory.OpenConnection();
+            var command = connection.CreateCommand();
+            command.CommandText = "select id, connection_string from mail_server_server";
+            ExecuteList(command).ForEach(r =>
             {
-                var command = connection.CreateCommand();
-                command.CommandText = "select id, connection_string from mail_server_server";
-                ExecuteList(command).ForEach(r =>
-                {
-                    var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
-                    databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), databasesFromDirs[connectionString.Name]);
-                });
-            }
+                var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
+                databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), databasesFromDirs[connectionString.Name]);
+            });
         }
         catch (Exception e)
         {
-            _logger.ErrorWithException(e);
+            logger.ErrorWithException(e);
         }
 
         foreach (var database in databases)
@@ -258,14 +237,14 @@ public class RestorePortalTask : PortalTaskBase
 
     private async Task RestoreFromDumpFile(IDataReadOperator dataReader, string fileName1, string fileName2 = null, string db = null)
     {
-        _options.DebugRestoreFrom(fileName1);
+        options.DebugRestoreFrom(fileName1);
         await using (var stream = dataReader.GetEntry(fileName1))
         {
             await RunMysqlFile(stream, db);
         }
         SetStepCompleted();
 
-        _options.DebugRestoreFrom(fileName2);
+        options.DebugRestoreFrom(fileName2);
         if (fileName2 != null)
         {
             await using (var stream = dataReader.GetEntry(fileName2))
@@ -280,14 +259,12 @@ public class RestorePortalTask : PortalTaskBase
     public List<object[]> ExecuteList(DbCommand command)
     {
         var list = new List<object[]>();
-        using (var result = command.ExecuteReader())
+        using var result = command.ExecuteReader();
+        while (result.Read())
         {
-            while (result.Read())
-            {
-                var objects = new object[result.FieldCount];
-                result.GetValues(objects);
-                list.Add(objects);
-            }
+            var objects = new object[result.FieldCount];
+            result.GetValues(objects);
+            list.Add(objects);
         }
 
         return list;
@@ -295,7 +272,7 @@ public class RestorePortalTask : PortalTaskBase
 
     private ConnectionStringSettings GetConnectionString(int id, string connectionString)
     {
-        connectionString = connectionString + ";convert zero datetime=True";
+        connectionString += ";convert zero datetime=True";
         return new ConnectionStringSettings("mailservice-" + id, connectionString, "MySql.Data.MySqlClient");
     }
 
@@ -351,7 +328,7 @@ public class RestorePortalTask : PortalTaskBase
 
     private async Task DoRestoreStorage(IDataReadOperator dataReader)
     {
-        _options.DebugBeginRestoreStorage();
+        options.DebugBeginRestoreStorage();
 
         var fileGroups = GetFilesToProcess(dataReader).GroupBy(file => file.Module).ToList();
         var groupsProcessed = 0;
@@ -382,7 +359,7 @@ public class RestorePortalTask : PortalTaskBase
                         }
                         catch (Exception error)
                         {
-                            _options.WarningCantRestoreFile(file.Module, file.Path, error);
+                            options.WarningCantRestoreFile(file.Module, file.Path, error);
                         }
                     }
                 }
@@ -403,12 +380,12 @@ public class RestorePortalTask : PortalTaskBase
             SetStepCompleted();
         }
 
-        _options.DebugEndRestoreStorage();
+        options.DebugEndRestoreStorage();
     }
 
     private async Task DoDeleteStorageAsync(IEnumerable<string> storageModules, IEnumerable<Tenant> tenants)
     {
-        _options.DebugBeginDeleteStorage();
+        options.DebugBeginDeleteStorage();
 
         foreach (var tenant in tenants)
         {
@@ -466,7 +443,7 @@ public class RestorePortalTask : PortalTaskBase
             "  statuschanged='{1}' " +
             "where id = '{2}'",
             (int)TenantStatus.Active,
-            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
             tenantId);
 
         var command = connection.CreateCommand().WithTimeout(120);

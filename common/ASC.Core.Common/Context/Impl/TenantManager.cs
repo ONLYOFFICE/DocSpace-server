@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -39,13 +39,13 @@ public class TenantManager
     internal IQuotaService QuotaService { get; set; }
     internal ITariffService TariffService { get; set; }
 
-    private static readonly List<string> _thisCompAddresses = new List<string>();
+    private static readonly List<string> _thisCompAddresses = new();
 
     internal IHttpContextAccessor HttpContextAccessor { get; set; }
     internal CoreBaseSettings CoreBaseSettings { get; set; }
     internal CoreSettings CoreSettings { get; set; }
 
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private readonly IDistributedLockProvider _distributedLockProvider;
 
     static TenantManager()
     {
@@ -72,13 +72,15 @@ public class TenantManager
         IQuotaService quotaService,
         ITariffService tariffService,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings)
+        CoreSettings coreSettings, 
+        IDistributedLockProvider distributedLockProvider)
     {
         TenantService = tenantService;
         QuotaService = quotaService;
         TariffService = tariffService;
         CoreBaseSettings = coreBaseSettings;
         CoreSettings = coreSettings;
+        _distributedLockProvider = distributedLockProvider;
     }
 
     public TenantManager(
@@ -87,7 +89,8 @@ public class TenantManager
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings) : this(tenantService, quotaService, tariffService, coreBaseSettings, coreSettings)
+        CoreSettings coreSettings, 
+        IDistributedLockProvider distributedLockProvider) : this(tenantService, quotaService, tariffService, coreBaseSettings, coreSettings, distributedLockProvider)
     {
         HttpContextAccessor = httpContextAccessor;
     }
@@ -105,11 +108,6 @@ public class TenantManager
     public async Task<Tenant> GetTenantAsync(int tenantId)
     {
         return await TenantService.GetTenantAsync(tenantId);
-    }
-
-    public Tenant GetTenant(int tenantId)
-    {
-        return TenantService.GetTenant(tenantId);
     }
 
     public async Task<Tenant> GetTenantAsync(string domain)
@@ -131,13 +129,12 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = await TenantService.GetTenantAsync(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = await TenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        if (t == null)
-        {
-            t = await TenantService.GetTenantAsync(domain);
-        }
+        
+        t ??= await TenantService.GetTenantAsync(domain);
+        
         if (t == null && CoreBaseSettings.Standalone && !isAlias)
         {
             t = await TenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
@@ -166,13 +163,12 @@ public class TenantManager
             if (!string.IsNullOrEmpty(baseUrl) && domain.EndsWith("." + baseUrl, StringComparison.InvariantCultureIgnoreCase))
             {
                 isAlias = true;
-                t = TenantService.GetTenant(domain.Substring(0, domain.Length - baseUrl.Length - 1));
+                t = TenantService.GetTenant(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        if (t == null)
-        {
-            t = TenantService.GetTenant(domain);
-        }
+        
+        t ??= TenantService.GetTenant(domain);
+        
         if (t == null && CoreBaseSettings.Standalone && !isAlias)
         {
             t = TenantService.GetTenantForStandaloneWithoutAlias(domain);
@@ -212,16 +208,6 @@ public class TenantManager
     public async Task RemoveTenantAsync(int tenantId, bool auto = false)
     {
         await TenantService.RemoveTenantAsync(tenantId, auto);
-    }
-
-    public async Task<Tenant> GetCurrentTenantAsync(HttpContext context)
-    {
-        return await GetCurrentTenantAsync(true, context);
-    }
-
-    public Tenant GetCurrentTenant(HttpContext context)
-    {
-        return GetCurrentTenant(true, context);
     }
 
     public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
@@ -266,7 +252,7 @@ public class TenantManager
         return tenant;
     }
 
-    public Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
+    private Tenant GetCurrentTenant(bool throwIfNotFound, HttpContext context)
     {
         if (_currentTenant != null)
         {
@@ -318,17 +304,12 @@ public class TenantManager
         return (await GetCurrentTenantAsync(true)).Id;
     }
 
-    public Tenant GetCurrentTenant()
-    {
-        return GetCurrentTenant(true);
-    }
-
     public async Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound)
     {
         return await GetCurrentTenantAsync(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
-
-    public Tenant GetCurrentTenant(bool throwIfNotFound)
+    
+    public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         return GetCurrentTenant(throwIfNotFound, HttpContextAccessor?.HttpContext);
     }
@@ -387,7 +368,7 @@ public class TenantManager
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
     {
-        return await GetTenantQuotaAsync((await GetCurrentTenantAsync()).Id, refresh);
+        return await GetTenantQuotaAsync(await GetCurrentTenantIdAsync(), refresh);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant, bool refresh = false)
@@ -450,18 +431,10 @@ public class TenantManager
 
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
-        try
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(
+                         $"quota_{row.TenantId}_{row.Path}_{row.UserId}"))
         {
-            await _semaphore.WaitAsync();
             await QuotaService.SetTenantQuotaRowAsync(row, exchange);
-        }
-        catch
-        {
-            throw;
-    }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 

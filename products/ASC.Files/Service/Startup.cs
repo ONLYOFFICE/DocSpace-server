@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,27 +25,18 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Service;
-public class Startup : BaseWorkerStartup
+public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    : BaseWorkerStartup(configuration, hostEnvironment)
 {
-    private readonly IConfiguration _configuration;
-    private readonly IHostEnvironment _hostEnvironment;
-
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-        _configuration = configuration;
-        _hostEnvironment = hostEnvironment;
-    }
-
     public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
 
         services.AddHttpClient();
 
-        DIHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
+        DIHelper.RegisterProducts(Configuration, HostEnvironment.ContentRootPath);
 
-        if (!bool.TryParse(_configuration["disable_elastic"], out var disableElastic))
+        if (!bool.TryParse(Configuration["disable_elastic"], out var disableElastic))
         {
             disableElastic = false;
         }
@@ -76,6 +67,12 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<ThumbnailBuilderService>();
 
         DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
+        DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
+        DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+        DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
+        DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+        DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+        DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
         services.AddHostedService<Launcher>();
         DIHelper.TryAdd<Launcher>();
@@ -92,6 +89,8 @@ public class Startup : BaseWorkerStartup
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
+        DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();
         services.AddScoped<CountRoomChecker>();

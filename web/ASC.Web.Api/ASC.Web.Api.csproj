@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyTitle>ASC.Web.Api</AssemblyTitle>
     <Company>Ascensio System SIA</Company>
     <Product>ASC.Web.Api</Product>
@@ -13,6 +13,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
@@ -42,23 +43,8 @@
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\whitelabel.svg" />
-      <EmbeddedResource Update="Core\AuditResource.ar-SA.resx">
-        <DependentUpon>AuditResource.resx</DependentUpon>
-      </EmbeddedResource>
-      <EmbeddedResource Update="Core\AuditResource.hy-AM.resx">
-        <DependentUpon>AuditResource.resx</DependentUpon>
-      </EmbeddedResource>
-      <EmbeddedResource Update="Core\AuditResource.ko-KR.resx">
-        <DependentUpon>AuditResource.resx</DependentUpon>
-      </EmbeddedResource>
-      <EmbeddedResource Update="Core\AuditResource.pt.resx">
-        <DependentUpon>AuditResource.resx</DependentUpon>
-      </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
-    </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\common\ASC.ActiveDirectory\ASC.ActiveDirectory.csproj" />
     <ProjectReference Include="..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
@@ -140,6 +126,21 @@
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Core\AuditResource.az.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.ar-SA.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.hy-AM.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.ko-KR.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.pt.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.ro.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

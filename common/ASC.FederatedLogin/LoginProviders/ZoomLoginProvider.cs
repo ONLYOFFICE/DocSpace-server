@@ -1,30 +1,28 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using static System.Formats.Asn1.AsnWriter;
 
 namespace ASC.FederatedLogin.LoginProviders;
 
@@ -38,13 +36,13 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     public override string CodeUrl => "https://zoom.us/oauth/authorize";
     public override string Scopes => "";
 
+    // used in ZoomService
     public const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
-
-    public ZoomLoginProvider() { }
-
+    
     private readonly RequestHelper _requestHelper;
 
+    public ZoomLoginProvider() { }
     public ZoomLoginProvider(
         OAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,
@@ -62,7 +60,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         _requestHelper = requestHelper;
     }
 
-    public override LoginProfile ProcessAuthoriztion(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
+    public override LoginProfile ProcessAuthorization(HttpContext context, IDictionary<string, string> @params, IDictionary<string, string> additionalStateArgs)
     {
         try
         {
@@ -97,12 +95,13 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
     }
 
+    // used in ZoomService
     public OAuth20Token GetAccessToken(string code, string redirectUri = null, string codeVerifier = null)
     {
         var clientPair = $"{ClientID}:{ClientSecret}";
-        var b64clientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
+        var base64ClientPair = Convert.ToBase64String(Encoding.UTF8.GetBytes(clientPair));
 
-        var body = new Dictionary<string, string>()
+        var body = new Dictionary<string, string>
         {
             { "code", code },
             { "grant_type", "authorization_code" },
@@ -116,7 +115,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
 
         var json = _requestHelper.PerformRequest(AccessTokenUrl, "application/x-www-form-urlencoded", "POST",
             body: string.Join("&", body.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}" )),
-            headers: new Dictionary<string, string> { { "Authorization", $"Basic {b64clientPair}" } }
+            headers: new Dictionary<string, string> { { "Authorization", $"Basic {base64ClientPair}" } }
         );
 
         return OAuth20Token.FromJson(json);
@@ -169,7 +168,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
             Locale = jsonProfile.Language,
             TimeZone = jsonProfile.Timezone,
             DisplayName = jsonProfile.DisplayName,
-            Provider = ProviderConstants.Zoom,
+            Provider = ProviderConstants.Zoom
         };
 
         return (profile, jsonProfile);

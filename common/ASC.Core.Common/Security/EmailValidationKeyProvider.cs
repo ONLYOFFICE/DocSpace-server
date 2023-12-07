@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -42,7 +42,7 @@ public class EmailValidationKeyProvider
     public TimeSpan ValidVisitLinkInterval { get; }
 
     private readonly ILogger<EmailValidationKeyProvider> _logger;
-    private static readonly DateTime _from = new DateTime(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime _from = new(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
     private readonly MachinePseudoKeys _machinePseudoKeys;
     private readonly TenantManager _tenantManager;
 
@@ -81,7 +81,7 @@ public class EmailValidationKeyProvider
 
     public string GetEmailKey(int tenantId, string email)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
 
         email = FormatEmail(tenantId, email);
 
@@ -122,7 +122,7 @@ public class EmailValidationKeyProvider
 
     private async Task<ValidationResult> ValidateEmailKeyInternalAsync(string email, string key, TimeSpan validInterval)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
 
         email = FormatEmail(await _tenantManager.GetCurrentTenantIdAsync(), email);
@@ -178,26 +178,38 @@ public class EmailValidationKeyModel
 
     /// <summary>Employee type</summary>
     /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
-    public EmployeeType? EmplType { get; set; }
+    public EmployeeType? EmplType { get; init; }
 
     /// <summary>Email</summary>
     /// <type>System.String, System</type>
-    public string Email { get; set; }
+    public string Email { get; init; }
 
     /// <summary>User ID</summary>
     /// <type>System.Nullabel{System.Guid}, System</type>
-    public Guid? UiD { get; set; }
+    public Guid? UiD { get; init; }
 
     /// <summary>Confirmation email type</summary>
     /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
-    public ConfirmType? Type { get; set; }
-    
+    public ConfirmType? Type { get; init; }
+
+    /// <summary>Module</summary>
+    /// <type>System.String, System</type>
+    public string Module { get; init; }
+
+    /// <summary>Access an account for the first time or not</summary>
+    /// <type>System.String, System</type>
+    public string First { get; init; }
+
+    /// <summary>Sends SMS code or not</summary>
+    /// <type>System.String, System</type>
+    public string Sms { get; init; }
+
     /// <summary>Room ID</summary>
     /// <type>System.String, System</type>
-    public string RoomId { get; set; }
+    public string RoomId { get; init; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string roomId)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string module, out string first, out string sms, out string roomId)
     {
-        (key, emplType, email, uiD, type, roomId) = (Key, EmplType, Email, UiD, Type, RoomId);
+        (key, emplType, email, uiD, type, module, first, sms, roomId) = (Key, EmplType, Email, UiD, Type, Module, First, Sms, RoomId);
     }
 }

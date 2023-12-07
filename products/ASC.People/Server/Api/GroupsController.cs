@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -33,34 +33,15 @@ namespace ASC.People.Api;
 [Scope]
 [DefaultRoute]
 [ApiController]
-public class GroupsController : ControllerBase
-{
-    private readonly UserManager _userManager;
-    private readonly ApiContext _apiContext;
-    private readonly GroupFullDtoHelper _groupFullDtoHelper;
-    private readonly MessageService _messageService;
-    private readonly MessageTarget _messageTarget;
-    private readonly PermissionContext _permissionContext;
-    private readonly FileSecurity _fileSecurity;
-
-    public GroupsController(
-        UserManager userManager,
+public class GroupController(UserManager userManager,
         ApiContext apiContext,
         GroupFullDtoHelper groupFullDtoHelper,
         MessageService messageService,
         MessageTarget messageTarget,
-        PermissionContext permissionContext, 
+        PermissionContext permissionContext,
         FileSecurity fileSecurity)
-    {
-        _userManager = userManager;
-        _apiContext = apiContext;
-        _groupFullDtoHelper = groupFullDtoHelper;
-        _messageService = messageService;
-        _messageTarget = messageTarget;
-        _permissionContext = permissionContext;
-        _fileSecurity = fileSecurity;
-    }
-
+    : ControllerBase
+{
     /// <summary>
     /// Returns the general information about all the groups, such as group ID and group manager.
     /// </summary>
@@ -77,16 +58,16 @@ public class GroupsController : ControllerBase
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(bool withMembers = false)
     {
-        var groups = (await _userManager.GetDepartmentsAsync()).Select(r => r);
+        var groups = (await userManager.GetDepartmentsAsync()).Select(r => r);
         
-        if (!string.IsNullOrEmpty(_apiContext.FilterValue))
+        if (!string.IsNullOrEmpty(apiContext.FilterValue))
         {
-            groups = groups.Where(r => r.Name!.Contains(_apiContext.FilterValue, StringComparison.InvariantCultureIgnoreCase));
+            groups = groups.Where(r => r.Name!.Contains(apiContext.FilterValue, StringComparison.InvariantCultureIgnoreCase));
         }
 
         foreach (var g in groups)
         {
-            yield return await _groupFullDtoHelper.Get(g, withMembers);
+            yield return await groupFullDtoHelper.Get(g, withMembers);
         }
     }
 
@@ -106,7 +87,7 @@ public class GroupsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<GroupDto> GetGroupAsync(Guid id)
     {
-        return await _groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
+        return await groupFullDtoHelper.Get(await GetGroupInfoAsync(id), true);
     }
 
     /// <summary>
@@ -123,7 +104,7 @@ public class GroupsController : ControllerBase
     [HttpGet("member/{id:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetGroupsByMemberIdAsync(Guid id)
     {
-        return (await _userManager.GetUserGroupsAsync(id)).Select(x => new GroupSummaryDto(x, _userManager));
+        return (await userManager.GetUserGroupsAsync(id)).Select(x => new GroupSummaryDto(x, userManager));
     }
 
     /// <summary>
@@ -139,9 +120,9 @@ public class GroupsController : ControllerBase
     [HttpPost]
     public async Task<GroupDto> AddGroupAsync(GroupRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = await _userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
+        var group = await userManager.SaveGroupInfoAsync(new GroupInfo { Name = inDto.GroupName });
 
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
@@ -153,9 +134,9 @@ public class GroupsController : ControllerBase
             }
         }
 
-        await _messageService.SendAsync(MessageAction.GroupCreated, _messageTarget.Create(group.ID), group.Name);
+        await messageService.SendAsync(MessageAction.GroupCreated, messageTarget.Create(group.ID), group.Name);
 
-        return await _groupFullDtoHelper.Get(group, true);
+        return await groupFullDtoHelper.Get(group, true);
     }
 
     /// <summary>
@@ -172,9 +153,9 @@ public class GroupsController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<GroupDto> UpdateGroupAsync(Guid id, GroupRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
-        var group = (await _userManager.GetGroupsAsync()).SingleOrDefault(x => x.ID == id);
+        var group = (await userManager.GetGroupsAsync()).SingleOrDefault(x => x.ID == id);
 
         if (group == null || group.ID == Constants.LostGroupInfo.ID)
         {
@@ -182,9 +163,9 @@ public class GroupsController : ControllerBase
         }
 
         group.Name = inDto.GroupName ?? group.Name;
-        await _userManager.SaveGroupInfoAsync(group);
+        await userManager.SaveGroupInfoAsync(group);
 
-        await RemoveMembersAsync(id, new GroupRequestDto { Members = (await _userManager.GetUsersByGroupAsync(id, EmployeeStatus.All)).Select(u => u.Id).Where(userId => !inDto.Members.Contains(userId)) });
+        await RemoveMembersAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id, EmployeeStatus.All)).Select(u => u.Id).Where(userId => !inDto.Members.Contains(userId)) });
 
         await TransferUserToDepartmentAsync(inDto.GroupManager, group, true);
 
@@ -196,7 +177,7 @@ public class GroupsController : ControllerBase
             }
         }
 
-        await _messageService.SendAsync(MessageAction.GroupUpdated, _messageTarget.Create(id), group.Name);
+        await messageService.SendAsync(MessageAction.GroupUpdated, messageTarget.Create(id), group.Name);
 
         return await GetGroupAsync(id);
     }
@@ -214,16 +195,16 @@ public class GroupsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<GroupDto> DeleteGroupAsync(Guid id)
     { 
-        await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var group = await GetGroupInfoAsync(id);
 
-        await _userManager.DeleteGroupAsync(id);
-        await _fileSecurity.RemoveSubjectAsync<int>(id);
+        await userManager.DeleteGroupAsync(id);
+        await fileSecurity.RemoveSubjectAsync<int>(id);
 
-        await _messageService.SendAsync(MessageAction.GroupDeleted, _messageTarget.Create(group.ID), group.Name);
+        await messageService.SendAsync(MessageAction.GroupDeleted, messageTarget.Create(group.ID), group.Name);
 
-        return await _groupFullDtoHelper.Get(group, false);
+        return await groupFullDtoHelper.Get(group, false);
     }
 
     /// <summary>
@@ -240,12 +221,12 @@ public class GroupsController : ControllerBase
     [HttpPut("{fromId:guid}/members/transfer/{toId:guid}")]
     public async Task<GroupDto> TransferMembersToAsync(Guid fromId, Guid toId)
     {
-        await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var oldGroup = await GetGroupInfoAsync(fromId);
         var newGroup = await GetGroupInfoAsync(toId);
 
-        var users = await _userManager.GetUsersByGroupAsync(oldGroup.ID);
+        var users = await userManager.GetUsersByGroupAsync(oldGroup.ID);
         
         foreach (var userInfo in users)
         {
@@ -269,7 +250,7 @@ public class GroupsController : ControllerBase
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersAsync(Guid id, GroupRequestDto inDto)
     {
-        await RemoveMembersAsync(id, new GroupRequestDto { Members = (await _userManager.GetUsersByGroupAsync(id)).Select(x => x.Id) });
+        await RemoveMembersAsync(id, new GroupRequestDto { Members = (await userManager.GetUsersByGroupAsync(id)).Select(x => x.Id) });
         await AddMembersAsync(id, inDto);
 
         return await GetGroupAsync(id);
@@ -289,7 +270,7 @@ public class GroupsController : ControllerBase
     [HttpPut("{id:guid}/members")]
     public async Task<GroupDto> AddMembersAsync(Guid id, GroupRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var group = await GetGroupInfoAsync(id);
 
@@ -317,9 +298,9 @@ public class GroupsController : ControllerBase
     {
         var group = await GetGroupInfoAsync(id);
         
-        if (await _userManager.UserExistsAsync(inDto.UserId))
+        if (await userManager.UserExistsAsync(inDto.UserId))
         {
-            await _userManager.SetDepartmentManagerAsync(group.ID, inDto.UserId);
+            await userManager.SetDepartmentManagerAsync(group.ID, inDto.UserId);
         }
         else
         {
@@ -343,7 +324,7 @@ public class GroupsController : ControllerBase
     [HttpDelete("{id:guid}/members")]
     public async Task<GroupDto> RemoveMembersAsync(Guid id, GroupRequestDto inDto)
     {
-        await _permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var group = await GetGroupInfoAsync(id);
 
@@ -357,7 +338,7 @@ public class GroupsController : ControllerBase
 
     private async Task<GroupInfo> GetGroupInfoAsync(Guid id)
     {
-        var group = (await _userManager.GetGroupsAsync()).SingleOrDefault(x => x.ID == id).NotFoundIfNull("group not found");
+        var group = (await userManager.GetGroupsAsync()).SingleOrDefault(x => x.ID == id).NotFoundIfNull("group not found");
         
         if (group.ID == Constants.LostGroupInfo.ID)
         {
@@ -369,29 +350,27 @@ public class GroupsController : ControllerBase
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo groupInfo, bool setAsManager)
     {
-        if (!await _userManager.UserExistsAsync(userId) && userId != Guid.Empty)
+        if (!await userManager.UserExistsAsync(userId) && userId != Guid.Empty)
         {
             return;
         }
 
         if (setAsManager)
         {
-            await _userManager.SetDepartmentManagerAsync(groupInfo.ID, userId);
+            await userManager.SetDepartmentManagerAsync(group.ID, userId);
         }
-        
-        await _userManager.AddUserIntoGroupAsync(userId, groupInfo.ID);
+        await userManager.AddUserIntoGroupAsync(userId, group.ID);
     }
 
-    private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo groupInfo)
+    private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)
     {
-        if (!await _userManager.UserExistsAsync(userId))
+        if (!await userManager.UserExistsAsync(userId))
         {
             return;
         }
 
-        var user = await _userManager.GetUsersAsync(userId);
-        
-        await _userManager.RemoveUserFromGroupAsync(user.Id, groupInfo.ID);
-        await _userManager.UpdateUserInfoAsync(user);
+        var user = await userManager.GetUsersAsync(userId);
+        await userManager.RemoveUserFromGroupAsync(user.Id, group.ID);
+        await userManager.UpdateUserInfoAsync(user);
     }
 }
