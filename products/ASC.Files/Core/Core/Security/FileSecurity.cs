@@ -863,6 +863,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
+            if (folder.FolderType == FolderType.Recent && isUser)
+            {
+                return false;
+            }
+
             if (action != FilesSecurityActions.Read)
             {
                 if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute &&
@@ -882,6 +887,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate && isRoom)
+                {
+                    return false;
+                }
+                
+                if (folder.FolderType == FolderType.Recent)
                 {
                     return false;
                 }
