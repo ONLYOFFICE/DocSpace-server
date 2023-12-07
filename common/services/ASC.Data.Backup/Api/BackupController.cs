@@ -37,6 +37,9 @@ public class BackupController : ControllerBase
 {
     private readonly BackupAjaxHandler _backupHandler;
     private readonly IEventBus _eventBus;
+    private readonly CoreBaseSettings _coreBaseSettings;
+    private readonly CoreSettings _coreSettings;
+    private readonly CommonLinkUtility _commonLinkUtility;
     private readonly Guid _currentUserId;
     private readonly int _tenantId;
 
@@ -44,12 +47,18 @@ public class BackupController : ControllerBase
         BackupAjaxHandler backupAjaxHandler,
         TenantManager tenantManager,
         SecurityContext securityContext,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        CoreBaseSettings coreBaseSettings,
+        CoreSettings coreSettings,
+        CommonLinkUtility commonLinkUtility)
     {
         _currentUserId = securityContext.CurrentAccount.ID;
         _tenantId = tenantManager.GetCurrentTenant().Id;
         _backupHandler = backupAjaxHandler;
         _eventBus = eventBus;
+        _coreBaseSettings = coreBaseSettings;
+        _coreSettings = coreSettings;
+        _commonLinkUtility = commonLinkUtility;
     }
     /// <summary>
     /// Returns the backup schedule of the current portal.
@@ -144,11 +153,16 @@ public class BackupController : ControllerBase
             }
         }
 
+        var serverBaseUri = _coreBaseSettings.Standalone && await _coreSettings.GetSettingAsync("BaseDomain") == null
+            ? _commonLinkUtility.GetFullAbsolutePath("")
+            : default;
+
         _eventBus.Publish(new BackupRequestIntegrationEvent(
              tenantId: _tenantId,
              storageParams: storageParams,
              storageType: storageType,
-             createBy: _currentUserId
+             createBy: _currentUserId,
+             serverBaseUri: serverBaseUri
         ));
 
         return await _backupHandler.GetBackupProgressAsync();
@@ -224,13 +238,18 @@ public class BackupController : ControllerBase
     {
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
+        var serverBaseUri = _coreBaseSettings.Standalone && await _coreSettings.GetSettingAsync("BaseDomain") == null
+            ? _commonLinkUtility.GetFullAbsolutePath("")
+            : default;
+
         _eventBus.Publish(new BackupRestoreRequestIntegrationEvent(
                              tenantId: _tenantId,
                              createBy: _currentUserId,
                              storageParams: storageParams,
                              storageType: (BackupStorageType)Int32.Parse(inDto.StorageType.ToString()),
                              notify: inDto.Notify,
-                             backupId: inDto.BackupId
+                             backupId: inDto.BackupId,
+                             serverBaseUri: serverBaseUri
                         ));
 
 
