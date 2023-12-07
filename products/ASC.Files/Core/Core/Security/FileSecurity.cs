@@ -1012,10 +1012,8 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (ace == null)
         {
-            if (ace == null)
-        {
-            if (!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-                (_cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) || 
+            if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive &&
+                 _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
                 _cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
                 ace = value.Clone();
@@ -1054,8 +1052,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                         .ThenByDescending(r => r.Share, new FileShareRecord.ShareComparer(e.RootFolderType))
                         .FirstOrDefault();
                 }
-            
-                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
+
+                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive &&
                     ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
                 {
                     var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
@@ -1063,7 +1061,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     _cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
                 }
             }
-        }
         }
 
         if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId && 
