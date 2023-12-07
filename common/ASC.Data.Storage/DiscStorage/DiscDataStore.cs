@@ -237,7 +237,7 @@ public class DiscDataStore(TempStream tempStream,
             }
             File.Delete(target);
         }
-        catch(Exception e)
+        catch
         {
             
         }
