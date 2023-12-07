@@ -33,9 +33,9 @@ public class BackupService(
         BackupWorker backupWorker,
         BackupRepository backupRepository)
     {
-    public string StartBackup(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
-        var progress = backupWorker.StartBackup(request, enqueueTask, taskId);
+        var progress = await backupWorker.StartBackupAsync(request, enqueueTask, taskId);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -109,9 +109,9 @@ public class BackupService(
         return backupHistory;
     }
 
-    public void StartTransfer(StartTransferRequest request)
+    public async Task StartTransferAsync(StartTransferRequest request)
     {
-        var progress = backupWorker.StartTransfer(request.TenantId, request.TargetRegion, request.NotifyUsers);
+        var progress = await backupWorker.StartTransferAsync(request.TenantId, request.TargetRegion, request.NotifyUsers);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -138,26 +138,26 @@ public class BackupService(
             request.StorageParams = JsonConvert.DeserializeObject<Dictionary<string, string>>(backupRecord.StorageParams);
         }
 
-        var progress = backupWorker.StartRestore(request);
+        var progress = await backupWorker.StartRestoreAsync(request);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
         }
     }
 
-    public BackupProgress GetBackupProgress(int tenantId)
+    public async Task<BackupProgress> GetBackupProgress(int tenantId)
     {
-        return backupWorker.GetBackupProgress(tenantId);
+        return await backupWorker.GetBackupProgressAsync(tenantId);
     }
 
-    public BackupProgress GetTransferProgress(int tenantId)
+    public async Task<BackupProgress> GetTransferProgress(int tenantId)
     {
-        return backupWorker.GetTransferProgress(tenantId);
+        return await backupWorker.GetTransferProgressAsync(tenantId);
     }
 
-    public BackupProgress GetRestoreProgress(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgress(int tenantId)
     {
-        return backupWorker.GetRestoreProgress(tenantId);
+        return await backupWorker.GetRestoreProgressAsync(tenantId);
     }
 
     public string GetTmpFolder()

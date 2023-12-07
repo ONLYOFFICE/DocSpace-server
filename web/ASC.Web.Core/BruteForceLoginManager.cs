@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,15 +28,15 @@ namespace ASC.Web.Core;
 
 [Scope]
 public class BruteForceLoginManager(SettingsManager settingsManager,
-    UserManager userManager,
-    TenantManager tenantManager,
-    IDistributedCache distributedCache,
-    SetupInfo setupInfo,
-    Recaptcha recaptcha)
-{
-    private static readonly SemaphoreSlim _semaphore = new(1);
+        UserManager userManager,
+        TenantManager tenantManager,
+        IDistributedCache distributedCache,
+        SetupInfo setupInfo,
+        Recaptcha recaptcha, 
+        IDistributedLockProvider distributedLockProvider)
+    {
 
-    public async Task<(bool, bool)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
+    public async Task<(bool Result, bool ShowRecaptcha)> IncrementAsync(string key, string requestIp, bool throwException, string exceptionMessage = null)
     {
         var blockCacheKey = GetBlockCacheKey(key, requestIp);
         
@@ -50,10 +50,8 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
             return (false, true);
         }
 
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
-            await _semaphore.WaitAsync();
-            
             if (GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException(exceptionMessage);
@@ -88,18 +86,12 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
 
             return (true, showRecaptcha);
         }
-        finally
-        {
-            _semaphore.Release();
-        }
     }
 
     public async Task DecrementAsync(string key, string requestIp)
     {
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
-            await _semaphore.WaitAsync();
-
             var settings = new LoginSettingsWrapper(settingsManager.Load<LoginSettings>());
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
             var history = GetFromCache<List<DateTime>>(historyCacheKey) ?? new List<DateTime>();
@@ -110,10 +102,6 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
             }
 
             SetToCache(historyCacheKey, history, DateTime.UtcNow.Add(settings.CheckPeriod));
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
@@ -132,9 +120,8 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
             throw new BruteForceCredentialException();
         }
 
-        try
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, login)))
         {
-            await _semaphore.WaitAsync();
             if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
             {
                 throw new BruteForceCredentialException();
@@ -168,24 +155,22 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
 
             user = await userManager.GetUsersByPasswordHashAsync(
                    await tenantManager.GetCurrentTenantIdAsync(),
-                   login,
-                   passwordHash);
+                login,
+                passwordHash);
 
             if (user == null || !userManager.UserExists(user))
             {
                 throw new Exception("user not found");
             }
 
-            if (!recaptchaPassed)
+            if (recaptchaPassed)
             {
-                history.RemoveAt(history.Count - 1);
-
-                SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
+                return user;
             }
-        }
-        finally
-        {
-            _semaphore.Release();
+
+            history.RemoveAt(history.Count - 1);
+
+            SetToCache(historyCacheKey, history, now.Add(settings.CheckPeriod));
         }
 
         return user;
@@ -239,4 +224,9 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
     private static string GetBlockCacheKey(string login, string requestIp) => $"loginblock/{login}/{requestIp}";
 
     private static string GetHistoryCacheKey(string login, string requestIp) => $"loginsec/{login}/{requestIp}";
+
+    private static string GetLockKey(string ip, string key)
+    {
+        return $"brut_force_{ip}_{key}";
+    }
 }

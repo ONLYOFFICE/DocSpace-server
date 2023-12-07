@@ -82,21 +82,21 @@ public class BackupAjaxHandler(BackupService backupService,
 
         await messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        return backupService.StartBackup(backupRequest, enqueueTask, taskId);
+        return await backupService.StartBackupAsync(backupRequest);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()
     {
         await DemandPermissionsBackupAsync();
 
-        return backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
+        return await backupService.GetBackupProgress(await GetCurrentTenantIdAsync());
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
 
-        return backupService.GetBackupProgress(tenantId);
+        return await backupService.GetBackupProgress(tenantId);
     }
 
     public async Task DeleteBackupAsync(Guid id)
@@ -295,7 +295,7 @@ public class BackupAjaxHandler(BackupService backupService,
     public async Task<BackupProgress> GetRestoreProgressAsync()
     {
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        var result = backupService.GetRestoreProgress(tenant.Id);
+        var result = await backupService.GetRestoreProgress(tenant.Id);
 
         return result;
     }
@@ -340,7 +340,7 @@ public class BackupAjaxHandler(BackupService backupService,
         await DemandPermissionsTransferAsync();
 
         await messageService.SendAsync(MessageAction.StartTransferSetting);
-        backupService.StartTransfer(
+        await backupService.StartTransferAsync(
             new StartTransferRequest
             {
                 TenantId = await GetCurrentTenantIdAsync(),
@@ -352,7 +352,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
     public async Task<BackupProgress> GetTransferProgressAsync()
     {
-        return backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
+        return await backupService.GetTransferProgress(await GetCurrentTenantIdAsync());
     }
 
     private async Task DemandPermissionsTransferAsync()
