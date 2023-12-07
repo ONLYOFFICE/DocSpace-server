@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -40,18 +40,18 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         SocketManager socketManager,
         ApiContext apiContext)
     : VirtualRoomsController<int>(globalFolderHelper,
-    fileOperationDtoHelper,
-    coreBaseSettings,
-    customTagsService,
-    roomLogoManager,
-    fileStorageService,
-    folderDtoHelper,
-    fileDtoHelper,
-    fileShareDtoHelper,
-    mapper,
-    socketManager,
-    apiContext)
-{
+            fileOperationDtoHelper,
+            coreBaseSettings,
+            customTagsService,
+            roomLogoManager,
+            fileStorageService,
+            folderDtoHelper,
+            fileDtoHelper,
+            fileShareDtoHelper,
+            mapper,
+            socketManager,
+            apiContext)
+    {
     /// <summary>
     /// Creates a room in the "Rooms" section.
     /// </summary>
@@ -85,18 +85,18 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         SocketManager socketManager,
         ApiContext apiContext)
     : VirtualRoomsController<string>(globalFolderHelper,
-    fileOperationDtoHelper,
-    coreBaseSettings,
-    customTagsService,
-    roomLogoManager,
-    fileStorageService,
-    folderDtoHelper,
-    fileDtoHelper,
-    fileShareDtoHelper,
-    mapper,
-    socketManager,
-    apiContext)
-{
+            fileOperationDtoHelper,
+            coreBaseSettings,
+            customTagsService,
+            roomLogoManager,
+            fileStorageService,
+            folderDtoHelper,
+            fileDtoHelper,
+            fileShareDtoHelper,
+            mapper,
+            socketManager,
+            apiContext)
+    {
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
     /// </summary>
@@ -132,7 +132,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         SocketManager socketManager,
         ApiContext apiContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-{
+    {
     protected readonly FileStorageService _fileStorageService = fileStorageService;
 
     /// <summary>
@@ -190,10 +190,9 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var operationResult = (await _fileStorageService.DeleteFolderAsync("delete", id, false, inDto.DeleteAfter, true))
-            .FirstOrDefault();
+        var (tasks, _) = await _fileStorageService.DeleteFolderAsync("delete", id, false, inDto.DeleteAfter, true);
 
-        return await fileOperationDtoHelper.GetAsync(operationResult);
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
@@ -214,10 +213,9 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var operationResult = (await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter))
-            .FirstOrDefault();
+        var (tasks, _) = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
-        return await fileOperationDtoHelper.GetAsync(operationResult);
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
@@ -238,10 +236,9 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(id);
 
-        var operationResult = (await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter))
-            .FirstOrDefault();
+        var (tasks, _) = await _fileStorageService.MoveOrCopyItemsAsync(new List<JsonElement> { movableRoom }, new List<JsonElement>(), destFolder, FileConflictResolveType.Skip, false, inDto.DeleteAfter);
 
-        return await fileOperationDtoHelper.GetAsync(operationResult);
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
@@ -567,9 +564,13 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         InvitationLinkService invitationLinkService,
-        AuthContext authContext)
+        AuthContext authContext,
+        DocumentBuilderTaskManager documentBuilderTaskManager,
+        TenantManager tenantManager,
+        IEventBus eventBus,
+        IServiceProvider serviceProvider)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-{
+    {
     /// <summary>
     /// Returns the contents of the "Rooms" section by the parameters specified in the request.
     /// </summary>
@@ -620,7 +621,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         var count = Convert.ToInt32(apiContext.Count);
         var filterValue = apiContext.FilterValue;
 
-        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, string.Empty,
+        var content = await fileStorageService.GetFolderItemsAsync(parentId, startIndex, count, filter, false, subjectId, filterValue, new string[] { },
             searchInContent ?? false, withSubfolders ?? false, orderBy, searchArea ?? SearchArea.Active, default, withoutTags ?? false, tagNames, excludeSubject ?? false,
             provider ?? ProviderFilter.None, subjectFilter ?? SubjectFilter.Owner);
 
@@ -797,6 +798,60 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
             await fileStorageService.SetAceObjectAsync(aceCollection, false);
         }
+    }
+
+    [HttpPost("rooms/{id}/indexexport")]
+    public async Task<DocumentBuilderTaskDto> StartRoomIndexExportAsync(int id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+
+        if (!room.SettingsIndexing)
+        {
+            throw new NotSupportedException("Folder indexing is turned off");
+        }
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+
+        var task = serviceProvider.GetService<DocumentBuilderTask<int>>();
+
+        task.Init(tenantId, userId, null, null, null);
+
+        var taskProgress = documentBuilderTaskManager.StartTask(task, false);
+
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, id);
+
+        eventBus.Publish(evt);
+
+        return DocumentBuilderTaskDto.Get(taskProgress);
+    }
+
+    [HttpGet("rooms/indexexport")]
+    public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+
+        var task = documentBuilderTaskManager.GetTask(tenantId, userId);
+
+        return DocumentBuilderTaskDto.Get(task);
+    }
+
+    [HttpDelete("rooms/indexexport")]
+    public async Task TerminateRoomIndexExport()
+    {
+        ErrorIfNotDocSpace();
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var userId = authContext.CurrentAccount.ID;
+
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, 0, true);
+
+        eventBus.Publish(evt);
     }
 
     private void ErrorIfNotDocSpace()

@@ -46,7 +46,7 @@ public interface IModuleSpecifics
 
     bool TryAdjustFilePath(bool dump, ColumnMapper columnMapper, ref string filePath);
     DbCommand CreateDeleteCommand(DbConnection connection, int tenantId, TableInfo table);
-    DbCommand CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row);
+    Task<DbCommand> CreateInsertCommand(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row);
     DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset);
     DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset, Guid id);
     IEnumerable<TableInfo> GetTablesOrdered();

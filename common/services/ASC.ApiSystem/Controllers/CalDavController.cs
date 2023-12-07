@@ -35,7 +35,7 @@ public class CalDavController(CommonMethods commonMethods,
         CoreSettings coreSettings,
         CommonConstants commonConstants,
         InstanceCrypto instanceCrypto,
-        ILogger logger,
+        ILogger<CalDavController> logger,
         IHttpClientFactory httpClientFactory)
     : ControllerBase
 {

@@ -1256,7 +1256,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         return await daoFactory.GetSecurityDao<T>().GetUsersWithSharedCountAsync(entry, text, employeeStatus, activationStatus, excludeShared);
     }
 
-    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<int>();
         var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
@@ -1478,7 +1478,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     private async IAsyncEnumerable<FileEntry> GetSharesForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, 
-        Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+        Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -1598,7 +1598,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetPrivacyForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var securityDao = daoFactory.GetSecurityDao<int>();
         var subjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID);
@@ -1618,7 +1618,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     private async IAsyncEnumerable<FileEntry<T>> GetPrivacyForMeAsync<T>(IEnumerable<FileShareRecord> records, List<Guid> subjects, FilterType filterType, bool subjectGroup, 
-        Guid subjectID, string searchText = "", string extension = "", bool searchInContent = false, bool withSubfolders = false)
+        Guid subjectID, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();

@@ -216,42 +216,6 @@ public class CoreSettings : IDisposable
         return Configuration["core:payment:region"] + tenant;
     }
 
-    public string GetKey(int tenant)
-    {
-        if (CoreBaseSettings.Standalone)
-        {
-            var key = GetSetting("PortalId");
-            if (string.IsNullOrEmpty(key))
-            {
-                try
-                {
-                    Semaphore.Wait();
-                    // thread safe
-                    key = GetSetting("PortalId");
-                    if (string.IsNullOrEmpty(key))
-                    {
-                        key = Guid.NewGuid().ToString();
-                        SaveSetting("PortalId", key);
-                    }
-                }
-                finally
-                {
-                    Semaphore.Release();
-                }
-            }
-
-            return key;
-        }
-
-        var t = TenantService.GetTenant(tenant);
-        if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
-        {
-            return t.PaymentId;
-        }
-
-        return Configuration["core:payment:region"] + tenant;
-    }
-
     public void Dispose()
     {
         Semaphore.Dispose();

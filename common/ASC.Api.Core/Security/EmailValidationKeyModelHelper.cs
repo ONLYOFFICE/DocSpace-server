@@ -96,7 +96,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 break;
 
             case ConfirmType.EmailChange:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + authContext.CurrentAccount.ID, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await userManager.GetUserByEmailAsync(email);

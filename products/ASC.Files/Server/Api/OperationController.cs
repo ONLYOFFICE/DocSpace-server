@@ -1,25 +1,25 @@
 ﻿// (c) Copyright Ascensio System SIA 2010-2023
-// 
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -30,9 +30,12 @@ namespace ASC.Files.Api;
 public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileStorageService fileStorageService)
+        FileStorageService fileStorageService,
+        IEventBus eventBus,
+        TenantManager tenantManager, 
+        AuthContext authContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-{
+    {
     /// <summary>
     /// Starts the download process of files and folders with the IDs specified in the request.
     /// </summary>
@@ -65,7 +68,18 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
             folders.Add(folderId, string.Empty);
         }
 
-        foreach (var e in await fileStorageService.BulkDownloadAsync(folders, files))
+        var (tasks, currentTaskId) = await fileStorageService.BulkDownloadAsync(folders, files, false);
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        eventBus.Publish(new BulkDownloadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            FileStringIds = files.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
+            FolderStringIds = folders.ToDictionary(x => JsonSerializer.Serialize(x.Key), x => x.Value),
+            TaskId = currentTaskId
+        });
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -84,7 +98,28 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        foreach (var e in await fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content))
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+
+        var (tasks, currentTaskId) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, true, inDto.DeleteAfter, inDto.Content, false);
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            DeleteAfter = inDto.DeleteAfter,
+            Ic = true,
+            FileStringIds = fileStringIds,
+            FolderStringIds = folderStringIds,
+            FileIntIds = fileIntIds,
+            FolderIntIds = folderIntIds,
+            Content = inDto.Content,
+            ConflictResolveType = inDto.ConflictResolveType,
+            DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId),
+            TaskId = currentTaskId
+        });
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -103,7 +138,23 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
-        var tasks = await fileStorageService.DeleteItemsAsync("delete", inDto.FileIds.ToList(), inDto.FolderIds.ToList(), false, inDto.DeleteAfter, inDto.Immediately);
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+
+        var (tasks, currentTaskId) = await fileStorageService.DeleteItemsAsync("delete", folderStringIds, fileStringIds, folderIntIds, fileIntIds, false, inDto.DeleteAfter, inDto.Immediately, false);
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        eventBus.Publish(new DeleteIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            DeleteAfter = inDto.DeleteAfter,
+            Immediately = inDto.Immediately,
+            FolderStringIds = folderStringIds,
+            FileStringIds = fileStringIds,
+            FolderIntIds = folderIntIds,
+            FileIntIds = fileIntIds,
+            TaskId = currentTaskId
+        });
 
         foreach (var e in tasks)
         {
@@ -123,9 +174,16 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var emptyTrash = await fileStorageService.EmptyTrashAsync();
+        var (tasks, currentTaskId) = await fileStorageService.EmptyTrashAsync(false);
 
-        foreach (var e in emptyTrash)
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        eventBus.Publish(new EmptyTrashIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = currentTaskId
+        });
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -163,7 +221,23 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
-        foreach (var e in await fileStorageService.MarkAsReadAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList()))
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+
+        var (tasks, currentTaskId) = await fileStorageService.MarkAsReadAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, false);
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        eventBus.Publish(new MarkAsReadIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            FolderStringIds = folderStringIds,
+            FileStringIds = fileStringIds,
+            FolderIntIds = folderIntIds,
+            FileIntIds = fileIntIds,
+            TaskId = currentTaskId
+        });
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
@@ -182,11 +256,31 @@ public class OperationController(FileOperationDtoHelper fileOperationDtoHelper,
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
-        foreach (var e in await fileStorageService.MoveOrCopyItemsAsync(inDto.FolderIds.ToList(), inDto.FileIds.ToList(), inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content))
+        var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+
+        var (tasks, currentTaskId) = await fileStorageService.MoveOrCopyItemsAsync(folderStringIds, fileStringIds, folderIntIds, fileIntIds, inDto.DestFolderId, inDto.ConflictResolveType, false, inDto.DeleteAfter, inDto.Content, false);
+
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+
+        eventBus.Publish(new MoveOrCopyIntegrationEvent(authContext.CurrentAccount.ID, tenantId)
+        {
+            DeleteAfter = inDto.DeleteAfter,
+            Ic = false,
+            FileStringIds = fileStringIds,
+            FolderStringIds = folderStringIds,
+            FileIntIds = fileIntIds, 
+            FolderIntIds = folderIntIds,
+            Content = inDto.Content,
+            ConflictResolveType = inDto.ConflictResolveType,
+            DestFolderId = JsonSerializer.Serialize(inDto.DestFolderId),
+            TaskId = currentTaskId
+        });
+
+        foreach (var e in tasks)
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
-
     }
 
     /// <summary>

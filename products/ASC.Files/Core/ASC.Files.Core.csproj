@@ -10,6 +10,10 @@
     <LangVersion>12</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+
+    <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
     <PackageReference Include="Box.V2.Core" Version="5.2.2" />
     <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
@@ -159,6 +163,7 @@
     <None Remove="Services\NotifyService\patterns.xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
     <EmbeddedResource Include="Services\NotifyService\patterns.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -406,6 +411,12 @@
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.az.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.ar-SA.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesUCResource.hy-AM.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
