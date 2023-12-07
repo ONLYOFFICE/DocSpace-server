@@ -252,7 +252,7 @@ public class UserController(ICache cache,
             var success = int.TryParse(linkData.RoomId, out var id);
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
             {
                 if (success)
                 {
@@ -1432,7 +1432,7 @@ public class UserController(ICache cache,
             
             if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
             {
-                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id), TimeSpan.FromSeconds(30)))
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                 {
                     await activeUsersChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
@@ -1442,7 +1442,7 @@ public class UserController(ICache cache,
             }
             else if (!self && !isUser && await _userManager.IsUserAsync(user))
             {
-                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id), TimeSpan.FromSeconds(30)))
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
                     await countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
@@ -1509,15 +1509,13 @@ public class UserController(ICache cache,
                         {
                             if (!await _userManager.IsUserAsync(user))
                             {
-                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id), 
-                                    TimeSpan.FromSeconds(30));
+                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
                                 
                                 await countPaidUserChecker.CheckAppend();
                             }
                             else
                             {
-                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id), 
-                                    TimeSpan.FromSeconds(30));
+                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
                                 
                                 await activeUsersChecker.CheckAppend();
                             }

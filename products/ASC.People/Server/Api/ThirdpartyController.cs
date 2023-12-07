@@ -243,7 +243,7 @@ public class ThirdpartyController(AccountLinker accountLinker,
             var success = int.TryParse(linkData.RoomId, out var id);
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
             {
                 if (success)
                 {

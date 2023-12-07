@@ -289,7 +289,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromSeconds(30)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -452,7 +452,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromSeconds(30)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
             var createOn = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
 
@@ -487,7 +487,7 @@ internal abstract class BaseTagDao<T> : AbstractDao, ITagDao<T>
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         
-        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromSeconds(30)))
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId)))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();

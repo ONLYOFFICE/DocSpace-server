@@ -102,7 +102,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
         var tenant = await tenantManager.GetCurrentTenantAsync();
         var key = typeof(UploadOperationProgress).FullName + tenant.Id;
 
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
             if (_queue.GetAllTasks().Any(x => x.Id != key))
             {
@@ -133,7 +133,7 @@ public class StaticUploader(IServiceProvider serviceProvider,
 
     public async Task<UploadOperationProgress> GetProgressAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
             var key = typeof(UploadOperationProgress).FullName + tenantId;
 

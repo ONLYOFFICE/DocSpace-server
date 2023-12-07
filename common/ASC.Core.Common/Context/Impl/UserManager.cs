@@ -471,13 +471,13 @@ public class UserManager
         {
             if (type is EmployeeType.User)
             {
-                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(Tenant.Id));
                 
                 await _activeUsersFeatureChecker.CheckAppend();
             }
             else if (paidUserQuotaCheck)
             {
-                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                lockHandle = await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
                 
                 await _countPaidUserChecker.CheckAppend();
             }

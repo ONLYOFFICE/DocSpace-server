@@ -351,7 +351,7 @@ public class FileStorageService //: IFileStorageService
     {
         var tenantId = await tenantManager.GetCurrentTenantIdAsync();
         
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
         {
             ArgumentNullException.ThrowIfNull(title);
 

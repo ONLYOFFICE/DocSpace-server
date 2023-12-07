@@ -193,7 +193,7 @@ public class CoreSettings
                 return key;
             }
 
-            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey, TimeSpan.FromSeconds(30)))
+            await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
             {
                 key = await GetSettingAsync("PortalId");
                 if (!string.IsNullOrEmpty(key))

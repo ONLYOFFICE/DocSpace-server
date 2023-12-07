@@ -37,7 +37,7 @@ public class EncryptionWorker(
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
         {
             var item = _queue.GetAllTasks<EncryptionOperation>().SingleOrDefault();
 

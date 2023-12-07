@@ -63,7 +63,7 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         _expiryInMilliseconds = (long)_options.Expiry.TotalMilliseconds;
     }
     
-    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
+    public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         if (timeout < _options.MinTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
         {
@@ -149,6 +149,11 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
 
     public async Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
+        if (timeout < _options.MinTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
+        {
+            timeout = _options.MinTimeout;
+        }
+        
         var stopWatch = Stopwatch.StartNew();
         
         var internalHandle = await _internalLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);

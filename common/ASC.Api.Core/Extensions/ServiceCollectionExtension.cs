@@ -110,7 +110,16 @@ public static class ServiceCollectionExtension
                 });
             });
 
-            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>();
+            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
+            {
+                var internalProvider = sp.GetRequiredService<ZooKeeperDistributedSynchronizationProvider>();
+                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                
+                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
+                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
+                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
+            });
         }
         
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();

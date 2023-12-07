@@ -1099,7 +1099,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        await using (await _distributedLockProvider.TryAcquireFairLockAsync($"{key}_{tenantId}", TimeSpan.FromSeconds(30)))
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync($"{key}_{tenantId}"))
         {
             folderId = await InternalGetFolderIDAsync(key);
 

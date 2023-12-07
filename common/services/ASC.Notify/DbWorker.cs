@@ -70,7 +70,7 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyS
 
     public async Task<IDictionary<int, NotifyMessage>> GetMessagesAsync(int count)
     {
-        await using(await distributedLockProvider.TryAcquireLockAsync("get_notify_messages", TimeSpan.FromMinutes(1)))
+        await using(await distributedLockProvider.TryAcquireLockAsync("get_notify_messages"))
         {
             using var scope = serviceScopeFactory.CreateScope();
 

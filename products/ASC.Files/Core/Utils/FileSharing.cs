@@ -151,7 +151,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
                 {
                     if (!correctAccess && currentUserType == EmployeeType.User)
                     {
-                        lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId), TimeSpan.FromSeconds(30));
+                        lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId));
                         
                         await countPaidUserChecker.CheckAppend();
                     }

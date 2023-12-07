@@ -263,7 +263,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
                 }
                 else if (currentType is EmployeeType.User)
                 {
-                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
                     
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
@@ -288,7 +288,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
                 }
                 else if (currentType is EmployeeType.User)
                 {
-                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                    lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
                     
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
@@ -298,7 +298,7 @@ public sealed class UserManagerWrapper(StudioNotifyService studioNotifyService,
             }
             else if (type is EmployeeType.Collaborator && currentType is EmployeeType.User)
             {
-                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id), TimeSpan.FromSeconds(30));
+                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(Tenant.Id));
                 
                 await countPaidUserChecker.CheckAppend();
                 await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);

@@ -31,8 +31,7 @@ public sealed class RedisLockOptionsBuilder
     private static readonly TimeSpan _defaultExpiry = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan _minimumExpiry = TimeSpan.FromSeconds(.1);
 
-    private static readonly TimeSpan _defaultMinimumTimeout = TimeSpan.FromSeconds(10);
-    private static readonly TimeSpan _minimumTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _defaultMinimumTimeout = TimeSpan.FromSeconds(30);
 
     private TimeSpan _expiry = _defaultExpiry;
     private TimeSpan _timeout = _defaultMinimumTimeout;
@@ -59,7 +58,7 @@ public sealed class RedisLockOptionsBuilder
 
     public RedisLockOptionsBuilder MinTimeout(TimeSpan minTimeout)
     {
-        if (minTimeout < _minimumTimeout || minTimeout == Timeout.InfiniteTimeSpan || minTimeout == TimeSpan.MaxValue)
+        if (minTimeout < _defaultMinimumTimeout || minTimeout == Timeout.InfiniteTimeSpan || minTimeout == TimeSpan.MaxValue)
         {
             return this;
         }

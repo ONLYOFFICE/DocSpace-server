@@ -50,7 +50,7 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
             return (false, true);
         }
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key), TimeSpan.FromSeconds(30)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
             if (GetFromCache<string>(blockCacheKey) != null)
             {
@@ -90,7 +90,7 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
 
     public async Task DecrementAsync(string key, string requestIp)
     {
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key), TimeSpan.FromSeconds(30)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, key)))
         {
             var settings = new LoginSettingsWrapper(settingsManager.Load<LoginSettings>());
             var historyCacheKey = GetHistoryCacheKey(key, requestIp);
@@ -120,7 +120,7 @@ public class BruteForceLoginManager(SettingsManager settingsManager,
             throw new BruteForceCredentialException();
         }
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, login), TimeSpan.FromSeconds(30)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLockKey(requestIp, login)))
         {
             if (!recaptchaPassed && GetFromCache<string>(blockCacheKey) != null)
             {

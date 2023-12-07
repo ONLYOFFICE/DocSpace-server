@@ -468,13 +468,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 {
                                     if (isRoom)
                                     {
-                                        moveRoomLock = await distributedLockProvider.TryAcquireFairLockAsync($"move_room_{CurrentTenant.Id}", 
-                                            TimeSpan.FromSeconds(30));
+                                        moveRoomLock = await distributedLockProvider.TryAcquireFairLockAsync($"move_room_{CurrentTenant.Id}");
                                         
                                         if (toFolder.FolderType == FolderType.VirtualRooms)
                                         {
                                             roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(
-                                                LockKeyHelper.GetRoomsCountCheckKey(CurrentTenant.Id), TimeSpan.FromSeconds(30));
+                                                LockKeyHelper.GetRoomsCountCheckKey(CurrentTenant.Id));
                                             
                                             await countRoomChecker.CheckAppend();
                                             newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);

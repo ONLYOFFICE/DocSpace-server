@@ -46,7 +46,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
     {
         var cacheKey = GetCacheKey<T>();
 
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{cacheKey}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{cacheKey}"))
         {
             var task = PeekTask(file, cacheKey);
 

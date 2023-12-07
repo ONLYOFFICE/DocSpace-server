@@ -285,7 +285,7 @@ public class SsoHandlerService
                 var type = EmployeeType.RoomAdmin;
                 var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
+                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
                 {
                     try
                     {

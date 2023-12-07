@@ -262,7 +262,7 @@ public class WebItemSecurity(UserManager userManager,
         {
             var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId), TimeSpan.FromSeconds(30)))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
                 if (await userManager.IsUserInGroupAsync(userid, Constants.GroupUser.ID))
                 {

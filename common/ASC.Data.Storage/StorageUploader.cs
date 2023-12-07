@@ -39,7 +39,7 @@ public class StorageUploader(
 
     public async Task StartAsync(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
             var id = GetCacheKey(tenantId);
 
@@ -55,7 +55,7 @@ public class StorageUploader(
 
     public async Task<MigrateOperation> GetProgressAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
             return _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
         }

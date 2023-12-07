@@ -31,18 +31,37 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
 {
     private readonly Medallion.Threading.IDistributedLockProvider _distributedLockProvider;
     private readonly ILogger<ZooKeeperDistributedLockProvider> _logger;
+    private readonly TimeSpan _minTimeout;
     
+    private static readonly TimeSpan _defaultMinTimeout = TimeSpan.FromSeconds(30);
     private static readonly IDistributedLockHandle _emptyHandle = new DefaultHandle();
 
-    public ZooKeeperDistributedLockProvider(Medallion.Threading.IDistributedLockProvider distributedLockProvider, ILogger<ZooKeeperDistributedLockProvider> logger)
+    public ZooKeeperDistributedLockProvider(
+        Medallion.Threading.IDistributedLockProvider distributedLockProvider, 
+        ILogger<ZooKeeperDistributedLockProvider> logger, 
+        TimeSpan? minTimeout = null)
     {
         _distributedLockProvider = distributedLockProvider;
         _logger = logger;
+
+        if (!minTimeout.HasValue || minTimeout.Value < _defaultMinTimeout || minTimeout.Value == TimeSpan.MaxValue || minTimeout.Value == Timeout.InfiniteTimeSpan)
+        {
+            _minTimeout = _defaultMinTimeout;
+        }
+        else
+        {
+            _minTimeout = minTimeout.Value;
+        }
     }
 
     public async Task<IDistributedLockHandle> TryAcquireFairLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, 
         CancellationToken cancellationToken = default)
     {
+        if (timeout < _minTimeout || timeout == Timeout.InfiniteTimeSpan || timeout == TimeSpan.MaxValue)
+        {
+            timeout = _minTimeout;
+        }
+        
         var stopWatch = Stopwatch.StartNew();
         
         var handle = await _distributedLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);

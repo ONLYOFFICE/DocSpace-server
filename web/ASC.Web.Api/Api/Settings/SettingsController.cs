@@ -495,7 +495,7 @@ public class SettingsController(MessageService messageService,
 
         if (inDto.Theme != null)
         {
-            await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme", TimeSpan.FromSeconds(30)))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme"))
             {
                 var theme = inDto.Theme;
 

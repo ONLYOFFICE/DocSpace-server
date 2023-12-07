@@ -121,7 +121,7 @@ public class StorageController(ILoggerProvider option,
             return false;
         }
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync("start_storage_encryption", TimeSpan.FromSeconds(30)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync("start_storage_encryption"))
         {
             var activeTenants = await tenantManager.GetTenantsAsync();
 

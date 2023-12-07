@@ -55,7 +55,7 @@ public class BackupWorker(
 
     public async Task StopAsync()
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             if (_progressQueue == null)
             {
@@ -75,7 +75,7 @@ public class BackupWorker(
 
     public async Task<BackupProgress> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
@@ -114,7 +114,7 @@ public class BackupWorker(
 
     public async Task StartScheduledBackupAsync(BackupSchedule schedule)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var item = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == schedule.TenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
@@ -136,7 +136,7 @@ public class BackupWorker(
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             return ToBackupProgress(_progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup));
         }
@@ -144,7 +144,7 @@ public class BackupWorker(
 
     public async Task<BackupProgress> GetTransferProgressAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             return ToBackupProgress(_progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Transfer));
         }
@@ -152,7 +152,7 @@ public class BackupWorker(
 
     public async Task<BackupProgress> GetRestoreProgressAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             return ToBackupProgress(_progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
@@ -160,7 +160,7 @@ public class BackupWorker(
 
     public async Task ResetBackupErrorAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var progress = _progressQueue.GetAllTasks<BackupProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
@@ -172,7 +172,7 @@ public class BackupWorker(
 
     public async Task ResetRestoreErrorAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var progress = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (progress != null)
@@ -184,7 +184,7 @@ public class BackupWorker(
 
     public async Task<BackupProgress> StartRestoreAsync(StartRestoreRequest request)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var item = _progressQueue.GetAllTasks<RestoreProgressItem>().FirstOrDefault(t => t.TenantId == request.TenantId);
             if (item is { IsCompleted: true })
@@ -205,7 +205,7 @@ public class BackupWorker(
 
     public async Task<BackupProgress> StartTransferAsync(int tenantId, string targetRegion, bool notify)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var item = _progressQueue.GetAllTasks<TransferProgressItem>().FirstOrDefault(t => t.TenantId == tenantId);
             if (item is { IsCompleted: true })

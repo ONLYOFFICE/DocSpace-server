@@ -63,7 +63,7 @@ public class QueueWorker<T>(IHttpContextAccessor httpContextAccessor,
 
     protected async Task<T> StartAsync(int tenantId, Guid userId, T newTask)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}", TimeSpan.FromMinutes(1)))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
             var task = GetProgressItemStatus(tenantId, userId);
 

@@ -419,7 +419,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         var isNew = false;
         DbFile toInsert = null;
 
-        await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey, TimeSpan.FromSeconds(30)))
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -585,7 +585,7 @@ internal class FileDao : AbstractDao, IFileDao<int>
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         DbFile toUpdate = null;
 
-        await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey, TimeSpan.FromSeconds(30)))
+        await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
