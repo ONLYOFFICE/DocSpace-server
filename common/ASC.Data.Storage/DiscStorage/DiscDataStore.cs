@@ -213,8 +213,34 @@ public class DiscDataStore(TempStream tempStream,
         {
             await stream.CopyToAsync(fs);
         }
-
+        if (chunkNumber % 2 == 0) 
+        {
+            _ = ConcatChunksAsync(domain, path, chunkNumber);
+        }
         return string.Format("{0}_{1}", chunkNumber, uploadId);
+    }
+
+    private async Task ConcatChunksAsync(string domain, string path, int chunkNumber)
+    {
+        var targetChunks = GetTarget(domain, path) + "chunks";
+
+        var target = Path.Combine(targetChunks, chunkNumber.ToString());
+        var prevTarget = Path.Combine(targetChunks, (chunkNumber - 1).ToString());
+        try
+        {
+            await using (var fs = new FileStream(target, FileMode.Open))
+            await using (var fsprev = new FileStream(prevTarget, FileMode.Open))
+            {
+                fs.Position = 0;
+                fsprev.Position = fsprev.Length;
+                await fs.CopyToAsync(fsprev);
+            }
+            File.Delete(target);
+        }
+        catch(Exception e)
+        {
+            
+        }
     }
 
     public override async Task<Uri> FinalizeChunkedUploadAsync(string domain, string path, string uploadId, Dictionary<int, string> eTags)
@@ -233,8 +259,21 @@ public class DiscDataStore(TempStream tempStream,
         {
             foreach (var eTag in sortETags)
             {
-                await using var eTagFs = new FileStream(Path.Combine(targetChunks, eTag.Key.ToString()), FileMode.Open);
-                await eTagFs.CopyToAsync(fs);
+                var t = Path.Combine(targetChunks, eTag.Key.ToString());
+                if (File.Exists(t))
+                {
+                    try
+                    {
+                        await using var eTagFs = new FileStream(t, FileMode.Open);
+                        await eTagFs.CopyToAsync(fs);
+                    }
+                    catch
+                    {
+                        await Task.Delay(500);
+                        await using var eTagFs = new FileStream(t, FileMode.Open);
+                        await eTagFs.CopyToAsync(fs);
+                    }
+                }
             }
         }
         Directory.Delete(Path.Combine(targetChunks), true);
