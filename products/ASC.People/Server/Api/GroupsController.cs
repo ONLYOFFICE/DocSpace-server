@@ -200,7 +200,7 @@ public class GroupController(UserManager userManager,
         var group = await GetGroupInfoAsync(id);
 
         await userManager.DeleteGroupAsync(id);
-        await fileSecurity.RemoveSubjectAsync<int>(id);
+        await fileSecurity.RemoveSubjectAsync<int>(id, false);
 
         await messageService.SendAsync(MessageAction.GroupDeleted, messageTarget.Create(group.ID), group.Name);
 
@@ -348,7 +348,7 @@ public class GroupController(UserManager userManager,
         return group;
     }
 
-    private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo groupInfo, bool setAsManager)
+    private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
         if (!await userManager.UserExistsAsync(userId) && userId != Guid.Empty)
         {

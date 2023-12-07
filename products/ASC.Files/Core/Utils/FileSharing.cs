@@ -98,7 +98,7 @@ public class FileSharingAceHelper(FileSecurity fileSecurity,
 
             if (existedShare == null && w.SubjectType == default)
             {
-                var group = await _userManager.GetGroupInfoAsync(w.Id);
+                var group = await userManager.GetGroupInfoAsync(w.Id);
 
                 if (group.ID != Constants.LostGroupInfo.ID)
                 {
@@ -902,7 +902,7 @@ public class FileSharing(Global global,
             else
             {
                 var user = await userManager.GetUsersAsync(record.Subject);
-                w.SubjectName = user.DisplayUserName(false, _displayUserSettingsHelper);
+                w.SubjectName = user.DisplayUserName(false, displayUserSettingsHelper);
             }
             
             w.Owner = entry.RootFolderType == FolderType.USER
