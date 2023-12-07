@@ -82,11 +82,13 @@ public class UserServiceCache
     }
     private void InvalidateCache(GroupCacheItem groupCacheItem)
     {
-        if (groupCacheItem != null)
+        if (groupCacheItem == null)
         {
-            var key = GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id));
-            Cache.Remove(key);
+            return;
         }
+
+        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id)));
+        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant));
     }
 
     private void UpdateUserGroupRefCache(UserGroupRef r)
