@@ -47,6 +47,7 @@ public class TfaappController : BaseSettingsController
     private readonly InstanceCrypto _instanceCrypto;
     private readonly Signature _signature;
     private readonly SecurityContext _securityContext;
+    private readonly TenantManager _tenantManager;
 
     public TfaappController(
         MessageService messageService,
@@ -69,7 +70,8 @@ public class TfaappController : BaseSettingsController
         InstanceCrypto instanceCrypto,
         Signature signature,
         SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        TenantManager tenantManager) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _smsProviderManager = smsProviderManager;
         _messageService = messageService;
@@ -88,6 +90,7 @@ public class TfaappController : BaseSettingsController
         _instanceCrypto = instanceCrypto;
         _signature = signature;
         _securityContext = securityContext;
+        _tenantManager = tenantManager;
     }
 
     /// <summary>
@@ -431,6 +434,11 @@ public class TfaappController : BaseSettingsController
         var user = await _userManager.GetUsersAsync(id);
 
         if (!isMe && !await _permissionContext.CheckPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser))
+        {
+            throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
+        }
+
+        if (!isMe && _tenantManager.GetCurrentTenant().OwnerId != _authContext.CurrentAccount.ID)
         {
             throw new SecurityAccessDeniedException(Resource.ErrorAccessDenied);
         }
