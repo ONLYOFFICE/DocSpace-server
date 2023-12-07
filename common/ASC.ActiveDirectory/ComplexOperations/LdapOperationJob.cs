@@ -396,7 +396,7 @@ public class LdapOperationJob(TenantManager tenantManager,
         {
             var ph = await settingsManager.LoadAsync<LdapCurrentUserPhotos>();
 
-            if (ph.CurrentPhotos == null || !ph.CurrentPhotos.Any())
+            if (ph.CurrentPhotos == null || ph.CurrentPhotos.Count == 0)
             {
                 return;
             }
@@ -491,7 +491,7 @@ public class LdapOperationJob(TenantManager tenantManager,
     {
         var current = await settingsManager.LoadAsync<LdapCurrentAcccessSettings>();
 
-        if (current.CurrentAccessRights == null || !current.CurrentAccessRights.Any())
+        if (current.CurrentAccessRights == null || current.CurrentAccessRights.Count == 0)
         {
             logger.DebugAccessRightsIsEmpty();
             return;
@@ -533,7 +533,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             currentPercent += step;
             var ldapGroups = novellLdapUserImporter.FindGroupsByAttribute(_ldapSettings.GroupNameAttribute, access.Value.Split(',').Select(x => x.Trim()));
 
-            if (!ldapGroups.Any())
+            if (ldapGroups.Count == 0)
             {
                 logger.DebugGiveUsersRightsNoLdapGroups(access.Key);
                 continue;
@@ -610,7 +610,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var ldapUsers = await novellLdapUserImporter.GetDiscoveredUsersByAttributesAsync();
 
-        if (!ldapUsers.Any())
+        if (ldapUsers.Count == 0)
         {
             _error = _resource.LdapSettingsErrorUsersNotFound;
             return;
@@ -641,7 +641,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var ldapGroups = novellLdapUserImporter.GetDiscoveredGroupsByAttributes();
 
-        if (!ldapGroups.Any())
+        if (ldapGroups.Count == 0)
         {
             _error = _resource.LdapSettingsErrorGroupsNotFound;
             return;
@@ -653,7 +653,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var (ldapGroupsUsers, uniqueLdapGroupUsers) = await GetGroupsUsersAsync(ldapGroups);
 
-        if (!uniqueLdapGroupUsers.Any())
+        if (uniqueLdapGroupUsers.Count == 0)
         {
             _error = _resource.LdapSettingsErrorUsersNotFound;
             return;
@@ -690,7 +690,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var percentage = GetProgress();
 
-        if (!ldapGroupsWithUsers.Any())
+        if (ldapGroupsWithUsers.Count == 0)
         {
             return;
         }
@@ -728,7 +728,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
     private async Task AddNewGroupAsync(GroupInfo ldapGroup, List<UserInfo> ldapGroupUsers, int gIndex, int gCount)
     {
-        if (!ldapGroupUsers.Any()) // Skip empty groups
+        if (ldapGroupUsers.Count == 0) // Skip empty groups
         {
             if (_operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
@@ -742,7 +742,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                 .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
                 .ToListAsync();
 
-        if (groupMembersToAdd.Any())
+        if (groupMembersToAdd.Count != 0)
         {
             switch (_operationType)
             {
@@ -857,7 +857,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                 }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
-                    && !groupMembersToAdd.Any())
+                    && groupMembersToAdd.Count == 0)
                 {
                     SetProgress(currentSource:
                         string.Format("({0}/{1}): {2}", gIndex, gCount, dbLdapGroup.Name));
@@ -873,18 +873,18 @@ public class LdapOperationJob(TenantManager tenantManager,
                     ldapChanges.SetUpdateGroupChange(ldapGroup);
                 }
 
-                if (groupMembersToRemove.Any())
+                if (groupMembersToRemove.Count != 0)
                 {
                     ldapChanges.SetRemoveGroupMembersChange(dbLdapGroup, groupMembersToRemove);
                 }
 
-                if (groupMembersToAdd.Any())
+                if (groupMembersToAdd.Count != 0)
                 {
                     ldapChanges.SetAddGroupMembersChange(dbLdapGroup, groupMembersToAdd);
                 }
 
                 if (dbGroupMembers.All(dbUser => groupMembersToRemove.Exists(u => u.Id.Equals(dbUser.Id)))
-                    && !groupMembersToAdd.Any())
+                    && groupMembersToAdd.Count == 0)
                 {
                     ldapChanges.SetRemoveGroupChange(dbLdapGroup, logger);
                 }
@@ -915,7 +915,7 @@ public class LdapOperationJob(TenantManager tenantManager,
 
         var percentage = GetProgress();
 
-        if (!ldapUsers.Any())
+        if (ldapUsers.Count == 0)
         {
             return;
         }
@@ -958,15 +958,14 @@ public class LdapOperationJob(TenantManager tenantManager,
     {
         var dbLdapUsers = (await userManager.GetUsersAsync(EmployeeStatus.All)).Where(u => u.Sid != null).ToList();
 
-        if (!dbLdapUsers.Any())
+        if (dbLdapUsers.Count == 0)
         {
             return ldapUsers;
         }
 
-        var removedUsers =
-            dbLdapUsers.Where(u => ldapUsers.FirstOrDefault(lu => u.Sid.Equals(lu.Sid)) == null).ToList();
+        var removedUsers = dbLdapUsers.Where(u => ldapUsers.FirstOrDefault(lu => u.Sid.Equals(lu.Sid)) == null).ToList();
 
-        if (!removedUsers.Any())
+        if (removedUsers.Count == 0)
         {
             return ldapUsers;
         }
@@ -1035,7 +1034,7 @@ public class LdapOperationJob(TenantManager tenantManager,
                 .Where(g => g.Sid != null && ldapGroups.FirstOrDefault(lg => g.Sid.Equals(lg.Sid)) == null)
                 .ToList();
 
-        if (!removedDbLdapGroups.Any())
+        if (removedDbLdapGroups.Count == 0)
         {
             return;
         }
@@ -1346,7 +1345,7 @@ public class LdapOperationJob(TenantManager tenantManager,
             return;
         }
 
-        if (settings.PasswordBytes == null || !settings.PasswordBytes.Any())
+        if (settings.PasswordBytes == null || settings.PasswordBytes.Length == 0)
         {
             if (!string.IsNullOrEmpty(settings.Password))
             {

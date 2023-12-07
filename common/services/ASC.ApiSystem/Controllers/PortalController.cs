@@ -31,8 +31,8 @@ namespace ASC.ApiSystem.Controllers;
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class PortalController(IConfiguration configuration,
-        SecurityContext securityContext,
+public class PortalController(
+        IConfiguration configuration,
         TenantManager tenantManager,
         SettingsManager settingsManager,
         ApiSystemHelper apiSystemHelper,
@@ -52,8 +52,6 @@ public class PortalController(IConfiguration configuration,
         QuotaUsageManager quotaUsageManager)
     : ControllerBase
 {
-    private readonly SecurityContext _securityContext = securityContext;
-
     #region For TEST api
 
     [HttpGet("test")]
