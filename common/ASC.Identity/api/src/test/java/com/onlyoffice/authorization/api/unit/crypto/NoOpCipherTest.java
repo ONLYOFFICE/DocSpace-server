@@ -3,7 +3,7 @@
  */
 package com.onlyoffice.authorization.api.unit.crypto;
 
-import com.onlyoffice.authorization.api.security.crypto.NoOpCipher;
+import com.onlyoffice.authorization.api.web.security.crypto.NoOpCipher;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 

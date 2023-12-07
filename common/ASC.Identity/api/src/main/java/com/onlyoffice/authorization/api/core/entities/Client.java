@@ -16,14 +16,14 @@ import java.util.Set;
 /**
  *
  */
+@Entity
 @Getter
 @Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "identity_clients")
-@ToString
 public class Client {
     @Id
     @Column(name = "client_id", unique = true, length = 36)
@@ -36,53 +36,53 @@ public class Client {
     private String clientSecret;
     @Column(name = "logo", columnDefinition = "LONGTEXT")
     private String logo;
-    @Column(name = "client_issued_at")
     @CreatedDate
+    @Column(name = "client_issued_at")
     private Timestamp clientIssuedAt;
     @Column(name = "authentication_method", length = 100)
     private String authenticationMethod;
     @Column(name = "tenant_id")
     private int tenant;
+    @Lob
     @Column(name = "tenant_url")
-    @Lob
     private String tenantUrl;
+    @Lob
     @Column(name = "website_url")
-    @Lob
     private String websiteUrl;
+    @Lob
     @Column(name = "terms_url")
-    @Lob
     private String termsUrl;
+    @Lob
     @Column(name = "policy_url")
-    @Lob
     private String policyUrl;
+    @Lob
     @Column(name = "redirect_uris")
-    @Lob
     private String redirectUris;
+    @Lob
     @Column(name = "allowed_origins")
-    @Lob
     private String allowedOrigins;
-    @Column(name = "logout_redirect_uri")
     @Lob
+    @Column(name = "logout_redirect_uri")
     private String logoutRedirectUri;
     @Column(name = "enabled")
     private boolean enabled;
     @Column(name = "invalidated")
     private boolean invalidated;
-    @Column(name = "scopes")
     @Lob
+    @Column(name = "scopes")
     private String scopes;
-    @Column(name = "created_on")
     @LastModifiedDate
+    @Column(name = "created_on")
     private Timestamp createdOn;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "modified_on")
     @LastModifiedDate
+    @Column(name = "modified_on")
     private Timestamp modifiedOn;
     @Column(name = "modified_by")
     private String modifiedBy;
-    @OneToMany(mappedBy = "client")
     @JsonBackReference
+    @OneToMany(mappedBy = "client")
     private Set<Consent> consents;
     @PrePersist
     private void prePersist() {

@@ -1,14 +1,13 @@
 package com.onlyoffice.authorization.api.core.entities;
 
-import com.onlyoffice.authorization.api.core.entities.enums.Action;
 import jakarta.persistence.*;
 import lombok.Builder;
 
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "audit_events")
 @Builder
+@Table(name = "audit_events")
 public class Audit {
     @Id
     private int id;

@@ -14,15 +14,15 @@ import java.util.Objects;
 /**
  *
  */
-@IdClass(Consent.ConsentId.class)
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity
 @Getter
 @Setter
-@Entity
-@Table(name = "identity_consents")
+@Builder
 @EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@IdClass(Consent.ConsentId.class)
+@Table(name = "identity_consents")
 public class Consent {
     @Id
     @Column(name = "registered_client_id")
@@ -30,15 +30,15 @@ public class Consent {
     @Id
     @Column(name = "principal_name")
     private String principalName;
-    @Column(name = "scopes")
     @Lob
+    @Column(name = "scopes")
     private String scopes;
     @Column(name = "modified_at")
     private Timestamp modifiedAt;
     @Column(name = "invalidated")
     private Boolean invalidated;
-    @ManyToOne(fetch = FetchType.EAGER)
     @JsonManagedReference
+    @ManyToOne(fetch = FetchType.EAGER)
     private Client client;
     @PrePersist
     private void prePersist() {

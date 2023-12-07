@@ -3,8 +3,8 @@
  */
 package com.onlyoffice.authorization.api.configuration;
 
-import com.onlyoffice.authorization.api.security.filters.CheckAuthAdminCookieFilter;
-import com.onlyoffice.authorization.api.security.filters.CheckAuthCookieFilter;
+import com.onlyoffice.authorization.api.web.security.filters.CheckAuthAdminCookieFilter;
+import com.onlyoffice.authorization.api.web.security.filters.CheckAuthCookieFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

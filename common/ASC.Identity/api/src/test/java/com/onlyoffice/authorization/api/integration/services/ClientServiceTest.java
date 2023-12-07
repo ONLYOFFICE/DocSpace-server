@@ -5,13 +5,13 @@ package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Client;
-import com.onlyoffice.authorization.api.core.transfer.request.ChangeClientActivationDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.docspace.DocspaceResponseDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.docspace.TenantDTO;
-import com.onlyoffice.authorization.api.ports.repositories.ClientRepository;
-import com.onlyoffice.authorization.api.ports.services.ClientService;
-import com.onlyoffice.authorization.api.security.container.TenantContextContainer;
-import com.onlyoffice.authorization.api.security.crypto.Cipher;
+import com.onlyoffice.authorization.api.web.server.transfer.request.ChangeClientActivationDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
+import com.onlyoffice.authorization.api.web.server.ports.repositories.ClientRepository;
+import com.onlyoffice.authorization.api.web.server.ports.services.ClientService;
+import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
+import com.onlyoffice.authorization.api.web.security.crypto.Cipher;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ public class ClientServiceTest extends ContainerBase {
     @BeforeEach
     @SneakyThrows
     void beforeEach() {
-        TenantContextContainer.context.set(DocspaceResponseDTO
+        TenantContextContainer.context.set(APIClientDTOWrapper
                 .<TenantDTO>builder()
                 .status(200)
                 .statusCode(200)

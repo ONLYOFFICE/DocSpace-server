@@ -4,7 +4,7 @@
 package com.onlyoffice.authorization.api.unit.crypto;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.security.crypto.AesGcmCipher;
+import com.onlyoffice.authorization.api.web.security.crypto.AesGcmCipher;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;

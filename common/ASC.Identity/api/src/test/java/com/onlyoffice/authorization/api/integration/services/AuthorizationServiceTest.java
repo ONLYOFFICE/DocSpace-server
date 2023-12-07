@@ -5,10 +5,10 @@ package com.onlyoffice.authorization.api.integration.services;
 
 import com.onlyoffice.authorization.api.ContainerBase;
 import com.onlyoffice.authorization.api.core.entities.Authorization;
-import com.onlyoffice.authorization.api.core.transfer.messages.AuthorizationMessage;
-import com.onlyoffice.authorization.api.external.mappers.AuthorizationMapper;
-import com.onlyoffice.authorization.api.ports.repositories.AuthorizationRepository;
-import com.onlyoffice.authorization.api.ports.services.AuthorizationService;
+import com.onlyoffice.authorization.api.web.server.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.web.server.utilities.mappers.AuthorizationMapper;
+import com.onlyoffice.authorization.api.web.server.ports.repositories.AuthorizationRepository;
+import com.onlyoffice.authorization.api.web.server.ports.services.AuthorizationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

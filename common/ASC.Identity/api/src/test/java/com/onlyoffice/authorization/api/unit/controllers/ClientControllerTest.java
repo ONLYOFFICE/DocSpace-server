@@ -5,16 +5,16 @@ package com.onlyoffice.authorization.api.unit.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
-import com.onlyoffice.authorization.api.core.transfer.request.CreateClientDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.ClientDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.PaginationDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.docspace.DocspaceResponseDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.docspace.MeDTO;
-import com.onlyoffice.authorization.api.core.transfer.response.docspace.TenantDTO;
-import com.onlyoffice.authorization.api.external.clients.DocspaceClient;
-import com.onlyoffice.authorization.api.external.controllers.ClientController;
-import com.onlyoffice.authorization.api.ports.services.ClientService;
-import com.onlyoffice.authorization.api.security.filters.CheckAuthAdminCookieFilter;
+import com.onlyoffice.authorization.api.web.client.APIClient;
+import com.onlyoffice.authorization.api.web.server.controllers.ClientController;
+import com.onlyoffice.authorization.api.web.client.transfer.APIClientDTOWrapper;
+import com.onlyoffice.authorization.api.web.client.transfer.MeDTO;
+import com.onlyoffice.authorization.api.web.client.transfer.TenantDTO;
+import com.onlyoffice.authorization.api.web.server.transfer.request.CreateClientDTO;
+import com.onlyoffice.authorization.api.web.server.transfer.response.ClientDTO;
+import com.onlyoffice.authorization.api.web.server.transfer.response.PaginationDTO;
+import com.onlyoffice.authorization.api.web.server.ports.services.ClientService;
+import com.onlyoffice.authorization.api.web.security.filters.CheckAuthAdminCookieFilter;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ public class ClientControllerTest {
     @Mock
     private ClientService clientService;
     @Mock
-    private DocspaceClient docspaceClient;
+    private APIClient apiClient;
     @Mock
     private ApplicationConfiguration applicationConfiguration;
     @InjectMocks
@@ -58,14 +58,14 @@ public class ClientControllerTest {
     void setup() {
         JacksonTester.initFields(this, new ObjectMapper());
         mvc = MockMvcBuilders.standaloneSetup(clientController)
-                .addFilter(new CheckAuthAdminCookieFilter(docspaceClient))
+                .addFilter(new CheckAuthAdminCookieFilter(apiClient))
                 .build();
     }
 
     @Test
     void canRetrieve() throws Exception {
-        given(docspaceClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
                         .<MeDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
@@ -80,8 +80,8 @@ public class ClientControllerTest {
                                 .isAdmin(true)
                                 .build())
                         .build());
-        given(docspaceClient.getProfile(URI.create("http://127.0.0.1"), "asc_auth_key=zxc", "admin@admin.com"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getProfile(URI.create("http://127.0.0.1"), "asc_auth_key=zxc", "admin@admin.com"))
+                .willReturn(APIClientDTOWrapper
                         .<MeDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
@@ -95,8 +95,8 @@ public class ClientControllerTest {
                                 .avatar("avatar")
                                 .build())
                         .build());
-        given(docspaceClient.getTenant(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getTenant(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
                         .<TenantDTO>builder()
                         .status(200)
                         .statusCode(200)
@@ -129,8 +129,8 @@ public class ClientControllerTest {
 
     @Test
     void canRetrieveByIdAndTenant() throws Exception {
-        given(docspaceClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
                         .<MeDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
@@ -145,8 +145,8 @@ public class ClientControllerTest {
                                 .isAdmin(true)
                                 .build())
                         .build());
-        given(docspaceClient.getTenant(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getTenant(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
                         .<TenantDTO>builder()
                         .status(200)
                         .statusCode(200)
@@ -172,8 +172,8 @@ public class ClientControllerTest {
 
     @Test
     void canCreateClient() throws Exception {
-        given(docspaceClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getMe(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
                         .<MeDTO>builder()
                         .statusCode(200)
                         .statusCode(200)
@@ -188,8 +188,8 @@ public class ClientControllerTest {
                                 .isAdmin(true)
                                 .build())
                         .build());
-        given(docspaceClient.getTenant(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
-                .willReturn(DocspaceResponseDTO
+        given(apiClient.getTenant(URI.create("http://127.0.0.1"), "asc_auth_key=zxc"))
+                .willReturn(APIClientDTOWrapper
                         .<TenantDTO>builder()
                         .status(200)
                         .statusCode(200)

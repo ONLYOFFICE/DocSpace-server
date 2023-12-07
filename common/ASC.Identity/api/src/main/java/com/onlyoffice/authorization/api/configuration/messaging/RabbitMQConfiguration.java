@@ -4,8 +4,8 @@
 package com.onlyoffice.authorization.api.configuration.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onlyoffice.authorization.api.core.transfer.messages.AuthorizationMessage;
-import com.onlyoffice.authorization.api.core.transfer.messages.ConsentMessage;
+import com.onlyoffice.authorization.api.web.server.transfer.messages.AuthorizationMessage;
+import com.onlyoffice.authorization.api.web.server.transfer.messages.ConsentMessage;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

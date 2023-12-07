@@ -15,11 +15,11 @@ import java.util.Objects;
  */
 @Data
 @Builder
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@IdClass(Authorization.AuthorizationId.class)
 @Table(name = "identity_authorizations")
+@IdClass(Authorization.AuthorizationId.class)
 public class Authorization {
     @Column(unique = true)
     private String id;

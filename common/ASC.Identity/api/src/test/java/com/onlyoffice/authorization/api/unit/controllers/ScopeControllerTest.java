@@ -3,7 +3,7 @@
  */
 package com.onlyoffice.authorization.api.unit.controllers;
 
-import com.onlyoffice.authorization.api.external.controllers.ScopeController;
+import com.onlyoffice.authorization.api.web.server.controllers.ScopeController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
