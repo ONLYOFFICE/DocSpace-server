@@ -43,10 +43,8 @@ internal sealed class BackupWorkerService(BackupWorker backupWorker,
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        backupWorker.StopAsync();
-
-        return Task.CompletedTask;
+        await backupWorker.StopAsync();
     }
 }
