@@ -55,7 +55,7 @@ public class BackupRequestedIntegrationEventHandler(
 
             if (@event.IsScheduled)
             {
-                backupWorker.StartScheduledBackup(new BackupSchedule
+                await backupWorker.StartScheduledBackupAsync(new BackupSchedule
                 {
                     BackupsStored = @event.BackupsStored,
                     StorageBasePath = @event.StorageBasePath,

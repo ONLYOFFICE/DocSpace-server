@@ -74,8 +74,6 @@ internal class FileMoveCopyOperationData<T> : FileOperationData<T>
 
 class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 {
-    private static readonly SemaphoreSlim _semaphore = new(1);
-
     private readonly int _daoFolderId;
     private readonly string _thirdPartyFolderId;
     private readonly bool _copy;
@@ -264,6 +262,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var tenantQuotaFeatureStatHelper = scope.ServiceProvider.GetService<TenantQuotaFeatureStatHelper>();
         var quotaSocketManager = scope.ServiceProvider.GetService<QuotaSocketManager>();
+        var distributedLockProvider = scope.ServiceProvider.GetRequiredService<IDistributedLockProvider>();
 
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -462,26 +461,35 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             }
                             else
                             {
+                                IDistributedLockHandle moveRoomLock = null;
+                                IDistributedLockHandle roomsCountCheckLock = null;
+                                
                                 try
                                 {
-                                    if (isRoom && toFolder.FolderType == FolderType.VirtualRooms)
+                                    if (isRoom)
                                     {
-                                        await _semaphore.WaitAsync();
-                                        await countRoomChecker.CheckAppend();
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await socketManager.DeleteFolder(folder);
-
-                                        var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
-                                        _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
-                                    }
-                                    else if (isRoom && toFolder.FolderType == FolderType.Archive)
-                                    {
-                                        await _semaphore.WaitAsync();
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await socketManager.DeleteFolder(folder);
+                                        moveRoomLock = await distributedLockProvider.TryAcquireFairLockAsync($"move_room_{CurrentTenant.Id}");
                                         
-                                        var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
-                                        _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                        if (toFolder.FolderType == FolderType.VirtualRooms)
+                                        {
+                                            roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(
+                                                LockKeyHelper.GetRoomsCountCheckKey(CurrentTenant.Id));
+                                            
+                                            await countRoomChecker.CheckAppend();
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                            await socketManager.DeleteFolder(folder);
+
+                                            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                            _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                        }
+                                        else if (toFolder.FolderType == FolderType.Archive)
+                                        {
+                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                            await socketManager.DeleteFolder(folder);
+                                        
+                                            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                            _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
+                                        }
                                     }
                                     else
                                     {
@@ -490,7 +498,15 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
                                 finally
                                 {
-                                    _semaphore.Release();
+                                    if (moveRoomLock != null)
+                                    {
+                                        await moveRoomLock.ReleaseAsync();
+                                    }
+
+                                    if (roomsCountCheckLock != null)
+                                    {
+                                        await roomsCountCheckLock.ReleaseAsync();
+                                    }
                                 }
                             }
 
