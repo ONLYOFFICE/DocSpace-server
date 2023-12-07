@@ -184,7 +184,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         }
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
-        result.AvailableExternalRights = fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
+        result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
         
         return result;
     }
