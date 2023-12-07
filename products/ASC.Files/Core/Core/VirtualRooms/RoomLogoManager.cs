@@ -140,6 +140,8 @@ public class RoomLogoManager(StorageFactory storageFactory,
         {
             if (string.IsNullOrEmpty(room.SettingsColor))
             {
+                room.SettingsColor = GetRandomColour();
+                
                 await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
