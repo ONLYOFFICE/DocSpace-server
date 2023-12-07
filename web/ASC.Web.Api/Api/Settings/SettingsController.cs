@@ -38,6 +38,7 @@ public class SettingsController(MessageService messageService,
         WebItemManagerSecurity webItemManagerSecurity,
         TenantInfoSettingsHelper tenantInfoSettingsHelper,
         TenantUtil tenantUtil,
+        CoreSettings coreSettings,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
@@ -94,7 +95,7 @@ public class SettingsController(MessageService messageService,
             Personal = coreBaseSettings.Personal,
             DocSpace = !coreBaseSettings.DisableDocSpace,
             Standalone = coreBaseSettings.Standalone,
-            BaseDomain = coreBaseSettings.Basedomain,
+            BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
@@ -124,6 +125,7 @@ public class SettingsController(MessageService messageService,
             settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
             settings.DocumentationEmail = setupInfo.DocumentationEmail;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
+            settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
             settings.Firebase = new FirebaseDto
             {

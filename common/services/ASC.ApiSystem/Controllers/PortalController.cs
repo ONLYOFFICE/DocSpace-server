@@ -39,7 +39,6 @@ public class PortalController(IConfiguration configuration,
         CommonMethods commonMethods,
         HostedSolution hostedSolution,
         CoreSettings coreSettings,
-        CoreBaseSettings coreBaseSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
         UserManagerWrapper userManagerWrapper,
@@ -48,7 +47,9 @@ public class PortalController(IConfiguration configuration,
         TimeZonesProvider timeZonesProvider,
         TimeZoneConverter timeZoneConverter,
         PasswordHasher passwordHasher,
-        CspSettingsHelper cspSettingsHelper)
+        CspSettingsHelper cspSettingsHelper,
+        CoreBaseSettings coreBaseSettings,
+        QuotaUsageManager quotaUsageManager)
     : ControllerBase
 {
     private readonly SecurityContext _securityContext = securityContext;
@@ -70,7 +71,7 @@ public class PortalController(IConfiguration configuration,
 
     [HttpPost("register")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal")]
     public async ValueTask<IActionResult> RegisterAsync(TenantModel model)
     {
         if (model == null)
@@ -183,7 +184,8 @@ public class PortalController(IConfiguration configuration,
             Industry = (TenantIndustry)model.Industry,
             Spam = model.Spam,
             Calls = model.Calls,
-            HostedRegion = model.Region
+            HostedRegion = model.Region,
+            LimitedAccessSpace = model.LimitedAccessSpace
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
@@ -298,7 +300,7 @@ public class PortalController(IConfiguration configuration,
 
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
@@ -334,7 +336,7 @@ public class PortalController(IConfiguration configuration,
 
     [HttpPut("status")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
@@ -405,52 +407,49 @@ public class PortalController(IConfiguration configuration,
 
     [HttpGet("get")]
     [AllowCrossSiteJson]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model)
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model, [FromQuery] bool statistics)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         try
         {
-            var tenants = new List<Tenant>();
-            var empty = true;
-
-            if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
-            {
-                empty = false;
-                tenants.AddRange(await hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
-            }
-
-            if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
-            {
-                empty = false;
-                var tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
-
-                if (tenant != null)
-                {
-                    tenants.Add(tenant);
-                }
-            }
-
-            if (model.TenantId.HasValue)
-            {
-                empty = false;
-                var tenant = await hostedSolution.GetTenantAsync(model.TenantId.Value);
-
-                if (tenant != null)
-                {
-                    tenants.Add(tenant);
-                }
-            }
-
-            if (empty)
-            {
-                tenants.AddRange((await hostedSolution.GetTenantsAsync(DateTime.MinValue)).OrderBy(t => t.Id).ToList());
-            }
-
-            var tenantsWrapper = tenants
+            var tenants = (await commonMethods.GetTenantsAsync(model))
                 .Distinct()
                 .Where(t => t.Status == TenantStatus.Active)
-                .OrderBy(t => t.Id)
-                .Select(commonMethods.ToTenantWrapper);
+                .OrderBy(t => t.Id);
+
+            var tenantsWrapper = new List<object>();
+
+            var owners = statistics
+                ? (await hostedSolution.FindUsersAsync(tenants.Select(t => t.OwnerId))).Select(owner => new TenantOwnerDto
+                    {
+                        Id = owner.Id,
+                        Email = owner.Email,
+                        DisplayName = userFormatter.GetUserName(owner)
+                    })
+                : null;
+
+            foreach (var t in tenants)
+            {
+                if (statistics)
+                {
+                    var quotaUsage = await quotaUsageManager.Get(t);
+                    var owner = owners.FirstOrDefault(o => o.Id == t.OwnerId);
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t, quotaUsage, owner));
+                }
+                else
+                {
+                    tenantsWrapper.Add(commonMethods.ToTenantWrapper(t));
+                }
+            }
 
             return Ok(new
             {
@@ -459,7 +458,7 @@ public class PortalController(IConfiguration configuration,
         }
         catch (Exception ex)
         {
-            option.LogError(ex, "");
+            option.LogError(ex, "GetPortalsAsync");
 
             return StatusCode(StatusCodes.Status500InternalServerError, new
             {
