@@ -31,7 +31,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
-        WaterMarksManager waterMarksManager,
+        WatermarkManager waterMarksManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -78,7 +78,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
-        WaterMarksManager waterMarksManager,
+        WatermarkManager waterMarksManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -127,7 +127,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
-        WaterMarksManager waterMarksManager,
+        WatermarkManager waterMarksManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -449,7 +449,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     {
         ErrorIfNotDocSpace();
 
-        var room = await waterMarksManager.AddRoomWaterMarksAsync(id, inDto);
+        var room = await waterMarksManager.AddRoomWatermarkAsync(id, inDto);
 
         return await _folderDtoHelper.GetAsync(room);
     }

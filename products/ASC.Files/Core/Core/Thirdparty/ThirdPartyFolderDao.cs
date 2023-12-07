@@ -650,7 +650,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(IDbContextFactory<File
         throw new NotImplementedException();
     }
 
-    public Task<WatermarkJson> GetWaterMarksSettings(Folder<string> room)
+    public Task<WatermarkJson> GetWatermarkSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

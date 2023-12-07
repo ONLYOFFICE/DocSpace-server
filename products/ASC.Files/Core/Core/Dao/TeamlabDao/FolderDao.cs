@@ -107,7 +107,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         return _mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
-    public async Task<WatermarkJson> GetWaterMarksSettings (Folder<int> room)
+    public async Task<WatermarkJson> GetWatermarkSettings (Folder<int> room)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -121,7 +121,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var waterMarkJson = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id); 
+        var waterMarkJson = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id); 
         waterMarkJson.Watermark = userName.Replace(waterMarkJson.Watermark, userInfo.UserName);
         waterMarkJson.Watermark = userEmail.Replace(waterMarkJson.Watermark, userInfo.Email);
         waterMarkJson.Watermark = userIpAdress.Replace(waterMarkJson.Watermark, ip);
@@ -133,7 +133,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var waterMarkJson = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id);
+        var waterMarkJson = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
         return JsonSerializer.Deserialize<WatermarkJson>(waterMarkJson.Watermark);
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
@@ -567,7 +567,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var toUpdate = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id);
+        var toUpdate = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
 
         toUpdate.Watermark = JsonSerializer.Serialize(waterMarkJson);
         filesDbContext.Update(toUpdate);
@@ -582,7 +582,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var watermark = await Queries.RoomWaterMarkAsync(filesDbContext, tenantId, room.Id);
+        var watermark = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
         watermark.Watermark = null;
         filesDbContext.Update(watermark);
         await filesDbContext.SaveChangesAsync();
@@ -2198,7 +2198,7 @@ static file class Queries
                     .Where(r => r.Id == folderId)
                     .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomWaterMarkAsync =
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomSettingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int roomId) =>
             ctx.RoomSettings

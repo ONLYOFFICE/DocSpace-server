@@ -441,7 +441,7 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         throw new NotImplementedException();
     }
 
-    public Task<WatermarkJson> GetWaterMarksSettings(Folder<string> room)
+    public Task<WatermarkJson> GetWatermarkSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

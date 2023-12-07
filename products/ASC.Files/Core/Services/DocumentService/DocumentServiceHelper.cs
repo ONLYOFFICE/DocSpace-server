@@ -178,7 +178,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
             locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
             var room = await DocSpaceHelper.GetRoomId(file, folderDao);
-            options = GetOptions( await folderDao.GetWaterMarksSettings(room));
+            options = GetOptions( await folderDao.GetWatermarkSettings(room));
         }
 
         if (file.Encrypted
@@ -335,19 +335,19 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public Options GetOptions(WatermarkJson watermarkJson)
     {
-        var runs = new List<Runs>();
-        var paragrahs = new List<Paragraphs>();
+        var runs = new List<Run>();
+        var paragrahs = new List<Paragraph>();
         if(watermarkJson.Text.Count != 0)
         {
             for(var i = 0; i < watermarkJson.Text.Count; i++)
             {
-                runs.Add(new Runs(watermarkJson.Text[i]));
+                runs.Add(new Run(watermarkJson.Text[i]));
                 if(i != watermarkJson.Text.Count - 1)
                 {
-                    runs.Add(new Runs("<%br%>"));
+                    runs.Add(new Run("\n"));
                 }
             }
-            paragrahs.Add(new Paragraphs(runs));
+            paragrahs.Add(new Paragraph(runs));
         }
         
         var options = new Options()

@@ -602,7 +602,7 @@ public class Options
 }
 public class WatermarkOnDraw
 {
-    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraphs> paragraphs)
+    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraph> paragraphs)
     {
         Width = width == 0 ? 200 : width; 
         Height = height == 0 ? 240 : height;
@@ -616,24 +616,24 @@ public class WatermarkOnDraw
 	public string Fill { get; set; }
     public int Rotate { get; set; }
     public double Transparent { get; set; }
-    public List<Paragraphs> Paragraphs { get; set; }
+    public List<Paragraph> Paragraphs { get; set; }
 }
-public class Paragraphs
+public class Paragraph
 {
-    public Paragraphs(List<Runs> runs)
+    public Paragraph(List<Run> runs)
     {
         Runs = runs;
         Align = 2;
     }
     public int Align { get; set; }
-    public List<Runs> Runs { get; set; }
+    public List<Run> Runs { get; set; }
 }
-public class Runs
+public class Run
 {
-    public Runs(string text)
+    public Run(string text)
     {
         FontSize = "42";
-        Fill = new int[3]{ 124, 124, 124 };
+        Fill = [124, 124, 124];
         Text = text;
     }
     public int[] Fill { get; set; }

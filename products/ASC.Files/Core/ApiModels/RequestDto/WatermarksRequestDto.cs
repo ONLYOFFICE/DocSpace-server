@@ -27,18 +27,53 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class WatermarksRequestDto
 {
+    /// <summary>Specifies whether watermarks are on or off</summary>
+    /// <type>System.Boolean, System</type>
     public bool Enabled { get; set; }
+
+    /// <summary>Specifies whether to display the username in the watermarks </summary>
+    /// <type>System.Boolean, System</type>
     public bool UserName { get; set; }
+
+    /// <summary>Specifies whether to display the user email in the watermarks </summary>
+    /// <type>System.Boolean, System</type>
     public bool UserEmail { get; set; }
+
+    /// <summary>Specifies whether to display the user ip-adress in the watermarks </summary>
+    /// <type>System.Boolean, System</type>
     public bool UserIpAdress { get; set; }
+
+    /// <summary>Specifies whether to display the current date in the watermarks </summary>
+    /// <type>System.Boolean, System</type>
     public bool CurrentDate { get; set; }
+
+    /// <summary>Specifies whether to display the room name  in the watermarks </summary>
+    /// <type>System.Boolean, System</type>
     public bool RoomName { get; set; }
+
+    /// <summary>Watermark Text</summary>
+    /// <type>System.String, System</type>
     public string Text { get; set; }
+
+    /// <summary>Watermark text and image rotate</summary>
+    /// <type>System.Int32, System</type>
     public int Rotate { get; set; }
-    public int Scale { get; set; }
-    public string UrlImage { get; set; }
-    public double Height { get; set; }
-    public double Width { get; set; }
+
+    /// <summary>Watermark image scale</summary>
+    /// <type>System.Int32, System</type>
+    public int ImageScale { get; set; }
+
+    /// <summary>Watermark image url</summary>
+    /// <type>System.String, System</type>
+    public string ImageUrl { get; set; }
+
+    /// <summary>Watermark image height</summary>
+    /// <type>System.Double, System</type>
+    public double ImageHeight { get; set; }
+
+    /// <summary>Watermark image width</summary>
+    /// <type>System.Double, System</type>
+    public double ImageWidth { get; set; }
 }
 
 public class WatermarksImageRequestDto

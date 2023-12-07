@@ -39,12 +39,12 @@ public class WatermarkJson
 }
 
 [Scope]
-public class WaterMarksManager
+public class WatermarkManager
 {
     private readonly IDaoFactory _daoFactory;
     private readonly FileSecurity _fileSecurity;
     private readonly RoomLogoManager _roomLogoManager;
-    public WaterMarksManager(
+    public WatermarkManager(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
         RoomLogoManager roomLogoManager)
@@ -54,7 +54,7 @@ public class WaterMarksManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<Folder<T>> AddRoomWaterMarksAsync<T>(T roomId, WatermarksRequestDto watermarksRequestDto)
+    public async Task<Folder<T>> AddRoomWatermarkAsync<T>(T roomId, WatermarksRequestDto watermarksRequestDto)
     {
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -69,21 +69,16 @@ public class WaterMarksManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
-
-        var textArray = GetWaterMarkText(watermarksRequestDto);
+        var textArray = GetWatermarkText(watermarksRequestDto);
         var watermarkSetings = new WatermarkJson()
         {
             Enabled = watermarksRequestDto.Enabled,
             Text = textArray,
             Rotate = watermarksRequestDto.Rotate,
-            Height = watermarksRequestDto.Height,
-            Width = watermarksRequestDto.Width,
+            Height = watermarksRequestDto.ImageHeight,
+            Width = watermarksRequestDto.ImageWidth,
             ImageUrl = string.Empty,
-            Scale = watermarksRequestDto.Scale
+            Scale = watermarksRequestDto.ImageScale
         };
 
         await folderDao.WatermarksSaveToDbAsync(watermarkSetings, room);
@@ -91,7 +86,7 @@ public class WaterMarksManager
         return room;
     }
     
-    internal List<string> GetWaterMarkText(WatermarksRequestDto watermarksRequestDto)
+    internal List<string> GetWatermarkText(WatermarksRequestDto watermarksRequestDto)
     {
         var text = new List<string> ();
         if (watermarksRequestDto.UserName)
@@ -140,11 +135,6 @@ public class WaterMarksManager
             throw new ItemNotFoundException();  
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
-
         var watermarkData  = await folderDao.GetWatermarkInfo(room);
         var watermarkRequestDto = new WatermarksRequestDto();
 
@@ -188,10 +178,10 @@ public class WaterMarksManager
             }
         }
         watermarkRequestDto.Rotate = watermarkData.Rotate;
-        watermarkRequestDto.Scale = watermarkData.Scale;
-        watermarkRequestDto.UrlImage = watermarkData.ImageUrl;
-        watermarkRequestDto.Height = watermarkData.Height;
-        watermarkRequestDto.Width = watermarkData.Width;
+        watermarkRequestDto.ImageScale = watermarkData.Scale;
+        watermarkRequestDto.ImageUrl = watermarkData.ImageUrl;
+        watermarkRequestDto.ImageHeight = watermarkData.Height;
+        watermarkRequestDto.ImageWidth = watermarkData.Width;
 
         return watermarkRequestDto;
     }
