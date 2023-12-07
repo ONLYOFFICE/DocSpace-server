@@ -147,25 +147,11 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer);
     }
 
-    public IDistributedLockHandle TryAcquireFairLock(string resource, TimeSpan timeout, bool throwIfNotAcquired = true,  CancellationToken cancellationToken = default)
-    {
-        return TryAcquireFairLockAsync(resource, timeout, throwIfNotAcquired, cancellationToken).GetAwaiter().GetResult();
-    }
-
     public async Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
     {
         var stopWatch = Stopwatch.StartNew();
         
         var internalHandle = await _internalLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);
-
-        return GetHandle(internalHandle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
-    }
-
-    public IDistributedLockHandle TryAcquireLock(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
-    {
-        var stopWatch = Stopwatch.StartNew();
-        
-        var internalHandle = _internalLockProvider.TryAcquireLock(resource, timeout, cancellationToken);
 
         return GetHandle(internalHandle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
     }
