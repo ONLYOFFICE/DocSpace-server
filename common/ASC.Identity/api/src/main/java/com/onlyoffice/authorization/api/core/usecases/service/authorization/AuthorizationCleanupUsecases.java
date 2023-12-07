@@ -11,4 +11,5 @@ import com.onlyoffice.authorization.api.web.server.transfer.messages.Authorizati
 public interface AuthorizationCleanupUsecases {
     void deleteAuthorization(AuthorizationMessage a);
     void deleteAuthorizations(Iterable<AuthorizationMessage> authorizations);
+    int deleteAuthorizationsByClientId(String registeredClientId);
 }

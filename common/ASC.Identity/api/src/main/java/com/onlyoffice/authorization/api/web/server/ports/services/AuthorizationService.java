@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.api.web.server.ports.services;
 
+import com.onlyoffice.authorization.api.core.exceptions.AuthorizationsDeletionException;
 import com.onlyoffice.authorization.api.core.usecases.repository.authorization.AuthorizationPersistenceMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.authorization.AuthorizationCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.authorization.AuthorizationCreationUsecases;
@@ -81,6 +82,22 @@ public class AuthorizationService implements AuthorizationCleanupUsecases, Autho
             } finally {
                 MDC.clear();
             }
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class, timeout = 2000)
+    public int deleteAuthorizationsByClientId(String registeredClientId) {
+        MDC.put("clientId", registeredClientId);
+        log.info("Deleting authorizations");
+        try {
+            var count = mutationUsecases.deleteAllByClientId(registeredClientId);
+            MDC.put("removed", String.valueOf(count));
+            log.info("Successfully removed authorizations");
+            return count;
+        } catch (RuntimeException e) {
+            throw new AuthorizationsDeletionException("Could not remove authorizations by client id", e);
+        } finally {
+            MDC.clear();
         }
     }
 }

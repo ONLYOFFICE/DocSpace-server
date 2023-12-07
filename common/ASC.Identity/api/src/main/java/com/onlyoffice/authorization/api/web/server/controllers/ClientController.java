@@ -6,6 +6,7 @@ package com.onlyoffice.authorization.api.web.server.controllers;
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.configuration.messaging.RabbitMQConfiguration;
 import com.onlyoffice.authorization.api.core.entities.Action;
+import com.onlyoffice.authorization.api.core.usecases.service.authorization.AuthorizationCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientCreationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutationUsecases;
@@ -76,6 +77,7 @@ public class ClientController {
     private final ClientCleanupUsecases cleanupUsecases;
     private final ConsentRetrieveUsecases consentRetrieveUsecases;
     private final ConsentCleanupUsecases consentCleanupUsecases;
+    private final AuthorizationCleanupUsecases authorizationCleanupUsecases;
 
     @PostConstruct
     public void init() {
@@ -408,6 +410,7 @@ public class ClientController {
         log.info("Received a new regenerate client's secret request");
         log.debug("Trying to regenerate client's secret");
         MDC.clear();
+        authorizationCleanupUsecases.deleteAuthorizationsByClientId(clientId);
         var regenerate = mutationUsecases.regenerateSecret(clientId, tenantContext
                 .getResponse().getTenantId());
         log.debug("Regeneration result", regenerate);
