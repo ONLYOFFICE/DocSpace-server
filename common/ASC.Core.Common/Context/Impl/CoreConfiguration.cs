@@ -216,40 +216,6 @@ public class CoreSettings
 
         return Configuration["core:payment:region"] + tenant;
     }
-
-    public string GetKey(int tenant)
-    {
-        if (CoreBaseSettings.Standalone)
-        {
-            var key = GetSetting("PortalId");
-            if (!string.IsNullOrEmpty(key))
-            {
-                return key;
-            }
-
-            using (_distributedLockProvider.TryAcquireFairLock(LockKey, TimeSpan.FromSeconds(30)))
-            {
-                key = GetSetting("PortalId");
-                if (!string.IsNullOrEmpty(key))
-                {
-                    return key;
-                }
-
-                key = Guid.NewGuid().ToString();
-                SaveSetting("PortalId", key);
-            }
-
-            return key;
-        }
-
-        var t = TenantService.GetTenant(tenant);
-        if (t != null && !string.IsNullOrWhiteSpace(t.PaymentId))
-        {
-            return t.PaymentId;
-        }
-
-        return Configuration["core:payment:region"] + tenant;
-    }
 }
 
 [Scope]

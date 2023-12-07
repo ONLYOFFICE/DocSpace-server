@@ -155,12 +155,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
         return base.GetSelectCommandConditionText(tenantId, table);
     }
 
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
     { 
         if (row.TableName == "files_thirdparty_id_mapping")
         {
             //todo: think...
-            preparedRow = new Dictionary<string, object>();
+            var preparedRow = new Dictionary<string, object>();
 
             object folderId = null;
             var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
@@ -173,7 +174,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             if (folderId == null)
             {
-                return false;
+                return (false, null);
             }
 
             var hashBytes = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(sboxId));
@@ -185,10 +186,10 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             columnMapper.SetMapping("files_thirdparty_id_mapping", "hash_id", row["hash_id"], hashedId);
 
-            return true;
+            return (true, preparedRow);
         }
 
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 
     protected override bool TryPrepareValue(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, IEnumerable<RelationInfo> relations, ref object value)
