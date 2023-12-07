@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using StackExchange.Redis.Extensions.Core.Abstractions;
+
 namespace ASC.Api.Core.Core;
 
 public static class CustomHealthCheck
@@ -52,18 +54,11 @@ public static class CustomHealthCheck
     public static IHealthChecksBuilder AddDistibutedCache(
         this IHealthChecksBuilder hcBuilder, IConfiguration configuration)
     {
-        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+        var redisConfiguration = configuration.GetSection("Redis");
 
         if (redisConfiguration != null)
         {
-            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
-            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
-            {
-                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
-            }
-
-
-            hcBuilder.AddRedis(redisConfiguration.ConfigurationOptions.ToString(),
+            hcBuilder.AddRedis(x => x.GetRequiredService<IRedisConnectionPoolManager>().GetConnection(),
                                name: "redis",
                                tags: new[] { "redis", "services" },
                                timeout: new TimeSpan(0, 0, 15));
