@@ -165,7 +165,10 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
                 var group = _serviceProvider.GetService<NCMigratingGroups>();
                 group.Init(item, Log);
                 group.Parse();
-                _migrationInfo.Groups.Add(group);
+                if (group.UserGuidList.Any(u => _migrationInfo.Users.ContainsKey(u))) 
+                {
+                    _migrationInfo.Groups.Add(group);
+                }
             }
         }
         catch (Exception ex)
@@ -450,5 +453,17 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
         _migrationInfo.FailedUsers = failedUsers.Count;
         _migrationInfo.SuccessedUsers = usersForImport.Count() - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
+    }
+
+    public override void Dispose()
+    {
+        if (Directory.Exists(_tmpFolder)) {
+            var folders = Directory.GetDirectories(_tmpFolder);
+            if (folders.Length > 0)
+            {
+                Directory.Delete(folders[0], true);
+            }
+        }
+        base.Dispose();
     }
 }
