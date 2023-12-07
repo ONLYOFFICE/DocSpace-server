@@ -77,14 +77,14 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         var queueKey = RedisLockUtils.PrefixName(LockQueueName, resource);
         var queueItemTimeoutKey = RedisLockUtils.PrefixName(LockQueueItemTimeoutName, resource);
         
-        var stopWatch = Stopwatch.StartNew();
+        var timestamp = TimeProvider.System.GetTimestamp();
         
         var status = await TryAcquireLockInternalAsync(database, resource, lockId, queueKey, queueItemTimeoutKey, timeout);
         if (status == LockStatus.Acquired)
         {
             timer = StartExtendLockLoop(database, resource, lockId, cancellationToken);
             
-            _logger.DebugTryAcquireLock(resource, stopWatch.ElapsedMilliseconds);
+            _logger.DebugTryAcquireLock(resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             
             return new RedisFairLockHandle(database, resource, lockId, ChannelName, queueKey, queueItemTimeoutKey, timer);
         }
@@ -102,11 +102,11 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         
         try
         {
-            while (stopWatch.Elapsed <= timeout)
+            while (TimeProvider.System.GetElapsedTime(timestamp) <= timeout)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var newTimeout = timeout - stopWatch.Elapsed;
+                var newTimeout = timeout - TimeProvider.System.GetElapsedTime(timestamp);
                 if (newTimeout <= TimeSpan.Zero)
                 {
                     break;
@@ -132,15 +132,15 @@ public class RedisLockProvider : Abstractions.IDistributedLockProvider
         {
             if (throwIfNotAcquired)
             {
-                throw new DistributedLockException(status, resource, stopWatch.ElapsedMilliseconds);
+                throw new DistributedLockException(status, resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             }
             
-            _logger.ErrorTryAcquireLock(resource, stopWatch.ElapsedMilliseconds);
+            _logger.ErrorTryAcquireLock(resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
             
             return _defaultHandle;
         }
         
-        _logger.DebugTryAcquireLock(resource, stopWatch.ElapsedMilliseconds);
+        _logger.DebugTryAcquireLock(resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds);
         
         timer = StartExtendLockLoop(database, resource, lockId, cancellationToken);
 

@@ -62,11 +62,11 @@ public class ZooKeeperDistributedLockProvider : Abstractions.IDistributedLockPro
             timeout = _minTimeout;
         }
         
-        var stopWatch = Stopwatch.StartNew();
+        var timestamp = TimeProvider.System.GetTimestamp();
         
         var handle = await _distributedLockProvider.TryAcquireLockAsync(resource, timeout, cancellationToken);
 
-        return GetHandle(handle, resource, stopWatch.ElapsedMilliseconds, throwIfNotAcquired);
+        return GetHandle(handle, resource, (long)TimeProvider.System.GetElapsedTime(timestamp).TotalMilliseconds, throwIfNotAcquired);
     }
 
     public Task<IDistributedLockHandle> TryAcquireLockAsync(string resource, TimeSpan timeout = default, bool throwIfNotAcquired = true, CancellationToken cancellationToken = default)
