@@ -42,6 +42,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
+    private const string ImageWatermarkPath = $"watermark{LogosPathSplitter}{{0}}.png";
     private const string ModuleName = "room_logos";
     private const string TempDomainPath = "logos_temp";
 
@@ -51,7 +52,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
     private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(16, 16));
 
     private IDataStore _dataStore;
-
+    private readonly CommonLinkUtility _commonLinkUtility;
     public bool EnableAudit { get; set; } = true;
     private int TenantId => tenantManager.GetCurrentTenant().Id;
 
@@ -107,7 +108,60 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         return room;
     }
+    public async Task<WatermarkSettings> CreateWatermarkImageAsync<T>(T id, string tempFile, int width, int height)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFolderAsync(id);
 
+        if (string.IsNullOrEmpty(tempFile))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+        }
+
+        var store = await GetDataStoreAsync();
+        var fileName = Path.GetFileName(tempFile);
+        var data = await GetTempAsync(store, fileName);
+
+        var stringId = GetId(room);
+
+        await SaveWatermarkImageAsync(store, stringId, data, -1);
+        await RemoveTempAsync(store, fileName);
+
+        var uri = await GetWatermarkImageAsync(room);
+        var watermarkSettings = await folderDao.GetWatermarkSettings(room);
+        watermarkSettings.ImageHeight = watermarkSettings.ImageScale * height / 100;
+        watermarkSettings.ImageWidth = watermarkSettings.ImageScale * width / 100;
+        watermarkSettings.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
+
+        await folderDao.SetWatermarkSettings(watermarkSettings, room);
+        return watermarkSettings;
+    }
+    public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
+    {
+        var stringId = GetId(room);
+
+        try
+        {
+            var store = await GetDataStoreAsync();
+            await store.DeleteFilesAsync(string.Empty, string.Format(ImageWatermarkPath, ProcessFolderId(stringId)), false);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorRemoveRoomLogo(e);
+        }
+
+        return room;
+    }
     public async Task<Folder<T>> DeleteAsync<T>(T id, bool checkPermissions = true)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -182,6 +236,15 @@ public class RoomLogoManager(StorageFactory storageFactory,
             Medium = await GetLogoPathAsync(id, SizeName.Medium, cacheKey, secure),
             Small = await GetLogoPathAsync(id, SizeName.Small, cacheKey, secure)
         };
+    }
+    public async ValueTask<string> GetWatermarkImageAsync<T>(Folder<T> room)
+    {
+        var id = GetId(room);
+
+        var cacheKey = Math.Abs(room.ModifiedOn.GetHashCode());
+        var secure = !securityContext.IsAuthenticated;
+
+        return await GetWatermarkImagePathAsync(id, cacheKey, secure);
     }
 
     public async Task<string> SaveTempAsync(byte[] data, long maxFileSize)
@@ -283,7 +346,37 @@ public class RoomLogoManager(StorageFactory storageFactory,
             throw new UnknownImageFormatException(error);
         }
     }
+    private async Task SaveWatermarkImageAsync(IDataStore store, string id, byte[] imageData, long maxFileSize)
+    {
+        imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 
+        var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+
+        if (imageData == null || imageData.Length == 0)
+        {
+            return;
+        }
+        if (maxFileSize != -1 && imageData.Length > maxFileSize)
+        {
+            throw new ImageWeightLimitException();
+        }
+
+        using (var stream = new MemoryStream(imageData))
+        {
+            await store.SaveAsync(fileName, stream);
+        }
+    }
+    private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)
+    {
+        var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
+        var headers = secure ? new[] { SecureHelper.GenerateSecureKeyHeader(fileName, emailValidationKeyProvider) } : null;
+
+        var store = await GetDataStoreAsync();
+
+        var uri = await store.GetPreSignedUriAsync(string.Empty, fileName, TimeSpan.MaxValue, headers);
+
+        return uri + (secure ? "&" : "?") + $"hash={hash}";
+    }
     private async ValueTask<string> GetLogoPathAsync<T>(T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = string.Format(LogosPath, ProcessFolderId(id), size.ToStringLowerFast());

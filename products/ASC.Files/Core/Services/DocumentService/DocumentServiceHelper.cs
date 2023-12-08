@@ -40,7 +40,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        IHttpContextAccessor httpContextAccessor,
+        AuthContext authContext)
     {
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
@@ -171,12 +173,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         var locatedInPrivateRoom = false;
-
+        var options = new Options();
         if (file.RootFolderType == FolderType.VirtualRooms)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
 
             locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
+            var room = await DocSpaceHelper.GetRoomId(file, folderDao);
+            options = GetOptions( await folderDao.GetWatermarkSettings(room), room);
         }
 
         if (file.Encrypted
@@ -268,8 +272,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                         ModifyFilter = rightModifyFilter,
                         Print = rightToDownload,
                         Download = rightToDownload
-                    }
-                },
+                    },
+                    Options = options,
+            },
             EditorConfig =
                 {
                     ModeWrite = modeWrite
@@ -330,7 +335,55 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
+    public Options GetOptions<T>(WatermarkSettings watermarkSettings, Folder<T> room)
+    {
+        var runs = new List<Run>();
+        var paragrahs = new List<Paragraph>();
+        var userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
+        var ip = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
 
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserName))
+        {
+            runs.Add(new Run(userInfo.UserName));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        {
+            runs.Add(new Run(userInfo.Email));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserIpAdress))
+        {
+            runs.Add(new Run(ip));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.CurrentDate))
+        {
+            runs.Add(new Run(DateTime.Now.ToString()));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.RoomName))
+        {
+            runs.Add(new Run(room.Title));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (!string.IsNullOrWhiteSpace(watermarkSettings.Text))
+        {
+            runs.Add(new Run(watermarkSettings.Text));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (runs.Any())
+        {
+            runs.Remove(runs.Last());
+        }
+        paragrahs.Add(new Paragraph(runs));
+
+        var options = new Options()
+        {
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth, watermarkSettings.ImageHeight, watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
+        };
+        return options;
+    }
     public async Task<string> GetDocKeyAsync<T>(File<T> file)
     {
         return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn);

@@ -34,7 +34,7 @@ public class DbRoomSettings
     public bool HasLogo { get; set; }
     public string Color { get; set; }
     public bool Indexing { get; set; }
-
+    public string Watermark { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
 }
@@ -72,6 +72,8 @@ public static class DbRoomSettingsExtension
             entity.Property(e => e.HasLogo).HasColumnName("has_logo").HasDefaultValueSql("0");
             
             entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
+
+            entity.Property(e => e.Watermark).HasColumnName("watermark").HasColumnType("text");
 
             entity.Property(e => e.Color)
                 .HasColumnName("color")

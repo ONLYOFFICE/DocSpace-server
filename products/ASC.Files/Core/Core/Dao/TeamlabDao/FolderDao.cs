@@ -50,7 +50,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     private readonly GlobalFolder _globalFolder;
     private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly GlobalStore _globalStore;
-
     public FolderDao(
         FactoryIndexerFolder factoryIndexer,
         UserManager userManager,
@@ -105,7 +104,15 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         return _mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var roomSettings = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
+        return JsonSerializer.Deserialize<WatermarkSettings>(roomSettings.Watermark);
+    }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
@@ -532,6 +539,33 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     }
 
+    public async Task<int> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var toUpdate = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
+
+        toUpdate.Watermark = JsonSerializer.Serialize(watermarkSettings);
+        filesDbContext.Update(toUpdate);
+
+        await filesDbContext.SaveChangesAsync();
+
+        return room.Id;
+    }
+
+    public async Task<Folder<int>> DeleteWatermarkSettings(Folder<int> room)
+    {
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var roomSettings = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
+        roomSettings.Watermark = null;
+        filesDbContext.Update(roomSettings);
+        await filesDbContext.SaveChangesAsync();
+        return room;
+    }
     private async Task<bool> IsExistAsync(int folderId)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
@@ -2144,6 +2178,14 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id == folderId)
                     .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+            ctx.RoomSettings
+            .Where(r => r.TenantId == tenantId)
+            .Where(r => r.RoomId == roomId)
+            .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, Task<int>> CountTreesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

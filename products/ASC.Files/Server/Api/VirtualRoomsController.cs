@@ -31,11 +31,13 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
+        WatermarkDtoHelper watermarkDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
         ApiContext apiContext)
@@ -43,11 +45,13 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
             fileOperationDtoHelper,
             coreBaseSettings,
             customTagsService,
+            watermarkManager,
             roomLogoManager,
             fileStorageService,
             folderDtoHelper,
             fileDtoHelper,
             fileShareDtoHelper,
+            watermarkDtoHelper,
             mapper,
             socketManager,
             apiContext)
@@ -76,11 +80,13 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
+        WatermarkDtoHelper watermarkDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
         ApiContext apiContext)
@@ -88,11 +94,13 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
             fileOperationDtoHelper,
             coreBaseSettings,
             customTagsService,
+            watermarkManager,
             roomLogoManager,
             fileStorageService,
             folderDtoHelper,
             fileDtoHelper,
             fileShareDtoHelper,
+            watermarkDtoHelper,
             mapper,
             socketManager,
             apiContext)
@@ -123,11 +131,13 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileShareDtoHelper fileShareDtoHelper,
+        WatermarkDtoHelper watermarkDtoHelper,
         IMapper mapper,
         SocketManager socketManager,
         ApiContext apiContext)
@@ -426,6 +436,82 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         return await _folderDtoHelper.GetAsync(room);
     }
 
+    /// <summary>
+    /// Adds the watermarks settings to a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Add room watermarks settings</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("{id}/watermark")]
+    public async Task<WatermarkDto> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
+    {
+        ErrorIfNotDocSpace();
+
+        var watermarkSettings = await watermarkManager.SetWatermarkAsync(id, inDto);
+
+        return watermarkDtoHelper.Get(watermarkSettings);
+    }
+
+    /// <summary>
+    /// Returns the watermark information.
+    /// </summary>
+    /// <short>Get watermark information</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Watermark information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>GET</httpMethod>
+    [AllowAnonymous]
+    [HttpGet("{id}/watermark")]
+    public async Task<WatermarkDto> GetWatermarkInfoAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
+        var watermarkSettings = await watermarkManager.GetWatermarkAsync(room);
+
+        return watermarkDtoHelper.Get(watermarkSettings);
+    }
+
+    /// <summary>
+    /// Removes the watermarks from a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Remove room watermarks</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <returns></returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>DELETE</httpMethod>
+    [HttpDelete("{id}/watermark")]
+    public async Task DeleteWatermarkAsync(T id)
+    {
+        ErrorIfNotDocSpace();
+
+        await watermarkManager.DeleteWatermarkAsync(id);
+    }
+    /// <summary>
+    /// Creates a watermark image for a room with the ID specified in the request.
+    /// </summary>
+    /// <short>Create a watermark image</short>
+    /// <category>Rooms</category>
+    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkImageRequestDto, ASC.Files.Core" name="inDto">Watermark image request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
+    /// <path>api/2.0/files/rooms/{id}/watermark</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("{id}/watermark")]
+    public async Task<WatermarkDto> CreateWatermarkImageAsync(T id, WatermarkImageRequestDto inDto)
+    {
+        ErrorIfNotDocSpace();
+
+        var watermarkSettings = await roomLogoManager.CreateWatermarkImageAsync(id, inDto.TmpFile, inDto.Width, inDto.Height);
+
+        return watermarkDtoHelper.Get(watermarkSettings);
+    }
     /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>

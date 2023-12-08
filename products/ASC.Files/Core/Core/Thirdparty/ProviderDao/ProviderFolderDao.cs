@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope]
@@ -535,5 +536,31 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var folderDao = selector.GetFolderDao(parentFolderId);
         await folderDao.InitCustomOrder(folderIds, parentFolderId);
+    }
+
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
+    {
+        ArgumentNullException.ThrowIfNull(folder);
+        var selector = _selectorFactory.GetSelector(folder.Id);
+        var folderDao = selector.GetFolderDao(folder.Id);
+
+        return folderDao.SetWatermarkSettings(watermarkSettings, folder);
+    }
+
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+        
+        return await folderDao.GetWatermarkSettings(room);
+    }
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+
+        return folderDao.DeleteWatermarkSettings(room);
     }
 }

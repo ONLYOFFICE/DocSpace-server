@@ -435,6 +435,21 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
     {
         return Task.CompletedTask;
     }
+
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 static file class Queries

@@ -62,4 +62,11 @@ public static class DocSpaceHelper
 
         return room is { SettingsPrivate: true };
     }
+    public static async Task<Folder<T>> GetRoomId<T>(File<T> file, IFolderDao<T> folderDao)
+    {
+        var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
+        var room = parents.Find(f => IsRoom(f.FolderType));
+
+        return room;
+    }
 }

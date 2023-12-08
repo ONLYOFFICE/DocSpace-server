@@ -181,6 +181,7 @@ public class DocumentConfig<T>(DocumentServiceConnector documentServiceConnector
     }
 
     public PermissionsConfig Permissions { get; set; } = new();
+	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
     public FileReferenceData<T> ReferenceData
@@ -592,6 +593,54 @@ public class PermissionsConfig
     public bool Print { get; set; } = true;
     public bool Rename { get; set; }
     public bool Review { get; set; } = true;
+}
+
+public class Options
+{
+    [JsonPropertyName("watermark_on_draw")]
+    public WatermarkOnDraw WatermarkOnDraw { get; set; }
+}
+public class WatermarkOnDraw
+{
+    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraph> paragraphs)
+    {
+        Width = width == 0 ? 200 : width; 
+        Height = height == 0 ? 240 : height;
+        Fill = fill;
+        Rotate = rotate;
+        Transparent = 0.4;
+        Paragraphs = paragraphs;
+    }
+	public double Width { get; set; }
+    public double Height { get; set; }
+	public string Fill { get; set; }
+    public int Rotate { get; set; }
+    public double Transparent { get; set; }
+    public List<Paragraph> Paragraphs { get; set; }
+}
+public class Paragraph
+{
+    public Paragraph(List<Run> runs)
+    {
+        Runs = runs;
+        Align = 2;
+    }
+    public int Align { get; set; }
+    public List<Run> Runs { get; set; }
+}
+public class Run
+{
+    public Run(string text)
+    {
+        FontSize = "42";
+        Fill = [124, 124, 124];
+        Text = text;
+    }
+    public int[] Fill { get; set; }
+    public string Text { get; set; }
+
+    [JsonPropertyName("font-size")]
+    public string FontSize { get; set; }
 }
 
 /// <summary>

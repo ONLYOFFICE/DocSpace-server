@@ -381,6 +381,8 @@ public interface IFolderDao<T>
     Task SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
-    
+    Task<T> SetWatermarkSettings(WatermarkSettings waterMarks, Folder<T> folder);
+    Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
+    Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
     #endregion
 }
