@@ -152,8 +152,9 @@ public class ProviderInfoHelper
                 if (!i.IsFileExists)
                 {
                     _cache.Remove($"{selector}-" + i.Key);
-
                     _cache.Remove($"{selector}d-" + i.Key);
+                    _cache.Remove($"{selector}-" + i.Key + "-d");
+                    _cache.Remove($"{selector}-" + i.Key + "-f");
                 }
                 else
                 {
@@ -221,22 +222,31 @@ public class ProviderInfoHelper
 
     internal async Task<List<TItem>> GetItemsAsync<TItem>(IThirdPartyItemStorage<TItem> storage, int id, string folderId, string selector, bool? folder = null) where TItem : class
     {
-        var items = _cache.Get<List<TItem>>($"{selector}-{folder}" + id + "-" + folderId);
+        var key = $"{selector}-" + id + "-" + folderId;
 
-        if (items == null)
+        if (folder.HasValue)
         {
-            if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
-            {
-                items = await googleStorage.GetItemsAsync(folderId, folder);
-            }
-            else
-            {
-                items = await storage.GetItemsAsync(folderId);
-            }
-            var key = $"{selector}-" + id + "-" + folderId;
-            _cache.Insert(key, items, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-            _cacheKeys.TryAdd(key, null);
+            key += folder.Value ? "-d" : "-f";
         }
+        
+        var items = _cache.Get<List<TItem>>(key);
+
+        if (items != null)
+        {
+            return items;
+        }
+
+        if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
+        {
+            items = await googleStorage.GetItemsAsync(folderId, folder);
+        }
+        else
+        {
+            items = await storage.GetItemsAsync(folderId);
+        }
+            
+        _cache.Insert(key, items, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
+        _cacheKeys.TryAdd(key, null);
 
         return items;
     }
