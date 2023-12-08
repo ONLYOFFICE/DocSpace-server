@@ -1377,8 +1377,9 @@ public class S3Storage : BaseStorage
         }
     }
 
-    public async Task<int> ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey, int ext)
+    public async Task ConcatFileStreamAsync(Stream stream, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue)
     {
+        queue.TryDequeue(out var ext);
         destinationKey += ext;
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
 
@@ -1431,7 +1432,7 @@ public class S3Storage : BaseStorage
         };
         await s3.CompleteMultipartUploadAsync(completeRequest);
         await stream.DisposeAsync();
-        return ext;
+        queue.Enqueue(ext);
     }
 
     public async Task ConcatFileAsync(string pathFile, string destinationDomain, string destinationKey)
@@ -1476,8 +1477,9 @@ public class S3Storage : BaseStorage
          await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
-    public async Task<int> ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, int ext)
+    public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue)
     {
+        queue.TryDequeue(out var ext);
         destinationKey += ext;
         var (uploadId, eTags, partNumber) = await InitiateConcatAsync(destinationDomain, destinationKey);
         using var s3 = GetClient();
@@ -1550,7 +1552,7 @@ public class S3Storage : BaseStorage
         };
         await s3.CompleteMultipartUploadAsync(completeRequest);
 
-        return ext;
+        queue.Enqueue(ext);
     }
 
     public async Task AddEndAsync(string domain, string key, bool last = false)

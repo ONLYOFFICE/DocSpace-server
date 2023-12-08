@@ -33,9 +33,10 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly S3Storage _store;
     private readonly string _domain;
     private readonly string _key;
-    private const int LimitTask = 10;
-    private readonly HashSet<int> _set = new HashSet<int>(LimitTask) { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    private readonly List<Task<int>> _tasks = new(LimitTask);
+    private const int Limit = 10;
+    private readonly List<Task> _tasks = new();
+    private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
+    private readonly ConcurrentQueue<int> _queue = new();
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -50,34 +51,34 @@ public class S3TarWriteOperator : IDataWriteOperator
         _key = _chunkedUploadSession.TempPath;
         _domain = _sessionHolder.TempDomain;
         _tempStream = tempStream;
+
+        for (var i = 1; i <= Limit; i++)
+        {
+            _queue.Enqueue(i);
+        }
     }
 
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        if (store is S3Storage) 
+        if (_tasks.Count > Limit * 3)
         {
-            if(_tasks.Count == LimitTask)
+            Task.WaitAll(_tasks.ToArray());
+            foreach (var task in _tasks)
             {
-                Task.WaitAny(_tasks.ToArray());
-                for (var i = 0; i < _tasks.Count; i++)
+                if(task.Exception != null)
                 {
-                    if (_tasks[i].Exception != null)
-                    {
-                        throw _tasks[i].Exception;
-                    }
-                    if (_tasks[i].IsCompleted)
-                    {
-                        _set.Add(_tasks[i].Result);
-                        _tasks.RemoveAt(i);
-                    }
+                    throw task.Exception;
                 }
             }
-            var s3Store = store as S3Storage;
+            _tasks.Clear();
+        }
+        if (store is S3Storage s3Store) 
+        {
             var fullPath = s3Store.MakePath(domain, path);
-            var min = _set.Min();
-            _set.Remove(min);
-            _tasks.Add(_store.ConcatFileAsync(fullPath, tarKey, _domain, _key, min));
+            var task = new Task(_store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue).Wait);
+            _tasks.Add(task);
+            task.Start(_scheduler);
         }
         else
         {
@@ -93,29 +94,13 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public Task WriteEntryAsync(string tarKey, Stream stream)
     {
-        if (_tasks.Count == LimitTask)
-        {
-            Task.WaitAny(_tasks.ToArray());
-            for (var i = 0; i < _tasks.Count; i++)
-            {
-                if (_tasks[i].IsCompleted)
-                {
-                    if (_tasks[i].Exception != null)
-                    {
-                        throw _tasks[i].Exception;
-                    }
-                    _set.Add(_tasks[i].Result);
-                    _tasks.RemoveAt(i);
-                }
-            }
-        }
-        var min = _set.Min();
-        _set.Remove(min);
         var tStream = _tempStream.Create();
         stream.Position = 0;
         stream.CopyTo(tStream);
-        _tasks.Add(_store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, min));
         
+        var task = new Task(_store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue).Wait);
+        _tasks.Add(task);
+        task.Start(_scheduler);
         return Task.CompletedTask;
     }
 
@@ -132,7 +117,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                 }
             }
         }
-        for (var i = 1; i <= 10; i++)
+        for (var i = 1; i <= Limit; i++)
         {
             var fullKey = _store.MakePath(_domain, _key + i);
             await _store.AddEndAsync(_domain, _key + i, i == 10);
