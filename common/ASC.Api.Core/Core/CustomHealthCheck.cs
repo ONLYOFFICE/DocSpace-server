@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using StackExchange.Redis.Extensions.Core.Abstractions;
-
 namespace ASC.Api.Core.Core;
 
 public static class CustomHealthCheck
@@ -58,7 +56,7 @@ public static class CustomHealthCheck
 
         if (redisConfiguration != null)
         {
-            hcBuilder.AddRedis(x => x.GetRequiredService<IRedisConnectionPoolManager>().GetConnection(),
+            hcBuilder.AddRedis(x => x.GetRequiredService<RedisPersistentConnection>().GetConnection(),
                                name: "redis",
                                tags: new[] { "redis", "services" },
                                timeout: new TimeSpan(0, 0, 15));
