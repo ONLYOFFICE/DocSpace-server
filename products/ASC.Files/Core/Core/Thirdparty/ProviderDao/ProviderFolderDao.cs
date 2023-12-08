@@ -590,6 +590,14 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folder;
     }
 
+    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    {
+        var selector = _selectorFactory.GetSelector(entry.Id);
+        var folderDao = selector.GetFolderDao(entry.Id);
+
+        return folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
+    }
+
     public async Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(folderId);

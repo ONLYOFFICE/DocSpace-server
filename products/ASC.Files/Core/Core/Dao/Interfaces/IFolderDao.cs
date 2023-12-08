@@ -371,9 +371,9 @@ public interface IFolderDao<T>
     /// Tries to return id of the parent virtual room
     /// Only in TMFolderDao
     /// </summary>
-    /// <param name="fileEntry"></param>
+    /// <param name="entry"></param>
     /// <returns></returns>
-    Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry);
+    Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
 

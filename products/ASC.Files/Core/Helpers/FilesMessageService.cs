@@ -208,9 +208,17 @@ public class FilesMessageService(ILoggerProvider options,
 
         var info = new AdditionalNotificationInfo
         {
-            RoomId = roomInfo.RoomId,
             RoomTitle = roomInfo.RoomTitle
         };
+
+        if (entry.ProviderEntry)
+        {
+            info.RoomIdString = Convert.ToString(roomInfo.RoomId);
+        }
+        else
+        {
+            info.RoomId = Convert.ToInt32(roomInfo.RoomId);
+        }
 
         if (action == MessageAction.RoomRenamed && !string.IsNullOrEmpty(oldTitle))
         {
@@ -220,14 +228,14 @@ public class FilesMessageService(ILoggerProvider options,
         if (action is MessageAction.RoomCreateUser or MessageAction.RoomRemoveUser
             && userid != Guid.Empty)
         {
-            info.UserIds = new List<Guid> { userid };
+            info.UserIds = [userid];
         }
 
         if (action == MessageAction.RoomUpdateAccessForUser
             && (userRole != FileShare.None)
             && userid != Guid.Empty)
         {
-            info.UserIds = new List<Guid> { userid };
+            info.UserIds = [userid];
             info.UserRole = (int)userRole;
         }
 

@@ -474,6 +474,13 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         return Task.FromResult("tar.gz");
     }
 
+    public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
+    {
+        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
+            ? (string.Empty, string.Empty) 
+            : (ProviderInfo.FolderId, ProviderInfo.CustomerTitle));
+    }
+
     public Task SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         return Task.CompletedTask;

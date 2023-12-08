@@ -2755,7 +2755,7 @@ public class FileStorageService //: IFileStorageService
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
-        var access = await fileSharing.GetSharedInfoAsync(Enumerable.Empty<int>(), new[] { roomId });
+        var access = await fileSharing.GetSharedInfoAsync(Enumerable.Empty<T>(), new[] { roomId });
         var usersIdWithAccess = access.Where(aceWrapper => !aceWrapper.SubjectGroup
                                         && aceWrapper.Access != FileShare.Restrict)
                                       .Select(aceWrapper => aceWrapper.Id);
