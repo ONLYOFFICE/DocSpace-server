@@ -192,24 +192,16 @@ public class EmailValidationKeyModel
     /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
     public ConfirmType? Type { get; init; }
 
-    /// <summary>Module</summary>
-    /// <type>System.String, System</type>
-    public string Module { get; init; }
-
     /// <summary>Access an account for the first time or not</summary>
     /// <type>System.String, System</type>
     public string First { get; init; }
-
-    /// <summary>Sends SMS code or not</summary>
-    /// <type>System.String, System</type>
-    public string Sms { get; init; }
 
     /// <summary>Room ID</summary>
     /// <type>System.String, System</type>
     public string RoomId { get; init; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string module, out string first, out string sms, out string roomId)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first, out string roomId)
     {
-        (key, emplType, email, uiD, type, module, first, sms, roomId) = (Key, EmplType, Email, UiD, Type, Module, First, Sms, RoomId);
+        (key, emplType, email, uiD, type, first, roomId) = (Key, EmplType, Email, UiD, Type, First, RoomId);
     }
 }
