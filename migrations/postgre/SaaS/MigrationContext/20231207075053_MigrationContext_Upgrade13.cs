@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ASC.Migrations.MySql.SaaS.Migrations
+namespace ASC.Migrations.PostgreSql.SaaS.Migrations
 {
     /// <inheritdoc />
     public partial class MigrationContext_Upgrade13 : Migration
@@ -10,21 +10,20 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "color",
-                table: "files_thirdparty_account",
-                type: "char(6)",
-                nullable: true,
-                collation: "utf8_general_ci")
-                .Annotation("MySql:CharSet", "utf8");
+            migrationBuilder.AddColumn<bool>(
+                name: "dump",
+                table: "backup_schedule",
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValueSql: "'0'");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "color",
-                table: "files_thirdparty_account");
+                name: "dump",
+                table: "backup_schedule");
         }
     }
 }
