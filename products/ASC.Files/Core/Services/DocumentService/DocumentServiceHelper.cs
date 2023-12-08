@@ -335,41 +335,41 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
-    public Options GetOptions<T>(WatermarkJson watermarkJson, Folder<T> room)
+    public Options GetOptions<T>(WatermarkSettings watermarkSettings, Folder<T> room)
     {
         var runs = new List<Run>();
         var paragrahs = new List<Paragraph>();
         var userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
         var ip = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
 
-        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.UserName))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserName))
         {
             runs.Add(new Run(userInfo.UserName));
             runs.Add(new Run(Environment.NewLine));
         }
-        if(watermarkJson.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        if(watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserEmail))
         {
             runs.Add(new Run(userInfo.Email));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.UserIpAdress))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.UserIpAdress))
         {
             runs.Add(new Run(ip));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.CurrentDate))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.CurrentDate))
         {
             runs.Add(new Run(DateTime.Now.ToString()));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.RoomName))
+        if (watermarkSettings.Additions.HasFlag(WatermarkAdditions.RoomName))
         {
             runs.Add(new Run(room.Title));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (watermarkJson.Text != string.Empty && (!string.IsNullOrWhiteSpace(watermarkJson.Text)))
+        if (watermarkSettings.Text != string.Empty && (!string.IsNullOrWhiteSpace(watermarkSettings.Text)))
         {
-            runs.Add(new Run(watermarkJson.Text));
+            runs.Add(new Run(watermarkSettings.Text));
             runs.Add(new Run(Environment.NewLine));
         }
         if (runs.Any())
@@ -380,7 +380,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var options = new Options()
         {
-            WatermarkOnDraw = new WatermarkOnDraw(watermarkJson.ImageWidth, watermarkJson.ImageHeight, watermarkJson.ImageUrl, watermarkJson.Rotate, paragrahs)
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth, watermarkSettings.ImageHeight, watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };
         return options;
     }

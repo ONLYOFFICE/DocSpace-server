@@ -436,17 +436,17 @@ internal class SharePointFolderDao(IServiceProvider serviceProvider,
         return Task.CompletedTask;
     }
 
-    public Task<string> WatermarksSaveToDbAsync(WatermarkJson waterMarks, Folder<string> folder)
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
     {
         throw new NotImplementedException();
     }
 
-    public Task<WatermarkJson> GetWatermarkSettings(Folder<string> room)
+    public Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Folder<string>> DeleteWatermarkFromDbAsync(Folder<string> room)
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

@@ -134,16 +134,16 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         var stringId = GetId(room);
 
-        await SaveWatermarkImageWithProcessAsync(store, stringId, data, -1);
+        await SaveWatermarkImageAsync(store, stringId, data, -1);
         await RemoveTempAsync(store, fileName);
 
         var uri = await GetWatermarkImageAsync(room);
-        var watermarkData = await folderDao.GetWatermarkSettings(room); 
-        watermarkData.ImageHeight = watermarkData.ImageScale * height / 100;
-        watermarkData.ImageWidth = watermarkData.ImageScale * width / 100;
-        watermarkData.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
+        var watermarkSettings = await folderDao.GetWatermarkSettings(room);
+        watermarkSettings.ImageHeight = watermarkSettings.ImageScale * height / 100;
+        watermarkSettings.ImageWidth = watermarkSettings.ImageScale * width / 100;
+        watermarkSettings.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
 
-        await folderDao.WatermarksSaveToDbAsync(watermarkData, room);
+        await folderDao.SetWatermarkSettings(watermarkSettings, room);
         return room;
     }
     public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
@@ -346,7 +346,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
             throw new UnknownImageFormatException(error);
         }
     }
-    private async Task SaveWatermarkImageWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize)
+    private async Task SaveWatermarkImageAsync(IDataStore store, string id, byte[] imageData, long maxFileSize)
     {
         imageData = UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 

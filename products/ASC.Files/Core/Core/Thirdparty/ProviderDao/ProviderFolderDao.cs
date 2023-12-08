@@ -538,16 +538,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await folderDao.InitCustomOrder(folderIds, parentFolderId);
     }
 
-    public Task<string> WatermarksSaveToDbAsync(WatermarkJson waterMarks, Folder<string> folder)
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
     {
         ArgumentNullException.ThrowIfNull(folder);
         var selector = _selectorFactory.GetSelector(folder.Id);
         var folderDao = selector.GetFolderDao(folder.Id);
 
-        return folderDao.WatermarksSaveToDbAsync(waterMarks, folder);
+        return folderDao.SetWatermarkSettings(watermarkSettings, folder);
     }
 
-    public async Task<WatermarkJson> GetWatermarkSettings(Folder<string> room)
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
     {
         ArgumentNullException.ThrowIfNull(room);
         var selector = _selectorFactory.GetSelector(room.Id);
@@ -555,12 +555,12 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         
         return await folderDao.GetWatermarkSettings(room);
     }
-    public Task<Folder<string>> DeleteWatermarkFromDbAsync(Folder<string> room)
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
     {
         ArgumentNullException.ThrowIfNull(room);
         var selector = _selectorFactory.GetSelector(room.Id);
         var folderDao = selector.GetFolderDao(room.Id);
 
-        return folderDao.DeleteWatermarkFromDbAsync(room);
+        return folderDao.DeleteWatermarkSettings(room);
     }
 }

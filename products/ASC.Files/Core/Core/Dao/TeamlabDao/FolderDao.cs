@@ -104,14 +104,14 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         return _mapper.Map<DbFolderQuery, Folder<int>>(dbFolder);
     }
-    public async Task<WatermarkJson> GetWatermarkSettings (Folder<int> room)
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<int> room)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var roomSettings = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
-        return JsonSerializer.Deserialize<WatermarkJson>(roomSettings.Watermark);
+        return JsonSerializer.Deserialize<WatermarkSettings>(roomSettings.Watermark);
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
@@ -538,7 +538,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
     }
 
-    public async Task<int> WatermarksSaveToDbAsync(WatermarkJson waterMarkJson, Folder<int> room)
+    public async Task<int> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<int> room)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
@@ -546,7 +546,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
 
         var toUpdate = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
 
-        toUpdate.Watermark = JsonSerializer.Serialize(waterMarkJson);
+        toUpdate.Watermark = JsonSerializer.Serialize(watermarkSettings);
         filesDbContext.Update(toUpdate);
 
         await filesDbContext.SaveChangesAsync();
@@ -554,7 +554,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         return room.Id;
     }
 
-    public async Task<Folder<int>> DeleteWatermarkFromDbAsync(Folder<int> room)
+    public async Task<Folder<int>> DeleteWatermarkSettings(Folder<int> room)
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 

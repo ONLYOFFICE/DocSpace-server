@@ -36,7 +36,7 @@ public enum WatermarkAdditions
     CurrentDate = 8,
     RoomName = 16
 }
-public class WatermarkJson
+public class WatermarkSettings
 {
     public bool Enabled { get; set; }      
     public string Text { get; set; }
@@ -79,7 +79,7 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        var watermarkSetings = new WatermarkJson()
+        var watermarkSetings = new WatermarkSettings()
         {
             Enabled = watermarksRequestDto.Enabled,
             Text = watermarksRequestDto.Text,
@@ -91,7 +91,7 @@ public class WatermarkManager
             ImageScale = watermarksRequestDto.ImageScale
         };
 
-        await folderDao.WatermarksSaveToDbAsync(watermarkSetings, room);
+        await folderDao.SetWatermarkSettings(watermarkSetings, room);
 
         return room;
     }
@@ -110,17 +110,17 @@ public class WatermarkManager
             throw new ItemNotFoundException();  
         }
 
-        var watermarkData  = await folderDao.GetWatermarkSettings(room);
+        var watermarkSettings = await folderDao.GetWatermarkSettings(room);
         var watermarkRequestDto = new WatermarksRequestDto();
 
-        watermarkRequestDto.Enabled = watermarkData.Enabled;
-        watermarkRequestDto.Rotate = watermarkData.Rotate;
-        watermarkRequestDto.Text = watermarkData.Text;
-        watermarkRequestDto.Additions = watermarkData.Additions;
-        watermarkRequestDto.ImageScale = watermarkData.ImageScale;
-        watermarkRequestDto.ImageUrl = watermarkData.ImageUrl;
-        watermarkRequestDto.ImageHeight = watermarkData.ImageHeight;
-        watermarkRequestDto.ImageWidth = watermarkData.ImageWidth;
+        watermarkRequestDto.Enabled = watermarkSettings.Enabled;
+        watermarkRequestDto.Rotate = watermarkSettings.Rotate;
+        watermarkRequestDto.Text = watermarkSettings.Text;
+        watermarkRequestDto.Additions = watermarkSettings.Additions;
+        watermarkRequestDto.ImageScale = watermarkSettings.ImageScale;
+        watermarkRequestDto.ImageUrl = watermarkSettings.ImageUrl;
+        watermarkRequestDto.ImageHeight = watermarkSettings.ImageHeight;
+        watermarkRequestDto.ImageWidth = watermarkSettings.ImageWidth;
 
         return watermarkRequestDto;
     }
@@ -145,7 +145,7 @@ public class WatermarkManager
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        await folderDao.DeleteWatermarkFromDbAsync(room);
+        await folderDao.DeleteWatermarkSettings(room);
 
         await _roomLogoManager.DeleteWatermarkImageAsync(room);
 
