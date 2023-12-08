@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.VirtualRooms;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -448,7 +446,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
     /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/watermark")]
@@ -467,7 +465,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <short>Get watermark information</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Watermark information</returns>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Watermark information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>GET</httpMethod>
     [AllowAnonymous]
@@ -488,7 +486,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <short>Remove room watermarks</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
+    /// <returns></returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("{id}/watermark")]
@@ -504,12 +502,12 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <short>Create a watermark image</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarksImageRequestDto, ASC.Files.Core" name="inDto">Watermark image request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkImageRequestDto, ASC.Files.Core" name="inDto">Watermark image request parameters</param>
+    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("{id}/watermark")]
-    public async Task<WatermarkDto> CreateWatermarkImageAsync(T id, WatermarksImageRequestDto inDto)
+    public async Task<WatermarkDto> CreateWatermarkImageAsync(T id, WatermarkImageRequestDto inDto)
     {
         ErrorIfNotDocSpace();
 
