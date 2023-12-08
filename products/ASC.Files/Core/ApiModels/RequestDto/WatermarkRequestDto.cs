@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class WatermarksRequestDto
+public class WatermarkRequestDto
 {
     /// <summary>Specifies whether watermarks are on or off</summary>
     /// <type>System.Boolean, System</type>

@@ -440,12 +440,12 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <short>Add room watermarks settings</short>
     /// <category>Rooms</category>
     /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarksRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
+    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkRequestDto, ASC.Files.Core" name="inDto">Request parameters for adding watermarks</param>
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("{id}/watermark")]
-    public async Task<FolderDto<T>> AddWaterMarksAsync(T id, WatermarksRequestDto inDto)
+    public async Task<FolderDto<T>> AddWaterMarksAsync(T id, WatermarkRequestDto inDto)
     {
         ErrorIfNotDocSpace();
 
@@ -465,7 +465,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <httpMethod>GET</httpMethod>
     [AllowAnonymous]
     [HttpGet("{id}/watermark")]
-    public async Task<WatermarksRequestDto> GetWatermarkInfoAsync(T id)
+    public async Task<WatermarkRequestDto> GetWatermarkInfoAsync(T id)
     {
         ErrorIfNotDocSpace();
 

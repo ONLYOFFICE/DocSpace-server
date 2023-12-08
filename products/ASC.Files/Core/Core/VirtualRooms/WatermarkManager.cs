@@ -64,7 +64,7 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<Folder<T>> AddRoomWatermarkAsync<T>(T roomId, WatermarksRequestDto watermarksRequestDto)
+    public async Task<Folder<T>> AddRoomWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarksRequestDto)
     {
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -96,7 +96,7 @@ public class WatermarkManager
         return room;
     }
     
-    public async Task<WatermarksRequestDto> GetWatermarkInformation<T>(Folder<T> room)
+    public async Task<WatermarkRequestDto> GetWatermarkInformation<T>(Folder<T> room)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
 
@@ -111,7 +111,7 @@ public class WatermarkManager
         }
 
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
-        var watermarkRequestDto = new WatermarksRequestDto();
+        var watermarkRequestDto = new WatermarkRequestDto();
 
         watermarkRequestDto.Enabled = watermarkSettings.Enabled;
         watermarkRequestDto.Rotate = watermarkSettings.Rotate;
