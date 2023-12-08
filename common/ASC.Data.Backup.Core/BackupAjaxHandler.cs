@@ -82,7 +82,7 @@ public class BackupAjaxHandler(BackupService backupService,
 
         await messageService.SendAsync(MessageAction.StartBackupSetting);
 
-        return await backupService.StartBackupAsync(backupRequest);
+        return await backupService.StartBackupAsync(backupRequest, enqueueTask, taskId);
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync()
