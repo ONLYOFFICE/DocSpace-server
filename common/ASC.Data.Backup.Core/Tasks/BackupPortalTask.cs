@@ -44,17 +44,18 @@ public class BackupPortalTask(DbFactory dbFactory,
     private const int MaxLength = 250;
     private const int BatchLimit = 5000;
 
-    private readonly bool _dump = coreBaseSettings.Standalone;
+    private bool _dump = coreBaseSettings.Standalone;
 
-    public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator)
+    public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator, bool dump)
     {
         ArgumentException.ThrowIfNullOrEmpty(toFilePath);
 
         BackupFilePath = toFilePath;
         Limit = limit;
         WriteOperator = writeOperator;
-        Init(tenantId);
+        _dump = dump;
 
+        Init(tenantId);
     }
 
     public override async Task RunJob()

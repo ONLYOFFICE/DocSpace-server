@@ -39,13 +39,7 @@ public class UserServiceCache
     internal readonly ICacheNotify<GroupCacheItem> CacheGroupCacheItem;
     internal readonly ICacheNotify<UserGroupRefCacheItem> CacheUserGroupRefItem;
 
-    public UserServiceCache(ICacheNotify<GroupCacheItem> cacheGroupCacheItem)
-    {
-        CacheGroupCacheItem = cacheGroupCacheItem;
-    }
-
     public UserServiceCache(
-        CoreBaseSettings coreBaseSettings,
         ICacheNotify<UserInfoCacheItem> cacheUserInfoItem,
         ICacheNotify<UserPhotoCacheItem> cacheUserPhotoItem,
         ICacheNotify<GroupCacheItem> cacheGroupCacheItem,

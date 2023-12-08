@@ -65,19 +65,26 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
         request.TryGetValue("uid", out var userIdKey);
         Guid.TryParse(userIdKey, out var userId);
 
+        request.TryGetValue("module", out var module);
+        request.TryGetValue("first", out var first);
+        request.TryGetValue("sms", out var sms);
+
         return new EmailValidationKeyModel
         {
             Email = _email,
             EmplType = employeeType,
             Key = key,
             Type = cType,
-            UiD = userId
+            UiD = userId,
+            Module = module,
+            First = first,
+            Sms = sms
         };
     }
 
     public async Task<ValidationResult> ValidateAsync(EmailValidationKeyModel inDto)
     {
-        var (key, emplType, email, uiD, type, _) = inDto;
+        var (key, emplType, email, uiD, type, module, first, sms, _) = inDto;
 
         ValidationResult checkKeyResult;
 
@@ -96,7 +103,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
                 break;
 
             case ConfirmType.EmailChange:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + authContext.CurrentAccount.ID, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 var userInfo = await userManager.GetUserByEmailAsync(email);
@@ -148,7 +155,7 @@ public class EmailValidationKeyModelHelper(IHttpContextAccessor httpContextAcces
             case ConfirmType.TfaActivation:
             case ConfirmType.TfaAuth:
             case ConfirmType.Auth:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, provider.ValidAuthKeyInterval);
+                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first + module + sms, key, provider.ValidAuthKeyInterval);
                 break;
 
             case ConfirmType.PortalContinue:

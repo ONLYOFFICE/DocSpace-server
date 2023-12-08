@@ -89,6 +89,7 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();

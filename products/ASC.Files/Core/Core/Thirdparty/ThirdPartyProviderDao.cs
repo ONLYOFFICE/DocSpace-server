@@ -35,7 +35,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent)
     {
         return AsyncEnumerable.Empty<File<string>>();
@@ -248,7 +248,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult((-1, string.Empty));
     }
     
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, bool withSubfolders = false,
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = default)
     {
         throw new NotImplementedException();

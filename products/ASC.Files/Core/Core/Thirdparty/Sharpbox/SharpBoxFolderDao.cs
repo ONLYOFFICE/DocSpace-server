@@ -40,10 +40,9 @@ internal class SharpBoxFolderDao(IServiceProvider serviceProvider,
         IFileDao<int> fileDao,
         IFolderDao<int> folderDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IFolderDao<string>
+        fileUtility, tempPath, regexDaoSelectorBase), IFolderDao<string>
 {
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {

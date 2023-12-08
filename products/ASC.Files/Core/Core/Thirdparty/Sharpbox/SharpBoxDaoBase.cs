@@ -26,25 +26,22 @@
 
 namespace ASC.Files.Thirdparty.Sharpbox;
 
-internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>
+internal abstract class SharpBoxDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    SetupInfo setupInfo,
+    ILogger<SharpBoxDaoBase> monitor,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry>(serviceProvider,
+        userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath,
+        regexDaoSelectorBase)
 {
     internal SharpBoxProviderInfo SharpBoxProviderInfo { get; private set; }
-    protected SharpBoxDaoBase(
-        IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        ILogger<SharpBoxDaoBase> monitor,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext,
-        RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-        _logger = monitor;
-    }
 
     public void Init(string pathPrefix, IProviderInfo<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> providerInfo)
     {
@@ -169,7 +166,7 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
             }
             catch (Exception ex)
             {
-                _logger.ErrorSharpboxMakeId(ex);
+                monitor.ErrorSharpboxMakeId(ex);
             }
         }
         else if (entry != null)
@@ -333,7 +330,6 @@ internal abstract class SharpBoxDaoBase : ThirdPartyProviderDao<ICloudFileSystem
     }
 
     private string _rootFolderId;
-    private readonly ILogger<SharpBoxDaoBase> _logger;
 
     protected string RootFolderMakeId()
     {

@@ -38,15 +38,13 @@ public class RemovePortalIntegrationEventHandler : IIntegrationEventHandler<Remo
         _logger = logger;
     }
 
-    public Task Handle(RemovePortalIntegrationEvent @event)
+    public async Task Handle(RemovePortalIntegrationEvent @event)
     {
         using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            _worker.Start(@event.TenantId);
-
-            return Task.CompletedTask;
+            await _worker.StartAsync(@event.TenantId);
         }
     }
 }

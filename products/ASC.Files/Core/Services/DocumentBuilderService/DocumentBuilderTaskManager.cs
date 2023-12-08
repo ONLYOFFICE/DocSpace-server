@@ -65,7 +65,7 @@ public class DocumentBuilderTaskManager
         }
     }
 
-    public DistributedTaskProgress StartTask<T>(DocumentBuilderTask<T> newTask)
+    public DistributedTaskProgress StartTask<T>(DocumentBuilderTask<T> newTask, bool enqueueTask = true)
     {
         lock (_synchRoot)
         {
@@ -77,10 +77,18 @@ public class DocumentBuilderTaskManager
                 task = null;
             }
 
-            if (task == null)
+            if (task == null || (enqueueTask && task.Status == DistributedTaskStatus.Created))
             {
                 task = newTask;
-                _queue.EnqueueTask(task);
+
+                if (enqueueTask)
+                {
+                    _queue.EnqueueTask(task);
+                }
+                else
+                {
+                    _queue.PublishTask(task);
+                }
             }
 
             return task;

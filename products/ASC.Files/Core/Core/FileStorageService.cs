@@ -85,9 +85,10 @@ public class FileStorageService //: IFileStorageService
         QuotaSocketManager quotaSocketManager,
         ExternalShare externalShare,
         TenantUtil tenantUtil,
-        RoomLogoManager roomLogoManager)
+        RoomLogoManager roomLogoManager, 
+        IDistributedLockProvider distributedLockProvider)
     {
-    private static readonly SemaphoreSlim _semaphore = new(1);
+    
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
     public async Task<Folder<T>> GetFolderAsync<T>(T folderId)
@@ -122,7 +123,7 @@ public class FileStorageService //: IFileStorageService
         {
             (entries, _) = await entryManager.GetEntriesAsync(
                 await folderDao.GetFolderAsync(parentId), 0, -1, FilterType.FoldersOnly,
-                false, Guid.Empty, string.Empty, string.Empty, false, false, new OrderBy(SortedByType.AZ, true));
+                false, Guid.Empty, string.Empty, new string[] { }, false, false, new OrderBy(SortedByType.AZ, true));
         }
         catch (Exception e)
         {
@@ -140,7 +141,7 @@ public class FileStorageService //: IFileStorageService
         bool subjectGroup,
         string subject,
         string searchText,
-        string extension,
+        string[] extension,
         bool searchInContent,
         bool withSubfolders,
         OrderBy orderBy,
@@ -348,9 +349,10 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool @private, bool indexing, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
     {
-        try
+        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
         {
-            await _semaphore.WaitAsync();
             ArgumentNullException.ThrowIfNull(title);
 
         await countRoomChecker.CheckAppend();
@@ -385,10 +387,6 @@ public class FileStorageService //: IFileStorageService
 
         return room;
     }
-        finally
-        {
-            _semaphore.Release();
-        }
     }
 
     private async Task<Folder<T>> CreatePublicRoomAsync<T>(string title, T parentId, bool @private, bool indexing)
@@ -605,7 +603,7 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string searchText, string extension, 
+    public async IAsyncEnumerable<FileEntry<T>> GetSiblingsFileAsync<T>(T fileId, T parentId, FilterType filter, bool subjectGroup, string subjectID, string searchText, string[] extension, 
         bool searchInContent, bool withSubfolders, OrderBy orderBy)
     {
         var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);
@@ -1977,7 +1975,7 @@ public class FileStorageService //: IFileStorageService
     }
 
     public async Task<(List<FileOperationResult>, string)> MoveOrCopyItemsAsync(List<string> foldersIdString, List<string> filesIdString, List<int> foldersIdInt, List<int> filesIdInt, JsonElement destFolderId, FileConflictResolveType resolve, bool ic, bool deleteAfter = false, bool content = false, bool enqueueTask = true, string taskId = null)
-    {
+        {
         ErrorIf(resolve == FileConflictResolveType.Overwrite && await userManager.IsUserAsync(authContext.CurrentAccount.ID), FilesCommonResource.ErrorMassage_SecurityException);
 
         if (filesIdString != null || foldersIdString != null || filesIdInt != null || foldersIdInt != null)
@@ -2409,7 +2407,7 @@ public class FileStorageService //: IFileStorageService
         return files;
     }
 
-    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string searchText, string extension,
+    public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(FilterType filter, int from, int count, bool subjectGroup, string subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
         var subjectId = string.IsNullOrEmpty(subjectID) ? Guid.Empty : new Guid(subjectID);

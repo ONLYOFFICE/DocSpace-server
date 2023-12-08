@@ -134,24 +134,19 @@ public class WebPath(WebPathSettings webPathSettings,
     ILoggerProvider options,
     IHttpClientFactory clientFactory)
 {
-    public IServiceProvider ServiceProvider { get; } = serviceProvider;
-    public IHostEnvironment HostEnvironment { get; } = hostEnvironment;
-    private IHttpClientFactory ClientFactory { get; } = clientFactory;
-
     private static readonly IDictionary<string, bool> _existing = new ConcurrentDictionary<string, bool>();
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public WebPath(
         WebPathSettings webPathSettings,
         IServiceProvider serviceProvider,
-        StaticUploader staticUploader,
         SettingsManager settingsManager,
         StorageSettingsHelper storageSettingsHelper,
         IHttpContextAccessor httpContextAccessor,
         IHostEnvironment hostEnvironment,
         CoreBaseSettings coreBaseSettings,
-            ILoggerProvider options,
-            IHttpClientFactory clientFactory)
+        ILoggerProvider options,
+        IHttpClientFactory clientFactory)
             : this(webPathSettings, serviceProvider, settingsManager, storageSettingsHelper, hostEnvironment, coreBaseSettings, options, clientFactory)
     {
         _httpContextAccessor = httpContextAccessor;
@@ -164,7 +159,7 @@ public class WebPath(WebPathSettings webPathSettings,
             throw new ArgumentException($"bad path format {relativePath} remove '~'", nameof(relativePath));
         }
 
-        if (coreBaseSettings.Standalone && await ServiceProvider.GetService<StaticUploader>().CanUploadAsync()) //hack for skip resolve DistributedTaskQueueOptionsManager
+        if (coreBaseSettings.Standalone && await serviceProvider.GetService<StaticUploader>().CanUploadAsync()) //hack for skip resolve DistributedTaskQueueOptionsManager
         {
             try
             {
@@ -192,7 +187,7 @@ public class WebPath(WebPathSettings webPathSettings,
             if (Uri.IsWellFormedUriString(path, UriKind.Relative) && _httpContextAccessor?.HttpContext != null)
             {
                 //Local
-                _existing[path] = File.Exists(CrossPlatform.PathCombine(HostEnvironment.ContentRootPath, path));
+                _existing[path] = File.Exists(CrossPlatform.PathCombine(hostEnvironment.ContentRootPath, path));
             }
             if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
             {
@@ -213,7 +208,7 @@ public class WebPath(WebPathSettings webPathSettings,
                 RequestUri = new Uri(path),
                 Method = HttpMethod.Head
             };
-            var httpClient = ClientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var response = httpClient.Send(request);
 
             return response.StatusCode == HttpStatusCode.OK;
