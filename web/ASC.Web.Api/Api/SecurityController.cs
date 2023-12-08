@@ -405,10 +405,11 @@ public class SecurityController : ControllerBase
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
+    [AllowAnonymous]
     [HttpGet("csp")]
     public async Task<CspDto> Csp()
     {
-        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        //await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await _cspSettingsHelper.LoadAsync();
         return new CspDto
         {
