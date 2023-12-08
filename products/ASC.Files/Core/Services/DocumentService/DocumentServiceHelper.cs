@@ -367,7 +367,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(room.Title));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (watermarkSettings.Text != string.Empty && (!string.IsNullOrWhiteSpace(watermarkSettings.Text)))
+        if (!string.IsNullOrWhiteSpace(watermarkSettings.Text))
         {
             runs.Add(new Run(watermarkSettings.Text));
             runs.Add(new Run(Environment.NewLine));

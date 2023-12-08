@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2010-2023
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,9 +23,12 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class WatermarkRequestDto
+namespace ASC.Files.Core.ApiModels.ResponseDto;
+
+/// <summary>
+/// </summary>
+public class WatermarkDto
 {
     /// <summary>Specifies whether watermarks are on or off</summary>
     /// <type>System.Boolean, System</type>
@@ -59,18 +62,21 @@ public class WatermarkRequestDto
     /// <type>System.Double, System</type>
     public double ImageWidth { get; set; }
 }
-
-public class WatermarkImageRequestDto
+[Scope]
+public class WatermarkDtoHelper()
 {
-    /// <summary>The path to the temporary image file</summary>
-    /// <type>System.String, System</type>
-    public string TmpFile { get; set; }
+    public WatermarkDto Get(WatermarkSettings watermarkSettings)
+    {
+        var result = new WatermarkDto();
+        result.Enabled = watermarkSettings.Enabled;
+        result.Additions = watermarkSettings.Additions;
+        result.Text = watermarkSettings.Text;
+        result.Rotate = watermarkSettings.Rotate;
+        result.ImageScale = watermarkSettings.ImageScale;
+        result.ImageUrl = watermarkSettings.ImageUrl;
+        result.ImageHeight = watermarkSettings.ImageHeight;
+        result.ImageWidth = watermarkSettings.ImageWidth;
 
-    /// <summary>The rectangle width</summary>
-    /// <type>System.Int32, System</type>
-    public int Width { get; set; }
-
-    /// <summary>The rectangle height</summary>
-    /// <type>System.Int32, System</type>
-    public int Height { get; set; }
+        return result;
+    }
 }

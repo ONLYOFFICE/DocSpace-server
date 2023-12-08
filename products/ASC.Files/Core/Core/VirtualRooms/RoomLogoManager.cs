@@ -108,14 +108,14 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         return room;
     }
-    public async Task<Folder<T>> CreateWatermarkImageAsync<T>(T id, string tempFile, int width, int height)
+    public async Task<WatermarkSettings> CreateWatermarkImageAsync<T>(T id, string tempFile, int width, int height)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
         if (string.IsNullOrEmpty(tempFile))
         {
-            return room;
+            throw new ItemNotFoundException();
         }
 
         if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
@@ -144,7 +144,7 @@ public class RoomLogoManager(StorageFactory storageFactory,
         watermarkSettings.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
 
         await folderDao.SetWatermarkSettings(watermarkSettings, room);
-        return room;
+        return watermarkSettings;
     }
     public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
     {

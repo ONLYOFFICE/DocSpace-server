@@ -64,7 +64,7 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<Folder<T>> AddRoomWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarksRequestDto)
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarksRequestDto)
     {
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -93,10 +93,10 @@ public class WatermarkManager
 
         await folderDao.SetWatermarkSettings(watermarkSetings, room);
 
-        return room;
+        return watermarkSetings;
     }
     
-    public async Task<WatermarkRequestDto> GetWatermarkInformation<T>(Folder<T> room)
+    public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
 
@@ -111,21 +111,11 @@ public class WatermarkManager
         }
 
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
-        var watermarkRequestDto = new WatermarkRequestDto();
 
-        watermarkRequestDto.Enabled = watermarkSettings.Enabled;
-        watermarkRequestDto.Rotate = watermarkSettings.Rotate;
-        watermarkRequestDto.Text = watermarkSettings.Text;
-        watermarkRequestDto.Additions = watermarkSettings.Additions;
-        watermarkRequestDto.ImageScale = watermarkSettings.ImageScale;
-        watermarkRequestDto.ImageUrl = watermarkSettings.ImageUrl;
-        watermarkRequestDto.ImageHeight = watermarkSettings.ImageHeight;
-        watermarkRequestDto.ImageWidth = watermarkSettings.ImageWidth;
-
-        return watermarkRequestDto;
+        return watermarkSettings;
     }
 
-    public async Task<Folder<T>> RemoveRoomWaterMarksAsync<T>(T roomId)
+    public async Task<Folder<T>> DeleteWatermarkAsync<T>(T roomId)
     {
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
