@@ -6,11 +6,11 @@ package com.onlyoffice.authorization.external.controllers;
 import com.onlyoffice.authorization.core.usecases.repositories.AuthorizationPersistenceQueryUsecases;
 import com.onlyoffice.authorization.core.usecases.repositories.ClientPersistenceQueryUsecases;
 import com.onlyoffice.authorization.external.clients.DocspaceClient;
-import com.onlyoffice.authorization.security.access.aspects.annotations.InvalidateSession;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,10 +30,10 @@ public class AuthorizationConsentController {
     private final String CLIENT_ID = "client_id";
     private final DocspaceClient docspaceClient;
     private final AuthorizationPersistenceQueryUsecases authorizationRepository;
+    private final OAuth2AuthorizationConsentService authorizationConsentService;
     private final ClientPersistenceQueryUsecases queryUsecases;
 
     @GetMapping(value = "/oauth2/consent")
-    @InvalidateSession
     public String consent(
             HttpServletRequest request,
             @CookieValue(name = ASC_AUTH_COOKIE) String authCookie,
