@@ -367,12 +367,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(room.Title));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (watermarkJson.Text != string.Empty)
+        if (watermarkJson.Text != string.Empty && (!string.IsNullOrWhiteSpace(watermarkJson.Text)))
         {
             runs.Add(new Run(watermarkJson.Text));
             runs.Add(new Run(Environment.NewLine));
         }
-        if (runs.Last().Text == Environment.NewLine)
+        if (runs.Any())
         {
             runs.Remove(runs.Last());
         }
