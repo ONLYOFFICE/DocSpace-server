@@ -44,7 +44,7 @@ public class ReassignController(PermissionContext permissionContext,
     /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("progress/{userid}")]
+    [HttpGet("progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userId)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);

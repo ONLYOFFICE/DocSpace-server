@@ -99,7 +99,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         return this;
     }
 
-    public Selector<T> InAll<TValue>(Expression<Func<T, object>> selector, TValue[] values)
+    public Selector<T> InAll<TValue>(Expression<Func<T, object>> selector, IEnumerable<TValue> values)
     {
         foreach (var v in values)
         {

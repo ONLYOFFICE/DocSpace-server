@@ -796,7 +796,7 @@ public class FileMarker(TenantManager tenantManager,
                 entryTags.Add(entry, tag);
             }
                 //todo: RemoveMarkAsNew(tag);
-            }
+        }
 
         return entryTags;
     }

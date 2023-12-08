@@ -333,7 +333,7 @@ public class UserController(ICache cache,
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{userid}/password")]
+    [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting("sensitive_api")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)

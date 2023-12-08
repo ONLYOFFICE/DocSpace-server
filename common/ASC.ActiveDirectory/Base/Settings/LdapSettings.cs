@@ -397,12 +397,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     {
         LdapMapping ??= new Dictionary<MappingFields, string>();
 
-        if (LdapMapping.TryGetValue(field, out var setting))
-        {
-            return setting;
-        }
-
-        return "";
+        return LdapMapping.GetValueOrDefault(field, "");
     }
     private void SetOldSetting(MappingFields field, string value)
     {

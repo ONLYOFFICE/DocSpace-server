@@ -223,7 +223,7 @@ public class BackupController(
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <httpMethod>DELETE</httpMethod>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
-    [HttpDelete("deletebackup/{id}")]
+    [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup(Guid id)
     {
         if (coreBaseSettings.Standalone)

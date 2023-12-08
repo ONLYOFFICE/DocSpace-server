@@ -707,7 +707,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("statistics/spaceusage/{id}")]
+    [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -975,8 +975,8 @@ public class SettingsController(MessageService messageService,
             return url;
         }
 
-            return currentLink;
-        }
+        return currentLink;
+    }
 
     /// <summary>
     /// Checks if the user has connected to TelegramBot.
