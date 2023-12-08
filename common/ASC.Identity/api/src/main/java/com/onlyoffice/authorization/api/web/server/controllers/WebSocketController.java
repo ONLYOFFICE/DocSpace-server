@@ -17,15 +17,15 @@ import org.springframework.stereotype.Component;
 public class WebSocketController {
     private final SocketIOServer server;
 
-    public WebSocketController(SocketIOServer server) {
-        this.server = server;
+    public WebSocketController(SocketIOServer srv) {
+        server = srv;
         server.addConnectListener(onConnected());
         server.addDisconnectListener(onDisconnected());
     }
 
     private ConnectListener onConnected() {
         return (client) -> {
-            String tenant = client.getHandshakeData().getSingleUrlParam("tenant");
+            var tenant = client.getHandshakeData().getSingleUrlParam("tenant");
             if (tenant == null || tenant.isBlank()) {
                 client.disconnect();
                 return;

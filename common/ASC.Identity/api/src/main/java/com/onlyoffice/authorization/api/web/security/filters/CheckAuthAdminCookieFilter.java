@@ -8,7 +8,6 @@ import com.onlyoffice.authorization.api.web.security.context.TenantContextContai
 import com.onlyoffice.authorization.api.web.security.context.UserContextContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,7 @@ public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
         log.debug("Validating admin user");
-        Cookie[] cookies = request.getCookies();
+        var cookies = request.getCookies();
         if (cookies == null || cookies.length < 1) {
             log.debug("No ASC and Docspace cookie provided");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -103,12 +102,12 @@ public class CheckAuthAdminCookieFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
-        String path = request.getRequestURI();
-        Pattern first = Pattern.compile("/api/2.0/clients/.*/info");
-        Pattern second = Pattern.compile("/api/2.0/clients/consents");
-        Pattern third = Pattern.compile("/api/2.0/clients/.*/revoke");
-        Pattern fourth = Pattern.compile("/api/2.0/oauth/info");
-        Pattern fifth = Pattern.compile("/health/*");
+        var path = request.getRequestURI();
+        var first = Pattern.compile("/api/2.0/clients/.*/info");
+        var second = Pattern.compile("/api/2.0/clients/consents");
+        var third = Pattern.compile("/api/2.0/clients/.*/revoke");
+        var fourth = Pattern.compile("/api/2.0/oauth/info");
+        var fifth = Pattern.compile("/health/*");
         return first.matcher(path).find() || second
                 .matcher(path).find() || third.matcher(path).find() ||
                 fourth.matcher(path).find() || fifth.matcher(path).find();

@@ -64,7 +64,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         MDC.put("clientId", clientId);
         log.info("Trying to create a new client deletion task");
         try {
-            this.amqpTemplate.convertAndSend(
+            amqpTemplate.convertAndSend(
                     configuration.getClient().getExchange(),
                     configuration.getClient().getRouting(),
                     ClientMessage
@@ -105,7 +105,6 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class, timeout = 2000)
     public ClientDTO saveClient(ClientMessage message) {
-        var context = TenantContextContainer.context.get();
         log.info("Trying to create a new client");
         message.setClientId(UUID.randomUUID().toString());
         message.setClientSecret(cipher.encrypt(UUID.randomUUID().toString()));
@@ -119,7 +118,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
     @Transactional
     public List<String> saveClients(Iterable<ClientMessage> messages) {
         log.info("Trying to save new clients");
-        List<String> ids = new ArrayList<>();
+        var ids = new ArrayList<String>();
 
         for (ClientMessage message : messages) {
             try {
@@ -146,7 +145,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         MDC.put("clientName", clientDTO.getName());
         log.info("Trying to create a new client creation task");
         try {
-            ClientDTO client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
+            var client = ClientMapper.INSTANCE.fromCommandToQuery(clientDTO);
             var secret = UUID.randomUUID().toString();
             var now = Timestamp.from(Instant.now());
             var me = UserContextContainer.context.get()
@@ -166,7 +165,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
             client.setModifiedBy(me.getEmail());
             client.setAuthenticationMethods(authenticationMethods);
 
-            this.amqpTemplate.convertAndSend(configuration.getClient().getExchange(),
+            amqpTemplate.convertAndSend(configuration.getClient().getExchange(),
                     configuration.getClient().getRouting(),
                     ClientMapper.INSTANCE.fromQueryToMessage(client));
 
@@ -213,7 +212,7 @@ public class ClientService implements ClientCleanupUsecases, ClientCreationUseca
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         MDC.put("clientId", clientId);
         log.info("Regenerating client's secret");
-        String secret = UUID.randomUUID().toString();
+        var secret = UUID.randomUUID().toString();
         MDC.put("clientSecret", secret);
         log.debug("Generated a new client's secret");
         MDC.clear();

@@ -104,7 +104,7 @@ public class Authorization {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Authorization.AuthorizationId that = (Authorization.AuthorizationId) o;
+            var that = (Authorization.AuthorizationId) o;
             return registeredClientId.equals(that.registeredClientId) && principalName.equals(that.principalName);
         }
 

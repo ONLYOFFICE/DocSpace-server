@@ -20,7 +20,7 @@ public class WebSocketConfiguration {
 
     @Bean
     public SocketIOServer socketIOServer() {
-        com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
+        var config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(host);
         config.setPort(port);
         return new SocketIOServer(config);

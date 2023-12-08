@@ -56,7 +56,7 @@ public class Consent {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ConsentId that = (ConsentId) o;
+            var that = (ConsentId) o;
             return registeredClientId.equals(that.registeredClientId) && principalName.equals(that.principalName);
         }
 

@@ -38,7 +38,7 @@ public class ScopeController {
 
     @PostConstruct
     public void init() {
-        this.scopes = configuration.getScopes()
+        scopes = configuration.getScopes()
                 .stream()
                 .map(s -> ScopeDTO
                         .builder()
@@ -84,7 +84,7 @@ public class ScopeController {
         MDC.put("tenantAlias", context.getResponse().getTenantAlias());
         log.info("Received get a specific scope");
         MDC.clear();
-        var scope = this.scopes.stream()
+        var scope = scopes.stream()
                 .filter(s -> s.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new ScopeNotFoundException("could not find scope with this name"));

@@ -30,11 +30,11 @@ import java.util.Map;
 /**
  *
  */
+@Slf4j
+@Setter
+@Getter
 @Configuration
 @ConfigurationProperties(prefix = "messaging.rabbitmq.configuration")
-@Getter
-@Setter
-@Slf4j
 public class RabbitMQConfiguration {
     private GenericQueueConfiguration audit;
     private GenericQueueConfiguration authorization;
@@ -46,8 +46,8 @@ public class RabbitMQConfiguration {
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper mapper) {
         log.info("Building a json message converter");
-        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter(mapper);
-        DefaultJackson2JavaTypeMapper classMapper = new DefaultJackson2JavaTypeMapper();
+        var messageConverter = new Jackson2JsonMessageConverter(mapper);
+        var classMapper = new DefaultJackson2JavaTypeMapper();
         classMapper.setTrustedPackages("*");
         classMapper.setIdClassMapping(Map.of(
                 "authorization", AuthorizationMessage.class,
@@ -92,7 +92,7 @@ public class RabbitMQConfiguration {
             MessageConverter converter
     ) {
         log.info("Building an amqp template");
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        var rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(converter);
         return rabbitTemplate;
     }

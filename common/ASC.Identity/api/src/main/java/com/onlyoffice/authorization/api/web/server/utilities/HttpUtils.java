@@ -21,12 +21,11 @@ public class HttpUtils {
     private HttpUtils() {}
 
     public static String getRequestIP(HttpServletRequest request) {
-        for (String header: IP_HEADERS) {
-            String value = request.getHeader(header);
-            if (value == null || value.isEmpty()) {
+        for (var header: IP_HEADERS) {
+            var value = request.getHeader(header);
+            if (value == null || value.isEmpty())
                 continue;
-            }
-            String[] parts = value.split("\\s*,\\s*");
+            var parts = value.split("\\s*,\\s*");
             return parts[0];
         }
 
@@ -34,8 +33,8 @@ public class HttpUtils {
     }
 
     public static String getClientOS(HttpServletRequest request) {
-        final String browserDetails = request.getHeader("User-Agent");
-        final String lowerCaseBrowser = browserDetails.toLowerCase();
+        var browserDetails = request.getHeader("User-Agent");
+        var lowerCaseBrowser = browserDetails.toLowerCase();
         if (lowerCaseBrowser.contains("windows")) {
             return "Windows";
         } else if (lowerCaseBrowser.contains("mac")) {
@@ -52,11 +51,11 @@ public class HttpUtils {
     }
 
     public static String getClientBrowser(HttpServletRequest request) {
-        final String browserDetails = request.getHeader("User-Agent");
-        final String user = browserDetails.toLowerCase();
-        String browser = "";
+        var browserDetails = request.getHeader("User-Agent");
+        var user = browserDetails.toLowerCase();
+        var browser = "";
         if (user.contains("msie")) {
-            String substring = browserDetails.substring(browserDetails.indexOf("MSIE")).split(";")[0];
+            var substring = browserDetails.substring(browserDetails.indexOf("MSIE")).split(";")[0];
             browser = substring.split(" ")[0].replace("MSIE", "IE") + " " + substring.split(" ")[1];
         } else if (user.contains("safari") && user.contains("version")) {
             browser = (browserDetails.substring(browserDetails.indexOf("Safari"))
@@ -93,10 +92,9 @@ public class HttpUtils {
     }
 
     public static String getFullURL(HttpServletRequest request) {
-        final StringBuffer requestURL = request.getRequestURL();
-        final String queryString = request.getQueryString();
-
-        final String result = queryString == null ? requestURL.toString() : requestURL.append('?')
+        var requestURL = request.getRequestURL();
+        var queryString = request.getQueryString();
+        var result = queryString == null ? requestURL.toString() : requestURL.append('?')
                 .append(queryString)
                 .toString();
 

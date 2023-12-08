@@ -32,7 +32,7 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
         log.debug("Validating asc user");
-        Cookie[] cookies = request.getCookies();
+        var cookies = request.getCookies();
         if (cookies == null || cookies.length < 1) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
@@ -95,10 +95,10 @@ public class CheckAuthCookieFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request)
             throws ServletException {
-        Pattern first = Pattern.compile("/api/2.0/oauth/info");
-        Pattern second = Pattern.compile("/health/*");
-        Pattern third = Pattern.compile("/api/2.0/clients/.*/info");
-        String path = request.getRequestURI();
+        var first = Pattern.compile("/api/2.0/oauth/info");
+        var second = Pattern.compile("/health/*");
+        var third = Pattern.compile("/api/2.0/clients/.*/info");
+        var path = request.getRequestURI();
         return first.matcher(path).find() || second.matcher(path).find() ||
                 third.matcher(path).find();
     }

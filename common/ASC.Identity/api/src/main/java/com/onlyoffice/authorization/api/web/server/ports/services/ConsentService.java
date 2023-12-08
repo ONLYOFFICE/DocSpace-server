@@ -107,7 +107,7 @@ public class ConsentService implements ConsentRetrieveUsecases,
     }
 
     public void asyncRevokeConsent(String clientId, String principalName) {
-        this.amqpTemplate.convertAndSend(
+        amqpTemplate.convertAndSend(
                 configuration.getConsent().getExchange(),
                 configuration.getConsent().getRouting(),
                 ConsentMessage

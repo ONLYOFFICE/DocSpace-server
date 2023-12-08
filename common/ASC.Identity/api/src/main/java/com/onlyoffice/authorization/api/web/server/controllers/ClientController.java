@@ -81,7 +81,7 @@ public class ClientController {
 
     @PostConstruct
     public void init() {
-        this.allowedScopes = applicationConfiguration.getScopes().stream()
+        allowedScopes = applicationConfiguration.getScopes().stream()
                 .map(s -> s.getName())
                 .collect(Collectors.toList());
     }
@@ -122,7 +122,7 @@ public class ClientController {
             MDC.clear();
         });
 
-        for (final ClientDTO client : pagination.getData()) {
+        for (final var client : pagination.getData()) {
             client.add(linkTo(methodOn(ClientController.class)
                     .getClient(response, address, client.getClientId()))
                     .withRel(HttpMethod.GET.name())

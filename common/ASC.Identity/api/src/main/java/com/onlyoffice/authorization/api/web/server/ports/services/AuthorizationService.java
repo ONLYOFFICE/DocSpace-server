@@ -43,7 +43,7 @@ public class AuthorizationService implements AuthorizationCleanupUsecases, Autho
     @Transactional
     public List<String> saveAuthorizations(Iterable<AuthorizationMessage> authorizations) {
         log.info("Saving authorizations");
-        List<String> ids = new ArrayList<>();
+        var ids = new ArrayList<String>();
 
         for (AuthorizationMessage authorization : authorizations) {
             try {

@@ -1,8 +1,8 @@
 package com.onlyoffice.authorization.api.web.server.ports.services;
 
-import com.onlyoffice.authorization.api.web.server.transfer.messages.AuditMessage;
 import com.onlyoffice.authorization.api.core.usecases.repository.audit.AuditPersistenceMutationUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.audit.AuditCreationUsecases;
+import com.onlyoffice.authorization.api.web.server.transfer.messages.AuditMessage;
 import com.onlyoffice.authorization.api.web.server.utilities.mappers.AuditMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class AuditService implements AuditCreationUsecases {
     private final AuditPersistenceMutationUsecases auditUsecases;
     @Transactional
     public List<String> saveAudits(Iterable<AuditMessage> audits) {
-        List<String> ids = new ArrayList<>();
+        var ids = new ArrayList<String>();
         for (AuditMessage audit : audits) {
             try {
                 MDC.put("auditUserId", audit.getUserId());
