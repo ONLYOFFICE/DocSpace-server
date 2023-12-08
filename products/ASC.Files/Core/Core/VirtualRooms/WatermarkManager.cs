@@ -27,15 +27,25 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+[Flags]
+public enum WatermarkAdditions
+{
+    UserName = 1,
+    UserEmail = 2,
+    UserIpAdress = 4,
+    CurrentDate = 8,
+    RoomName = 16
+}
 public class WatermarkJson
 {
     public bool Enabled { get; set; }      
-    public List<string> Text { get; set; }
+    public string Text { get; set; }
+    public WatermarkAdditions Additions { get; set; }
     public int Rotate { get; set; }
-    public double Width { get; set; }
-    public double Height { get; set; }
+    public double ImageWidth { get; set; }
+    public double ImageHeight { get; set; }
     public string ImageUrl { get; set; }
-    public int Scale { get; set; }
+    public int ImageScale { get; set; }
 }
 
 [Scope]
@@ -69,16 +79,16 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        var textArray = GetWatermarkText(watermarksRequestDto);
         var watermarkSetings = new WatermarkJson()
         {
             Enabled = watermarksRequestDto.Enabled,
-            Text = textArray,
+            Text = watermarksRequestDto.Text,
+            Additions = watermarksRequestDto.Additions,
             Rotate = watermarksRequestDto.Rotate,
-            Height = watermarksRequestDto.ImageHeight,
-            Width = watermarksRequestDto.ImageWidth,
+            ImageHeight = watermarksRequestDto.ImageHeight,
+            ImageWidth = watermarksRequestDto.ImageWidth,
             ImageUrl = string.Empty,
-            Scale = watermarksRequestDto.ImageScale
+            ImageScale = watermarksRequestDto.ImageScale
         };
 
         await folderDao.WatermarksSaveToDbAsync(watermarkSetings, room);
@@ -86,41 +96,6 @@ public class WatermarkManager
         return room;
     }
     
-    internal List<string> GetWatermarkText(WatermarksRequestDto watermarksRequestDto)
-    {
-        var text = new List<string> ();
-        if (watermarksRequestDto.UserName)
-        {
-            text.Add("${UserName}");
-        }
-
-        if (watermarksRequestDto.UserEmail)
-        {
-            text.Add("${UserEmail}");
-        }
-
-        if (watermarksRequestDto.UserIpAdress)
-        {
-            text.Add("${UserIpAdress}");
-        }
-
-        if (watermarksRequestDto.CurrentDate)
-        {
-            text.Add("${CurrentDate}");
-        }
-
-        if (watermarksRequestDto.RoomName)
-        {
-            text.Add("${RoomName}");
-        }
-        if (watermarksRequestDto.Text != string.Empty)
-        {
-            text.Add((watermarksRequestDto.Text));
-        }
-
-        return text;
-    }
-
     public async Task<WatermarksRequestDto> GetWatermarkInformation<T>(Folder<T> room)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -135,53 +110,17 @@ public class WatermarkManager
             throw new ItemNotFoundException();  
         }
 
-        var watermarkData  = await folderDao.GetWatermarkInfo(room);
+        var watermarkData  = await folderDao.GetWatermarkSettings(room);
         var watermarkRequestDto = new WatermarksRequestDto();
 
         watermarkRequestDto.Enabled = watermarkData.Enabled;
-
-        var userName = @"\${UserName}";
-        var userEmail = @"\${UserEmail}";
-        var userIpAdress = @"\${UserIpAdress}";
-        var currentDate = @"\${CurrentDate}";
-        var roomName = @"\${RoomName}";
-        var text = @"\$\{(.*?)\}";
-
-        if (watermarkData.Text.Count != 0)
-        {
-            foreach (var watermark in watermarkData.Text)
-            {
-                if (Regex.IsMatch(watermark, userName))
-                {
-                    watermarkRequestDto.UserName = true;
-                }
-                if (Regex.IsMatch(watermark, userEmail))
-                {
-                    watermarkRequestDto.UserEmail = true;
-                }
-                if (Regex.IsMatch(watermark, userIpAdress))
-                {
-                    watermarkRequestDto.UserIpAdress = true;
-                }
-                if (Regex.IsMatch(watermark, currentDate))
-                {
-                    watermarkRequestDto.CurrentDate = true;
-                }
-                if (Regex.IsMatch(watermark, roomName))
-                {
-                    watermarkRequestDto.RoomName = true;
-                }
-                if(!Regex.IsMatch(watermark, text))
-                {
-                    watermarkRequestDto.Text = watermark;
-                }
-            }
-        }
         watermarkRequestDto.Rotate = watermarkData.Rotate;
-        watermarkRequestDto.ImageScale = watermarkData.Scale;
+        watermarkRequestDto.Text = watermarkData.Text;
+        watermarkRequestDto.Additions = watermarkData.Additions;
+        watermarkRequestDto.ImageScale = watermarkData.ImageScale;
         watermarkRequestDto.ImageUrl = watermarkData.ImageUrl;
-        watermarkRequestDto.ImageHeight = watermarkData.Height;
-        watermarkRequestDto.ImageWidth = watermarkData.Width;
+        watermarkRequestDto.ImageHeight = watermarkData.ImageHeight;
+        watermarkRequestDto.ImageWidth = watermarkData.ImageWidth;
 
         return watermarkRequestDto;
     }

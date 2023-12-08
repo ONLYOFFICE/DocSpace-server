@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using DocuSign.eSign.Model;
 
 namespace ASC.Files.Thirdparty.ProviderDao;
 
@@ -556,16 +555,6 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         
         return await folderDao.GetWatermarkSettings(room);
     }
-
-    public Task<WatermarkJson> GetWatermarkInfo(Folder<string> room)
-    {
-        ArgumentNullException.ThrowIfNull(room);
-        var selector = _selectorFactory.GetSelector(room.Id);
-        var folderDao = selector.GetFolderDao(room.Id);
-
-        return folderDao.GetWatermarkInfo(room);
-    }
-
     public Task<Folder<string>> DeleteWatermarkFromDbAsync(Folder<string> room)
     {
         ArgumentNullException.ThrowIfNull(room);

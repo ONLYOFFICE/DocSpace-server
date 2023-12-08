@@ -138,9 +138,9 @@ public class RoomLogoManager(StorageFactory storageFactory,
         await RemoveTempAsync(store, fileName);
 
         var uri = await GetWatermarkImageAsync(room);
-        var watermarkData = await folderDao.GetWatermarkInfo(room); 
-        watermarkData.Height = watermarkData.Scale == 0 ? height : (watermarkData.Scale * height) / 100;
-        watermarkData.Width = watermarkData.Scale == 0 ? width : (watermarkData.Scale * width) / 100;
+        var watermarkData = await folderDao.GetWatermarkSettings(room); 
+        watermarkData.ImageHeight = watermarkData.ImageScale * height / 100;
+        watermarkData.ImageWidth = watermarkData.ImageScale * width / 100;
         watermarkData.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
 
         await folderDao.WatermarksSaveToDbAsync(watermarkData, room);
@@ -356,36 +356,14 @@ public class RoomLogoManager(StorageFactory storageFactory,
         {
             return;
         }
-
-        using (var stream = new MemoryStream(imageData))
-        {
-            await store.SaveAsync(fileName, stream);
-        }
-
-
-        if (imageData is not { Length: > 0 })
-        {
-            throw new UnknownImageFormatException();
-        }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
         {
             throw new ImageWeightLimitException();
         }
 
-        try
+        using (var stream = new MemoryStream(imageData))
         {
-            using var imageStream = new MemoryStream(imageData);
-            using var img = await Image.LoadAsync(imageStream);
-            imageData = CommonPhotoManager.SaveToBytes(img);
-            var imageFileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
-
-            using var stream2 = new MemoryStream(imageData);
-            await store.SaveAsync(imageFileName, stream2);
-            
-        }
-        catch (ArgumentException error)
-        {
-            throw new UnknownImageFormatException(error);
+            await store.SaveAsync(fileName, stream);
         }
     }
     private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)

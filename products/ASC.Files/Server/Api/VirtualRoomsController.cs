@@ -31,7 +31,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
-        WatermarkManager waterMarksManager,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -44,7 +44,7 @@ public class VirtualRoomsInternalController(GlobalFolderHelper globalFolderHelpe
             fileOperationDtoHelper,
             coreBaseSettings,
             customTagsService,
-            waterMarksManager,
+            watermarkManager,
             roomLogoManager,
             fileStorageService,
             folderDtoHelper,
@@ -78,7 +78,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
-        WatermarkManager waterMarksManager,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -91,7 +91,7 @@ public class VirtualRoomsThirdPartyController(GlobalFolderHelper globalFolderHel
             fileOperationDtoHelper,
             coreBaseSettings,
             customTagsService,
-            waterMarksManager,
+            watermarkManager,
             roomLogoManager,
             fileStorageService,
             folderDtoHelper,
@@ -127,7 +127,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         FileOperationDtoHelper fileOperationDtoHelper,
         CoreBaseSettings coreBaseSettings,
         CustomTagsService customTagsService,
-        WatermarkManager waterMarksManager,
+        WatermarkManager watermarkManager,
         RoomLogoManager roomLogoManager,
         FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
@@ -444,12 +444,12 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("rooms/{id}/watermark")]
+    [HttpPut("{id}/watermark")]
     public async Task<FolderDto<T>> AddWaterMarksAsync(T id, WatermarksRequestDto inDto)
     {
         ErrorIfNotDocSpace();
 
-        var room = await waterMarksManager.AddRoomWatermarkAsync(id, inDto);
+        var room = await watermarkManager.AddRoomWatermarkAsync(id, inDto);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -464,14 +464,14 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>GET</httpMethod>
     [AllowAnonymous]
-    [HttpGet("rooms/{id}/watermark")]
+    [HttpGet("{id}/watermark")]
     public async Task<WatermarksRequestDto> GetWatermarkInfoAsync(T id)
     {
         ErrorIfNotDocSpace();
 
         var room = await _fileStorageService.GetFolderAsync(id).NotFoundIfNull("Folder not found");
 
-        return await waterMarksManager.GetWatermarkInformation(room);
+        return await watermarkManager.GetWatermarkInformation(room);
     }
 
     /// <summary>
@@ -483,12 +483,12 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>DELETE</httpMethod>
-    [HttpDelete("rooms/{id}/watermark")]
+    [HttpDelete("{id}/watermark")]
     public async Task<FolderDto<T>> DeleteWatermarkAsync(T id)
     {
         ErrorIfNotDocSpace();
 
-        var room = await waterMarksManager.RemoveRoomWaterMarksAsync(id);
+        var room = await watermarkManager.RemoveRoomWaterMarksAsync(id);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -502,7 +502,7 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
     /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.FolderDto, ASC.Files.Core">Room information</returns>
     /// <path>api/2.0/files/rooms/{id}/watermark</path>
     /// <httpMethod>POST</httpMethod>
-    [HttpPost("rooms/{id}/watermark")]
+    [HttpPost("{id}/watermark")]
     public async Task<FolderDto<T>> CreateWatermarkImageAsync(T id, WatermarksImageRequestDto inDto)
     {
         ErrorIfNotDocSpace();

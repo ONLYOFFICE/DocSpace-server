@@ -40,7 +40,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
-        ExternalShare externalShare)
+        ExternalShare externalShare,
+        IHttpContextAccessor httpContextAccessor,
+        AuthContext authContext)
     {
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
@@ -178,7 +180,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
             locatedInPrivateRoom = await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
             var room = await DocSpaceHelper.GetRoomId(file, folderDao);
-            options = GetOptions( await folderDao.GetWatermarkSettings(room));
+            options = GetOptions( await folderDao.GetWatermarkSettings(room), room);
         }
 
         if (file.Encrypted
@@ -333,26 +335,52 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
     }
 
-    public Options GetOptions(WatermarkJson watermarkJson)
+    public Options GetOptions<T>(WatermarkJson watermarkJson, Folder<T> room)
     {
         var runs = new List<Run>();
         var paragrahs = new List<Paragraph>();
-        if(watermarkJson.Text.Count != 0)
+        var userInfo = userManager.GetUsers(authContext.CurrentAccount.ID);
+        var ip = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
+
+        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.UserName))
         {
-            for(var i = 0; i < watermarkJson.Text.Count; i++)
-            {
-                runs.Add(new Run(watermarkJson.Text[i]));
-                if(i != watermarkJson.Text.Count - 1)
-                {
-                    runs.Add(new Run("\n"));
-                }
-            }
-            paragrahs.Add(new Paragraph(runs));
+            runs.Add(new Run(userInfo.UserName));
+            runs.Add(new Run(Environment.NewLine));
         }
-        
+        if(watermarkJson.Additions.HasFlag(WatermarkAdditions.UserEmail))
+        {
+            runs.Add(new Run(userInfo.Email));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.UserIpAdress))
+        {
+            runs.Add(new Run(ip));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.CurrentDate))
+        {
+            runs.Add(new Run(DateTime.Now.ToString()));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkJson.Additions.HasFlag(WatermarkAdditions.RoomName))
+        {
+            runs.Add(new Run(room.Title));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (watermarkJson.Text != string.Empty)
+        {
+            runs.Add(new Run(watermarkJson.Text));
+            runs.Add(new Run(Environment.NewLine));
+        }
+        if (runs.Last().Text == Environment.NewLine)
+        {
+            runs.Remove(runs.Last());
+        }
+        paragrahs.Add(new Paragraph(runs));
+
         var options = new Options()
         {
-            WatermarkOnDraw = new WatermarkOnDraw(watermarkJson.Width, watermarkJson.Height, watermarkJson.ImageUrl, watermarkJson.Rotate, paragrahs)
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkJson.ImageWidth, watermarkJson.ImageHeight, watermarkJson.ImageUrl, watermarkJson.Rotate, paragrahs)
         };
         return options;
     }

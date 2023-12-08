@@ -31,25 +31,9 @@ public class WatermarksRequestDto
     /// <type>System.Boolean, System</type>
     public bool Enabled { get; set; }
 
-    /// <summary>Specifies whether to display the username in the watermarks </summary>
-    /// <type>System.Boolean, System</type>
-    public bool UserName { get; set; }
-
-    /// <summary>Specifies whether to display the user email in the watermarks </summary>
-    /// <type>System.Boolean, System</type>
-    public bool UserEmail { get; set; }
-
-    /// <summary>Specifies whether to display the user ip-adress in the watermarks </summary>
-    /// <type>System.Boolean, System</type>
-    public bool UserIpAdress { get; set; }
-
-    /// <summary>Specifies whether to display the current date in the watermarks </summary>
-    /// <type>System.Boolean, System</type>
-    public bool CurrentDate { get; set; }
-
-    /// <summary>Specifies whether to display the room name  in the watermarks </summary>
-    /// <type>System.Boolean, System</type>
-    public bool RoomName { get; set; }
+    /// <summary>Specifies whether to display: username, user email, user ip-adress, current date and room name </summary>
+    /// <type>WatermarkAdditions</type>
+    public WatermarkAdditions Additions { get; set; }
 
     /// <summary>Watermark Text</summary>
     /// <type>System.String, System</type>

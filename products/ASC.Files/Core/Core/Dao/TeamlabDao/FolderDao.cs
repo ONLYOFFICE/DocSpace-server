@@ -50,7 +50,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     private readonly GlobalFolder _globalFolder;
     private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly GlobalStore _globalStore;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     public FolderDao(
         FactoryIndexerFolder factoryIndexer,
         UserManager userManager,
@@ -71,8 +70,7 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         CrossDao crossDao,
         IMapper mapper,
         GlobalStore globalStore,
-        GlobalFolder globalFolder,
-        IHttpContextAccessor httpContextAccessor)
+        GlobalFolder globalFolder)
         : base(
               dbContextManager,
               userManager,
@@ -94,7 +92,6 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         _mapper = mapper;
         _globalStore = globalStore;
         _globalFolder = globalFolder;
-        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -111,30 +108,10 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
     {
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-        var userName = new Regex (@"\${UserName}");
-        var userEmail = new Regex(@"\${UserEmail}");
-        var userIpAdress = new Regex(@"\${UserIpAdress}");
-        var currentDate = new Regex(@"\${CurrentDate}");
-        var roomName = new Regex(@"\${RoomName}");
-        var userInfo = _userManager.GetUsers(_authContext.CurrentAccount.ID);
-        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress.ToString();
-
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var waterMarkJson = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id); 
-        waterMarkJson.Watermark = userName.Replace(waterMarkJson.Watermark, userInfo.UserName);
-        waterMarkJson.Watermark = userEmail.Replace(waterMarkJson.Watermark, userInfo.Email);
-        waterMarkJson.Watermark = userIpAdress.Replace(waterMarkJson.Watermark, ip);
-        waterMarkJson.Watermark = currentDate.Replace(waterMarkJson.Watermark, DateTime.Now.ToString());
-        waterMarkJson.Watermark = roomName.Replace(waterMarkJson.Watermark, room.Title);
-        return JsonSerializer.Deserialize<WatermarkJson>(waterMarkJson.Watermark);
-    }
-    public async Task<WatermarkJson> GetWatermarkInfo (Folder<int> room)
-    {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var waterMarkJson = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
-        return JsonSerializer.Deserialize<WatermarkJson>(waterMarkJson.Watermark);
+        var roomSettings = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
+        return JsonSerializer.Deserialize<WatermarkJson>(roomSettings.Watermark);
     }
     public async Task<Folder<int>> GetFolderAsync(string title, int parentId)
     {
@@ -582,9 +559,9 @@ internal class FolderDao : AbstractDao, IFolderDao<int>
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var watermark = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
-        watermark.Watermark = null;
-        filesDbContext.Update(watermark);
+        var roomSettings = await Queries.RoomSettingsAsync(filesDbContext, tenantId, room.Id);
+        roomSettings.Watermark = null;
+        filesDbContext.Update(roomSettings);
         await filesDbContext.SaveChangesAsync();
         return room;
     }
