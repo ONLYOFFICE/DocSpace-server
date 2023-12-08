@@ -166,9 +166,9 @@ public class MigrationCreator
             }
             return user.Id;
         }
-        catch (ArgumentException e)
+        catch (ArgumentException)
         {
-            throw e;
+            throw;
         }
         catch (Exception)
         {
