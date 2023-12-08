@@ -163,7 +163,7 @@ public class BackupController(
             }
         }
 
-        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, false);
+        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, inDto.Dump, false);
 
         eventBus.Publish(new BackupRequestIntegrationEvent(
              tenantId: _tenantId,
