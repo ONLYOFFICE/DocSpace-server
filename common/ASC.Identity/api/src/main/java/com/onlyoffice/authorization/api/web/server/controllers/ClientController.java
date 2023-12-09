@@ -13,6 +13,7 @@ import com.onlyoffice.authorization.api.core.usecases.service.client.ClientMutat
 import com.onlyoffice.authorization.api.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentCleanupUsecases;
 import com.onlyoffice.authorization.api.core.usecases.service.consent.ConsentRetrieveUsecases;
+import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter;
 import com.onlyoffice.authorization.api.web.client.APIClient;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.security.context.UserContextContainer;
@@ -63,7 +64,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class ClientController {
     private final String AUTH_COOKIE_NAME = "asc_auth_key";
     private final String X_DOCSPACE_ADDRESS = "x-docspace-address";
-    private List<String> allowedScopes = new ArrayList<>();
 
     private final ApplicationConfiguration applicationConfiguration;
     private final RabbitMQConfiguration configuration;
@@ -79,6 +79,8 @@ public class ClientController {
     private final ConsentCleanupUsecases consentCleanupUsecases;
     private final AuthorizationCleanupUsecases authorizationCleanupUsecases;
 
+    private List<String> allowedScopes = new ArrayList<>();
+
     @PostConstruct
     public void init() {
         allowedScopes = applicationConfiguration.getScopes().stream()
@@ -89,6 +91,7 @@ public class ClientController {
     @GetMapping
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
+    @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<PaginationDTO<ClientDTO>> getClients(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -159,6 +162,7 @@ public class ClientController {
     @GetMapping("/{clientId}/info")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
+    @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<ClientInfoDTO> getClientInfo(@PathVariable @NotEmpty String clientId) {
         MDC.put("clientId", clientId);
         log.info("Received a new get client info request");
@@ -172,6 +176,7 @@ public class ClientController {
     @DeleteMapping("/{clientId}/revoke")
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
+    @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity revokeUserClient(
             HttpServletRequest request,
             @PathVariable @NotEmpty String clientId
@@ -205,6 +210,7 @@ public class ClientController {
     @GetMapping("/consents")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
+    @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<Set<ConsentDTO>> getClientsInfo() {
         var context = TenantContextContainer.context.get();
         var user = UserContextContainer.context.get();
@@ -224,6 +230,7 @@ public class ClientController {
     @GetMapping("/{clientId}")
     @Retry(name = "getClientRetryRateLimiter")
     @RateLimiter(name = "getClientRateLimiter")
+    @DistributedRateLimiter(name = "identityFetchClient")
     public ResponseEntity<ClientDTO> getClient(
             HttpServletResponse response,
             @CookieValue(name = X_DOCSPACE_ADDRESS) String address,
@@ -267,6 +274,7 @@ public class ClientController {
     @PostMapping
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
+    @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity<ClientDTO> postClient(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -335,6 +343,7 @@ public class ClientController {
     @PutMapping("/{clientId}")
     @Retry(name = "updateClientRetryRateLimiter")
     @RateLimiter(name = "updateClientRateLimiter")
+    @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity<ClientDTO> updateClient(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -396,6 +405,7 @@ public class ClientController {
     @PatchMapping("/{clientId}/regenerate")
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
+    @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity<SecretDTO> regenerateSecret(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -458,6 +468,7 @@ public class ClientController {
     @DeleteMapping("/{clientId}")
     @Retry(name = "batchClientRetryRateLimiter")
     @RateLimiter(name = "batchClientRateLimiter")
+    @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity deleteClient(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -491,6 +502,7 @@ public class ClientController {
     @PatchMapping("/{clientId}/activation")
     @Retry(name = "regenerateClientSecretRetryRateLimiter")
     @RateLimiter(name = "regenerateClientSecretRateLimiter")
+    @DistributedRateLimiter(name = "identityMutateClient")
     public ResponseEntity activateClient(
             HttpServletRequest request,
             HttpServletResponse response,

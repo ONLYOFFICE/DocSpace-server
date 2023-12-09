@@ -5,9 +5,9 @@ package com.onlyoffice.authorization.api.web.server.controllers;
 
 import com.onlyoffice.authorization.api.configuration.ApplicationConfiguration;
 import com.onlyoffice.authorization.api.core.exceptions.ScopeNotFoundException;
+import com.onlyoffice.authorization.api.extensions.annotations.DistributedRateLimiter;
 import com.onlyoffice.authorization.api.web.security.context.TenantContextContainer;
 import com.onlyoffice.authorization.api.web.server.transfer.response.ScopeDTO;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotEmpty;
@@ -60,7 +60,7 @@ public class ScopeController {
 
     @GetMapping
     @Retry(name = "getScopesRetryRateLimiter")
-    @RateLimiter(name = "getScopesRateLimiter")
+    @DistributedRateLimiter(name = "identityFetchScope")
     public ResponseEntity<Iterable<ScopeDTO>> getScopes() {
         var context = TenantContextContainer.context.get();
         if (context == null)
@@ -74,7 +74,7 @@ public class ScopeController {
 
     @GetMapping("/{name}")
     @Retry(name = "getScopesRetryRateLimiter")
-    @RateLimiter(name = "getScopesRateLimiter")
+    @DistributedRateLimiter(name = "identityFetchScope")
     public ResponseEntity<ScopeDTO> getScope(@PathVariable @NotEmpty String name) {
         var context = TenantContextContainer.context.get();
         if (context == null)
