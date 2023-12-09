@@ -3,7 +3,7 @@
  */
 package com.onlyoffice.authorization.api.extensions.annotations;
 
-import com.onlyoffice.authorization.api.extensions.validators.UrlCollectionValidator;
+import com.onlyoffice.authorization.api.extensions.validators.URLCollectionValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})
-@Constraint(validatedBy = UrlCollectionValidator.class)
+@Constraint(validatedBy = URLCollectionValidator.class)
 public @interface URLCollection {
     String message() default "url collection has invalid entries";
     Class<?>[] groups() default {};

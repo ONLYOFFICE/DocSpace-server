@@ -164,10 +164,27 @@ spring:
           max-interval: 3000
           multiplier: 3.0
 
+caching:
+  redis:
+    addresses: ["redis://localhost:6379"]
+    limiters:
+      -
+        name: "identityFetchClient"
+        limit: 5
+        refresh: 1
+      -
+        name: "identityMutateClient"
+        limit: 3
+        refresh: 1
+      -
+        name: "identityFetchScope"
+        limit: 5
+        refresh: 1
+
 resilience4j:
   circuitbreaker:
     instances:
-      docspace:
+      asc:
         registerHealthIndicator: true
         eventConsumerBufferSize: 10
         failureRateThreshold: 50
@@ -197,7 +214,7 @@ resilience4j:
   ratelimiter:
     configs:
       default:
-        limitRefreshPeriod: 1s
+        limitRefreshPeriod: 1000ms
         limitForPeriod: 1000
         timeoutDuration: 500ms
         registerHealthIndicator: true
@@ -216,12 +233,6 @@ resilience4j:
         limitForPeriod: 15
       getScopesRateLimiter:
         baseConfig: default
-  timelimiter:
-    instances:
-      mutateTimeLimiter:
-        timeoutDuration: 2s
-      readTimeLimiter:
-        timeoutDuration: 1s
 
 management:
   health:
