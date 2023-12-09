@@ -101,6 +101,11 @@
 		<!-- Spring Cloud Dependencies -->
 
 		<dependency>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson-spring-boot-starter</artifactId>
+			<version>3.23.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 			<version>4.0.4</version>
@@ -167,17 +172,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-ratelimiter</artifactId>
-			<version>2.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-bulkhead</artifactId>
-			<version>2.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-timelimiter</artifactId>
 			<version>2.1.0</version>
 		</dependency>
 
