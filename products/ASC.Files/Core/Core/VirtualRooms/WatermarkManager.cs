@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Files.Core.VirtualRooms;
 
 [Flags]
@@ -84,14 +83,14 @@ public class WatermarkManager
             Enabled = watermarkRequestDto.Enabled,
             Text = watermarkRequestDto.Text,
             Additions = watermarkRequestDto.Additions,
-            Rotate = watermarkRequestDto.Rotate,
-            ImageScale = watermarkRequestDto.ImageScale
+            Rotate = watermarkRequestDto.Rotate
         };
 
         if(!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
         {
-            watermarkSettings.ImageHeight = watermarkSettings.ImageScale * watermarkRequestDto.ImageHeight / 100;
-            watermarkSettings.ImageWidth = watermarkSettings.ImageScale * watermarkRequestDto.ImageWidth / 100;
+            watermarkSettings.ImageScale = watermarkRequestDto.ImageScale;
+            watermarkSettings.ImageHeight = watermarkRequestDto.ImageHeight;
+            watermarkSettings.ImageWidth = watermarkRequestDto.ImageWidth;
             watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
         }
 
