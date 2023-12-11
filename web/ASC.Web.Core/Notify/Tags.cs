@@ -43,11 +43,8 @@ public static class Tags
     public const string InviteLink = "InviteLink";
     public const string Date = "Date";
     public const string IP = "IP";
-    public const string WebStudioLink = "WebStudioLink";
     public const string AuthorLink = "AuthorLink";
     public const string Activities = "Activities";
-    public const string BackupUrl = "BackupUrl";
-    public const string BackupHours = "BackupHours";
 
     public const string DeactivateUrl = "DeactivateUrl";
     public const string ActivateUrl = "ActivateUrl";
