@@ -494,25 +494,6 @@ public abstract class VirtualRoomsController<T>(GlobalFolderHelper globalFolderH
         await watermarkManager.DeleteWatermarkAsync(id);
     }
     /// <summary>
-    /// Creates a watermark image for a room with the ID specified in the request.
-    /// </summary>
-    /// <short>Create a watermark image</short>
-    /// <category>Rooms</category>
-    /// <param type="System.Int32, System" method="url" name="id">Room ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.WatermarkImageRequestDto, ASC.Files.Core" name="inDto">Watermark image request parameters</param>
-    /// <returns type="ASC.Files.Core.ApiModels.ResponseDto.WatermarkDto, ASC.Files.Core">Room information</returns>
-    /// <path>api/2.0/files/rooms/{id}/watermark</path>
-    /// <httpMethod>POST</httpMethod>
-    [HttpPost("{id}/watermark")]
-    public async Task<WatermarkDto> CreateWatermarkImageAsync(T id, WatermarkImageRequestDto inDto)
-    {
-        ErrorIfNotDocSpace();
-
-        var watermarkSettings = await roomLogoManager.CreateWatermarkImageAsync(id, inDto.TmpFile, inDto.Width, inDto.Height);
-
-        return watermarkDtoHelper.Get(watermarkSettings);
-    }
-    /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>
     /// <short>Create a room logo</short>

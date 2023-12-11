@@ -38,7 +38,8 @@ public class RoomLogoManager(StorageFactory storageFactory,
     FilesMessageService filesMessageService,
     EmailValidationKeyProvider emailValidationKeyProvider,
     SecurityContext securityContext,
-    FileUtilityConfiguration fileUtilityConfiguration)
+    FileUtilityConfiguration fileUtilityConfiguration,
+    CommonLinkUtility commonLinkUtility)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -52,7 +53,6 @@ public class RoomLogoManager(StorageFactory storageFactory,
     private static readonly (SizeName, Size) _smallLogoSize = (SizeName.Small, new Size(16, 16));
 
     private IDataStore _dataStore;
-    private readonly CommonLinkUtility _commonLinkUtility;
     public bool EnableAudit { get; set; } = true;
     private int TenantId => tenantManager.GetCurrentTenant().Id;
 
@@ -108,28 +108,10 @@ public class RoomLogoManager(StorageFactory storageFactory,
 
         return room;
     }
-    public async Task<WatermarkSettings> CreateWatermarkImageAsync<T>(T id, string tempFile, int width, int height)
+    public async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, string imageUrl)
     {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var room = await folderDao.GetFolderAsync(id);
-
-        if (string.IsNullOrEmpty(tempFile))
-        {
-            throw new ItemNotFoundException();
-        }
-
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
-        {
-            throw new ItemNotFoundException();
-        }
-
-        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
-        }
-
         var store = await GetDataStoreAsync();
-        var fileName = Path.GetFileName(tempFile);
+        var fileName = Path.GetFileName(imageUrl);
         var data = await GetTempAsync(store, fileName);
 
         var stringId = GetId(room);
@@ -138,13 +120,10 @@ public class RoomLogoManager(StorageFactory storageFactory,
         await RemoveTempAsync(store, fileName);
 
         var uri = await GetWatermarkImageAsync(room);
-        var watermarkSettings = await folderDao.GetWatermarkSettings(room);
-        watermarkSettings.ImageHeight = watermarkSettings.ImageScale * height / 100;
-        watermarkSettings.ImageWidth = watermarkSettings.ImageScale * width / 100;
-        watermarkSettings.ImageUrl = _commonLinkUtility.GetFullAbsolutePath(uri);
+        
+        var imgUrl = commonLinkUtility.GetFullAbsolutePath(uri);
 
-        await folderDao.SetWatermarkSettings(watermarkSettings, room);
-        return watermarkSettings;
+        return imgUrl;
     }
     public async Task<Folder<T>> DeleteWatermarkImageAsync<T>(Folder<T> room)
     {

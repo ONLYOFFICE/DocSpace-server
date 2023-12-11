@@ -64,7 +64,7 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarksRequestDto)
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
     {
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -79,21 +79,25 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        var watermarkSetings = new WatermarkSettings()
+        var watermarkSettings = new WatermarkSettings()
         {
-            Enabled = watermarksRequestDto.Enabled,
-            Text = watermarksRequestDto.Text,
-            Additions = watermarksRequestDto.Additions,
-            Rotate = watermarksRequestDto.Rotate,
-            ImageHeight = watermarksRequestDto.ImageHeight,
-            ImageWidth = watermarksRequestDto.ImageWidth,
-            ImageUrl = string.Empty,
-            ImageScale = watermarksRequestDto.ImageScale
+            Enabled = watermarkRequestDto.Enabled,
+            Text = watermarkRequestDto.Text,
+            Additions = watermarkRequestDto.Additions,
+            Rotate = watermarkRequestDto.Rotate,
+            ImageScale = watermarkRequestDto.ImageScale
         };
 
-        await folderDao.SetWatermarkSettings(watermarkSetings, room);
+        if(!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
+        {
+            watermarkSettings.ImageHeight = watermarkSettings.ImageScale * watermarkRequestDto.ImageHeight / 100;
+            watermarkSettings.ImageWidth = watermarkSettings.ImageScale * watermarkRequestDto.ImageWidth / 100;
+            watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+        }
 
-        return watermarkSetings;
+        await folderDao.SetWatermarkSettings(watermarkSettings, room);
+
+        return watermarkSettings;
     }
     
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
