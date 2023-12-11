@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Files.Core.VirtualRooms;
 
 [Flags]
@@ -64,7 +63,7 @@ public class WatermarkManager
         _roomLogoManager = roomLogoManager;
     }
 
-    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarksRequestDto)
+    public async Task<WatermarkSettings> SetWatermarkAsync<T>(T roomId, WatermarkRequestDto watermarkRequestDto)
     {
         var room = await _daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
         var folderDao = _daoFactory.GetFolderDao<T>();
@@ -79,21 +78,25 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        var watermarkSetings = new WatermarkSettings()
+        var watermarkSettings = new WatermarkSettings()
         {
-            Enabled = watermarksRequestDto.Enabled,
-            Text = watermarksRequestDto.Text,
-            Additions = watermarksRequestDto.Additions,
-            Rotate = watermarksRequestDto.Rotate,
-            ImageHeight = watermarksRequestDto.ImageHeight,
-            ImageWidth = watermarksRequestDto.ImageWidth,
-            ImageUrl = string.Empty,
-            ImageScale = watermarksRequestDto.ImageScale
+            Enabled = watermarkRequestDto.Enabled,
+            Text = watermarkRequestDto.Text,
+            Additions = watermarkRequestDto.Additions,
+            Rotate = watermarkRequestDto.Rotate
         };
 
-        await folderDao.SetWatermarkSettings(watermarkSetings, room);
+        if(!string.IsNullOrEmpty(watermarkRequestDto.ImageUrl))
+        {
+            watermarkSettings.ImageScale = watermarkRequestDto.ImageScale;
+            watermarkSettings.ImageHeight = watermarkRequestDto.ImageHeight;
+            watermarkSettings.ImageWidth = watermarkRequestDto.ImageWidth;
+            watermarkSettings.ImageUrl = await _roomLogoManager.CreateWatermarkImageAsync(room, watermarkRequestDto.ImageUrl);
+        }
 
-        return watermarkSetings;
+        await folderDao.SetWatermarkSettings(watermarkSettings, room);
+
+        return watermarkSettings;
     }
     
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)

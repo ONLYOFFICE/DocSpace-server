@@ -47,7 +47,7 @@ public class WatermarkRequestDto
     /// <type>System.Int32, System</type>
     public int ImageScale { get; set; }
 
-    /// <summary>Watermark image url</summary>
+    /// <summary>The path to the temporary image file</summary>
     /// <type>System.String, System</type>
     public string ImageUrl { get; set; }
 
@@ -58,19 +58,4 @@ public class WatermarkRequestDto
     /// <summary>Watermark image width</summary>
     /// <type>System.Double, System</type>
     public double ImageWidth { get; set; }
-}
-
-public class WatermarkImageRequestDto
-{
-    /// <summary>The path to the temporary image file</summary>
-    /// <type>System.String, System</type>
-    public string TmpFile { get; set; }
-
-    /// <summary>The rectangle width</summary>
-    /// <type>System.Int32, System</type>
-    public int Width { get; set; }
-
-    /// <summary>The rectangle height</summary>
-    /// <type>System.Int32, System</type>
-    public int Height { get; set; }
 }

@@ -380,7 +380,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var options = new Options()
         {
-            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth, watermarkSettings.ImageHeight, watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
+            WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };
         return options;
     }
