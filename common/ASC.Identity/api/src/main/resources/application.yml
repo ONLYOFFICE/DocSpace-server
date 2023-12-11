@@ -166,7 +166,7 @@ spring:
 
 caching:
   redis:
-    addresses: ["redis://localhost:6379"]
+    addresses: ${REDIS_ADDRESSES:redis://localhost:6379}
     limiters:
       -
         name: "identityFetchClient"
