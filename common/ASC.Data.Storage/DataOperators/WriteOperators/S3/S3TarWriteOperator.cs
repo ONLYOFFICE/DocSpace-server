@@ -37,6 +37,7 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly List<Task> _tasks = new();
     private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
     private readonly ConcurrentQueue<int> _queue = new();
+    private readonly CancellationTokenSource _cts = new();
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -76,7 +77,21 @@ public class S3TarWriteOperator : IDataWriteOperator
         if (store is S3Storage s3Store) 
         {
             var fullPath = s3Store.MakePath(domain, path);
-            var task = new Task(_store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue).Wait);
+            var task = new Task(() =>
+            {
+                try
+                {
+                    if (!_cts.Token.IsCancellationRequested)
+                    {
+                        _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue).Wait();
+                    }
+                }
+                catch
+                {
+                    _cts.Cancel();
+                    throw;
+                }
+            });
             _tasks.Add(task);
             task.Start(_scheduler);
         }
@@ -92,16 +107,29 @@ public class S3TarWriteOperator : IDataWriteOperator
         }
     }
 
-    public Task WriteEntryAsync(string tarKey, Stream stream)
+    public async Task WriteEntryAsync(string tarKey, Stream stream)
     {
         var tStream = _tempStream.Create();
         stream.Position = 0;
-        stream.CopyTo(tStream);
+        await stream.CopyToAsync(tStream);
         
-        var task = new Task(_store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue).Wait);
+        var task = new Task(() =>
+        {
+            try
+            {
+                if (!_cts.Token.IsCancellationRequested)
+                {
+                    _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue).Wait();
+                }
+            }
+            catch
+            {
+                _cts.Cancel();
+                throw;
+            }
+        });
         _tasks.Add(task);
         task.Start(_scheduler);
-        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
