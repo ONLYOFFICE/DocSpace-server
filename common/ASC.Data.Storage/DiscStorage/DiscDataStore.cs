@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,46 +27,7 @@
 namespace ASC.Data.Storage.DiscStorage;
 
 [Scope]
-public class DiscDataStore : BaseStorage
-{
-    public override bool IsSupportInternalUri => false;
-    public override bool IsSupportedPreSignedUri => false;
-    public override bool IsSupportChunking => true;
-
-    private readonly Dictionary<string, MappedPath> _mappedPaths = new Dictionary<string, MappedPath>();
-    private ICrypt _crypt;
-    private readonly EncryptionSettingsHelper _encryptionSettingsHelper;
-    private readonly EncryptionFactory _encryptionFactory;
-
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
-    {
-        Tenant = tenant;
-        //Fill map path
-        Modulename = moduleConfig.Name;
-        DataList = new DataList(moduleConfig);
-
-        foreach (var domain in moduleConfig.Domain)
-        {
-            _mappedPaths.Add(domain.Name, new MappedPath(_tpathUtils, tenant, moduleConfig.AppendTenantId, domain.Path, handlerConfig.GetProperties()));
-        }
-
-        //Add default
-        _mappedPaths.Add(string.Empty, new MappedPath(_tpathUtils, tenant, moduleConfig.AppendTenantId, PathUtils.Normalize(moduleConfig.Path), handlerConfig.GetProperties()));
-
-        //Make expires
-        DomainsExpires =
-            moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).
-                ToDictionary(x => x.Name,
-                             y => y.Expires);
-        DomainsExpires.Add(string.Empty, moduleConfig.Expires);
-        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : _encryptionSettingsHelper.Load();
-        _crypt = _encryptionFactory.GetCrypt(moduleConfig.Name, settings);
-        DataStoreValidator = validator;
-        return this;
-    }
-
-    public DiscDataStore(
-        TempStream tempStream,
+public class DiscDataStore(TempStream tempStream,
         TenantManager tenantManager,
         PathUtils pathUtils,
         EmailValidationKeyProvider emailValidationKeyProvider,
@@ -78,10 +39,40 @@ public class DiscDataStore : BaseStorage
         IHttpClientFactory clientFactory,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager)
-        : base(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
+    : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager)
+{
+    public override bool IsSupportInternalUri => false;
+    public override bool IsSupportedPreSignedUri => false;
+    public override bool IsSupportChunking => true;
+
+    private readonly Dictionary<string, MappedPath> _mappedPaths = new();
+    private ICrypt _crypt;
+
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
-        _encryptionSettingsHelper = encryptionSettingsHelper;
-        _encryptionFactory = encryptionFactory;
+        Tenant = tenant;
+        //Fill map path
+        Modulename = moduleConfig.Name;
+        DataList = new DataList(moduleConfig);
+
+        foreach (var domain in moduleConfig.Domain)
+        {
+            _mappedPaths.Add(domain.Name, new MappedPath(_pathUtils, tenant, moduleConfig.AppendTenantId, domain.Path, handlerConfig.GetProperties()));
+        }
+
+        //Add default
+        _mappedPaths.Add(string.Empty, new MappedPath(_pathUtils, tenant, moduleConfig.AppendTenantId, PathUtils.Normalize(moduleConfig.Path), handlerConfig.GetProperties()));
+
+        //Make expires
+        DomainsExpires =
+            moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).
+                ToDictionary(x => x.Name,
+                             y => y.Expires);
+        DomainsExpires.Add(string.Empty, moduleConfig.Expires);
+        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : encryptionSettingsHelper.Load();
+        _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);
+        DataStoreValidator = validator;
+        return this;
     }
 
     public string GetPhysicalPath(string domain, string path)
@@ -98,7 +89,7 @@ public class DiscDataStore : BaseStorage
         return Task.FromResult(GetReadStream(domain, path, true));
     }
 
-    public Stream GetReadStream(string domain, string path, bool withDecription)
+    private Stream GetReadStream(string domain, string path, bool withDescription)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -106,7 +97,7 @@ public class DiscDataStore : BaseStorage
 
         if (File.Exists(target))
         {
-            return withDecription ? _crypt.GetReadStream(target) : File.OpenRead(target);
+            return withDescription ? _crypt.GetReadStream(target) : File.OpenRead(target);
         }
 
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
@@ -341,10 +332,10 @@ public class DiscDataStore : BaseStorage
         }
     }
 
-    public override Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir)
+    public override Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir)
     {
-        var target = GetTarget(srcdomain, srcdir);
-        var newtarget = GetTarget(newdomain, newdir);
+        var target = GetTarget(srcDomain, srcDir);
+        var newtarget = GetTarget(newDomain, newDir);
         var newtargetSub = newtarget.Remove(newtarget.LastIndexOf(Path.DirectorySeparatorChar));
 
         if (!Directory.Exists(newtargetSub))
@@ -357,13 +348,13 @@ public class DiscDataStore : BaseStorage
         return Task.CompletedTask;
     }
 
-    public override async Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true)
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
-        ArgumentNullException.ThrowIfNull(srcpath);
-        ArgumentNullException.ThrowIfNull(newpath);
+        ArgumentNullException.ThrowIfNull(srcPath);
+        ArgumentNullException.ThrowIfNull(newPath);
 
-        var target = GetTarget(srcdomain, srcpath);
-        var newtarget = GetTarget(newdomain, newpath);
+        var target = GetTarget(srcDomain, srcPath);
+        var newtarget = GetTarget(newDomain, newPath);
 
         if (File.Exists(target))
         {
@@ -382,14 +373,14 @@ public class DiscDataStore : BaseStorage
 
             File.Move(target, newtarget);
 
-            await QuotaUsedDeleteAsync(srcdomain, flength);
-            await QuotaUsedAddAsync(newdomain, flength, quotaCheckFileSize);
+            await QuotaUsedDeleteAsync(srcDomain, flength);
+            await QuotaUsedAddAsync(newDomain, flength, quotaCheckFileSize);
         }
         else
         {
             throw new FileNotFoundException("File not found", Path.GetFullPath(target));
         }
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
     public override Task<bool> IsDirectoryAsync(string domain, string path)
@@ -541,7 +532,7 @@ public class DiscDataStore : BaseStorage
             var entries = Directory.GetDirectories(targetDir, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             var tmp = Array.ConvertAll(
             entries,
-            x => x.Substring(targetDir.Length));
+            x => x[targetDir.Length..]);
             return tmp.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
@@ -563,7 +554,7 @@ public class DiscDataStore : BaseStorage
             var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             var tmp = Array.ConvertAll(
             entries,
-            x => x.Substring(targetDir.Length));
+            x => x[targetDir.Length..]);
             return tmp.ToAsyncEnumerable();
         }
         return AsyncEnumerable.Empty<string>();
@@ -603,13 +594,13 @@ public class DiscDataStore : BaseStorage
         return Task.FromResult(size);
     }
 
-    public override async Task<Uri> CopyAsync(string srcdomain, string srcpath, string newdomain, string newpath)
+    public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
     {
         ArgumentNullException.ThrowIfNull(srcpath);
-        ArgumentNullException.ThrowIfNull(newpath);
+        ArgumentNullException.ThrowIfNull(newPath);
 
-        var target = GetTarget(srcdomain, srcpath);
-        var newtarget = GetTarget(newdomain, newpath);
+        var target = GetTarget(srcDomain, srcpath);
+        var newtarget = GetTarget(newDomain, newPath);
 
         if (File.Exists(target))
         {
@@ -621,24 +612,24 @@ public class DiscDataStore : BaseStorage
             File.Copy(target, newtarget, true);
 
             var flength = _crypt.GetFileSize(target);
-            await QuotaUsedAddAsync(newdomain, flength);
+            await QuotaUsedAddAsync(newDomain, flength);
         }
         else
         {
             throw new FileNotFoundException("File not found", Path.GetFullPath(target));
         }
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task CopyDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir)
+    public override async Task CopyDirectoryAsync(string srcDomain, string srcdir, string newDomain, string newDir)
     {
-        var target = GetTarget(srcdomain, srcdir);
-        var newtarget = GetTarget(newdomain, newdir);
+        var target = GetTarget(srcDomain, srcdir);
+        var newtarget = GetTarget(newDomain, newDir);
 
         var diSource = new DirectoryInfo(target);
         var diTarget = new DirectoryInfo(newtarget);
 
-        await CopyAllAsync(diSource, diTarget, newdomain);
+        await CopyAllAsync(diSource, diTarget, newDomain);
     }
 
 

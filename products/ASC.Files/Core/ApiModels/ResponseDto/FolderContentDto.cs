@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -62,8 +62,6 @@ public class FolderContentDto<T>
     /// <type>System.Int32, System</type>
     public int New { get; set; }
 
-    public FolderContentDto() { }
-
     public static FolderContentDto<int> GetSample()
     {
         return new FolderContentDto<int>
@@ -79,43 +77,21 @@ public class FolderContentDto<T>
 
             StartIndex = 0,
             Count = 4,
-            Total = 4,
+            Total = 4
         };
     }
 }
 
 [Scope]
-public class FolderContentDtoHelper
+public class FolderContentDtoHelper(FileSecurity fileSecurity,
+    IDaoFactory daoFactory,
+    FileDtoHelper fileWrapperHelper,
+    FolderDtoHelper folderWrapperHelper,
+    BadgesSettingsHelper badgesSettingsHelper,
+    FileSecurityCommon fileSecurityCommon,
+    AuthContext authContext,
+    BreadCrumbsManager breadCrumbsManager)
 {
-    private readonly FileSecurity _fileSecurity;
-    private readonly FileSecurityCommon _fileSecurityCommon;
-    private readonly AuthContext _authContext;
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileDtoHelper _fileDtoHelper;
-    private readonly FolderDtoHelper _folderDtoHelper;
-    private readonly BadgesSettingsHelper _badgesSettingsHelper;
-    private readonly BreadCrumbsManager _breadCrumbsManager;
-
-    public FolderContentDtoHelper(
-        FileSecurity fileSecurity,
-        IDaoFactory daoFactory,
-        FileDtoHelper fileWrapperHelper,
-        FolderDtoHelper folderWrapperHelper,
-        BadgesSettingsHelper badgesSettingsHelper,
-        FileSecurityCommon fileSecurityCommon,
-        AuthContext authContext,
-        BreadCrumbsManager breadCrumbsManager)
-    {
-        _fileSecurity = fileSecurity;
-        _daoFactory = daoFactory;
-        _fileDtoHelper = fileWrapperHelper;
-        _folderDtoHelper = folderWrapperHelper;
-        _badgesSettingsHelper = badgesSettingsHelper;
-        _fileSecurityCommon = fileSecurityCommon;
-        _authContext = authContext;
-        _breadCrumbsManager = breadCrumbsManager;
-    }
-
     public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
     {
         var parentInternalIds = new HashSet<int>();
@@ -152,7 +128,7 @@ public class FolderContentDtoHelper
             }
         }
 
-        var order = await _breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
+        var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
         var foldersIntWithRightsTask = GetFoldersWithRightsAsync(parentInternalIds).ToListAsync();
         var foldersStringWithRightsTask = GetFoldersWithRightsAsync(parentThirdPartyIds).ToListAsync();
 
@@ -161,9 +137,9 @@ public class FolderContentDtoHelper
 
         var foldersTask = await GetFoldersDto(folders, order).ToListAsync();
         var filesTask = await GetFilesDto(files, foldersTask.Count, order).ToListAsync();
-        var currentTask = _folderDtoHelper.GetAsync(folderItems.FolderInfo);
+        var currentTask = folderWrapperHelper.GetAsync(folderItems.FolderInfo);
 
-        var isEnableBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
+        var isEnableBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
         var result = new FolderContentDto<T>
         {
@@ -183,30 +159,30 @@ public class FolderContentDtoHelper
         {
             if (ids.Any())
             {
-                var folderDao = _daoFactory.GetFolderDao<T1>();
+                var folderDao = daoFactory.GetFolderDao<T1>();
 
-                return _fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
+                return fileSecurity.CanReadAsync(folderDao.GetFoldersAsync(ids));
             }
 
             return AsyncEnumerable.Empty<Tuple<FileEntry<T1>, bool>>();
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, int foldersCount, string order)
+        async IAsyncEnumerable<FileEntryDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, int foldersCount, string entriesOrder)
         {
             foreach (var r in fileEntries)
             {
                 if (r is File<int> fol1)
                 {
-                    yield return await _fileDtoHelper.GetAsync(fol1, foldersIntWithRights, foldersCount, order);
+                    yield return await fileWrapperHelper.GetAsync(fol1, foldersIntWithRights, foldersCount, entriesOrder);
                 }
                 else if (r is File<string> fol2)
                 {
-                    yield return await _fileDtoHelper.GetAsync(fol2, foldersStringWithRights, foldersCount, order);
+                    yield return await fileWrapperHelper.GetAsync(fol2, foldersStringWithRights, foldersCount, entriesOrder);
                 }
             }
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string order)
+        async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder)
         {
             List<FileShareRecord> currentUsersRecords = null;
 
@@ -214,38 +190,38 @@ public class FolderContentDtoHelper
             {
                 if (r is Folder<int> fol1)
                 {
-                    yield return await GetFolder(fol1, foldersIntWithRights, order);
+                    yield return await GetFolder(fol1, foldersIntWithRights, entriesOrder);
                 }
                 else if (r is Folder<string> fol2)
                 {
-                    yield return await GetFolder(fol2, foldersStringWithRights, order);
+                    yield return await GetFolder(fol2, foldersStringWithRights, entriesOrder);
                 }
             }
 
-            async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, List<Tuple<FileEntry<T1>, bool>> foldersWithRights, string order)
+            async Task<FolderDto<T1>> GetFolder<T1>(Folder<T1> fol1, List<Tuple<FileEntry<T1>, bool>> foldersWithRights, string order1)
             {
-                var result = await _folderDtoHelper.GetAsync(fol1, foldersWithRights, order);
+                var folder = await folderWrapperHelper.GetAsync(fol1, foldersWithRights, order1);
                 if (DocSpaceHelper.IsRoom(fol1.FolderType))
                 {
-                    if (fol1.CreateBy == _authContext.CurrentAccount.ID)
+                    if (fol1.CreateBy == authContext.CurrentAccount.ID)
                     {
-                        result.InRoom = true;
+                        folder.InRoom = true;
                     }
                     else
                     {
-                        if (currentUsersRecords == null && await _fileSecurityCommon.IsDocSpaceAdministratorAsync(_authContext.CurrentAccount.ID))
+                        if (currentUsersRecords == null && await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
                         {
-                            var securityDao = _daoFactory.GetSecurityDao<T>();
-                            var currentUserSubjects = await _fileSecurity.GetUserSubjectsAsync(_authContext.CurrentAccount.ID);
+                            var securityDao = daoFactory.GetSecurityDao<T>();
+                            var currentUserSubjects = await fileSecurity.GetUserSubjectsAsync(authContext.CurrentAccount.ID);
                             currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects).ToListAsync();
                         }
                         if (currentUsersRecords != null)
                         {
-                            result.InRoom = currentUsersRecords.Any(c => c.EntryId.Equals(fol1.Id));
+                            folder.InRoom = currentUsersRecords.Exists(c => c.EntryId.Equals(fol1.Id));
                         }
                     }
                 }
-                return result;
+                return folder;
             }
         }
     }

@@ -475,4 +475,16 @@
   <data name="UnlockComment" xml:space="preserve">
     <value>Ֆայլն ապակողպված է</value>
   </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Համօգտագործվող հղում</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Հրավերի հղում</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Հղումների առավելագույն քանակը չի կարող գերազանցել {0}-ը</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Դուք չափազանց շատ անգամներ եք փորձել մուտքագրել ձեր գաղտնաբառը: Խնդրում ենք փորձեք մի փոքր ուշ</value>
+  </data>
 </root>

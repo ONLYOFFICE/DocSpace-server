@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,34 +26,25 @@
 
 namespace ASC.Notify;
 
-[Singletone]
-public class DbWorker : IDisposable
+[Singleton]
+public class DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyServiceCfg> notifyServiceCfg, IDistributedLockProvider distributedLockProvider)
 {
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly NotifyServiceCfg _notifyServiceCfg;
-
-    public DbWorker(IServiceScopeFactory serviceScopeFactory, IOptions<NotifyServiceCfg> notifyServiceCfg)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _notifyServiceCfg = notifyServiceCfg.Value;
-    }
+    private readonly NotifyServiceCfg _notifyServiceCfg = notifyServiceCfg.Value;
 
     public async Task SaveMessageAsync(NotifyMessage m)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
 
-        var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-        await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var tx = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            var notifyQueue = _mapper.Map<NotifyMessage, NotifyQueue>(m);
+            var notifyQueue = mapper.Map<NotifyMessage, NotifyQueue>(m);
             notifyQueue.Attachments = JsonConvert.SerializeObject(m.Attachments);
 
             notifyQueue = (await dbContext.NotifyQueue.AddAsync(notifyQueue)).Entity;
@@ -79,14 +70,13 @@ public class DbWorker : IDisposable
 
     public async Task<IDictionary<int, NotifyMessage>> GetMessagesAsync(int count)
     {
-        try
+        await using(await distributedLockProvider.TryAcquireLockAsync("get_notify_messages"))
         {
-            await _semaphore.WaitAsync();
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
 
-            var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-            await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+            await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
             var q = dbContext.NotifyQueue
                 .Join(dbContext.NotifyInfo, r => r.NotifyId, r => r.NotifyId, (queue, info) => new { queue, info })
@@ -101,7 +91,7 @@ public class DbWorker : IDisposable
                     r => r.queue.NotifyId,
                     r =>
                     {
-                        var res = _mapper.Map<NotifyQueue, NotifyMessage>(r.queue);
+                        var res = mapper.Map<NotifyQueue, NotifyMessage>(r.queue);
 
                         try
                         {
@@ -109,35 +99,29 @@ public class DbWorker : IDisposable
                         }
                         catch (Exception)
                         {
-
                         }
 
                         return res;
                     });
 
-
-            await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(q=> q.SetProperty(p => p.State, (int)MailSendingState.Sending));
+            await dbContext.NotifyInfo.Where(r => messages.Keys.Any(a => a == r.NotifyId)).ExecuteUpdateAsync(entry=> entry.SetProperty(p => p.State, (int)MailSendingState.Sending));
 
             return messages;
-        }
-        finally
-        {
-            _semaphore.Release();
         }
     }
 
     public async Task ResetStatesAsync()
     {
-        using var scope = _serviceScopeFactory.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+        using var scope = serviceScopeFactory.CreateScope();
+        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         await Queries.ResetStatesAsync(dbContext);
     }
 
     public async Task SetStateAsync(int id, MailSendingState result)
     {
-        using var scope = _serviceScopeFactory.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContext();
+        using var scope = serviceScopeFactory.CreateScope();
+        await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<NotifyDbContext>>().CreateDbContextAsync();
 
         if (result == MailSendingState.Sended)
         {
@@ -159,11 +143,6 @@ public class DbWorker : IDisposable
 
             await Queries.UpdateNotifyInfoAsync(dbContext, id, (int)result);
         }
-    }
-
-    public void Dispose()
-    {
-        _semaphore.Dispose();
     }
 }
 

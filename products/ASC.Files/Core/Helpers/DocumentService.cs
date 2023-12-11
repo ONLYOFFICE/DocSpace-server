@@ -1,29 +1,28 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 namespace ASC.Files.Core.Helpers;
 
@@ -59,7 +58,7 @@ public static class DocumentService
         }
 
         var key = Regex.Replace(expectedKey, "[^0-9a-zA-Z_]", "_");
-        return key.Substring(key.Length - Math.Min(key.Length, maxLength));
+        return key[^Math.Min(key.Length, maxLength)..];
     }
 
     /// <summary>
@@ -181,7 +180,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -226,13 +225,10 @@ public static class DocumentService
         {
             if (responseStream != null)
             {
-                responseStream.Dispose();
+                await responseStream.DisposeAsync();
             }
 
-            if (response != null)
-            {
-                response.Dispose();
-            }
+            response?.Dispose();
         }
 
         return GetResponseUri(dataResponse);
@@ -275,7 +271,7 @@ public static class DocumentService
         var body = new CommandBody
         {
             Command = method,
-            Key = documentRevisionId,
+            Key = documentRevisionId
         };
 
         if (!string.IsNullOrEmpty(callbackUrl))
@@ -283,7 +279,7 @@ public static class DocumentService
             body.Callback = callbackUrl;
         }
 
-        if (users != null && users.Length > 0)
+        if (users is { Length: > 0 })
         {
             body.Users = users;
         }
@@ -309,7 +305,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new System.Text.Json.JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -327,10 +323,9 @@ public static class DocumentService
             }
 
             using var reader = new StreamReader(stream);
-            dataResponse = await reader.ReadToEndAsync();
+            dataResponse = await reader.ReadToEndAsync(cancellationTokenSource.Token);
         }
-
-
+        
         try
         {
             var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, new JsonSerializerOptions
@@ -359,7 +354,7 @@ public static class DocumentService
         string signatureSecret,
        IHttpClientFactory clientFactory)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(docbuilderUrl);
+        ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
 
         if (string.IsNullOrEmpty(requestKey) && string.IsNullOrEmpty(scriptUrl))
         {
@@ -409,7 +404,7 @@ public static class DocumentService
             body.Token = token;
         }
 
-        var bodyString = JsonSerializer.Serialize(body, new System.Text.Json.JsonSerializerOptions()
+        var bodyString = JsonSerializer.Serialize(body, new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
@@ -417,7 +412,7 @@ public static class DocumentService
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
 
-        string dataResponse = null;
+        string dataResponse;
 
         using (var response = await httpClient.SendAsync(request))
         await using (var responseStream = await response.Content.ReadAsStreamAsync())
@@ -458,7 +453,7 @@ public static class DocumentService
 
     public static Task<bool> HealthcheckRequestAsync(string healthcheckUrl, IHttpClientFactory clientFactory)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(healthcheckUrl);
+        ArgumentException.ThrowIfNullOrEmpty(healthcheckUrl);
 
         return InternalHealthcheckRequestAsync(healthcheckUrl, clientFactory);
     }
@@ -528,7 +523,7 @@ public static class DocumentService
             NotModify = 4,
             UnknownCommand = 5,
             Token = 6,
-            TokenExpire = 7,
+            TokenExpire = 7
         }
 
         [DebuggerDisplay("{BuildVersion}")]
@@ -597,7 +592,7 @@ public static class DocumentService
     private class CommandBody
     {
         [Newtonsoft.Json.JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public CommandMethod Command { get; set; }
 
         [JsonProperty(PropertyName = "c", Required = Required.Always)]
@@ -732,7 +727,7 @@ public static class DocumentService
     }
 
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
-    private class ConvertionBody
+    private sealed class ConvertionBody
     {
         [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]
@@ -780,7 +775,7 @@ public static class DocumentService
     }
 
     [DebuggerDisplay("{Key}")]
-    private class BuilderBody
+    private sealed class BuilderBody
     {
         [JsonProperty(PropertyName = "async")]
         [JsonPropertyName("async")]
@@ -814,33 +809,10 @@ public static class DocumentService
         public string Url { get; set; }
     }
 
-    public class DocumentServiceException : Exception
+    public class DocumentServiceException(DocumentServiceException.ErrorCode errorCode, string message)
+        : Exception(message)
     {
-        public ErrorCode Code { get; set; }
-
-        public DocumentServiceException(ErrorCode errorCode, string message)
-            : base(message)
-        {
-            Code = errorCode;
-        }
-
-        protected DocumentServiceException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            if (info != null)
-            {
-                Code = (ErrorCode)info.GetValue("Code", typeof(ErrorCode));
-            }
-        }
-
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-
-            if (info != null)
-            {
-                info.AddValue("Code", Code);
-            }
-        }
+        public ErrorCode Code { get; set; } = errorCode;
 
         public static void ProcessResponseError(string errorCode)
         {
@@ -863,7 +835,7 @@ public static class DocumentService
                 ErrorCode.Convert => "convertation",
                 ErrorCode.ConvertTimeout => "convertation timeout",
                 ErrorCode.Unknown => "unknown error",
-                _ => "errorCode = " + errorCode,
+                _ => "errorCode = " + errorCode
             };
             throw new DocumentServiceException(code, errorMessage);
         }

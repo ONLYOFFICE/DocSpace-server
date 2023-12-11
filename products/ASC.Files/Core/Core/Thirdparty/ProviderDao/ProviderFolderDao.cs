@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,16 +27,7 @@
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope]
-internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
-{
-    private readonly SetupInfo _setupInfo;
-    private readonly GlobalFolderHelper _globalFolderHelper;
-    private readonly IProviderDao _providerDao;
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly AuthContext _authContext;
-
-    public ProviderFolderDao(
-        SetupInfo setupInfo,
+internal class ProviderFolderDao(SetupInfo setupInfo,
         IServiceProvider serviceProvider,
         TenantManager tenantManager,
         ISecurityDao<string> securityDao,
@@ -46,15 +37,8 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         IDbContextFactory<FilesDbContext> dbContextFactory,
         AuthContext authContext,
         SelectorFactory selectorFactory)
-        : base(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao)
-    {
-        _setupInfo = setupInfo;
-        _globalFolderHelper = globalFolderHelper;
-        _providerDao = providerDao;
-        _dbContextFactory = dbContextFactory;
-        _authContext = authContext;
-    }
-
+    : ProviderDaoBase(serviceProvider, tenantManager, crossDao, selectorFactory, securityDao), IFolderDao<string>
+{
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var selector = _selectorFactory.GetSelector(folderId);
@@ -124,13 +108,13 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
     public override async IAsyncEnumerable<Folder<string>> GetFakeRoomsAsync(IEnumerable<string> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
         string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
-        var virtualRoomsFolderId = IdConverter.Convert<string>(await _globalFolderHelper.GetFolderVirtualRooms());
-        var archiveFolderId = IdConverter.Convert<string>(await _globalFolderHelper.GetFolderArchive());
+        var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
+        var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId, archiveFolderId).Where(p => !string.IsNullOrEmpty(p.FolderId))
+        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId).Where(p => !string.IsNullOrEmpty(p.FolderId))
             .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         rooms = FilterRoomsAsync(rooms, provider, filterType, subjectId, excludeSubject, subjectFilter, subjectEntriesIds, searchText, withoutTags, tags, filesDbContext);
 
@@ -149,14 +133,14 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
             yield break;
         }
 
-        var virtualRoomsFolderId = IdConverter.Convert<string>(await _globalFolderHelper.GetFolderVirtualRooms());
-        var archiveFolderId = IdConverter.Convert<string>(await _globalFolderHelper.GetFolderArchive());
+        var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
+        var archiveFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderArchive());
 
-        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId, archiveFolderId)
-            .Where(p => !string.IsNullOrEmpty(p.FolderId) && (p.Owner == _authContext.CurrentAccount.ID || roomsIds.Contains(p.FolderId)))
+        var rooms = GetProvidersAsync(parentsIds, virtualRoomsFolderId)
+            .Where(p => !string.IsNullOrEmpty(p.FolderId) && (p.Owner == authContext.CurrentAccount.ID || roomsIds.Contains(p.FolderId)))
             .Select(r => ToFakeRoom(r, virtualRoomsFolderId, archiveFolderId));
 
-        var filesDbContext = _dbContextFactory.CreateDbContext();
+        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         rooms = FilterRoomsAsync(rooms, provider, filterType, subjectId, excludeSubject, subjectFilter, subjectEntriesIds, searchText, withoutTags, tags, filesDbContext);
 
@@ -331,29 +315,24 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
                 : await folderDao.CopyFolderAsync(selector.ConvertId(folderId), selector.ConvertId(toFolderId), null);
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(string[] folderIds, TTo to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<string> folderIds, TTo to)
     {
-        if (to is int tId)
+        return to switch
         {
-            return CanMoveOrCopyAsync(folderIds, tId);
-        }
-
-        if (to is string tsId)
-        {
-            return CanMoveOrCopyAsync(folderIds, tsId);
-        }
-
-        throw new NotImplementedException();
+            int tId => CanMoveOrCopyAsync(folderIds, tId),
+            string tsId => CanMoveOrCopyAsync(folderIds, tsId),
+            _ => throw new NotImplementedException()
+        };
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, int to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
         return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
     }
 
-    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(string[] folderIds, string to)
+    public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
     {
-        if (folderIds.Length == 0)
+        if (!folderIds.Any())
         {
             return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
         }
@@ -424,10 +403,9 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
     public bool UseRecursiveOperation(string folderId, string toRootFolderId)
     {
         var selector = _selectorFactory.GetSelector(folderId);
-        bool useRecursive;
 
         var folderDao = selector.GetFolderDao(folderId);
-        useRecursive = folderDao.UseRecursiveOperation(folderId, null);
+        var useRecursive = folderDao.UseRecursiveOperation(folderId, null);
 
         if (toRootFolderId != null)
         {
@@ -454,9 +432,9 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
         var folderDao = selector.GetFolderDao(folderId);
         var storageMaxUploadSize = await folderDao.GetMaxUploadSizeAsync(selector.ConvertId(folderId), chunkedUpload);
 
-        if (storageMaxUploadSize == -1 || storageMaxUploadSize == long.MaxValue)
+        if (storageMaxUploadSize is -1 or long.MaxValue)
         {
-            storageMaxUploadSize = _setupInfo.ProviderMaxUploadSize;
+            storageMaxUploadSize = setupInfo.ProviderMaxUploadSize;
         }
 
         return storageMaxUploadSize;
@@ -491,28 +469,28 @@ internal class ProviderFolderDao : ProviderDaoBase, IFolderDao<string>
             ProviderFilter.Yandex => ProviderTypes.Yandex.ToStringFast(),
             ProviderFilter.WebDav => ProviderTypes.WebDav.ToStringFast(),
             ProviderFilter.kDrive => ProviderTypes.kDrive.ToStringFast(),
-            _ => throw new NotImplementedException(),
+            _ => throw new NotImplementedException()
         };
 
         return folders.Where(x => providerKey == x.ProviderKey);
     }
 
-    private async IAsyncEnumerable<IProviderInfo> GetProvidersAsync(IEnumerable<string> parentsIds, string virtualRoomsFolderId, string archiveFolderId)
+    private async IAsyncEnumerable<IProviderInfo> GetProvidersAsync(IEnumerable<string> parentsIds, string virtualRoomsFolderId)
     {
         IAsyncEnumerable<IProviderInfo> providers;
 
         if (parentsIds.Count() > 1)
         {
-            providers = _providerDao.GetProvidersInfoAsync(FolderType.VirtualRooms);
-            providers = providers.Concat(_providerDao.GetProvidersInfoAsync(FolderType.Archive));
+            providers = providerDao.GetProvidersInfoAsync(FolderType.VirtualRooms);
+            providers = providers.Concat(providerDao.GetProvidersInfoAsync(FolderType.Archive));
         }
         else if (parentsIds.FirstOrDefault() == virtualRoomsFolderId)
         {
-            providers = _providerDao.GetProvidersInfoAsync(FolderType.VirtualRooms);
+            providers = providerDao.GetProvidersInfoAsync(FolderType.VirtualRooms);
         }
         else
         {
-            providers = _providerDao.GetProvidersInfoAsync(FolderType.Archive);
+            providers = providerDao.GetProvidersInfoAsync(FolderType.Archive);
         }
 
         await foreach (var provider in providers)

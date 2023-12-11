@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -32,24 +32,16 @@ public interface INotifyEngineAction
     void AfterTransferRequest(NotifyRequest request);
 }
 
-[Singletone]
-public class NotifyEngine
+[Singleton]
+public class NotifyEngine(Context context,
+    ILoggerProvider options)
 {
-    private readonly ILogger _logger;
-    private readonly Context _context;
-    internal readonly List<SendMethodWrapper> SendMethods = new List<SendMethodWrapper>();
-    private readonly Dictionary<string, IPatternStyler> _stylers = new Dictionary<string, IPatternStyler>();
+    private readonly ILogger _logger = options.CreateLogger("ASC.Notify");
+    private readonly Context _context = context ?? throw new ArgumentNullException(nameof(context));
+    internal readonly List<SendMethodWrapper> SendMethods = new();
+    private readonly Dictionary<string, IPatternStyler> _stylers = new();
     private readonly IPatternFormatter _sysTagFormatter = new ReplacePatternFormatter(@"_#(?<tagName>[A-Z0-9_\-.]+)#_", true);
-    internal readonly ICollection<Type> Actions;
-
-    public NotifyEngine(
-        Context context,
-        ILoggerProvider options)
-    {
-        Actions = new List<Type>();
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _logger = options.CreateLogger("ASC.Notify");
-    }
+    internal readonly ICollection<Type> Actions = new List<Type>();
 
     public void AddAction<T>() where T : INotifyEngineAction
     {
@@ -59,7 +51,7 @@ public class NotifyEngine
     internal void RegisterSendMethod(Func<DateTime, Task> method, string cron)
     {
         ArgumentNullException.ThrowIfNull(method);
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(cron);
+        ArgumentException.ThrowIfNullOrEmpty(cron);
 
         var w = new SendMethodWrapper(method, cron, _logger);
         lock (SendMethods)
@@ -93,15 +85,9 @@ public class NotifyEngine
             sendResponces.AddRange(await SendGroupNotify(request, serviceScope));
         }
 
-        NotifyResult result;
-        if (sendResponces.Count == 0)
-        {
-            result = new NotifyResult(SendResult.OK, sendResponces);
-        }
-        else
-        {
-            result = new NotifyResult(sendResponces.Aggregate((SendResult)0, (s, r) => r.Result), sendResponces);
-        }
+        var result = sendResponces.Count == 0 ? 
+            new NotifyResult(SendResult.OK, sendResponces) : 
+            new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
         _logger.Debug(result.ToString());
 
         return result;
@@ -156,7 +142,7 @@ public class NotifyEngine
 
                     try
                     {
-                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? new IRecipient[0];
+                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? Array.Empty<IRecipient>();
                         foreach (var recipient in recipients)
                         {
                             try
@@ -216,7 +202,7 @@ public class NotifyEngine
             _logger.ErrorPrepare(ex);
         }
 
-        if (request._senderNames != null && request._senderNames.Length > 0)
+        if (request._senderNames is { Length: > 0 })
         {
             foreach (var sendertag in request._senderNames)
             {
@@ -259,7 +245,7 @@ public class NotifyEngine
 
         request.CurrentSender = channel.SenderName;
 
-        (var oops, var noticeMessage) = await CreateNoticeMessageFromNotifyRequestAsync(request, channel.SenderName, serviceScope);
+        var (oops, noticeMessage) = await CreateNoticeMessageFromNotifyRequestAsync(request, channel.SenderName, serviceScope);
         if (oops != null)
         {
             return oops;
@@ -280,7 +266,6 @@ public class NotifyEngine
     private async Task<(SendResponse, NoticeMessage)> CreateNoticeMessageFromNotifyRequestAsync(NotifyRequest request, string sender, IServiceScope serviceScope)
     {
         ArgumentNullException.ThrowIfNull(request);
-        NoticeMessage noticeMessage = null;
         var recipientProvider = request.GetRecipientsProvider(serviceScope);
         var recipient = request.Recipient as IDirectRecipient;
 
@@ -292,7 +277,7 @@ public class NotifyEngine
         }
 
         recipient = await recipientProvider.FilterRecipientAddressesAsync(recipient);
-        noticeMessage = request.CreateMessage(recipient);
+        var noticeMessage = request.CreateMessage(recipient);
 
         addresses = recipient.Addresses;
         if (addresses == null || addresses.All(string.IsNullOrEmpty))
@@ -315,17 +300,15 @@ public class NotifyEngine
         var formatter = patternProvider.GetFormatter(pattern);
         try
         {
-            if (formatter != null)
-            {
-                formatter.FormatMessage(noticeMessage, noticeMessage.Arguments);
-            }
+            formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
-                noticeMessage, new[]
-                                       {
-                                               new TagValue(Context.SysRecipientId, request.Recipient.ID),
-                                               new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                                               new TagValue(Context.SysRecipientAddress, addresses.Length > 0 ? addresses[0] : null)
-                                       }
+                noticeMessage, 
+                new ITagValue[]
+               {
+                       new TagValue(Context.SysRecipientId, request.Recipient.ID),
+                       new TagValue(Context.SysRecipientName, request.Recipient.Name),
+                       new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
+               }
                 );
             //Do styling here
             if (!string.IsNullOrEmpty(pattern.Styler))
@@ -400,10 +383,8 @@ public class NotifyEngine
                 {
                     pattern = apProvider.GetPatternMethod(request.NotifyAction, senderName, request);
                 }
-                if (pattern == null)
-                {
-                    pattern = apProvider.GetPattern(request.NotifyAction, senderName);
-                }
+                
+                pattern ??= apProvider.GetPattern(request.NotifyAction, senderName);
 
                 request._patterns[i] = pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted.");
             }

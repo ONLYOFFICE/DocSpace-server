@@ -419,4 +419,13 @@
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Максимальное количество ссылок не должно превышать {0}</value>
   </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Пригласительная ссылка</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Ссылка для доступа</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
+  </data>
 </root>

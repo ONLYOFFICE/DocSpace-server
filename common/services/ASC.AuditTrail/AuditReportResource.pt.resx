@@ -780,4 +780,16 @@
   <data name="ThirdPartyUpdated" xml:space="preserve">
     <value>Terceiro Atualizado: {0}. Fornecedor: {1}</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Link externo criado: {0}. Função: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Link externo excluído: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Link externo atualizado: {0}. Função: {1}</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>País</value>
+  </data>
 </root>

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -106,7 +106,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.Boolean, System</type>
     public bool IsAdmin { get; set; }
 
-    /// <summary>Is room admin or not</summary>
+    /// <summary>Specifies if the user is a room administrator or not</summary>
     /// <type>System.Boolean, System</type>
     public bool IsRoomAdmin { get; set; }
 
@@ -147,8 +147,8 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsSSO { get; set; }
 
     /// <summary>Theme</summary>
-    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsEnum}, System</type>
-    public DarkThemeSettingsEnum? Theme { get; set; }
+    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsType}, System</type>
+    public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>Quota limit</summary>
     /// <type>System.Int64, System</type>
@@ -193,17 +193,8 @@ public class EmployeeFullDto : EmployeeDto
 }
 
 [Scope]
-public class EmployeeFullDtoHelper : EmployeeDtoHelper
-{
-    private readonly ApiContext _context;
-    private readonly WebItemSecurity _webItemSecurity;
-    private readonly ApiDateTimeHelper _apiDateTimeHelper;
-    private readonly WebItemManager _webItemManager;
-    private readonly SettingsManager _settingsManager;
-    private readonly IQuotaService _quotaService;
-
-    public EmployeeFullDtoHelper(
-        ApiContext context,
+public class EmployeeFullDtoHelper(
+        ApiContext httpContext,
         UserManager userManager,
         UserPhotoManager userPhotoManager,
         WebItemSecurity webItemSecurity,
@@ -213,17 +204,10 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         WebItemManager webItemManager,
         SettingsManager settingsManager,
         IQuotaService quotaService,
+        TenantManager tenantManager,
         ILogger<EmployeeDtoHelper> logger)
-    : base(context, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
-    {
-        _context = context;
-        _webItemSecurity = webItemSecurity;
-        _apiDateTimeHelper = apiDateTimeHelper;
-        _webItemManager = webItemManager;
-        _settingsManager = settingsManager;
-        _quotaService = quotaService;
-    }
-
+    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
+{
     public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     {
         if (apiContext?.Fields == null)
@@ -264,12 +248,12 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         var result = new EmployeeFullDto
         {
             FirstName = userInfo.FirstName,
-            LastName = userInfo.LastName,
+            LastName = userInfo.LastName
         };
 
         await FillGroupsAsync(result, userInfo);
 
-        var photoData = await _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
+        var photoData = await  _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
 
         if (photoData != null)
         {
@@ -284,37 +268,38 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
     public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
         var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
-
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        
         var result = new EmployeeFullDto
         {
             UserName = userInfo.UserName,
             FirstName = userInfo.FirstName,
             LastName = userInfo.LastName,
-            Birthday = _apiDateTimeHelper.Get(userInfo.BirthDate),
+            Birthday = apiDateTimeHelper.Get(userInfo.BirthDate),
             Status = userInfo.Status,
             ActivationStatus = userInfo.ActivationStatus & ~EmployeeActivationStatus.AutoGenerated,
-            Terminated = _apiDateTimeHelper.Get(userInfo.TerminatedDate),
-            WorkFrom = _apiDateTimeHelper.Get(userInfo.WorkFromDate),
+            Terminated = apiDateTimeHelper.Get(userInfo.TerminatedDate),
+            WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
             IsVisitor = await _userManager.IsUserAsync(userInfo),
             IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
             IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
-            IsOwner = userInfo.IsOwner(_context.Tenant),
+            IsOwner = userInfo.IsOwner(tenant),
             IsCollaborator = currentType is EmployeeType.Collaborator,
             IsLDAP = userInfo.IsLDAP(),
             IsSSO = userInfo.IsSSO(),
-            Shared = shared,
+            Shared = shared
         };
 
         await InitAsync(result, userInfo);
 
-        var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
         if (quotaSettings.EnableUserQuota)
         {
-            result.UsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(_context.Tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
-            var userQuotaSettings = await _settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
-            result.QuotaLimit = userQuotaSettings != null ? userQuotaSettings.UserQuota : quotaSettings.DefaultUserQuota;
+            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+            var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
+            result.QuotaLimit = userQuotaSettings?.UserQuota ?? quotaSettings.DefaultUserQuota;
         }
 
         if (userInfo.Sex.HasValue)
@@ -349,25 +334,24 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
-
-        if (_context.Check("avatarMax"))
+        if (_httpContext.Check("avatarMax"))
         {
             result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         }
 
-        if (_context.Check("avatarMedium"))
+        if (_httpContext.Check("avatarMedium"))
         {
             result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         }
 
-        if (_context.Check("avatar"))
+        if (_httpContext.Check("avatar"))
         {
             result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         }
 
-        if (_context.Check("listAdminModules"))
+        if (_httpContext.Check("listAdminModules"))
         {
-            var listAdminModules = await userInfo.GetListAdminModulesAsync(_webItemSecurity, _webItemManager);
+            var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);
             if (listAdminModules.Count > 0)
             {
                 result.ListAdminModules = listAdminModules;
@@ -379,7 +363,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
-        if (!_context.Check("groups") && !_context.Check("department"))
+        if (!_httpContext.Check("groups") && !_httpContext.Check("department"))
         {
             return;
         }

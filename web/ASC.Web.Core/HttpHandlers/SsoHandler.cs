@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.Web.Core.HttpHandlers;
 public class SsoHandler
 {
-    public SsoHandler(RequestDelegate next)
+    public SsoHandler(RequestDelegate _)
     {
     }
 
@@ -43,8 +43,7 @@ public class SsoHandler
 
 [Scope]
 public class SsoHandlerService
-{    
-    private static readonly SemaphoreSlim _semaphore = new(1);
+{
     private readonly ILogger<SsoHandlerService> _log;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly UserManager _userManager;
@@ -61,6 +60,7 @@ public class SsoHandlerService
     private readonly TenantUtil _tenantUtil;
     private readonly Action<string> _signatureResolver;
     private readonly CountPaidUserChecker _countPaidUserChecker;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private const string MOB_PHONE = "mobphone";
     private const string EXT_MOB_PHONE = "extmobphone";
 
@@ -82,7 +82,8 @@ public class SsoHandlerService
         MessageService messageService,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         TenantUtil tenantUtil,
-        CountPaidUserChecker countPaidUserChecker)
+        CountPaidUserChecker countPaidUserChecker, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _log = log;
         _coreBaseSettings = coreBaseSettings;
@@ -99,14 +100,15 @@ public class SsoHandlerService
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _tenantUtil = tenantUtil;
         _countPaidUserChecker = countPaidUserChecker;
-        _signatureResolver = signature =>
+        _distributedLockProvider = distributedLockProvider;
+        _signatureResolver = s =>
         {
-            int.TryParse(signature.Substring(signature.Length - 1), out var lastSignChar);
-            signature = signature.Remove(signature.Length - 1);
+            int.TryParse(s[^1..], out var lastSignChar);
+            s = s.Remove(s.Length - 1);
 
             while (lastSignChar > 0)
             {
-                signature = signature + "=";
+                s += "=";
                 lastSignChar--;
             }
         };
@@ -196,7 +198,7 @@ public class SsoHandlerService
                     _log.WarningWithException("Failed to save user", ex);
                 }
 
-                var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.TenantId, userInfo.Id, MessageAction.LoginSuccessViaSSO);
+                var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
 
                 context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
 
@@ -281,10 +283,10 @@ public class SsoHandlerService
             if (string.IsNullOrEmpty(newUserInfo.UserName))
             {
                 var type = EmployeeType.RoomAdmin;
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-                try
+                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
                 {
-                    await _semaphore.WaitAsync();
                     try
                     {
                         await _countPaidUserChecker.CheckAppend();
@@ -295,10 +297,6 @@ public class SsoHandlerService
                     }
 
                     newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);
-                }
-                finally
-                {
-                    _semaphore.Release();
                 }
             }
             else
@@ -388,7 +386,7 @@ public class SsoHandlerService
             userInfo.Location = location;
             userInfo.Title = title;
 
-            var portalUserContacts = userInfo.ContactsList == null ? new List<string>() : userInfo.ContactsList;
+            var portalUserContacts = userInfo.ContactsList ?? new List<string>();
 
             var newContacts = new List<string>();
             var phones = new List<string>();
@@ -453,7 +451,7 @@ public class SsoHandlerService
         var newStr = str.Trim();
 
         return newStr.Length > limit
-                ? newStr.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? newStr[..MAX_NUMBER_OF_SYMBOLS]
                 : newStr;
     }
 }
@@ -478,18 +476,13 @@ public enum MessageKey
     SsoSettingsUserTerminated,
     SsoError,
     SsoAuthFailed,
-    SsoAttributesNotFound,
+    SsoAttributesNotFound
 }
 
-public class SSOException : Exception
+public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
-    public MessageKey MessageKey { get; }
-
-    public SSOException(string message, MessageKey messageKey) : base(message)
-    {
-        MessageKey = messageKey;
+    public MessageKey MessageKey { get; } = messageKey;
     }
-}
 
 public static class SsoHandlerExtensions
 {

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,23 +27,15 @@
 namespace ASC.Core.Data;
 
 [Scope]
-public class DbSubscriptionService : ISubscriptionService
+public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper)
+    : ISubscriptionService
 {
-    private readonly IDbContextFactory<UserDbContext> _dbContextFactory;
-    private readonly IMapper _mapper;
-
-    public DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper)
-    {
-        _dbContextFactory = dbContextFactory;
-        _mapper = mapper;
-    }
-
     public async Task<string[]> GetRecipientsAsync(int tenant, string sourceId, string actionId, string objectId)
     {
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await Queries.RecipientsAsync(userDbContext, tenant, sourceId, actionId, objectId ?? string.Empty).ToArrayAsync();
     }
@@ -53,7 +45,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = await Queries.SubscriptionsAsync(userDbContext, tenant, sourceId, actionId).ToListAsync();
 
@@ -65,7 +57,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.SubscriptionsByRecipientIdAsync(userDbContext, tenant, sourceId, actionId, recipientId, objectId ?? string.Empty);
 
@@ -78,7 +70,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = Queries.SubscriptionsByRecipientAsync(userDbContext, tenant, sourceId, actionId, recipientId, objectId ?? string.Empty);
 
@@ -91,7 +83,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await Queries.AnySubscriptionsByRecipientAsync(userDbContext, tenant, sourceId, actionId, recipientId, objectId ?? string.Empty);
     }
@@ -102,7 +94,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await Queries.ObjectsAsync(userDbContext, tenant, sourceId, actionId, recipientId, checkSubscribe).ToArrayAsync();
     }
@@ -121,7 +113,7 @@ public class DbSubscriptionService : ISubscriptionService
             TenantId = s.Tenant
         };
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         await userDbContext.AddOrUpdateAsync(q => q.Subscriptions, subs);
         await userDbContext.SaveChangesAsync();
     }
@@ -136,7 +128,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var sub = await Queries.SubscriptionsByObjectAsync(userDbContext, tenant, sourceId, actionId, objectId ?? string.Empty);
 
@@ -153,7 +145,7 @@ public class DbSubscriptionService : ISubscriptionService
         ArgumentNullException.ThrowIfNull(sourceId);
         ArgumentNullException.ThrowIfNull(actionId);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var methods = await Queries.DbSubscriptionMethodsAsync(userDbContext, tenant, sourceId, recipientId).ToListAsync();
         var result = new List<SubscriptionMethod>();
@@ -161,7 +153,7 @@ public class DbSubscriptionService : ISubscriptionService
 
         foreach (var r in methods)
         {
-            var m = _mapper.Map<DbSubscriptionMethod, SubscriptionMethod>(r);
+            var m = mapper.Map<DbSubscriptionMethod, SubscriptionMethod>(r);
             var key = m.Source + m.Action + m.Recipient;
             if (m.Tenant == Tenant.DefaultTenant)
             {
@@ -185,7 +177,7 @@ public class DbSubscriptionService : ISubscriptionService
     {
         ArgumentNullException.ThrowIfNull(m);
 
-        await using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         if (m.Methods == null || m.Methods.Length == 0)
         {
@@ -219,7 +211,7 @@ public class DbSubscriptionService : ISubscriptionService
 
         foreach (var r in subs)
         {
-            var s = _mapper.Map<Subscription, SubscriptionRecord>(r);
+            var s = mapper.Map<Subscription, SubscriptionRecord>(r);
             var key = s.SourceId + s.ActionId + s.RecipientId + s.ObjectId;
             if (s.Tenant == Tenant.DefaultTenant)
             {
@@ -286,8 +278,7 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Recipient == recipientId)
                     .Where(r => r.Unsubscribed)
-                    .Where(r => (!string.IsNullOrEmpty(objectId) && (r.Object == objectId || r.Object == string.Empty)) || (string.IsNullOrEmpty(objectId) && r.Object == string.Empty))
-                    .Any());
+                    .Any(r => (!string.IsNullOrEmpty(objectId) && (r.Object == objectId || r.Object == string.Empty)) || (string.IsNullOrEmpty(objectId) && r.Object == string.Empty)));
 
     public static readonly Func<UserDbContext, int, string, string, string, bool, IAsyncEnumerable<string>>
         ObjectsAsync = EF.CompileAsyncQuery(
@@ -310,8 +301,7 @@ static file class Queries
                     .Where(r => r.Source == sourceId)
                     .Where(r => r.Action == actionId)
                     .Where(r => r.TenantId == tenantId)
-                    .Where(r => objectId.Length == 0 || r.Object == objectId)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => objectId.Length == 0 || r.Object == objectId));
 
     public static readonly Func<UserDbContext, int, string, string, string, string, IAsyncEnumerable<Subscription>>
         SubscriptionsByRecipientIdAsync = EF.CompileAsyncQuery(
@@ -340,9 +330,5 @@ static file class Queries
         DbSubscriptionMethodAsync = EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, string sourceId, string actionId, string recipientId) =>
                 ctx.SubscriptionMethods
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Source == sourceId)
-                    .Where(r => r.Action == actionId)
-                    .Where(r => r.Recipient == recipientId)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.Source == sourceId && r.Action == actionId && r.Recipient == recipientId));
 }

@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Caching;
 
-[Singletone]
+[Singleton]
 public class SubscriptionServiceCache
 {
     internal readonly ICache Cache;
@@ -39,7 +39,7 @@ public class SubscriptionServiceCache
         NotifyRecord = notifyRecord;
         NotifyMethod = notifyMethod;
 
-        notifyRecord.Subscribe((s) =>
+        notifyRecord.Subscribe(s =>
         {
             var store = GetSubsciptionsStore(s.Tenant, s.SourceId, s.ActionId);
             if (store != null)
@@ -51,7 +51,7 @@ public class SubscriptionServiceCache
             }
         }, CacheNotifyAction.InsertOrUpdate);
 
-        notifyRecord.Subscribe((s) =>
+        notifyRecord.Subscribe(s =>
         {
             var store = GetSubsciptionsStore(s.Tenant, s.SourceId, s.ActionId);
             if (store != null)
@@ -70,7 +70,7 @@ public class SubscriptionServiceCache
             }
         }, CacheNotifyAction.Remove);
 
-        notifyMethod.Subscribe((m) =>
+        notifyMethod.Subscribe(m =>
         {
             var store = GetSubsciptionsStore(m.Tenant, m.SourceId, m.ActionId);
             if (store != null)
@@ -95,22 +95,14 @@ public class SubscriptionServiceCache
 }
 
 [Scope]
-public class CachedSubscriptionService : ISubscriptionService
+public class CachedSubscriptionService(DbSubscriptionService service, SubscriptionServiceCache subscriptionServiceCache)
+    : ISubscriptionService
 {
-    private readonly ISubscriptionService _service;
-    private readonly ICache _cache;
-    private readonly ICacheNotify<SubscriptionRecord> _notifyRecord;
-    private readonly ICacheNotify<SubscriptionMethodCache> _notifyMethod;
-    private readonly TimeSpan _cacheExpiration;
-
-    public CachedSubscriptionService(DbSubscriptionService service, SubscriptionServiceCache subscriptionServiceCache)
-    {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        _cache = subscriptionServiceCache.Cache;
-        _notifyRecord = subscriptionServiceCache.NotifyRecord;
-        _notifyMethod = subscriptionServiceCache.NotifyMethod;
-        _cacheExpiration = TimeSpan.FromMinutes(5);
-    }
+    private readonly ISubscriptionService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly ICache _cache = subscriptionServiceCache.Cache;
+    private readonly ICacheNotify<SubscriptionRecord> _notifyRecord = subscriptionServiceCache.NotifyRecord;
+    private readonly ICacheNotify<SubscriptionMethodCache> _notifyMethod = subscriptionServiceCache.NotifyMethod;
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(5);
 
 
     public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)
@@ -153,19 +145,19 @@ public class CachedSubscriptionService : ISubscriptionService
     public async Task SaveSubscriptionAsync(SubscriptionRecord s)
     {
         await _service.SaveSubscriptionAsync(s);
-        _notifyRecord.Publish(s, CacheNotifyAction.InsertOrUpdate);
+        await _notifyRecord.PublishAsync(s, CacheNotifyAction.InsertOrUpdate);
     }
 
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId)
     {
         await _service.RemoveSubscriptionsAsync(tenant, sourceId, actionId);
-        _notifyRecord.Publish(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId }, CacheNotifyAction.Remove);
+        await _notifyRecord.PublishAsync(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId }, CacheNotifyAction.Remove);
     }
 
     public async Task RemoveSubscriptionsAsync(int tenant, string sourceId, string actionId, string objectId)
     {
         await _service.RemoveSubscriptionsAsync(tenant, sourceId, actionId, objectId);
-        _notifyRecord.Publish(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId, ObjectId = objectId }, CacheNotifyAction.Remove);
+        await _notifyRecord.PublishAsync(new SubscriptionRecord { Tenant = tenant, SourceId = sourceId, ActionId = actionId, ObjectId = objectId }, CacheNotifyAction.Remove);
     }
 
     public async Task<IEnumerable<SubscriptionMethod>> GetSubscriptionMethodsAsync(int tenant, string sourceId, string actionId, string recipientId)
@@ -180,7 +172,7 @@ public class CachedSubscriptionService : ISubscriptionService
     public async Task SetSubscriptionMethodAsync(SubscriptionMethod m)
     {
         await _service.SetSubscriptionMethodAsync(m);
-        _notifyMethod.Publish(m, CacheNotifyAction.Any);
+        await _notifyMethod.PublishAsync(m, CacheNotifyAction.Any);
     }
 
 
@@ -228,15 +220,16 @@ internal class SubsciptionsStore
 
     public IEnumerable<SubscriptionRecord> GetSubscriptions(string recipientId, string objectId)
     {
+        var objId = objectId ?? string.Empty;
         return recipientId != null ?
             _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionRecord>() :
-            _recordsByObj.ContainsKey(objectId ?? string.Empty) ? _recordsByObj[objectId ?? string.Empty].ToList() : new List<SubscriptionRecord>();
+            _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : new List<SubscriptionRecord>();
     }
 
     public SubscriptionRecord GetSubscription(string recipientId, string objectId)
     {
         return _recordsByRec.TryGetValue(recipientId, out var value) ?
-            value.Where(s => s.ObjectId == (objectId ?? "")).FirstOrDefault() :
+            value.Find(s => s.ObjectId == (objectId ?? "")) :
             null;
     }
 
@@ -276,7 +269,7 @@ internal class SubsciptionsStore
     public void SetSubscriptionMethod(SubscriptionMethod m)
     {
         _methods.RemoveAll(r => r.Tenant == m.Tenant && r.Source == m.Source && r.Action == m.Action && r.Recipient == m.Recipient);
-        if (m.Methods != null && 0 < m.Methods.Length)
+        if (m.Methods is { Length: > 0 })
         {
             _methods.Add(m);
         }

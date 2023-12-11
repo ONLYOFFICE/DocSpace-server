@@ -724,4 +724,13 @@
   <data name="CountryCol" xml:space="preserve">
     <value>国</value>
   </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>外部リンクが作成されました：{0}．役割：{1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>外部リンクが削除されました：{0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>外部リンクが更新されました：{0}．役割：{1}</value>
+  </data>
 </root>

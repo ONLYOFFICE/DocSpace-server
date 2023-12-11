@@ -1,7 +1,7 @@
 h1
 {
     color: #333333;
-    font-size: 40px;
+    font-size: 30px;
     font-weight: bold;
     margin: 0;
 }
@@ -42,7 +42,7 @@ ol li, ul li {
 
 a, p a
 {
-    color: #0078BD !important;
+    color: #FF6F3D !important;
     word-wrap: break-word !important;
 }
 
@@ -98,9 +98,6 @@ td
 }
 
 a:-webkit-any-link {
-    color: #0078BD;
+    color: #FF6F3D;
     word-wrap: break-word !important;
-}
-a {
-    color: #FF6F3D !important;
 }
