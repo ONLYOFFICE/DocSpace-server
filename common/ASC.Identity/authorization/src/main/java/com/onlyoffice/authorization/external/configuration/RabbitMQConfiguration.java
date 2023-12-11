@@ -1,11 +1,10 @@
 /**
  *
  */
-package com.onlyoffice.authorization.external.messaging.configuration;
+package com.onlyoffice.authorization.external.configuration;
 
 import com.onlyoffice.authorization.core.transfer.messaging.AuthorizationMessage;
 import com.onlyoffice.authorization.core.transfer.messaging.ConsentMessage;
-import com.onlyoffice.authorization.external.messaging.configuration.GenericQueueConfiguration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.amqp.core.AcknowledgeMode;
