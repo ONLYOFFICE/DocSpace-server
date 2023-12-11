@@ -244,8 +244,11 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
         MDC.clear();
 
-        var tasks = new ArrayList<Callable<Boolean>>();
         var msg = this.queryUsecases.getById(id);
+        if (msg == null)
+            return null;
+
+        var tasks = new ArrayList<Callable<Boolean>>();
 
         MDC.put("id", id);
         log.info("Found authorization in the database");
@@ -346,6 +349,9 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
             return null;
         }
 
+        if (result == null)
+            return null;
+
         var tasks = new ArrayList<Callable<Boolean>>();
         if (result.getAuthorizationCodeValue() != null && !result.getAuthorizationCodeValue().isBlank())
             tasks.add(() -> {
@@ -401,10 +407,8 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private OAuth2Authorization toObject(Authorization entity) {
         RegisteredClient registeredClient = this.registeredClientRepository.findById(entity.getRegisteredClientId());
-        if (registeredClient == null) {
-            throw new DataRetrievalFailureException(
-                    "the registered client with id '" + entity.getRegisteredClientId() + "' was not found in the registered client repository.");
-        }
+        if (registeredClient == null)
+            return null;
 
         OAuth2Authorization.Builder builder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .id(entity.getId())

@@ -32,43 +32,36 @@ public interface AuthorizationRepository extends Repository<Authorization, Strin
 
     default Authorization getById(String id) throws EntityNotFoundException {
         return this.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with id %s", id)));
+                .orElse(null);
     }
 
     default Authorization getByPrincipalNameAndRegisteredClientId(String principalName, String registeredClientId) throws RuntimeException {
         return this.findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with principal %s and client id %s", principalName, registeredClientId)));
+                .orElse(null);
     }
 
     default Authorization getByState(String state) throws EntityNotFoundException {
         return this.findByState(state)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with state %s", state)));
+                .orElse(null);
     }
 
     default Authorization getByAuthorizationCodeValue(String authorizationCode) throws EntityNotFoundException {
         return this.findByAuthorizationCodeValue(authorizationCode)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with auth code %s", authorizationCode)));
+                .orElse(null);
     }
 
     default Authorization getByAccessTokenValue(String accessToken) throws EntityNotFoundException {
         return this.findByAccessTokenValue(accessToken)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with access token %s", accessToken)));
+                .orElse(null);
     }
 
     default Authorization getByRefreshTokenValue(String refreshToken) throws EntityNotFoundException {
         return this.findByRefreshTokenValue(refreshToken)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with refresh token %s", refreshToken)));
+                .orElse(null);
     }
 
     default Authorization getByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(String token) {
         return this.findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(token)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find authorization with parameter %s", token)));
+                .orElse(null);
     }
 }

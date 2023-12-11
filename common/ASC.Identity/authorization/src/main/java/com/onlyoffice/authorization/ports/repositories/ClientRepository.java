@@ -19,12 +19,10 @@ public interface ClientRepository extends Repository<Client, String>,
     Optional<Client> findClientByClientId(String clientId);
     default Client getById(String id) throws EntityNotFoundException {
         return this.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find client with id %s", id)));
+                .orElse(null);
     }
     default Client getClientByClientId(String clientId) throws RuntimeException {
         return this.findClientByClientId(clientId)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find client with client id %s", clientId)));
+                .orElse(null);
     }
 }

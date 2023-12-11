@@ -9,11 +9,11 @@ import com.onlyoffice.authorization.core.entities.Authorization;
  *
  */
 public interface AuthorizationPersistenceQueryUsecases {
-    Authorization getById(String id) throws RuntimeException;
-    Authorization getByPrincipalNameAndRegisteredClientId(String principalName, String registeredClientId) throws RuntimeException;
-    Authorization getByState(String state) throws RuntimeException;
-    Authorization getByAuthorizationCodeValue(String authorizationCode) throws RuntimeException;
-    Authorization getByAccessTokenValue(String accessToken) throws RuntimeException;
-    Authorization getByRefreshTokenValue(String refreshToken) throws RuntimeException;
+    Authorization getById(String id);
+    Authorization getByPrincipalNameAndRegisteredClientId(String principalName, String registeredClientId);
+    Authorization getByState(String state);
+    Authorization getByAuthorizationCodeValue(String authorizationCode);
+    Authorization getByAccessTokenValue(String accessToken);
+    Authorization getByRefreshTokenValue(String refreshToken);
     Authorization getByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValue(String token);
 }

@@ -36,6 +36,9 @@ public class ClientService implements ClientRetrieveUsecases {
         MDC.put("client_id", id);
         log.info("Trying to get client by id");
         var client = clientUsecases.getById(id);
+        if (client == null)
+            return null;
+
         if (!client.isEnabled()) {
             log.info("Client is disabled");
             MDC.clear();
@@ -50,6 +53,9 @@ public class ClientService implements ClientRetrieveUsecases {
         MDC.put("client_id", clientId);
         log.info("Trying to get client by client id");
         var client = clientUsecases.getClientByClientId(clientId);
+        if (client == null)
+            return null;
+
         if (!client.isEnabled()) {
             log.info("Client id disabled");
             MDC.clear();

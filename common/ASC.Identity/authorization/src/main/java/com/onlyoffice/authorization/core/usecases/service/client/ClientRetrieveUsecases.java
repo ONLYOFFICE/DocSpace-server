@@ -9,6 +9,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
  *
  */
 public interface ClientRetrieveUsecases {
-    RegisteredClient getClientById(String id) throws RuntimeException;
-    RegisteredClient getClientByClientId(String clientId) throws RuntimeException;
+    RegisteredClient getClientById(String id);
+    RegisteredClient getClientByClientId(String clientId);
 }

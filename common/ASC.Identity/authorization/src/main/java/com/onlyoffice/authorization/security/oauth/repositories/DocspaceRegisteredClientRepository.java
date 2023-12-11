@@ -3,6 +3,7 @@
  */
 package com.onlyoffice.authorization.security.oauth.repositories;
 
+import com.onlyoffice.authorization.core.exceptions.EntityNotFoundException;
 import com.onlyoffice.authorization.core.exceptions.ReadOnlyOperationException;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.security.crypto.aes.Cipher;
@@ -49,6 +50,9 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
 
         try {
             var client = retrieveUsecases.getClientById(id);
+            if (client == null)
+                throw new EntityNotFoundException("Client with this client_id does not exist");
+
             log.info("Found registered client in database. Decrypting the secret");
             client = RegisteredClient.from(client)
                     .clientSecret(cipher.decrypt(client.getClientSecret()))
@@ -77,6 +81,9 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
 
         try {
             var client = retrieveUsecases.getClientByClientId(clientId);
+            if (client == null)
+                throw new EntityNotFoundException("Client with this client_id does not exist");
+
             log.info("Found registered client in database. Decrypting the secret");
             client = RegisteredClient.from(client)
                     .clientSecret(cipher.decrypt(client.getClientSecret()))
