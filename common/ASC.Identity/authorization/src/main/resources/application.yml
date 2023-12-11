@@ -83,6 +83,19 @@ spring:
           time_zone: UTC
         dialect: org.hibernate.dialect.MySQLDialect
 
+caching:
+  redis:
+    addresses: ["redis://localhost:6379"]
+    limiters:
+      -
+        name: "identityAuthorizationLogin"
+        limit: 3
+        refresh: 1
+      -
+        name: "identityAuthorizationConsent"
+        limit: 3
+        refresh: 1
+
 resilience4j:
   bulkhead:
     instances:
