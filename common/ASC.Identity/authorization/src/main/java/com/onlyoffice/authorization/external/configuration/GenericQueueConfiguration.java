@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.onlyoffice.authorization.external.messaging.configuration;
+package com.onlyoffice.authorization.external.configuration;
 
 import lombok.Getter;
 import lombok.Setter;
