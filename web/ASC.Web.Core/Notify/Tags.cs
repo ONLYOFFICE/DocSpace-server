@@ -86,8 +86,6 @@ public static class CommonTags
 
     public const string ProductID = "__ProductID";
 
-    public const string ProductUrl = "__ProductUrl";
-
     public const string DateTime = "__DateTime";
 
     public const string AuthorID = "__AuthorID";

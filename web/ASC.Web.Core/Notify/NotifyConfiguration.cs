@@ -237,11 +237,8 @@ public class NotifyTransferRequest(TenantManager tenantManager,
             }
         }
 
-        commonLinkUtility.GetLocationByRequest(out var product, out _);
-        if (product == null && CallContext.GetData("asc.web.product_id") != null)
-        {
-            product = webItemManager[(Guid)CallContext.GetData("asc.web.product_id")] as IProduct;
-        }
+        var productid = CallContext.GetData("asc.web.product_id");
+        var product = productid != null ? webItemManager[(Guid)productid] as IProduct : null;
 
         var logoText = TenantWhiteLabelSettings.DefaultLogoText;
         if ((tenantExtra.Enterprise || coreBaseSettings.CustomMode) && !await MailWhiteLabelSettings.IsDefaultAsync(settingsManager))
@@ -254,7 +251,6 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(aid))));
         request.Arguments.Add(new TagValue(CommonTags.VirtualRootPath, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
         request.Arguments.Add(new TagValue(CommonTags.ProductID, product?.ID ?? Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.ProductUrl, commonLinkUtility.GetFullAbsolutePath(product != null ? product.StartURL : "~")));
         request.Arguments.Add(new TagValue(CommonTags.DateTime, tenantUtil.DateTimeNow()));
         request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
         request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())));
