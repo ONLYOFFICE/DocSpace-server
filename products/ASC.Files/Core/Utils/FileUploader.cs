@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class FileUploader(FilesSettingsHelper filesSettingsHelper,
+public class FileUploader(
         FileUtility fileUtility,
         UserManager userManager,
         TenantManager tenantManager,
