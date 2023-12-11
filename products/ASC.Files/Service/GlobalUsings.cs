@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,6 +39,7 @@ global using ASC.Core.Billing;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Hosting.Interfaces;
 global using ASC.Core.Common.Quota;
@@ -64,10 +65,12 @@ global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
+global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Expired;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
+global using ASC.Files.Service.RoomIndexExport;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.Thumbnail.IntegrationEvents.EventHandling;
 global using ASC.Web.Core;
@@ -84,6 +87,7 @@ global using ASC.Web.Studio.Utility;
 global using Autofac;
 
 global using Microsoft.AspNetCore.Builder;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
 

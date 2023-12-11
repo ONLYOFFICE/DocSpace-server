@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,78 +26,100 @@
 
 namespace ASC.People.Api;
 
-public class ReassignController : ApiControllerBase
-{
-    private Tenant Tenant => _apiContext.Tenant;
-
-    private readonly PermissionContext _permissionContext;
-    private readonly QueueWorkerReassign _queueWorkerReassign;
-    private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
-    private readonly ApiContext _apiContext;
-    private readonly SecurityContext _securityContext;
-
-    public ReassignController(
-        PermissionContext permissionContext,
+[DefaultRoute("reassign")]
+public class ReassignController(PermissionContext permissionContext,
         QueueWorkerReassign queueWorkerReassign,
         UserManager userManager,
         AuthContext authContext,
-        ApiContext apiContext,
+        TenantManager tenantManager,
         SecurityContext securityContext)
+    : ApiControllerBase
     {
-        _permissionContext = permissionContext;
-        _queueWorkerReassign = queueWorkerReassign;
-        _userManager = userManager;
-        _authContext = authContext;
-        _apiContext = apiContext;
-        _securityContext = securityContext;
+    /// <summary>
+    /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
+    /// </summary>
+    /// <short>Get the reassignment progress</short>
+    /// <param type="System.Guid, System" name="userId">User ID whose data is reassigned</param>
+    /// <category>User data</category>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
+    /// <path>api/2.0/people/reassign/progress/{userid}</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("progress/{userid:guid}")]
+    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(Guid userId)
+    {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
+
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var progressItem = queueWorkerReassign.GetProgressItemStatus(tenant.Id, userId);
+
+        return TaskProgressResponseDto.Get(progressItem);
     }
 
-    [HttpGet("reassign/progress")]
-    public ReassignProgressItem GetReassignProgress(Guid userId)
+    /// <summary>
+    /// Starts the data reassignment for the user with the ID specified in the request.
+    /// </summary>
+    /// <short>Start the data reassignment</short>
+    /// <param type="ASC.People.ApiModels.RequestDto.StartReassignRequestDto, ASC.People" name="inDto">Request parameters for starting the reassignment process</param>
+    /// <category>User data</category>
+    /// <returns type="ASC.People.ApiModels.ResponseDto.TaskProgressResponseDto, ASC.People">Reassignment progress</returns>
+    /// <path>api/2.0/people/reassign/start</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("start")]
+    public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
     {
-        _permissionContext.DemandPermissions(Constants.Action_EditUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        return _queueWorkerReassign.GetProgressItemStatus(Tenant.Id, userId);
+        var toUser = await userManager.GetUsersAsync(inDto.ToUserId);
+
+        if (userManager.IsSystemUser(toUser.Id)
+            || await userManager.IsUserAsync(toUser)
+            || toUser.Status == EmployeeStatus.Terminated)
+        {
+            throw new ArgumentException("Can not reassign data to user with id = " + toUser.Id);
+        }
+
+        var fromUser = await userManager.GetUsersAsync(inDto.FromUserId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        
+        if (userManager.IsSystemUser(fromUser.Id)
+            || fromUser.IsOwner(tenant)
+            || fromUser.IsMe(authContext)
+            || await userManager.IsUserAsync(toUser)
+            || fromUser.Status != EmployeeStatus.Terminated)
+        {
+            throw new ArgumentException("Can not reassign data from user with id = " + fromUser.Id);
+        }
+
+        var progressItem = await queueWorkerReassign.StartAsync(tenant.Id, fromUser.Id, toUser.Id, securityContext.CurrentAccount.ID, true, inDto.DeleteProfile);
+
+        return TaskProgressResponseDto.Get(progressItem);
     }
 
-    [HttpPost("reassign/start")]
-    public ReassignProgressItem StartReassign(StartReassignRequestDto inDto)
+    /// <summary>
+    /// Terminates the data reassignment for the user with the ID specified in the request.
+    /// </summary>
+    /// <short>Terminate the data reassignment</short>
+    /// <param type="ASC.People.ApiModels.RequestDto.TerminateRequestDto, ASC.People" name="inDto">Request parameters for terminating the reassignment process</param>
+    /// <category>User data</category>
+    /// <path>api/2.0/people/reassign/terminate</path>
+    /// <httpMethod>PUT</httpMethod>
+    /// <returns></returns>
+    [HttpPut("terminate")]
+    public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
     {
-        _permissionContext.DemandPermissions(Constants.Action_EditUser);
+        await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
-        var fromUser = _userManager.GetUsers(inDto.FromUserId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var progressItem = queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
-        if (fromUser == null || fromUser.Id == Constants.LostUser.Id)
+        if (progressItem != null)
         {
-            throw new ArgumentException("User with id = " + inDto.FromUserId + " not found");
+            queueWorkerReassign.Terminate(tenant.Id, inDto.UserId);
+
+            progressItem.Status = DistributedTaskStatus.Canceled;
+            progressItem.IsCompleted = true;
         }
 
-        if (fromUser.IsOwner(Tenant) || fromUser.IsMe(_authContext) || fromUser.Status != EmployeeStatus.Terminated)
-        {
-            throw new ArgumentException("Can not delete user with id = " + inDto.FromUserId);
-        }
-
-        var toUser = _userManager.GetUsers(inDto.ToUserId);
-
-        if (toUser == null || toUser.Id == Constants.LostUser.Id)
-        {
-            throw new ArgumentException("User with id = " + inDto.ToUserId + " not found");
-        }
-
-        if (_userManager.IsUser(toUser) || toUser.Status == EmployeeStatus.Terminated)
-        {
-            throw new ArgumentException("Can not reassign data to user with id = " + inDto.ToUserId);
-        }
-
-        return _queueWorkerReassign.Start(Tenant.Id, inDto.FromUserId, inDto.ToUserId, _securityContext.CurrentAccount.ID, inDto.DeleteProfile);
-    }
-
-    [HttpPut("reassign/terminate")]
-    public void TerminateReassign(TerminateRequestDto inDto)
-    {
-        _permissionContext.DemandPermissions(Constants.Action_EditUser);
-
-        _queueWorkerReassign.Terminate(Tenant.Id, inDto.UserId);
+        return TaskProgressResponseDto.Get(progressItem);
     }
 }

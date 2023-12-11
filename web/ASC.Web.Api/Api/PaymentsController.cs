@@ -1,56 +1,41 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Api.Controllers;
 
+///<summary>
+/// Portal information access.
+///</summary>
+///<name>portal</name>
 [Scope]
-[DefaultRoute]
+[DefaultRoute("payment")]
 [ApiController]
 [AllowNotPayment]
 [ControllerName("portal")]
-public class PaymentController : ControllerBase
-{
-    private readonly ApiContext _apiContext;
-    private readonly UserManager _userManager;
-    private readonly TenantManager _tenantManager;
-    private readonly ITariffService _tariffService;
-    private readonly SecurityContext _securityContext;
-    private readonly RegionHelper _regionHelper;
-    private readonly QuotaHelper _quotaHelper;
-    private readonly IMemoryCache _memoryCache;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly MessageService _messageService;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly int _maxCount = 10;
-    private readonly int _expirationMinutes = 2;
-    protected Tenant Tenant { get { return _apiContext.Tenant; } }
-
-    public PaymentController(
-        ApiContext apiContext,
-        UserManager userManager,
+public class PaymentController(UserManager userManager,
         TenantManager tenantManager,
         ITariffService tariffService,
         SecurityContext securityContext,
@@ -60,61 +45,98 @@ public class PaymentController : ControllerBase
         IHttpContextAccessor httpContextAccessor,
         MessageService messageService,
         StudioNotifyService studioNotifyService)
-    {
-        _apiContext = apiContext;
-        _userManager = userManager;
-        _tenantManager = tenantManager;
-        _tariffService = tariffService;
-        _securityContext = securityContext;
-        _regionHelper = regionHelper;
-        _quotaHelper = tariffHelper;
-        _memoryCache = memoryCache;
-        _httpContextAccessor = httpContextAccessor;
-        _messageService = messageService;
-        _studioNotifyService = studioNotifyService;
-    }
+    : ControllerBase
+{
+    private readonly int _maxCount = 10;
+    private readonly int _expirationMinutes = 2;
 
-    [HttpPut("payment/url")]
-    public async Task<Uri> GetPaymentUrl(PaymentUrlRequestsDto inDto)
+    /// <summary>
+    /// Returns the URL to the payment page.
+    /// </summary>
+    /// <short>
+    /// Get the payment page URL
+    /// </short>
+    /// <category>Payment</category>
+    /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
+    /// <returns type="System.Uri, System">The URL to the payment page</returns>
+    /// <path>api/2.0/portal/payment/url</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("url")]
+    public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        if (_tariffService.GetPayments(Tenant.Id).Any() ||
-            !_userManager.IsDocSpaceAdmin(_securityContext.CurrentAccount.ID))
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        
+        if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
+            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
         {
             return null;
         }
 
-        var currency = _regionHelper.GetCurrencyFromRequest();
-
-        return await _tariffService.GetShoppingUri(Tenant.Id, currency,
-            Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName,
-            _userManager.GetUsers(_securityContext.CurrentAccount.ID).Email,
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
+        
+        return await tariffService.GetShoppingUriAsync(
+            tenant.Id,
+            tenant.AffiliateId,
+            tenant.PartnerId,
+            currency,
+            CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+            (await userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).Email,
             inDto.Quantity,
             inDto.BackUrl);
     }
 
-    [HttpPut("payment/update")]
-    public async Task<bool> PaymentUpdate(PaymentUrlRequestsDto inDto)
+    /// <summary>
+    /// Updates the quantity of payment.
+    /// </summary>
+    /// <short>
+    /// Update the payment quantity
+    /// </short>
+    /// <category>Payment</category>
+    /// <param type="ASC.Web.Api.Models.PaymentUrlRequestsDto, ASC.Web.Api" name="inDto">Payment URL request parameters</param>
+    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
+    /// <path>api/2.0/portal/payment/update</path>
+    /// <httpMethod>PUT</httpMethod>
+    [HttpPut("update")]
+    public async Task<bool> PaymentUpdateAsync(PaymentUrlRequestsDto inDto)
     {
-        var payerId = _tariffService.GetTariff(Tenant.Id).CustomerId;
-        var payer = _userManager.GetUserByEmail(payerId);
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
 
-        if (!_tariffService.GetPayments(Tenant.Id).Any() ||
-            _securityContext.CurrentAccount.ID != payer.Id)
+        if (!(await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
+            securityContext.CurrentAccount.ID != payer.Id)
         {
             return false;
         }
 
-        return await _tariffService.PaymentChange(Tenant.Id, inDto.Quantity);
+        return await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
     }
 
-    [HttpGet("payment/account")]
-    public object GetPaymentAccount(string backUrl)
+    /// <summary>
+    /// Returns the URL to the payment account.
+    /// </summary>
+    /// <short>
+    /// Get the payment account
+    /// </short>
+    /// <category>Payment</category>
+    /// <param type="System.String, System" name="backUrl">Back URL</param>
+    /// <returns type="System.Object, System">The URL to the payment account</returns>
+    /// <path>api/2.0/portal/payment/account</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("account")]
+    public async Task<object> GetPaymentAccountAsync(string backUrl)
     {
-        var payerId = _tariffService.GetTariff(Tenant.Id).CustomerId;
-        var payer = _userManager.GetUserByEmail(payerId);
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
 
-        if (_securityContext.CurrentAccount.ID != payer.Id &&
-            _securityContext.CurrentAccount.ID != Tenant.OwnerId)
+        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
+
+        if (securityContext.CurrentAccount.ID != payer.Id &&
+            securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
             return null;
         }
@@ -123,21 +145,42 @@ public class PaymentController : ControllerBase
         return !string.IsNullOrEmpty(backUrl) ? $"{result}?backUrl={backUrl}" : result;
     }
 
-    [HttpGet("payment/prices")]
-    public object GetPrices()
+    /// <summary>
+    /// Returns the available portal prices.
+    /// </summary>
+    /// <short>
+    /// Get prices
+    /// </short>
+    /// <category>Payment</category>
+    /// <returns type="System.Object, System">List of available portal prices</returns>
+    /// <path>api/2.0/portal/payment/prices</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("prices")]
+    public async Task<object> GetPricesAsync()
     {
-        var currency = _regionHelper.GetCurrencyFromRequest();
-        var result = _tenantManager.GetProductPriceInfo()
-            .ToDictionary(pr => pr.Key, pr => pr.Value.ContainsKey(currency) ? pr.Value[currency] : 0);
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
+        var result = (await tenantManager.GetProductPriceInfoAsync())
+            .ToDictionary(pr => pr.Key, pr => pr.Value.GetValueOrDefault(currency, 0));
         return result;
     }
 
 
-    [HttpGet("payment/currencies")]
-    public IEnumerable<CurrenciesDto> GetCurrencies()
+    /// <summary>
+    /// Returns the available portal currencies.
+    /// </summary>
+    /// <short>
+    /// Get currencies
+    /// </short>
+    /// <category>Payment</category>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CurrenciesDto, ASC.Web.Api">List of available portal currencies</returns>
+    /// <path>api/2.0/portal/payment/currencies</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("currencies")]
+    public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
     {
-        var defaultRegion = _regionHelper.GetDefaultRegionInfo();
-        var currentRegion = _regionHelper.GetCurrentRegionInfo();
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
 
         yield return new CurrenciesDto(defaultRegion);
 
@@ -147,20 +190,52 @@ public class PaymentController : ControllerBase
         }
     }
 
-    [HttpGet("payment/quotas")]
-    public IAsyncEnumerable<QuotaDto> GetQuotas()
+    /// <summary>
+    /// Returns the available portal quotas.
+    /// </summary>
+    /// <short>
+    /// Get quotas
+    /// </short>
+    /// <category>Quota</category>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">List of available portal quotas</returns>
+    /// <path>api/2.0/portal/payment/quotas</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("quotas")]
+    public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
     {
-        return _quotaHelper.GetQuotas();
+        return await tariffHelper.GetQuotasAsync().ToListAsync();
     }
 
-    [HttpGet("payment/quota")]
-    public async Task<QuotaDto> GetQuota(bool refresh)
+    /// <summary>
+    /// Returns the payment information about the current portal quota.
+    /// </summary>
+    /// <short>
+    /// Get quota payment information
+    /// </short>
+    /// <category>Payment</category>
+    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.QuotaDto, ASC.Web.Api">Payment information about the current portal quota</returns>
+    /// <path>api/2.0/portal/payment/quota</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("quota")]
+    public async Task<QuotaDto> GetQuotaAsync(bool refresh)
     {
-        return await _quotaHelper.GetCurrentQuota(refresh);
+        return await tariffHelper.GetCurrentQuotaAsync(refresh);
     }
 
-    [HttpPost("payment/request")]
-    public void SendSalesRequest(SalesRequestsDto inDto)
+    /// <summary>
+    /// Sends a request for portal payment.
+    /// </summary>
+    /// <short>
+    /// Send a payment request
+    /// </short>
+    /// <category>Payment</category>
+    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.SalesRequestsDto, ASC.Web.Api" name="inDto">Portal payment request parameters</param>
+    /// <returns></returns>
+    /// <path>api/2.0/portal/payment/request</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("request")]
+    public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
     {
         if (!inDto.Email.TestEmailRegex())
         {
@@ -174,22 +249,19 @@ public class PaymentController : ControllerBase
 
         CheckCache("salesrequest");
 
-        _studioNotifyService.SendMsgToSales(inDto.Email, inDto.UserName, inDto.Message);
-        _messageService.Send(MessageAction.ContactSalesMailSent);
+        await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
+        await messageService.SendAsync(MessageAction.ContactSalesMailSent);
     }
 
-    internal void CheckCache(string basekey)
+    private void CheckCache(string baseKey)
     {
-        var key = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString() + basekey;
+        var key = httpContextAccessor.HttpContext.Connection.RemoteIpAddress + baseKey;
 
-        if (_memoryCache.TryGetValue<int>(key, out var count))
+        if (memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
         {
-            if (count > _maxCount)
-            {
-                throw new Exception(Resource.ErrorRequestLimitExceeded);
-            }
+            throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        _memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 }

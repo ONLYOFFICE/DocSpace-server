@@ -120,37 +120,39 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Hei, $UserName!
 
-Tervetuloa ONLYOFFICE DocSpaceen! Käyttäjäprofiilisi on lisätty onnistuneesti "${__VirtualRootPath }":"${__VirtualRootPath }". 
+Tervetuloa ONLYOFFICE DocSpaceen! Käyttäjäprofiilisi on lisätty onnistuneesti "${__VirtualRootPath }":"${__VirtualRootPath }". Nyt voit:
 
-*#Työskentele muiden käyttäjien kanssa huoneessa, johon sinut on kutsuttu*: yhteistyöhuoneet reaaliaikaiseen yhdessäkirjoittamiseen tai mukautetut huoneet joustavin asetuksin mihin tahansa tarkoitukseen*.
-*# Työstä eri tiedostomuotoja*: tekstiasiakirjoja, laskentataulukoita, esityksiä, digitaalisia lomakkeita, PDF:ä, e-kirjoja, multimediaa.
-*# Tee yhteistyötä dokumenteilla* kahdessa eri yhteismuokkaustilassa: reaaliajassa tai lukittamalla kappaleita. Jäljitä muutoksia, kommunikoi reaaliajassa käyttäen sisäänrakennettua chatia tai tehden audio- tai videopuheluita.
-*# Yhdistä mihin tahansa pilvitallennustilaan* ja työskentele vaihtelematta sovellusten välillä.
+* Työskentele muiden käyttäjien kanssa huoneessa, johon sinut on kutsuttu: *yhteistyöhuoneet reaaliaikaiseen yhdessäkirjoittamiseen tai mukautetut huoneet joustavin asetuksin mihin tahansa tarkoitukseen*.
 
-$GreenButton
+* *Työstä eri tiedostomuotoja*: tekstiasiakirjoja, laskentataulukoita, esityksiä, digitaalisia lomakkeita, PDF:ä, e-kirjoja, multimediaa.
 
-Jos tarvitset apua, selaa "Apukeskusta":"https://helpcenter.onlyoffice.com/" tai kysy "tukitiimiltämme":https://www.onlyoffice.com/support-contact-form.aspx".
-Ystävällisin terveisin,
-ONLYOFFICE Team
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+* *Tee yhteistyötä dokumenteilla* kahdessa eri yhteismuokkaustilassa: reaaliajassa tai lukittamalla kappaleita. Jäljitä muutoksia, kommunikoi reaaliajassa käyttäen sisäänrakennettua chatia tai tehden audio- tai videopuheluita.
+
+* *Yhdistä mihin tahansa pilvitallennustilaan* ja työskentele vaihtelematta sovellusten välillä.
+
+$OrangeButton
+
+Jos tarvitset apua, selaa "Apukeskusta"Help Center":"${__HelpLink}" tai kysy "tukitiimiltämme":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Haluatko vaihtaa pilvi office-tilisi salasanan? Klikkaa alla olevaa painiketta vahvistaaksesi.
 
-$GreenButton
+$OrangeButton
 
 Linkki on voimassa 7 päivää.
 
-Etkö halua vaihtaa salasanaasi?Jätä tämä viesti huomiotta.</value>
+Etkö halua vaihtaa salasanaasi? Jätä tämä viesti huomiotta.</value>
   </data>
   <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>h1. Tervetuloa Henkilökohtaiseen ONLYOFFICE:een
+    <value>h1.Tervetuloa Henkilökohtaiseen ONLYOFFICE:een
 
-Olet juuri luonut henkilökohtaisen toimistosi pilvessä. 
+Olet juuri luonut henkilökohtaisen toimistosi pilvessä.
 
-h3. Kyseessä on virtuaalinen työtila, jossa voit muokata ja johon voit tallentaa asiakirjoja, työskennellä niiden kanssa mistä tahansa tarjoten pääsyn myös ystävillesi tai kollegoillesi.
+h3.Kyseessä on virtuaalinen työtila, jossa voit muokata ja johon voit tallentaa asiakirjoja, työskennellä niiden kanssa mistä tahansa tarjoten pääsyn myös ystävillesi tai kollegoillesi.
 
-h3. Vinkkejä ONLYOFFICE:n nopeaa aloitusta varten:
+h3.Vinkkejä ONLYOFFICE:n nopeaa aloitusta varten:
 
 - Luo, katsele ja muokkaa tekstiasiakirjoja, taulukoita, esityksiä
 
@@ -162,19 +164,18 @@ h3. Vinkkejä ONLYOFFICE:n nopeaa aloitusta varten:
 
 - Käytä erilaisia lisäosia lisätäksesi lisäominaisuuksia.
 
-- Pääsy helposti henkilökohtaiseen pilveesi "Chrome-laajennuksen":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US" kautta.
+- Pääsy helposti henkilökohtaiseen pilveesi "Chrome-laajennuksen":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=fi" kautta.
 
 Voit myös muokata asiakirjoja offlinessa ilmaisten "työpöytäsovellusten":"https://www.onlyoffice.com/download-desktop.aspx" avulla tai hanki mobiilimuokkausohjelma "iOS:ille":"https://apps.apple.com/app/onlyoffice-documents/id944896972" tai "Androidille":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents".
 
-Ystävällisin terveisin,
-ONLYOFFICE- tiimi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Haluatko muuttaa pilvitoimistotilisi sähköpostiosoitetta?
 
-Klikkaa alla olevaa painiketta ja kirjaudu sisään pilveesi.
+Klikkaa alla olevaa painiketta ja kirjaudu sisään* pilveesi.
 
-$GreenButton
+$OrangeButton
 
 Linkki on 7 päivää voimassa.
 
@@ -189,40 +190,34 @@ olet juuri rekisteröinyt tili ONLYOFFICE-ratkaisussa henkilökohtaiseen käytt�
 
 Jos linkki ei avaudu, ole hyvä ja kopioi seuraava "$InviteLink":"$InviteLink" ja liitä se selaimesi osoitekenttään.
 
-Ystävällisin terveisin,
-ONLYOFFICE-tiimi</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Olet rekisteröinyt tilisi lopetuksen personal.onlyoffice.comissa. Seuraa linkkiä saattaaksesi pyynnön loppuun saakka (linkki on 7 päivää voimassa):
 
-Vahvista tilin lopetus
+$OrangeButton
 
 *Huomio*: Poistamisen jälkeen tilisi ja kaikki siihen liittyvät tiedot poistetaan lopullisesti "Tietosuojalausuntomme":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0" mukaisesti.
 
-"Lue lisää tilin lopetuksesta":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Lue lisää tilin lopetuksesta":"${__HelpLink}/administration/configuration.aspx"
 
 Jätä tämä sähköposti huomiotta mikäli et halua jatkaa. 
 
-Jos sinulla on kysyttävää, ole hyvä ja ota meihin yhteyttä osoitteella "support@onlyoffice.com":"mailto:support@onlyoffice.com"
-Ystävällisin terveisin,
-ONLYOFFICE-tiimi</value>
+Jos sinulla on kysyttävää, ole hyvä ja ota meihin yhteyttä osoitteella "${__SupportEmail}":"mailto:${__SupportEmail}"
+
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>Hyvä $UserName,
 
-Tietojen siirtäminen käyttäjältä "$FromUserName":"$FromUserLink" on onnistunut. 
+Tietojen siirtäminen käyttäjältä "$FromUserName":"$FromUserLink" on onnistunut.
 
-Henkilötietojen poistaminen on sallittu ilmaiseksi:
-
-#Asiakirjat- $DocsSpace
-#Sähköposti -$MailSpace
-#Puhe - $TalkSpace</value>
+Henkilötietojen poistaminen salli $DocsSpace-n vapauttamisen</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>h2. Uusi portaali on rekisteröity
+    <value>h3.Uusi portaali on rekisteröity
 
-#Portaalin url:
-"${__VirtualRootPath}":"${__VirtualRootPath}"
+# Portaalin url: "${__VirtualRootPath}":"${__VirtualRootPath}"
 # Etunimi: $UserName
 # Sukunimi: $UserLastName
 # Sähköposti: $UserEmail

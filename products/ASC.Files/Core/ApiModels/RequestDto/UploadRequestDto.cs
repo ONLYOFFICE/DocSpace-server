@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,26 +26,50 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// </summary>
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
+    /// <summary>File</summary>
+    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
     public IFormFile File { get; set; }
+
+    /// <summary>Content-Type header</summary>
+    /// <type>System.Net.Mime.ContentType, System.Net.Mime</type>
     public ContentType ContentType { get; set; }
+
+    /// <summary>Content-Disposition header</summary>
+    /// <type>System.Net.Mime.ContentDisposition, System.Net.Mime</type>
     public ContentDisposition ContentDisposition { get; set; }
+
+    /// <summary>List of files when specified as multipart/form-data</summary>
+    /// <type>System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Http.IFormFile}, System.Collections.Generic</type>
     public IEnumerable<IFormFile> Files { get; set; }
+
+    /// <summary>Specifies whether to create a new file if it already exists or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool CreateNewIfExist { get; set; }
+
+    /// <summary>Specifies whether to upload documents in the original formats as well or not</summary>
+    /// <type>System.Nullable{System.Boolean}, System</type>
     public bool? StoreOriginalFileFlag { get; set; }
+
+    /// <summary>Specifies whether to keep the file converting status or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
     private bool _disposedValue;
 
+    /// <summary>Request input stream</summary>
+    /// <type>System.IO.Stream, System.IO</type>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
         set => _stream = value;
     }
 
-    protected virtual void Dispose(bool disposing)
+    public void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

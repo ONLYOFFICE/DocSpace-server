@@ -1,84 +1,75 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using File = Microsoft.SharePoint.Client.File;
+using Folder = Microsoft.SharePoint.Client.Folder;
+
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
-internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
-{
-    private readonly CrossDao _crossDao;
-    private readonly SharePointDaoSelector _sharePointDaoSelector;
-    private readonly IFileDao<int> _fileDao;
-
-    public SharePointFileDao(
-        IServiceProvider serviceProvider,
+internal class SharePointFileDao(IServiceProvider serviceProvider,
         UserManager userManager,
         TenantManager tenantManager,
         TenantUtil tenantUtil,
         IDbContextFactory<FilesDbContext> dbContextManager,
         SetupInfo setupInfo,
-        ILogger<SharePointFileDao> monitor,
         FileUtility fileUtility,
         CrossDao crossDao,
         SharePointDaoSelector sharePointDaoSelector,
         IFileDao<int> fileDao,
         TempPath tempPath,
-        AuthContext authContext)
-        : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor, fileUtility, tempPath, authContext)
+        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+    : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
+        fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
+{
+    public async Task InvalidateCacheAsync(string fileId)
     {
-        _crossDao = crossDao;
-        _sharePointDaoSelector = sharePointDaoSelector;
-        _fileDao = fileDao;
+        await SharePointProviderInfo.InvalidateStorageAsync();
     }
 
-    public Task InvalidateCacheAsync(string fileId)
+    public async Task<File<string>> GetFileAsync(string fileId)
     {
-        return ProviderInfo.InvalidateStorageAsync();
-    }
-
-    public Task<File<string>> GetFileAsync(string fileId)
-    {
-        return GetFileAsync(fileId, 1);
+        return await GetFileAsync(fileId, 1);
     }
 
     public async Task<File<string>> GetFileAsync(string fileId, int fileVersion)
     {
-        return ProviderInfo.ToFile(await ProviderInfo.GetFileByIdAsync(fileId));
+        return SharePointProviderInfo.ToFile(await SharePointProviderInfo.GetFileByIdAsync(fileId));
     }
 
     public async Task<File<string>> GetFileAsync(string parentId, string title)
     {
-        var files = await ProviderInfo.GetFolderFilesAsync(parentId);
+        var files = await SharePointProviderInfo.GetFolderFilesAsync(parentId);
 
-        return ProviderInfo.ToFile(files.FirstOrDefault(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase)));
+        return SharePointProviderInfo.ToFile(files.FirstOrDefault(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase)));
     }
 
     public async Task<File<string>> GetFileStableAsync(string fileId, int fileVersion = -1)
     {
-        return ProviderInfo.ToFile(await ProviderInfo.GetFileByIdAsync(fileId));
+        return SharePointProviderInfo.ToFile(await SharePointProviderInfo.GetFileByIdAsync(fileId));
     }
 
     public async IAsyncEnumerable<File<string>> GetFileHistoryAsync(string fileId)
@@ -96,11 +87,12 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
         foreach (var fileId in fileIds)
         {
-            yield return ProviderInfo.ToFile(await ProviderInfo.GetFileByIdAsync(fileId));
+            yield return SharePointProviderInfo.ToFile(await SharePointProviderInfo.GetFileByIdAsync(fileId));
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent, bool checkShared = false)
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
+        string[] extension, bool searchInContent, bool checkShared = false)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -112,15 +104,13 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.Where(x => subjectGroup
-                                         ? _userManager.IsUserInGroup(x.CreateBy, subjectID)
+            files = files.WhereAwait(async x => subjectGroup
+                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                return AsyncEnumerable.Empty<File<string>>();
             case FilterType.DocumentsOnly:
                 files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
@@ -147,7 +137,7 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -164,21 +154,27 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
             files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
+        if (!extension.IsNullOrEmpty())
+        {
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
+        }
+
         return files;
     }
 
     public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
     {
-        var files = await ProviderInfo.GetFolderFilesAsync(parentId);
+        var files = await SharePointProviderInfo.GetFolderFilesAsync(parentId);
 
         foreach (var entry in files)
         {
-            yield return ProviderInfo.ToFile(entry).Id;
+            yield return SharePointProviderInfo.ToFile(entry).Id;
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1)
+    public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -186,48 +182,46 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         }
 
         //Get only files
-        var folderFiles = await ProviderInfo.GetFolderFilesAsync(parentId);
-        var files = folderFiles.Select(r => ProviderInfo.ToFile(r));
+        var folderFiles = await SharePointProviderInfo.GetFolderFilesAsync(parentId);
+        var files = folderFiles.Select(r => SharePointProviderInfo.ToFile(r)).ToAsyncEnumerable();
 
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.Where(x => subjectGroup
-                                         ? _userManager.IsUserInGroup(x.CreateBy, subjectID)
+            files = files.WhereAwait(async x => subjectGroup
+                                         ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
 
         switch (filterType)
         {
-            case FilterType.FoldersOnly:
-                yield break;
             case FilterType.DocumentsOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Document);
                 break;
             case FilterType.OFormOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OForm);
                 break;
             case FilterType.OFormTemplateOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.OFormTemplate);
                 break;
             case FilterType.PresentationsOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Presentation);
                 break;
             case FilterType.SpreadsheetsOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Spreadsheet).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Spreadsheet);
                 break;
             case FilterType.ImagesOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Image).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Image);
                 break;
             case FilterType.ArchiveOnly:
-                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Archive).ToList();
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Archive);
                 break;
             case FilterType.MediaOnly:
                 files = files.Where(x =>
                 {
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
 
-                    return fileType == FileType.Audio || fileType == FileType.Video;
+                    return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
             case FilterType.ByExtension:
@@ -241,13 +235,16 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1).ToList();
+            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
         }
 
-        if (orderBy == null)
+        if (!extension.IsNullOrEmpty())
         {
-            orderBy = new OrderBy(SortedByType.DateAndTime, false);
+            extension = extension.Select(e => e.Trim().ToLower()).ToArray();
+            files = files.Where(x => extension.Contains(FileUtility.GetFileExtension(x.Title)));
         }
+
+        orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
 
         files = orderBy.SortedBy switch
         {
@@ -255,10 +252,10 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
             SortedByType.AZ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
             SortedByType.DateAndTime => orderBy.IsAsc ? files.OrderBy(x => x.ModifiedOn) : files.OrderByDescending(x => x.ModifiedOn),
             SortedByType.DateAndTimeCreation => orderBy.IsAsc ? files.OrderBy(x => x.CreateOn) : files.OrderByDescending(x => x.CreateOn),
-            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title),
+            _ => orderBy.IsAsc ? files.OrderBy(x => x.Title) : files.OrderByDescending(x => x.Title)
         };
 
-        foreach (var f in files)
+        await foreach (var f in files)
         {
             yield return f;
         }
@@ -271,13 +268,13 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset)
     {
-        var fileToDownload = await ProviderInfo.GetFileByIdAsync(file.Id);
+        var fileToDownload = await SharePointProviderInfo.GetFileByIdAsync(file.Id);
         if (fileToDownload == null)
         {
             throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMassage_FileNotFound);
         }
 
-        var fileStream = await ProviderInfo.GetFileStreamAsync(fileToDownload.ServerRelativeUrl, (int)offset);
+        var fileStream = await SharePointProviderInfo.GetFileStreamAsync(fileToDownload.ServerRelativeUrl, (int)offset);
 
         return fileStream;
     }
@@ -292,26 +289,21 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
         return Task.FromResult(false);
     }
 
-    public Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(fileStream);
 
-        return internalSaveFileAsync(file, fileStream);
-    }
-
-    private async Task<File<string>> internalSaveFileAsync(File<string> file, Stream fileStream)
-    {
         if (file.Id != null)
         {
-            var sharePointFile = await ProviderInfo.CreateFileAsync(file.Id, fileStream);
+            var sharePointFile = await SharePointProviderInfo.CreateFileAsync(file.Id, fileStream);
 
-            var resultFile = ProviderInfo.ToFile(sharePointFile);
+            var resultFile = SharePointProviderInfo.ToFile(sharePointFile);
             if (!sharePointFile.Name.Equals(file.Title))
             {
-                var folder = await ProviderInfo.GetFolderByIdAsync(file.ParentId);
+                var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
                 file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
 
-                var id = await ProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
+                var id = await SharePointProviderInfo.RenameFileAsync(DaoSelector.ConvertId(resultFile.Id), file.Title);
 
                 return await GetFileAsync(DaoSelector.ConvertId(id));
             }
@@ -321,36 +313,36 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
         if (file.ParentId != null)
         {
-            var folder = await ProviderInfo.GetFolderByIdAsync(file.ParentId);
+            var folder = await SharePointProviderInfo.GetFolderByIdAsync(file.ParentId);
             file.Title = await GetAvailableTitleAsync(file.Title, folder, IsExistAsync);
 
-            return ProviderInfo.ToFile(await ProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
+            return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CreateFileAsync(folder.ServerRelativeUrl + "/" + file.Title, fileStream));
 
         }
 
         return null;
     }
 
-    public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
     {
-        return SaveFileAsync(file, fileStream);
+        return await SaveFileAsync(file, fileStream);
     }
 
-    public Task DeleteFileAsync(string fileId)
+    public async Task DeleteFileAsync(string fileId)
     {
-        return ProviderInfo.DeleteFileAsync(fileId);
+        await SharePointProviderInfo.DeleteFileAsync(fileId);
     }
 
     public async Task<bool> IsExistAsync(string title, object folderId)
     {
-        var files = await ProviderInfo.GetFolderFilesAsync(folderId);
+        var files = await SharePointProviderInfo.GetFolderFilesAsync(folderId);
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public async Task<bool> IsExistAsync(string title, Microsoft.SharePoint.Client.Folder folder)
+    public async Task<bool> IsExistAsync(string title, Folder folder)
     {
-        var files = await ProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
+        var files = await SharePointProviderInfo.GetFolderFilesAsync(folder.ServerRelativeUrl);
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
@@ -359,12 +351,12 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
     {
         if (toFolderId is int tId)
         {
-            return (TTo)Convert.ChangeType(await MoveFileAsync(fileId, tId), typeof(TTo));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId));
         }
 
         if (toFolderId is string tsId)
         {
-            return (TTo)Convert.ChangeType(await MoveFileAsync(fileId, tsId), typeof(TTo));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tsId));
         }
 
         throw new NotImplementedException();
@@ -372,9 +364,9 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<int> MoveFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharePointDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharePointDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             true)
             ;
 
@@ -383,8 +375,8 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<string> MoveFileAsync(string fileId, string toFolderId)
     {
-        var newFileId = await ProviderInfo.MoveFileAsync(fileId, toFolderId);
-        await UpdatePathInDBAsync(ProviderInfo.MakeId(fileId), newFileId);
+        var newFileId = await SharePointProviderInfo.MoveFileAsync(fileId, toFolderId);
+        await UpdatePathInDBAsync(SharePointProviderInfo.MakeId(fileId), newFileId);
 
         return newFileId;
     }
@@ -406,9 +398,9 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId)
     {
-        var moved = await _crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, _sharePointDaoSelector.ConvertId,
-            toFolderId, _fileDao, r => r,
+        var moved = await crossDao.PerformCrossDaoFileCopyAsync(
+            fileId, this, sharePointDaoSelector.ConvertId,
+            toFolderId, fileDao, r => r,
             false)
             ;
 
@@ -417,14 +409,14 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
     {
-        return ProviderInfo.ToFile(await ProviderInfo.CopyFileAsync(fileId, toFolderId));
+        return SharePointProviderInfo.ToFile(await SharePointProviderInfo.CopyFileAsync(fileId, toFolderId));
     }
 
 
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
     {
-        var newFileId = await ProviderInfo.RenameFileAsync(file.Id, newTitle);
-        await UpdatePathInDBAsync(ProviderInfo.MakeId(file.Id), newFileId);
+        var newFileId = await SharePointProviderInfo.RenameFileAsync(file.Id, newTitle);
+        await UpdatePathInDBAsync(SharePointProviderInfo.MakeId(file.Id), newFileId);
 
         return newFileId;
     }
@@ -487,14 +479,24 @@ internal class SharePointFileDao : SharePointDaoBase, IFileDao<string>
     {
         if (file.Id != null)
         {
-            file.Id = ProviderInfo.MakeId(file.Id);
+            file.Id = SharePointProviderInfo.MakeId(file.Id);
         }
 
         if (file.ParentId != null)
         {
-            file.ParentId = ProviderInfo.MakeId(file.ParentId);
+            file.ParentId = SharePointProviderInfo.MakeId(file.ParentId);
         }
 
         return file;
+    }
+
+    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    {
+        return Task.CompletedTask;
     }
 }

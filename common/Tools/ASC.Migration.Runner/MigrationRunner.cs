@@ -37,39 +37,18 @@ public class MigrationRunner
 
     public void RunApplyMigrations(string path, ProviderInfo dbProvider, ProviderInfo teamlabsiteProvider, ConfigurationInfo configurationInfo)
     {
-        var counter = 0;
 
-        foreach (var assembly in GetAssemblies(path))
+        var migrationContext = _dbContextActivator.CreateInstance(typeof(MigrationContext), dbProvider);
+        migrationContext.Database.Migrate();
+
+        var teamlabContext = _dbContextActivator.CreateInstance(typeof(TeamlabSiteContext), teamlabsiteProvider);
+        teamlabContext.Database.Migrate();
+
+        if (configurationInfo == ConfigurationInfo.Standalone)
         {
-            var ctxTypesFinder = new AssemblyContextFinder(assembly);
-
-            foreach (var contextType in ctxTypesFinder.GetIndependentContextsTypes())
-            {
-                var provider = contextType.GetInterfaces().Contains(typeof(ITeamlabsiteDb)) ? teamlabsiteProvider : dbProvider;
-
-                var context = _dbContextActivator.CreateInstance(contextType, provider);
-                context.Database.Migrate();
-
-                if (configurationInfo == ConfigurationInfo.Standalone)
-                {
-                    context = _dbContextActivator.CreateInstance(contextType, provider, ConfigurationInfo.Standalone);
-                    context.Database.Migrate();
-                }
-
-                counter++;
-            }
+            migrationContext = _dbContextActivator.CreateInstance(typeof(MigrationContext), dbProvider, ConfigurationInfo.Standalone);
+            migrationContext.Database.Migrate();
         }
-
-        Console.WriteLine($"Applied {counter} migrations");
-    }
-
-    private static IEnumerable<Assembly> GetAssemblies(string path)
-    {
-        var assemblyPaths = Directory.GetFiles(path, "ASC.*.dll");
-
-        foreach (var assembly in assemblyPaths)
-        {
-            yield return Assembly.LoadFrom(assembly);
-        }
+        Console.WriteLine("Applied migrations");
     }
 }

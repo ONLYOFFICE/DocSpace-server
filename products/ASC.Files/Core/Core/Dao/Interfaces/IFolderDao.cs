@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -60,12 +60,12 @@ public interface IFolderDao<T>
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
     IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(IEnumerable<T> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
-    
+
     IAsyncEnumerable<Folder<T>> GetFakeRoomsAsync(IEnumerable<T> parentsIds, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds);
@@ -86,24 +86,27 @@ public interface IFolderDao<T>
     /// <param name="subjectID"></param>
     /// <param name="searchText"></param>
     /// <param name="withSubfolders"></param>
-    /// <param name="tagIds"></param>
+    /// <param name="excludeSubject"></param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <param name="roomId"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool exludeSubject = false, int offset = 0, int count = -1);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
     /// </summary>
     /// <param name="folderIds"></param>
-    /// <param name="filterTypes"></param>
+    /// <param name="filterType"></param>
     /// <param name="subjectGroup"></param>
     /// <param name="subjectID"></param>
     /// <param name="searchText"></param>
     /// <param name="searchSubfolders"></param>
     /// <param name="checkShare"></param>
-    /// <param name="tagIds"></param>
+    /// <param name="excludeSubject"></param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, FilterType filterTypes = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool exludeSubject = false);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false);
 
     /// <summary>
     ///     Get folder, contains folder with id
@@ -154,10 +157,10 @@ public interface IFolderDao<T>
     /// <returns>
     /// Returns pair of file ID, file name, in which the same name.
     /// </returns>
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync(T[] folderIds, T to);
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync<TTo>(T[] folderIds, TTo to);
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync(T[] folderIds, string to);
-    Task<IDictionary<T, string>> CanMoveOrCopyAsync(T[] folderIds, int to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync(IEnumerable<T> folderIds, T to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync<TTo>(IEnumerable<T> folderIds, TTo to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync(IEnumerable<T> folderIds, string to);
+    Task<IDictionary<T, string>> CanMoveOrCopyAsync(IEnumerable<T> folderIds, int to);
 
     /// <summary>
     ///     Rename folder
@@ -212,20 +215,23 @@ public interface IFolderDao<T>
     /// <returns>Maximum size of file which can be uploaded to folder</returns>
     Task<long> GetMaxUploadSizeAsync(T folderId, bool chunkedUpload = false);
 
-    IDataWriteOperator CreateDataWriteOperator(
+    Task<IDataWriteOperator> CreateDataWriteOperatorAsync(
             T folderId,
             CommonChunkedUploadSession chunkedUploadSession,
             CommonChunkedUploadSessionHolder sessionHolder);
-    
+
+
+    Task<string> GetBackupExtensionAsync(T folderId);
 
     #region Only for TMFolderDao
 
     /// <summary>
     /// Set created by
     /// </summary>
-    /// <param name="folderIds"></param>
+    /// <param name="oldOwnerId"></param>
     /// <param name="newOwnerId"></param>
-    Task ReassignFoldersAsync(T[] folderIds, Guid newOwnerId);
+    /// <param name="exceptFolderIds"></param>
+    Task ReassignFoldersAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<T> exceptFolderIds);
 
 
     /// <summary>
@@ -282,8 +288,6 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDRecentAsync(bool createIfNotExists);
 
     /// <summary>
-
-    /// <summary>
     /// Returns id folder "Favorites"
     /// Only in TMFolderDao
     /// </summary>
@@ -304,6 +308,7 @@ public interface IFolderDao<T>
     /// Only in TMFolderDao
     /// </summary>
     /// <param name="createIfNotExists"></param>
+    /// <param name="userId"></param>
     /// <returns></returns>
     Task<T> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId = null);
 
@@ -370,7 +375,12 @@ public interface IFolderDao<T>
     /// <param name="fileEntry"></param>
     /// <returns></returns>
     Task<(int RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync<TTo>(FileEntry<TTo> fileEntry);
-    Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false);
+    Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
+        T roomId = default);
 
+    Task SetCustomOrder(T folderId, T parentFolderId, int order);
+
+    Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
+    
     #endregion
 }

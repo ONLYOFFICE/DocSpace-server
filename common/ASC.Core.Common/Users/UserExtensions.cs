@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -48,15 +48,26 @@ public static class UserExtensions
         return user != null && user.Id == id;
     }
 
-    public static bool IsDocSpaceAdmin(this UserManager userManager, Guid id)
+    public static async Task<bool> IsDocSpaceAdminAsync(this UserManager userManager, Guid id)
     {
-        var ui = userManager.GetUsers(id);
-        return userManager.IsDocSpaceAdmin(ui);
+        var ui = await userManager.GetUsersAsync(id);
+        return await userManager.IsDocSpaceAdminAsync(ui);
     }
 
-    public static bool IsDocSpaceAdmin(this UserManager userManager, UserInfo ui)
+    public static async Task<bool> IsDocSpaceAdminAsync(this UserManager userManager, UserInfo ui)
     {
-        return ui != null && userManager.IsUserInGroup(ui.Id, Constants.GroupAdmin.ID);
+        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupAdmin.ID);
+    }
+
+    public static async Task<bool> IsUserAsync(this UserManager userManager, Guid id)
+    {
+        var ui = await userManager.GetUsersAsync(id);
+        return await userManager.IsUserAsync(ui);
+    }
+
+    public static async Task<bool> IsUserAsync(this UserManager userManager, UserInfo ui)
+    {
+        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupUser.ID);
     }
 
     public static bool IsUser(this UserManager userManager, Guid id)
@@ -64,31 +75,31 @@ public static class UserExtensions
         var ui = userManager.GetUsers(id);
         return userManager.IsUser(ui);
     }
-
+    
     public static bool IsUser(this UserManager userManager, UserInfo ui)
     {
         return ui != null && userManager.IsUserInGroup(ui.Id, Constants.GroupUser.ID);
     }
 
-    public static bool IsCollaborator(this UserManager userManager, UserInfo userInfo)
+    public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, UserInfo userInfo)
     {
-        return userInfo != null && userManager.IsUserInGroup(userInfo.Id, Constants.GroupCollaborator.ID);
+        return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupCollaborator.ID);
     }
     
-    public static bool IsCollaborator(this UserManager userManager, Guid id)
+    public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, Guid id)
     {
-        var userInfo = userManager.GetUsers(id);
-        return userManager.IsCollaborator(userInfo);
+        var userInfo = await userManager.GetUsersAsync(id);
+        return await userManager.IsCollaboratorAsync(userInfo);
     }
 
-    public static bool IsOutsider(this UserManager userManager, Guid id)
+    public static async Task<bool> IsOutsiderAsync(this UserManager userManager, Guid id)
     {
-        return userManager.IsUser(id) && id == Constants.OutsideUser.Id;
+        return await userManager.IsUserAsync(id) && id == Constants.OutsideUser.Id;
     }
 
-    public static bool IsOutsider(this UserManager userManager, UserInfo ui)
+    public static async Task<bool> IsOutsiderAsync(this UserManager userManager, UserInfo ui)
     {
-        return userManager.IsUser(ui) && ui.Id == Constants.OutsideUser.Id;
+        return await userManager.IsUserAsync(ui) && ui.Id == Constants.OutsideUser.Id;
     }
 
     public static bool IsLDAP(this UserInfo ui)
@@ -112,16 +123,16 @@ public static class UserExtensions
         return !string.IsNullOrEmpty(ui.SsoNameId);
     }
 
-    public static EmployeeType GetUserType(this UserManager userManager, Guid id)
+    public static async Task<EmployeeType> GetUserTypeAsync(this UserManager userManager, Guid id)
     {
-        if (userManager.GetUsers(id).Equals(Constants.LostUser))
+        if ((await userManager.GetUsersAsync(id)).Equals(Constants.LostUser))
         {
             return EmployeeType.User;
         }
         
-        return userManager.IsDocSpaceAdmin(id) ? EmployeeType.DocSpaceAdmin : 
-            userManager.IsUser(id) ? EmployeeType.User : 
-            userManager.IsCollaborator(id) ? EmployeeType.Collaborator :
+        return await userManager.IsDocSpaceAdminAsync(id) ? EmployeeType.DocSpaceAdmin : 
+            await userManager.IsUserAsync(id) ? EmployeeType.User : 
+            await userManager.IsCollaboratorAsync(id) ? EmployeeType.Collaborator :
             EmployeeType.RoomAdmin;
     }
 

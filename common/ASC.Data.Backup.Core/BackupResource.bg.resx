@@ -123,4 +123,7 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Задайте парола</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Резервното копие е по-голямо от общия размер на портала</value>
+  </data>
 </root>

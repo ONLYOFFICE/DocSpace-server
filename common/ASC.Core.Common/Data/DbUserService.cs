@@ -1,95 +1,95 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Core.Data;
 
 [Scope]
-public class EFUserService : IUserService
-{
-    private readonly IDbContextFactory<UserDbContext> _dbContextFactory;
-    private readonly MachinePseudoKeys _machinePseudoKeys;
-    private readonly IMapper _mapper;
-
-    public EFUserService(
-        IDbContextFactory<UserDbContext> dbContextFactory,
+public class EFUserService(IDbContextFactory<UserDbContext> dbContextFactory,
         MachinePseudoKeys machinePseudoKeys,
         IMapper mapper)
+    : IUserService
+{
+    public async Task<Group> GetGroupAsync(int tenant, Guid id)
     {
-        _dbContextFactory = dbContextFactory;
-        _machinePseudoKeys = machinePseudoKeys;
-        _mapper = mapper;
-    }
-
-    public Group GetGroup(int tenant, Guid id)
-    {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        return GetGroupQuery(userDbContext, tenant)
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetGroupQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
-            .ProjectTo<Group>(_mapper.ConfigurationProvider)
-            .FirstOrDefault();
+            .ProjectTo<Group>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
-    public IEnumerable<Group> GetGroups(int tenant)
+    public async Task<IEnumerable<Group>> GetGroupsAsync(int tenant)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        return GetGroupQuery(userDbContext, tenant)
-            .ProjectTo<Group>(_mapper.ConfigurationProvider)
-            .ToList();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetGroupQuery(userDbContext, tenant)
+            .ProjectTo<Group>(mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetUserQuery(userDbContext, tenant)
+            .Where(r => r.Id == id)
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public UserInfo GetUser(int tenant, Guid id)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        using var userDbContext = dbContextFactory.CreateDbContext();
         return GetUserQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
-            .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
             .FirstOrDefault();
     }
 
-    public UserInfo GetUser(int tenant, string email)
+    public async Task<UserInfo> GetUserAsync(int tenant, string email)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        return GetUserQuery(userDbContext, tenant)
-            .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
-            .FirstOrDefault(r => r.Email == email && !r.Removed);
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetUserQuery(userDbContext, tenant)
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(r => r.Email == email && !r.Removed);
     }
 
-    public UserInfo GetUserByUserName(int tenant, string userName)
+    public async Task<UserInfo> GetUserByUserName(int tenant, string userName)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        return GetUserQuery(userDbContext, tenant)
-            .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
-            .FirstOrDefault(r => r.UserName == userName && !r.Removed);
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetUserQuery(userDbContext, tenant)
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(r => r.UserName == userName && !r.Removed);
     }
 
-    public UserInfo GetUserByPasswordHash(int tenant, string login, string passwordHash)
+    public async Task<UserInfo> GetUserByPasswordHashAsync(int tenant, string login, string passwordHash)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(login);
+        ArgumentException.ThrowIfNullOrEmpty(login);
 
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         if (Guid.TryParse(login, out var userId))
         {
             var pwdHash = GetPasswordHash(userId, passwordHash);
@@ -102,17 +102,16 @@ public class EFUserService : IUserService
                     User = user,
                     UserSecurity = security
                 })
-                .Where(r => r.UserSecurity.PwdHash == pwdHash)
-                ;
+                .Where(r => r.UserSecurity.PwdHash == pwdHash);
 
             if (tenant != Tenant.DefaultTenant)
             {
-                q = q.Where(r => r.UserSecurity.Tenant == tenant);
+                q = q.Where(r => r.UserSecurity.TenantId == tenant);
             }
 
-            return q.Select(r => r.User)
-                .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
-                .FirstOrDefault();
+            return await q.Select(r => r.User)
+                .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
         else
         {
@@ -120,13 +119,13 @@ public class EFUserService : IUserService
                 .Where(r => !r.Removed)
                 .Where(r => r.Email == login);
 
-            var users = q.ProjectTo<UserInfo>(_mapper.ConfigurationProvider).ToList();
+            var users = await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).ToListAsync();
             foreach (var user in users)
             {
                 var pwdHash = GetPasswordHash(user.Id, passwordHash);
 
-                var any = userDbContext.UserSecurity
-                    .Any(r => r.UserId == user.Id && (r.PwdHash == pwdHash));
+                var any = await userDbContext.UserSecurity
+                    .AnyAsync(r => r.UserId == user.Id && (r.PwdHash == pwdHash));
 
                 if (any)
                 {
@@ -138,117 +137,159 @@ public class EFUserService : IUserService
         }
     }
 
-    public IEnumerable<UserInfo> GetUsersAllTenants(IEnumerable<Guid> userIds)
+    public async Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         var q = userDbContext.Users
             .Where(r => userIds.Contains(r.Id))
             .Where(r => !r.Removed);
 
-        return q.ProjectTo<UserInfo>(_mapper.ConfigurationProvider).ToList();
+        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).ToListAsync();
     }
 
     public UserGroupRef GetUserGroupRef(int tenant, Guid groupId, UserGroupRefType refType)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        return GetUserGroupRefInternal(tenant, groupId, refType).SingleOrDefault();
+    }
+
+    public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
+    {
+        return await GetUserGroupRefInternal(tenant, groupId, refType).SingleOrDefaultAsync();
+    }
+
+    private IQueryable<UserGroupRef> GetUserGroupRefInternal(int tenant, Guid groupId, UserGroupRefType refType)
+    {
+        using var userDbContext = dbContextFactory.CreateDbContext();
         IQueryable<UserGroup> q = userDbContext.UserGroups;
 
         if (tenant != Tenant.DefaultTenant)
         {
-            q = q.Where(r => r.Tenant == tenant);
+            q = q.Where(r => r.TenantId == tenant);
+        }
+        return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed)
+            .ProjectTo<UserGroupRef>(mapper.ConfigurationProvider);
+    }
+
+    public async Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        IQueryable<UserGroup> q = userDbContext.UserGroups;
+
+        if (tenant != Tenant.DefaultTenant)
+        {
+            q = q.Where(r => r.TenantId == tenant);
         }
 
-        return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed)
-            .ProjectTo<UserGroupRef>(_mapper.ConfigurationProvider).SingleOrDefault();
+        return await q.ProjectTo<UserGroupRef>(mapper.ConfigurationProvider).ToDictionaryAsync(r => r.CreateKey(), r => r);
     }
 
     public IDictionary<string, UserGroupRef> GetUserGroupRefs(int tenant)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        using var userDbContext = dbContextFactory.CreateDbContext();
         IQueryable<UserGroup> q = userDbContext.UserGroups;
 
         if (tenant != Tenant.DefaultTenant)
         {
-            q = q.Where(r => r.Tenant == tenant);
+            q = q.Where(r => r.TenantId == tenant);
         }
 
-        return q.ProjectTo<UserGroupRef>(_mapper.ConfigurationProvider)
+        return q.ProjectTo<UserGroupRef>(mapper.ConfigurationProvider)
             .AsEnumerable().ToDictionary(r => r.CreateKey(), r => r);
     }
 
-    public DateTime GetUserPasswordStamp(int tenant, Guid id)
+    public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        var stamp = userDbContext.UserSecurity
-            .Where(r => r.Tenant == tenant)
-            .Where(r => r.UserId == id)
-            .Select(r => r.LastModified)
-            .FirstOrDefault();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var stamp = await Queries.LastModifiedAsync(userDbContext, tenant, id);
 
         return stamp ?? DateTime.MinValue;
     }
 
-    public byte[] GetUserPhoto(int tenant, Guid id)
+    public async Task<byte[]> GetUserPhotoAsync(int tenant, Guid id)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        var photo = userDbContext.Photos
-            .Where(r => r.Tenant == tenant)
-            .Where(r => r.UserId == id)
-            .Select(r => r.Photo)
-            .FirstOrDefault();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var photo = await Queries.PhotoAsync(userDbContext, tenant, id);
 
         return photo ?? Array.Empty<byte>();
     }
 
-    public IEnumerable<UserInfo> GetUsers(int tenant)
+    public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        return GetUserQuery(userDbContext, tenant)
-            .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
-            .ToList();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await GetUserQuery(userDbContext, tenant)
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
-    public IQueryable<UserInfo> GetUsers(int tenant, bool isDocSpaceAdmin, EmployeeStatus? employeeStatus, List<List<Guid>> includeGroups, List<Guid> excludeGroups, EmployeeActivationStatus? activationStatus, AccountLoginType? accountLoginType, string text, string sortBy, bool sortOrderAsc, long limit, long offset, out int total, out int count)
+    public async Task<int> GetUsersCountAsync(
+        int tenant,
+        bool isDocSpaceAdmin,
+        EmployeeStatus? employeeStatus,
+        List<List<Guid>> includeGroups,
+        List<Guid> excludeGroups,
+        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
+        EmployeeActivationStatus? activationStatus,
+        AccountLoginType? accountLoginType,
+        string text)
     {
-        var userDbContext = _dbContextFactory.CreateDbContext();
-        var totalQuery = GetUserQuery(userDbContext, tenant);
-        totalQuery = GetUserQueryForFilter(userDbContext, totalQuery, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, activationStatus, accountLoginType, text);
-        total = totalQuery.Count();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = GetUserQuery(userDbContext, tenant);
 
-        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, activationStatus, accountLoginType, text);
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
 
-        var orderedQuery = q.OrderBy(r => r.ActivationStatus == EmployeeActivationStatus.Pending);
-        q = orderedQuery;
+        return await q.CountAsync();
+    }
+
+    public async IAsyncEnumerable<UserInfo> GetUsers(
+        int tenant,
+        bool isDocSpaceAdmin,
+        EmployeeStatus? employeeStatus,
+        List<List<Guid>> includeGroups,
+        List<Guid> excludeGroups,
+        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
+        EmployeeActivationStatus? activationStatus,
+        AccountLoginType? accountLoginType,
+        string text,
+        Guid ownerId,
+        string sortBy,
+        bool sortOrderAsc,
+        long limit,
+        long offset)
+    {
+        if (limit <= 0)
+        {
+            yield break;
+        }
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = GetUserQuery(userDbContext, tenant);
+
+        q = GetUserQueryForFilter(userDbContext, q, isDocSpaceAdmin, employeeStatus, includeGroups, excludeGroups, combinedGroups, activationStatus, accountLoginType, text);
+
+        var orderedQuery = q.OrderBy(r => r.ActivationStatus);
 
         if (!string.IsNullOrEmpty(sortBy))
         {
             if (sortBy == "type")
             {
-                var q1 = from user in q
-                         join userGroup in userDbContext.UserGroups.Where(g => !g.Removed && (g.UserGroupId == Users.Constants.GroupAdmin.ID || g.UserGroupId == Users.Constants.GroupUser.ID
-                                 || g.UserGroupId == Users.Constants.GroupCollaborator.ID))
-                         on user.Id equals userGroup.Userid into joinedGroup
-                         from @group in joinedGroup.DefaultIfEmpty()
-                         select new { user, @group };
+                var q1 = (from user in q
+                    join userGroup in userDbContext.UserGroups.Where(g =>
+                        !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupUser.ID ||
+                                       g.UserGroupId == Constants.GroupCollaborator.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                    from @group in joinedGroup.DefaultIfEmpty()
+                    select new UserWithGroup { User = user, Group = @group });
 
-                if (sortOrderAsc)
-                {
-                    q = q1.OrderBy(r => r.user.ActivationStatus == EmployeeActivationStatus.Pending)
-                        .ThenBy(r => r.group == null ? 2 :
-                            r.group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 :
-                            r.group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4)
-                        .Select(r => r.user);
-                }
-                else
-                {
-                    q = q1.OrderBy(r => r.user.ActivationStatus == EmployeeActivationStatus.Pending)
-                        .ThenByDescending(u => u.group == null ? 2 :
-                            u.group.UserGroupId == Users.Constants.GroupAdmin.ID ? 1 :
-                            u.group.UserGroupId == Users.Constants.GroupCollaborator.ID ? 3 : 4)
-                        .Select(r => r.user);
-                }
+                Expression<Func<UserWithGroup, int>> orderByUserType = u => 
+                    u.User.Id == ownerId ? 0 :
+                    u.Group == null ? 2 : 
+                    u.Group.UserGroupId == Constants.GroupAdmin.ID ? 1 : 
+                    u.Group.UserGroupId == Constants.GroupCollaborator.ID ? 3 : 4;
+                
+                q = (sortOrderAsc ? q1.OrderBy(orderByUserType) : q1.OrderByDescending(orderByUserType)).Select(r => r.User);
             }
             else
             {
@@ -256,193 +297,162 @@ public class EFUserService : IUserService
             }
         }
 
-        if (offset != 0)
+        if (offset > 0)
         {
             q = q.Skip((int)offset);
         }
 
-        if (limit != 0)
+        q = q.Take((int)limit);
+
+        await foreach (var user in q.ToAsyncEnumerable())
         {
-            q = q.Take((int)limit);
+            yield return mapper.Map<User, UserInfo>(user);
         }
-
-        count = q.Count();
-
-        return q.ProjectTo<UserInfo>(_mapper.ConfigurationProvider);
     }
 
     public IQueryable<UserInfo> GetUsers(int tenant, out int total)
     {
-        var userDbContext = _dbContextFactory.CreateDbContext();
-        total = userDbContext.Users.Count(r => r.Tenant == tenant);
+        using var userDbContext = dbContextFactory.CreateDbContext();
+        total = userDbContext.Users.Count(r => r.TenantId == tenant);
 
         return GetUserQuery(userDbContext, tenant)
-            .ProjectTo<UserInfo>(_mapper.ConfigurationProvider);
+            .ProjectTo<UserInfo>(mapper.ConfigurationProvider);
     }
 
-    public IEnumerable<int> GetTenantsWithFeeds(DateTime from)
+    public async Task<IEnumerable<int>> GetTenantsWithFeedsAsync(DateTime from)
     {
-        var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var tenants = userDbContext.Users.Where(u => u.LastModified > from).Select(u => u.Tenant).Distinct().ToList();
-
-        return tenants;
+        return await Queries.TenantIdsAsync(userDbContext, from).ToListAsync();
     }
 
-    public void RemoveGroup(int tenant, Guid id)
+    public async Task RemoveGroupAsync(int tenant, Guid id)
     {
-        RemoveGroup(tenant, id, false);
+        await RemoveGroupAsync(tenant, id, false);
     }
 
-    public void RemoveGroup(int tenant, Guid id, bool immediate)
+    public async Task RemoveGroupAsync(int tenant, Guid id, bool immediate)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        var ids = CollectGroupChilds(userDbContext, tenant, id);
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        var ids = await CollectGroupChildsAsync(userDbContext, tenant, id);
         var stringIds = ids.Select(r => r.ToString()).ToList();
 
         var strategy = userDbContext.Database.CreateExecutionStrategy();
 
-        strategy.Execute(async () =>
+        await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-
-            await userDbContext.Acl.Where(r => r.Tenant == tenant && ids.Any(i => i == r.Subject)).ExecuteDeleteAsync();
-            await userDbContext.Subscriptions.Where(r => r.Tenant == tenant && stringIds.Any(i => i == r.Recipient)).ExecuteDeleteAsync();
-            await userDbContext.SubscriptionMethods.Where(r => r.Tenant == tenant && stringIds.Any(i => i == r.Recipient)).ExecuteDeleteAsync();
-
-            var userGroups = userDbContext.UserGroups.Where(r => r.Tenant == tenant && ids.Any(i => i == r.UserGroupId));
-            var groups = userDbContext.Groups.Where(r => r.Tenant == tenant && ids.Any(i => i == r.Id));
+            await Queries.DeleteAclsByIdsAsync(userDbContext, tenant, ids);
+            await Queries.DeteteSubscriptionsByIdsAsync(userDbContext, tenant, stringIds);
+            await Queries.DeleteDbSubscriptionMethodsByIdsAsync(userDbContext, tenant, stringIds);
 
             if (immediate)
             {
-                await userGroups.ExecuteDeleteAsync();
-                await groups.ExecuteDeleteAsync();
+                await Queries.DeteleUserGroupsByIdsAsync(userDbContext, tenant, ids);
+                await Queries.DeleteDbGroupsAsync(userDbContext, tenant, ids);
             }
             else
             {
-                await userGroups.ExecuteUpdateAsync(ug => ug
-                .SetProperty(p => p.Removed, true)
-                .SetProperty(p => p.LastModified, DateTime.UtcNow));
-
-                await groups.ExecuteUpdateAsync(g => g
-                .SetProperty(p => p.Removed, true)
-                .SetProperty(p => p.LastModified, DateTime.UtcNow));
+                await Queries.UpdateUserGroupsByIdsAsync(userDbContext, tenant, ids);
+                await Queries.UpdateDbGroupsAsync(userDbContext, tenant, ids);
             }
 
-            await tr.CommitAsync();
-        }).GetAwaiter()
-          .GetResult();
+            await tx.CommitAsync();
+        });
     }
 
-    public void RemoveUser(int tenant, Guid id)
+    public async Task RemoveUserAsync(int tenant, Guid id)
     {
-        RemoveUser(tenant, id, false);
+        await RemoveUserAsync(tenant, id, false);
     }
 
-    public void RemoveUser(int tenant, Guid id, bool immediate)
+    public async Task RemoveUserAsync(int tenant, Guid id, bool immediate)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
         var strategy = userDbContext.Database.CreateExecutionStrategy();
 
-        strategy.Execute(async () =>
+        await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var tr = await dbContext.Database.BeginTransactionAsync();
 
-            await userDbContext.Acl.Where(r => r.Tenant == tenant && r.Subject == id).ExecuteDeleteAsync();
-            await userDbContext.Subscriptions.Where(r => r.Tenant == tenant && r.Recipient == id.ToString()).ExecuteDeleteAsync();
-            await userDbContext.SubscriptionMethods.Where(r => r.Tenant == tenant && r.Recipient == id.ToString()).ExecuteDeleteAsync();
-            await userDbContext.Photos.Where(r => r.Tenant == tenant && r.UserId == id).ExecuteDeleteAsync();
-
-            var userGroups = userDbContext.UserGroups.Where(r => r.Tenant == tenant && r.Userid == id);
-            var users = userDbContext.Users.Where(r => r.Tenant == tenant && r.Id == id);
-            var userSecurity = userDbContext.UserSecurity.Where(r => r.Tenant == tenant && r.UserId == id);
+            await Queries.DeleteAclsAsync(dbContext, tenant, id);
+            await Queries.DeleteSubscriptionsAsync(dbContext, tenant, id.ToString());
+            await Queries.DeleteDbSubscriptionMethodsAsync(dbContext, tenant, id.ToString());
+            await Queries.DeleteUserPhotosAsync(dbContext, tenant, id);
 
             if (immediate)
             {
-                await userGroups.ExecuteDeleteAsync();
-                await users.ExecuteDeleteAsync();
-                await userSecurity.ExecuteDeleteAsync();
+                await Queries.DeleteUserGroupsAsync(dbContext, tenant, id);
+                await Queries.DeleteUsersAsync(dbContext, tenant, id);
+                await Queries.DeleteUserSecuritiesAsync(dbContext, tenant, id);
             }
             else
             {
-                await userGroups.ExecuteUpdateAsync(ug => ug
-                .SetProperty(p => p.Removed, true)
-                .SetProperty(p => p.LastModified, DateTime.UtcNow));
-
-                await users.ExecuteUpdateAsync(ug => ug
-                 .SetProperty(p => p.Removed, true)
-                 .SetProperty(p => p.LastModified, DateTime.UtcNow)
-                 .SetProperty(p => p.TerminatedDate, DateTime.UtcNow)
-                 .SetProperty(p => p.Status, EmployeeStatus.Terminated)
-                 );
+                await Queries.UpdateUserGroupsAsync(dbContext, tenant, id);
+                await Queries.UpdateUsersAsync(dbContext, tenant, id);
             }
-
             await tr.CommitAsync();
-        }).GetAwaiter()
-          .GetResult();
+        });
     }
 
-    public void RemoveUserGroupRef(int tenant, Guid userId, Guid groupId, UserGroupRefType refType)
+    public async Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType)
     {
-        RemoveUserGroupRef(tenant, userId, groupId, refType, false);
+        await RemoveUserGroupRefAsync(tenant, userId, groupId, refType, false);
     }
 
-    public void RemoveUserGroupRef(int tenant, Guid userId, Guid groupId, UserGroupRefType refType, bool immediate)
+    public async Task RemoveUserGroupRefAsync(int tenant, Guid userId, Guid groupId, UserGroupRefType refType, bool immediate)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync(); 
         var strategy = userDbContext.Database.CreateExecutionStrategy();
 
-        strategy.Execute(async () =>
+        await strategy.ExecuteAsync(async () =>
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
-
-            var userGroups = userDbContext.UserGroups.Where(r => r.Tenant == tenant && r.Userid == userId && r.UserGroupId == groupId && r.RefType == refType);
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            await using var tr = await dbContext.Database.BeginTransactionAsync();
             if (immediate)
             {
-                await userGroups.ExecuteDeleteAsync();
+                await Queries.DeleteUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
             }
             else
             {
-                await userGroups.ExecuteUpdateAsync(ug => ug
-                .SetProperty(p => p.Removed, true)
-                .SetProperty(p => p.LastModified, DateTime.UtcNow));
+                await Queries.UpdateUserGroupsByGroupIdAsync(dbContext, tenant, userId, groupId, refType);
             }
 
-            var user = userDbContext.Users.First(r => r.Tenant == tenant && r.Id == userId);
+            var user = await Queries.UserAsync(dbContext, tenant, userId);
             user.LastModified = DateTime.UtcNow;
-            await userDbContext.SaveChangesAsync();
+            dbContext.Update(user);
 
+            await dbContext.SaveChangesAsync();
             await tr.CommitAsync();
-        }).GetAwaiter()
-          .GetResult();
+        });
     }
 
-    public Group SaveGroup(int tenant, Group group)
+    public async Task<Group> SaveGroupAsync(int tenant, Group group)
     {
         ArgumentNullException.ThrowIfNull(group);
 
-        if (group.Id == default)
+        if (group.Id == Guid.Empty)
         {
             group.Id = Guid.NewGuid();
         }
 
         group.LastModified = DateTime.UtcNow;
-        group.Tenant = tenant;
+        group.TenantId = tenant;
 
-        var dbGroup = _mapper.Map<Group, DbGroup>(group);
+        var dbGroup = mapper.Map<Group, DbGroup>(group);
 
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        userDbContext.AddOrUpdate(userDbContext.Groups, dbGroup);
-        userDbContext.SaveChanges();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.Groups, dbGroup);
+        await userDbContext.SaveChangesAsync();
 
         return group;
     }
 
-    public UserInfo SaveUser(int tenant, UserInfo user)
+    public async Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
     {
         ArgumentNullException.ThrowIfNull(user);
 
@@ -451,7 +461,7 @@ public class EFUserService : IUserService
             throw new ArgumentOutOfRangeException("Empty username.");
         }
 
-        if (user.Id == default)
+        if (user.Id == Guid.Empty)
         {
             user.Id = Guid.NewGuid();
         }
@@ -462,102 +472,81 @@ public class EFUserService : IUserService
         }
 
         user.LastModified = DateTime.UtcNow;
-        user.Tenant = tenant;
+        user.TenantId = tenant;
         user.UserName = user.UserName.Trim();
         user.Email = user.Email.Trim();
 
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        var strategy = userDbContext.Database.CreateExecutionStrategy();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        strategy.Execute(async () =>
+        var any = await Queries.AnyUsersAsync(userDbContext, tenant, user.UserName, user.Id);
+
+        if (any)
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tx = await userDbContext.Database.BeginTransactionAsync();
-            var any = GetUserQuery(userDbContext, tenant)
-                .Any(r => r.UserName == user.UserName && r.Id != user.Id && !r.Removed);
+            throw new ArgumentOutOfRangeException("Duplicate username.");
+        }
 
-            if (any)
-            {
-                throw new ArgumentOutOfRangeException("Duplicate username.");
-            }
+        any = await Queries.AnyUsersByEmailAsync(userDbContext, tenant, user.Email, user.Id);
 
-            any = GetUserQuery(userDbContext, tenant)
-                .Any(r => r.Email == user.Email && r.Id != user.Id && !r.Removed);
+        if (any)
+        {
+            throw new ArgumentOutOfRangeException("Duplicate email.");
+        }
 
-            if (any)
-            {
-                throw new ArgumentOutOfRangeException("Duplicate email.");
-            }
-
-            await userDbContext.AddOrUpdateAsync(r => userDbContext.Users, _mapper.Map<UserInfo, User>(user));
-            await userDbContext.SaveChangesAsync();
-            await tx.CommitAsync();
-        }).GetAwaiter()
-          .GetResult();
+        await userDbContext.AddOrUpdateAsync(q => q.Users, mapper.Map<UserInfo, User>(user));
+        await userDbContext.SaveChangesAsync();
 
         return user;
     }
 
-    public UserGroupRef SaveUserGroupRef(int tenant, UserGroupRef userGroupRef)
+    public async Task<UserGroupRef> SaveUserGroupRefAsync(int tenant, UserGroupRef userGroupRef)
     {
         ArgumentNullException.ThrowIfNull(userGroupRef);
 
         userGroupRef.LastModified = DateTime.UtcNow;
-        userGroupRef.Tenant = tenant;
+        userGroupRef.TenantId = tenant;
 
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        var strategy = userDbContext.Database.CreateExecutionStrategy();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        strategy.Execute(async () =>
+        var user = await Queries.FirstOrDefaultUserAsync(userDbContext, tenant, userGroupRef.UserId);
+        if (user != null)
         {
-            using var userDbContext = _dbContextFactory.CreateDbContext();
-            using var tr = await userDbContext.Database.BeginTransactionAsync();
-
-            var user = await GetUserQuery(userDbContext, tenant).FirstOrDefaultAsync(a => a.Tenant == tenant && a.Id == userGroupRef.UserId);
-            if (user != null)
-            {
-                user.LastModified = userGroupRef.LastModified;
-                await userDbContext.AddOrUpdateAsync(r => userDbContext.UserGroups, _mapper.Map<UserGroupRef, UserGroup>(userGroupRef));
-            }
-
+            user.LastModified = userGroupRef.LastModified;
+            await userDbContext.AddOrUpdateAsync(q => q.UserGroups, mapper.Map<UserGroupRef, UserGroup>(userGroupRef));
             await userDbContext.SaveChangesAsync();
-            await tr.CommitAsync();
-        }).GetAwaiter()
-          .GetResult();
+        }
 
         return userGroupRef;
     }
 
-    public void SetUserPasswordHash(int tenant, Guid id, string passwordHash)
+    public async Task SetUserPasswordHashAsync(int tenant, Guid id, string passwordHash)
     {
         var h1 = GetPasswordHash(id, passwordHash);
 
         var us = new UserSecurity
         {
-            Tenant = tenant,
+            TenantId = tenant,
             UserId = id,
             PwdHash = h1,
             LastModified = DateTime.UtcNow
         };
 
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        userDbContext.AddOrUpdate(userDbContext.UserSecurity, us);
-        userDbContext.SaveChanges();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.UserSecurity, us);
+        await userDbContext.SaveChangesAsync();
     }
 
-    public void SetUserPhoto(int tenant, Guid id, byte[] photo)
+    public async Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var userPhoto = userDbContext.Photos.FirstOrDefault(r => r.UserId == id && r.Tenant == tenant);
-
+        var userPhoto = await Queries.UserPhotoAsync(userDbContext, tenant, id);
         if (photo != null && photo.Length != 0)
         {
             if (userPhoto == null)
             {
                 userPhoto = new UserPhoto
                 {
-                    Tenant = tenant,
+                    TenantId = tenant,
                     UserId = id,
                     Photo = photo
                 };
@@ -567,26 +556,24 @@ public class EFUserService : IUserService
                 userPhoto.Photo = photo;
             }
 
-
-            userDbContext.AddOrUpdate(userDbContext.Photos, userPhoto);
-
+            await userDbContext.AddOrUpdateAsync(q => q.Photos, userPhoto);
+            
             var userEntity = new User
             {
                 Id = id,
                 LastModified = DateTime.UtcNow,
-                Tenant = tenant
+                TenantId = tenant
             };
 
             userDbContext.Users.Attach(userEntity);
             userDbContext.Entry(userEntity).Property(x => x.LastModified).IsModified = true;
-
         }
         else if (userPhoto != null)
         {
             userDbContext.Photos.Remove(userPhoto);
         }
 
-        userDbContext.SaveChanges();
+        await userDbContext.SaveChangesAsync();
     }
 
     private IQueryable<User> GetUserQuery(UserDbContext userDbContext, int tenant)
@@ -596,7 +583,7 @@ public class EFUserService : IUserService
 
         if (tenant != Tenant.DefaultTenant)
         {
-            q = q.Where(r => r.Tenant == tenant);
+            q = q.Where(r => r.TenantId == tenant);
             where = true;
         }
 
@@ -614,7 +601,7 @@ public class EFUserService : IUserService
 
         if (tenant != Tenant.DefaultTenant)
         {
-            q = q.Where(r => r.Tenant == tenant);
+            q = q.Where(r => r.TenantId == tenant);
         }
 
         return q;
@@ -627,26 +614,61 @@ public class EFUserService : IUserService
         EmployeeStatus? employeeStatus,
         List<List<Guid>> includeGroups,
         List<Guid> excludeGroups,
+        List<Tuple<List<List<Guid>>, List<Guid>>> combinedGroups,
         EmployeeActivationStatus? activationStatus,
         AccountLoginType? accountLoginType,
         string text)
     {
         q = q.Where(r => !r.Removed);
 
-        if (includeGroups != null && includeGroups.Count > 0)
+        if (includeGroups is { Count: > 0 } || excludeGroups is { Count: > 0 })
         {
-            foreach (var ig in includeGroups)
+            if (includeGroups is { Count: > 0 })
             {
-                q = q.Where(r => userDbContext.UserGroups.Any(a => !a.Removed && a.Tenant == r.Tenant && a.Userid == r.Id && ig.Any(r => r == a.UserGroupId)));
+                foreach (var ig in includeGroups)
+                {
+                    q = q.Where(r => userDbContext.UserGroups.Any(a => !a.Removed && a.TenantId == r.TenantId && a.Userid == r.Id && ig.Any(r => r == a.UserGroupId)));
+                }
+            }
+
+            if (excludeGroups is { Count: > 0 })
+            {
+                foreach (var eg in excludeGroups)
+                {
+                    q = q.Where(r => !userDbContext.UserGroups.Any(a => !a.Removed && a.TenantId == r.TenantId && a.Userid == r.Id && a.UserGroupId == eg));
+                }
             }
         }
-
-        if (excludeGroups != null && excludeGroups.Count > 0)
+        else if (combinedGroups != null && combinedGroups.Any())
         {
-            foreach (var eg in excludeGroups)
+            Expression<Func<User, bool>> a = r => false;
+
+            foreach (var cg in combinedGroups)
             {
-                q = q.Where(r => !userDbContext.UserGroups.Any(a => !a.Removed && a.Tenant == r.Tenant && a.Userid == r.Id && a.UserGroupId == eg));
+                Expression<Func<User, bool>> b = r => true;
+
+                var cgIncludeGroups = cg.Item1;
+                var cgExcludeGroups = cg.Item2;
+                if (cgIncludeGroups is { Count: > 0 })
+                {
+                    foreach (var ig in cgIncludeGroups)
+                    {
+                        b = b.And(r => userDbContext.UserGroups.Any(user => !user.Removed && user.TenantId == r.TenantId && user.Userid == r.Id && ig.Any(ug => ug == user.UserGroupId)));
+                    }
+                }
+
+                if (cgExcludeGroups is { Count: > 0 })
+                {
+                    foreach (var eg in cgExcludeGroups)
+                    {
+                        b = b.And(r => !userDbContext.UserGroups.Any(ug => !ug.Removed && ug.TenantId == r.TenantId && ug.Userid == r.Id && ug.UserGroupId == eg));
+                    }
+                }
+
+                a = a.Or(b);
             }
+
+            q = q.Where(a);
         }
 
         if (!isDocSpaceAdmin && employeeStatus == null)
@@ -660,14 +682,7 @@ public class EFUserService : IUserService
             {
                 case EmployeeStatus.LeaveOfAbsence:
                 case EmployeeStatus.Terminated:
-                    if (isDocSpaceAdmin)
-                    {
-                        q = q.Where(u => u.Status == EmployeeStatus.Terminated);
-                    }
-                    else
-                    {
-                        q = q.Where(u => false);
-                    }
+                    q = isDocSpaceAdmin ? q.Where(u => u.Status == EmployeeStatus.Terminated) : q.Where(u => false);
                     break;
                 case EmployeeStatus.All:
                     if (!isDocSpaceAdmin)
@@ -698,35 +713,27 @@ public class EFUserService : IUserService
                 u.Email.Contains(text));
         }
 
-        switch (accountLoginType)
+        q = accountLoginType switch
         {
-            case AccountLoginType.LDAP:
-                q = q.Where(r => r.Sid != null);
-                break;
-            case AccountLoginType.SSO:
-                q = q.Where(r => r.SsoNameId != null);
-                break;
-            case AccountLoginType.Standart:
-                q = q.Where(r => r.SsoNameId == null && r.Sid == null);
-                break;
-        }
+            AccountLoginType.LDAP => q.Where(r => r.Sid != null),
+            AccountLoginType.SSO => q.Where(r => r.SsoNameId != null),
+            AccountLoginType.Standart => q.Where(r => r.SsoNameId == null && r.Sid == null),
+            _ => q
+        };
 
         return q;
     }
 
-    private List<Guid> CollectGroupChilds(UserDbContext userDbContext, int tenant, Guid id)
+    private async Task<List<Guid>> CollectGroupChildsAsync(UserDbContext userDbContext, int tenant, Guid id)
     {
         var result = new List<Guid>();
 
-        var childs = userDbContext.Groups
-            .Where(r => r.Tenant == tenant)
-            .Where(r => r.ParentId == id)
-            .Select(r => r.Id);
+        var childs = Queries.GroupIdsAsync(userDbContext, tenant, id);
 
-        foreach (var child in childs)
+        await foreach (var child in childs)
         {
             result.Add(child);
-            result.AddRange(CollectGroupChilds(userDbContext, tenant, child));
+            result.AddRange(await CollectGroupChildsAsync(userDbContext, tenant, child));
         }
 
         result.Add(id);
@@ -734,40 +741,276 @@ public class EFUserService : IUserService
         return result.Distinct().ToList();
     }
 
-    public UserInfo GetUser(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)
+    public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         var q = GetUserQuery(userDbContext, tenant).Where(r => r.Id == id);
 
         if (exp != null)
         {
-            return q.Select(exp).FirstOrDefault();
+            return await q.Select(exp).FirstOrDefaultAsync();
         }
-        else
-        {
-            return q.ProjectTo<UserInfo>(_mapper.ConfigurationProvider).FirstOrDefault();
-        }
+
+        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
     }
 
-    public IEnumerable<string> GetDavUserEmails(int tenant)
+    public async Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant)
     {
-        using var userDbContext = _dbContextFactory.CreateDbContext();
-        return (from usersDav in userDbContext.UsersDav
-                join users in userDbContext.Users on new { tenant = usersDav.TenantId, userId = usersDav.UserId } equals new { tenant = users.Tenant, userId = users.Id }
-                where usersDav.TenantId == tenant
-                select users.Email)
-                .Distinct()
-                .ToList();
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.EmailsAsync(userDbContext, tenant).ToListAsync();
     }
 
     protected string GetPasswordHash(Guid userId, string password)
     {
-        return Hasher.Base64Hash(password + userId + Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant()), HashAlg.SHA512);
+        return Hasher.Base64Hash(password + userId + Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), HashAlg.SHA512);
     }
 }
 
 public class DbUserSecurity
 {
-    public User User { get; set; }
-    public UserSecurity UserSecurity { get; set; }
+    public User User { get; init; }
+    public UserSecurity UserSecurity { get; init; }
+}
+
+public class UserWithGroup
+{
+    public User User { get; init; }
+    public UserGroup Group { get; init; }
+}
+
+static file class Queries
+{
+    public static readonly Func<UserDbContext, int, Guid, Task<DateTime?>> LastModifiedAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.UserSecurity
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.UserId == userId)
+                    .Select(r => r.LastModified)
+                    .FirstOrDefault());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<byte[]>> PhotoAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.Photos
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.UserId == userId)
+                    .Select(r => r.Photo)
+                    .FirstOrDefault());
+
+    public static readonly Func<UserDbContext, DateTime, IAsyncEnumerable<int>> TenantIdsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, DateTime from) =>
+                ctx.Users
+                    .Where(u => u.LastModified > from)
+                    .Select(u => u.TenantId)
+                    .Distinct());
+
+    public static readonly Func<UserDbContext, int, Guid, IAsyncEnumerable<Guid>> GroupIdsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid parentId) =>
+                ctx.Groups
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentId == parentId)
+                    .Select(r => r.Id));
+
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> DeleteAclsByIdsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+                ctx.Acl
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.Subject))
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, IEnumerable<string>, Task<int>>
+        DeteteSubscriptionsByIdsAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<string> ids) =>
+                ctx.Subscriptions
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.Recipient))
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, IEnumerable<string>, Task<int>>
+        DeleteDbSubscriptionMethodsByIdsAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<string> ids) =>
+                ctx.SubscriptionMethods
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.Recipient))
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>>
+        DeteleUserGroupsByIdsAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+                ctx.UserGroups
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.UserGroupId))
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>>
+        UpdateUserGroupsByIdsAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+                ctx.UserGroups
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.UserGroupId))
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
+                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> DeleteDbGroupsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+                ctx.Groups
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.Id))
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, IEnumerable<Guid>, Task<int>> UpdateDbGroupsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, IEnumerable<Guid> ids) =>
+                ctx.Groups
+                    .Where(r => r.TenantId == tenantId
+                                && ids.Any(i => i == r.Id))
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
+                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteAclsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.Acl
+                    .Where(r => r.TenantId == tenantId
+                                && r.Subject == id)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, string, Task<int>> DeleteSubscriptionsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, string id) =>
+                ctx.Subscriptions
+                    .Where(r => r.TenantId == tenantId
+                                && r.Recipient == id)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, string, Task<int>>
+        DeleteDbSubscriptionMethodsAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, string id) =>
+                ctx.SubscriptionMethods
+                    .Where(r => r.TenantId == tenantId
+                                && r.Recipient == id)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUserPhotosAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.Photos
+                    .Where(r => r.TenantId == tenantId && r.UserId == userId)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUserGroupsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.UserGroups
+                    .Where(r => r.TenantId == tenantId
+                                && r.Userid == userId)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> UpdateUserGroupsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.UserGroups
+                    .Where(r => r.TenantId == tenantId
+                                && r.Userid == userId)
+                    .ExecuteUpdate(q=> q.SetProperty(p => p.Removed, true)
+                                        .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUsersAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.Users.Where(r => r.TenantId == tenantId
+                                     && r.Id == id)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> UpdateUsersAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.Users.Where(r => r.TenantId == tenantId
+                                     && r.Id == id)
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
+                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)
+                                         .SetProperty(p => p.TerminatedDate, DateTime.UtcNow)
+                                         .SetProperty(p => p.Status, EmployeeStatus.Terminated)));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> DeleteUserSecuritiesAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.UserSecurity
+                    .Where(r => r.TenantId == tenantId
+                                && r.UserId == userId)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>>
+        DeleteUserGroupsByGroupIdAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId, Guid groupId, UserGroupRefType refType) =>
+                ctx.UserGroups
+                    .Where(r => r.TenantId == tenantId
+                                && r.Userid == userId
+                                && r.UserGroupId == groupId
+                                && r.RefType == refType)
+                    .ExecuteDelete());
+
+    public static readonly Func<UserDbContext, int, Guid, Guid, UserGroupRefType, Task<int>>
+        UpdateUserGroupsByGroupIdAsync = EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId, Guid groupId, UserGroupRefType refType) =>
+                ctx.UserGroups
+                    .Where(r => r.TenantId == tenantId
+                                && r.Userid == userId
+                                && r.UserGroupId == groupId
+                                && r.RefType == refType)
+                    .ExecuteUpdate(q => q.SetProperty(p => p.Removed, true)
+                                         .SetProperty(p => p.LastModified, DateTime.UtcNow)));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<User>> UserAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.Users
+                    .First(r => r.TenantId == tenantId
+                                && r.Id == userId));
+
+    public static readonly Func<UserDbContext, int, string, Guid, Task<bool>> AnyUsersAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, string userName, Guid id) =>
+                ctx.Users
+                    .Where(r => tenantId == Tenant.DefaultTenant || r.TenantId == tenantId)
+                    .Any(r => r.UserName == userName && r.Id != id && !r.Removed));
+
+    public static readonly Func<UserDbContext, int, string, Guid, Task<bool>> AnyUsersByEmailAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, string email, Guid id) =>
+                ctx.Users
+                    .Where(r => tenantId == Tenant.DefaultTenant || r.TenantId == tenantId)
+                    .Any(r => r.Email == email && r.Id != id && !r.Removed));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<User>> FirstOrDefaultUserAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid id) =>
+                ctx.Users
+                    .Where(r => tenantId == Tenant.DefaultTenant || r.TenantId == tenantId)
+                    .FirstOrDefault(a => a.Id == id));
+
+    public static readonly Func<UserDbContext, int, Guid, Task<UserPhoto>> UserPhotoAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid userId) =>
+                ctx.Photos
+                    .FirstOrDefault(r => r.UserId == userId
+                                         && r.TenantId == tenantId));
+
+    public static readonly Func<UserDbContext, int, IAsyncEnumerable<string>> EmailsAsync =
+        EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId) =>
+                (from usersDav in ctx.UsersDav
+                 join users in ctx.Users on new { tenant = usersDav.TenantId, userId = usersDav.UserId } equals new
+                 {
+                     tenant = users.TenantId,
+                     userId = users.Id
+                 }
+                 where usersDav.TenantId == tenantId
+                 select users.Email)
+                .Distinct());
 }

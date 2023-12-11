@@ -71,19 +71,19 @@ Pour en savoir plus, connectez-vous à votre compte.</value>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. Diffusion terminée
 
-Ce courriel est pour vous informer que la diffusion des messages $MailsCount que vous avez demandée est maintenant terminée.
+Ce courriel est pour vous informer que la diffusion des messages $MailsCount que vous avez demandée est maintenant terminée. $Message
 
 Vous pouvez vérifier le statut de ces messages dans votre dossier "Envoyés":"$__VirtualRootPath/addons/mail/#sent" du module "Mail".</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1. Accès accordé au document: "$DocumentTitle":"$DocumentURL"
+    <value>h1. Accès accordé au document : "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" vous a accordé l'accès au document "$DocumentTitle":"$DocumentURL" avec les droits d'accès: "$AccessRights". 
+$__DateTime "$__AuthorName":"$__AuthorUrl" vous a accordé l'accès au document "$DocumentTitle":"$DocumentURL" avec les droits d'accès : "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1. Accès accordé au dossier: "$DocumentTitle":"$DocumentURL"
+    <value>h1. Accès accordé au dossier : "$DocumentTitle":"$DocumentURL"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" vous a accordé l'accès au dossier "$DocumentTitle":"$DocumentURL" avec les droits d'accès: "$AccessRights". 
 
@@ -115,14 +115,14 @@ $Message</value>
   </data>
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName vous a mentionné dans le commentaire du document
- 
-$__AuthorName vous a mentionné dans le commentaire du document "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL":
- 
+
+$__AuthorName vous a mentionné dans le commentaire du document "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL" :
+
 $Message</value>
   </data>
   <data name="pattern_RoomRemoved" xml:space="preserve">
     <value>h1. $__AuthorName a supprimé la salle
- 
+
 $__AuthorName a supprimé la salle : $RoomTitle</value>
   </data>
   <data name="subject_DocuSignComplete_push" xml:space="preserve">

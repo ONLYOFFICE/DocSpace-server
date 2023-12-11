@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,43 +29,35 @@ using SecurityContext = ASC.Core.SecurityContext;
 namespace ASC.Api.Core.Auth;
 
 [Scope]
-public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class BasicAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private readonly UserManager _userManager;
     private readonly SecurityContext _securityContext;
     private readonly PasswordHasher _passwordHasher;
 
     public BasicAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock
-        ) : base(options, logger, encoder, clock)
-    {
-
-    }
-
-    public BasicAuthHandler(
       IOptionsMonitor<AuthenticationSchemeOptions> options,
       ILoggerFactory logger,
       UrlEncoder encoder,
-      ISystemClock clock,
       UserManager userManager,
       SecurityContext securityContext,
-      PasswordHasher passwordHasher) : this(options, logger, encoder, clock)
+      PasswordHasher passwordHasher) : this(options, logger, encoder)
     {
         _userManager = userManager;
         _securityContext = securityContext;
         _passwordHasher = passwordHasher;
     }
 
-    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        Response.Headers.Add("WWW-Authenticate", "Basic");
+        Response.Headers.Append("WWW-Authenticate", "Basic");
 
         if (!Request.Headers.ContainsKey("Authorization"))
         {
-            return Task.FromResult(AuthenticateResult.Fail("Authorization header missing."));
+            return AuthenticateResult.Fail("Authorization header missing.");
         }
 
         // Get authorization key
@@ -74,7 +66,7 @@ public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOption
 
         if (!authHeaderRegex.IsMatch(authorizationHeader))
         {
-            return Task.FromResult(AuthenticateResult.Fail("Authorization code not formatted properly."));
+            return AuthenticateResult.Fail("Authorization code not formatted properly.");
         }
 
         var authBase64 = Encoding.UTF8.GetString(Convert.FromBase64String(authHeaderRegex.Replace(authorizationHeader, "$1")));
@@ -84,17 +76,17 @@ public class BasicAuthHandler : AuthenticationHandler<AuthenticationSchemeOption
 
         try
         {
-            var userInfo = _userManager.GetUserByEmail(authUsername);
+            var userInfo = await _userManager.GetUserByEmailAsync(authUsername);
             var passwordHash = _passwordHasher.GetClientPassword(authPassword);
 
-            _securityContext.AuthenticateMe(userInfo.Email, passwordHash);
+            await _securityContext.AuthenticateMeAsync(userInfo.Email, passwordHash);
 
         }
         catch (Exception)
         {
-            return Task.FromResult(AuthenticateResult.Fail("The username or password is not correct."));
+            return AuthenticateResult.Fail("The username or password is not correct.");
         }
 
-        return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(Context.User, Scheme.Name)));
+        return AuthenticateResult.Success(new AuthenticationTicket(Context.User, Scheme.Name));
     }
 }

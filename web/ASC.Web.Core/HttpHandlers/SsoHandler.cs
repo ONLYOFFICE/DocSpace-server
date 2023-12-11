@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.Web.Core.HttpHandlers;
 public class SsoHandler
 {
-    public SsoHandler(RequestDelegate next)
+    public SsoHandler(RequestDelegate _)
     {
     }
 
@@ -60,6 +60,7 @@ public class SsoHandlerService
     private readonly TenantUtil _tenantUtil;
     private readonly Action<string> _signatureResolver;
     private readonly CountPaidUserChecker _countPaidUserChecker;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private const string MOB_PHONE = "mobphone";
     private const string EXT_MOB_PHONE = "extmobphone";
 
@@ -81,7 +82,8 @@ public class SsoHandlerService
         MessageService messageService,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         TenantUtil tenantUtil,
-        CountPaidUserChecker countPaidUserChecker)
+        CountPaidUserChecker countPaidUserChecker, 
+        IDistributedLockProvider distributedLockProvider)
     {
         _log = log;
         _coreBaseSettings = coreBaseSettings;
@@ -98,14 +100,15 @@ public class SsoHandlerService
         _displayUserSettingsHelper = displayUserSettingsHelper;
         _tenantUtil = tenantUtil;
         _countPaidUserChecker = countPaidUserChecker;
-        _signatureResolver = signature =>
+        _distributedLockProvider = distributedLockProvider;
+        _signatureResolver = s =>
         {
-            int.TryParse(signature.Substring(signature.Length - 1), out var lastSignChar);
-            signature = signature.Remove(signature.Length - 1);
+            int.TryParse(s[^1..], out var lastSignChar);
+            s = s.Remove(s.Length - 1);
 
             while (lastSignChar > 0)
             {
-                signature = signature + "=";
+                s += "=";
                 lastSignChar--;
             }
         };
@@ -120,12 +123,12 @@ public class SsoHandlerService
                 throw new SSOException("Single sign-on settings are disabled", MessageKey.SsoSettingsDisabled);
             }
 
-            if (!(_coreBaseSettings.Standalone || _tenantManager.GetTenantQuota(_tenantManager.GetCurrentTenant().Id).Sso))
+            if (!(_coreBaseSettings.Standalone || (await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync())).Sso))
             {
                 throw new SSOException("Single sign-on settings are not paid", MessageKey.ErrorNotAllowedOption);
             }
 
-            var settings = _settingsManager.Load<SsoSettingsV2>();
+            var settings = await _settingsManager.LoadAsync<SsoSettingsV2>();
 
             if (context.Request.Query["config"] == "saml")
             {
@@ -136,7 +139,7 @@ public class SsoHandlerService
                 return;
             }
 
-            if (!settings.EnableSso)
+            if (!settings.EnableSso.GetValueOrDefault())
             {
                 throw new SSOException("Single sign-on is disabled", MessageKey.SsoSettingsDisabled);
             }
@@ -154,11 +157,11 @@ public class SsoHandlerService
 
                 if (userData == null)
                 {
-                    _messageService.Send(MessageAction.LoginFailViaSSO);
+                    await _messageService.SendAsync(MessageAction.LoginFailViaSSO);
                     throw new SSOException("SAML response is not valid", MessageKey.SsoSettingsNotValidToken);
                 }
 
-                var userInfo = ToUserInfo(userData, true);
+                var userInfo = await ToUserInfoAsync(userData, true);
 
                 if (Equals(userInfo, Constants.LostUser))
                 {
@@ -170,15 +173,15 @@ public class SsoHandlerService
                     throw new SSOException("Current user is terminated", MessageKey.SsoSettingsUserTerminated);
                 }
 
-                if (context.User != null && context.User.Identity != null && context.User.Identity.IsAuthenticated)
+                if (context.User.Identity is { IsAuthenticated: true })
                 {
-                    var authenticatedUserInfo = _userManager.GetUsers(((IUserAccount)context.User.Identity).ID);
+                    var authenticatedUserInfo = await _userManager.GetUsersAsync(((IUserAccount)context.User.Identity).ID);
 
                     if (!Equals(userInfo, authenticatedUserInfo))
                     {
                         var loginName = authenticatedUserInfo.DisplayUserName(false, _displayUserSettingsHelper);
-                        _messageService.Send(loginName, MessageAction.Logout);
-                        await _cookiesManager.ResetUserCookie();
+                        await _messageService.SendAsync(loginName, MessageAction.Logout);
+                        await _cookiesManager.ResetUserCookieAsync();
                         _securityContext.Logout();
                     }
                     else
@@ -188,14 +191,14 @@ public class SsoHandlerService
                 }
                 try
                 {
-                    userInfo = await AddUser(userInfo);
+                    userInfo = await AddUserAsync(userInfo);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _log.WarningWithException("Failed to save user", ex);
                 }
 
-                var authKey = _cookiesManager.AuthenticateMeAndSetCookies(userInfo.Tenant, userInfo.Id, MessageAction.LoginSuccessViaSSO);
+                var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
 
                 context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
 
@@ -209,11 +212,11 @@ public class SsoHandlerService
                     throw new SSOException("SAML Logout response is not valid", MessageKey.SsoSettingsNotValidToken);
                 }
 
-                var userInfo = _userManager.GetSsoUserByNameId(logoutSsoUserData.NameId);
+                var userInfo = await _userManager.GetSsoUserByNameIdAsync(logoutSsoUserData.NameId);
 
                 if (Equals(userInfo, Constants.LostUser))
                 {
-                    _messageService.Send(MessageAction.LoginFailViaSSO);
+                    await _messageService.SendAsync(MessageAction.LoginFailViaSSO);
                     throw new SSOException("Can't logout userInfo using current SAML response", MessageKey.SsoSettingsNotValidToken);
                 }
 
@@ -222,12 +225,12 @@ public class SsoHandlerService
                     throw new SSOException("Current user is terminated", MessageKey.SsoSettingsUserTerminated);
                 }
 
-                _securityContext.AuthenticateMeWithoutCookie(userInfo.Id);
+                await _securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
 
                 var loginName = userInfo.DisplayUserName(false, _displayUserSettingsHelper);
-                _messageService.Send(loginName, MessageAction.Logout);
+                await _messageService.SendAsync(loginName, MessageAction.Logout);
 
-                await _cookiesManager.ResetUserCookie();
+                await _cookiesManager.ResetUserCookieAsync();
                 _securityContext.Logout();
             }
         }
@@ -255,12 +258,12 @@ public class SsoHandlerService
     //TODO
     private async Task WriteErrorToResponse(HttpContext context, MessageKey messageKey)
     {
-         context.Response.StatusCode = 500;
-         context.Response.ContentType = "text/plain";
-         await context.Response.WriteAsync(((int)messageKey).ToString());
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync(((int)messageKey).ToString());
     }
 
-    private async Task<UserInfo> AddUser(UserInfo userInfo)
+    private async Task<UserInfo> AddUserAsync(UserInfo userInfo)
     {
         UserInfo newUserInfo;
 
@@ -275,23 +278,26 @@ public class SsoHandlerService
 
             _log.DebugAddingOrUpdatingUser(userInfo.Id);
 
-            _securityContext.AuthenticateMeWithoutCookie(ASC.Core.Configuration.Constants.CoreSystem);
+            await _securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
 
             if (string.IsNullOrEmpty(newUserInfo.UserName))
             {
                 var type = EmployeeType.RoomAdmin;
+                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
 
-                try
+                await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
                 {
-                    await _countPaidUserChecker.CheckAppend();
-                }
-                catch (Exception)
-                {
-                    type = EmployeeType.User;
-                }
+                    try
+                    {
+                        await _countPaidUserChecker.CheckAppend();
+                    }
+                    catch (Exception)
+                    {
+                        type = EmployeeType.User;
+                    }
 
-                newUserInfo = await _userManagerWrapper.AddUser(newUserInfo, UserManagerWrapper.GeneratePassword(), true,
-                  false, type);
+                    newUserInfo = await _userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword(), true, false, type);
+                }
             }
             else
             {
@@ -300,7 +306,7 @@ public class SsoHandlerService
                     throw new Exception(Resource.ErrorIncorrectUserName);
                 }
 
-                await _userManager.UpdateUserInfo(newUserInfo);
+                await _userManager.UpdateUserInfoAsync(newUserInfo);
             }
 
             /*var photoUrl = samlResponse.GetRemotePhotoUrl();
@@ -319,7 +325,7 @@ public class SsoHandlerService
 
     }
 
-    private UserInfo ToUserInfo(SsoUserData UserData, bool checkExistance = false)
+    private async Task<UserInfo> ToUserInfoAsync(SsoUserData UserData, bool checkExistance = false)
     {
         var firstName = TrimToLimit(UserData.FirstName);
         var lastName = TrimToLimit(UserData.LastName);
@@ -339,11 +345,11 @@ public class SsoHandlerService
 
         if (checkExistance)
         {
-            userInfo = _userManager.GetSsoUserByNameId(nameId);
+            userInfo = await _userManager.GetSsoUserByNameIdAsync(nameId);
 
             if (Equals(userInfo, Constants.LostUser))
             {
-                userInfo = _userManager.GetUserByEmail(email);
+                userInfo = await _userManager.GetUserByEmailAsync(email);
             }
         }
 
@@ -380,7 +386,7 @@ public class SsoHandlerService
             userInfo.Location = location;
             userInfo.Title = title;
 
-            var portalUserContacts = userInfo.ContactsList == null ? new List<string>() : userInfo.ContactsList;
+            var portalUserContacts = userInfo.ContactsList ?? new List<string>();
 
             var newContacts = new List<string>();
             var phones = new List<string>();
@@ -445,7 +451,7 @@ public class SsoHandlerService
         var newStr = str.Trim();
 
         return newStr.Length > limit
-                ? newStr.Substring(0, MAX_NUMBER_OF_SYMBOLS)
+                ? newStr[..MAX_NUMBER_OF_SYMBOLS]
                 : newStr;
     }
 }
@@ -470,18 +476,13 @@ public enum MessageKey
     SsoSettingsUserTerminated,
     SsoError,
     SsoAuthFailed,
-    SsoAttributesNotFound,
+    SsoAttributesNotFound
 }
 
-public class SSOException : Exception
+public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
-    public MessageKey MessageKey { get; }
-
-    public SSOException(string message, MessageKey messageKey) : base(message)
-    {
-        MessageKey = messageKey;
+    public MessageKey MessageKey { get; } = messageKey;
     }
-}
 
 public static class SsoHandlerExtensions
 {

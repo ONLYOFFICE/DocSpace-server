@@ -1,50 +1,64 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Thirdparty.Box;
 
-internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
+[Scope]
+internal class BoxDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>(serviceProvider, userManager, tenantManager, tenantUtil,
+        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<BoxFile, BoxFolder, BoxItem>
 {
-    protected override string Id => "box";
+    private BoxProviderInfo _providerInfo;
 
-    protected BoxDaoBase(
-        IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextManager,
-        SetupInfo setupInfo,
-        ILogger monitor,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor, fileUtility, tempPath, authContext)
+    public void Init(string pathPrefix, IProviderInfo<BoxFile, BoxFolder, BoxItem> providerInfo)
     {
+        PathPrefix = pathPrefix;
+        ProviderInfo = providerInfo;
+        _providerInfo = providerInfo as BoxProviderInfo;
     }
 
-    protected static string MakeBoxId(object entryId)
+    public string GetName(BoxItem item)
+    {
+        return item.Name;
+    }
+    public string GetId(BoxItem item)
+    {
+        return item.Id;
+    }
+
+    public string MakeThirdId(object entryId)
     {
         var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
 
@@ -53,14 +67,14 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
                    : id.TrimStart('/');
     }
 
-    protected static string GetParentFolderId(BoxItem boxItem)
+    public string GetParentFolderId(BoxItem boxItem)
     {
         return boxItem == null || boxItem.Parent == null
                    ? null
                    : boxItem.Parent.Id;
     }
 
-    protected string MakeId(BoxItem boxItem)
+    public string MakeId(BoxItem boxItem)
     {
         var path = string.Empty;
         if (boxItem != null)
@@ -71,14 +85,14 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         return MakeId(path);
     }
 
-    protected override string MakeId(string path = null)
+    public override string MakeId(string path = null)
     {
         var p = string.IsNullOrEmpty(path) || path == "0" ? "" : ("-|" + path.TrimStart('/'));
 
         return $"{PathPrefix}{p}";
     }
 
-    protected string MakeFolderTitle(BoxFolder boxFolder)
+    public string MakeFolderTitle(BoxFolder boxFolder)
     {
         if (boxFolder == null || IsRoot(boxFolder))
         {
@@ -88,7 +102,7 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         return Global.ReplaceInvalidCharsAndTruncate(boxFolder.Name);
     }
 
-    protected string MakeFileTitle(BoxFile boxFile)
+    public string MakeFileTitle(BoxFile boxFile)
     {
         if (boxFile == null || string.IsNullOrEmpty(boxFile.Name))
         {
@@ -98,17 +112,17 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         return Global.ReplaceInvalidCharsAndTruncate(boxFile.Name);
     }
 
-    protected Folder<string> ToFolder(BoxFolder boxFolder)
+    public Folder<string> ToFolder(BoxFolder boxFolder)
     {
         if (boxFolder == null)
         {
             return null;
         }
 
-        if (boxFolder is ErrorFolder)
+        if (boxFolder is ErrorFolder errorFolder)
         {
             //Return error entry
-            return ToErrorFolder(boxFolder as ErrorFolder);
+            return ToErrorFolder(errorFolder);
         }
 
         var isRoot = IsRoot(boxFolder);
@@ -123,8 +137,8 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         folder.Title = MakeFolderTitle(boxFolder);
         folder.FilesCount = boxFolder.ItemCollection != null ? boxFolder.ItemCollection.Entries.Count(item => item is BoxFile) : 0;
         folder.FoldersCount = boxFolder.ItemCollection != null ? boxFolder.ItemCollection.Entries.Count(item => item is BoxFolder) : 0;
-        folder.Private = ProviderInfo.Private;
-        folder.HasLogo = ProviderInfo.HasLogo;
+        folder.SettingsPrivate = ProviderInfo.Private;
+        folder.SettingsHasLogo = ProviderInfo.HasLogo;
         SetFolderType(folder, isRoot);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
@@ -140,7 +154,7 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         return folder;
     }
 
-    protected static bool IsRoot(BoxFolder boxFolder)
+    public bool IsRoot(BoxFolder boxFolder)
     {
         return boxFolder.Id == "0";
     }
@@ -180,16 +194,16 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
             return null;
         }
 
-        if (boxFile is ErrorFile)
+        if (boxFile is ErrorFile errorFile)
         {
             //Return error entry
-            return ToErrorFile(boxFile as ErrorFile);
+            return ToErrorFile(errorFile);
         }
 
         var file = GetFile();
 
         file.Id = MakeId(boxFile.Id);
-        file.ContentLength = boxFile.Size.HasValue ? (long)boxFile.Size : 0;
+        file.ContentLength = boxFile.Size ?? 0;
         file.CreateOn = boxFile.CreatedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.CreatedAt.Value.UtcDateTime) : default;
         file.ParentId = MakeId(GetParentFolderId(boxFile));
         file.ModifiedOn = boxFile.ModifiedAt.HasValue ? _tenantUtil.DateTimeFromUtc(boxFile.ModifiedAt.Value.UtcDateTime) : default;
@@ -201,17 +215,17 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         return file;
     }
 
-    public async Task<Folder<string>> GetRootFolderAsync(string folderId)
+    public async Task<Folder<string>> GetRootFolderAsync()
     {
-        return ToFolder(await GetBoxFolderAsync("0"));
+        return ToFolder(await GetFolderAsync("0"));
     }
 
-    protected async Task<BoxFolder> GetBoxFolderAsync(string folderId)
+    public async Task<BoxFolder> GetFolderAsync(string folderId)
     {
-        var boxFolderId = MakeBoxId(folderId);
+        var boxFolderId = MakeThirdId(folderId);
         try
         {
-            var folder = await ProviderInfo.GetBoxFolderAsync(boxFolderId);
+            var folder = await _providerInfo.GetFolderAsync(boxFolderId);
 
             return folder;
         }
@@ -221,32 +235,32 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         }
     }
 
-    protected ValueTask<BoxFile> GetBoxFileAsync(string fileId)
+    public Task<BoxFile> GetFileAsync(string fileId)
     {
-        var boxFileId = MakeBoxId(fileId);
+        var boxFileId = MakeThirdId(fileId);
         try
         {
-            var file = ProviderInfo.GetBoxFileAsync(boxFileId);
+            var file = _providerInfo.GetFileAsync(boxFileId);
 
             return file;
         }
         catch (Exception ex)
         {
-            return ValueTask.FromResult<BoxFile>(new ErrorFile(ex, boxFileId));
+            return Task.FromResult<BoxFile>(new ErrorFile(ex, boxFileId));
         }
     }
 
-    protected override async Task<IEnumerable<string>> GetChildrenAsync(string folderId)
+    public override async Task<IEnumerable<string>> GetChildrenAsync(string folderId)
     {
-        var items = await GetBoxItemsAsync(folderId);
+        var items = await GetItemsAsync(folderId);
 
-        return items.Select(entry => MakeId(entry.Id));
+        return items.Select(entry => MakeThirdId(entry.Id));
     }
 
-    protected List<BoxItem> GetBoxItems(string parentId, bool? folder = null)
+    public async Task<List<BoxItem>> GetItemsAsync(string parentId, bool? folder = null)
     {
-        var boxFolderId = MakeBoxId(parentId);
-        var items = ProviderInfo.GetBoxItemsAsync(boxFolderId).Result;
+        var boxFolderId = MakeThirdId(parentId);
+        var items = await _providerInfo.GetItemsAsync(boxFolderId);
 
         if (folder.HasValue)
         {
@@ -261,25 +275,7 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         return items;
     }
 
-    protected async Task<List<BoxItem>> GetBoxItemsAsync(string parentId, bool? folder = null)
-    {
-        var boxFolderId = MakeBoxId(parentId);
-        var items = await ProviderInfo.GetBoxItemsAsync(boxFolderId);
-
-        if (folder.HasValue)
-        {
-            if (folder.Value)
-            {
-                return items.Where(i => i is BoxFolder).ToList();
-            }
-
-            return items.Where(i => i is BoxFile).ToList();
-        }
-
-        return items;
-    }
-
-    protected sealed class ErrorFolder : BoxFolder
+    protected sealed class ErrorFolder : BoxFolder, IErrorItem
     {
         public string Error { get; set; }
         public string ErrorId { get; private set; }
@@ -294,7 +290,7 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         }
     }
 
-    protected sealed class ErrorFile : BoxFile
+    protected sealed class ErrorFile : BoxFile, IErrorItem
     {
         public string Error { get; set; }
         public string ErrorId { get; private set; }
@@ -309,36 +305,7 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
         }
     }
 
-    protected string GetAvailableTitle(string requestTitle, string parentFolderId, Func<string, string, bool> isExist)
-    {
-        if (!isExist(requestTitle, parentFolderId))
-        {
-            return requestTitle;
-        }
-
-        var re = new Regex(@"( \(((?<index>[0-9])+)\)(\.[^\.]*)?)$");
-        var match = re.Match(requestTitle);
-
-        if (!match.Success)
-        {
-            var insertIndex = requestTitle.Length;
-            if (requestTitle.LastIndexOf('.') != -1)
-            {
-                insertIndex = requestTitle.LastIndexOf('.');
-            }
-
-            requestTitle = requestTitle.Insert(insertIndex, " (1)");
-        }
-
-        while (isExist(requestTitle, parentFolderId))
-        {
-            requestTitle = re.Replace(requestTitle, MatchEvaluator);
-        }
-
-        return requestTitle;
-    }
-
-    protected async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
+    public async Task<string> GetAvailableTitleAsync(string requestTitle, string parentFolderId, Func<string, string, Task<bool>> isExist)
     {
         if (!await isExist(requestTitle, parentFolderId))
         {
@@ -370,7 +337,7 @@ internal abstract class BoxDaoBase : ThirdPartyProviderDao<BoxProviderInfo>
     private string MatchEvaluator(Match match)
     {
         var index = Convert.ToInt32(match.Groups[2].Value);
-        var staticText = match.Value.Substring(string.Format(" ({0})", index).Length);
+        var staticText = match.Value[string.Format(" ({0})", index).Length..];
 
         return string.Format(" ({0}){1}", index + 1, staticText);
     }

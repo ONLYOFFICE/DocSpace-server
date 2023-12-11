@@ -4,9 +4,10 @@
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../Data",
-        "log__dir": "../../Logs",
+        "$STORAGE_ROOT": "../../../Data",
         "log__name": "web.studio",
+        "log__dir": "../../../Logs",
+        "core__eventBus__subscriptionClientName": "asc_event_bus_webstudio_queue",
         "ASPNETCORE_URLS": "http://localhost:5003",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -15,9 +16,9 @@
       "commandName": "WSL2",
       "launchBrowser": false,
       "environmentVariables": {
-        "$STORAGE_ROOT": "../../Data",
+        "$STORAGE_ROOT": "../../../Data",
         "log__name": "web.studio",
-        "log__dir": "../../Logs",
+        "log__dir": "../../../Logs",
         "ASPNETCORE_URLS": "http://localhost:5003",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

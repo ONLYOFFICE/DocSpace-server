@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,6 +69,7 @@ global using ASC.Common.Radicale.Core;
 global using ASC.Common.Security;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
@@ -138,6 +139,7 @@ global using Microsoft.EntityFrameworkCore.Migrations;
 global using Microsoft.EntityFrameworkCore.Migrations.Operations;
 global using Microsoft.EntityFrameworkCore.Query;
 global using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+global using Microsoft.EntityFrameworkCore.Update;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
@@ -153,6 +155,8 @@ global using Newtonsoft.Json;
 global using NVelocity;
 global using NVelocity.App.Events;
 
+global using Polly;
+
 global using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 global using Pomelo.EntityFrameworkCore.MySql.Migrations;
 
@@ -161,7 +165,7 @@ global using ProtoBuf;
 global using Telegram.Bot;
 
 global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
-global using Microsoft.EntityFrameworkCore.Update;
+
 global using AppOptions = FirebaseAdmin.AppOptions;
 global using FirebaseApp = FirebaseAdmin.FirebaseApp;
 global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;

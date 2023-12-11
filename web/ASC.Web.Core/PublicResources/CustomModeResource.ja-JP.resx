@@ -59,65 +59,60 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="pattern_personal_custom_mode_after_registration1" xml:space="preserve">
-    <value>ｈ１．個人ONLYOFFICEへようこそ！
+    <value>h1.ONLYOFFICE Personalへようこそ
 
-個人オフィスを作成したところです。
+クラウド上にパーソナルオフィスが作成されました。
 
-h3．こちらは文書を編集して保存したり、友達にアクセス権を提供したり、どこからでも文書を修理のを可能にする仮想作業空間です。
+h3.バーチャルなワークスペースで、ドキュメントの編集や保存ができ、どこからでも作業でき、友人や同僚にもアクセスできます。
 
-ONLYOFFICEはMicrosoft Office™文書形式と互換性で、作成されたオブジェクト書式と品質の 損失が皆無であることを保証します。
+h3.まずはONLYOFFICEでできることをご紹介します：
 
-ｈ３．簡単に作業に取りかかるために、ONLYOFFICEの可能性は下記の通りです：
+- テキスト文書、スプレッドシート、プレゼンテーションの作成、閲覧、編集。
 
-－コンピューターからファイルをアップロードし、または新たの作成すること；
+- すべての一般的なフォーマットで作業できます。MS Officeファイルとの高い互換性。
 
-－全ての共通の形式と修理すること；
+- すぐに記入できるフォーム":"https://www.onlyoffice.com/ja/form-creator.aspx"の作成と共同編集。
 
-－オートシェイプ、グラフ、表及び数式などを編集すること；
+- オンラインで文書を共有し、共同作業。
 
-－編集機能を拡大するように、様々な追加機能を使用すること； 
+- さまざまなプラグインを使用して、追加機能を適用できます。
 
-「Chromeの拡張機能」を介して、個人ONLYOFFICEクラウドに容易にアクセスできます："https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US"。
+- "Chrome拡張機能":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=ja" を使って、パーソナルクラウドに簡単にアクセスできます。
 
-「デスクトップ編集者」:"https://www.onlyoffice.com/download-desktop.aspx"を使用して、無料で、オフラインに文書を編集し、またはiOSかAndroid デバイスに「モバイル編集スイート」:"https://www.onlyoffice.com/mobile.aspx"をダウンロードします。
+無料の"デスクトップエディター":"https://www.onlyoffice.com/ja/download-desktop.aspx"を使ってオフラインでドキュメントを編集したり、"iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972"または"Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents"デバイス用のモバイル編集スイートを入手することもできます。
 
-敬具、
-ONLYOFFICEチーム</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_confirmation" xml:space="preserve">
     <value>今日は、
 
-個人使用のONLYOFFICEアカウントを登録されたところです。”こちら”："$InviteLink"　をクリックして、登録を承認し、パスワードを作成します。
+個人使用のONLYOFFICEアカウントを登録されたところです。"こちら":"$InviteLink"　をクリックして、登録を承認し、パスワードを作成します。
 
 リンクを開けない場合に、"$InviteLink":"$InviteLink"をコピーして、ブラウザのアドレスバーに貼り付けできます。
 
-敬具、
-ONLYOFFICEチーム</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>personal.onlyoffice.comでアカウント削除を要求しました。要求を完成するために、リンクに従ってください（リンクは７日間中に有効です）。
 
-$GreenButton
+$OrangeButton
 
-＊ご注意ください＊：削除すると、「プライバシーポリシー」:"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"に従い、アカウントとそれに対応しているデータも消去されるようになります。
+*ご注意*：削除後、お客様のアカウントとそれに関連するすべてのデータは、当社の「"プライバシーステートメント":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0"」に従って永久に消去されます。
+
+"退会についてもっと読む":"${__HelpLink}/administration/configuration.aspx"
 
 削除したくない場合に、このメッセージを無視して下さい。
 
-ご質問があったら、"support@onlyoffice.com":"mailto:support@onlyoffice.com"で連絡ください。
+ご質問があったら、"${__SupportEmail}":"mailto:${__SupportEmail}"
 
-敬具、
-ONLYOFFICEチーム</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>$UserNameさん、
 
 "$FromUserName":"$FromUserLink"のデータ削除過程は正常に終了されました。
 
-個人データの削除により解放された容量：
-
-＃文書 ‐ $DocsSpace 
-＃メール ‐ $MailSpace
-＃チャット ‐ $TalkSpace</value>
+個人データの削除により解放された容量 $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.新しいポータルが登録された
@@ -138,9 +133,6 @@ ONLYOFFICEチーム</value>
   <data name="subject_personal_custom_mode_after_registration1" xml:space="preserve">
     <value>個人的なONLYOFFICEへようこそ</value>
   </data>
-  <data name="subject_personal_custom_mode_change_password" xml:space="preserve">
-    <value>個人的なONLYOFFICE。パスワード アシスタンス</value>
-  </data>
   <data name="subject_personal_custom_mode_confirmation" xml:space="preserve">
     <value>個人的なONLYOFFICE。メールアドレスの照合を行ってください</value>
   </data>
@@ -156,7 +148,7 @@ ONLYOFFICEチーム</value>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>クラウドオフィスアカウントのメールを変更したいですか？下のボタンをクリックして、クラウドにログイン*してください。
 
-$GreenButton
+$OrangeButton
 
 このリンクは7日間有効です。
 
@@ -164,30 +156,29 @@ $GreenButton
   </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>$UserName 様
- 
+
 ONLYOFFICE DocSpaceへようこそ！あなたのユーザープロファイルは、"${__VirtualRootPath}":"${__VirtualRootPath}"に正常に追加されました。これで、次のことができるようになりました：
- 
+
 * 招待されたルームで他のユーザーと作業する*: リアルタイムの共同執筆のためのコラボレーションルームや、あらゆる目的のために柔軟な設定を持つカスタムルーム*.
- 
+
 * *テキスト文書、スプレッドシート、プレゼンテーション、デジタルフォーム、PDF、電子書籍、マルチメディアなど、さまざまな形式のファイルを扱うことができます。
- 
-* *リアルタイムまたは段落ロックという2つの共同編集モードにより、文書*の共同編集が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
- 
+
+* リアルタイムまたは段落ロックという2つの共同編集モードにより、*文書の共同編集*が可能です。変更点を追跡し、内蔵のチャットを使ってリアルタイムでコミュニケーションしたり、オーディオやビデオ通話をすることができます。
+
 * *任意のクラウドストレージ*を接続し、アプリケーションを切り替えることなく作業することができます。
 
-$GreenButton
+$OrangeButton
 
-お困りの際は、"ヘルプセンター":"https://helpcenter.onlyoffice.com/" をご覧いただくか、"サポートチーム":"https://www.onlyoffice.com/ja/support-contact-form.aspx"までご連絡ください。
+お困りの際は、"ヘルプセンター":"${__HelpLink}" をご覧いただくか、"サポートチーム":"${__SupportLink}"までご連絡ください。
 
-ONLYOFFICE チーム
-"www.onlyoffice.com":https://www.onlyoffice.com/ja</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>クラウドオフィスアカウントのメールアドレスを変更したいですか？
 
 以下のボタンをクリックし、クラウドにログイン*してください。
 
-$GreenButton
+$OrangeButton
 
 リンクは7日間有効です。
 

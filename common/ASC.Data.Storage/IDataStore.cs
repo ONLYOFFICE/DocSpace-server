@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -33,9 +33,12 @@ public interface IDataStore
 {
     IDataWriteOperator CreateDataWriteOperator(
             CommonChunkedUploadSession chunkedUploadSession,
-            CommonChunkedUploadSessionHolder sessionHolder);
+            CommonChunkedUploadSessionHolder sessionHolder,
+            bool isConsumerStorage = false);
+    string GetBackupExtension(bool isConsumerStorage = false);
 
     IQuotaController QuotaController { get; set; }
+    IDataStoreValidator DataStoreValidator { get; set; }
 
     TimeSpan GetExpire(string domain);
 
@@ -112,16 +115,17 @@ public interface IDataStore
     ///</summary>
     ///<param name="domain"></param>
     ///<param name="path"></param>
+    ///<param name="offset"></param>
     ///<returns></returns>
     Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
     ///<summary>
     /// Saves the contents of the stream in the repository.
-    ///</ Summary>
-    /// <param Name="domain"> </param>
-    /// <param Name="path"> </param>
-    /// <param Name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
-    /// <returns> </Returns>
+    ///</summary>
+    /// <param name="domain"> </param>
+    /// <param name="path"> </param>
+    /// <param name="stream"> flow. Is read from the current position! Desirable to set to 0 when the transmission MemoryStream instance </param>
+    /// <returns> </returns>
     Task<Uri> SaveAsync(string domain, string path, Stream stream);
 
     /// <summary>
@@ -198,7 +202,7 @@ public interface IDataStore
     /// Deletes files
     ///</summary>
     ///<param name="domain"></param>
-    ///<param name="listPaths"></param>
+    ///<param name="paths"></param>
     Task DeleteFilesAsync(string domain, List<string> paths);
 
     ///<summary>
@@ -213,30 +217,30 @@ public interface IDataStore
     ///<summary>
     /// Moves the contents of one directory to another. s3 for a very expensive procedure.
     ///</summary>
-    ///<param name="srcdomain"></param>
-    ///<param name="srcdir"></param>
-    ///<param name="newdomain"></param>
-    ///<param name="newdir"></param>
-    Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir);
+    ///<param name="srcDomain"></param>
+    ///<param name="srcDir"></param>
+    ///<param name="newDomain"></param>
+    ///<param name="newDir"></param>
+    Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir);
 
     ///<summary>
     /// Moves file
     ///</summary>
-    ///<param name="srcdomain"></param>
-    ///<param name="srcpath"></param>
-    ///<param name="newdomain"></param>
-    ///<param name="newpath"></param>
+    ///<param name="srcDomain"></param>
+    ///<param name="srcPath"></param>
+    ///<param name="newDomain"></param>
+    ///<param name="newPath"></param>
+    ///<param name="quotaCheckFileSize"></param>
     ///<returns></returns>
-    Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true);
+    Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
 
     ///<summary>
     /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
     ///</summary>
     ///<param name="domain"></param>
-    ///<param name="assignedPath"></param>
     ///<param name="stream"></param>
     ///<returns></returns>
-    Task<Uri> SaveTempAsync(string domain, out string assignedPath, Stream stream);
+    Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
 
     /// <summary>
     ///  Returns a list of links to all subfolders
@@ -294,8 +298,8 @@ public interface IDataStore
 
     Task<long> GetUsedQuotaAsync(string domain);
 
-    Task<Uri> CopyAsync(string srcdomain, string path, string newdomain, string newpath);
-    Task CopyDirectoryAsync(string srcdomain, string dir, string newdomain, string newdir);
+    Task<Uri> CopyAsync(string srcDomain, string path, string newDomain, string newPath);
+    Task CopyDirectoryAsync(string srcDomain, string dir, string newDomain, string newDir);
 
     //Then there are restarted methods without domain. functionally identical to the top
 
@@ -305,8 +309,8 @@ public interface IDataStore
     Task<Uri> SaveAsync(string path, Stream stream);
     Task DeleteAsync(string path);
     Task DeleteFilesAsync(string folderPath, string pattern, bool recursive);
-    Task<Uri> MoveAsync(string srcpath, string newdomain, string newpath);
-    Task<Uri> SaveTempAsync(out string assignedPath, Stream stream);
+    Task<Uri> MoveAsync(string srcPath, string newDomain, string newPath);
+    Task<(Uri, string)> SaveTempAsync(Stream stream);
     IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string path, bool recursive);
     IAsyncEnumerable<Uri> ListFilesAsync(string path, string pattern, bool recursive);
     Task<bool> IsFileAsync(string path);
@@ -314,12 +318,12 @@ public interface IDataStore
     Task DeleteDirectoryAsync(string path);
     Task<long> GetFileSizeAsync(string path);
     Task<long> GetDirectorySizeAsync(string path);
-    Task<Uri> CopyAsync(string path, string newdomain, string newpath);
-    Task CopyDirectoryAsync(string dir, string newdomain, string newdir);
+    Task<Uri> CopyAsync(string path, string newDomain, string newPath);
+    Task CopyDirectoryAsync(string dir, string newDomain, string newDir);
 #pragma warning restore 1591
 
 
-    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props);
+    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator);
     IDataStore SetQuotaController(IQuotaController controller);
 
     Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);

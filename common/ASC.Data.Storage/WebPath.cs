@@ -1,42 +1,41 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Data.Storage;
 
-[Singletone]
+[Singleton]
 public class WebPathSettings
 {
     private readonly IEnumerable<Appender> _appenders;
 
     public WebPathSettings(Configuration.Storage storage)
     {
-        var section = storage;
-        if (section != null)
+        if (storage != null)
         {
-            _appenders = section.Appender;
+            _appenders = storage.Appender;
         }
     }
 
@@ -94,8 +93,8 @@ public class WebPathSettings
                 if (relativePath.IndexOfAny(new[] { '?', '=', '&' }) != -1)
                 {
                     //Cut it
-                    query = relativePath.Substring(relativePath.IndexOf('?'));
-                    relativePath = relativePath.Substring(0, relativePath.IndexOf('?'));
+                    query = relativePath[relativePath.IndexOf('?')..];
+                    relativePath = relativePath[..relativePath.IndexOf('?')];
                 }
                 //if (HostingEnvironment.IsHosted)
                 //{
@@ -126,73 +125,45 @@ public class WebPathSettings
 }
 
 [Scope]
-public class WebPath
+public class WebPath(WebPathSettings webPathSettings,
+    IServiceProvider serviceProvider,
+    SettingsManager settingsManager,
+    StorageSettingsHelper storageSettingsHelper,
+    IHostEnvironment hostEnvironment,
+    CoreBaseSettings coreBaseSettings,
+    ILoggerProvider options,
+    IHttpClientFactory clientFactory)
 {
-    public IServiceProvider ServiceProvider { get; }
-    public IHostEnvironment HostEnvironment { get; }
-    private IHttpClientFactory ClientFactory { get; }
-
     private static readonly IDictionary<string, bool> _existing = new ConcurrentDictionary<string, bool>();
-    private readonly WebPathSettings _webPathSettings;
-    private readonly SettingsManager _settingsManager;
-    private readonly StorageSettingsHelper _storageSettingsHelper;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly ILoggerProvider _options;
 
     public WebPath(
         WebPathSettings webPathSettings,
         IServiceProvider serviceProvider,
-        SettingsManager settingsManager,
-        StorageSettingsHelper storageSettingsHelper,
-        IHostEnvironment hostEnvironment,
-        CoreBaseSettings coreBaseSettings,
-        ILoggerProvider options,
-        IHttpClientFactory clientFactory)
-    {
-        _webPathSettings = webPathSettings;
-        ServiceProvider = serviceProvider;
-        _settingsManager = settingsManager;
-        _storageSettingsHelper = storageSettingsHelper;
-        HostEnvironment = hostEnvironment;
-        _coreBaseSettings = coreBaseSettings;
-        _options = options;
-        ClientFactory = clientFactory;
-    }
-
-    public WebPath(
-        WebPathSettings webPathSettings,
-        IServiceProvider serviceProvider,
-        StaticUploader staticUploader,
         SettingsManager settingsManager,
         StorageSettingsHelper storageSettingsHelper,
         IHttpContextAccessor httpContextAccessor,
         IHostEnvironment hostEnvironment,
         CoreBaseSettings coreBaseSettings,
-            ILoggerProvider options,
-            IHttpClientFactory clientFactory)
+        ILoggerProvider options,
+        IHttpClientFactory clientFactory)
             : this(webPathSettings, serviceProvider, settingsManager, storageSettingsHelper, hostEnvironment, coreBaseSettings, options, clientFactory)
     {
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Task<string> GetPathAsync(string relativePath)
+    public async Task<string> GetPathAsync(string relativePath)
     {
         if (!string.IsNullOrEmpty(relativePath) && relativePath.IndexOf('~') == 0)
         {
             throw new ArgumentException($"bad path format {relativePath} remove '~'", nameof(relativePath));
         }
 
-        return InternalGetPathAsync(relativePath);
-    }
-
-    private async Task<string> InternalGetPathAsync(string relativePath)
-    {
-        if (_coreBaseSettings.Standalone && ServiceProvider.GetService<StaticUploader>().CanUpload()) //hack for skip resolve DistributedTaskQueueOptionsManager
+        if (coreBaseSettings.Standalone && await serviceProvider.GetService<StaticUploader>().CanUploadAsync()) //hack for skip resolve DistributedTaskQueueOptionsManager
         {
             try
             {
-                var uri = await _storageSettingsHelper.DataStore(_settingsManager.Load<CdnStorageSettings>()).GetInternalUriAsync("", relativePath, TimeSpan.Zero, null);
+                var uri = await (await storageSettingsHelper.DataStoreAsync(await settingsManager.LoadAsync<CdnStorageSettings>())).GetInternalUriAsync("", relativePath, TimeSpan.Zero, null);
                 var result = uri.AbsoluteUri.ToLower();
                 if (!string.IsNullOrEmpty(result))
                 {
@@ -205,7 +176,7 @@ public class WebPath
             }
         }
 
-        return _webPathSettings.GetPath(_httpContextAccessor?.HttpContext, _options, relativePath);
+        return webPathSettings.GetPath(_httpContextAccessor?.HttpContext, options, relativePath);
     }
 
     public async Task<bool> ExistsAsync(string relativePath)
@@ -216,7 +187,7 @@ public class WebPath
             if (Uri.IsWellFormedUriString(path, UriKind.Relative) && _httpContextAccessor?.HttpContext != null)
             {
                 //Local
-                _existing[path] = File.Exists(CrossPlatform.PathCombine(HostEnvironment.ContentRootPath, path));
+                _existing[path] = File.Exists(CrossPlatform.PathCombine(hostEnvironment.ContentRootPath, path));
             }
             if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
             {
@@ -237,7 +208,7 @@ public class WebPath
                 RequestUri = new Uri(path),
                 Method = HttpMethod.Head
             };
-            var httpClient = ClientFactory.CreateClient();
+            var httpClient = clientFactory.CreateClient();
             using var response = httpClient.Send(request);
 
             return response.StatusCode == HttpStatusCode.OK;

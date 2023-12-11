@@ -8,10 +8,15 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.CodeDom.Compiler;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Resources;
+using System.Runtime.CompilerServices;
+
 namespace ASC.AuditTrail {
-    using System;
-    
-    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -19,27 +24,27 @@ namespace ASC.AuditTrail {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [DebuggerNonUserCode()]
+    [CompilerGenerated()]
     public class AuditReportResource {
         
-        private static global::System.Resources.ResourceManager resourceMan;
+        private static ResourceManager resourceMan;
         
-        private static global::System.Globalization.CultureInfo resourceCulture;
+        private static CultureInfo resourceCulture;
         
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal AuditReportResource() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static ResourceManager ResourceManager {
             get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.AuditTrail.AuditReportResource", typeof(AuditReportResource).Assembly);
+                if (ReferenceEquals(resourceMan, null)) {
+                    ResourceManager temp = new ResourceManager("ASC.AuditTrail.AuditReportResource", typeof(AuditReportResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -50,8 +55,8 @@ namespace ASC.AuditTrail {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public static CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -187,6 +192,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to City.
+        /// </summary>
+        public static string CityCol {
+            get {
+                return ResourceManager.GetString("CityCol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Color Theme Changed.
         /// </summary>
         public static string ColorThemeChanged {
@@ -210,6 +224,15 @@ namespace ASC.AuditTrail {
         public static string CopyActionType {
             get {
                 return ResourceManager.GetString("CopyActionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Country.
+        /// </summary>
+        public static string CountryCol {
+            get {
+                return ResourceManager.GetString("CountryCol", resourceCulture);
             }
         }
         
@@ -1267,7 +1290,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Products: [{0}]. Groups [{1}].  Access Opened.
+        ///   Looks up a localized string similar to Products: [{0}]. Groups [{1}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpenedForGroups {
             get {
@@ -1276,7 +1299,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Products: [{0}]. Users [{1}].  Access Opened.
+        ///   Looks up a localized string similar to Products: [{0}]. Users [{1}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpenedForUsers {
             get {
@@ -1384,29 +1407,56 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External link created: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link deleted: {0}.
+        /// </summary>
+        public static string RoomExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link updated: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link created. Role: {1}.
         /// </summary>
-        public static string RoomLinkCreated {
+        public static string RoomInvitationLinkCreated {
             get {
-                return ResourceManager.GetString("RoomLinkCreated", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkCreated", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Link deleted.
         /// </summary>
-        public static string RoomLinkDeleted {
+        public static string RoomInvitationLinkDeleted {
             get {
-                return ResourceManager.GetString("RoomLinkDeleted", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkDeleted", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Link updated. Role: {1}.
         /// </summary>
-        public static string RoomLinkUpdated {
+        public static string RoomInvitationLinkUpdated {
             get {
-                return ResourceManager.GetString("RoomLinkUpdated", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkUpdated", resourceCulture);
             }
         }
         

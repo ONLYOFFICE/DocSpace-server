@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -27,38 +27,17 @@
 namespace ASC.Web.Api.Core;
 
 [Scope]
-public class DnsSettings
+public class DnsSettings(PermissionContext permissionContext,
+    TenantManager tenantManager,
+    UserManager userManager,
+    CoreBaseSettings coreBaseSettings,
+    CoreSettings coreSettings,
+    StudioNotifyService studioNotifyService,
+    CommonLinkUtility commonLinkUtility,
+    MessageService messageService,
+    CspSettingsHelper cspSettingsHelper)
 {
-    private readonly PermissionContext _permissionContext;
-    private readonly TenantManager _tenantManager;
-    private readonly UserManager _userManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly CoreSettings _coreSettings;
-    private readonly StudioNotifyService _studioNotifyService;
-    private readonly CommonLinkUtility _commonLinkUtility;
-    private readonly MessageService _messageService;
-
-    public DnsSettings(
-        PermissionContext permissionContext,
-        TenantManager tenantManager,
-        UserManager userManager,
-        CoreBaseSettings coreBaseSettings,
-        CoreSettings coreSettings,
-        StudioNotifyService studioNotifyService,
-        CommonLinkUtility commonLinkUtility,
-        MessageService messageService)
-    {
-        _permissionContext = permissionContext;
-        _tenantManager = tenantManager;
-        _userManager = userManager;
-        _coreBaseSettings = coreBaseSettings;
-        _coreSettings = coreSettings;
-        _studioNotifyService = studioNotifyService;
-        _commonLinkUtility = commonLinkUtility;
-        _messageService = messageService;
-    }
-
-    public string SaveDnsSettings(string dnsName, bool enableDns)
+    public async Task<string> SaveDnsSettingsAsync(string dnsName, bool enableDns)
     {
         try
         {
@@ -67,32 +46,36 @@ public class DnsSettings
                 throw new Exception(Resource.ErrorNotAllowedOption);
             }
 
-            _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-            var tenant = _tenantManager.GetCurrentTenant();
+            var tenant = await tenantManager.GetCurrentTenantAsync();
 
             if (!enableDns || string.IsNullOrEmpty(dnsName))
             {
                 dnsName = null;
             }
 
-            if (dnsName == null || CheckCustomDomain(dnsName))
+            if (dnsName == null || await CheckCustomDomainAsync(dnsName))
             {
-                if (_coreBaseSettings.Standalone)
+                if (coreBaseSettings.Standalone)
                 {
+                    var oldDomain = tenant.GetTenantDomain(coreSettings);
+
                     tenant.MappedDomain = dnsName;
-                    _tenantManager.SaveTenant(tenant);
+                    await tenantManager.SaveTenantAsync(tenant);
+
+                    await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
                     return null;
                 }
 
                 if (tenant.MappedDomain != dnsName)
                 {
-                    var portalAddress = $"http://{tenant.Alias ?? string.Empty}.{_coreSettings.BaseDomain}";
+                    var portalAddress = $"http://{tenant.Alias ?? string.Empty}.{coreSettings.BaseDomain}";
 
-                    var u = _userManager.GetUsers(tenant.OwnerId);
-                    _studioNotifyService.SendMsgDnsChange(tenant, GenerateDnsChangeConfirmUrl(u.Email, dnsName, tenant.Alias, ConfirmType.DnsChange), portalAddress, dnsName);
+                    var u = await userManager.GetUsersAsync(tenant.OwnerId);
+                    await studioNotifyService.SendMsgDnsChangeAsync(tenant, await GenerateDnsChangeConfirmUrlAsync(u.Email, dnsName, tenant.Alias, ConfirmType.DnsChange), portalAddress, dnsName);
 
-                    _messageService.Send(MessageAction.DnsSettingsUpdated);
+                    await messageService.SendAsync(MessageAction.DnsSettingsUpdated);
                     return string.Format(Resource.DnsChangeMsg, string.Format("<a href=\"mailto:{0}\">{0}</a>", u.Email.HtmlEncode()));
                 }
 
@@ -107,7 +90,7 @@ public class DnsSettings
         }
     }
 
-    private bool CheckCustomDomain(string domain)
+    private async Task<bool> CheckCustomDomainAsync(string domain)
     {
         if (string.IsNullOrEmpty(domain))
         {
@@ -121,12 +104,12 @@ public class DnsSettings
         {
             return false;
         }
-        Uri test;
-        if (Uri.TryCreate(domain.Contains(Uri.SchemeDelimiter) ? domain : Uri.UriSchemeHttp + Uri.SchemeDelimiter + domain, UriKind.Absolute, out test))
+
+        if (Uri.TryCreate(domain.Contains(Uri.SchemeDelimiter) ? domain : Uri.UriSchemeHttp + Uri.SchemeDelimiter + domain, UriKind.Absolute, out var test))
         {
             try
             {
-                _tenantManager.CheckTenantAddress(test.Host);
+                await tenantManager.CheckTenantAddressAsync(test.Host);
             }
             catch (TenantTooShortException ex)
             {
@@ -147,19 +130,19 @@ public class DnsSettings
         return false;
     }
 
-    private string GenerateDnsChangeConfirmUrl(string email, string dnsName, string tenantAlias, ConfirmType confirmType)
+    private async Task<string> GenerateDnsChangeConfirmUrlAsync(string email, string dnsName, string tenantAlias, ConfirmType confirmType)
     {
-        var postfix = string.Join(string.Empty, new[] { dnsName, tenantAlias });
+        var postfix = string.Join(string.Empty, dnsName, tenantAlias);
 
         var sb = new StringBuilder();
-        sb.Append(_commonLinkUtility.GetConfirmationEmailUrl(email, confirmType, postfix));
+        sb.Append(await commonLinkUtility.GetConfirmationEmailUrlAsync(email, confirmType, postfix));
         if (!string.IsNullOrEmpty(dnsName))
         {
-            sb.AppendFormat("&dns={0}", dnsName);
+            sb.Append($"&dns={dnsName}");
         }
         if (!string.IsNullOrEmpty(tenantAlias))
         {
-            sb.AppendFormat("&alias={0}", tenantAlias);
+            sb.Append($"&alias={tenantAlias}");
         }
         return sb.ToString();
     }
@@ -168,9 +151,9 @@ public class DnsSettings
     {
         get
         {
-            return string.IsNullOrEmpty(_coreSettings.BaseDomain)
+            return string.IsNullOrEmpty(coreSettings.BaseDomain)
                        ? string.Empty
-                       : $".{_coreSettings.BaseDomain}";
+                       : $".{coreSettings.BaseDomain}";
         }
     }
 }

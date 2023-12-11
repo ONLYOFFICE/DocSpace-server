@@ -1,103 +1,126 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class CustomNavigationController : BaseSettingsController
-{
-    private readonly MessageService _messageService;
-    private readonly PermissionContext _permissionContext;
-    private readonly SettingsManager _settingsManager;
-    private readonly StorageHelper _storageHelper;
-
-    public CustomNavigationController(
-        MessageService messageService,
+[DefaultRoute("customnavigation")]
+public class CustomNavigationController(MessageService messageService,
         ApiContext apiContext,
         PermissionContext permissionContext,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         StorageHelper storageHelper,
         IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor)
+    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+{
+    /// <summary>
+    /// Returns a list of the custom navigation items.
+    /// </summary>
+    /// <short>Get the custom navigation items</short>
+    /// <category>Custom navigation</category>
+    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">List of the custom navigation items</returns>
+    /// <path>api/2.0/settings/customnavigation/getall</path>
+    /// <httpMethod>GET</httpMethod>
+    /// <collection>list</collection>
+    [HttpGet("getall")]
+    public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {
-        _messageService = messageService;
-        _permissionContext = permissionContext;
-        _settingsManager = settingsManager;
-        _storageHelper = storageHelper;
+        return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items;
     }
 
-    [HttpGet("customnavigation/getall")]
-    public List<CustomNavigationItem> GetCustomNavigationItems()
-    {
-        return _settingsManager.Load<CustomNavigationSettings>().Items;
-    }
-
-    [HttpGet("customnavigation/getsample")]
+    /// <summary>
+    /// Returns a custom navigation item sample.
+    /// </summary>
+    /// <short>Get a custom navigation item sample</short>
+    /// <category>Custom navigation</category>
+    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
+    /// <path>api/2.0/settings/customnavigation/getsample</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("getsample")]
     public CustomNavigationItem GetCustomNavigationItemSample()
     {
         return CustomNavigationItem.GetSample();
     }
 
-    [HttpGet("customnavigation/get/{id}")]
-    public CustomNavigationItem GetCustomNavigationItem(Guid id)
+    /// <summary>
+    /// Returns a custom navigation item by the ID specified in the request.
+    /// </summary>
+    /// <short>Get a custom navigation item by ID</short>
+    /// <category>Custom navigation</category>
+    /// <param type="System.Guid, System" method="url" name="id">Custom navigation item ID</param>
+    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
+    /// <path>api/2.0/settings/customnavigation/get/{id}</path>
+    /// <httpMethod>GET</httpMethod>
+    [HttpGet("get/{id:guid}")]
+    public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(Guid id)
     {
-        return _settingsManager.Load<CustomNavigationSettings>().Items.FirstOrDefault(item => item.Id == id);
+        return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == id);
     }
 
-    [HttpPost("customnavigation/create")]
-    public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem item)
+    /// <summary>
+    /// Adds a custom navigation item with the parameters specified in the request.
+    /// </summary>
+    /// <short>Add a custom navigation item</short>
+    /// <category>Custom navigation</category>
+    /// <param type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core" name="inDto">Custom navigation parameters</param>
+    /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
+    /// <path>api/2.0/settings/customnavigation/create</path>
+    /// <httpMethod>POST</httpMethod>
+    [HttpPost("create")]
+    public async Task<CustomNavigationItem> CreateCustomNavigationItem(CustomNavigationItem inDto)
     {
-        _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = _settingsManager.Load<CustomNavigationSettings>();
+        var settings = await settingsManager.LoadAsync<CustomNavigationSettings>();
 
         var exist = false;
 
         foreach (var existItem in settings.Items)
         {
-            if (existItem.Id != item.Id)
+            if (existItem.Id != inDto.Id)
             {
                 continue;
             }
 
-            existItem.Label = item.Label;
-            existItem.Url = item.Url;
-            existItem.ShowInMenu = item.ShowInMenu;
-            existItem.ShowOnHomePage = item.ShowOnHomePage;
+            existItem.Label = inDto.Label;
+            existItem.Url = inDto.Url;
+            existItem.ShowInMenu = inDto.ShowInMenu;
+            existItem.ShowOnHomePage = inDto.ShowOnHomePage;
 
-            if (existItem.SmallImg != item.SmallImg)
+            if (existItem.SmallImg != inDto.SmallImg)
             {
-                await _storageHelper.DeleteLogo(existItem.SmallImg);
-                existItem.SmallImg = await _storageHelper.SaveTmpLogo(item.SmallImg);
+                await storageHelper.DeleteLogoAsync(existItem.SmallImg);
+                existItem.SmallImg = await storageHelper.SaveTmpLogo(inDto.SmallImg);
             }
 
-            if (existItem.BigImg != item.BigImg)
+            if (existItem.BigImg != inDto.BigImg)
             {
-                await _storageHelper.DeleteLogo(existItem.BigImg);
-                existItem.BigImg = await _storageHelper.SaveTmpLogo(item.BigImg);
+                await storageHelper.DeleteLogoAsync(existItem.BigImg);
+                existItem.BigImg = await storageHelper.SaveTmpLogo(inDto.BigImg);
             }
 
             exist = true;
@@ -106,40 +129,49 @@ public class CustomNavigationController : BaseSettingsController
 
         if (!exist)
         {
-            item.Id = Guid.NewGuid();
-            item.SmallImg = await _storageHelper.SaveTmpLogo(item.SmallImg);
-            item.BigImg = await _storageHelper.SaveTmpLogo(item.BigImg);
+            inDto.Id = Guid.NewGuid();
+            inDto.SmallImg = await storageHelper.SaveTmpLogo(inDto.SmallImg);
+            inDto.BigImg = await storageHelper.SaveTmpLogo(inDto.BigImg);
 
-            settings.Items.Add(item);
+            settings.Items.Add(inDto);
         }
 
-        _settingsManager.Save(settings);
+        await settingsManager.SaveAsync(settings);
 
-        _messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
+        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
 
-        return item;
+        return inDto;
     }
 
-    [HttpDelete("customnavigation/delete/{id}")]
+    /// <summary>
+    /// Deletes a custom navigation item with the ID specified in the request.
+    /// </summary>
+    /// <short>Delete a custom navigation item</short>
+    /// <category>Custom navigation</category>
+    /// <param type="System.Guid, System" method="url" name="id">Custom navigation item ID</param>
+    /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
+    /// <httpMethod>DELETE</httpMethod>
+    /// <returns></returns>
+    [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(Guid id)
     {
-        _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = _settingsManager.Load<CustomNavigationSettings>();
+        var settings = await settingsManager.LoadAsync<CustomNavigationSettings>();
 
-        var terget = settings.Items.FirstOrDefault(item => item.Id == id);
+        var target = settings.Items.Find(item => item.Id == id);
 
-        if (terget == null)
+        if (target == null)
         {
             return;
         }
 
-        await _storageHelper.DeleteLogo(terget.SmallImg);
-        await _storageHelper.DeleteLogo(terget.BigImg);
+        await storageHelper.DeleteLogoAsync(target.SmallImg);
+        await storageHelper.DeleteLogoAsync(target.BigImg);
 
-        settings.Items.Remove(terget);
-        _settingsManager.Save(settings);
+        settings.Items.Remove(target);
+        await settingsManager.SaveAsync(settings);
 
-        _messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
+        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
     }
 }

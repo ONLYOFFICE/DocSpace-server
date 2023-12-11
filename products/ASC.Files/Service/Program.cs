@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (logevent) => AppName);
+                                s.RegisterLayoutRenderer("application-context", _ => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -52,9 +52,9 @@ try
     logger.Info("Configuring web host ({applicationContext})...", AppName);
 
     builder.Host.ConfigureDefault();
-    builder.Host.ConfigureContainer<ContainerBuilder>((context, builder) =>
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
-        builder.Register(context.Configuration, true, false, "search.json", "feed.json");
+        containerBuilder.Register(context.Configuration, true, false, "search.json", "feed.json");
     });
 
     var startup = new Startup(builder.Configuration, builder.Environment);
@@ -68,16 +68,19 @@ try
     var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
 
     eventBus.Subscribe<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
+    eventBus.Subscribe<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
+    eventBus.Subscribe<DeleteIntegrationEvent, DeleteIntegrationEventHandler>();
+    eventBus.Subscribe<MoveOrCopyIntegrationEvent, MoveOrCopyIntegrationEventHandler>();
+    eventBus.Subscribe<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
+    eventBus.Subscribe<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
+    eventBus.Subscribe<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }
@@ -89,6 +92,6 @@ finally
 
 public partial class Program
 {
-    public static string Namespace = typeof(Startup).Namespace;
-    public static string AppName = Namespace.Substring(Namespace.LastIndexOf('.', Namespace.LastIndexOf('.') - 1) + 1).Replace(".", "");
+    public static readonly string Namespace = typeof(Startup).Namespace;
+    public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.', Namespace.LastIndexOf('.') - 1) + 1)..].Replace(".", "");
 }

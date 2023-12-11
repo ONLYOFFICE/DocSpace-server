@@ -217,7 +217,7 @@
     <value>Bad request.</value>
   </data>
   <data name="ErrorMassage_ChangeOwner" xml:space="preserve">
-    <value>You can not select this user</value>
+    <value>You cannot select this user</value>
   </data>
   <data name="ErrorMassage_ConvertTimeout" xml:space="preserve">
     <value>Conversion takes too much time.</value>
@@ -474,5 +474,59 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
     <value>You don't have enough permission to archive the room</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>The maximum number of links may not exceed {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>You have tried too many times to enter your password. Please try again later</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Invitation link</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Shared link</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Date Generated</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Export Author</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Room index</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Size (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Folder</value>
   </data>
 </root>

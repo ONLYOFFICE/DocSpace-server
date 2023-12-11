@@ -1,35 +1,39 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Profile = AutoMapper.Profile;
+
 namespace ASC.Core.Tenants;
 
-[DebuggerDisplay("{Tenant} {Name}")]
+/// <summary>
+/// </summary>
+[DebuggerDisplay("{TenantId} {Name}")]
 public class TenantQuota : IMapFrom<DbQuota>
 {
-    public static readonly TenantQuota Default = new TenantQuota(Tenants.Tenant.DefaultTenant)
+    public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
         Name = "Default",
         MaxFileSize = 25 * 1024 * 1024, // 25Mb
@@ -39,11 +43,28 @@ public class TenantQuota : IMapFrom<DbQuota>
         CountRoom = int.MaxValue
     };
 
-    public int Tenant { get; set; }
+    /// <summary>Tenant ID</summary>
+    /// <type>System.Int32, System</type>
+    public int TenantId { get; set; }
+
+    /// <summary>Name</summary>
+    /// <type>System.String, System</type>
     public string Name { get; set; }
+
+    /// <summary>Price</summary>
+    /// <type>System.Decimal, System</type>
     public decimal Price { get; set; }
+
+    /// <summary>Price currency symbol</summary>
+    /// <type>System.String, System</type>
     public string PriceCurrencySymbol { get; set; }
+
+    /// <summary>Product ID</summary>
+    /// <type>System.String, System</type>
     public string ProductId { get; set; }
+
+    /// <summary>Specifies if the tenant quota is visible or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Visible { get; set; }
 
     [JsonIgnore]
@@ -51,6 +72,8 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private List<string> _featuresList;
 
+    /// <summary>Tenant quota features</summary>
+    /// <type>System.String, System</type>
     public string Features
     {
         get
@@ -59,18 +82,14 @@ public class TenantQuota : IMapFrom<DbQuota>
         }
         set
         {
-            if (value != null)
-            {
-                _featuresList = value.Split(' ', ',', ';').ToList();
-            }
-            else
-            {
-                _featuresList = new List<string>();
-            }
+            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : new List<string>();
         }
     }
 
     private readonly MaxFileSizeFeature _maxFileSizeFeature;
+
+    /// <summary>Maximum file size</summary>
+    /// <type>System.Int64, System</type>
     public long MaxFileSize
     {
         get => _maxFileSizeFeature.Value;
@@ -78,6 +97,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly MaxTotalSizeFeature _maxTotalSizeFeature;
+
+    /// <summary>Maximum total size</summary>
+    /// <type>System.Int64, System</type>
     public long MaxTotalSize
     {
         get => _maxTotalSizeFeature.Value;
@@ -85,6 +107,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly CountUserFeature _countUserFeature;
+
+    /// <summary>Number of portal users</summary>
+    /// <type>System.Int32, System</type>
     public int CountUser
     {
         get => _countUserFeature.Value;
@@ -92,6 +117,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly CountPaidUserFeature _countPaidUserFeature;
+
+    /// <summary>Number of portal room administrators</summary>
+    /// <type>System.Int32, System</type>
     public int CountRoomAdmin
     {
         get => _countPaidUserFeature.Value;
@@ -99,6 +127,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly UsersInRoomFeature _usersInRoomFeature;
+
+    /// <summary>Number of room users</summary>
+    /// <type>System.Int32, System</type>
     public int UsersInRoom
     {
         get => _usersInRoomFeature.Value;
@@ -106,6 +137,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly CountRoomFeature _countRoomFeature;
+
+    /// <summary>Number of rooms</summary>
+    /// <type>System.Int32, System</type>
     public int CountRoom
     {
         get => _countRoomFeature.Value;
@@ -113,6 +147,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _nonProfitFeature;
+
+    /// <summary>Specifies if the tenant quota is nonprofit or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool NonProfit
     {
         get => _nonProfitFeature.Value;
@@ -120,6 +157,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _trialFeature;
+
+    /// <summary>Specifies if the tenant quota is trial or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Trial
     {
         get => _trialFeature.Value;
@@ -127,6 +167,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _freeFeature;
+
+    /// <summary>Specifies if the tenant quota is free or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Free
     {
         get => _freeFeature.Value;
@@ -134,6 +177,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _updateFeature;
+
+    /// <summary>Specifies if the tenant quota is updated or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Update
     {
         get => _updateFeature.Value;
@@ -141,6 +187,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _auditFeature;
+
+    /// <summary>Specifies if the audit trail is available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Audit
     {
         get => _auditFeature.Value;
@@ -148,6 +197,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _docsEditionFeature;
+
+    /// <summary>Specifies if this tenant quota is Docs edition or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool DocsEdition
     {
         get => _docsEditionFeature.Value;
@@ -155,6 +207,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _ldapFeature;
+
+    /// <summary>Specifies if the LDAP settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Ldap
     {
         get => _ldapFeature.Value;
@@ -162,6 +217,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _ssoFeature;
+
+    /// <summary>Specifies if the SSO settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Sso
     {
         get => _ssoFeature.Value;
@@ -169,6 +227,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _whiteLabelFeature;
+
+    /// <summary>Specifies if the white label settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool WhiteLabel
     {
         get => _whiteLabelFeature.Value;
@@ -176,6 +237,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _customizationFeature;
+
+    /// <summary>Specifies if the customization settings are available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Customization
     {
         get => _customizationFeature.Value;
@@ -183,6 +247,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _customFeature;
+
+    /// <summary>Specifies if the custom domain URL is available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Custom
     {
         get => _customFeature.Value;
@@ -190,6 +257,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
+
+    /// <summary>Specifies if the automatic Backup&amp;Restore feature is available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool AutoBackupRestore
     {
         get => _autoBackupRestoreFeature.Value;
@@ -197,6 +267,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _oauthFeature;
+
+    /// <summary>Specifies if Oauth is available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool Oauth
     {
         get => _oauthFeature.Value;
@@ -204,6 +277,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _contentSearchFeature;
+
+    /// <summary>Specifies if the content search is available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool ContentSearch
     {
         get => _contentSearchFeature.Value;
@@ -211,6 +287,9 @@ public class TenantQuota : IMapFrom<DbQuota>
     }
 
     private readonly TenantQuotaFeatureFlag _thirdPartyFeature;
+
+    /// <summary>Specifies if the third-party accounts linking is available or not</summary>
+    /// <type>System.Boolean, System</type>
     public bool ThirdParty
     {
         get => _thirdPartyFeature.Value;
@@ -271,12 +350,12 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     public TenantQuota(int tenant) : this()
     {
-        Tenant = tenant;
+        TenantId = tenant;
     }
 
     public TenantQuota(TenantQuota quota) : this()
     {
-        Tenant = quota.Tenant;
+        TenantId = quota.TenantId;
         Name = quota.Name;
         Price = quota.Price;
         ProductId = quota.ProductId;
@@ -287,15 +366,15 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     public override int GetHashCode()
     {
-        return Tenant.GetHashCode();
+        return TenantId.GetHashCode();
     }
 
     public override bool Equals(object obj)
     {
-        return obj is TenantQuota q && q.Tenant == Tenant;
+        return obj is TenantQuota q && q.TenantId == TenantId;
     }
 
-    public async Task Check(IServiceProvider serviceProvider)
+    public async Task CheckAsync(IServiceProvider serviceProvider)
     {
         foreach (var checker in serviceProvider.GetServices<ITenantQuotaFeatureChecker>())
         {
@@ -413,7 +492,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     internal string GetFeature(string name)
     {
-        return _featuresList.FirstOrDefault(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
+        return _featuresList.Find(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
     }
 
     internal void ReplaceFeature<T>(string name, T value, T defaultValue)
@@ -423,14 +502,7 @@ public class TenantQuota : IMapFrom<DbQuota>
 
         if (!EqualityComparer<T>.Default.Equals(value, default) && !EqualityComparer<T>.Default.Equals(value, defaultValue))
         {
-            if (value is bool)
-            {
-                _featuresList.Add($"{name}");
-            }
-            else
-            {
-                _featuresList.Add($"{name}:{value}");
-            }
+            _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
     }
 }

@@ -445,13 +445,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Το δωμάτιο διαγράφηκε</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Ο σύνδεσμος δημιουργήθηκε. Ρόλος: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Ο σύνδεσμος διαγράφηκε</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Ο σύνδεσμος ενημερώθηκε. Ρόλος: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -717,5 +717,20 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Χρήστες [{0}]. Έγινε ενημέρωση μικρογραφιών άβαταρ</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Πόλη</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Χώρα</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Δημιουργήθηκε εξωτερικός σύνδεσμος: {0}. Ρόλος: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Ο εξωτερικός σύνδεσμος διαγράφηκε: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Ο εξωτερικός σύνδεσμος ενημερώθηκε: {0}. Ρόλος: {1}</value>
   </data>
 </root>

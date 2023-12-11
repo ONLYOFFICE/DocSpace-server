@@ -667,15 +667,6 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>房间已删除</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
-    <value>链接已创建。角色：{1}</value>
-  </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
-    <value>链接已删除</value>
-  </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
-    <value>链接已更新。角色：{1}</value>
-  </data>
   <data name="RoomLogoCreated" xml:space="preserve">
     <value>徽标已创建</value>
   </data>
@@ -717,5 +708,29 @@
   </data>
   <data name="UserTfaDisconnected" xml:space="preserve">
     <value>身份验证应用已断开连接：{0}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>市</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>国家</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>链接已创建。角色：{1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>链接已删除</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>链接已更新。角色：{1}</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>已创建外部链接：{0}。角色：{1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>已删除外部链接：{0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>已更新外部链接：{0}。角色：{1}</value>
   </data>
 </root>

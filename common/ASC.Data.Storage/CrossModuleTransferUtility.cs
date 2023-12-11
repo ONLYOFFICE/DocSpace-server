@@ -1,70 +1,50 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Data.Storage;
 
-public class CrossModuleTransferUtility
+public class CrossModuleTransferUtility(ILogger option,
+    TempStream tempStream,
+    TempPath tempPath,
+    IDataStore source,
+    IDataStore destination)
 {
-    private readonly ILogger _logger;
-    private readonly IDataStore _source;
-    private readonly IDataStore _destination;
-    private readonly long _maxChunkUploadSize;
-    private readonly int _chunkSize;
-    private readonly TempStream _tempStream;
-    private readonly TempPath _tempPath;
+    private readonly IDataStore _source = source ?? throw new ArgumentNullException(nameof(source));
+    private readonly IDataStore _destination = destination ?? throw new ArgumentNullException(nameof(destination));
+    private readonly long _maxChunkUploadSize = 10 * 1024 * 1024;
+    private readonly int _chunkSize = 5 * 1024 * 1024;
 
-    public CrossModuleTransferUtility(
-        ILogger option,
-        TempStream tempStream,
-        TempPath tempPath,
-        IDataStore source,
-        IDataStore destination)
-    {
-        _logger = option;
-        _tempStream = tempStream;
-        _tempPath = tempPath;
-        _source = source ?? throw new ArgumentNullException(nameof(source));
-        _destination = destination ?? throw new ArgumentNullException(nameof(destination));
-        _maxChunkUploadSize = 10 * 1024 * 1024;
-        _chunkSize = 5 * 1024 * 1024;
-    }
-
-    public Task CopyFileAsync(string srcDomain, string srcPath, string destDomain, string destPath)
+    public async ValueTask CopyFileAsync(string srcDomain, string srcPath, string destDomain, string destPath)
     {
         ArgumentNullException.ThrowIfNull(srcDomain);
         ArgumentNullException.ThrowIfNull(srcPath);
         ArgumentNullException.ThrowIfNull(destDomain);
         ArgumentNullException.ThrowIfNull(destPath);
 
-        return InternalCopyFileAsync(srcDomain, srcPath, destDomain, destPath);
-    }
-
-    private async Task InternalCopyFileAsync(string srcDomain, string srcPath, string destDomain, string destPath)
-    {
-        using var stream = await _source.GetReadStreamAsync(srcDomain, srcPath);
+        await using var stream = await _source.GetReadStreamAsync(srcDomain, srcPath);
         if (stream.Length < _maxChunkUploadSize)
         {
             await _destination.SaveAsync(destDomain, destPath, stream);
@@ -72,7 +52,7 @@ public class CrossModuleTransferUtility
         else
         {
             var session = new CommonChunkedUploadSession(stream.Length);
-            var holder = new CommonChunkedUploadSessionHolder(_tempPath, _destination, destDomain);
+            var holder = new CommonChunkedUploadSessionHolder(tempPath, _destination, destDomain);
             await holder.InitAsync(session);
             try
             {
@@ -99,7 +79,7 @@ public class CrossModuleTransferUtility
             }
             catch (Exception ex)
             {
-                _logger.ErrorCopyFile(ex);
+                option.ErrorCopyFile(ex);
                 await holder.AbortAsync(session);
             }
         }
@@ -107,7 +87,7 @@ public class CrossModuleTransferUtility
 
     private bool GetStream(Stream stream, out Stream memstream)
     {
-        memstream = _tempStream.Create();
+        memstream = tempStream.Create();
         var total = 0;
         int readed;
         const int portion = 2048;

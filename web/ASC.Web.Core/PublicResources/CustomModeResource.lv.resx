@@ -120,28 +120,26 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievienots "${__VirtualRootPath}":"${__VirtualRootPath}". Tagad jūs varat::
+Laipni lūdzam ONLYOFFICE DocSpace! Jūsu lietotāja profils ir veiksmīgi pievienots "${__VirtualRootPath}":"${__VirtualRootPath}". Tagad jūs varat:
 
 * Strādāt ar citiem lietotājiem telpā, kurā esat uzaicināts*: sadarbības telpas reāllaika koprediģēšanai vai pielāgotas telpas ar elastīgiem iestatījumiem jebkuram mērķim*.
 
-* *Strādāt ar dažādu formātu failiem *: teksta dokumenti, izklājlapas, prezentācijas, digitālās veidlapas, PDF, e-grāmatas, multivide.
+* *Strādāt ar dažādu formātu failiem*: teksta dokumenti, izklājlapas, prezentācijas, digitālās veidlapas, PDF, e-grāmatas, multivide.
 
 * *Sadarboties ar dokumentiem*, izmantojot divus koprediģēšanas režīmus: reāllaika vai rindkopu bloķēšanu. Izsekojiet izmaiņas, sazinieties reāllaikā, izmantojot iebūvēto tērzēšanu vai veicot audio un video zvanus. 
 
 * *Pievienojiet jebkuru mākoņkrātuvi* un strādājiet, nepārslēdzoties starp lietotnēm. 
 
-$GreenButton
+$OrangeButton
 
-Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"https://helpcenter.onlyoffice.com/ vai jautājiet mūsu atbalsta komandai:https://www.onlyoffice.com/support-contact-form.aspx".
+Ja nepieciešama palīdzība, pārlūkojiet mūsu "Palīdzības centru":"${__HelpLink}" vai jautājiet mūsu "atbalsta komandai":"${__SupportLink}".
 
-Jūsu 
-ONLYOFFICE komanda
-"www.onlyoffice.com":"http://onlyoffice.com/"</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_password_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt sava mākoņa biroja konta paroli? Noklikšķiniet uz tālāk redzamās pogas, lai apstiprinātu.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -166,19 +164,18 @@ h3.Lūk, ko jūs varat darīt ONLYOFFICE iesākumam:
 
 - Izmantojiet dažādus spraudņus, lai izmantotu papildu funkcijas.
 
-- Viegli piekļūstiet savam personiskajam mākonim, izmantojot "Chrome paplašinājumu":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=en-US".
+- Viegli piekļūstiet savam personiskajam mākonim, izmantojot "Chrome paplašinājumu":"https://chrome.google.com/webstore/detail/onlyoffice-personal/ohdlcmpahmacjddiaokoogleflddlahc?hl=lv".
 
 Varat arī rediģēt dokumentus bezsaistē, izmantojot mūsu bezmaksas "darbvirsmas redaktorus":"https://www.onlyoffice.com/download-desktop.aspx" vai iegūt mobilo rediģēšanas komplektu savai "iOS":"https://apps.apple.com/app/onlyoffice-documents/id944896972" vai "Android":"https://play.google.com/store/apps/details?id=com.onlyoffice.documents" ierīcei.
 
-Ar cieņu,
-ONLYOFFICE komanda</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_change_email_v115" xml:space="preserve">
     <value>Vai vēlaties mainīt sava mākoņa biroja konta e-pastu?
 
 Noklikšķiniet uz tālāk redzamās pogas un piesakieties* savā mākonī.
 
-$GreenButton
+$OrangeButton
 
 Saite ir derīga septiņas dienas.
 
@@ -193,35 +190,29 @@ jūs tikko reģistrējāt kontu ONLYOFFICE risinājumā personīgai lietošanai.
 
 Ja nevarat atvērt saiti, nokopējiet šo "$InviteLink":"$InviteLink" un ielīmējiet to pārlūkprogrammas adreses joslā.
 
-Ar cieņu,
-ONLYOFFICE komanda</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_personal_custom_mode_profile_delete" xml:space="preserve">
     <value>Jūs pieprasījāt pārtraukt konta darbību personal.onlyoffice.com. Lai pabeigtu pieprasījumu, izmantojiet saiti (saite ir aktīva septiņas dienas): 
 
-Apstiprināt konta darbības izbeigšanu
+$OrangeButton
 
-*Piezīme*: pēc izdzēšanas jūsu konts un visi ar to saistītie dati tiks neatgriezeniski izdzēsti saskaņā ar mūsu "Paziņojumu par konfidencialitāti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0". 
+*Piezīme*: pēc izdzēšanas jūsu konts un visi ar to saistītie dati tiks neatgriezeniski izdzēsti saskaņā ar mūsu "Paziņojumu par konfidencialitāti":"https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=5048502&amp;doc=SXhWMEVzSEYxNlVVaXJJeUVtS0kyYk14YWdXTEFUQmRWL250NllHNUFGbz0_IjUwNDg1MDIi0".
 
-"Lasīt vairāk par konta darbības izbeigšanu":"https://helpcenter.onlyoffice.com/administration/configuration.aspx"
+"Lasīt vairāk par konta darbības izbeigšanu":"${__HelpLink}/administration/configuration.aspx"
 
 Ignorējiet šo e-pasta ziņojumu, ja nevēlaties turpināt. 
 
-Ja jums ir kādi jautājumi, sazinieties ar mums pa e-pastu "support@onlyoffice.com":"mailto:support@onlyoffice.com"
+Ja jums ir kādi jautājumi, sazinieties ar mums pa e-pastu "${__SupportEmail}":"mailto:${__SupportEmail}"
 
-Ar cieņu,
-ONLYOFFICE komanda</value>
+$TrulyYours</value>
   </data>
   <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Cien. $UserName,
+    <value>Cien $UserName,
 
 Datu noņemšanas no lietotāja "$FromUserName":"$FromUserLink" process ir veiksmīgi pabeigts.
 
-Personas datu izdzēšana ļāva atbrīvot:
-
-# Dokumenti - $DocsSpace
-# Pasts - $MailSpace
-# Saruna - $TalkSpace</value>
+Personas datu izdzēšana ļāva atbrīvot $DocsSpace</value>
   </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Ir reģistrēts jauns portāls

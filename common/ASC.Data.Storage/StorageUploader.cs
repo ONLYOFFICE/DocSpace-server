@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2010-2023
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,39 +26,20 @@
 
 namespace ASC.Data.Storage;
 
-[Singletone]
-public class StorageUploader
+[Singleton]
+public class StorageUploader(
+    IServiceProvider serviceProvider,
+    TempStream tempStream,
+    ICacheNotify<MigrationProgress> cacheMigrationNotify,
+    IDistributedTaskQueueFactory queueFactory,
+    ILogger<StorageUploader> logger, 
+    IDistributedLockProvider distributedLockProvider)
 {
-    protected readonly DistributedTaskQueue _queue;
+    protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
 
-    private static readonly object _locker;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly TempStream _tempStream;
-    private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
-    private readonly ILogger<StorageUploader> _logger;
-
-    static StorageUploader()
+    public async Task StartAsync(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
     {
-        _locker = new object();
-    }
-
-    public StorageUploader(
-        IServiceProvider serviceProvider,
-        TempStream tempStream,
-        ICacheNotify<MigrationProgress> cacheMigrationNotify,
-        IDistributedTaskQueueFactory queueFactory,
-        ILogger<StorageUploader> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _tempStream = tempStream;
-        _cacheMigrationNotify = cacheMigrationNotify;
-        _logger = logger;
-        _queue = queueFactory.CreateQueue();
-    }
-
-    public void Start(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
-    {
-        lock (_locker)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
             var id = GetCacheKey(tenantId);
 
@@ -67,14 +48,14 @@ public class StorageUploader
                 return;
             }
 
-            var migrateOperation = new MigrateOperation(_serviceProvider, _cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, _tempStream, _logger);
+            var migrateOperation = new MigrateOperation(serviceProvider, cacheMigrationNotify, id, tenantId, newStorageSettings, storageFactoryConfig, tempStream, logger);
             _queue.EnqueueTask(migrateOperation);
         }
     }
 
-    public MigrateOperation GetProgress(int tenantId)
+    public async Task<MigrateOperation> GetProgressAsync(int tenantId)
     {
-        lock (_locker)
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
             return _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
         }
@@ -152,14 +133,14 @@ public class MigrateOperation : DistributedTaskProgress
             var tempPath = scope.ServiceProvider.GetService<TempPath>();
             var scopeClass = scope.ServiceProvider.GetService<MigrateOperationScope>();
             var (tenantManager, securityContext, storageFactory, options, storageSettingsHelper, settingsManager) = scopeClass;
-            var tenant = tenantManager.GetTenant(_tenantId);
+            var tenant = await tenantManager.GetTenantAsync(_tenantId);
             tenantManager.SetCurrentTenant(tenant);
 
-            securityContext.AuthenticateMeWithoutCookie(tenant.OwnerId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
 
             foreach (var module in _modules)
             {
-                var oldStore = storageFactory.GetStorage(_tenantId, module);
+                var oldStore = await storageFactory.GetStorageAsync(_tenantId, module);
                 var store = storageFactory.GetStorageFromConsumer(_tenantId, module, storageSettingsHelper.DataStoreConsumer(_settings));
                 var domains = _storageFactoryConfig.GetDomainList(module).ToList();
 
@@ -180,7 +161,7 @@ public class MigrateOperation : DistributedTaskProgress
                 }
 
                 files = (await oldStore.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true).ToArrayAsync())
-                .Where(path => domains.All(domain => !path.Contains(domain + "/")))
+                .Where(path => domains.TrueForAll(domain => !path.Contains(domain + "/")))
                 .ToArray();
 
                 foreach (var file in files)
@@ -194,9 +175,9 @@ public class MigrateOperation : DistributedTaskProgress
                 MigrationPublish();
             }
 
-            settingsManager.Save(_settings);
+            await settingsManager.SaveAsync(_settings);
             tenant.SetStatus(TenantStatus.Active);
-            tenantManager.SaveTenant(tenant);
+            await tenantManager.SaveTenantAsync(tenant);
 
             Status = DistributedTaskStatus.Completed;
         }
@@ -223,42 +204,10 @@ public class MigrateOperation : DistributedTaskProgress
     }
 }
 
-public class MigrateOperationScope
-{
-    private readonly TenantManager _tenantManager;
-    private readonly SecurityContext _securityContext;
-    private readonly StorageFactory _storageFactory;
-    private readonly ILogger _options;
-    private readonly StorageSettingsHelper _storageSettingsHelper;
-    private readonly SettingsManager _settingsManager;
-
-    public MigrateOperationScope(TenantManager tenantManager,
-        SecurityContext securityContext,
-        StorageFactory storageFactory,
-        ILogger<MigrateOperationScope> options,
-        StorageSettingsHelper storageSettingsHelper,
-        SettingsManager settingsManager)
-    {
-        _tenantManager = tenantManager;
-        _securityContext = securityContext;
-        _storageFactory = storageFactory;
-        _options = options;
-        _storageSettingsHelper = storageSettingsHelper;
-        _settingsManager = settingsManager;
-    }
-
-    public void Deconstruct(out TenantManager tenantManager,
-        out SecurityContext securityContext,
-        out StorageFactory storageFactory,
-        out ILogger options,
-        out StorageSettingsHelper storageSettingsHelper,
-        out SettingsManager settingsManager)
-    {
-        tenantManager = _tenantManager;
-        securityContext = _securityContext;
-        storageFactory = _storageFactory;
-        options = _options;
-        storageSettingsHelper = _storageSettingsHelper;
-        settingsManager = _settingsManager;
-    }
-}
+public record MigrateOperationScope(
+    TenantManager TenantManager,
+    SecurityContext SecurityContext,
+    StorageFactory StorageFactory,
+    ILogger<MigrateOperationScope> Options,
+    StorageSettingsHelper StorageSettingsHelper,
+    SettingsManager SettingsManager);
