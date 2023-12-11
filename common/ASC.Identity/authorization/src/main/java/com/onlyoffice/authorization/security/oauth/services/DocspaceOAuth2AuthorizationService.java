@@ -14,9 +14,8 @@ import com.onlyoffice.authorization.core.usecases.service.authorization.Authoriz
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationCreationUsecases;
 import com.onlyoffice.authorization.core.usecases.service.authorization.AuthorizationRetrieveUsecases;
 import com.onlyoffice.authorization.external.caching.hazelcast.AuthorizationCache;
-import com.onlyoffice.authorization.external.messaging.configuration.RabbitMQConfiguration;
+import com.onlyoffice.authorization.external.configuration.RabbitMQConfiguration;
 import com.onlyoffice.authorization.security.crypto.aes.Cipher;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +85,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @RateLimiter(name = "mutateRateLimiter")
     public void save(OAuth2Authorization authorization) {
         MDC.put("id", authorization.getId());
         log.info("Trying to save authorization");
@@ -183,7 +181,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
                 msg);
     }
 
-    @RateLimiter(name = "mutateRateLimiter")
     public void remove(OAuth2Authorization authorization) {
         MDC.put("id", authorization.getId());
         log.info("Trying to remove authorization by id");
@@ -232,7 +229,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         );
     }
 
-    @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationFallback")
     public OAuth2Authorization findById(String id) {
         MDC.put("id", id);
         log.info("Trying to find authorization by id");
@@ -306,7 +302,6 @@ public class DocspaceOAuth2AuthorizationService implements OAuth2AuthorizationSe
         return null;
     }
 
-    @RateLimiter(name = "getRateLimiter", fallbackMethod = "findAuthorizationByTokenFallback")
     @SneakyThrows
     public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
         MDC.put("token", token);

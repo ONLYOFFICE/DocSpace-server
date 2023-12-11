@@ -7,8 +7,7 @@ import com.onlyoffice.authorization.core.entities.Consent;
 import com.onlyoffice.authorization.core.transfer.messaging.ConsentMessage;
 import com.onlyoffice.authorization.core.usecases.repositories.ConsentPersistenceQueryUsecases;
 import com.onlyoffice.authorization.core.usecases.service.consent.ConsentRetrieveUsecases;
-import com.onlyoffice.authorization.external.messaging.configuration.RabbitMQConfiguration;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import com.onlyoffice.authorization.external.configuration.RabbitMQConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -38,7 +37,6 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
     private final CacheManager cacheManager;
     private final AmqpTemplate amqpTemplate;
 
-    @RateLimiter(name = "mutateRateLimiter")
     public void save(OAuth2AuthorizationConsent authorizationConsent) {
         MDC.put("client_id", authorizationConsent.getRegisteredClientId());
         MDC.put("principal_name", authorizationConsent.getPrincipalName());
@@ -56,7 +54,6 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
         );
     }
 
-    @RateLimiter(name = "mutateRateLimiter")
     public void remove(OAuth2AuthorizationConsent authorizationConsent) {
         MDC.put("client_id", authorizationConsent.getRegisteredClientId());
         MDC.put("principal_name", authorizationConsent.getPrincipalName());
@@ -72,7 +69,6 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
         );
     }
 
-    @RateLimiter(name = "getRateLimiter", fallbackMethod = "findConsentFallback")
     public OAuth2AuthorizationConsent findById(String registeredClientId, String principalName) {
         MDC.put("registered_client_id", registeredClientId);
         MDC.put("principal_name", principalName);

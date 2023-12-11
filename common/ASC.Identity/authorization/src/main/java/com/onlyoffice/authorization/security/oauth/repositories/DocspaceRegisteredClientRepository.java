@@ -6,7 +6,6 @@ package com.onlyoffice.authorization.security.oauth.repositories;
 import com.onlyoffice.authorization.core.exceptions.ReadOnlyOperationException;
 import com.onlyoffice.authorization.core.usecases.service.client.ClientRetrieveUsecases;
 import com.onlyoffice.authorization.security.crypto.aes.Cipher;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -37,7 +36,6 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
         throw new ReadOnlyOperationException("Docspace registered client repository supports only read operations");
     }
 
-    @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findById(String id) {
         MDC.put("client_id", id);
         log.info("Trying to find registered client by id");
@@ -66,7 +64,6 @@ public class DocspaceRegisteredClientRepository implements RegisteredClientRepos
         }
     }
 
-    @RateLimiter(name = "getRateLimiter", fallbackMethod = "findClientFallback")
     public RegisteredClient findByClientId(String clientId) {
         MDC.put("client_id", clientId);
         log.info("Trying to find registered client by id");
