@@ -85,8 +85,11 @@ public class DocspaceOAuth2AuthorizationConsentService implements OAuth2Authoriz
 
         log.info("Trying to find authorization consent in the database");
         MDC.clear();
-        return toObject(this.consentUsecases.getByRegisteredClientIdAndPrincipalName(
-                registeredClientId, principalName));
+        var consent = this.consentUsecases.getByRegisteredClientIdAndPrincipalName(
+                registeredClientId, principalName);
+        if (consent == null)
+            return null;
+        return toObject(consent);
     }
 
     private OAuth2AuthorizationConsent findConsentFallback(String registeredClientId, String principalName, Throwable e) {

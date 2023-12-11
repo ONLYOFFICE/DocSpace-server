@@ -24,8 +24,6 @@ public interface ConsentRepository extends Repository<Consent, Consent.ConsentId
                                                                @Param("principalName") String principalName);
     default Consent getByRegisteredClientIdAndPrincipalName(String registeredClientId, String principalName) throws RuntimeException {
         return this.findByRegisteredClientIdAndPrincipalName(registeredClientId, principalName)
-                .orElseThrow(() -> new EntityNotFoundException(String
-                        .format("could not find consent with client id and principal name",
-                                registeredClientId, principalName)));
+                .orElse(null);
     }
 }
