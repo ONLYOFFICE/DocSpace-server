@@ -62,9 +62,24 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store)
     {
-        if (_tasks.Count > Limit * 3)
+        if (_cts.IsCancellationRequested)
         {
-            Task.WaitAll(_tasks.ToArray());
+            return;
+        }
+        if (_tasks.Count >= Limit * 3)
+        {
+            try
+            {
+                Task.WaitAll(_tasks.ToArray());
+                _tasks.Clear();
+            }
+            catch
+            {
+                var task = _tasks.First(t => t.Exception != null);
+                _cts.Cancel();
+                throw task.Exception;
+            }
+
             foreach (var task in _tasks)
             {
                 if(task.Exception != null)
@@ -79,17 +94,9 @@ public class S3TarWriteOperator : IDataWriteOperator
             var fullPath = s3Store.MakePath(domain, path);
             var task = new Task(() =>
             {
-                try
+                if (!_cts.Token.IsCancellationRequested)
                 {
-                    if (!_cts.Token.IsCancellationRequested)
-                    {
-                        _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue).Wait();
-                    }
-                }
-                catch
-                {
-                    _cts.Cancel();
-                    throw;
+                    _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue).Wait();
                 }
             });
             _tasks.Add(task);
@@ -109,23 +116,19 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream)
     {
+        if (_cts.IsCancellationRequested)
+        {
+            return;
+        }
         var tStream = _tempStream.Create();
         stream.Position = 0;
         await stream.CopyToAsync(tStream);
         
         var task = new Task(() =>
         {
-            try
+            if (!_cts.Token.IsCancellationRequested)
             {
-                if (!_cts.Token.IsCancellationRequested)
-                {
-                    _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue).Wait();
-                }
-            }
-            catch
-            {
-                _cts.Cancel();
-                throw;
+                _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue).Wait();
             }
         });
         _tasks.Add(task);
@@ -136,15 +139,23 @@ public class S3TarWriteOperator : IDataWriteOperator
     {
         if (_tasks.Count != 0)
         {
-            Task.WaitAll(_tasks.ToArray());
-            foreach (var task in _tasks)
+            try
             {
-                if(task.Exception != null)
+                Task.WaitAll(_tasks.ToArray());
+                _tasks.Clear();
+            }
+            catch
+            {
+                for (var i = 1; i <= Limit; i++)
                 {
-                    throw task.Exception;
+                    await _store.DeleteAsync(_domain, _key + i);
                 }
+                var task = _tasks.First(t => t.Exception != null);
+                _cts.Cancel();
+                throw task.Exception;
             }
         }
+        
         for (var i = 1; i <= Limit; i++)
         {
             var fullKey = _store.MakePath(_domain, _key + i);
