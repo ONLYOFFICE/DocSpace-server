@@ -124,14 +124,14 @@ public class WebPluginManager
         _log = log;
     }
 
-    private void DemandWebPlugins(string action = null)
+    private void DemandWebPlugins(bool upload = false, bool delete = false)
     {
         if (!_webPluginConfigSettings.Enabled)
         {
             throw new SecurityException("Plugins disabled");
         }
 
-        if (!string.IsNullOrWhiteSpace(action) && _webPluginConfigSettings.Allow.Any() && !_webPluginConfigSettings.Allow.Contains(action))
+        if ((upload && !_webPluginConfigSettings.AllowUpload) || (delete && !_webPluginConfigSettings.AllowDelete))
         {
             throw new SecurityException("Forbidden action");
         }
@@ -160,7 +160,7 @@ public class WebPluginManager
 
     public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file, bool system)
     {
-        DemandWebPlugins("upload");
+        DemandWebPlugins(upload: true);
 
         if (system && !_coreBaseSettings.Standalone)
         {
@@ -461,7 +461,7 @@ public class WebPluginManager
 
     public async Task<WebPlugin> DeleteWebPluginAsync(int tenantId, string name)
     {
-        DemandWebPlugins("delete");
+        DemandWebPlugins(delete: true);
 
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 
