@@ -363,9 +363,9 @@ public class SettingsController : BaseSettingsController
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<object> GetSupportedCultures()
+    public IEnumerable<string> GetSupportedCultures()
     {
-        return _setupInfo.EnabledCultures.Select(r => r.Name).OrderBy(s => s).ToArray();
+        return _setupInfo.EnabledCultures.Select(r => r.Name).ToList();
     }
 
     /// <summary>

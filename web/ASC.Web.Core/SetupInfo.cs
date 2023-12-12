@@ -137,7 +137,6 @@ public class SetupInfo
             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Distinct()
             .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
-            .OrderBy(l => l.DisplayName)
             .ToList();
 
         EnabledCulturesPersonal = GetAppSettings("web:cultures:personal", GetAppSettings("web:cultures", "en-US"))
