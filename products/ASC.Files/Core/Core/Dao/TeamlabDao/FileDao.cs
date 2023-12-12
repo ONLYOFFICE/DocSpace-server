@@ -344,7 +344,7 @@ internal class FileDao(
 
         if (checkQuota && _coreBaseSettings.Personal && SetupInfo.IsVisibleSettings("PersonalMaxSpace"))
         {
-            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(_settingsManager);
+            var personalMaxSpace = await _coreConfiguration.PersonalMaxSpaceAsync(settingsManager);
             if (personalMaxSpace - await globalSpace.GetUserUsedSpaceAsync(file.GetFileQuotaOwner()) < file.ContentLength)
             {
                 throw FileSizeComment.GetPersonalFreeSpaceException(personalMaxSpace);
@@ -352,7 +352,7 @@ internal class FileDao(
         }
 
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var folderDao = _daoFactory.GetFolderDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
 
         var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
@@ -386,7 +386,7 @@ internal class FileDao(
 
                 if (userQuotaLimit != UserQuotaSettings.NoQuota)
                 {
-                    var userUsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
 
                     if (userQuotaLimit - userUsedSpace < file.ContentLength)
                     {
@@ -890,7 +890,7 @@ internal class FileDao(
                     {
                         file.RootCreateBy = toFolder.RootCreateBy;
                         file.RootFolderType = toFolder.FolderType;
-                        await _storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id,
+                        await storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id,
                             FileConstant.ModuleId, "",
                             WebItemManager.DocumentsProductID.ToString(), 
                             file.ContentLength, file.GetFileQuotaOwner());
@@ -899,7 +899,7 @@ internal class FileDao(
                         toFolderRoomId != -1 && 
                         ((oldParentId == trashId && fromRoomTag == null) || roomId == -1))
                     {
-                        await _storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id,
+                        await storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id,
                             FileConstant.ModuleId, "",
                             WebItemManager.DocumentsProductID.ToString(), 
                             file.ContentLength, file.GetFileQuotaOwner());
@@ -1134,11 +1134,11 @@ internal class FileDao(
             {
                 file.RootCreateBy = toFolder.RootCreateBy;
                 file.RootFolderType = toFolder.FolderType;
-                await _storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
+                await storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
             }
             if (fromFolder.FolderType == FolderType.USER || fromFolder.FolderType == FolderType.DEFAULT)
             {
-                await _storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
+                await storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
             }
         }
 

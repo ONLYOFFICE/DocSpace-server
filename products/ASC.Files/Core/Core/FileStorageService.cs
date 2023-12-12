@@ -85,8 +85,7 @@ public class FileStorageService //: IFileStorageService
         QuotaSocketManager quotaSocketManager,
         ExternalShare externalShare,
         TenantUtil tenantUtil,
-        RoomLogoManager roomLogoManager, 
-        IQuotaService quotaService,
+        RoomLogoManager roomLogoManager,
         IDistributedLockProvider distributedLockProvider)
     {
     

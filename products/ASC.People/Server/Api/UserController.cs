@@ -64,7 +64,6 @@ public class UserController(ICache cache,
         CountPaidUserChecker countPaidUserChecker,
         CountUserChecker activeUsersChecker,
         UsersInRoomChecker usersInRoomChecker,
-        IQuotaService quotaService,
         IUrlShortener urlShortener,
         FileSecurityCommon fileSecurityCommon, 
         IDistributedLockProvider distributedLockProvider)

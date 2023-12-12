@@ -47,7 +47,8 @@ internal class FolderDao(
         IMapper mapper,
         GlobalStore globalStore,
     GlobalFolder globalFolder,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    StorageFactory storageFactory)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -698,7 +699,7 @@ internal class FolderDao(
                         toFolderRoomId == -1 && 
                         ((oldParentId == trashId && fromRoomTag != null) || roomId != -1))
                     {
-                        await _storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedAddAsync(_tenantManager.GetCurrentTenant().Id, 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -707,7 +708,7 @@ internal class FolderDao(
                         toFolderRoomId != -1 && 
                         ((oldParentId == trashId && fromRoomTag == null) || (oldParentId != trashId && roomId == -1)))
                     {
-                        await _storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id, 
+                        await storageFactory.QuotaUsedDeleteAsync(_tenantManager.GetCurrentTenant().Id, 
                             FileConstant.ModuleId, "", 
                             WebItemManager.DocumentsProductID.ToString(), 
                             folder.Counter, toFolder.RootCreateBy);
@@ -887,7 +888,7 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        _ = _factoryIndexer.IndexAsync(toUpdate);
+        _ = factoryIndexer.IndexAsync(toUpdate);
 
         return folder.Id;
     }
@@ -904,7 +905,7 @@ internal class FolderDao(
         filesDbContext.Update(toUpdate);
         await filesDbContext.SaveChangesAsync();
 
-        _ = _factoryIndexer.IndexAsync(toUpdate);
+        _ = factoryIndexer.IndexAsync(toUpdate);
 
         return folder.Id;
     }
@@ -923,7 +924,7 @@ internal class FolderDao(
 
         await filesDbContext.SaveChangesAsync();
 
-        _ = _factoryIndexer.IndexAsync(toUpdate);
+        _ = factoryIndexer.IndexAsync(toUpdate);
 
         return folder.Id;
     }

@@ -186,7 +186,7 @@ public class HostedSolution(ITenantService tenantService,
 
     public async Task<TenantQuotaSettings> GetTenantQuotaSettings(int tenantId)
     {
-        return await SettingsManager.LoadAsync<TenantQuotaSettings>(tenantId, Guid.Empty);
+        return await settingsManager.LoadAsync<TenantQuotaSettings>(tenantId, Guid.Empty);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int tenant)
@@ -196,7 +196,7 @@ public class HostedSolution(ITenantService tenantService,
 
     public async Task<List<TenantQuotaRow>> FindTenantQuotaRowsAsync(int tenant)
     {
-        return await ClientTenantManager.FindTenantQuotaRowsAsync(tenant);
+        return await clientTenantManager.FindTenantQuotaRowsAsync(tenant);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
