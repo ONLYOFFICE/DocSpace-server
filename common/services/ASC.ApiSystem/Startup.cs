@@ -113,8 +113,12 @@ public class Startup
         services.AddEventBus(_configuration);
         services.AddDistributedTaskQueue();
         services.AddCacheNotify(_configuration);
+        services.AddDistributedLock(_configuration);
 
         services.RegisterFeature();
+
+        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
+        services.AddScoped<CountRoomCheckerStatistic>();
 
         _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 

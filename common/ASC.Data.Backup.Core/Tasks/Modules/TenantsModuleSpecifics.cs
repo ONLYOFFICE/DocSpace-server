@@ -59,15 +59,16 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
             new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
         };
 
-    protected override bool TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row, out Dictionary<string, object> preparedRow)
+    protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
+        TableInfo table, DataRowInfo row)
     {
         if (table.Name == "tenants_tenants" && string.IsNullOrEmpty(Convert.ToString(row["payment_id"])))
         {
             var oldTenantID = Convert.ToInt32(row["id"]);
-            columnMapper.SetMapping("tenants_tenants", "payment_id", row["payment_id"], coreSettings.GetKey(oldTenantID));
+            columnMapper.SetMapping("tenants_tenants", "payment_id", row["payment_id"], await coreSettings.GetKeyAsync(oldTenantID));
         }
 
-        return base.TryPrepareRow(dump, connection, columnMapper, table, row, out preparedRow);
+        return await base.TryPrepareRow(dump, connection, columnMapper, table, row);
     }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)

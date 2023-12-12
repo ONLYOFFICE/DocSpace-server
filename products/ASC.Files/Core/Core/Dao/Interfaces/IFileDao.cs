@@ -90,7 +90,7 @@ public interface IFileDao<T>
     /// <param name="searchInContent"></param>
     /// <param name="checkShared"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent, bool checkShared = false);
 
     /// <summary>
@@ -120,7 +120,7 @@ public interface IFileDao<T>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
-    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension,
+    IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default);
 
     /// <summary>
@@ -276,7 +276,7 @@ public interface IFileDao<T>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string extension, 
+    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent);
     /// <summary>
     /// Search the list of files containing text
@@ -318,7 +318,7 @@ public interface IFileDao<T>
 
     Task SaveProperties(T fileId, EntryProperties entryProperties);
 
-    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string extension, bool searchInContent, 
+    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default);
 
     Task SetCustomOrder(T fileId, T parentFolderId, int order);

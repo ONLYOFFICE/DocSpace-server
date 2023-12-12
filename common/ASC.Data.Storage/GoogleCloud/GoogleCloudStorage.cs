@@ -874,11 +874,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             return PredefinedObjectAcl.Private;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override async Task<string> GetFileEtagAsync(string domain, string path)

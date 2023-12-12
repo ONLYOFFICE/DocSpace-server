@@ -158,7 +158,7 @@ public class ConnectionsController(UserManager userManager,
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
-    [HttpPut("logoutall/{userId}")]
+    [HttpPut("logoutall/{userId:guid}")]
     public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
         if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)
@@ -212,7 +212,7 @@ public class ConnectionsController(UserManager userManager,
     /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("logout/{loginEventId}")]
+    [HttpPut("logout/{loginEventId:int}")]
     public async Task<bool> LogOutActiveConnection(int loginEventId)
     {
         try

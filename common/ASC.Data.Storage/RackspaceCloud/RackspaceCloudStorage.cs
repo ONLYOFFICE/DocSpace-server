@@ -769,11 +769,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             return ACL.Auto;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     public override Task<string> GetFileEtagAsync(string domain, string path)

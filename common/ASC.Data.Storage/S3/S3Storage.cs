@@ -1107,12 +1107,8 @@ public class S3Storage(TempStream tempStream,
             return S3CannedACL.Private;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
         }
-        return _moduleAcl;
-    }
 
     private S3CannedACL GetS3Acl(ACL acl)
     {

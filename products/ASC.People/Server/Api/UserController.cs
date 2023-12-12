@@ -66,10 +66,11 @@ public class UserController(ICache cache,
         UsersInRoomChecker usersInRoomChecker,
         IQuotaService quotaService,
         IUrlShortener urlShortener,
-        FileSecurityCommon fileSecurityCommon)
+        FileSecurityCommon fileSecurityCommon, 
+        IDistributedLockProvider distributedLockProvider)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
     {
-    private static readonly SemaphoreSlim _semaphore = new(1);
+
 
     /// <summary>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
@@ -249,10 +250,10 @@ public class UserController(ICache cache,
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
+            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
 
-            try
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersInRoomCountCheckKey(tenantId)))
             {
-                await _semaphore.WaitAsync();
             if (success)
             {
                     await usersInRoomChecker.CheckAppend();
@@ -264,11 +265,7 @@ public class UserController(ICache cache,
                     await fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
             }
         }
-            finally
-            {
-                _semaphore.Release();
             }
-        }
 
         if (inDto.IsUser.GetValueOrDefault(false))
         {
@@ -336,7 +333,7 @@ public class UserController(ICache cache,
     /// <returns type="ASC.Web.Api.Models.EmployeeFullDto, ASC.Api.Core">Detailed user information</returns>
     /// <path>api/2.0/people/{userid}/password</path>
     /// <httpMethod>PUT</httpMethod>
-    [HttpPut("{userid}/password")]
+    [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting("sensitive_api")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(Guid userid, MemberRequestDto inDto)
@@ -432,7 +429,7 @@ public class UserController(ICache cache,
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         var tenant = await tenantManager.GetCurrentTenantAsync();
-        queueWorkerRemove.Start(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
+        await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
 
         await messageService.SendAsync(MessageAction.UserDeleted, messageTarget.Create(user.Id), userName);
 
@@ -931,7 +928,7 @@ public class UserController(ICache cache,
 
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
-            queueWorkerRemove.Start(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
+            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false);
         }
 
         await messageService.SendAsync(MessageAction.UsersDeleted, messageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -1434,18 +1431,20 @@ public class UserController(ICache cache,
         if (inDto.IsUser.HasValue)
         {
             var isUser = inDto.IsUser.Value;
-            try
-            {
-                await _semaphore.WaitAsync();
+            
                 if (isUser && canBeGuestFlag && !await _userManager.IsUserAsync(user))
+                {
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
                 {
                     await activeUsersChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
                     webItemSecurityCache.ClearCache(tenant.Id);
                     changed = true;
                 }
-
-            if (!self && !isUser && await _userManager.IsUserAsync(user))
+            }
+            else if (!self && !isUser && await _userManager.IsUserAsync(user))
+                {
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
                     await countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
@@ -1453,11 +1452,7 @@ public class UserController(ICache cache,
                     changed = true;
                 }
         }
-            finally
-            {
-                _semaphore.Release();
             }
-        }
 
         if (changed)
         {
@@ -1510,15 +1505,20 @@ public class UserController(ICache cache,
                 case EmployeeStatus.Active:
                     if (user.Status == EmployeeStatus.Terminated)
                     {
+                        IDistributedLockHandle lockHandle = null;
+                        
                         try
                         {
-                            await _semaphore.WaitAsync();
                         if (!await _userManager.IsUserAsync(user))
                         {
+                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id));
+                                
                                 await countPaidUserChecker.CheckAppend();
                         }
                         else
                         {
+                                lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id));
+                                
                                 await activeUsersChecker.CheckAppend();
                         }
 
@@ -1528,8 +1528,11 @@ public class UserController(ICache cache,
                     }
                         finally
                         {
-                            _semaphore.Release();
+                            if (lockHandle != null)
+                            {
+                                await lockHandle.ReleaseAsync();
                         }
+                    }
                     }
                     break;
                 case EmployeeStatus.Terminated:

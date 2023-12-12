@@ -68,6 +68,11 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
 
         DIHelper.TryAdd<ThumbnailRequestedIntegrationEventHandler>();
         DIHelper.TryAdd<RoomIndexExportIntegrationEventHandler>();
+        DIHelper.TryAdd<DeleteIntegrationEventHandler>();
+        DIHelper.TryAdd<MoveOrCopyIntegrationEventHandler>();
+        DIHelper.TryAdd<BulkDownloadIntegrationEventHandler>();
+        DIHelper.TryAdd<MarkAsReadIntegrationEventHandler>();
+        DIHelper.TryAdd<EmptyTrashIntegrationEventHandler>();
 
         services.AddHostedService<Launcher>();
         DIHelper.TryAdd<Launcher>();
@@ -84,6 +89,7 @@ public class Startup(IConfiguration configuration, IHostEnvironment hostEnvironm
         DIHelper.TryAdd<SocketServiceClient>();
         DIHelper.TryAdd<FileStorageService>();
         DIHelper.TryAdd<Builder<int>>();
+        DIHelper.TryAdd<DistributedTaskProgress>();
         DIHelper.TryAdd<DocumentBuilderTask<int>>();
 
         services.AddScoped<ITenantQuotaFeatureChecker, CountRoomChecker>();

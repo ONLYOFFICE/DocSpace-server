@@ -44,17 +44,18 @@ public class BackupPortalTask(DbFactory dbFactory,
     private const int MaxLength = 250;
     private const int BatchLimit = 5000;
 
-    private readonly bool _dump = coreBaseSettings.Standalone;
+    private bool _dump = coreBaseSettings.Standalone;
 
-    public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator)
+    public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator, bool dump)
     {
         ArgumentException.ThrowIfNullOrEmpty(toFilePath);
 
         BackupFilePath = toFilePath;
         Limit = limit;
         WriteOperator = writeOperator;
-        Init(tenantId);
+        _dump = dump;
 
+        Init(tenantId);
     }
 
     public override async Task RunJob()
@@ -409,7 +410,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         }
     }
 
-    private List<object[]> GetData(string t, List<string> columns, int offset, string connectionString)
+    private List<object[]> GetData(string t, IEnumerable<string> columns, int offset, string connectionString)
     {
         using var connection = DbFactory.OpenConnection(connectionString: connectionString);
         var command = connection.CreateCommand();
@@ -419,7 +420,7 @@ public class BackupPortalTask(DbFactory dbFactory,
         return ExecuteList(command);
     }
 
-    private List<object[]> GetDataWithPrimary(string t, List<string> columns, string primary, int start, int step, string connectionString)
+    private List<object[]> GetDataWithPrimary(string t, IEnumerable<string> columns, string primary, int start, int step, string connectionString)
     {
         using var connection = DbFactory.OpenConnection(connectionString: connectionString);
         var command = connection.CreateCommand();

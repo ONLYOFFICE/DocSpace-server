@@ -38,6 +38,7 @@ public class SettingsController(MessageService messageService,
         WebItemManagerSecurity webItemManagerSecurity,
         TenantInfoSettingsHelper tenantInfoSettingsHelper,
         TenantUtil tenantUtil,
+        CoreSettings coreSettings,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         IConfiguration configuration,
@@ -61,10 +62,11 @@ public class SettingsController(MessageService messageService,
         ExternalShare externalShare,
         ConfigurationExtension configurationExtension,
         IMapper mapper,
-        UserFormatter userFormatter)
+        UserFormatter userFormatter, 
+        IDistributedLockProvider distributedLockProvider)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
-    private static readonly SemaphoreSlim _semaphore = new(1);
+
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -93,7 +95,7 @@ public class SettingsController(MessageService messageService,
             Personal = coreBaseSettings.Personal,
             DocSpace = !coreBaseSettings.DisableDocSpace,
             Standalone = coreBaseSettings.Standalone,
-            BaseDomain = coreBaseSettings.Basedomain,
+            BaseDomain = coreBaseSettings.Standalone ? await coreSettings.GetSettingAsync("BaseDomain") ?? coreBaseSettings.Basedomain : coreBaseSettings.Basedomain,
             Version = configuration["version:number"] ?? "",
             TenantStatus = tenant.Status,
             TenantAlias = tenant.Alias,
@@ -123,6 +125,7 @@ public class SettingsController(MessageService messageService,
             settings.BookTrainingEmail = setupInfo.BookTrainingEmail;
             settings.DocumentationEmail = setupInfo.DocumentationEmail;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
+            settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
 
             settings.Firebase = new FirebaseDto
             {
@@ -574,9 +577,8 @@ public class SettingsController(MessageService messageService,
 
         if (inDto.Theme != null)
         {
-            try
+            await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme"))
             {
-                await _semaphore.WaitAsync();
                 var theme = inDto.Theme;
 
                 if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
@@ -618,14 +620,9 @@ public class SettingsController(MessageService messageService,
                     }
                 }
 
-
                 await settingsManager.SaveAsync(settings);
             }
-            finally
-            {
-                _semaphore.Release();
             }
-        }
 
         if (inDto.Selected.HasValue && settings.Themes.Exists(r => r.Id == inDto.Selected.Value))
         {
@@ -790,7 +787,7 @@ public class SettingsController(MessageService messageService,
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("statistics/spaceusage/{id}")]
+    [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(Guid id)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

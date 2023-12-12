@@ -44,7 +44,7 @@ public static class LdapUtils
 
         var dcList = matchList.Select(match => match.Groups[1].Value).ToList();
 
-        return !dcList.Any() ? null : string.Join(".", dcList);
+        return dcList.Count == 0 ? null : string.Join(".", dcList);
     }
 
     public static bool IsLoginAccepted(LdapLogin ldapLogin, UserInfo ldapUser, string ldapDomain)

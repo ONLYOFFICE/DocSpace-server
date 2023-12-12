@@ -29,6 +29,7 @@ using Apache.NMS;
 using ASC.EventBus.Serializers;
 
 namespace ASC.Api.Core.Extensions;
+
 public static class ServiceCollectionExtension
 {
     public static void AddCacheNotify(this IServiceCollection services, IConfiguration configuration)
@@ -84,6 +85,111 @@ public static class ServiceCollectionExtension
         {
             services.AddDistributedMemoryCache();
         }
+    }
+
+    public static IServiceCollection AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
+    {
+        var zooKeeperConfiguration = configuration.GetSection("Zookeeper").Get<ZooKeeperConfiguration>();
+
+        if (zooKeeperConfiguration != null)
+        {
+            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(_ =>
+            {
+                return new ZooKeeperDistributedSynchronizationProvider(new ZooKeeperPath(zooKeeperConfiguration.DirectoryPath), zooKeeperConfiguration.Connection,
+                    options =>
+                {
+                    if (zooKeeperConfiguration.ConnectionTimeout.HasValue)
+                    {
+                        options.ConnectTimeout(zooKeeperConfiguration.ConnectionTimeout.Value);
+                    }
+
+                    if (zooKeeperConfiguration.SessionTimeout.HasValue)
+                    {
+                        options.SessionTimeout(zooKeeperConfiguration.SessionTimeout.Value);
+                    }
+                });
+            });
+
+            return services.AddSingleton<IDistributedLockProvider, ZooKeeperDistributedLockProvider>(sp =>
+            {
+                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
+                var logger = sp.GetRequiredService<ILogger<ZooKeeperDistributedLockProvider>>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                
+                return TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout) 
+                    ? new ZooKeeperDistributedLockProvider(internalProvider, logger, minTimeout) 
+                    : new ZooKeeperDistributedLockProvider(internalProvider, logger);
+            });
+        }
+        
+        var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
+
+        if (redisConfiguration != null)
+        {
+            //  https://github.com/imperugo/StackExchange.Redis.Extensions/issues/513
+            if (configuration.GetSection("Redis").GetValue<string>("User") != null)
+            {
+                redisConfiguration.ConfigurationOptions.User = configuration.GetSection("Redis").GetValue<string>("User");
+            }
+
+            services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(sp =>
+            {
+                var database = sp.GetRequiredService<IRedisClient>().GetDefaultDatabase().Database;
+                var cfg = sp.GetRequiredService<IConfiguration>();
+
+                return new RedisDistributedSynchronizationProvider(database, opt =>
+                {
+                    if (TimeSpan.TryParse(cfg["core:lock:expiry"], out var expiry))
+                    {
+                        opt.Expiry(expiry);
+                    }
+
+                    if (TimeSpan.TryParse(cfg["core:lock:extendInterval"], out var extendInterval))
+                    {
+                        opt.ExtensionCadence(extendInterval);
+                    }
+                    
+                    if (TimeSpan.TryParse(cfg["core:lock:minValidityTime"], out var minValidityTime))
+                    {
+                        opt.MinValidityTime(minValidityTime);
+                    }
+
+                    if (TimeSpan.TryParse(cfg["core:lock:minSleepTime"], out var minSleepTime)
+                        && TimeSpan.TryParse(cfg["core:lock:maxSleepTime"], out var maxSleepTime))
+                    {
+                        opt.BusyWaitSleepTime(minSleepTime, maxSleepTime);
+                    }
+                });
+            });
+
+            return services.AddSingleton<IDistributedLockProvider, RedisLockProvider>(sp =>
+            {
+                var redisClient = sp.GetRequiredService<IRedisClient>();
+                var logger = sp.GetRequiredService<ILogger<RedisLockProvider>>();
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                var internalProvider = sp.GetRequiredService<Medallion.Threading.IDistributedLockProvider>();
+                
+                return new RedisLockProvider(redisClient, logger, internalProvider, opt =>
+                {
+                    if (TimeSpan.TryParse(cfg["core:lock:expiry"], out var expiry))
+                    {
+                        opt.Expiry(expiry);
+                    }
+
+                    if (TimeSpan.TryParse(cfg["core:lock:extendInterval"], out var extendInterval))
+                    {
+                        opt.ExtendInterval(extendInterval);
+                    }
+
+                    if (TimeSpan.TryParse(cfg["core:lock:minTimeout"], out var minTimeout))
+                    {
+                        opt.MinTimeout(minTimeout);
+                    }
+                });
+            });
+        }
+
+        throw new NotImplementedException("DistributedLock: Provider not found.");
     }
 
     public static void AddEventBus(this IServiceCollection services, IConfiguration configuration)

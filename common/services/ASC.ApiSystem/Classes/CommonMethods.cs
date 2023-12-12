@@ -42,7 +42,7 @@ public class CommonMethods(
         TenantManager tenantManager,
         IHttpClientFactory clientFactory)
     {
-    public object ToTenantWrapper(Tenant t)
+    public object ToTenantWrapper(Tenant t, QuotaUsageDto quotaUsage = null, TenantOwnerDto owner = null)
     {
         return new
         {
@@ -61,7 +61,8 @@ public class CommonMethods(
             quota = !hostedSolution.GetTenantQuotaSettings(t.Id).Result.DisableQuota ? hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize : -1,
             usedSize = hostedSolution.FindTenantQuotaRowsAsync(t.Id).Result
                             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
-                            .Sum(q => q.Counter)
+                            .Sum(q => q.Counter),
+            owner
         };
     }
 
@@ -146,6 +147,47 @@ public class CommonMethods(
         return (false, null);
     }
 
+    public async Task<List<Tenant>> GetTenantsAsync(TenantModel model)
+    {
+        var tenants = new List<Tenant>();
+        var empty = true;
+
+        if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
+        {
+            empty = false;
+            tenants.AddRange(await hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
+        }
+
+        if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        {
+            empty = false;
+            var tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
+
+            if (tenant != null)
+            {
+                tenants.Add(tenant);
+            }
+        }
+
+        if (model.TenantId.HasValue)
+        {
+            empty = false;
+            var tenant = await hostedSolution.GetTenantAsync(model.TenantId.Value);
+
+            if (tenant != null)
+            {
+                tenants.Add(tenant);
+            }
+        }
+
+        if (empty)
+        {
+            tenants.AddRange((await hostedSolution.GetTenantsAsync(DateTime.MinValue)).OrderBy(t => t.Id).ToList());
+        }
+
+        return tenants;
+    }
+
     public bool IsTestEmail(string email)
     {
         //the point is not needed in gmail.com
@@ -224,6 +266,13 @@ public class CommonMethods(
         //}
 
         //return null;
+    }
+
+    public async Task<IEnumerable<string>> GetHostIpsAsync()
+    {
+        var hostName = Dns.GetHostName();
+        var hostEntry = await Dns.GetHostEntryAsync(hostName);
+        return hostEntry.AddressList.Select(ip => ip.ToString());
     }
 
     public bool ValidateRecaptcha(string response, RecaptchaType recaptchaType, string ip)
