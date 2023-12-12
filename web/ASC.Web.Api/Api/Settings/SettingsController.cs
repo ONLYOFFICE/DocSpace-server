@@ -228,7 +228,15 @@ public class SettingsController : BaseSettingsController
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            settings.Plugins.Allow = _configuration.GetSection("plugins:allow").Get<List<string>>() ?? new List<string>();
+            if (bool.TryParse(_configuration["plugins:allowUpload"], out var pluginsAllowUpload))
+            {
+                settings.Plugins.AllowUpload = pluginsAllowUpload;
+            }
+
+            if (bool.TryParse(_configuration["plugins:allowDelete"], out var pluginsAllowDelete))
+            {
+                settings.Plugins.AllowDelete = pluginsAllowDelete;
+            }
 
             var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
             settings.FormGallery = _mapper.Map<FormGalleryDto>(formGallerySettings);
