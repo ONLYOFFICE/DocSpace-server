@@ -36,9 +36,9 @@ public class PluginsDto
 
     /// <summary>Specifies if the plugins can be uploaded or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool AllowUpload { get; set; }
+    public bool Upload { get; set; }
 
     /// <summary>Specifies if the plugins can be deleted or not</summary>
     /// <type>System.Boolean, System</type>
-    public bool AllowDelete { get; set; }
+    public bool Delete { get; set; }
 }

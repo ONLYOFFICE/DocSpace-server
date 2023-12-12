@@ -39,8 +39,8 @@ public class WebPluginConfigSettings
     private string[] _assetExtensions;
 
     public bool Enabled { get; set; }
-    public bool AllowUpload { get; set; }
-    public bool AllowDelete { get; set; }
+    public bool Upload { get; set; }
+    public bool Delete { get; set; }
 
     public long MaxSize
     {

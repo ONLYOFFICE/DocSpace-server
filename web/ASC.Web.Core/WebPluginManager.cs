@@ -131,7 +131,7 @@ public class WebPluginManager
             throw new SecurityException("Plugins disabled");
         }
 
-        if ((upload && !_webPluginConfigSettings.AllowUpload) || (delete && !_webPluginConfigSettings.AllowDelete))
+        if ((upload && !_webPluginConfigSettings.Upload) || (delete && !_webPluginConfigSettings.Delete))
         {
             throw new SecurityException("Forbidden action");
         }

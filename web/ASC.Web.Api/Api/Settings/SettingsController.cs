@@ -228,14 +228,14 @@ public class SettingsController : BaseSettingsController
                 settings.Plugins.Enabled = pluginsEnabled;
             }
 
-            if (bool.TryParse(_configuration["plugins:allowUpload"], out var pluginsAllowUpload))
+            if (bool.TryParse(_configuration["plugins:upload"], out var pluginsUpload))
             {
-                settings.Plugins.AllowUpload = pluginsAllowUpload;
+                settings.Plugins.Upload = pluginsUpload;
             }
 
-            if (bool.TryParse(_configuration["plugins:allowDelete"], out var pluginsAllowDelete))
+            if (bool.TryParse(_configuration["plugins:delete"], out var pluginsDelete))
             {
-                settings.Plugins.AllowDelete = pluginsAllowDelete;
+                settings.Plugins.Delete = pluginsDelete;
             }
 
             var formGallerySettings = _configurationExtension.GetSetting<OFormSettings>("files:oform");
