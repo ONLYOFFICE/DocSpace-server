@@ -1363,7 +1363,7 @@ public class UserController : PeopleControllerBase
     {
         var user = await GetUserInfoAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id))
+        if (_userManager.IsSystemUser(user.Id) || !Equals(user.Id, _securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
