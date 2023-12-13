@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -48,5 +49,11 @@ public class AnonymousReplacerAuthenticationFilter extends OncePerRequestFilter 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
+    }
+
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        var first = Pattern.compile("/oauth2/token");
+        var path = request.getRequestURI();
+        return first.matcher(path).find();
     }
 }
