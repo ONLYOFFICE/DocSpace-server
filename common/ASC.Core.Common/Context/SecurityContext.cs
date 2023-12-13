@@ -344,7 +344,7 @@ public class AuthContext
         HttpContextAccessor = httpContextAccessor;
     }
 
-    public IAccount CurrentAccount => Principal?.Identity is IAccount account ? (IAccount)Principal.Identity : Constants.Guest;
+    public IAccount CurrentAccount => Principal?.Identity as IAccount ?? Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;
 

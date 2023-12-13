@@ -663,7 +663,7 @@ public class UserPhotoManager(UserManager userManager,
             return await GetSizedPhotoAbsoluteWebPath(userID, size);
         }
 
-        if (!_resizeQueue.GetAllTasks<ResizeWorkerItem>().Any(r => r["key"] == key))
+        if (_resizeQueue.GetAllTasks<ResizeWorkerItem>().All(r => r["key"] != key))
         {
             //Add
             _resizeQueue.EnqueueTask(async (_, _) => await ResizeImage(resizeTask), resizeTask);

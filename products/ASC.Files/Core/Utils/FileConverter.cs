@@ -592,7 +592,7 @@ public class FileConverter(FileUtility fileUtility,
             if (e.StatusCode != HttpStatusCode.NotFound)
             {
                     errorString += $" Error {e.Message}";
-                }
+            }
 
             throw new Exception(errorString);
         }

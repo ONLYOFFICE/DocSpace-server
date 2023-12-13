@@ -125,7 +125,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         if (toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive && !await FilesSecurity.CanCreateAsync(toFolder))
         {
                 throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException_Create);
-            }
+        }
 
         this[Res] += $"folder_{tto}{SplitChar}";
         
@@ -873,7 +873,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             if(toFolderParentRoom == null)
             {
                 return true;
-        }
+            }
 
             return false;
         }

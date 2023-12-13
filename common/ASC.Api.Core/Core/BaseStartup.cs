@@ -41,9 +41,9 @@ public abstract class BaseStartup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
 
-    protected virtual bool AddControllersAsServices { get; }
+    protected bool AddControllersAsServices { get; }
     protected virtual bool ConfirmAddScheme { get; }
-    protected virtual bool AddAndUseSession { get; }
+    protected bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool LoadProducts { get; set; } = true;
     protected bool LoadConsumers { get; } = true;

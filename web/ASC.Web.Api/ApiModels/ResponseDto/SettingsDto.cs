@@ -133,6 +133,10 @@ public class SettingsDto
     /// <summary>Link to the help</summary>
     /// <type>System.String, System</type>
     public string HelpLink { get; set; }
+    
+    /// <summary>Link to the forum</summary>
+    /// <type>System.String, System</type>
+    public string ForumLink { get; set; }
 
     /// <summary>API documentation link</summary>
     /// <type>System.String, System</type>
@@ -161,6 +165,7 @@ public class SettingsDto
     /// <summary>Specifies whether the cookie settings are enabled</summary>
     /// <type>System.Boolean, System</type>
     public bool CookieSettingsEnabled { get; set; }
+    public bool LimitedAccessSpace { get; set; }
 
     /// <summary>User name validation regex</summary>
     /// <type>System.String, System</type>

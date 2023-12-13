@@ -103,7 +103,7 @@ public class SecurityController(TenantManager tenantManager,
     /// <returns type="System.Boolean, System">Boolean value: true - module is enabled, false - module is disabled</returns>
     /// <path>api/2.0/settings/security/{id}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<bool> GetWebItemSecurityInfoAsync(Guid id)
     {
         var module = WebItemManager[id];
@@ -301,7 +301,7 @@ public class SecurityController(TenantManager tenantManager,
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    [HttpGet("administrator/{productid}")]
+    [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(Guid productid)
     {
         var admins = await webItemSecurity.GetProductAdministratorsAsync(productid);

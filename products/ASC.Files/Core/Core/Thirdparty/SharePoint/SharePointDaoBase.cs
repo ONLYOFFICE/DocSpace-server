@@ -29,22 +29,20 @@ using Folder = Microsoft.SharePoint.Client.Folder;
 
 namespace ASC.Files.Thirdparty.SharePoint;
 
-internal class SharePointDaoBase : ThirdPartyProviderDao<File, Folder, ClientObject>
+internal class SharePointDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<File, Folder, ClientObject>(serviceProvider, userManager, tenantManager, tenantUtil,
+        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
 {
     internal SharePointProviderInfo SharePointProviderInfo { get; private set; }
-
-    public SharePointDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext, 
-        RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<File, Folder, ClientObject> providerInfo)
     {

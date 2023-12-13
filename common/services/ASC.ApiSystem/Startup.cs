@@ -36,6 +36,7 @@ public class Startup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly DIHelper _diHelper;
     private readonly string _corsOrigin;
+    private readonly bool _standalone;
 
     public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
@@ -43,6 +44,7 @@ public class Startup
         _hostEnvironment = hostEnvironment;
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
+        _standalone = _configuration["core:base-domain"] == "localhost";
     }
 
     public async Task ConfigureServices(IServiceCollection services)
@@ -135,6 +137,9 @@ public class Startup
 
         services.RegisterFeature();
 
+        services.AddScoped<ITenantQuotaFeatureStat<CountRoomFeature, int>, CountRoomCheckerStatistic>();
+        services.AddScoped<CountRoomCheckerStatistic>();
+
         _diHelper.TryAdd(typeof(IWebhookPublisher), typeof(WebhookPublisher));
 
         _diHelper.RegisterProducts(_configuration, _hostEnvironment.ContentRootPath);
@@ -147,9 +152,20 @@ public class Startup
                     .TryAddSingleton(services);
         }
 
-        services.AddAuthentication()
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
-            .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { });
+        if (_standalone)
+        {
+            services
+                .AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
+                .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { })
+                .AddScheme<AuthenticationSchemeOptions, ApiSystemAuthHandler>("auth:portal", _ => { });
+        }
+        else
+        {
+            services.AddAuthentication()
+               .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
+               .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:registerportal", _ => { });
+        }
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
