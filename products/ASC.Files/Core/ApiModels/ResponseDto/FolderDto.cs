@@ -184,7 +184,7 @@ public class FolderDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             result.Order = !string.IsNullOrEmpty(order) ? string.Join('.', order, folder.Order) : folder.Order.ToString();
         }
 
-        if (folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.ReadyFormFolder)
+        if (folder.FolderType == FolderType.InProcessFormFolder || folder.FolderType == FolderType.ReadyFormFolder || folder.FolderType == FolderType.FormFillingFolder)
         {
             result.Type = folder.FolderType;
         }
