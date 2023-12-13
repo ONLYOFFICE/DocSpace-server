@@ -970,7 +970,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 if (action == FilesSecurityActions.FillForms && file != null)
                 {
-                    var fileFolder = await _daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
+                    var fileFolder = await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId);
                     if (fileFolder.FolderType == FolderType.FormFillingFolder && file.CreateBy != userId)
                     {
                         return false;

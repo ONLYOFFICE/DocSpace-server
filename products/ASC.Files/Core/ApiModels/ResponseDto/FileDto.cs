@@ -199,7 +199,7 @@ public class FileDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
         if (fileType == FileType.OForm)
         {
-            var linkDao = _daoFactory.GetLinkDao();
+            var linkDao = daoFactory.GetLinkDao();
             var linkedId = await linkDao.GetLinkedAsync(file.Id.ToString());
             result.HasDraft = linkedId != null ? true : false;
         }

@@ -72,7 +72,6 @@ public class FileStorageService //: IFileStorageService
         CompressToArchive compressToArchive,
         OFormRequestManager oFormRequestManager,
         MessageService messageService,
-        IServiceScopeFactory serviceScopeFactory,
         ThirdPartySelector thirdPartySelector,
         ThumbnailSettings thumbnailSettings,
         FileShareParamsHelper fileShareParamsHelper,
@@ -186,11 +185,11 @@ public class FileStorageService //: IFileStorageService
         {
             var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parent);
             var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
-            var ace = await _fileSharing.GetPureSharesAsync(room, new List<Guid> { _authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
+            var ace = await fileSharing.GetPureSharesAsync(room, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
 
             if (ace != null && ace.Access == FileShare.FillForms)
             {
-                subjectId = _authContext.CurrentAccount.ID;
+                subjectId = authContext.CurrentAccount.ID;
             }
         }
 
@@ -3456,7 +3455,7 @@ public class FileStorageService //: IFileStorageService
     {
         var fileDao = GetFileDao<T>();
         var folderDao = GetFolderDao<T>();
-        var linkDao = _daoFactory.GetLinkDao();
+        var linkDao = daoFactory.GetLinkDao();
         var sourceId = await linkDao.GetSourceAsync(form.Id.ToString());
 
         if (sourceId != null)
@@ -3465,11 +3464,11 @@ public class FileStorageService //: IFileStorageService
 
             if (int.TryParse(sourceId, out var sourceInt))
             {
-                properties = _daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
+                properties = daoFactory.GetFileDao<int>().GetProperties(sourceInt).Result;
             }
             else
             {
-                properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
+                properties = daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
             }
 
             if (properties.FormFilling.ResultsFileID == null)
@@ -3477,7 +3476,7 @@ public class FileStorageService //: IFileStorageService
                 var dt = JsonConvert.DeserializeObject<DataTable>(data);
 
                 var resultFolderId = (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T));
-                var resultsFileID = await _exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
+                var resultsFileID = await exportToCSV.UploadCsvReport(resultFolderId, properties.FormFilling.Title, dt);
 
                 properties.FormFilling.ResultsFileID = resultsFileID.ToString();
                 await fileDao.SaveProperties((T)Convert.ChangeType(sourceId, typeof(T)), properties);
@@ -3487,15 +3486,15 @@ public class FileStorageService //: IFileStorageService
                 var resultsFile = await fileDao.GetFileAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFileID, typeof(T)));
 
                 var updateDt = JsonConvert.DeserializeObject<DataTable>(data);
-                await _exportToCSV.UpdateCsvReport(resultsFile, updateDt);
+                await exportToCSV.UpdateCsvReport(resultsFile, updateDt);
             }
 
             await fileDao.MoveFileAsync(form.Id, (T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
             await linkDao.DeleteLinkAsync(sourceId);
 
-            await _socketManager.UpdateFileAsync(form);
+            await socketManager.UpdateFileAsync(form);
             var folder = await folderDao.GetFolderAsync((T)Convert.ChangeType(properties.FormFilling.ResultsFolderId, typeof(T)));
-            await _socketManager.UpdateFolderAsync(folder);
+            await socketManager.UpdateFolderAsync(folder);
         }
     }
 

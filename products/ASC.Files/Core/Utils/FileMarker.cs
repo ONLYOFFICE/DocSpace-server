@@ -165,7 +165,7 @@ public class FileMarker(TenantManager tenantManager,
                     var (currentRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(parentFolder);
                     var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(currentRoomId, typeof(T))).NotFoundIfNull();
 
-                    await foreach (var ace in _fileSecurity.GetPureSharesAsync(room, guids))
+                    await foreach (var ace in fileSecurity.GetPureSharesAsync(room, guids))
                     {
                         if (ace.Share != FileShare.FillForms && ace.Subject != obj.CurrentAccountId)
                         {

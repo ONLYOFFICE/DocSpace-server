@@ -132,7 +132,7 @@ internal class FolderDao(
 
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
-            yield return _mapper.Map<DbFolderQuery, Folder<int>>(e);
+            yield return mapper.Map<DbFolderQuery, Folder<int>>(e);
         }
 
     }

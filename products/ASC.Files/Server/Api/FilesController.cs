@@ -35,7 +35,7 @@ public class FilesControllerInternal(FilesControllerHelper filesControllerHelper
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-    : FilesController<int>(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
+    : FilesController<int>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper);
 
 public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
@@ -45,7 +45,7 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
-    : FilesController<string>(filesControllerHelper, fileStorageService, mapper, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper)
+    : FilesController<string>(filesControllerHelper, fileStorageService, fileOperationDtoHelper, folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
     /// Returns the detailed information about a third-party file with the ID specified in the request.
@@ -69,7 +69,6 @@ public class FilesControllerThirdparty(FilesControllerHelper filesControllerHelp
 
 public abstract class FilesController<T>(FilesControllerHelper filesControllerHelper,
         FileStorageService fileStorageService,
-        IMapper mapper,
         FileOperationDtoHelper fileOperationDtoHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
@@ -376,7 +375,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
     [HttpPut("file/{formId}/signed")]
     public async Task<object> SignedFormAsync(T formId, SignedFormRequestDto inDto)
     {
-        return await _filesControllerHelper.SignedFormAsync(formId, inDto.Data);
+        return await filesControllerHelper.SignedFormAsync(formId, inDto.Data);
     }
 
     /// <summary>
@@ -418,8 +417,7 @@ public abstract class FilesController<T>(FilesControllerHelper filesControllerHe
         await fileStorageService.SetFileOrder(fileId, inDto.Order);
     }}
 
-public class FilesControllerCommon(IMapper mapper,
-        IServiceScopeFactory serviceScopeFactory,
+public class FilesControllerCommon(
         GlobalFolderHelper globalFolderHelper,
         FileStorageService fileStorageService,
         FilesControllerHelper filesControllerHelperInternal,
