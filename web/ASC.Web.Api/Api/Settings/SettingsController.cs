@@ -102,7 +102,8 @@ public class SettingsController(MessageService messageService,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             LegalTerms = setupInfo.LegalTerms,
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
-            UserNameRegex = userFormatter.UserNameRegex.ToString()
+            UserNameRegex = userFormatter.UserNameRegex.ToString(),
+            ForumLink = await commonLinkUtility.GetUserForumLinkAsync(settingsManager, additionalWhiteLabelSettingsHelper)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != default)
@@ -115,7 +116,7 @@ public class SettingsController(MessageService messageService,
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
             var timeZone = tenant.TimeZone;
-            settings.Timezone = timeZone;
+            settings.Timezone = timeZoneConverter.WindowsTzId2OlsonTzId(timeZone);
             settings.UtcOffset = timeZoneConverter.GetTimeZone(timeZone).GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -337,7 +338,7 @@ public class SettingsController(MessageService messageService,
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = tz.Id,
+                Id = timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
                 DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
