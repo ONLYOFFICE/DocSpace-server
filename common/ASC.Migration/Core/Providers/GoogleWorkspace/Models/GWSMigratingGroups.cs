@@ -35,8 +35,8 @@ public class GWSMigratingGroups : MigratingGroup
     private List<string> _userUidList;
     private readonly UserManager _userManager;
     private string _rootFolder;
-    private GroupInfo _groupinfo;
-    public Guid Guid => _groupinfo.ID;
+    private GroupInfo _groupInfo;
+    public Guid Guid => _groupInfo.ID;
     public override List<string> UserGuidList => _userUidList;
     public override string GroupName => _groupName;
     public GWSMigratingGroups(UserManager userManager)
@@ -64,24 +64,21 @@ public class GWSMigratingGroups : MigratingGroup
                 _groupName = line.Split(',')[9];
                 if (!string.IsNullOrWhiteSpace(_groupName))
                 {
-                    _groupinfo = new GroupInfo()
+                    _groupInfo = new GroupInfo()
                     {
                         Name = _groupName
                     };
                 }
             }
         }
-        if (!string.IsNullOrWhiteSpace(_groupinfo.Name))
+        if (!string.IsNullOrWhiteSpace(_groupInfo.Name))
         {
             var groupMembers = Path.Combine(groupsFolder, "members.csv");
-            using (var sr = new StreamReader(groupMembers))
+            using var sr = new StreamReader(groupMembers);
+            var line = sr.ReadLine();
+            while ((line = sr.ReadLine()) != null)
             {
-                var line = sr.ReadLine();
-                while ((line = sr.ReadLine()) != null)
-                {
-                    var b = line.Split(',');
-                    _userUidList.Add(line.Split(',')[1]);
-                }
+                _userUidList.Add(line.Split(',')[1]);
             }
         }
     }
@@ -89,28 +86,27 @@ public class GWSMigratingGroups : MigratingGroup
     public override async Task MigrateAsync()
     {
         var existingGroups = (await _userManager.GetGroupsAsync()).ToList();
-        var oldGroup = existingGroups.Find(g => g.Name == _groupinfo.Name);
+        var oldGroup = existingGroups.Find(g => g.Name == _groupInfo.Name);
         if (oldGroup != null)
         {
-            _groupinfo = oldGroup;
+            _groupInfo = oldGroup;
         }
         else
         {
-            _groupinfo = await _userManager.SaveGroupInfoAsync(_groupinfo);
+            _groupInfo = await _userManager.SaveGroupInfoAsync(_groupInfo);
         }
         foreach (var userEmail in _userUidList)
         {
-            UserInfo user;
             try
             {
-                user = await _userManager.GetUserByEmailAsync(userEmail);
-                if (user == Constants.LostUser)
+                var user = await _userManager.GetUserByEmailAsync(userEmail);
+                if (user.Equals(Constants.LostUser))
                 {
-                    throw new ArgumentNullException();
+                    continue;
                 }
-                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupinfo.ID))
+                if (!await _userManager.IsUserInGroupAsync(user.Id, _groupInfo.ID))
                 {
-                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupinfo.ID);
+                    await _userManager.AddUserIntoGroupAsync(user.Id, _groupInfo.ID);
                 }
             }
             catch (Exception ex)

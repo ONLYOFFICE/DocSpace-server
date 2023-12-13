@@ -59,21 +59,14 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
     {
         _logger.Init();
         _cancellationToken = cancellationToken;
-        var tempTakeouts = new List<string>();
         var files = Directory.GetFiles(path);
         _path = path;
-        if (!files.Any() || !files.Any(f => f.EndsWith(".zip")))
+        if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
         {
             throw new Exception("Folder must not be empty and should contain .zip files.");
         }
-        foreach (var item in files)
-        {
-            if (item.EndsWith(".zip"))
-            {
-                tempTakeouts.Add(item);
-            }
-        }
-        _takeouts = tempTakeouts.ToArray();
+
+        _takeouts = files.Where(item => item.EndsWith(".zip")).ToArray();
 
         _migrationInfo = new GwsMigrationInfo();
         _migrationInfo.MigratorName = _meta.Name;
@@ -172,10 +165,10 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
 
         var usersForImport = _migrationInfo.Users
             .Where(u => u.Value.ShouldImport)
-            .Select(u => u.Value);
+            .Select(u => u.Value).ToList();
 
         var failedUsers = new List<GwsMigratingUser>();
-        var usersCount = usersForImport.Count();
+        var usersCount = usersForImport.Count;
         var progressStep = usersCount == 0 ? 25 : 25 / usersCount;
         // Add all users first
         var i = 1;
@@ -205,11 +198,11 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
 
         var groupsForImport = _migrationInfo.Groups
                 .Where(g => g.ShouldImport)
-                .Select(g => g);
-        var groupsCount = groupsForImport.Count();
+                .Select(g => g).ToList();
+        var groupsCount = groupsForImport.Count;
         if (groupsCount != 0)
         {
-            progressStep = 25 / groupsForImport.Count();
+            progressStep = 25 / groupsCount;
             //Create all groups
             i = 1;
             foreach (var group in groupsForImport)
@@ -237,7 +230,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
             }
             if (failedUsers.Contains(user))
             {
-               // ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
                 continue;
             }
 
@@ -273,7 +266,7 @@ public class GoogleWorkspaceMigration : AbstractMigration<GwsMigrationInfo, GwsM
         }
 
         _migrationInfo.FailedUsers = failedUsers.Count;
-        _migrationInfo.SuccessedUsers = usersForImport.Count() - _migrationInfo.FailedUsers;
+        _migrationInfo.SuccessedUsers = usersForImport.Count - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 }
