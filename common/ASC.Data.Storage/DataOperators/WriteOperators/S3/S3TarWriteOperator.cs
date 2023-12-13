@@ -137,7 +137,7 @@ public class S3TarWriteOperator : IDataWriteOperator
     {
         try
         {
-            Task.WaitAll(_tasks.ToArray());
+            await Task.WhenAll(_tasks.ToArray());
             _tasks.Clear();
         }
         catch
