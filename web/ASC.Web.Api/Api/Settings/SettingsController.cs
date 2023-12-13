@@ -405,7 +405,7 @@ public class SettingsController : BaseSettingsController
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = tz.Id,
+                Id = _timeZoneConverter.WindowsTzId2OlsonTzId(tz.Id),
                 DisplayName = _timeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
