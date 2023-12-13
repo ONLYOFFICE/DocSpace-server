@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.Helpers;
 
-[Singletone]
+[Singleton]
 public class FileUtilityConfiguration
 {
     private readonly IConfiguration _configuration;
@@ -132,10 +132,16 @@ public class FileUtilityConfiguration
         get => _masterFormExtension ??= _configuration["files:docservice:internal-form"] ?? ".docxf";
     }
 
+    private List<LogoColor> _logoColors;
+    public List<LogoColor> LogoColors
+    {
+        get => _logoColors ??= _configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? new List<LogoColor>();
+    }
+
     public Dictionary<FileType, string> InternalExtension
     {
-        get => new Dictionary<FileType, string>
-            {
+        get => new()
+        {
                 { FileType.Document, _configuration["files:docservice:internal-doc"] ?? ".docx" },
                 { FileType.Spreadsheet, _configuration["files:docservice:internal-xls"] ?? ".xlsx" },
                 { FileType.Presentation, _configuration["files:docservice:internal-ppt"] ?? ".pptx" }
@@ -174,7 +180,14 @@ public class FileUtilityConfiguration
     }
 }
 
-public enum Accessability
+public class LogoColor
+{
+    public byte R { get; set; }
+    public byte G { get; set; }
+    public byte B { get; set; }
+}
+
+public enum Accessibility
 {
     ImageView,
     MediaView,
@@ -185,7 +198,8 @@ public enum Accessability
     WebRestrictedEditing,
     WebComment,
     CoAuhtoring,
-    Convert
+    CanConvert,
+    MustConvert,
 }
 
 [Scope]
@@ -195,11 +209,13 @@ public class FileUtility
     public FileUtility(
         FileUtilityConfiguration fileUtilityConfiguration,
         FilesLinkUtility filesLinkUtility,
-        IDbContextFactory<FilesDbContext> dbContextFactory)
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        SetupInfo setupInfo)
     {
         _fileUtilityConfiguration = fileUtilityConfiguration;
         _filesLinkUtility = filesLinkUtility;
         _dbContextFactory = dbContextFactory;
+        _setupInfo = setupInfo;
         CanForcesave = GetCanForcesave();
     }
 
@@ -247,10 +263,16 @@ public class FileUtility
         return GetInternalExtension(googleExtension);
     }
 
+    public string GetInternalConvertExtension(string fileName)
+    {
+        return "ooxml";
+    }
+
     public static string ReplaceFileExtension(string fileName, string newExtension)
     {
         newExtension = string.IsNullOrEmpty(newExtension) ? string.Empty : newExtension;
-        return Path.GetFileNameWithoutExtension(fileName) + newExtension;
+        return Path.GetFileNameWithoutExtension(fileName)
+                 + "." + newExtension.TrimStart('.');
     }
 
     public static FileType GetFileTypeByFileName(string fileName)
@@ -310,45 +332,50 @@ public class FileUtility
         return FileType.Unknown;
     }
 
-    public IDictionary<Accessability, bool> GetAccessability(string fileName)
+    public async Task<IDictionary<Accessibility, bool>> GetAccessibility<T>(File<T> file)
     {
-        var result = new Dictionary<Accessability, bool>();
+        var fileName = file.Title;
+        
+        var result = new Dictionary<Accessibility, bool>();
 
-        foreach (var r in Enum.GetValues<Accessability>())
+        foreach (var r in Enum.GetValues<Accessibility>())
         {
             var val = false;
 
             switch (r)
             {
-                case Accessability.ImageView:
+                case Accessibility.ImageView:
                     val = CanImageView(fileName);
                     break;
-                case Accessability.MediaView:
+                case Accessibility.MediaView:
                     val = CanMediaView(fileName);
                     break;
-                case Accessability.WebView:
+                case Accessibility.WebView:
                     val = CanWebView(fileName);
                     break;
-                case Accessability.WebEdit:
+                case Accessibility.WebEdit:
                     val = CanWebEdit(fileName);
                     break;
-                case Accessability.WebReview:
+                case Accessibility.WebReview:
                     val = CanWebReview(fileName);
                     break;
-                case Accessability.WebCustomFilterEditing:
+                case Accessibility.WebCustomFilterEditing:
                     val = CanWebCustomFilterEditing(fileName);
                     break;
-                case Accessability.WebRestrictedEditing:
+                case Accessibility.WebRestrictedEditing:
                     val = CanWebRestrictedEditing(fileName);
                     break;
-                case Accessability.WebComment:
+                case Accessibility.WebComment:
                     val = CanWebComment(fileName);
                     break;
-                case Accessability.CoAuhtoring:
-                    val = CanCoAuhtoring(fileName);
+                case Accessibility.CoAuhtoring:
+                    val = CanCoAuthoring(fileName);
                     break;
-                case Accessability.Convert:
-                    val = CanConvert(fileName);
+                case Accessibility.CanConvert:
+                    val = await CanConvert(file);
+                    break;
+                case Accessibility.MustConvert:
+                    val = MustConvert(fileName);
                     break;
             }
 
@@ -406,14 +433,19 @@ public class FileUtility
         return ExtsWebCommented.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
-    public bool CanCoAuhtoring(string fileName)
+    public bool CanCoAuthoring(string fileName)
     {
         var ext = GetFileExtension(fileName);
         return ExtsCoAuthoring.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
+    
+    public async Task<bool> CanConvert<T>(File<T> file)
+    {
+        var ext = GetFileExtension(file.Title);
+        return (await GetExtsConvertibleAsync()).ContainsKey(ext) && file.ContentLength <= _setupInfo.AvailableFileSize;
+    }
 
-
-    public bool CanConvert(string fileName)
+    public bool MustConvert(string fileName)
     {
         var ext = GetFileExtension(fileName);
         return ExtsMustConvert.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
@@ -429,44 +461,48 @@ public class FileUtility
 
     #region member
 
-    private Dictionary<string, List<string>> _extsConvertible;
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1);
+    private static ConcurrentDictionary<string, List<string>> _extsConvertible;
 
-    public Dictionary<string, List<string>> ExtsConvertible
+    public async Task<IDictionary<string, List<string>>> GetExtsConvertibleAsync()
     {
-        get
+        if (_extsConvertible != null)
         {
-            if (_extsConvertible == null)
-            {
-                _extsConvertible = new Dictionary<string, List<string>>();
-                if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
-                {
-                    return _extsConvertible;
-                }
-
-                using var filesDbContext = _dbContextFactory.CreateDbContext();
-                var list = filesDbContext.FilesConverts.Select(r => new { r.Input, r.Output }).ToList();
-
-                foreach (var item in list)
-                {
-                    var input = item.Input;
-                    var output = item.Output;
-                    if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
-                    {
-                        continue;
-                    }
-
-                    input = input.ToLower().Trim();
-                    output = output.ToLower().Trim();
-                    if (!_extsConvertible.ContainsKey(input))
-                    {
-                        _extsConvertible[input] = new List<string>();
-                    }
-
-                    _extsConvertible[input].Add(output);
-                }
-            }
             return _extsConvertible;
         }
+
+        await _semaphoreSlim.WaitAsync();
+        
+        _extsConvertible = new ConcurrentDictionary<string, List<string>>();
+        if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
+        {
+            return _extsConvertible;
+        }
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var list = await Queries.FoldersAsync(filesDbContext).ToListAsync();
+
+        foreach (var item in list)
+        {
+            var input = item.Input;
+            var output = item.Output;
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
+            {
+                continue;
+            }
+
+            input = input.ToLower().Trim();
+            output = output.ToLower().Trim();
+            if (!_extsConvertible.ContainsKey(input))
+            {
+                _extsConvertible[input] = new List<string>();
+            }
+
+            _extsConvertible[input].Add(output);
+        }
+
+        _semaphoreSlim.Release();
+        return _extsConvertible;
     }
 
     private List<string> _extsUploadable;
@@ -599,88 +635,93 @@ public class FileUtility
     private readonly FileUtilityConfiguration _fileUtilityConfiguration;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    public static readonly List<string> ExtsArchive = new List<string>
-            {
+    private readonly SetupInfo _setupInfo;
+
+    public static readonly ImmutableList<string> ExtsArchive =  new List<string>()
+    {
                 ".zip", ".rar", ".ace", ".arc", ".arj",
                 ".bh", ".cab", ".enc", ".gz", ".ha",
                 ".jar", ".lha", ".lzh", ".pak", ".pk3",
                 ".tar", ".tgz", ".gz", ".uu", ".uue", ".xxe",
                 ".z", ".zoo"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsVideo = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsVideo =  new List<string>()
+    {
                 ".3gp", ".asf", ".avi", ".f4v",
                 ".fla", ".flv", ".m2ts", ".m4v",
                 ".mkv", ".mov", ".mp4", ".mpeg",
                 ".mpg", ".mts", ".ogv", ".svi",
                 ".vob", ".webm", ".wmv"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsAudio = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsAudio =  new List<string>()
+    {
                 ".aac", ".ac3", ".aiff", ".amr",
                 ".ape", ".cda", ".flac", ".m4a",
                 ".mid", ".mka", ".mp3", ".mpc",
                 ".oga", ".ogg", ".pcm", ".ra",
                 ".raw", ".wav", ".wma"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsImage = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsImage =  new List<string>()
+    {
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
                 ".png", ".ppm", ".rgb", ".svg", ".xbm", ".xpm", ".xwd",
                 ".svgt", ".svgy", ".gdraw", ".webp"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsSpreadsheet = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>()
+    {
                 ".xls", ".xlsx", ".xlsm",
                 ".xlt", ".xltx", ".xltm",
                 ".ods", ".fods", ".ots", ".csv",
+                ".sxc", ".et", ".ett",
                 ".xlst", ".xlsy", ".xlsb",
                 ".gsheet"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsPresentation = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsPresentation = new List<string>()
+    {
                 ".pps", ".ppsx", ".ppsm",
                 ".ppt", ".pptx", ".pptm",
                 ".pot", ".potx", ".potm",
                 ".odp", ".fodp", ".otp",
+                ".dps", ".dpt", ".sxi",
                 ".pptt", ".ppty",
                 ".gslides"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsDocument = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsDocument = new List<string>()
+    {
                 ".doc", ".docx", ".docm",
                 ".dot", ".dotx", ".dotm",
                 ".odt", ".fodt", ".ott", ".rtf", ".txt",
-                ".html", ".htm", ".mht", ".xml",
+                ".html", ".htm", ".mht", ".mhtml", ".xml",
                 ".pdf", ".djvu", ".fb2", ".epub", ".xps",".oxps",
+                ".sxw", ".stw", ".wps", ".wpt",
                 ".doct", ".docy",
                 ".gdoc"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsFormTemplate = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsFormTemplate = new List<string>()
+    {
                 ".docxf"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsOForm = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsOForm = new List<string>()
+    {
                 ".oform"
-            };
+            }.ToImmutableList();
 
-    public static readonly List<string> ExtsTemplate = new List<string>
-            {
+    public static readonly ImmutableList<string> ExtsTemplate = new List<string>()
+    {
                 ".ott", ".ots", ".otp",
                 ".dot", ".dotm", ".dotx",
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx",
-            };
+            }.ToImmutableList();
     public Dictionary<FileType, string> InternalExtension => _fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => _fileUtilityConfiguration.MasterFormExtension; }
@@ -705,4 +746,13 @@ public class FileUtility
     private bool GetCanForcesave() => _fileUtilityConfiguration.GetCanForcesave();
 
     #endregion
+}
+
+static file class Queries
+{
+    public static readonly Func<FilesDbContext, IEnumerable<FilesConverts>> Folders =
+        Microsoft.EntityFrameworkCore.EF.CompileQuery((FilesDbContext ctx) => ctx.FilesConverts);
+
+    public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FoldersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
 }

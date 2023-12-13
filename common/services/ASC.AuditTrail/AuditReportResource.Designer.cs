@@ -187,6 +187,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to City.
+        /// </summary>
+        public static string CityCol {
+            get {
+                return ResourceManager.GetString("CityCol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Color Theme Changed.
         /// </summary>
         public static string ColorThemeChanged {
@@ -210,6 +219,15 @@ namespace ASC.AuditTrail {
         public static string CopyActionType {
             get {
                 return ResourceManager.GetString("CopyActionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Country.
+        /// </summary>
+        public static string CountryCol {
+            get {
+                return ResourceManager.GetString("CountryCol", resourceCulture);
             }
         }
         
@@ -1267,7 +1285,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Products: [{0}]. Groups [{1}].  Access Opened.
+        ///   Looks up a localized string similar to Products: [{0}]. Groups [{1}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpenedForGroups {
             get {
@@ -1276,7 +1294,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Products: [{0}]. Users [{1}].  Access Opened.
+        ///   Looks up a localized string similar to Products: [{0}]. Users [{1}]. Access Opened.
         /// </summary>
         public static string ProductAccessOpenedForUsers {
             get {
@@ -1384,29 +1402,56 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External link created: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomExternalLinkCreated {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link deleted: {0}.
+        /// </summary>
+        public static string RoomExternalLinkDeleted {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External link updated: {0}. Role: {1}.
+        /// </summary>
+        public static string RoomExternalLinkUpdated {
+            get {
+                return ResourceManager.GetString("RoomExternalLinkUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Link created. Role: {1}.
         /// </summary>
-        public static string RoomLinkCreated {
+        public static string RoomInvitationLinkCreated {
             get {
-                return ResourceManager.GetString("RoomLinkCreated", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkCreated", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Link deleted.
         /// </summary>
-        public static string RoomLinkDeleted {
+        public static string RoomInvitationLinkDeleted {
             get {
-                return ResourceManager.GetString("RoomLinkDeleted", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkDeleted", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Link updated. Role: {1}.
         /// </summary>
-        public static string RoomLinkUpdated {
+        public static string RoomInvitationLinkUpdated {
             get {
-                return ResourceManager.GetString("RoomLinkUpdated", resourceCulture);
+                return ResourceManager.GetString("RoomInvitationLinkUpdated", resourceCulture);
             }
         }
         

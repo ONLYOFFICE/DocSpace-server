@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -42,7 +42,7 @@ public class EmailValidationKeyProvider
     public TimeSpan ValidVisitLinkInterval { get; }
 
     private readonly ILogger<EmailValidationKeyProvider> _logger;
-    private static readonly DateTime _from = new DateTime(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime _from = new(2010, 01, 01, 0, 0, 0, DateTimeKind.Utc);
     private readonly MachinePseudoKeys _machinePseudoKeys;
     private readonly TenantManager _tenantManager;
 
@@ -69,6 +69,11 @@ public class EmailValidationKeyProvider
         _logger = logger;
     }
 
+    public async Task<string> GetEmailKeyAsync(string email)
+    {
+        return GetEmailKey(await _tenantManager.GetCurrentTenantIdAsync(), email);
+    }
+
     public string GetEmailKey(string email)
     {
         return GetEmailKey(_tenantManager.GetCurrentTenant().Id, email);
@@ -76,7 +81,7 @@ public class EmailValidationKeyProvider
 
     public string GetEmailKey(int tenantId, string email)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
 
         email = FormatEmail(tenantId, email);
 
@@ -102,25 +107,25 @@ public class EmailValidationKeyProvider
         }
     }
 
-    public ValidationResult ValidateEmailKey(string email, string key)
+    public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key)
     {
-        return ValidateEmailKey(email, key, TimeSpan.MaxValue);
+        return await ValidateEmailKeyAsync(email, key, TimeSpan.MaxValue);
     }
 
-    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval)
+    public async Task<ValidationResult> ValidateEmailKeyAsync(string email, string key, TimeSpan validInterval)
     {
-        var result = ValidateEmailKeyInternal(email, key, validInterval);
-        _logger.DebugValidationResult(result, email, key, validInterval, _tenantManager.GetCurrentTenant().Id);
+        var result = await ValidateEmailKeyInternalAsync(email, key, validInterval);
+        _logger.DebugValidationResult(result, email, key, validInterval, await _tenantManager.GetCurrentTenantIdAsync());
 
         return result;
     }
 
-    private ValidationResult ValidateEmailKeyInternal(string email, string key, TimeSpan validInterval)
+    private async Task<ValidationResult> ValidateEmailKeyInternalAsync(string email, string key, TimeSpan validInterval)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(email);
+        ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
 
-        email = FormatEmail(_tenantManager.GetCurrentTenant().Id, email);
+        email = FormatEmail(await _tenantManager.GetCurrentTenantIdAsync(), email);
         var parts = key.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2)
         {
@@ -173,22 +178,26 @@ public class EmailValidationKeyModel
 
     /// <summary>Employee type</summary>
     /// <type>System.Nullabel{ASC.Core.Users.EmployeeType}, System</type>
-    public EmployeeType? EmplType { get; set; }
+    public EmployeeType? EmplType { get; init; }
 
     /// <summary>Email</summary>
     /// <type>System.String, System</type>
-    public string Email { get; set; }
+    public string Email { get; init; }
 
     /// <summary>User ID</summary>
     /// <type>System.Nullabel{System.Guid}, System</type>
-    public Guid? UiD { get; set; }
+    public Guid? UiD { get; init; }
 
     /// <summary>Confirmation email type</summary>
     /// <type>System.Nullabel{ASC.Web.Studio.Utility.ConfirmType}, System</type>
-    public ConfirmType? Type { get; set; }
+    public ConfirmType? Type { get; init; }
+    
+    /// <summary>Room ID</summary>
+    /// <type>System.String, System</type>
+    public string RoomId { get; set; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string roomId)
     {
-        (key, emplType, email, uiD, type) = (Key, EmplType, Email, UiD, Type);
+        (key, emplType, email, uiD, type, roomId) = (Key, EmplType, Email, UiD, Type, RoomId);
     }
 }

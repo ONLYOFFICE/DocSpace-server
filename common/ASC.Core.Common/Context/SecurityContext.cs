@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -84,15 +84,15 @@ public class SecurityContext
     }
 
 
-    public string AuthenticateMe(string login, string passwordHash, Func<int> funcLoginEvent = null)
+    public async Task<string> AuthenticateMeAsync(string login, string passwordHash, Func<Task<int>> funcLoginEvent = null)
     {
         ArgumentNullException.ThrowIfNull(login);
         ArgumentNullException.ThrowIfNull(passwordHash);
 
-        var tenantid = _tenantManager.GetCurrentTenant().Id;
-        var u = _userManager.GetUsersByPasswordHash(tenantid, login, passwordHash);
+        var tenantid = await _tenantManager.GetCurrentTenantIdAsync();
+        var u = await _userManager.GetUsersByPasswordHashAsync(tenantid, login, passwordHash);
 
-        return AuthenticateMe(new UserAccount(u, tenantid, _userFormatter), funcLoginEvent);
+        return await AuthenticateMeAsync(new UserAccount(u, tenantid, _userFormatter), funcLoginEvent);
     }
 
     public async Task<bool> AuthenticateMe(string cookie)
@@ -136,12 +136,12 @@ public class SecurityContext
             return false;
         }
 
-        if (tenant != _tenantManager.GetCurrentTenant().Id)
+        if (tenant != await _tenantManager.GetCurrentTenantIdAsync())
         {
             return false;
         }
 
-        var settingsTenant = _tenantCookieSettingsHelper.GetForTenant(tenant);
+        var settingsTenant = await _tenantCookieSettingsHelper.GetForTenantAsync(tenant);
 
         if (indexTenant != settingsTenant.Index)
         {
@@ -155,7 +155,7 @@ public class SecurityContext
 
         try
         {
-            var settingsUser = _tenantCookieSettingsHelper.GetForUser(userid);
+            var settingsUser = await _tenantCookieSettingsHelper.GetForUserAsync(userid);
             if (indexUser != settingsUser.Index)
             {
                 return false;
@@ -163,14 +163,14 @@ public class SecurityContext
 
             if (loginEventId != 0)
             {
-                var loginEventById = await _dbLoginEventsManager.GetById(loginEventId);
+                var loginEventById = await _dbLoginEventsManager.GetByIdAsync(loginEventId);
                 if (loginEventById == null || !loginEventById.Active)
                 {
                     return false;
                 }
             }
 
-            AuthenticateMeWithoutCookie(new UserAccount(new UserInfo { Id = userid }, tenant, _userFormatter));
+            await AuthenticateMeWithoutCookieAsync(new UserAccount(new UserInfo { Id = userid }, tenant, _userFormatter));
             return true;
         }
         catch (InvalidCredentialException ice)
@@ -190,15 +190,15 @@ public class SecurityContext
         return false;
     }
 
-    public string AuthenticateMe(Guid userId, Func<int> funcLoginEvent = null, List<Claim> additionalClaims = null)
+    public async Task<string> AuthenticateMeAsync(Guid userId, Func<Task<int>> funcLoginEvent = null, List<Claim> additionalClaims = null)
     {
-        var account = _authentication.GetAccountByID(_tenantManager.GetCurrentTenant().Id, userId);
-        return AuthenticateMe(account, funcLoginEvent, additionalClaims);
+        var account = await _authentication.GetAccountByIDAsync(await _tenantManager.GetCurrentTenantIdAsync(), userId);
+        return await AuthenticateMeAsync(account, funcLoginEvent, additionalClaims);
     }
 
-    public string AuthenticateMe(IAccount account, Func<int> funcLoginEvent = null, List<Claim> additionalClaims = null)
+    public async Task<string> AuthenticateMeAsync(IAccount account, Func<Task<int>> funcLoginEvent = null, List<Claim> additionalClaims = null)
     {
-        AuthenticateMeWithoutCookie(account, additionalClaims);
+        await AuthenticateMeWithoutCookieAsync(account, additionalClaims);
 
         string cookie = null;
 
@@ -207,16 +207,16 @@ public class SecurityContext
             var loginEventId = 0;
             if (funcLoginEvent != null)
             {
-                loginEventId = funcLoginEvent();
+                loginEventId = await funcLoginEvent();
             }
 
-            cookie = _cookieStorage.EncryptCookie(_tenantManager.GetCurrentTenant().Id, account.ID, loginEventId);
+            cookie = await _cookieStorage.EncryptCookieAsync(await _tenantManager.GetCurrentTenantIdAsync(), account.ID, loginEventId);
         }
 
         return cookie;
     }
 
-    public void AuthenticateMeWithoutCookie(IAccount account, List<Claim> additionalClaims = null)
+    public async Task AuthenticateMeWithoutCookieAsync(IAccount account, List<Claim> additionalClaims = null)
     {
         if (account == null || account.Equals(Configuration.Constants.Guest))
         {
@@ -232,9 +232,9 @@ public class SecurityContext
 
         if (account is IUserAccount)
         {
-            var tenant = _tenantManager.GetCurrentTenant();
+            var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-            var u = _userManager.GetUsers(account.ID);
+            var u = await _userManager.GetUsersAsync(account.ID);
 
             if (u.Id == Users.Constants.LostUser.Id)
             {
@@ -248,26 +248,26 @@ public class SecurityContext
             // for LDAP users only
             if (u.Sid != null)
             {
-                if (!_tenantManager.GetTenantQuota(tenant.Id).Ldap)
+                if (!(await _tenantManager.GetTenantQuotaAsync(tenant.Id)).Ldap)
                 {
                     throw new BillingException("Your tariff plan does not support this option.", "Ldap");
                 }
             }
 
-            if (_userManager.IsUserInGroup(u.Id, Users.Constants.GroupAdmin.ID))
+            if (await _userManager.IsUserInGroupAsync(u.Id, Users.Constants.GroupAdmin.ID))
             {
                 roles.Add(Role.DocSpaceAdministrators);
             }
 
             roles.Add(Role.RoomAdministrators);
 
-            account = new UserAccount(u, _tenantManager.GetCurrentTenant().Id, _userFormatter);
+            account = new UserAccount(u, await _tenantManager.GetCurrentTenantIdAsync(), _userFormatter);
         }
 
         var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Sid, account.ID.ToString()),
-                new Claim(ClaimTypes.Name, account.Name)
+                new(ClaimTypes.Sid, account.ID.ToString()),
+                new(ClaimTypes.Name, account.Name)
             };
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
@@ -279,11 +279,11 @@ public class SecurityContext
         _authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
     }
 
-    public void AuthenticateMeWithoutCookie(Guid userId, List<Claim> additionalClaims = null)
+    public async Task AuthenticateMeWithoutCookieAsync(Guid userId, List<Claim> additionalClaims = null)
     {
-        var account = _authentication.GetAccountByID(_tenantManager.GetCurrentTenant().Id, userId);
+        var account = await _authentication.GetAccountByIDAsync(await _tenantManager.GetCurrentTenantIdAsync(), userId);
 
-        AuthenticateMeWithoutCookie(account, additionalClaims);
+        await AuthenticateMeWithoutCookieAsync(account, additionalClaims);
     }
 
     public void Logout()
@@ -291,16 +291,16 @@ public class SecurityContext
         _authContext.Logout();
     }
 
-    public void SetUserPasswordHash(Guid userID, string passwordHash)
+    public async Task SetUserPasswordHashAsync(Guid userID, string passwordHash)
     {
-        var tenantid = _tenantManager.GetCurrentTenant().Id;
-        var u = _userManager.GetUsersByPasswordHash(tenantid, userID.ToString(), passwordHash);
+        var tenantid = await _tenantManager.GetCurrentTenantIdAsync();
+        var u = await _userManager.GetUsersByPasswordHashAsync(tenantid, userID.ToString(), passwordHash);
         if (!Equals(u, Users.Constants.LostUser))
         {
             throw new PasswordException("A new password must be used");
         }
 
-        _authentication.SetUserPasswordHash(userID, passwordHash);
+        await _authentication.SetUserPasswordHashAsync(userID, passwordHash);
     }
 
     public class PasswordException : Exception
@@ -321,39 +321,39 @@ public class PermissionContext
         AuthContext = authContext;
     }
 
-    public bool CheckPermissions(params IAction[] actions)
+    public async Task<bool> CheckPermissionsAsync(params IAction[] actions)
     {
-        return PermissionResolver.Check(AuthContext.CurrentAccount, actions);
+        return await PermissionResolver.CheckAsync(AuthContext.CurrentAccount, actions);
     }
 
-    public bool CheckPermissions(ISecurityObject securityObject, params IAction[] actions)
+    public async Task<bool> CheckPermissionsAsync(ISecurityObject securityObject, params IAction[] actions)
     {
-        return CheckPermissions(securityObject, null, actions);
+        return await CheckPermissionsAsync(securityObject, null, actions);
     }
 
-    public bool CheckPermissions(IAccount account, ISecurityObject securityObject, params IAction[] actions)
+    public async Task<bool> CheckPermissionsAsync(IAccount account, ISecurityObject securityObject, params IAction[] actions)
     {
-        return PermissionResolver.Check(account, securityObject, null, actions);
+        return await PermissionResolver.CheckAsync(account, securityObject, null, actions);
     }
 
-    public bool CheckPermissions(ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
+    public async Task<bool> CheckPermissionsAsync(ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
     {
-        return PermissionResolver.Check(AuthContext.CurrentAccount, objectId, securityObjProvider, actions);
+        return await PermissionResolver.CheckAsync(AuthContext.CurrentAccount, objectId, securityObjProvider, actions);
     }
 
-    public void DemandPermissions(params IAction[] actions)
+    public async Task DemandPermissionsAsync(params IAction[] actions)
     {
-        PermissionResolver.Demand(AuthContext.CurrentAccount, actions);
+        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, actions);
     }
 
-    public void DemandPermissions(ISecurityObject securityObject, params IAction[] actions)
+    public async Task DemandPermissionsAsync(ISecurityObject securityObject, params IAction[] actions)
     {
-        DemandPermissions(securityObject, null, actions);
+        await DemandPermissionsAsync(securityObject, null, actions);
     }
 
-    public void DemandPermissions(ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
+    public async Task DemandPermissionsAsync(ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, params IAction[] actions)
     {
-        PermissionResolver.Demand(AuthContext.CurrentAccount, objectId, securityObjProvider, actions);
+        await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, objectId, securityObjProvider, actions);
     }
 }
 
@@ -361,6 +361,7 @@ public class PermissionContext
 public class AuthContext
 {
     private IHttpContextAccessor HttpContextAccessor { get; }
+    private static readonly List<string> _typesCheck = new List<string>() { ConfirmType.LinkInvite.ToString(), ConfirmType.EmpInvite.ToString() };
 
     public AuthContext()
     {
@@ -381,12 +382,17 @@ public class AuthContext
         Principal = null;
     }
 
+    public bool IsFromInvite()
+    {
+        return Principal.Claims.Any(c => _typesCheck.Contains(c.Value));
+    }
+
     internal ClaimsPrincipal Principal
     {
-        get => Thread.CurrentPrincipal as ClaimsPrincipal ?? HttpContextAccessor?.HttpContext?.User;
+        get => CustomSynchronizationContext.CurrentContext.CurrentPrincipal as ClaimsPrincipal ?? HttpContextAccessor?.HttpContext?.User;
         set
         {
-            Thread.CurrentPrincipal = value;
+            CustomSynchronizationContext.CurrentContext.CurrentPrincipal = value;
 
             if (HttpContextAccessor?.HttpContext != null)
             {

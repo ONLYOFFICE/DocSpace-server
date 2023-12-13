@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -38,7 +38,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
     private const string _bunchRightNodeStartTrash = "files/trash/";
     private const string _bunchRightNodeStartPrivacy = "files/privacy/";
 
-    private static readonly Regex _regexIsInteger = new Regex(@"^\d+$", RegexOptions.Compiled);
+    private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
     private readonly Helpers _helpers;
     private readonly ILogger<ModuleProvider> _logger;
     private readonly TableInfo[] _tables = new[]
@@ -172,8 +172,8 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
             preparedRow = new Dictionary<string, object>();
 
             object folderId = null;
-
-            var sboxId = Regex.Replace(row[1].ToString(), @"(?<=(?:sbox-|box-|dropbox-|spoint-|drive-|onedrive-))\d+", match =>
+            var ids = string.Join("-|", Selectors.All.Select(s => s.Id));
+            var sboxId = Regex.Replace(row[1].ToString(), @"(?<=(?:" + $"{ids}-" + @"))\d+", match =>
             {
                 folderId = columnMapper.GetMapping("files_thirdparty_account", "id", match.Value);
 
@@ -257,7 +257,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
     {
-        if (table.Name == "files_thirdparty_account" && (columnName == "password" || columnName == "token") && value != null)
+        if (table.Name == "files_thirdparty_account" && columnName is "password" or "token" && value != null)
         {
             try
             {
@@ -270,7 +270,7 @@ public class FilesModuleSpecifics : ModuleSpecificsBase
             }
             return true;
         }
-        if (table.Name == "files_folder" && (columnName == "create_by" || columnName == "modified_by"))
+        if (table.Name == "files_folder" && columnName is "create_by" or "modified_by")
         {
             base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
 
@@ -296,7 +296,7 @@ public class FilesModuleSpecifics2 : ModuleSpecificsBase
     public override IEnumerable<TableInfo> Tables => _tables;
     public override IEnumerable<RelationInfo> TableRelations => _rels;
 
-    private static readonly Regex _regexIsInteger = new Regex(@"^\d+$", RegexOptions.Compiled);
+    private static readonly Regex _regexIsInteger = new(@"^\d+$", RegexOptions.Compiled);
     private const string _tagStartMessage = "Message";
     private const string _tagStartTask = "Task";
     private const string _tagStartProject = "Project";

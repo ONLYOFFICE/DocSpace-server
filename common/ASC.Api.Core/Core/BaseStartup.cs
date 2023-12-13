@@ -1,30 +1,30 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using JsonConverter = System.Text.Json.Serialization.JsonConverter;
+using Flurl.Util;
 
 namespace ASC.Api.Core;
 
@@ -38,16 +38,15 @@ public abstract class BaseStartup
     private readonly IHostEnvironment _hostEnvironment;
     private readonly string _corsOrigin;
 
-    protected virtual JsonConverter[] Converters { get; }
     protected virtual bool AddControllersAsServices { get; }
     protected virtual bool ConfirmAddScheme { get; }
     protected virtual bool AddAndUseSession { get; }
     protected DIHelper DIHelper { get; }
     protected bool LoadProducts { get; set; } = true;
     protected bool LoadConsumers { get; } = true;
-    protected bool WebhooksEnabled { get; set; }
+    protected bool WebhooksEnabled { get; init; }
 
-    public BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
+    protected BaseStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
@@ -79,7 +78,7 @@ public abstract class BaseStartup
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
             var knownNetworks = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownNetworks").Get<List<String>>();
 
-            if (knownProxies != null && knownProxies.Count > 0)
+            if (knownProxies is { Count: > 0 })
             {
                 foreach (var knownProxy in knownProxies)
                 {
@@ -88,7 +87,7 @@ public abstract class BaseStartup
             }
 
 
-            if (knownNetworks != null && knownNetworks.Count > 0)
+            if (knownNetworks is { Count: > 0 })
             {
                 foreach (var knownNetwork in knownNetworks)
                 {
@@ -100,6 +99,106 @@ public abstract class BaseStartup
             }
         });
 
+        var redisOptions = _configuration.GetSection("Redis").Get<RedisConfiguration>().ConfigurationOptions;
+        var connectionMultiplexer = ConnectionMultiplexer.Connect(redisOptions);
+
+        services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter.CreateChained(
+            PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+            {
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+
+                if (userId == null)
+                {
+                    userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                }
+
+                var permitLimit = 1500;
+
+                var partitionKey = $"sw_{userId}";
+
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
+                {
+                    PermitLimit = permitLimit,
+                    Window = TimeSpan.FromMinutes(1),
+                    ConnectionMultiplexerFactory = () => connectionMultiplexer
+                });
+            }),
+                PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                {
+                    var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                    string partitionKey;
+                    int permitLimit;
+
+                    if (userId == null)
+                    {
+                        userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                    }
+
+                    if (String.Compare(httpContext?.Request.Method, "GET", StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        permitLimit = 50;
+                        partitionKey = $"cr_read_{userId}";
+
+                    }
+                    else
+                    {
+                        permitLimit = 15;
+                        partitionKey = $"cr_write_{userId}";
+                    }
+
+                    return RedisRateLimitPartition.GetConcurrencyRateLimiter(partitionKey, _ => new RedisConcurrencyRateLimiterOptions
+                    {
+                        PermitLimit = permitLimit,
+                        QueueLimit = 0,
+                        ConnectionMultiplexerFactory = () => connectionMultiplexer
+                    });
+                }), 
+                PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                   {
+                       var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+
+                       if (userId == null)
+                       {
+                           userId = httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+                       }
+
+                       var partitionKey = $"fw_post_put_{userId}";
+                       var permitLimit = 10000;
+
+                       if (!(String.Compare(httpContext?.Request.Method, "POST", StringComparison.OrdinalIgnoreCase) == 0 ||
+                             String.Compare(httpContext?.Request.Method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
+                       {
+                           return RateLimitPartition.GetNoLimiter("no_limiter");
+                       }
+
+                       return RedisRateLimitPartition.GetFixedWindowRateLimiter(partitionKey, _ => new RedisFixedWindowRateLimiterOptions
+                       {
+                           PermitLimit = permitLimit,
+                           Window = TimeSpan.FromDays(1),
+                           ConnectionMultiplexerFactory = () => connectionMultiplexer
+                       });
+                   }
+            ));
+
+            options.AddPolicy("sensitive_api", httpContext =>
+            {
+                var userId = httpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
+                var permitLimit = 5;
+                var partitionKey = $"sensitive_api_{userId}";
+
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions
+                {
+                    PermitLimit = permitLimit,
+                    Window = TimeSpan.FromMinutes(1),
+                    ConnectionMultiplexerFactory = () => connectionMultiplexer
+                });
+            });
+
+            options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
+        });
+
         services.AddScoped<EFLoggerFactory>();
 
         services.AddBaseDbContextPool<AccountLinkContext>()
@@ -109,6 +208,7 @@ public abstract class BaseStartup
                 .AddBaseDbContextPool<TelegramDbContext>()
                 .AddBaseDbContextPool<FirebaseDbContext>()
                 .AddBaseDbContextPool<CustomDbContext>()
+                .AddBaseDbContextPool<UrlShortenerDbContext>()
                 .AddBaseDbContextPool<WebstudioDbContext>()
                 .AddBaseDbContextPool<InstanceRegistrationContext>()
                 .AddBaseDbContextPool<IntegrationEventLogContext>()
@@ -127,15 +227,6 @@ public abstract class BaseStartup
             {
                 options.JsonSerializerOptions.WriteIndented = false;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                options.JsonSerializerOptions.Converters.Add(new ApiDateTimeConverter());
-
-                if (Converters != null)
-                {
-                    foreach (var c in Converters)
-                    {
-                        options.JsonSerializerOptions.Converters.Add(c);
-                    }
-                }
             };
 
         services.AddControllers().AddJsonOptions(jsonOptions);
@@ -203,13 +294,13 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
-        var authBuilder = services.AddAuthentication(options =>
+        services.AddAuthentication(options =>
         {
             options.DefaultScheme = MultiAuthSchemes;
             options.DefaultChallengeScheme = MultiAuthSchemes;
-        }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, a => { })
-          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, a => { })
-          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", a => { })
+        }).AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
+          .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
+          .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
           .AddJwtBearer("Bearer", options =>
             {
                 options.Authority = _configuration["core:oidc:authority"];
@@ -222,7 +313,7 @@ public abstract class BaseStartup
 
                 options.Events = new JwtBearerEvents
                 {
-                    OnTokenValidated = ctx =>
+                    OnTokenValidated = async ctx =>
                     {
                         using var scope = ctx.HttpContext.RequestServices.CreateScope();
 
@@ -237,9 +328,7 @@ public abstract class BaseStartup
 
                         var userId = new Guid(claimUserId);
 
-                        securityContext.AuthenticateMeWithoutCookie(userId, ctx.Principal.Claims.ToList());
-
-                        return Task.CompletedTask;
+                        await securityContext.AuthenticateMeWithoutCookieAsync(userId, ctx.Principal.Claims.ToList());
                     }
                 };
             })
@@ -282,6 +371,12 @@ public abstract class BaseStartup
 
         services.AddBillingHttpClient();
 
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
+        services.AddActivePassiveHostedService<NotifySenderService>(DIHelper);
+        services.AddActivePassiveHostedService<NotifySchedulerService>(DIHelper);
+
 
         if (!_hostEnvironment.IsDevelopment())
         {
@@ -311,7 +406,12 @@ public abstract class BaseStartup
             app.UseSession();
         }
 
+        app.UseSynchronizationContextMiddleware();
+
         app.UseAuthentication();
+
+        // TODO: if some client requests very slow, this line will need to remove
+        app.UseRateLimiter();
 
         app.UseAuthorization();
 
@@ -348,6 +448,8 @@ public abstract class BaseStartup
                 await context.Response.WriteAsync($"{Environment.MachineName} running {CustomHealthCheck.Running}");
             });
         });
+
+
     }
 
     public void ConfigureContainer(ContainerBuilder builder)

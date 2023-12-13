@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,14 +28,13 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 public class TipsController : BaseSettingsController
 {
-    private Tenant Tenant { get { return ApiContext.Tenant; } }
-
     private readonly AuthContext _authContext;
     private readonly StudioNotifyHelper _studioNotifyHelper;
     private readonly SettingsManager _settingsManager;
     private readonly SetupInfo _setupInfo;
     private readonly ILogger _log;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly TenantManager _tenantManager;
 
     public TipsController(
         ILoggerProvider option,
@@ -47,6 +46,7 @@ public class TipsController : BaseSettingsController
         SetupInfo setupInfo,
         IMemoryCache memoryCache,
         IHttpClientFactory clientFactory,
+        TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _log = option.CreateLogger("ASC.Api");
@@ -55,6 +55,7 @@ public class TipsController : BaseSettingsController
         _settingsManager = settingsManager;
         _setupInfo = setupInfo;
         _clientFactory = clientFactory;
+        _tenantManager = tenantManager;
     }
 
     /// <summary>
@@ -67,15 +68,16 @@ public class TipsController : BaseSettingsController
     /// <path>api/2.0/settings/tips</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("tips")]
-    public TipsSettings UpdateTipsSettings(SettingsRequestsDto inDto)
+    public async Task<TipsSettings> UpdateTipsSettingsAsync(SettingsRequestsDto inDto)
     {
         var settings = new TipsSettings { Show = inDto.Show };
-        _settingsManager.SaveForCurrentUser(settings);
+        await _settingsManager.SaveForCurrentUserAsync(settings);
 
         if (!inDto.Show && !string.IsNullOrEmpty(_setupInfo.TipsAddress))
         {
             try
             {
+                var tenant = await _tenantManager.GetCurrentTenantAsync();
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"{_setupInfo.TipsAddress}/tips/deletereaded")
@@ -84,13 +86,13 @@ public class TipsController : BaseSettingsController
                 var data = new NameValueCollection
                 {
                     ["userId"] = _authContext.CurrentAccount.ID.ToString(),
-                    ["tenantId"] = Tenant.Id.ToString(CultureInfo.InvariantCulture)
+                    ["tenantId"] = tenant.Id.ToString(CultureInfo.InvariantCulture)
                 };
                 var body = JsonSerializer.Serialize(data);//todo check
                 request.Content = new StringContent(body);
 
                 var httpClient = _clientFactory.CreateClient();
-                using var response = httpClient.Send(request);
+                using var response = await httpClient.SendAsync(request);
 
             }
             catch (Exception e)
@@ -111,9 +113,9 @@ public class TipsController : BaseSettingsController
     /// <path>api/2.0/settings/tips/change/subscription</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("tips/change/subscription")]
-    public bool UpdateTipsSubscription()
+    public async Task<bool> UpdateTipsSubscriptionAsync()
     {
-        return StudioPeriodicNotify.ChangeSubscription(_authContext.CurrentAccount.ID, _studioNotifyHelper);
+        return await StudioPeriodicNotify.ChangeSubscriptionAsync(_authContext.CurrentAccount.ID, _studioNotifyHelper);
     }
 
     /// <summary>
@@ -125,8 +127,8 @@ public class TipsController : BaseSettingsController
     /// <path>api/2.0/settings/tips/subscription</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("tips/subscription")]
-    public bool GetTipsSubscription()
+    public async Task<bool> GetTipsSubscriptionAsync()
     {
-        return _studioNotifyHelper.IsSubscribedToNotify(_authContext.CurrentAccount.ID, Actions.PeriodicNotify);
+        return await _studioNotifyHelper.IsSubscribedToNotifyAsync(_authContext.CurrentAccount.ID, Actions.PeriodicNotify);
     }
 }

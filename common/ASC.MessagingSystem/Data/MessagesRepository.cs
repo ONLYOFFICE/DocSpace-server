@@ -1,34 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using IsolationLevel = System.Data.IsolationLevel;
-
 namespace ASC.MessagingSystem.Data;
 
-[Singletone(Additional = typeof(MessagesRepositoryExtension))]
+[Singleton(Additional = typeof(MessagesRepositoryExtension))]
 public class MessagesRepository : IDisposable
 {
     private DateTime _lastSave = DateTime.UtcNow;
@@ -40,8 +38,8 @@ public class MessagesRepository : IDisposable
     private readonly ILogger<MessagesRepository> _logger;
     private readonly Timer _timer;
     private readonly int _cacheLimit;
-    private readonly HashSet<MessageAction> _forceSaveAuditActions = new HashSet<MessageAction>
-        { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+    private readonly HashSet<MessageAction> _forceSaveAuditActions = new() { MessageAction.RoomInviteLinkUsed, MessageAction.UserSentPasswordChangeInstructions };
 
     public MessagesRepository(IServiceScopeFactory serviceScopeFactory, ILogger<MessagesRepository> logger, IMapper mapper, IConfiguration configuration)
     {
@@ -52,7 +50,7 @@ public class MessagesRepository : IDisposable
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
 
-        _timer = new Timer(FlushCache);
+        _timer = new Timer(async state => await FlushCacheAsync(state));
 
         _mapper = mapper;
 
@@ -65,7 +63,7 @@ public class MessagesRepository : IDisposable
 
     ~MessagesRepository()
     {
-        FlushCache(true);
+        FlushCache();
     }
 
     private bool ForseSave(EventMessage message)
@@ -79,11 +77,11 @@ public class MessagesRepository : IDisposable
         return _forceSaveAuditActions.Contains(message.Action);
     }
 
-    public int Add(EventMessage message)
+    public async Task<int> AddAsync(EventMessage message)
     {
         if (ForseSave(message))
         {
-            var id = 0;
+            int id;
             if (!string.IsNullOrEmpty(message.UAHeader))
             {
                 try
@@ -97,15 +95,15 @@ public class MessagesRepository : IDisposable
             }
 
             using var scope = _serviceScopeFactory.CreateScope();
-            using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
 
             if ((int)message.Action < 2000)
             {
-                id = AddLoginEvent(message, ef);
+                id = await AddLoginEventAsync(message, ef);
             }
             else
             {
-                id = AddAuditEvent(message, ef);
+                id = await AddAuditEventAsync(message, ef);
             }
             return id;
         }
@@ -113,7 +111,9 @@ public class MessagesRepository : IDisposable
         var now = DateTime.UtcNow;
         var key = string.Format("{0}|{1}|{2}|{3}", message.TenantId, message.UserId, message.Id, now.Ticks);
 
-        lock (_cache)
+        await _semaphore.WaitAsync();
+
+        try
         {
             _cache[key] = message;
 
@@ -123,18 +123,22 @@ public class MessagesRepository : IDisposable
                 _timerStarted = true;
             }
         }
+        finally
+        {
+            _semaphore.Release();
+        }
         return 0;
     }
-    private void FlushCache(object state)
+    private async Task FlushCacheAsync(object state)
     {
-        FlushCache(false);
+        await FlushCacheAsync();
     }
 
-    private void FlushCache(bool isDisposed = false)
+    private async Task FlushCacheAsync()
     {
         List<EventMessage> events = null;
 
-        if (DateTime.UtcNow > _lastSave.Add(_cacheTime) || _cache.Count > _cacheLimit || isDisposed)
+        if (DateTime.UtcNow > _lastSave.Add(_cacheTime) || _cache.Count > _cacheLimit)
         {
             lock (_cache)
             {
@@ -153,64 +157,109 @@ public class MessagesRepository : IDisposable
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
-        using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
-        var strategy = ef.Database.CreateExecutionStrategy();
+        await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
 
-        strategy.Execute(async () =>
+        var dict = new Dictionary<string, ClientInfo>();
+
+        foreach (var message in events)
         {
-            using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
-            using var tx = await ef.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
-            var dict = new Dictionary<string, ClientInfo>();
-
-            foreach (var message in events)
+            if (!string.IsNullOrEmpty(message.UAHeader))
             {
-                if (!string.IsNullOrEmpty(message.UAHeader))
+                try
                 {
-                    try
-                    {
-                        MessageSettings.AddInfoMessage(message, dict);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.ErrorFlushCache(message.Id, e);
-                    }
+                    MessageSettings.AddInfoMessage(message, dict);
                 }
-
-                if (!ForseSave(message))
+                catch (Exception e)
                 {
-                    // messages with action code < 2000 are related to login-history
-                    if ((int)message.Action < 2000)
-                    {
-                        AddLoginEvent(message, ef);
-                    }
-                    else
-                    {
-                        AddAuditEvent(message, ef);
-                    }
+                    _logger.ErrorFlushCache(message.Id, e);
                 }
             }
 
-            await tx.CommitAsync();
-        }).GetAwaiter()
-          .GetResult();
+            if (!ForseSave(message))
+            {
+                // messages with action code < 2000 are related to login-history
+                if ((int)message.Action < 2000)
+                {
+                    var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
+                    await ef.LoginEvents.AddAsync(loginEvent);
+                }
+                else
+                {
+                    var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
+                    await ef.AuditEvents.AddAsync(auditEvent);
+                }
+            }
+        }
+        await ef.SaveChangesAsync();
     }
 
-    private int AddLoginEvent(EventMessage message, MessagesContext dbContext)
+    private void FlushCache()
     {
-        var loginEvent = _mapper.Map<EventMessage, LoginEvent>(message);
+        List<EventMessage> events;
 
-        dbContext.LoginEvents.Add(loginEvent);
-        dbContext.SaveChanges();
+        lock (_cache)
+        {
+            _timer.Change(-1, -1);
+            _timerStarted = false;
+
+            events = new List<EventMessage>(_cache.Values);
+            _cache.Clear();
+            _lastSave = DateTime.UtcNow;
+        }
+
+        using var scope = _serviceScopeFactory.CreateScope();
+        using var ef = scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContext();
+
+        var dict = new Dictionary<string, ClientInfo>();
+
+        foreach (var message in events)
+        {
+            if (!string.IsNullOrEmpty(message.UAHeader))
+            {
+                try
+                {
+                    MessageSettings.AddInfoMessage(message, dict);
+                }
+                catch (Exception e)
+                {
+                    _logger.ErrorFlushCache(message.Id, e);
+                }
+            }
+
+            if (!ForseSave(message))
+            {
+                // messages with action code < 2000 are related to login-history
+                if ((int)message.Action < 2000)
+                {
+                    var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
+                    ef.LoginEvents.Add(loginEvent);
+                }
+                else
+                {
+                    var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
+                    ef.AuditEvents.Add(auditEvent);
+                }
+            }
+        }
+        ef.SaveChanges();
+    }
+
+    private async Task<int> AddLoginEventAsync(EventMessage message, MessagesContext dbContext)
+    {
+        var loginEvent = _mapper.Map<EventMessage, DbLoginEvent>(message);
+
+        await dbContext.LoginEvents.AddAsync(loginEvent);
+        await dbContext.SaveChangesAsync();
 
         return loginEvent.Id;
     }
 
-    private int AddAuditEvent(EventMessage message, MessagesContext dbContext)
+    private async Task<int> AddAuditEventAsync(EventMessage message, MessagesContext dbContext)
     {
-        var auditEvent = _mapper.Map<EventMessage, AuditEvent>(message);
+        var auditEvent = _mapper.Map<EventMessage, DbAuditEvent>(message);
 
-        dbContext.AuditEvents.Add(auditEvent);
-        dbContext.SaveChanges();
+        await dbContext.AuditEvents.AddAsync(auditEvent);
+        await dbContext.SaveChangesAsync();
 
         return auditEvent.Id;
     }

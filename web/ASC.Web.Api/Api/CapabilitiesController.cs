@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -67,12 +67,13 @@ public class CapabilitiesController : ControllerBase
     ///<httpMethod>GET</httpMethod>
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
-    public CapabilitiesDto GetPortalCapabilities()
+    public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
     {
+        var quota = await _tenantManager.GetTenantQuotaAsync(await _tenantManager.GetCurrentTenantIdAsync());
         var result = new CapabilitiesDto
         {
             LdapEnabled = false,
-            OauthEnabled = _coreBaseSettings.Standalone || _tenantManager.GetTenantQuota(_tenantManager.GetCurrentTenant().Id).Oauth,
+            OauthEnabled = _coreBaseSettings.Standalone || quota.Oauth,
             Providers = new List<string>(0),
             SsoLabel = string.Empty,
             SsoUrl = string.Empty
@@ -82,7 +83,7 @@ public class CapabilitiesController : ControllerBase
         {
             if (_coreBaseSettings.Standalone
                     || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
-                        && _tenantManager.GetTenantQuota(_tenantManager.GetCurrentTenant().Id).Ldap)
+                        && quota.Ldap)
             {
                 //var settings = SettingsManager.Load<LdapSettings>();
 
@@ -101,13 +102,13 @@ public class CapabilitiesController : ControllerBase
             {
                 result.Providers = ProviderManager.AuthProviders.Where(loginProvider =>
                 {
-                    if ((loginProvider == ProviderConstants.Facebook || loginProvider == ProviderConstants.AppleId)
+                    if (loginProvider is ProviderConstants.Facebook or ProviderConstants.AppleId
                                                                     && _coreBaseSettings.Standalone && HttpContext.Request.MobileApp())
                     {
                         return false;
                     }
                     var provider = _providerManager.GetLoginProvider(loginProvider);
-                    return provider != null && provider.IsEnabled;
+                    return provider is { IsEnabled: true };
                 })
                 .ToList();
             }
@@ -121,11 +122,11 @@ public class CapabilitiesController : ControllerBase
         {
             if (_coreBaseSettings.Standalone
                     || SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
-                        && _tenantManager.GetTenantQuota(_tenantManager.GetCurrentTenant().Id).Sso)
+                        && quota.Sso)
             {
-                var settings = _settingsManager.Load<SsoSettingsV2>();
+                var settings = await _settingsManager.LoadAsync<SsoSettingsV2>();
 
-                if (settings.EnableSso)
+                if (settings.EnableSso.GetValueOrDefault())
                 {
                     result.SsoUrl = settings.IdpSettings.SsoUrl;
                     result.SsoLabel = settings.SpLoginLabel;

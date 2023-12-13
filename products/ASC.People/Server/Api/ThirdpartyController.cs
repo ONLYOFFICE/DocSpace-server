@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,6 +28,7 @@ namespace ASC.People.Api;
 
 public class ThirdpartyController : ApiControllerBase
 {
+    private static readonly SemaphoreSlim _semaphore = new(1);
     private readonly AccountLinker _accountLinker;
     private readonly CookiesManager _cookiesManager;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -72,9 +73,9 @@ public class ThirdpartyController : ApiControllerBase
         UserManager userManager,
         MessageTarget messageTarget,
         StudioNotifyService studioNotifyService,
-        TenantManager tenantManager, 
-        InvitationLinkService invitationLinkService, 
-        FileSecurity fileSecurity, 
+        TenantManager tenantManager,
+        InvitationLinkService invitationLinkService,
+        FileSecurity fileSecurity,
         UsersInRoomChecker usersInRoomChecker)
     {
         _accountLinker = accountLinker;
@@ -118,14 +119,14 @@ public class ThirdpartyController : ApiControllerBase
     /// <collection>list</collection>
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("thirdparty/providers")]
-    public ICollection<AccountInfoDto> GetAuthProviders(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
+    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
     {
         ICollection<AccountInfoDto> infos = new List<AccountInfoDto>();
         IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
 
         if (_authContext.IsAuthenticated)
         {
-            linkedAccounts = _accountLinker.GetLinkedProfiles(_authContext.CurrentAccount.ID.ToString());
+            linkedAccounts = await _accountLinker.GetLinkedProfilesAsync(_authContext.CurrentAccount.ID.ToString());
         }
 
         fromOnly = string.IsNullOrWhiteSpace(fromOnly) ? string.Empty : fromOnly.ToLower();
@@ -137,7 +138,7 @@ public class ThirdpartyController : ApiControllerBase
                 continue;
             }
             var loginProvider = _providerManager.GetLoginProvider(provider);
-            if (loginProvider != null && loginProvider.IsEnabled)
+            if (loginProvider is { IsEnabled: true })
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";
@@ -169,19 +170,19 @@ public class ThirdpartyController : ApiControllerBase
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
     [HttpPut("thirdparty/linkaccount")]
-    public void LinkAccount(LinkAccountRequestDto inDto)
+    public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
         var profile = new LoginProfile(_signature, _instanceCrypto, inDto.SerializedProfile);
 
-        if (!(_coreBaseSettings.Standalone || _tenantManager.GetCurrentTenantQuota().Oauth))
+        if (!(_coreBaseSettings.Standalone || (await _tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
             throw new Exception("ErrorNotAllowedOption");
         }
 
         if (string.IsNullOrEmpty(profile.AuthorizationError))
         {
-            _accountLinker.AddLink(_securityContext.CurrentAccount.ID.ToString(), profile);
-            _messageService.Send(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
+            await _accountLinker.AddLinkAsync(_securityContext.CurrentAccount.ID.ToString(), profile);
+            await _messageService.SendAsync(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
         }
         else
         {
@@ -207,7 +208,7 @@ public class ThirdpartyController : ApiControllerBase
     /// <requiresAuthorization>false</requiresAuthorization>
     [AllowAnonymous]
     [HttpPost("thirdparty/signup")]
-    public async Task SignupAccount(SignupAccountRequestDto inDto)
+    public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
     {
         var passwordHash = inDto.PasswordHash;
         var mustChangePassword = false;
@@ -233,48 +234,48 @@ public class ThirdpartyController : ApiControllerBase
         {
             throw new Exception(Resource.ErrorNotCorrectEmail);
         }
-        
+
         var linkData = await _invitationLinkService.GetProcessedLinkDataAsync(inDto.Key, inDto.Email, inDto.EmployeeType ?? EmployeeType.RoomAdmin);
 
         if (!linkData.IsCorrect)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_InvintationLink);
         }
-        
+
         var employeeType = linkData.EmployeeType;
 
-        var userID = Guid.Empty;
+        Guid userId;
         try
         {
-            _securityContext.AuthenticateMeWithoutCookie(Core.Configuration.Constants.CoreSystem);
-            
+            await _securityContext.AuthenticateMeWithoutCookieAsync(Core.Configuration.Constants.CoreSystem);
+
             var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
-            
+
             var newUser = await CreateNewUser(GetFirstName(inDto, thirdPartyProfile), GetLastName(inDto, thirdPartyProfile), GetEmailAddress(inDto, thirdPartyProfile), passwordHash, employeeType, true, invitedByEmail);
             var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            _messageService.Send(MessageInitiator.System, messageAction, _messageTarget.Create(newUser.Id), newUser.DisplayUserName(false, _displayUserSettingsHelper));
-            userID = newUser.Id;
+            await _messageService.SendAsync(MessageInitiator.System, messageAction, _messageTarget.Create(newUser.Id), newUser.DisplayUserName(false, _displayUserSettingsHelper));
+            userId = newUser.Id;
             if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
             {
-                await SaveContactImage(userID, thirdPartyProfile.Avatar);
+                await SaveContactImage(userId, thirdPartyProfile.Avatar);
             }
 
-            _accountLinker.AddLink(userID.ToString(), thirdPartyProfile);
+            await _accountLinker.AddLinkAsync(userId.ToString(), thirdPartyProfile);
         }
         finally
         {
             _securityContext.Logout();
         }
 
-        var user = _userManager.GetUsers(userID);
+        var user = await _userManager.GetUsersAsync(userId);
 
-        _cookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.Id);
+        await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
 
-        _studioNotifyService.UserHasJoin();
+        await _studioNotifyService.UserHasJoinAsync();
 
         if (mustChangePassword)
         {
-            _studioNotifyService.UserPasswordChange(user);
+            await _studioNotifyService.UserPasswordChangeAsync(user);
         }
 
         _userHelpTourHelper.IsNewUser = true;
@@ -282,20 +283,29 @@ public class ThirdpartyController : ApiControllerBase
         {
             _personalSettingsHelper.IsNewUser = true;
         }
-        
+
         if (linkData is { LinkType: InvitationLinkType.CommonWithRoom })
         {
             var success = int.TryParse(linkData.RoomId, out var id);
 
-            if (success)
+
+            try
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                await _semaphore.WaitAsync();
+                if (success)
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(id, FileEntryType.Folder, user.Id, linkData.Share);
+                }
+                else
+                {
+                    await _usersInRoomChecker.CheckAppend();
+                    await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                }
             }
-            else
+            finally
             {
-                await _usersInRoomChecker.CheckAppend();
-                await _fileSecurity.ShareAsync(linkData.RoomId, FileEntryType.Folder, user.Id, linkData.Share);
+                _semaphore.Release();
             }
         }
     }
@@ -312,11 +322,11 @@ public class ThirdpartyController : ApiControllerBase
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
     [HttpDelete("thirdparty/unlinkaccount")]
-    public void UnlinkAccount(string provider)
+    public async Task UnlinkAccountAsync(string provider)
     {
-        _accountLinker.RemoveProvider(_securityContext.CurrentAccount.ID.ToString(), provider);
+        await _accountLinker.RemoveProviderAsync(_securityContext.CurrentAccount.ID.ToString(), provider);
 
-        _messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
+        await _messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
     }
 
     private async Task<UserInfo> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, bool inviteByEmail)
@@ -330,7 +340,7 @@ public class ThirdpartyController : ApiControllerBase
 
         if (inviteByEmail)
         {
-            user = _userManager.GetUserByEmail(email);
+            user = await _userManager.GetUserByEmailAsync(email);
 
             if (user.Equals(Constants.LostUser) || user.ActivationStatus != EmployeeActivationStatus.Pending)
             {
@@ -345,37 +355,33 @@ public class ThirdpartyController : ApiControllerBase
         if (_coreBaseSettings.Personal)
         {
             user.ActivationStatus = EmployeeActivationStatus.Activated;
-            user.CultureName = _coreBaseSettings.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name;
+            user.CultureName = _coreBaseSettings.CustomMode ? "ru-RU" : CultureInfo.CurrentUICulture.Name;
         }
 
-        return await _userManagerWrapper.AddUser(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+        return await _userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
     }
 
     private async Task SaveContactImage(Guid userID, string url)
     {
-        using (var memstream = new MemoryStream())
+        using var memstream = new MemoryStream();
+        var request = new HttpRequestMessage
         {
-            var request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(url)
-            };
+            RequestUri = new Uri(url)
+        };
 
-            var httpClient = _httpClientFactory.CreateClient();
-            using (var response = httpClient.Send(request))
-            using (var stream = response.Content.ReadAsStream())
-            {
-                var buffer = new byte[512];
-                int bytesRead;
-                while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    memstream.Write(buffer, 0, bytesRead);
-                }
-
-                var bytes = memstream.ToArray();
-
-                await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
-            }
+        var httpClient = _httpClientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var buffer = new byte[512];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            memstream.Write(buffer, 0, bytesRead);
         }
+
+        var bytes = memstream.ToArray();
+
+        await _userPhotoManager.SaveOrUpdatePhoto(userID, bytes);
     }
 
     private string GetEmailAddress(SignupAccountRequestDto inDto)

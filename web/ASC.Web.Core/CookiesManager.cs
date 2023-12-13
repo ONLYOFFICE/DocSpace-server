@@ -1,30 +1,28 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.Core.Data;
 
 using Microsoft.Net.Http.Headers;
 
@@ -36,7 +34,10 @@ namespace ASC.Web.Core;
 public enum CookiesType
 {
     AuthKey,
-    SocketIO
+    SocketIO,
+    ShareLink,
+    AnonymousSessionKey,
+    ConfirmKey
 }
 
 [Scope]
@@ -44,6 +45,9 @@ public class CookiesManager
 {
     private const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
+    private const string ShareLinkCookiesName = "sharelink";
+    private const string AnonymousSessionKeyCookiesName = "anonymous_session_key";
+    private const string ConfirmCookiesName = "asc_confirm_key";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager _userManager;
@@ -53,6 +57,7 @@ public class CookiesManager
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly DbLoginEventsManager _dbLoginEventsManager;
     private readonly MessageService _messageService;
+    private readonly IPSecurity.IPSecurity _ipSecurity;
     private readonly SameSiteMode? _sameSiteMode;
 
     public CookiesManager(
@@ -64,6 +69,7 @@ public class CookiesManager
         CoreBaseSettings coreBaseSettings,
         DbLoginEventsManager dbLoginEventsManager,
         MessageService messageService,
+        IPSecurity.IPSecurity ipSecurity,
         IConfiguration configuration)
     {
         _httpContextAccessor = httpContextAccessor;
@@ -74,6 +80,7 @@ public class CookiesManager
         _coreBaseSettings = coreBaseSettings;
         _dbLoginEventsManager = dbLoginEventsManager;
         _messageService = messageService;
+        _ipSecurity = ipSecurity;
 
         if (Enum.TryParse<SameSiteMode>(configuration["web:samesite"], out var sameSiteMode))
         {
@@ -81,7 +88,7 @@ public class CookiesManager
         }
     }
 
-    public void SetCookies(CookiesType type, string value, bool session = false)
+    public async Task SetCookiesAsync(CookiesType type, string value, bool session = false, string itemId = null)
     {
         if (_httpContextAccessor?.HttpContext == null)
         {
@@ -90,10 +97,10 @@ public class CookiesManager
 
         var options = new CookieOptions
         {
-            Expires = GetExpiresDate(session)
+            Expires = await GetExpiresDateAsync(session)
         };
 
-        if (type == CookiesType.AuthKey)
+        if (type == CookiesType.AuthKey || type == CookiesType.ConfirmKey)
         {
             options.HttpOnly = true;
 
@@ -107,138 +114,171 @@ public class CookiesManager
             {
                 options.Secure = true;
 
-                if (_sameSiteMode.HasValue && _sameSiteMode.Value == SameSiteMode.None)
+                if (_sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = _sameSiteMode.Value;
                 }
             }
 
-            if (FromCors())
+            if (FromCors(_httpContextAccessor.HttpContext.Request))
             {
                 options.Domain = $".{_coreBaseSettings.Basedomain}";
             }
         }
 
-        _httpContextAccessor.HttpContext.Response.Cookies.Append(GetCookiesName(type), value, options);
+        var cookieName = GetCookiesName(type);
+
+        if (!string.IsNullOrEmpty(itemId))
+        {
+            cookieName += itemId;
+        }
+
+        _httpContextAccessor.HttpContext.Response.Cookies.Append(cookieName, value, options);
     }
 
     public string GetCookies(CookiesType type)
     {
-        if (_httpContextAccessor?.HttpContext != null)
-        {
-            var cookieName = GetCookiesName(type);
-
-            if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
-            {
-                return _httpContextAccessor.HttpContext.Request.Cookies[cookieName] ?? "";
-            }
-        }
-        return "";
+        return _httpContextAccessor?.HttpContext != null && _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(GetCookiesName(type), out var cookie)
+            ? cookie
+            : string.Empty;
     }
 
-    public void ClearCookies(CookiesType type)
+    public string GetCookies(CookiesType type, string itemId, bool allowHeader = false)
+    {
+        if (_httpContextAccessor?.HttpContext == null)
+        {
+            return string.Empty;
+        }
+
+        var cookieName = GetCookiesName(type);
+
+        if (!string.IsNullOrEmpty(itemId))
+        {
+            cookieName += itemId;
+        }
+
+        if (_httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(cookieName, out var cookie))
+        {
+            return cookie;
+        }
+
+        if (allowHeader && _httpContextAccessor.HttpContext.Request.Headers.TryGetValue(cookieName, out var cookieHeader))
+        {
+            return cookieHeader;
+        }
+        
+        return string.Empty;
+    }
+
+    public void ClearCookies(CookiesType type, string itemId = null)
     {
         if (_httpContextAccessor?.HttpContext == null)
         {
             return;
         }
 
-        if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(GetCookiesName(type)))
+        var cookieName = GetCookiesName(type);
+
+        if (!string.IsNullOrEmpty(itemId))
         {
-            _httpContextAccessor.HttpContext.Response.Cookies.Delete(GetCookiesName(type), new CookieOptions() { Expires = DateTime.Now.AddDays(-3) });
+            cookieName += itemId;
+        }
+
+        if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
+        {
+            _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions() { Expires = DateTime.Now.AddDays(-3) });
         }
     }
 
-    private DateTime? GetExpiresDate(bool session)
+    private async Task<DateTime?> GetExpiresDateAsync(bool session)
     {
         DateTime? expires = null;
 
         if (!session)
         {
-            var tenant = _tenantManager.GetCurrentTenant().Id;
-            expires = _tenantCookieSettingsHelper.GetExpiresTime(tenant);
+            var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+            expires = await _tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
         }
 
         return expires;
     }
 
-    public async Task SetLifeTime(int lifeTime, bool enabled)
+    public async Task SetLifeTimeAsync(int lifeTime, bool enabled)
     {
-        var tenant = _tenantManager.GetCurrentTenant();
-        if (!_userManager.IsUserInGroup(_securityContext.CurrentAccount.ID, Constants.GroupAdmin.ID))
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        if (!await _userManager.IsUserInGroupAsync(_securityContext.CurrentAccount.ID, Constants.GroupAdmin.ID))
         {
             throw new SecurityException();
         }
 
-        var settings = _tenantCookieSettingsHelper.GetForTenant(tenant.Id);
+        var settings = await _tenantCookieSettingsHelper.GetForTenantAsync(tenant.Id);
         settings.Enabled = enabled;
 
         if (lifeTime > 0)
         {
             settings.Index += 1;
-            settings.LifeTime = lifeTime;
+            settings.LifeTime = lifeTime > 9999 ? 9999 : lifeTime;
         }
         else
         {
             settings.LifeTime = 0;
         }
 
-        _tenantCookieSettingsHelper.SetForTenant(tenant.Id, settings);
+        await _tenantCookieSettingsHelper.SetForTenantAsync(tenant.Id, settings);
 
         if (enabled && lifeTime > 0)
         {
-            await _dbLoginEventsManager.LogOutAllActiveConnectionsForTenant(tenant.Id);
+            await _dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
         }
 
-        AuthenticateMeAndSetCookies(tenant.Id, _securityContext.CurrentAccount.ID);
+        await AuthenticateMeAndSetCookiesAsync(_securityContext.CurrentAccount.ID);
     }
 
-    public TenantCookieSettings GetLifeTime(int tenantId)
+    public async Task<TenantCookieSettings> GetLifeTimeAsync(int tenantId)
     {
-        return _tenantCookieSettingsHelper.GetForTenant(tenantId);
+        return (await _tenantCookieSettingsHelper.GetForTenantAsync(tenantId));
     }
 
-    public async Task ResetUserCookie(Guid? userId = null)
+    public async Task ResetUserCookieAsync(Guid? userId = null)
     {
-        var currentUserId = _securityContext.CurrentAccount.ID;
-        var tenant = _tenantManager.GetCurrentTenant().Id;
-        var settings = _tenantCookieSettingsHelper.GetForUser(userId ?? currentUserId);
-        settings.Index = settings.Index + 1;
-        _tenantCookieSettingsHelper.SetForUser(userId ?? currentUserId, settings);
+        var targetUserId = userId ?? _securityContext.CurrentAccount.ID;
+        var tenant = await _tenantManager.GetCurrentTenantIdAsync();
+        var settings = await _tenantCookieSettingsHelper.GetForUserAsync(targetUserId);
+        settings.Index += 1;
+        await _tenantCookieSettingsHelper.SetForUserAsync(targetUserId, settings);
 
-        await _dbLoginEventsManager.LogOutAllActiveConnections(tenant, userId ?? currentUserId);
+        await _dbLoginEventsManager.LogOutAllActiveConnectionsAsync(tenant, targetUserId);
 
-        if (!userId.HasValue)
+        if (targetUserId == _securityContext.CurrentAccount.ID)
         {
-            AuthenticateMeAndSetCookies(tenant, currentUserId);
+            await AuthenticateMeAndSetCookiesAsync(targetUserId);
         }
     }
 
-    public async Task ResetTenantCookie()
+    public async Task ResetTenantCookieAsync()
     {
-        var tenant = _tenantManager.GetCurrentTenant();
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
 
-        if (!_userManager.IsUserInGroup(_securityContext.CurrentAccount.ID, Constants.GroupAdmin.ID))
+        if (!await _userManager.IsUserInGroupAsync(_securityContext.CurrentAccount.ID, Constants.GroupAdmin.ID))
         {
             throw new SecurityException();
         }
 
-        var settings = _tenantCookieSettingsHelper.GetForTenant(tenant.Id);
+        var settings = await _tenantCookieSettingsHelper.GetForTenantAsync(tenant.Id);
         settings.Index += 1;
-        _tenantCookieSettingsHelper.SetForTenant(tenant.Id, settings);
+        await _tenantCookieSettingsHelper.SetForTenantAsync(tenant.Id, settings);
 
-        await _dbLoginEventsManager.LogOutAllActiveConnectionsForTenant(tenant.Id);
+        await _dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
     }
 
-    public string AuthenticateMeAndSetCookies(int tenantId, Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false)
+    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false)
     {
         var isSuccess = true;
         var cookies = string.Empty;
-        Func<int> funcLoginEvent = () => { return GetLoginEventId(action); };
 
         try
         {
-            cookies = _securityContext.AuthenticateMe(userId, funcLoginEvent);
+            cookies = await _securityContext.AuthenticateMeAsync(userId, FuncLoginEvent);
         }
         catch (Exception)
         {
@@ -249,51 +289,35 @@ public class CookiesManager
         {
             if (isSuccess)
             {
-                SetCookies(CookiesType.AuthKey, cookies, session);
-                _dbLoginEventsManager.ResetCache(tenantId, userId);
+                await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
             }
         }
 
         return cookies;
-    }
 
-    public void AuthenticateMeAndSetCookies(string login, string passwordHash, MessageAction action, bool session = false)
-    {
-        var isSuccess = true;
-        var cookies = string.Empty;
-        Func<int> funcLoginEvent = () => { return GetLoginEventId(action); };
-
-        try
+        async Task<int> FuncLoginEvent()
         {
-            cookies = _securityContext.AuthenticateMe(login, passwordHash, funcLoginEvent);
-        }
-        catch (Exception)
-        {
-            isSuccess = false;
-            throw;
-        }
-        finally
-        {
-            if (isSuccess)
-            {
-                SetCookies(CookiesType.AuthKey, cookies, session);
-                _dbLoginEventsManager.ResetCache();
-            }
+            return await _ipSecurity.VerifyAsync() ? await GetLoginEventIdAsync(action) : 0;
         }
     }
 
-    public int GetLoginEventId(MessageAction action)
+    private async Task<int> GetLoginEventIdAsync(MessageAction action)
     {
-        var tenantId = _tenantManager.GetCurrentTenant().Id;
+        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
         var userId = _securityContext.CurrentAccount.ID;
         var data = new MessageUserData(tenantId, userId);
 
-        return _messageService.SendLoginMessage(data, action);
+        return await _messageService.SendLoginMessageAsync(data, action);
     }
 
     public string GetAscCookiesName()
     {
         return GetCookiesName(CookiesType.AuthKey);
+    }
+
+    public string GetConfirmCookiesName()
+    {
+        return GetCookiesName(CookiesType.ConfirmKey);
     }
 
     private string GetCookiesName(CookiesType type)
@@ -302,40 +326,38 @@ public class CookiesManager
         {
             CookiesType.AuthKey => AuthCookiesName,
             CookiesType.SocketIO => SocketIOCookiesName,
-
+            CookiesType.ShareLink => ShareLinkCookiesName,
+            CookiesType.AnonymousSessionKey => AnonymousSessionKeyCookiesName,
+            CookiesType.ConfirmKey => ConfirmCookiesName,
             _ => string.Empty,
         };
 
-        if (FromCors())
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request == null || !FromCors(request) || !request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
         {
-            var origin = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Origin].FirstOrDefault();
-            if (!string.IsNullOrEmpty(origin))
-            {
-                var originUri = new Uri(origin);
-                var host = originUri.Host;
-                var alias = host.Substring(0, host.Length - _coreBaseSettings.Basedomain.Length - 1);
-                result = $"{result}_{alias}";
-            }
+            return result;
         }
+
+        var originUri = new Uri(origin);
+        var host = originUri.Host;
+        var alias = host.Substring(0, host.Length - _coreBaseSettings.Basedomain.Length - 1);
+        result = $"{result}_{alias}";
 
         return result;
     }
 
-    private bool FromCors()
+    private bool FromCors(HttpRequest request)
     {
-        var urlRewriter = _httpContextAccessor.HttpContext.Request.Url();
-        var origin = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Origin].FirstOrDefault();
-        var baseDomain = _coreBaseSettings.Basedomain;
+        var urlRewriter = request.Url();
 
         try
         {
-            if (!string.IsNullOrEmpty(origin))
+            if ( request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
             {
                 var originUri = new Uri(origin);
-
-                if (!string.IsNullOrEmpty(baseDomain) &&
-                urlRewriter.Host != originUri.Host &&
-                originUri.Host.EndsWith(baseDomain))
+                var baseDomain = _coreBaseSettings.Basedomain;
+                
+                if (!string.IsNullOrEmpty(baseDomain) && urlRewriter.Host != originUri.Host && originUri.Host.EndsWith(baseDomain))
                 {
                     return true;
                 }

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -32,7 +32,6 @@ public class DocumentServiceHelper
     private readonly IDaoFactory _daoFactory;
     private readonly FileShareLink _fileShareLink;
     private readonly UserManager _userManager;
-    private readonly AuthContext _authContext;
     private readonly FileSecurity _fileSecurity;
     private readonly SetupInfo _setupInfo;
     private readonly FileUtility _fileUtility;
@@ -43,12 +42,12 @@ public class DocumentServiceHelper
     private readonly FileTrackerHelper _fileTracker;
     private readonly EntryStatusManager _entryStatusManager;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ExternalShare _externalShare;
 
     public DocumentServiceHelper(
         IDaoFactory daoFactory,
         FileShareLink fileShareLink,
         UserManager userManager,
-        AuthContext authContext,
         FileSecurity fileSecurity,
         SetupInfo setupInfo,
         FileUtility fileUtility,
@@ -58,12 +57,12 @@ public class DocumentServiceHelper
         LockerManager lockerManager,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ExternalShare externalShare)
     {
         _daoFactory = daoFactory;
         _fileShareLink = fileShareLink;
         _userManager = userManager;
-        _authContext = authContext;
         _fileSecurity = fileSecurity;
         _setupInfo = setupInfo;
         _fileUtility = fileUtility;
@@ -74,18 +73,18 @@ public class DocumentServiceHelper
         _fileTracker = fileTracker;
         _entryStatusManager = entryStatusManager;
         _serviceProvider = serviceProvider;
+        _externalShare = externalShare;
     }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(T fileId, int version, string doc, bool editPossible, bool tryEdit, bool tryCoauth)
     {
         var lastVersion = true;
-        FileShare linkRight;
 
         var fileDao = _daoFactory.GetFileDao<T>();
 
         var fileOptions = await _fileShareLink.CheckAsync(doc, fileDao);
         var file = fileOptions.File;
-        linkRight = fileOptions.FileShare;
+        var linkRight = fileOptions.FileShare;
 
         if (file == null)
         {
@@ -256,7 +255,7 @@ public class DocumentServiceHelper
             bool coauth;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoauth
-                && (!(coauth = _fileUtility.CanCoAuhtoring(file.Title)) || _fileTracker.IsEditingAlone(file.Id)))
+                && (!(coauth = _fileUtility.CanCoAuthoring(file.Title)) || _fileTracker.IsEditingAlone(file.Id)))
             {
                 if (tryEdit)
                 {
@@ -264,7 +263,7 @@ public class DocumentServiceHelper
                     strError = string.Format(!coauth
                                                  ? FilesCommonResource.ErrorMassage_EditingCoauth
                                                  : FilesCommonResource.ErrorMassage_EditingMobile,
-                                             _global.GetUserName(editingBy, true));
+                                             await _global.GetUserNameAsync(editingBy, true));
                 }
                 rightToEdit = editPossible = reviewPossible = fillFormsPossible = commentPossible = false;
             }
@@ -277,7 +276,7 @@ public class DocumentServiceHelper
             fileStable = await fileDao.GetFileStableAsync(file.Id, file.Version);
         }
 
-        var docKey = GetDocKey(fileStable);
+        var docKey = await GetDocKeyAsync(fileStable);
         var modeWrite = (editPossible || reviewPossible || fillFormsPossible || commentPossible) && tryEdit;
 
         if (file.ParentId != null)
@@ -324,24 +323,27 @@ public class DocumentServiceHelper
             configuration.Document.IsLinkedForMe = !string.IsNullOrEmpty(sourceId);
         }
 
+        if (await _externalShare.GetLinkIdAsync() == Guid.Empty)
+        {
+            return (file, configuration, locatedInPrivateRoom);
+        }
+
+        configuration.Document.SharedLinkParam = FilesLinkUtility.FolderShareKey;
+        configuration.Document.SharedLinkKey = _externalShare.GetKey();
+
         return (file, configuration, locatedInPrivateRoom);
     }
 
     private async Task<bool> CanDownloadAsync<T>(FileSecurity fileSecurity, File<T> file, FileShare linkRight)
     {
-        if (!file.DenyDownload)
+        var canDownload = linkRight != FileShare.Restrict && linkRight != FileShare.Read && linkRight != FileShare.Comment;
+
+        if (canDownload)
         {
             return true;
         }
 
-        var canDownload = linkRight != FileShare.Restrict && linkRight != FileShare.Read && linkRight != FileShare.Comment;
-
-        if (canDownload || _authContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
-        {
-            return canDownload;
-        }
-
-        if (linkRight == FileShare.Read || linkRight == FileShare.Comment)
+        if (linkRight is FileShare.Read or FileShare.Comment)
         {
             var fileDao = _daoFactory.GetFileDao<T>();
             file = await fileDao.GetFileAsync(file.Id); // reset Access prop
@@ -359,28 +361,21 @@ public class DocumentServiceHelper
             return null;
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        var encoder = new JwtEncoder(new HMACSHA256Algorithm(),
-                                     new JwtSerializer(),
-                                     new JwtBase64UrlEncoder());
-#pragma warning restore CS0618 // Type or member is obsolete
-
-
-        return encoder.Encode(payload, _fileUtility.SignatureSecret);
+        return JsonWebToken.Encode(payload, _fileUtility.SignatureSecret);
     }
 
 
-    public string GetDocKey<T>(File<T> file)
+    public async Task<string> GetDocKeyAsync<T>(File<T> file)
     {
-        return GetDocKey(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn);
+        return await GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn);
     }
 
-    public string GetDocKey<T>(T fileId, int fileVersion, DateTime modified)
+    public async Task<string> GetDocKeyAsync<T>(T fileId, int fileVersion, DateTime modified)
     {
-        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode()}_{_global.GetDocDbKey()}";
+        var str = $"teamlab_{fileId}_{fileVersion}_{modified.GetHashCode().ToString(CultureInfo.InvariantCulture)}_{await _global.GetDocDbKeyAsync()}";
 
         var keyDoc = Encoding.UTF8.GetBytes(str)
-                             .ToList()
+                             .AsEnumerable()
                              .Concat(_machinePseudoKeys.GetMachineConstant())
                              .ToArray();
 
@@ -400,7 +395,7 @@ public class DocumentServiceHelper
 
         foreach (var uid in _fileTracker.GetEditingBy(file.Id))
         {
-            if (!_userManager.UserExists(uid) && !sharedLink)
+            if (!await _userManager.UserExistsAsync(uid) && !sharedLink)
             {
                 usersDrop.Add(uid.ToString());
                 continue;
@@ -428,14 +423,14 @@ public class DocumentServiceHelper
             fileStable = await fileDao.GetFileStableAsync(file.Id, file.Version);
         }
 
-        var docKey = GetDocKey(fileStable);
+        var docKey = await GetDocKeyAsync(fileStable);
 
         await DropUserAsync(docKey, usersDrop.ToArray(), file.Id);
     }
 
-    public Task<bool> DropUserAsync(string docKeyForTrack, string[] users, object fileId = null)
+    public async Task<bool> DropUserAsync(string docKeyForTrack, string[] users, object fileId = null)
     {
-        return _documentServiceConnector.CommandAsync(CommandMethod.Drop, docKeyForTrack, fileId, null, users);
+        return await _documentServiceConnector.CommandAsync(CommandMethod.Drop, docKeyForTrack, fileId, null, users);
     }
 
     public async Task<bool> RenameFileAsync<T>(File<T> file, IFileDao<T> fileDao)
@@ -451,7 +446,7 @@ public class DocumentServiceHelper
         }
 
         var fileStable = file.Forcesave == ForcesaveType.None ? file : await fileDao.GetFileStableAsync(file.Id, file.Version);
-        var docKeyForTrack = GetDocKey(fileStable);
+        var docKeyForTrack = await GetDocKeyAsync(fileStable);
 
         var meta = new MetaData { Title = file.Title };
 

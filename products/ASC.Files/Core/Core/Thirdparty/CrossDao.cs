@@ -1,34 +1,32 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Classes;
-
 namespace ASC.Files.Core.Thirdparty;
 
-[Scope(Additional = typeof(CrossDaoExtension))]
+[Scope]
 internal class CrossDao //Additional SharpBox
 {
     private readonly IServiceProvider _serviceProvider;
@@ -84,9 +82,9 @@ internal class CrossDao //Additional SharpBox
         fromFile.Id = fromConverter(fromFile.Id);
 
         var mustConvert = !string.IsNullOrEmpty(fromFile.ConvertedType);
-        using (var fromFileStream = mustConvert
-                                        ? await _fileConverter.ExecAsync(fromFile)
-                                        : await fromFileDao.GetFileStreamAsync(fromFile))
+        await using (var fromFileStream = mustConvert
+                         ? await _fileConverter.ExecAsync(fromFile)
+                         : await fromFileDao.GetFileStreamAsync(fromFile))
         {
             toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
             toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
@@ -96,7 +94,7 @@ internal class CrossDao //Additional SharpBox
         {
             foreach (var size in _thumbnailSettings.Sizes)
             {
-                await globalStore.GetStore().CopyAsync(String.Empty,
+                await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
                                       fromFileDao.GetUniqThumbnailPath(fromFile, size.Width, size.Height),
                                       String.Empty,
                                       toFileDao.GetUniqThumbnailPath(toFile, size.Width, size.Height));
@@ -135,7 +133,7 @@ internal class CrossDao //Additional SharpBox
             {
                 fromFileTags.ForEach(x => x.EntryId = toFile.Id);
 
-                await tagDao.SaveTags(fromFileTags);
+                await tagDao.SaveTagsAsync(fromFileTags);
             }
 
             //Delete source file if needed
@@ -225,7 +223,7 @@ internal class CrossDao //Additional SharpBox
             {
                 fromFileNewTags.ForEach(x => x.EntryId = toFolderId);
 
-                await tagDao.SaveTags(fromFileNewTags);
+                await tagDao.SaveTagsAsync(fromFileNewTags);
             }
 
             if (copyException == null)
@@ -243,18 +241,5 @@ internal class CrossDao //Additional SharpBox
         }
 
         return await toFolderDao.GetFolderAsync(toConverter(toFolderId));
-    }
-}
-
-public static class CrossDaoExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<SharpBoxDaoSelector>();
-        services.TryAdd<SharePointDaoSelector>();
-        services.TryAdd<OneDriveDaoSelector>();
-        services.TryAdd<GoogleDriveDaoSelector>();
-        services.TryAdd<DropboxDaoSelector>();
-        services.TryAdd<BoxDaoSelector>();
     }
 }

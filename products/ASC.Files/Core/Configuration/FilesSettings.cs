@@ -1,32 +1,31 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Files.Classes;
 
-[Serializable]
 public class FilesSettings : ISettings<FilesSettings>
 {
     [JsonPropertyName("EnableThirdpartySettings")]
@@ -109,38 +108,39 @@ public class FilesSettings : ISettings<FilesSettings>
             HideTemplatesSetting = false,
             DownloadTarGzSetting = false,
             AutomaticallyCleanUpSetting = null,
-            DefaultSharingAccessRightsSetting = null
+            DefaultSharingAccessRightsSetting = null,
         };
     }
 
     [JsonIgnore]
-    public Guid ID => new Guid("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");
+    public Guid ID => new("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");
 }
 
 [Scope]
 public class FilesSettingsHelper
 {
     private readonly SettingsManager _settingsManager;
-    private readonly CoreBaseSettings _coreBaseSettings;
     private readonly SetupInfo _setupInfo;
     private readonly FileUtility _fileUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly SearchSettingsHelper _searchSettingsHelper;
+    private readonly AuthContext _authContext;
+    private static readonly FilesSettings _emptySettings = new();
 
     public FilesSettingsHelper(
         SettingsManager settingsManager,
-        CoreBaseSettings coreBaseSettings,
         SetupInfo setupInfo,
         FileUtility fileUtility,
         FilesLinkUtility filesLinkUtility,
-        SearchSettingsHelper searchSettingsHelper)
+        SearchSettingsHelper searchSettingsHelper,
+        AuthContext authContext)
     {
         _settingsManager = settingsManager;
-        _coreBaseSettings = coreBaseSettings;
         _setupInfo = setupInfo;
         _fileUtility = fileUtility;
         _filesLinkUtility = filesLinkUtility;
         _searchSettingsHelper = searchSettingsHelper;
+        _authContext = authContext;
     }
 
     public List<string> ExtsImagePreviewed => _fileUtility.ExtsImagePreviewed;
@@ -155,15 +155,15 @@ public class FilesSettingsHelper
     public List<string> ExtsWebTemplate => _fileUtility.ExtsWebTemplate;
     public List<string> ExtsCoAuthoring => _fileUtility.ExtsCoAuthoring;
     public List<string> ExtsMustConvert => _fileUtility.ExtsMustConvert;
-    public Dictionary<string, List<string>> ExtsConvertible => _fileUtility.ExtsConvertible;
+    public IDictionary<string, List<string>> ExtsConvertible => _fileUtility.GetExtsConvertibleAsync().Result;
     public List<string> ExtsUploadable => _fileUtility.ExtsUploadable;
-    public List<string> ExtsArchive => FileUtility.ExtsArchive;
-    public List<string> ExtsVideo => FileUtility.ExtsVideo;
-    public List<string> ExtsAudio => FileUtility.ExtsAudio;
-    public List<string> ExtsImage => FileUtility.ExtsImage;
-    public List<string> ExtsSpreadsheet => FileUtility.ExtsSpreadsheet;
-    public List<string> ExtsPresentation => FileUtility.ExtsPresentation;
-    public List<string> ExtsDocument => FileUtility.ExtsDocument;
+    public ImmutableList<string> ExtsArchive => FileUtility.ExtsArchive;
+    public ImmutableList<string> ExtsVideo => FileUtility.ExtsVideo;
+    public ImmutableList<string> ExtsAudio => FileUtility.ExtsAudio;
+    public ImmutableList<string> ExtsImage => FileUtility.ExtsImage;
+    public ImmutableList<string> ExtsSpreadsheet => FileUtility.ExtsSpreadsheet;
+    public ImmutableList<string> ExtsPresentation => FileUtility.ExtsPresentation;
+    public ImmutableList<string> ExtsDocument => FileUtility.ExtsDocument;
     public Dictionary<FileType, string> InternalFormats => _fileUtility.InternalExtension;
     public string MasterFormExtension => _fileUtility.MasterFormExtension;
     public string ParamVersion => FilesLinkUtility.Version;
@@ -403,7 +403,7 @@ public class FilesSettingsHelper
     {
         get
         {
-            return _searchSettingsHelper.CanSearchByContent<DbFile>();
+            return _searchSettingsHelper.CanSearchByContentAsync<DbFile>().Result;
         }
     }
 
@@ -469,21 +469,31 @@ public class FilesSettingsHelper
 
     private FilesSettings Load()
     {
-        return _settingsManager.Load<FilesSettings>();
+        return !_authContext.IsAuthenticated ? _emptySettings : _settingsManager.Load<FilesSettings>();
     }
 
     private void Save(FilesSettings settings)
     {
+        if (!_authContext.IsAuthenticated)
+        {
+            return;
+        }
+
         _settingsManager.Save(settings);
     }
 
     private FilesSettings LoadForCurrentUser()
     {
-        return _settingsManager.LoadForCurrentUser<FilesSettings>();
+        return !_authContext.IsAuthenticated ? _emptySettings : _settingsManager.LoadForCurrentUser<FilesSettings>();
     }
 
     private void SaveForCurrentUser(FilesSettings settings)
     {
+        if (!_authContext.IsAuthenticated)
+        {
+            return;
+        }
+
         _settingsManager.SaveForCurrentUser(settings);
     }
 }

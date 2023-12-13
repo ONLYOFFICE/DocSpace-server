@@ -1,28 +1,30 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Web.Api.Core;
 
 namespace ASC.ApiSystem.Controllers;
 
@@ -46,7 +48,9 @@ public class PortalController : ControllerBase
     private readonly TimeZonesProvider _timeZonesProvider;
     private readonly TimeZoneConverter _timeZoneConverter;
     private readonly PasswordHasher _passwordHasher;
+    private readonly CspSettingsHelper _cspSettingsHelper;
     private readonly ILogger<PortalController> _log;
+    private readonly CoreBaseSettings _coreBaseSettings;
 
     public PortalController(
         IConfiguration configuration,
@@ -57,6 +61,7 @@ public class PortalController : ControllerBase
         CommonMethods commonMethods,
         HostedSolution hostedSolution,
         CoreSettings coreSettings,
+        CoreBaseSettings coreBaseSettings,
         TenantDomainValidator tenantDomainValidator,
         UserFormatter userFormatter,
         UserManagerWrapper userManagerWrapper,
@@ -64,7 +69,8 @@ public class PortalController : ControllerBase
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
         TimeZoneConverter timeZoneConverter,
-        PasswordHasher passwordHasher)
+        PasswordHasher passwordHasher,
+        CspSettingsHelper cspSettingsHelper)
     {
         _configuration = configuration;
         _securityContext = securityContext;
@@ -81,7 +87,9 @@ public class PortalController : ControllerBase
         _timeZonesProvider = timeZonesProvider;
         _timeZoneConverter = timeZoneConverter;
         _passwordHasher = passwordHasher;
+        _cspSettingsHelper = cspSettingsHelper;
         _log = option;
+        _coreBaseSettings = coreBaseSettings;
     }
 
     #region For TEST api
@@ -102,7 +110,7 @@ public class PortalController : ControllerBase
     [HttpPost("register")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
-    public async Task<IActionResult> RegisterAsync(TenantModel model)
+    public async ValueTask<IActionResult> RegisterAsync(TenantModel model)
     {
         if (model == null)
         {
@@ -214,6 +222,7 @@ public class PortalController : ControllerBase
             Industry = (TenantIndustry)model.Industry,
             Spam = model.Spam,
             Calls = model.Calls,
+            HostedRegion = model.Region
         };
 
         if (!string.IsNullOrEmpty(model.AffiliateId))
@@ -232,18 +241,22 @@ public class PortalController : ControllerBase
         }
 
         Tenant t;
-
         try
         {
             /****REGISTRATION!!!*****/
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
-            {
-                await _apiSystemHelper.AddTenantToCacheAsync(info.Address, _securityContext.CurrentAccount.ID);
+
+            t = await _hostedSolution.RegisterTenantAsync(info);
+
+            _tenantManager.SetCurrentTenant(t);
+
+            await _cspSettingsHelper.SaveAsync(null, true);
+
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
+            { 
+                await _apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(_coreSettings), model.AWSRegion);
 
                 _log.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
             }
-
-            _hostedSolution.RegisterTenant(info, out t);
 
             /*********/
 
@@ -276,10 +289,10 @@ public class PortalController : ControllerBase
 
                 var tariff = new Tariff
                 {
-                    Quotas = new List<Quota> { new Quota(trialQuotaId, 1) },
+                    Quotas = new List<Quota> { new(trialQuotaId, 1) },
                     DueDate = dueDate
                 };
-                _hostedSolution.SetTariff(t.Id, tariff);
+                await _hostedSolution.SetTariffAsync(t.Id, tariff);
             }
         }
 
@@ -297,11 +310,11 @@ public class PortalController : ControllerBase
                 /* set wizard not completed*/
                 _tenantManager.SetCurrentTenant(t);
 
-                var settings = _settingsManager.Load<WizardSettings>();
+                var settings = await _settingsManager.LoadAsync<WizardSettings>();
 
                 settings.Completed = false;
 
-                _settingsManager.Save(settings);
+                await _settingsManager.SaveAsync(settings);
             }
             catch (Exception e)
             {
@@ -325,9 +338,10 @@ public class PortalController : ControllerBase
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public IActionResult Remove([FromQuery] TenantModel model)
+    public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
-        if (!_commonMethods.GetTenant(model, out var tenant))
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
+        if (!succ)
         {
             _log.LogError("Model without tenant");
 
@@ -349,7 +363,7 @@ public class PortalController : ControllerBase
             });
         }
 
-        _hostedSolution.RemoveTenant(tenant);
+        await _hostedSolution.RemoveTenantAsync(tenant);
 
         return Ok(new
         {
@@ -360,9 +374,10 @@ public class PortalController : ControllerBase
     [HttpPut("status")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public IActionResult ChangeStatus(TenantModel model)
+    public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
-        if (!_commonMethods.GetTenant(model, out var tenant))
+        var (succ, tenant) = await _commonMethods.TryGetTenantAsync(model);
+        if (!succ)
         {
             _log.LogError("Model without tenant");
 
@@ -393,7 +408,7 @@ public class PortalController : ControllerBase
 
         tenant.SetStatus(active);
 
-        _hostedSolution.SaveTenant(tenant);
+        await _hostedSolution.SaveTenantAsync(tenant);
 
         return Ok(new
         {
@@ -403,22 +418,17 @@ public class PortalController : ControllerBase
 
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
-    public Task<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
+    public async ValueTask<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
     {
         if (model == null)
         {
-            return Task.FromResult<IActionResult>(BadRequest(new
+            return BadRequest(new
             {
                 error = "portalNameEmpty",
                 message = "PortalName is required"
-            }));
+            });
         }
 
-        return InternalCheckExistingNamePortalAsync(model);
-    }
-
-    private async Task<IActionResult> InternalCheckExistingNamePortalAsync(TenantModel model)
-    {
         var (exists, error) = await CheckExistingNamePortalAsync((model.PortalName ?? "").Trim());
 
         if (!exists)
@@ -435,7 +445,7 @@ public class PortalController : ControllerBase
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public IActionResult GetPortals([FromQuery] TenantModel model)
+    public async Task<IActionResult> GetPortalsAsync([FromQuery] TenantModel model)
     {
         try
         {
@@ -445,13 +455,13 @@ public class PortalController : ControllerBase
             if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
             {
                 empty = false;
-                tenants.AddRange(_hostedSolution.FindTenants((model.Email ?? "").Trim()));
+                tenants.AddRange(await _hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
             }
 
             if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
             {
                 empty = false;
-                var tenant = _hostedSolution.GetTenant((model.PortalName ?? "").Trim());
+                var tenant = (await _hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
 
                 if (tenant != null)
                 {
@@ -462,7 +472,7 @@ public class PortalController : ControllerBase
             if (model.TenantId.HasValue)
             {
                 empty = false;
-                var tenant = _hostedSolution.GetTenant(model.TenantId.Value);
+                var tenant = await _hostedSolution.GetTenantAsync(model.TenantId.Value);
 
                 if (tenant != null)
                 {
@@ -472,7 +482,7 @@ public class PortalController : ControllerBase
 
             if (empty)
             {
-                tenants.AddRange(_hostedSolution.GetTenants(DateTime.MinValue).OrderBy(t => t.Id).ToList());
+                tenants.AddRange((await _hostedSolution.GetTenantsAsync(DateTime.MinValue)).OrderBy(t => t.Id).ToList());
             }
 
             var tenantsWrapper = tenants
@@ -503,14 +513,14 @@ public class PortalController : ControllerBase
 
     #region Validate Method
 
-    private async Task ValidateDomainAsync(string domain)
+    private async Task ValidateTenantAliasAsync(string alias)
     {
         // size
-        _tenantDomainValidator.ValidateDomainLength(domain);
+        _tenantDomainValidator.ValidateDomainLength(alias);
         // characters
-        _tenantDomainValidator.ValidateDomainCharacters(domain);
+        _tenantDomainValidator.ValidateDomainCharacters(alias);
 
-        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(domain, _securityContext.CurrentAccount.ID);
+        var sameAliasTenants = await _apiSystemHelper.FindTenantsInCacheAsync(alias);
 
         if (sameAliasTenants != null)
         {
@@ -518,29 +528,24 @@ public class PortalController : ControllerBase
         }
     }
 
-    private Task<(bool exists, object error)> CheckExistingNamePortalAsync(string portalName)
-    {
-        if (string.IsNullOrEmpty(portalName))
-        {
-            object error = new { error = "portalNameEmpty", message = "PortalName is required" };
-            return Task.FromResult((false, error));
-        }
-
-        return internalCheckExistingNamePortalAsync(portalName);
-    }
-
-    private async Task<(bool exists, object error)> internalCheckExistingNamePortalAsync(string portalName)
+    private async ValueTask<(bool, object)> CheckExistingNamePortalAsync(string portalName)
     {
         object error = null;
+        if (string.IsNullOrEmpty(portalName))
+        {
+            error = new { error = "portalNameEmpty", message = "PortalName is required" };
+            return (false, error);
+        }
+
         try
         {
-            if (!string.IsNullOrEmpty(_apiSystemHelper.ApiCacheUrl))
+            if (!_coreBaseSettings.Standalone && _apiSystemHelper.ApiCacheEnable)
             {
-                await ValidateDomainAsync(portalName.Trim());
+                await ValidateTenantAliasAsync(portalName.Trim());
             }
             else
             {
-                _hostedSolution.CheckTenantAddress(portalName.Trim());
+                await _hostedSolution.CheckTenantAddressAsync(portalName.Trim());
             }
         }
         catch (TenantAlreadyExistsException ex)
@@ -566,7 +571,7 @@ public class PortalController : ControllerBase
             return (false, error);
         }
 
-        return (true, error);
+        return (true, null);
     }
 
     private bool CheckValidName(string name, out object error)

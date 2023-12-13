@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -43,7 +43,7 @@ public class RackspaceCloudStorage : BaseStorage
     private bool _lowerCasing = true;
     private Uri _cname;
     private Uri _cnameSSL;
-    private readonly List<string> _domains = new List<string>();
+    private readonly List<string> _domains = new();
     private readonly ILogger<RackspaceCloudStorage> _logger;
 
     public RackspaceCloudStorage(
@@ -64,7 +64,7 @@ public class RackspaceCloudStorage : BaseStorage
         TempPath = tempPath;
     }
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props)
+    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -120,6 +120,8 @@ public class RackspaceCloudStorage : BaseStorage
                              ? new Uri(props["cnamessl"], UriKind.Absolute)
                              : new Uri(cdnHeaders.CDNSslUri);
 
+        DataStoreValidator = dataStoreValidator;
+        
         return this;
     }
 
@@ -202,7 +204,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         if (EnableQuotaCheck(domain))
         {
-            QuotaController.QuotaUsedCheck(buffered.Length);
+            await QuotaController.QuotaUsedCheckAsync(buffered.Length);
         }
 
         var client = GetClient();
@@ -244,8 +246,7 @@ public class RackspaceCloudStorage : BaseStorage
         {
             try
             {
-
-                using (var emptyStream = _tempStream.Create())
+                await using (var emptyStream = _tempStream.Create())
                 {
 
                     var headers = new Dictionary<string, string>
@@ -284,7 +285,7 @@ public class RackspaceCloudStorage : BaseStorage
                             _region
                            );
 
-        await QuotaUsedAdd(domain, buffered.Length);
+        await QuotaUsedAddAsync(domain, buffered.Length);
 
         return await GetUriAsync(domain, path);
 
@@ -298,7 +299,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         client.DeleteObject(_private_container, MakePath(domain, path));
 
-        await QuotaUsedDelete(domain, size);
+        await QuotaUsedDeleteAsync(domain, size);
 
     }
 
@@ -321,22 +322,17 @@ public class RackspaceCloudStorage : BaseStorage
 
         if (QuotaController != null)
         {
-            await QuotaUsedDelete(domain, files.Select(x => x.Bytes).Sum());
+            await QuotaUsedDeleteAsync(domain, files.Select(x => x.Bytes).Sum());
         }
     }
 
-    public override Task DeleteFilesAsync(string domain, List<string> paths)
+    public override async Task DeleteFilesAsync(string domain, List<string> paths)
     {
         if (paths.Count == 0)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        return InternalDeleteFilesAsync(domain, paths);
-    }
-
-    private async Task InternalDeleteFilesAsync(string domain, List<string> paths)
-    {
         var keysToDel = new List<string>();
 
         long quotaUsed = 0;
@@ -371,7 +367,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         if (quotaUsed > 0)
         {
-            await QuotaUsedDelete(domain, quotaUsed);
+            await QuotaUsedDeleteAsync(domain, quotaUsed);
         }
     }
 
@@ -394,15 +390,15 @@ public class RackspaceCloudStorage : BaseStorage
 
         if (QuotaController != null)
         {
-            await QuotaUsedDelete(domain, files.Select(x => x.Bytes).Sum());
+            await QuotaUsedDeleteAsync(domain, files.Select(x => x.Bytes).Sum());
         }
     }
 
-    public override Task MoveDirectoryAsync(string srcdomain, string srcdir, string newdomain, string newdir)
+    public override Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir)
     {
         var client = GetClient();
-        var srckey = MakePath(srcdomain, srcdir);
-        var dstkey = MakePath(newdomain, newdir);
+        var srckey = MakePath(srcDomain, srcDir);
+        var dstkey = MakePath(newDomain, newDir);
 
         var paths = client.ListObjects(_private_container, null, null, srckey, _region).Select(x => x.Name);
 
@@ -415,29 +411,29 @@ public class RackspaceCloudStorage : BaseStorage
         return Task.CompletedTask;
     }
 
-    public override async Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, bool quotaCheckFileSize = true)
+    public override async Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true)
     {
-        var srcKey = MakePath(srcdomain, srcpath);
-        var dstKey = MakePath(newdomain, newpath);
-        var size = await GetFileSizeAsync(srcdomain, srcpath);
+        var srcKey = MakePath(srcDomain, srcPath);
+        var dstKey = MakePath(newDomain, newPath);
+        var size = await GetFileSizeAsync(srcDomain, srcPath);
 
         var client = GetClient();
 
         client.CopyObject(_private_container, srcKey, _private_container, dstKey);
 
-        await DeleteAsync(srcdomain, srcpath);
+        await DeleteAsync(srcDomain, srcPath);
 
-        await QuotaUsedDelete(srcdomain, size);
-        await QuotaUsedAdd(newdomain, size, quotaCheckFileSize);
+        await QuotaUsedDeleteAsync(srcDomain, size);
+        await QuotaUsedAddAsync(newDomain, size, quotaCheckFileSize);
 
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
-    public override Task<Uri> SaveTempAsync(string domain, out string assignedPath, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
     {
-        assignedPath = Guid.NewGuid().ToString();
+       var assignedPath = Guid.NewGuid().ToString();
 
-        return SaveAsync(domain, assignedPath, stream);
+        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
     }
 
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
@@ -488,7 +484,7 @@ public class RackspaceCloudStorage : BaseStorage
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(obj.Name).StartsWith(QuotaController.ExcludePattern))
                 {
-                    await QuotaUsedDelete(domain, obj.Bytes);
+                    await QuotaUsedDeleteAsync(domain, obj.Bytes);
                 }
             }
         }
@@ -526,7 +522,7 @@ public class RackspaceCloudStorage : BaseStorage
         return Task.FromResult(result);
     }
 
-    public override Task<long> ResetQuotaAsync(string domain)
+    public override async Task<long> ResetQuotaAsync(string domain)
     {
         var client = GetClient();
 
@@ -542,12 +538,12 @@ public class RackspaceCloudStorage : BaseStorage
                 size += obj.Bytes;
             }
 
-            QuotaController.QuotaUsedSet(Modulename, domain, DataList.GetData(domain), size);
+            await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
 
-            return Task.FromResult(size);
+            return size;
         }
 
-        return Task.FromResult<long>(0);
+        return 0;
     }
 
     public override Task<long> GetUsedQuotaAsync(string domain)
@@ -567,24 +563,24 @@ public class RackspaceCloudStorage : BaseStorage
         return Task.FromResult(result);
     }
 
-    public override async Task<Uri> CopyAsync(string srcdomain, string path, string newdomain, string newpath)
+    public override async Task<Uri> CopyAsync(string srcDomain, string path, string newDomain, string newPath)
     {
-        var srcKey = MakePath(srcdomain, path);
-        var dstKey = MakePath(newdomain, newpath);
-        var size = await GetFileSizeAsync(srcdomain, path);
+        var srcKey = MakePath(srcDomain, path);
+        var dstKey = MakePath(newDomain, newPath);
+        var size = await GetFileSizeAsync(srcDomain, path);
         var client = GetClient();
 
         client.CopyObject(_private_container, srcKey, _private_container, dstKey);
 
-        await QuotaUsedAdd(newdomain, size);
+        await QuotaUsedAddAsync(newDomain, size);
 
-        return await GetUriAsync(newdomain, newpath);
+        return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task CopyDirectoryAsync(string srcdomain, string dir, string newdomain, string newdir)
+    public override async Task CopyDirectoryAsync(string srcDomain, string dir, string newDomain, string newDir)
     {
-        var srckey = MakePath(srcdomain, dir);
-        var dstkey = MakePath(newdomain, newdir);
+        var srckey = MakePath(srcDomain, dir);
+        var dstkey = MakePath(newDomain, newDir);
         var client = GetClient();
 
         var files = client.ListObjects(_private_container, null, null, null, srckey, _region);
@@ -593,7 +589,7 @@ public class RackspaceCloudStorage : BaseStorage
         {
             client.CopyObject(_private_container, file.Name, _private_container, file.Name.Replace(srckey, dstkey));
 
-            await QuotaUsedAdd(newdomain, file.Bytes);
+            await QuotaUsedAddAsync(newDomain, file.Bytes);
         }
     }
 
@@ -638,7 +634,7 @@ public class RackspaceCloudStorage : BaseStorage
 
         var mode = chunkNumber == 0 ? FileMode.Create : FileMode.Append;
 
-        using (var fs = new FileStream(filePath, mode))
+        await using (var fs = new FileStream(filePath, mode))
         {
             var buffer = new byte[BufferSize];
             int readed;
@@ -675,7 +671,7 @@ public class RackspaceCloudStorage : BaseStorage
         {
             var size = await GetFileSizeAsync(domain, path);
 
-            await QuotaUsedAdd(domain, size);
+            await QuotaUsedAddAsync(domain, size);
         }
 
         return await GetUriAsync(domain, path);

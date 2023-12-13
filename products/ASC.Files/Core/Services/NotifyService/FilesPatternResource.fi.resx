@@ -76,14 +76,14 @@ Tämä on sähköposti tiedonanto, jossa ilmoitamme että olet pyytänyt $MailsC
 Voit löytää onnistuneesti lähetetyt viestit "Lähetetty":"$__VirtualRootPath/addons/mail/#sent" kansiosta sähköposti moduulissa.</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1. Pääsy myönnetty asiakirjaan: "$DocumentTitle":"$DocumentURL" 
+    <value>h1. Pääsy myönnetty asiakirjaan: "$DocumentTitle":"$DocumentURL"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" on myöntänyt sinulle pääsyn asiakirjaan "$DocumentTitle":"$DocumentURL" seuraavin oikeuksin: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1. Pääsyoikeus myönnetty kansioon: "$DocumentTitle":"$DocumentURL" 
+    <value>h1. Pääsyoikeus myönnetty kansioon: "$DocumentTitle":"$DocumentURL"
 
 $__DateTime "$__AuthorName":"$__AuthorUrl" on myöntänyt sinulle pääsyn kansioon "$DocumentTitle":"$DocumentURL" seuraavin oikeuksin: "$AccessRights". 
 
@@ -105,9 +105,9 @@ $Message</value>
     <value>Asiakirjat. Pääsy kansioon $DocumentTitle myönnetty</value>
   </data>
   <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__TekijänNimi mainitsi sinut dokumentin kommentissa
+    <value>h1. $__AuthorName mainitsi sinut dokumentin kommentissa
 
-$__TekijänNimi mainitsi sinut "$ DocumentTitle":"$DocumentURL " kommentissa huoneen asiakirjassa "$ RoomTitle":"$RoomURL ":
+$__AuthorName mainitsi sinut "$ DocumentTitle":"$DocumentURL" kommentissa huoneen asiakirjassa "$RoomTitle":"$RoomURL":
 
 $Message</value>
   </data>

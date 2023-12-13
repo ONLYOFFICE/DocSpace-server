@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -40,12 +40,11 @@ public class StudioWhatsNewNotify
     private readonly AuthManager _authManager;
     private readonly AuditEventsRepository _auditEventsRepository;
     private readonly CoreSettings _coreSettings;
-    private readonly NotifyEngineQueue _notifyEngineQueue;
-    private readonly IConfiguration _confuguration;
+    private readonly IConfiguration _configuration;
     private readonly WorkContext _workContext;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
-
-    public static readonly List<MessageAction?> DailyActions = new List<MessageAction?>()
+    private readonly IServiceProvider _serviceProvider;
+    public static readonly List<MessageAction?> DailyActions = new()
     {
         MessageAction.FileCreated,
         MessageAction.FileUpdatedRevisionComment,
@@ -57,7 +56,7 @@ public class StudioWhatsNewNotify
         MessageAction.UserUpdated
     };
 
-    public static readonly List<MessageAction?> RoomsActivityActions = new List<MessageAction?>()
+    public static readonly List<MessageAction?> RoomsActivityActions = new()
     {
          MessageAction.FileUploaded,
          MessageAction.UserFileUpdated,
@@ -75,13 +74,13 @@ public class StudioWhatsNewNotify
         SecurityContext securityContext,
         AuthManager authManager,
         CoreSettings coreSettings,
-        NotifyEngineQueue notifyEngineQueue,
-        IConfiguration confuguration,
+        IConfiguration configuration,
         WorkContext workContext,
         ILoggerProvider optionsMonitor,
         AuditEventsRepository auditEventsRepository,
         WebItemManager webItemManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper)
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        IServiceProvider serviceProvider)
     {
         _webItemManager = webItemManager;
         _tenantManager = tenantManager;
@@ -92,16 +91,15 @@ public class StudioWhatsNewNotify
         _securityContext = securityContext;
         _authManager = authManager;
         _coreSettings = coreSettings;
-        _notifyEngineQueue = notifyEngineQueue;
-        _confuguration = confuguration;
+        _configuration = configuration;
         _workContext = workContext;
         _auditEventsRepository = auditEventsRepository;
         _log = optionsMonitor.CreateLogger("ASC.Notify");
         _displayUserSettingsHelper = displayUserSettingsHelper;
-
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task SendMsgWhatsNew(DateTime scheduleDate, WhatsNewType whatsNewType)
+    public async Task SendMsgWhatsNewAsync(DateTime scheduleDate, WhatsNewType whatsNewType)
     {
         var products = _webItemManager.GetItemsAll<IProduct>();
 
@@ -113,61 +111,66 @@ public class StudioWhatsNewNotify
 
         _log.InformationStartSendWhatsNew();
 
-        var tenants = GetChangedTenants(scheduleDate, whatsNewType);
+        var tenants = await GetChangedTenantsAsync(scheduleDate, whatsNewType);
 
         foreach (var tenantid in tenants)
         {
-            await SendMsgWhatsNew(tenantid, scheduleDate, whatsNewType, products);
+            await SendMsgWhatsNewAsync(tenantid, scheduleDate, whatsNewType, products);
         }
     }
 
-    private IEnumerable<int> GetChangedTenants(DateTime date, WhatsNewType whatsNewType)
+    private async Task<IEnumerable<int>> GetChangedTenantsAsync(DateTime date, WhatsNewType whatsNewType)
     {
         switch (whatsNewType)
         {
             case WhatsNewType.DailyFeed:
-                return _auditEventsRepository.GetTenants(date.Date.AddDays(-1), date.Date.AddSeconds(-1));
+                return await _auditEventsRepository.GetTenantsAsync(date.Date.AddDays(-1), date.Date.AddSeconds(-1));
             case WhatsNewType.RoomsActivity:
-                return _auditEventsRepository.GetTenants(date.AddHours(-1), date.AddSeconds(-1));
+                return await _auditEventsRepository.GetTenantsAsync(date.AddHours(-1), date.AddSeconds(-1));
             default:
                 return Enumerable.Empty<int>();
         }
     }
 
-    private async Task SendMsgWhatsNew(int tenantid, DateTime scheduleDate, WhatsNewType whatsNewType, List<IProduct> products)
+    private async Task SendMsgWhatsNewAsync(int tenantid, DateTime scheduleDate, WhatsNewType whatsNewType, List<IProduct> products)
     {
         try
         {
-            var tenant = _tenantManager.GetTenant(tenantid);
+            var tenant = await _tenantManager.GetTenantAsync(tenantid);
             if (tenant == null ||
                 tenant.Status != TenantStatus.Active ||
-                !TimeToSendWhatsNew(_tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType) || //ToDo
-                TariffState.NotPaid <= _tariffService.GetTariff(tenantid).State)
+                !TimeToSendWhatsNew(_tenantUtil.DateTimeFromUtc(tenant.TimeZone, scheduleDate), whatsNewType))
             {
                 return;
             }
 
             _tenantManager.SetCurrentTenant(tenant);
-            var client = _workContext.NotifyContext.RegisterClient(_notifyEngineQueue, _studioNotifyHelper.NotifySource);
+
+            if (TariffState.NotPaid <= (await _tariffService.GetTariffAsync(tenantid)).State)
+            {
+                return;
+            }
+
+            var client = _workContext.RegisterClient(_serviceProvider, _studioNotifyHelper.NotifySource);
 
             _log.InformationStartSendWhatsNewIn(tenant.GetTenantDomain(_coreSettings), tenantid);
-            foreach (var user in _userManager.GetUsers())
+            foreach (var user in await _userManager.GetUsersAsync())
             {
                 _log.Debug($"SendMsgWhatsNew start checking subscription: {user.Email}");//temp
 
-                if (!CheckSubscription(user, whatsNewType))
+                if (!await CheckSubscriptionAsync(user, whatsNewType))
                 {
                     continue;
                 }
 
                 _log.Debug($"SendMsgWhatsNew checking subscription complete: {user.Email}");//temp
 
-                _securityContext.AuthenticateMeWithoutCookie(_authManager.GetAccountByID(tenant.Id, user.Id));
+                await _securityContext.AuthenticateMeWithoutCookieAsync(await _authManager.GetAccountByIDAsync(tenant.Id, user.Id));
 
                 var culture = string.IsNullOrEmpty(user.CultureName) ? tenant.GetCulture() : user.GetCulture();
 
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = culture;
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
 
                 var auditEvents = new List<ActivityInfo>();
 
@@ -193,7 +196,7 @@ public class StudioWhatsNewNotify
                 if (userActivities.Any())
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
-                    client.SendNoticeAsync(
+                    await client.SendNoticeAsync(
                         Actions.SendWhatsNew, null, user,
                         new TagValue(Tags.Activities, userActivities),
                         new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType, culture)),
@@ -217,7 +220,6 @@ public class StudioWhatsNewNotify
 
         var date = activityInfo.Data;
         var userName = user.DisplayUserName(_displayUserSettingsHelper);
-        var userEmail = user.Email;
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
         var fileTitle = HtmlUtil.GetText(activityInfo.FileTitle, 512);
@@ -321,15 +323,15 @@ public class StudioWhatsNewNotify
         return true;
     }
 
-    private bool CheckSubscription(UserInfo user, WhatsNewType whatsNewType)
+    private async Task<bool> CheckSubscriptionAsync(UserInfo user, WhatsNewType whatsNewType)
     {
         if (whatsNewType == WhatsNewType.DailyFeed &&
-            _studioNotifyHelper.IsSubscribedToNotify(user, Actions.SendWhatsNew))
+            await _studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.SendWhatsNew))
         {
             return true;
         }
         else if (whatsNewType == WhatsNewType.RoomsActivity &&
-            _studioNotifyHelper.IsSubscribedToNotify(user, Actions.RoomsActivity))
+            await _studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
         {
             return true;
         }
@@ -345,12 +347,9 @@ public class StudioWhatsNewNotify
         }
 
         var hourToSend = 7;
-        if (!string.IsNullOrEmpty(_confuguration["web:whatsnew-time"]))
+        if (!string.IsNullOrEmpty(_configuration["web:whatsnew-time"]) && int.TryParse(_configuration["web:whatsnew-time"], out var hour))
         {
-            if (int.TryParse(_confuguration["web:whatsnew-time"], out var hour))
-            {
-                hourToSend = hour;
-            }
+            hourToSend = hour;
         }
         return currentTime.Hour == hourToSend;
     }
@@ -372,9 +371,9 @@ public class StudioWhatsNewNotify
 
 public class ActivityInfo
 {
-    public Guid UserId { get; set; }
-    public MessageAction Action { get; set; }
-    public DateTime Data { get; set; }
+    public Guid UserId { get; init; }
+    public MessageAction Action { get; init; }
+    public DateTime Data { get; init; }
     public string FileTitle { get; set; }
     public string FileUrl { get; set; }
     public string RoomUri { get; set; }

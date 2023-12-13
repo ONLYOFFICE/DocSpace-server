@@ -1,32 +1,32 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ActiveDirectory.ComplexOperations;
 
-[Singletone(Additional = typeof(LdapOperationExtension))]
+[Singleton(Additional = typeof(LdapOperationExtension))]
 public class LdapSaveSyncOperation
 {
     public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
@@ -42,10 +42,10 @@ public class LdapSaveSyncOperation
         _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
     }
 
-    public void RunJob(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
+    public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
         var item = _progressQueue.GetAllTasks<LdapOperationJob>().FirstOrDefault(t => t.TenantId == tenant.Id);
-        if (item != null && item.IsCompleted)
+        if (item is { IsCompleted: true })
         {
             _progressQueue.DequeueTask(item.Id);
             item = null;
@@ -54,14 +54,14 @@ public class LdapSaveSyncOperation
         {
             using var scope = _serviceProvider.CreateScope();
             item = scope.ServiceProvider.GetRequiredService<LdapOperationJob>();
-            item.InitJob(settings, tenant, operationType, resource, userId);
+            await item.InitJobAsync(settings, tenant, operationType, resource, userId);
             _progressQueue.EnqueueTask(item);
         }
 
         item.PublishChanges();
     }
 
-    public LdapOperationStatus TestLdapSave(LdapSettings ldapSettings, Tenant tenant, string userId)
+    public async Task<LdapOperationStatus> TestLdapSaveAsync(LdapSettings ldapSettings, Tenant tenant, string userId)
     {
         var (hasStarted, operations) = HasStarterdForTenant(tenant.Id, LdapOperationType.SyncTest, LdapOperationType.SaveTest);
 
@@ -78,11 +78,11 @@ public class LdapSaveSyncOperation
         var ldapLocalization = new LdapLocalization();
         ldapLocalization.Init(Resource.ResourceManager);
 
-        RunJob(ldapSettings, tenant, LdapOperationType.SaveTest, ldapLocalization, userId);
+        await RunJobAsync(ldapSettings, tenant, LdapOperationType.SaveTest, ldapLocalization, userId);
         return ToLdapOperationStatus(tenant.Id);
     }
 
-    public LdapOperationStatus SaveLdapSettings(LdapSettings ldapSettings, Tenant tenant, string userId)
+    public async Task<LdapOperationStatus> SaveLdapSettingsAsync(LdapSettings ldapSettings, Tenant tenant, string userId)
     {
         var operations = GetOperationsForTenant(tenant.Id);
 
@@ -102,11 +102,11 @@ public class LdapSaveSyncOperation
         var ldapLocalization = new LdapLocalization();
         ldapLocalization.Init(Resource.ResourceManager, WebstudioNotifyPatternResource.ResourceManager);
 
-        RunJob(ldapSettings, tenant, LdapOperationType.Save, ldapLocalization, userId);
+        await RunJobAsync(ldapSettings, tenant, LdapOperationType.Save, ldapLocalization, userId);
         return ToLdapOperationStatus(tenant.Id);
     }
 
-    public LdapOperationStatus SyncLdap(LdapSettings ldapSettings, Tenant tenant, string userId)
+    public async Task<LdapOperationStatus> SyncLdapAsync(LdapSettings ldapSettings, Tenant tenant, string userId)
     {
         var (hasStarted, operations) = HasStarterdForTenant(tenant.Id, LdapOperationType.Sync, LdapOperationType.Save);
 
@@ -123,11 +123,11 @@ public class LdapSaveSyncOperation
         var ldapLocalization = new LdapLocalization();
         ldapLocalization.Init(Resource.ResourceManager);
 
-        RunJob(ldapSettings, tenant, LdapOperationType.Sync, ldapLocalization, userId);
+        await RunJobAsync(ldapSettings, tenant, LdapOperationType.Sync, ldapLocalization, userId);
         return ToLdapOperationStatus(tenant.Id);
     }
 
-    public LdapOperationStatus TestLdapSync(LdapSettings ldapSettings, Tenant tenant)
+    public async Task<LdapOperationStatus> TestLdapSyncAsync(LdapSettings ldapSettings, Tenant tenant)
     {
         var (hasStarted, operations) = HasStarterdForTenant(tenant.Id, LdapOperationType.SyncTest, LdapOperationType.SaveTest);
 
@@ -144,7 +144,7 @@ public class LdapSaveSyncOperation
         var ldapLocalization = new LdapLocalization();
         ldapLocalization.Init(Resource.ResourceManager);
 
-        RunJob(ldapSettings, tenant, LdapOperationType.SyncTest, ldapLocalization);
+        await RunJobAsync(ldapSettings, tenant, LdapOperationType.SyncTest, ldapLocalization);
         return ToLdapOperationStatus(tenant.Id);
     }
 

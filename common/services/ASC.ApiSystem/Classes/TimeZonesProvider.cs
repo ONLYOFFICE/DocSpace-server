@@ -1,32 +1,32 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.ApiSystem.Classes;
 
-[Singletone]
+[Singleton]
 public class TimeZonesProvider
 {
     private readonly ILogger<TimeZonesProvider> _log;
@@ -42,7 +42,7 @@ public class TimeZonesProvider
 
     #region Private
 
-    private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new Dictionary<string, KeyValuePair<string, string>>
+    private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new()
     {
         { "", new KeyValuePair<string, string>("Europe/London", "GMT Standard Time") },
         { "fr", new KeyValuePair<string, string>("Europe/Paris", "Romance Standard Time") },
@@ -67,7 +67,7 @@ public class TimeZonesProvider
         { "vi", new KeyValuePair<string, string>("Asia/Shanghai", "China Standard Time") }
     };
 
-    private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new Dictionary<string, CultureInfo>
+    private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new()
     {
         { "", CultureInfo.GetCultureInfo("en-US") },
         { "fr", CultureInfo.GetCultureInfo("fr-FR") },
@@ -99,7 +99,7 @@ public class TimeZonesProvider
 
     public TimeZoneInfo GetCurrentTimeZoneInfo(string languageKey)
     {
-        var time = _timeZones.ContainsKey(languageKey) ? _timeZones[languageKey] : _timeZones[""];
+        var time = _timeZones.TryGetValue(languageKey, out var zone) ? zone : _timeZones[""];
         try
         {
             try
@@ -126,7 +126,7 @@ public class TimeZonesProvider
             return _commonConstants.DefaultCulture;
         }
 
-        var culture = _cultureUiMap.ContainsKey(languageKey) ? _cultureUiMap[languageKey] : null;
+        var culture = _cultureUiMap.TryGetValue(languageKey, out var value) ? value : null;
 
         return culture ?? _commonConstants.DefaultCulture;
     }

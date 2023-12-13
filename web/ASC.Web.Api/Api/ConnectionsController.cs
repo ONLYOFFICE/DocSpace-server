@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -93,13 +93,14 @@ public class ConnectionsController : ControllerBase
     [HttpGet("activeconnections")]
     public async Task<object> GetAllActiveConnections()
     {
-        var user = _userManager.GetUsers(_securityContext.CurrentAccount.ID);
-        var loginEvents = await _dbLoginEventsManager.GetLoginEvents(user.Tenant, user.Id);
-        var listLoginEvents = loginEvents.ConvertAll(Convert);
+        var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
+        var loginEvents = await _dbLoginEventsManager.GetLoginEventsAsync(user.TenantId, user.Id);
+        var tasks = loginEvents.ConvertAll(async r => await _geolocationHelper.AddGeolocationAsync(r));
+        var listLoginEvents = (await Task.WhenAll(tasks)).ToList();
         var loginEventId = GetLoginEventIdFromCookie();
         if (loginEventId != 0)
         {
-            var loginEvent = listLoginEvents.FirstOrDefault(x => x.Id == loginEventId);
+            var loginEvent = listLoginEvents.Find(x => x.Id == loginEventId);
             if (loginEvent != null)
             {
                 listLoginEvents.Remove(loginEvent);
@@ -108,7 +109,7 @@ public class ConnectionsController : ControllerBase
         }
         else
         {
-            if (listLoginEvents.Count == 0)
+            if (listLoginEvents.Count == 0 && _httpContextAccessor.HttpContext != null)
             {
                 var request = _httpContextAccessor.HttpContext.Request;
                 var uaHeader = MessageSettings.GetUAHeader(request);
@@ -117,7 +118,7 @@ public class ConnectionsController : ControllerBase
                 var browser = MessageSettings.GetBrowser(clientInfo);
                 var ip = MessageSettings.GetIP(request);
 
-                var baseEvent = new CustomEvent
+                var baseEvent = new BaseEvent
                 {
                     Id = 0,
                     Platform = platformAndDevice,
@@ -126,7 +127,7 @@ public class ConnectionsController : ControllerBase
                     IP = ip
                 };
 
-                listLoginEvents.Add(Convert(baseEvent));
+                listLoginEvents.Add(await _geolocationHelper.AddGeolocationAsync(baseEvent));
             }
         }
 
@@ -153,7 +154,7 @@ public class ConnectionsController : ControllerBase
     {
         try
         {
-            var user = _userManager.GetUsers(_securityContext.CurrentAccount.ID);
+            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
             var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
 
             await LogOutAllActiveConnections(user.Id);
@@ -163,10 +164,10 @@ public class ConnectionsController : ControllerBase
             var auditEventDate = DateTime.UtcNow;
             auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
-            var hash = auditEventDate.ToString("s");
-            var confirmationUrl = _commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+            var confirmationUrl = await _commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            _messageService.Send(auditEventDate, MessageAction.UserSentPasswordChangeInstructions, _messageTarget.Create(user.Id), userName);
+            await _messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, _messageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -189,10 +190,10 @@ public class ConnectionsController : ControllerBase
     /// <httpMethod>PUT</httpMethod>
     /// <returns></returns>
     [HttpPut("activeconnections/logoutall/{userId}")]
-    public async Task LogOutAllActiveConnectionsForUser(Guid userId)
+    public async Task LogOutAllActiveConnectionsForUserAsync(Guid userId)
     {
-        if (!_userManager.IsDocSpaceAdmin(_securityContext.CurrentAccount.ID)
-            && !_webItemSecurity.IsProductAdministrator(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID))
+        if (!await _userManager.IsDocSpaceAdminAsync(_securityContext.CurrentAccount.ID)
+            && !await _webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, _securityContext.CurrentAccount.ID))
         {
             throw new SecurityException("Method not available");
         }
@@ -215,13 +216,13 @@ public class ConnectionsController : ControllerBase
     {
         try
         {
-            var user = _userManager.GetUsers(_securityContext.CurrentAccount.ID);
+            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
             var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
             var loginEventFromCookie = GetLoginEventIdFromCookie();
 
-            await _dbLoginEventsManager.LogOutAllActiveConnectionsExceptThis(loginEventFromCookie, user.Tenant, user.Id);
+            await _dbLoginEventsManager.LogOutAllActiveConnectionsExceptThisAsync(loginEventFromCookie, user.TenantId, user.Id);
 
-            _messageService.Send(MessageAction.UserLogoutActiveConnections, userName);
+            await _messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
         }
         catch (Exception ex)
@@ -247,12 +248,12 @@ public class ConnectionsController : ControllerBase
     {
         try
         {
-            var user = _userManager.GetUsers(_securityContext.CurrentAccount.ID);
+            var user = await _userManager.GetUsersAsync(_securityContext.CurrentAccount.ID);
             var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
 
-            await _dbLoginEventsManager.LogOutEvent(loginEventId);
+            await _dbLoginEventsManager.LogOutEventAsync(loginEventId);
 
-            _messageService.Send(MessageAction.UserLogoutActiveConnection, userName);
+            await _messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
         catch (Exception ex)
@@ -265,12 +266,12 @@ public class ConnectionsController : ControllerBase
     private async Task LogOutAllActiveConnections(Guid? userId = null)
     {
         var currentUserId = _securityContext.CurrentAccount.ID;
-        var user = _userManager.GetUsers(userId ?? currentUserId);
+        var user = await _userManager.GetUsersAsync(userId ?? currentUserId);
         var userName = user.DisplayUserName(false, _displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        _messageService.Send(auditEventDate, currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, _messageTarget.Create(user.Id), userName);
-        await _cookiesManager.ResetUserCookie(user.Id);
+        await _messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, _messageTarget.Create(user.Id), auditEventDate, userName);
+        await _cookiesManager.ResetUserCookieAsync(user.Id);
     }
 
     private int GetLoginEventIdFromCookie()
@@ -278,46 +279,5 @@ public class ConnectionsController : ControllerBase
         var cookie = _cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = _cookieStorage.GetLoginEventIdFromCookie(cookie);
         return loginEventId;
-    }
-
-    private CustomEvent Convert(BaseEvent baseEvent)
-    {
-        var location = GetGeolocation(baseEvent.IP);
-        return new CustomEvent
-        {
-            Id = baseEvent.Id,
-            IP = baseEvent.IP,
-            Platform = baseEvent.Platform,
-            Browser = baseEvent.Browser,
-            Date = baseEvent.Date,
-            Country = location[0],
-            City = location[1]
-        };
-    }
-
-    private string[] GetGeolocation(string ip)
-    {
-        try
-        {
-            var location = _geolocationHelper.GetIPGeolocation(IPAddress.Parse(ip));
-            if (string.IsNullOrEmpty(location.Key))
-            {
-                return new string[] { string.Empty, string.Empty };
-            }
-            var regionInfo = new RegionInfo(location.Key).EnglishName;
-            return new string[] { regionInfo, location.City };
-        }
-        catch (Exception ex)
-        {
-            _logger.ErrorWithException(ex);
-            return new string[] { string.Empty, string.Empty };
-        }
-    }
-
-    private class CustomEvent : BaseEvent
-    {
-        public string Country { get; set; }
-
-        public string City { get; set; }
     }
 }

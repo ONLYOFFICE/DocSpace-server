@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,6 +34,7 @@ public class SsoController : BaseSettingsController
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly UserManager _userManager;
     private readonly MessageService _messageService;
+    private readonly AuthContext _authContext;
 
     public SsoController(
         TenantManager tenantManager,
@@ -45,7 +46,8 @@ public class SsoController : BaseSettingsController
         PermissionContext permissionContext,
         CoreBaseSettings coreBaseSettings,
         UserManager userManager,
-        MessageService messageService) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        MessageService messageService,
+        AuthContext authContext) : base(apiContext, memoryCache, webItemManager, httpContextAccessor)
     {
         _tenantManager = tenantManager;
         _settingsManager = settingsManager;
@@ -53,6 +55,7 @@ public class SsoController : BaseSettingsController
         _coreBaseSettings = coreBaseSettings;
         _userManager = userManager;
         _messageService = messageService;
+        _authContext = authContext;
     }
 
     /// <summary>
@@ -66,11 +69,31 @@ public class SsoController : BaseSettingsController
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("ssov2")]
-    public SsoSettingsV2 GetSsoSettingsV2()
+    [AllowAnonymous, AllowNotPayment]
+    public async Task<SsoSettingsV2> GetSsoSettingsV2()
     {
-        CheckSsoPermissions();
+        var settings = await _settingsManager.LoadAsync<SsoSettingsV2>();
 
-        var settings = _settingsManager.Load<SsoSettingsV2>();
+        if (!_authContext.IsAuthenticated)
+        {
+            bool hideAuthPage;
+            try
+            {
+                await CheckSsoPermissionsAsync(true);
+                hideAuthPage = settings.HideAuthPage;
+            }
+            catch (BillingException)
+            {
+                hideAuthPage = false;
+            }
+
+            return new SsoSettingsV2
+            {
+                HideAuthPage = hideAuthPage
+            };
+        }
+
+        await CheckSsoPermissionsAsync();
 
         if (string.IsNullOrEmpty(settings.SpLoginLabel))
         {
@@ -91,9 +114,9 @@ public class SsoController : BaseSettingsController
     /// <path>api/2.0/settings/ssov2/default</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("ssov2/default")]
-    public SsoSettingsV2 GetDefaultSsoSettingsV2()
+    public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2Async()
     {
-        CheckSsoPermissions();
+        await CheckSsoPermissionsAsync();
         return _settingsManager.GetDefault<SsoSettingsV2>();
     }
 
@@ -133,9 +156,9 @@ public class SsoController : BaseSettingsController
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("ssov2")]
-    public async Task<SsoSettingsV2> SaveSsoSettingsV2(SsoSettingsRequestsDto inDto)
+    public async Task<SsoSettingsV2> SaveSsoSettingsV2Async(SsoSettingsRequestsDto inDto)
     {
-        CheckSsoPermissions();
+        await CheckSsoPermissionsAsync();
 
         var serializeSettings = inDto.SerializeSettings;
 
@@ -188,19 +211,20 @@ public class SsoController : BaseSettingsController
             settings.SpLoginLabel = settings.SpLoginLabel.Substring(0, 100);
         }
 
-        if (!_settingsManager.Save(settings))
+        if (!await _settingsManager.SaveAsync(settings))
         {
             throw new Exception(Resource.SsoSettingsCantSaveSettings);
         }
 
-        if (!settings.EnableSso)
+        var enableSso = settings.EnableSso.GetValueOrDefault();
+        if (!enableSso)
         {
-            await ConverSsoUsersToOrdinary();
+            await ConverSsoUsersToOrdinaryAsync();
         }
 
-        var messageAction = settings.EnableSso ? MessageAction.SSOEnabled : MessageAction.SSODisabled;
+        var messageAction = enableSso ? MessageAction.SSOEnabled : MessageAction.SSODisabled;
 
-        _messageService.Send(messageAction);
+        await _messageService.SendAsync(messageAction);
 
         return settings;
     }
@@ -216,27 +240,27 @@ public class SsoController : BaseSettingsController
     /// <path>api/2.0/settings/ssov2</path>
     /// <httpMethod>DELETE</httpMethod>
     [HttpDelete("ssov2")]
-    public async Task<SsoSettingsV2> ResetSsoSettingsV2()
+    public async Task<SsoSettingsV2> ResetSsoSettingsV2Async()
     {
-        CheckSsoPermissions();
+        await CheckSsoPermissionsAsync();
 
         var defaultSettings = _settingsManager.GetDefault<SsoSettingsV2>();
 
-        if (!_settingsManager.Save(defaultSettings))
+        if (!await _settingsManager.SaveAsync(defaultSettings))
         {
             throw new Exception(Resource.SsoSettingsCantSaveSettings);
         }
 
-        await ConverSsoUsersToOrdinary();
+        await ConverSsoUsersToOrdinaryAsync();
 
-        _messageService.Send(MessageAction.SSODisabled);
+        await _messageService.SendAsync(MessageAction.SSODisabled);
 
         return defaultSettings;
     }
 
-    private async Task ConverSsoUsersToOrdinary()
+    private async Task ConverSsoUsersToOrdinaryAsync()
     {
-        var ssoUsers = _userManager.GetUsers().Where(u => u.IsSSO()).ToList();
+        var ssoUsers = (await _userManager.GetUsersAsync()).Where(u => u.IsSSO()).ToList();
 
         if (!ssoUsers.Any())
         {
@@ -250,7 +274,7 @@ public class SsoController : BaseSettingsController
 
             existingSsoUser.ConvertExternalContactsToOrdinary();
 
-            await _userManager.UpdateUserInfo(existingSsoUser);
+            await _userManager.UpdateUserInfoAsync(existingSsoUser);
         }
     }
 
@@ -259,13 +283,16 @@ public class SsoController : BaseSettingsController
         return Uri.TryCreate(uriName, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
-    private void CheckSsoPermissions()
+    private async Task CheckSsoPermissionsAsync(bool allowAnonymous = false)
     {
-        _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+        if (!allowAnonymous)
+        {
+            await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        }
 
         if (!_coreBaseSettings.Standalone
             && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
-                || !_tenantManager.GetCurrentTenantQuota().Sso))
+                || !(await _tenantManager.GetCurrentTenantQuotaAsync()).Sso))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Sso");
         }

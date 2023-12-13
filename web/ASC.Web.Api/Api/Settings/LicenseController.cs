@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -80,14 +80,14 @@ public class LicenseController : BaseSettingsController
     /// <httpMethod>GET</httpMethod>
     [HttpGet("license/refresh")]
     [AllowNotPayment]
-    public bool RefreshLicense()
+    public async Task<bool> RefreshLicenseAsync()
     {
         if (!_coreBaseSettings.Standalone)
         {
             return false;
         }
 
-        _licenseReader.RefreshLicense();
+        await _licenseReader.RefreshLicenseAsync();
         return true;
     }
 
@@ -103,19 +103,19 @@ public class LicenseController : BaseSettingsController
     /// <httpMethod>POST</httpMethod>
     [AllowNotPayment]
     [HttpPost("license/accept")]
-    public object AcceptLicense()
+    public async Task<object> AcceptLicenseAsync()
     {
         if (!_coreBaseSettings.Standalone)
         {
             return "";
         }
 
-        TariffSettings.SetLicenseAccept(_settingsManager);
-        _messageService.Send(MessageAction.LicenseKeyUploaded);
+        await TariffSettings.SetLicenseAcceptAsync(_settingsManager);
+        await _messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
         try
         {
-            _licenseReader.RefreshLicense();
+            await _licenseReader.RefreshLicenseAsync();
         }
         catch (BillingNotFoundException)
         {
@@ -149,20 +149,20 @@ public class LicenseController : BaseSettingsController
     /// <httpMethod>POST</httpMethod>
     ///<visible>false</visible>
     [HttpPost("license/trial")]
-    public bool ActivateTrial()
+    public async Task<bool> ActivateTrialAsync()
     {
         if (!_coreBaseSettings.Standalone)
         {
             throw new NotSupportedException();
         }
 
-        if (!_userManager.IsDocSpaceAdmin(_authContext.CurrentAccount.ID))
+        if (!await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID))
         {
             throw new SecurityException();
         }
 
-        var curQuota = _tenantManager.GetCurrentTenantQuota();
-        if (curQuota.Tenant != Tenant.DefaultTenant)
+        var curQuota = await _tenantManager.GetCurrentTenantQuotaAsync();
+        if (curQuota.TenantId != Tenant.DefaultTenant)
         {
             return false;
         }
@@ -172,7 +172,7 @@ public class LicenseController : BaseSettingsController
             return false;
         }
 
-        var curTariff = _tenantExtra.GetCurrentTariff();
+        var curTariff = await _tenantExtra.GetCurrentTariffAsync();
         if (curTariff.DueDate.Date != DateTime.MaxValue.Date)
         {
             return false;
@@ -188,19 +188,19 @@ public class LicenseController : BaseSettingsController
         };
         quota.Trial = true;
 
-        _tenantManager.SaveTenantQuota(quota);
+        await _tenantManager.SaveTenantQuotaAsync(quota);
 
         const int DEFAULT_TRIAL_PERIOD = 30;
 
         var tariff = new Tariff
         {
-            Quotas = new List<Quota> { new Quota(quota.Tenant, 1) },
+            Quotas = new List<Quota> { new(quota.TenantId, 1) },
             DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
         };
 
-        _tariffService.SetTariff(-1, tariff, new List<TenantQuota>() { quota });
+        await _tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, new List<TenantQuota>() { quota });
 
-        _messageService.Send(MessageAction.LicenseKeyUploaded);
+        await _messageService.SendAsync(MessageAction.LicenseKeyUploaded);
 
         return true;
     }
@@ -239,12 +239,12 @@ public class LicenseController : BaseSettingsController
     [AllowNotPayment]
     [HttpPost("license")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public object UploadLicense([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<object> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {
-            ApiContext.AuthByClaim();
-            if (!_authContext.IsAuthenticated && _settingsManager.Load<WizardSettings>().Completed)
+            await ApiContext.AuthByClaimAsync();
+            if (!_authContext.IsAuthenticated && (await _settingsManager.LoadAsync<WizardSettings>()).Completed)
             {
                 throw new SecurityException(Resource.PortalSecurity);
             }
@@ -265,7 +265,7 @@ public class LicenseController : BaseSettingsController
             return dueDate >= DateTime.UtcNow.Date
                                     ? Resource.LicenseUploaded
                                     : string.Format(
-                                        _tenantManager.GetCurrentTenantQuota().Update
+                                        (await _tenantManager.GetCurrentTenantQuotaAsync()).Update
                                             ? Resource.LicenseUploadedOverdueSupport
                                             : Resource.LicenseUploadedOverdue,
                                                     "",

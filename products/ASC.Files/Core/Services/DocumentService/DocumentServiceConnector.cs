@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -69,7 +69,7 @@ public class DocumentServiceConnector
         return ASC.Files.Core.Helpers.DocumentService.GenerateRevisionId(expectedKey);
     }
 
-    public Task<(int ResultPercent, string ConvertedDocumentUri)> GetConvertedUriAsync(string documentUri,
+    public async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> GetConvertedUriAsync(string documentUri,
                                       string fromExtension,
                                       string toExtension,
                                       string documentRevisionId,
@@ -82,7 +82,7 @@ public class DocumentServiceConnector
         _logger.DebugDocServiceConvert(fromExtension, toExtension, documentUri, _filesLinkUtility.DocServiceConverterUrl);
         try
         {
-            return ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(
+            return await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(
                 _fileUtility,
                 _filesLinkUtility.DocServiceConverterUrl,
                 documentUri,
@@ -143,19 +143,18 @@ public class DocumentServiceConnector
                                            string inputScript,
                                            bool isAsync)
     {
-        var urls = new Dictionary<string, string>();
         string scriptUrl = null;
         if (!string.IsNullOrEmpty(inputScript))
         {
             using (var stream = new MemoryStream())
-            using (var writer = new StreamWriter(stream))
+            await using (var writer = new StreamWriter(stream))
             {
                 await writer.WriteAsync(inputScript);
                 await writer.FlushAsync();
                 stream.Position = 0;
                 scriptUrl = await _pathProvider.GetTempUrlAsync(stream, ".docbuilder");
             }
-            scriptUrl = ReplaceCommunityAdress(scriptUrl);
+            scriptUrl = await ReplaceCommunityAdressAsync(scriptUrl);
             requestKey = null;
         }
 
@@ -235,14 +234,14 @@ public class DocumentServiceConnector
 
         if (!string.IsNullOrEmpty(_filesLinkUtility.DocServiceConverterUrl))
         {
-            string convertedFileUri = null;
+            string convertedFileUri;
             try
             {
                 const string fileExtension = ".docx";
                 var toExtension = _fileUtility.GetInternalExtension(fileExtension);
                 var url = _pathProvider.GetEmptyFileUrl(fileExtension);
 
-                var fileUri = ReplaceCommunityAdress(url);
+                var fileUri = await ReplaceCommunityAdressAsync(url);
 
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
                 var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(_fileUtility, _filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, false, _fileUtility.SignatureSecret, _clientFactory);
@@ -297,10 +296,10 @@ public class DocumentServiceConnector
         {
             try
             {
-                var storeTemplate = _globalStore.GetStoreTemplate();
+                var storeTemplate = await _globalStore.GetStoreTemplateAsync();
                 var scriptUri = await storeTemplate.GetUriAsync("", "test.docbuilder");
                 var scriptUrl = _baseCommonLinkUtility.GetFullAbsolutePath(scriptUri.ToString());
-                scriptUrl = ReplaceCommunityAdress(scriptUrl);
+                scriptUrl = await ReplaceCommunityAdressAsync(scriptUrl);
 
                 await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestAsync(_fileUtility, _filesLinkUtility.DocServiceDocbuilderUrl, null, scriptUrl, false, _fileUtility.SignatureSecret, _clientFactory);
             }
@@ -341,9 +340,48 @@ public class DocumentServiceConnector
             return url;
         }
 
-        var urlRewriterQuery = uri.Scheme + Uri.SchemeDelimiter + uri.Host + ":" + uri.Port;
         var query = HttpUtility.ParseQueryString(uri.Query);
-//        query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
+        //        query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
+        uri.Query = query.ToString();
+
+        var communityUrl = new UriBuilder(docServicePortalUrl);
+        uri.Scheme = communityUrl.Scheme;
+        uri.Host = communityUrl.Host;
+        uri.Port = communityUrl.Port;
+
+        return uri.ToString();
+    }
+
+    public async Task<string> ReplaceCommunityAdressAsync(string url)
+    {
+        var docServicePortalUrl = _filesLinkUtility.DocServicePortalUrl;
+
+        if (string.IsNullOrEmpty(url))
+        {
+            return url;
+        }
+
+        if (string.IsNullOrEmpty(docServicePortalUrl))
+        {
+            var tenant = await _tenantManager.GetCurrentTenantAsync();
+            if (!_tenantExtra.Saas
+                || string.IsNullOrEmpty(tenant.MappedDomain)
+                || !url.StartsWith("https://" + tenant.MappedDomain))
+            {
+                return url;
+            }
+
+            docServicePortalUrl = "https://" + tenant.GetTenantDomain(_coreSettings, false);
+        }
+
+        var uri = new UriBuilder(url);
+        if (new UriBuilder(_baseCommonLinkUtility.ServerRootPath).Host != uri.Host)
+        {
+            return url;
+        }
+
+        var query = HttpUtility.ParseQueryString(uri.Query);
+        //query[HttpRequestExtensions.UrlRewriterHeader] = urlRewriterQuery;
         uri.Query = query.ToString();
 
         var communityUrl = new UriBuilder(docServicePortalUrl);

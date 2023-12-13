@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -59,13 +59,13 @@ public class CustomSchemasController : BaseSettingsController
     /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
     [HttpGet("customschemas")]
-    public List<SchemaRequestsDto> PeopleSchemas()
+    public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
-        return _customNamingPeople
-                .GetSchemas()
-                .Select(r =>
+        return await _customNamingPeople
+                .GetSchemas().ToAsyncEnumerable()
+                .SelectAwait(async r =>
                 {
-                    var names = _customNamingPeople.GetPeopleNames(r.Key);
+                    var names = await _customNamingPeople.GetPeopleNamesAsync(r.Key);
 
                     return new SchemaRequestsDto
                     {
@@ -82,7 +82,7 @@ public class CustomSchemasController : BaseSettingsController
                         GuestsCaption = names.GuestsCaption,
                     };
                 })
-                .ToList();
+                .ToListAsync();
     }
 
     /// <summary>
@@ -95,17 +95,17 @@ public class CustomSchemasController : BaseSettingsController
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>POST</httpMethod>
     [HttpPost("customschemas")]
-    public SchemaRequestsDto SaveNamingSettings(SchemaRequestsDto inDto)
+    public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaRequestsDto inDto)
     {
-        _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        _customNamingPeople.SetPeopleNames(inDto.Id);
+        await _customNamingPeople.SetPeopleNamesAsync(inDto.Id);
 
-        _tenantManager.SaveTenant(_tenantManager.GetCurrentTenant());
+        await _tenantManager.SaveTenantAsync(await _tenantManager.GetCurrentTenantAsync());
 
-        _messageService.Send(MessageAction.TeamTemplateChanged);
+        await _messageService.SendAsync(MessageAction.TeamTemplateChanged);
 
-        return PeopleSchema(inDto.Id);
+        return await PeopleSchemaAsync(inDto.Id);
     }
 
     /// <summary>
@@ -118,9 +118,9 @@ public class CustomSchemasController : BaseSettingsController
     /// <path>api/2.0/settings/customschemas</path>
     /// <httpMethod>PUT</httpMethod>
     [HttpPut("customschemas")]
-    public SchemaRequestsDto SaveCustomNamingSettings(SchemaRequestsDto inDto)
+    public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
     {
-        _permissionContext.DemandPermissions(SecutiryConstants.EditPortalSettings);
+        await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var usrCaption = (inDto.UserCaption ?? "").Trim();
         var usrsCaption = (inDto.UsersCaption ?? "").Trim();
@@ -159,13 +159,13 @@ public class CustomSchemasController : BaseSettingsController
             GuestsCaption = guestsCaption.Substring(0, Math.Min(30, guestsCaption.Length)),
         };
 
-        _customNamingPeople.SetPeopleNames(names);
+        await _customNamingPeople.SetPeopleNamesAsync(names);
 
-        _tenantManager.SaveTenant(_tenantManager.GetCurrentTenant());
+        await _tenantManager.SaveTenantAsync(await _tenantManager.GetCurrentTenantAsync());
 
-        _messageService.Send(MessageAction.TeamTemplateChanged);
+        await _messageService.SendAsync(MessageAction.TeamTemplateChanged);
 
-        return PeopleSchema(PeopleNamesItem.CustomID);
+        return await PeopleSchemaAsync(PeopleNamesItem.CustomID);
     }
 
     /// <summary>
@@ -178,9 +178,9 @@ public class CustomSchemasController : BaseSettingsController
     /// <path>api/2.0/settings/customschemas/{id}</path>
     /// <httpMethod>GET</httpMethod>
     [HttpGet("customschemas/{id}")]
-    public SchemaRequestsDto PeopleSchema(string id)
+    public async Task<SchemaRequestsDto> PeopleSchemaAsync(string id)
     {
-        var names = _customNamingPeople.GetPeopleNames(id);
+        var names = await _customNamingPeople.GetPeopleNamesAsync(id);
         var schemaItem = new SchemaRequestsDto
         {
             Id = names.Id,

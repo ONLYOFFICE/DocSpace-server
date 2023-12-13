@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -34,9 +34,10 @@ public class CommonChunkedUploadSessionHolder
     private readonly TempPath _tempPath;
     private readonly string _domain;
     public long MaxChunkUploadSize;
+    public string TempDomain;
 
     public const string StoragePath = "sessions";
-    private readonly object _locker = new object();
+    private readonly object _locker = new();
 
     public CommonChunkedUploadSessionHolder(
         TempPath tempPath,
@@ -52,7 +53,7 @@ public class CommonChunkedUploadSessionHolder
 
     public async Task StoreAsync(CommonChunkedUploadSession s)
     {
-        using var stream = s.Serialize();
+        await using var stream = s.Serialize();
         await DataStore.SavePrivateAsync(_domain, GetPathWithId(s.Id), stream, s.Expired);
     }
 
@@ -61,24 +62,19 @@ public class CommonChunkedUploadSessionHolder
         await DataStore.DeleteAsync(_domain, GetPathWithId(s.Id));
     }
 
-    public Task<Stream> GetStreamAsync(string sessionId)
+    public async Task<Stream> GetStreamAsync(string sessionId)
     {
-        return DataStore.GetReadStreamAsync(_domain, GetPathWithId(sessionId));
+        return await DataStore.GetReadStreamAsync(_domain, GetPathWithId(sessionId));
     }
 
-    public Task InitAsync(CommonChunkedUploadSession chunkedUploadSession)
+    public async ValueTask InitAsync(CommonChunkedUploadSession chunkedUploadSession)
     {
         if (chunkedUploadSession.BytesTotal < MaxChunkUploadSize && chunkedUploadSession.BytesTotal != -1)
         {
             chunkedUploadSession.UseChunks = false;
-            return Task.CompletedTask;
+            return;
         }
 
-        return internalInitAsync(chunkedUploadSession);
-    }
-
-    private async Task internalInitAsync(CommonChunkedUploadSession chunkedUploadSession)
-    {
         var tempPath = Guid.NewGuid().ToString();
         var uploadId = await DataStore.InitiateChunkedUploadAsync(_domain, tempPath);
 
@@ -96,7 +92,8 @@ public class CommonChunkedUploadSessionHolder
         return Path.GetFileName(tempPath);
     }
 
-    public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath, bool quotaCheckFileSize = true)
+    public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath,
+        bool quotaCheckFileSize = true)
     {
         await DataStore.MoveAsync(_domain, chunkedUploadSession.TempPath, string.Empty, newPath, quotaCheckFileSize);
     }
@@ -116,7 +113,8 @@ public class CommonChunkedUploadSessionHolder
         }
     }
 
-    public virtual async Task<string> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length)
+    public virtual async Task<string> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,
+        long length)
     {
         var tempPath = uploadSession.TempPath;
         var uploadId = uploadSession.UploadId;
@@ -130,18 +128,22 @@ public class CommonChunkedUploadSessionHolder
             uploadSession.BytesUploaded += length;
         }
 
-        var eTag = await DataStore.UploadChunkAsync(_domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber, length);
+        var eTag = await DataStore.UploadChunkAsync(_domain, tempPath, uploadId, stream, MaxChunkUploadSize, chunkNumber,
+            length);
 
         lock (_locker)
         {
-            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ?? new Dictionary<int, string>();
+            var eTags = uploadSession.GetItemOrDefault<Dictionary<int, string>>("ETag") ??
+                        new Dictionary<int, string>();
             eTags.Add(chunkNumber, eTag);
             uploadSession.Items["ETag"] = eTags;
         }
+
         return Path.GetFileName(tempPath);
     }
 
-    public Stream UploadSingleChunk(CommonChunkedUploadSession uploadSession, Stream stream, long chunkLength)
+    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream,
+        long chunkLength)
     {
         if (uploadSession.BytesTotal == 0)
         {
@@ -157,40 +159,7 @@ public class CommonChunkedUploadSessionHolder
                 uploadSession.ChunksBuffer = _tempPath.GetTempFileName();
             }
 
-            using (var bufferStream = new FileStream(uploadSession.ChunksBuffer, FileMode.Append))
-            {
-                stream.CopyTo(bufferStream);
-            }
-
-            uploadSession.BytesUploaded += chunkLength;
-
-            if (uploadSession.BytesTotal == uploadSession.BytesUploaded)
-            {
-                return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite,
-                    4096, FileOptions.DeleteOnClose);
-            }
-        }
-
-        return Stream.Null;
-    }
-
-    public async Task<Stream> UploadSingleChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long chunkLength)
-    {
-        if (uploadSession.BytesTotal == 0)
-        {
-            uploadSession.BytesTotal = chunkLength;
-        }
-
-        if (uploadSession.BytesTotal >= chunkLength)
-        {
-            //This is hack fixing strange behaviour of plupload in flash mode.
-
-            if (string.IsNullOrEmpty(uploadSession.ChunksBuffer))
-            {
-                uploadSession.ChunksBuffer = _tempPath.GetTempFileName();
-            }
-
-            using (var bufferStream = new FileStream(uploadSession.ChunksBuffer, FileMode.Append))
+            await using (var bufferStream = new FileStream(uploadSession.ChunksBuffer, FileMode.Append))
             {
                 await stream.CopyToAsync(bufferStream);
             }
@@ -199,7 +168,8 @@ public class CommonChunkedUploadSessionHolder
 
             if (uploadSession.BytesTotal == uploadSession.BytesUploaded)
             {
-                return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite,
+                return new FileStream(uploadSession.ChunksBuffer, FileMode.Open, FileAccess.ReadWrite,
+                    FileShare.ReadWrite,
                     4096, FileOptions.DeleteOnClose);
             }
         }

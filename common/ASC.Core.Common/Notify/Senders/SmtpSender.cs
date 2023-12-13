@@ -1,38 +1,38 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Notify.Senders;
 
-[Singletone]
+[Singleton]
 public class SmtpSender : INotifySender
 {
     protected ILogger _logger;
     private IDictionary<string, string> _initProperties;
     protected readonly IConfiguration _configuration;
-    protected IServiceProvider _serviceProvider;
+    protected readonly IServiceProvider _serviceProvider;
 
     private string _host;
     private int _port;
@@ -58,11 +58,11 @@ public class SmtpSender : INotifySender
         _initProperties = properties;
     }
 
-    public virtual Task<NoticeSendResult> Send(NotifyMessage m)
+    public virtual async Task<NoticeSendResult> SendAsync(NotifyMessage m)
     {
         using var scope = _serviceProvider.CreateScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-        tenantManager.SetCurrentTenant(m.TenantId);
+        await tenantManager.SetCurrentTenantAsync(m.TenantId);
 
         var configuration = scope.ServiceProvider.GetService<CoreConfiguration>();
 
@@ -72,25 +72,25 @@ public class SmtpSender : INotifySender
         {
             try
             {
-                BuildSmtpSettings(configuration);
+                await BuildSmtpSettingsAsync(configuration);
 
                 var mail = BuildMailMessage(m);
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 
-                smtpClient.Connect(_host, _port,
+                await smtpClient.ConnectAsync(_host, _port,
                     _ssl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
                 if (_credentials != null)
                 {
-                    smtpClient.Authenticate(_credentials);
+                    await smtpClient.AuthenticateAsync(_credentials);
                 }
                 else if (_saslMechanism != null)
                 {
-                    smtpClient.Authenticate(_saslMechanism);
+                    await smtpClient.AuthenticateAsync(_saslMechanism);
                 }
 
-                smtpClient.Send(mail);
+                await smtpClient.SendAsync(mail);
                 result = NoticeSendResult.OK;
             }
             catch (Exception e)
@@ -148,18 +148,18 @@ public class SmtpSender : INotifySender
         {
             if (smtpClient.IsConnected)
             {
-                smtpClient.Disconnect(true);
+                await smtpClient.DisconnectAsync(true);
             }
 
             smtpClient.Dispose();
         }
 
-        return Task.FromResult(result);
+        return result;
     }
 
-    private void BuildSmtpSettings(CoreConfiguration configuration)
+    private async Task BuildSmtpSettingsAsync(CoreConfiguration configuration)
     {
-        if (configuration.SmtpSettings.IsDefaultSettings && _initProperties.ContainsKey("host") && !string.IsNullOrEmpty(_initProperties["host"]))
+        if ((await configuration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings && _initProperties.ContainsKey("host") && !string.IsNullOrEmpty(_initProperties["host"]))
         {
             _host = _initProperties["host"];
 
@@ -190,7 +190,7 @@ public class SmtpSender : INotifySender
         }
         else
         {
-            var s = configuration.SmtpSettings;
+            var s = await configuration.GetDefaultSmtpSettingsAsync();
 
             _host = s.Host;
             _port = s.Port;
@@ -235,7 +235,7 @@ public class SmtpSender : INotifySender
                 ContentTransferEncoding = ContentEncoding.QuotedPrintable
             };
 
-            if (m.Attachments != null && m.Attachments.Length > 0)
+            if (m.Attachments is { Length: > 0 })
             {
                 var multipartRelated = new MultipartRelated
                 {
@@ -281,12 +281,27 @@ public class SmtpSender : INotifySender
 
     protected string GetHtmlView(string body)
     {
+        body = body.StartsWith("<body")
+            ? body
+            : $@"<body style=""background: linear-gradient(#ffffff, #ffffff); background-color: #ffffff;"">{body}</body>";
+
         return $@"<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">
                       <html>
                         <head>
                             <meta content=""text/html;charset=UTF-8"" http-equiv=""Content-Type"">
+                            <meta name=""color-scheme"" content=""light"">
+                            <meta name=""supported-color-schemes"" content=""light only"">
+                            <style type=""text/css"">
+                              :root {{
+                                color-scheme: light;
+                                supported-color-schemes: light;
+                              }}
+                              [data-ogsc] body {{ 
+                                background-color: #ffffff !important;
+                              }}
+                            </style>
                         </head>
-                        <body>{body}</body>
+                        {body}
                       </html>";
     }
 

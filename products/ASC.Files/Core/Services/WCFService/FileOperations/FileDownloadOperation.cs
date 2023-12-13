@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -31,8 +31,9 @@ internal class FileDownloadOperationData<T> : FileOperationData<T>
     public Dictionary<T, string> FilesDownload { get; }
     public IDictionary<string, StringValues> Headers { get; }
 
-    public FileDownloadOperationData(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant, IDictionary<string, StringValues> headers, bool holdResult = true)
-        : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, holdResult)
+    public FileDownloadOperationData(Dictionary<T, string> folders, Dictionary<T, string> files, Tenant tenant, IDictionary<string, StringValues> headers,
+        ExternalShareData externalShareData, bool holdResult = true)
+        : base(folders.Select(f => f.Key).ToList(), files.Select(f => f.Key).ToList(), tenant, externalShareData, holdResult)
     {
         FilesDownload = files;
         Headers = headers;
@@ -59,8 +60,9 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
         var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-        var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (globalStore, filesLinkUtility, _, _, _, log) = scopeClass;
+        var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
+        var globalStore = scope.ServiceProvider.GetService<GlobalStore>();
+        var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
         var stream = _tempStream.Create();
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
@@ -70,7 +72,7 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
 
         if (stream != null)
         {
-            var archiveExtension = "";
+            string archiveExtension;
 
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
@@ -78,28 +80,44 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
             }
 
             stream.Position = 0;
-            var fileName = FileConstant.DownloadTitle + archiveExtension;
+            string fileName;
 
-            var thidpartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
+            var thirdPartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
             var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thidpartyFolderOnly || daoFolderOnly) && (thidpartyFolderOnly != daoFolderOnly))
+            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
-                if (thidpartyFolderOnly)
-                {
-                    fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title, archiveExtension);
-                }
-                else
-                {
-                    fileName = string.Format(@"{0}{1}", (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
-                }
+                fileName = string.Format(@"{0}{1}", thirdPartyFolderOnly ? 
+                    (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title : 
+                    (await daoFactory.GetFolderDao<int>().GetFolderAsync(daoOperation.Folders[0])).Title, archiveExtension);
             }
             else
             {
-                fileName = string.Format(@"{0}-{1}-{2}{3}", tenantManager.GetCurrentTenant().Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd"), archiveExtension);
+                fileName = string.Format(@"{0}-{1}-{2}{3}", (await tenantManager.GetCurrentTenantAsync()).Alias.ToLower(), FileConstant.DownloadTitle, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), archiveExtension);
             }
 
-            var store = globalStore.GetStore();
-            var path = string.Format(@"{0}\{1}", ((IAccount)_principal.Identity).ID, fileName);
+            var store = await globalStore.GetStoreAsync();
+            string path;
+            string sessionKey = null;
+
+            var isAuthenticated = _principal.Identity is IAccount;
+
+            if (isAuthenticated)
+            {
+                path = string.Format(@"{0}\{1}", ((IAccount)_principal.Identity).ID, fileName);
+            }
+            else
+            {
+                var sessionId = await externalShare.GetSessionIdAsync();
+                var linkId = await externalShare.GetLinkIdAsync();
+
+                if (sessionId == Guid.Empty || linkId == Guid.Empty)
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMassage_SecurityException);
+                }
+
+                path = $@"{linkId}\{sessionId}\{fileName}";
+                sessionKey = await externalShare.CreateDownloadSessionKeyAsync();
+            }
 
             if (await store.IsFileAsync(FileConstant.StorageDomainTmp, path))
             {
@@ -114,11 +132,15 @@ class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<str
                 "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
 
             this[Res] = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(instanceCrypto.Encrypt(fileName))}";
+
+            if (!isAuthenticated)
+            {
+                this[Res] += $"&session={HttpUtility.UrlEncode(sessionKey)}";
+            }
         }
 
         this[Finish] = true;
         PublishChanges();
-
     }
 
     public override void PublishChanges(DistributedTask task)
@@ -163,14 +185,14 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         this[OpType] = (int)FileOperationType.Download;
     }
 
-    protected override async Task DoJob(IServiceScope scope)
+    protected override async Task DoJob(IServiceScope serviceScope)
     {
         if (Files.Count == 0 && Folders.Count == 0)
         {
             return;
         }
 
-        (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(scope);
+        (_entriesPathId, var filesForSend, var folderForSend) = await GetEntriesPathIdAsync(serviceScope);
 
         if (_entriesPathId == null || _entriesPathId.Count == 0)
         {
@@ -190,23 +212,23 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         PublishChanges();
 
-        var filesMessageService = _serviceProvider.GetRequiredService<FilesMessageService>();
+        var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         foreach (var file in filesForSend)
         {
             var key = file.Id;
             if (_files.ContainsKey(key) && !string.IsNullOrEmpty(_files[key]))
             {
-                _ = filesMessageService.Send(file, _headers, MessageAction.FileDownloadedAs, file.Title, _files[key]);
+                await filesMessageService.SendAsync(MessageAction.FileDownloadedAs, file, _headers, file.Title, _files[key]);
             }
             else
             {
-                _ = filesMessageService.Send(file, _headers, MessageAction.FileDownloaded, file.Title);
+                await filesMessageService.SendAsync(MessageAction.FileDownloaded, file, _headers, file.Title);
             }
         }
 
         foreach (var folder in folderForSend)
         {
-            _ = filesMessageService.Send(folder, _headers, MessageAction.FolderDownloaded, folder.Title);
+            await filesMessageService.SendAsync(MessageAction.FolderDownloaded, folder, _headers, folder.Title);
         }
     }
 
@@ -217,12 +239,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         var title = file.Title;
 
-        if (_files.TryGetValue(file.Id, out var convertToExt))
+        if (_files.TryGetValue(file.Id, out var convertToExt) && !string.IsNullOrEmpty(convertToExt))
         {
-            if (!string.IsNullOrEmpty(convertToExt))
-            {
-                title = FileUtility.ReplaceFileExtension(title, convertToExt);
-            }
+            title = FileUtility.ReplaceFileExtension(title, convertToExt);
         }
 
         var entriesPathId = new ItemNameValueCollection<T>();
@@ -296,7 +315,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             var folderPath = path + folder.Title + "/";
             entriesPathId.Add(folderPath, default(T));
 
-            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, true));
+            var files = FilesSecurity.FilterDownloadAsync(FileDao.GetFilesAsync(folder.Id, null, FilterType.None, false, Guid.Empty, string.Empty, string.Empty, true));
 
             await foreach (var file in files)
             {
@@ -320,120 +339,110 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             return;
         }
+        
+        var fileConverter = scope.ServiceProvider.GetService<FileConverter>();
+        var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
 
-        var scopeClass = scope.ServiceProvider.GetService<FileDownloadOperationScope>();
-        var (_, _, _, fileConverter, filesMessageService, _) = scopeClass;
-        var FileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
+        using var compressTo = scope.ServiceProvider.GetService<CompressToArchive>();
+        compressTo.SetStream(stream);
 
-        using (var compressTo = scope.ServiceProvider.GetService<CompressToArchive>())
+        foreach (var path in _entriesPathId.AllKeys)
         {
-            compressTo.SetStream(stream);
-
-            foreach (var path in _entriesPathId.AllKeys)
+            if (string.IsNullOrEmpty(path))
             {
-                if (string.IsNullOrEmpty(path))
+                ProgressStep();
+                continue;
+            }
+
+            var counter = 0;
+            foreach (var entryId in _entriesPathId[path])
+            {
+                if (CancellationToken.IsCancellationRequested)
                 {
-                    ProgressStep();
-                    continue;
+                    CancellationToken.ThrowIfCancellationRequested();
                 }
 
-                var counter = 0;
-                foreach (var entryId in _entriesPathId[path])
+                var newTitle = path;
+
+                File<T> file = null;
+                var convertToExt = string.Empty;
+
+                if (!Equals(entryId, default(T)))
                 {
-                    if (CancellationToken.IsCancellationRequested)
+                    await fileDao.InvalidateCacheAsync(entryId);
+                    file = await fileDao.GetFileAsync(entryId);
+
+                    if (file == null)
                     {
-                        CancellationToken.ThrowIfCancellationRequested();
+                        this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
+                        continue;
                     }
 
-                    var newtitle = path;
+                    if (_files.TryGetValue(file.Id, out convertToExt) && !string.IsNullOrEmpty(convertToExt))
+                    {
+                        newTitle = FileUtility.ReplaceFileExtension(path, convertToExt);
+                    }
+                }
 
-                    File<T> file = null;
-                    var convertToExt = string.Empty;
+                if (0 < counter)
+                {
+                    var suffix = " (" + counter + ")";
 
                     if (!Equals(entryId, default(T)))
                     {
-                        await FileDao.InvalidateCacheAsync(entryId);
-                        file = await FileDao.GetFileAsync(entryId);
-
-                        if (file == null)
-                        {
-                            this[Err] = FilesCommonResource.ErrorMassage_FileNotFound;
-                            continue;
-                        }
-
-                        if (_files.TryGetValue(file.Id, out convertToExt))
-                        {
-                            if (!string.IsNullOrEmpty(convertToExt))
-                            {
-                                newtitle = FileUtility.ReplaceFileExtension(path, convertToExt);
-                            }
-                        }
-                    }
-
-                    if (0 < counter)
-                    {
-                        var suffix = " (" + counter + ")";
-
-                        if (!Equals(entryId, default(T)))
-                        {
-                            newtitle = newtitle.IndexOf('.') > 0 ? newtitle.Insert(newtitle.LastIndexOf('.'), suffix) : newtitle + suffix;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    if (!Equals(entryId, default(T)) && file != null)
-                    {
-                        compressTo.CreateEntry(newtitle, file.ModifiedOn);
-                        try
-                        {
-                            if (fileConverter.EnableConvert(file, convertToExt))
-                            {
-                                //Take from converter
-                                using (var readStream = await fileConverter.ExecAsync(file, convertToExt))
-                                {
-                                    await compressTo.PutStream(readStream);
-                                }
-                            }
-                            else
-                            {
-                                using (var readStream = await FileDao.GetFileStreamAsync(file))
-                                {
-                                    await compressTo.PutStream(readStream);
-                                }
-                            }
-                            compressTo.CloseEntry();
-                        }
-                        catch (Exception ex)
-                        {
-                            this[Err] = ex.Message;
-
-                            Logger.ErrorWithException(ex);
-                        }
+                        newTitle = newTitle.IndexOf('.') > 0 ? newTitle.Insert(newTitle.LastIndexOf('.'), suffix) : newTitle + suffix;
                     }
                     else
                     {
-                        compressTo.CreateEntry(newtitle);
-                        compressTo.PutNextEntry();
-                        compressTo.CloseEntry();
-                    }
-
-                    counter++;
-
-                    if (!Equals(entryId, default(T)) && file != null)
-                    {
-                        ProcessedFile(entryId);
-                    }
-                    else
-                    {
-                        ProcessedFolder(default(T));
+                        break;
                     }
                 }
 
-                ProgressStep();
+                if (!Equals(entryId, default(T)) && file != null)
+                {
+                    compressTo.CreateEntry(newTitle, file.ModifiedOn);
+                    try
+                    {
+                        if (await fileConverter.EnableConvertAsync(file, convertToExt))
+                        {
+                            //Take from converter
+                            await using var readStream = await fileConverter.ExecAsync(file, convertToExt);
+                            await compressTo.PutStream(readStream);
+                        }
+                        else
+                        {
+                            await using var readStream = await fileDao.GetFileStreamAsync(file);
+                            await compressTo.PutStream(readStream);
+                        }
+                        compressTo.CloseEntry();
+                    }
+                    catch (Exception ex)
+                    {
+                        this[Err] = ex.Message;
+
+                        Logger.ErrorWithException(ex);
+                    }
+                }
+                else
+                {
+                    compressTo.CreateEntry(newTitle);
+                    compressTo.PutNextEntry();
+                    compressTo.CloseEntry();
+                }
+
+                counter++;
+
+                if (!Equals(entryId, default(T)) && file != null)
+                {
+                    ProcessedFile(entryId);
+                }
+                else
+                {
+                    ProcessedFolder(default(T));
+                }
             }
+
+            ProgressStep();
         }
     }
 
@@ -459,7 +468,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
 internal class ItemNameValueCollection<T>
 {
-    private readonly Dictionary<string, List<T>> _dic = new Dictionary<string, List<T>>();
+    private readonly Dictionary<string, List<T>> _dic = new();
 
 
     public IEnumerable<string> AllKeys => _dic.Keys;
@@ -502,42 +511,5 @@ internal class ItemNameValueCollection<T>
     public void Remove(string name)
     {
         _dic.Remove(name);
-    }
-}
-
-[Scope]
-class FileDownloadOperationScope
-{
-    private readonly GlobalStore _globalStore;
-    private readonly FilesLinkUtility _filesLinkUtility;
-    private readonly SetupInfo _setupInfo;
-    private readonly FileConverter _fileConverter;
-    private readonly FilesMessageService _filesMessageService;
-    private readonly ILogger _log;
-
-    public FileDownloadOperationScope(
-        GlobalStore globalStore,
-        FilesLinkUtility filesLinkUtility,
-        SetupInfo setupInfo,
-        FileConverter fileConverter,
-        FilesMessageService filesMessageService,
-        ILogger<FileDownloadOperation> log)
-    {
-        _globalStore = globalStore;
-        _filesLinkUtility = filesLinkUtility;
-        _setupInfo = setupInfo;
-        _fileConverter = fileConverter;
-        _filesMessageService = filesMessageService;
-        _log = log;
-    }
-
-    public void Deconstruct(out GlobalStore globalStore, out FilesLinkUtility filesLinkUtility, out SetupInfo setupInfo, out FileConverter fileConverter, out FilesMessageService filesMessageService, out ILogger log)
-    {
-        globalStore = _globalStore;
-        filesLinkUtility = _filesLinkUtility;
-        setupInfo = _setupInfo;
-        fileConverter = _fileConverter;
-        filesMessageService = _filesMessageService;
-        log = _log;
     }
 }

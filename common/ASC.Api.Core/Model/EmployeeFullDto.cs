@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -106,6 +106,10 @@ public class EmployeeFullDto : EmployeeDto
     /// <type>System.Boolean, System</type>
     public bool IsAdmin { get; set; }
 
+    /// <summary>Specifies if the user is a room administrator or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsRoomAdmin { get; set; }
+
     /// <summary>Specifies if the LDAP settings are enabled for the user or not</summary>
     /// <type>System.Boolean, System</type>
     public bool IsLDAP { get; set; }
@@ -143,8 +147,8 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsSSO { get; set; }
 
     /// <summary>Theme</summary>
-    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsEnum}, System</type>
-    public DarkThemeSettingsEnum? Theme { get; set; }
+    /// <type>System.Nullable{ASC.Web.Core.Users.DarkThemeSettingsType}, System</type>
+    public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>Quota limit</summary>
     /// <type>System.Int64, System</type>
@@ -153,6 +157,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>Portal used space</summary>
     /// <type>System.Double, System</type>
     public double UsedSpace { get; set; }
+    public bool? Shared { get; set; }
 
     public static new EmployeeFullDto GetSample()
     {
@@ -208,8 +213,9 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         WebItemManager webItemManager,
         SettingsManager settingsManager,
         IQuotaService quotaService,
+        TenantManager tenantManager,
         ILogger<EmployeeDtoHelper> logger)
-    : base(context, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, logger)
+    : base(context, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, tenantManager, logger)
     {
         _context = context;
         _webItemSecurity = webItemSecurity;
@@ -253,6 +259,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         return lambda;
     }
+    
     public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo)
     {
         var result = new EmployeeFullDto
@@ -261,7 +268,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
             LastName = userInfo.LastName,
         };
 
-        FillGroups(result, userInfo);
+        await FillGroupsAsync(result, userInfo);
 
         var photoData = await _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
 
@@ -275,8 +282,11 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         return result;
     }
 
-    public async Task<EmployeeFullDto> GetFull(UserInfo userInfo)
+    public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
+        var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        
         var result = new EmployeeFullDto
         {
             UserName = userInfo.UserName,
@@ -288,23 +298,25 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
             Terminated = _apiDateTimeHelper.Get(userInfo.TerminatedDate),
             WorkFrom = _apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
-            IsVisitor = _userManager.IsUser(userInfo),
-            IsAdmin = _userManager.IsDocSpaceAdmin(userInfo),
-            IsOwner = userInfo.IsOwner(_context.Tenant),
-            IsCollaborator = _userManager.IsCollaborator(userInfo),
+            IsVisitor = await _userManager.IsUserAsync(userInfo),
+            IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
+            IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
+            IsOwner = userInfo.IsOwner(tenant),
+            IsCollaborator = currentType is EmployeeType.Collaborator,
             IsLDAP = userInfo.IsLDAP(),
-            IsSSO = userInfo.IsSSO()
+            IsSSO = userInfo.IsSSO(),
+            Shared = shared,
         };
 
-        await Init(result, userInfo);
+        await InitAsync(result, userInfo);
 
-        var quotaSettings = _settingsManager.Load<TenantUserQuotaSettings>();
+        var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
 
         if (quotaSettings.EnableUserQuota)
         {
-            result.UsedSpace = Math.Max(0, _quotaService.FindUserQuotaRows(_context.Tenant.Id, userInfo.Id).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
-            var userQuotaSettings = _settingsManager.Load<UserQuotaSettings>(userInfo);
-            result.QuotaLimit = userQuotaSettings != null ? userQuotaSettings.UserQuota : quotaSettings.DefaultUserQuota;
+            result.UsedSpace = Math.Max(0, (await _quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag)).Sum(r => r.Counter));
+            var userQuotaSettings = await _settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
+            result.QuotaLimit = userQuotaSettings?.UserQuota ?? quotaSettings.DefaultUserQuota;
         }
 
         if (userInfo.Sex.HasValue)
@@ -335,7 +347,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
         }
 
         FillConacts(result, userInfo);
-        FillGroups(result, userInfo);
+        await FillGroupsAsync(result, userInfo);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
@@ -357,7 +369,7 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         if (_context.Check("listAdminModules"))
         {
-            var listAdminModules = userInfo.GetListAdminModules(_webItemSecurity, _webItemManager);
+            var listAdminModules = await userInfo.GetListAdminModulesAsync(_webItemSecurity, _webItemManager);
             if (listAdminModules.Count > 0)
             {
                 result.ListAdminModules = listAdminModules;
@@ -366,14 +378,15 @@ public class EmployeeFullDtoHelper : EmployeeDtoHelper
 
         return result;
     }
-    private void FillGroups(EmployeeFullDto result, UserInfo userInfo)
+
+    private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
         if (!_context.Check("groups") && !_context.Check("department"))
         {
             return;
         }
 
-        var groups = _userManager.GetUserGroups(userInfo.Id)
+        var groups = (await _userManager.GetUserGroupsAsync(userInfo.Id))
             .Select(x => new GroupSummaryDto(x, _userManager))
             .ToList();
 

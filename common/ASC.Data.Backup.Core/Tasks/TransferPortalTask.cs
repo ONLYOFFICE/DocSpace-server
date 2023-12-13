@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -77,8 +77,8 @@ public class TransferPortalTask : PortalTaskBase
     public override async Task RunJob()
     {
         _logger.DebugBeginTransfer(TenantId);
-        var fromDbFactory = new DbFactory(null, null, null, null);
-        var toDbFactory = new DbFactory(null, null, null, null);
+        var fromDbFactory = new DbFactory(null, null);
+        var toDbFactory = new DbFactory(null, null);
         var tenantAlias = GetTenantAlias(fromDbFactory);
         var backupFilePath = GetBackupFilePath(tenantAlias);
         var columnMapper = new ColumnMapper();
@@ -96,9 +96,9 @@ public class TransferPortalTask : PortalTaskBase
 
             //save db data to temporary file
             var backupTask = _serviceProvider.GetService<BackupPortalTask>();
-            backupTask.Init(TenantId, backupFilePath, Limit, ZipWriteOperatorFactory.GetDefaultWriteOperator(_tempStream, backupFilePath));
+            backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(_tempStream, backupFilePath));
             backupTask.ProcessStorage = false;
-            backupTask.ProgressChanged += (sender, args) => SetCurrentStepProgress(args.Progress);
+            backupTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 backupTask.IgnoreModule(moduleName);
@@ -109,7 +109,7 @@ public class TransferPortalTask : PortalTaskBase
             var restoreTask = _serviceProvider.GetService<RestorePortalTask>();
             restoreTask.Init(ToRegion, backupFilePath, columnMapper: columnMapper);
             restoreTask.ProcessStorage = false;
-            restoreTask.ProgressChanged += (sender, args) => SetCurrentStepProgress(args.Progress);
+            restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)
             {
                 restoreTask.IgnoreModule(moduleName);
@@ -119,7 +119,7 @@ public class TransferPortalTask : PortalTaskBase
             //transfer files
             if (ProcessStorage)
             {
-                await DoTransferStorage(columnMapper);
+                await DoTransferStorageAsync(columnMapper);
             }
 
             SaveTenant(toDbFactory, tenantAlias, TenantStatus.Active);
@@ -153,15 +153,15 @@ public class TransferPortalTask : PortalTaskBase
         }
     }
 
-    private async Task DoTransferStorage(ColumnMapper columnMapper)
+    private async Task DoTransferStorageAsync(ColumnMapper columnMapper)
     {
         _logger.DebugBeginTransferStorage();
         var fileGroups = (await GetFilesToProcess(TenantId)).GroupBy(file => file.Module).ToList();
         var groupsProcessed = 0;
         foreach (var group in fileGroups)
         {
-            var baseStorage = StorageFactory.GetStorage(TenantId, group.Key);
-            var destStorage = StorageFactory.GetStorage(columnMapper.GetTenantMapping(), group.Key, ToRegion);
+            var baseStorage = await StorageFactory.GetStorageAsync(TenantId, group.Key);
+            var destStorage = await StorageFactory.GetStorageAsync(columnMapper.GetTenantMapping(), group.Key, ToRegion);
             var utility = new CrossModuleTransferUtility(_logger, _tempStream, _tempPath, baseStorage, destStorage);
 
             foreach (var file in group)
@@ -248,7 +248,7 @@ public class TransferPortalTask : PortalTaskBase
             Directory.CreateDirectory(BackupDirectory ?? DefaultDirectoryName);
         }
 
-        return CrossPlatform.PathCombine(BackupDirectory ?? DefaultDirectoryName, tenantAlias + DateTime.UtcNow.ToString("(yyyy-MM-dd HH-mm-ss)") + ".backup");
+        return CrossPlatform.PathCombine(BackupDirectory ?? DefaultDirectoryName, tenantAlias + DateTime.UtcNow.ToString("(yyyy-MM-dd HH-mm-ss)", CultureInfo.InvariantCulture) + ".backup");
     }
 
 }

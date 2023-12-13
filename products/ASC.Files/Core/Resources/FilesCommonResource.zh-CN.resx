@@ -311,7 +311,8 @@
     <value>创建、编辑、分享文档。与他人实时协作。100%兼容微软Office格式。</value>
   </data>
   <data name="ProductDescriptionEx" xml:space="preserve">
-    <value>创建、编辑、分享文档。和他们实时协作。100%兼容微软Office格式。</value>
+    <value>创建、编辑、分享文档。和他们实时协作。
+100%兼容微软Office格式。</value>
   </data>
   <data name="ProductDescriptionShort" xml:space="preserve">
     <value>创建、编辑、保存和共享文档。连接你的Google驱动器，Dropbox和Box账户，把所有文档放在一个地方。</value>
@@ -414,5 +415,17 @@
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>您不能固定房间</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>共享链接</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>邀请链接</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>链接的数量不得超过 {0}</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>输入错误密码的次数过多。请稍后再试</value>
   </data>
 </root>

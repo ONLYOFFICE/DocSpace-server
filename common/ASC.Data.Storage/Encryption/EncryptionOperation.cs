@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -61,7 +61,7 @@ public class EncryptionOperation : DistributedTaskProgress
         var scopeClass = scope.ServiceProvider.GetService<EncryptionOperationScope>();
         var (log, encryptionSettingsHelper, tenantManager, notifyHelper, coreBaseSettings, storageFactoryConfig, storageFactory, configuration) = scopeClass;
         notifyHelper.Init(_serverRootPath);
-        _tenants = tenantManager.GetTenants(false);
+        _tenants = await tenantManager.GetTenantsAsync(false);
         _modules = storageFactoryConfig.GetModuleList(exceptDisabledMigration: true);
         _useProgressFile = Convert.ToBoolean(configuration["storage:encryption:progressfile"] ?? "true");
 
@@ -75,7 +75,7 @@ public class EncryptionOperation : DistributedTaskProgress
                 throw new NotSupportedException();
             }
 
-            if (_encryptionSettings.Status == EncryprtionStatus.Encrypted || _encryptionSettings.Status == EncryprtionStatus.Decrypted)
+            if (_encryptionSettings.Status is EncryprtionStatus.Encrypted or EncryprtionStatus.Decrypted)
             {
                 log.DebugStorageAlready(_encryptionSettings.Status);
 
@@ -91,10 +91,10 @@ public class EncryptionOperation : DistributedTaskProgress
 
                 foreach (var module in _modules)
                 {
-                    dictionary.Add(module, (DiscDataStore)storageFactory.GetStorage(tenant.Id, module));
+                    dictionary.Add(module, (DiscDataStore)await storageFactory.GetStorageAsync(tenant.Id, module));
                 }
 
-                await Parallel.ForEachAsync(dictionary, async (elem, token) =>
+                await Parallel.ForEachAsync(dictionary, async (elem, _) =>
                 {
                     await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, log);
                 });
@@ -106,12 +106,12 @@ public class EncryptionOperation : DistributedTaskProgress
             if (!_hasErrors)
             {
                 await DeleteProgressFilesAsync(storageFactory);
-                SaveNewSettings(encryptionSettingsHelper, log);
+                await SaveNewSettingsAsync(encryptionSettingsHelper, log);
             }
 
             Percentage = 90;
             PublishChanges();
-            ActivateTenants(tenantManager, log, notifyHelper);
+            await ActivateTenantsAsync(tenantManager, log, notifyHelper);
 
             Percentage = 100;
 
@@ -149,27 +149,22 @@ public class EncryptionOperation : DistributedTaskProgress
         log.DebugPercentage(Percentage);
     }
 
-    private Task<List<string>> ReadProgressAsync(DiscDataStore store)
+    private async ValueTask<List<string>> ReadProgressAsync(DiscDataStore store)
     {
         if (!_useProgressFile)
         {
-            return Task.FromResult(new List<string>());
+            return new List<string>();
         }
 
-        return InternalReadProgressAsync(store);
-    }
-
-    private async Task<List<string>> InternalReadProgressAsync(DiscDataStore store)
-    {
         var encryptedFiles = new List<string>();
 
         if (await store.IsFileAsync(string.Empty, ProgressFileName))
         {
-            using var stream = await store.GetReadStreamAsync(string.Empty, ProgressFileName);
+            await using var stream = await store.GetReadStreamAsync(string.Empty, ProgressFileName);
             using var reader = new StreamReader(stream);
             string line;
 
-            while ((line = reader.ReadLine()) != null)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
                 encryptedFiles.Add(line);
             }
@@ -258,7 +253,7 @@ public class EncryptionOperation : DistributedTaskProgress
         {
             foreach (var module in _modules)
             {
-                var store = (DiscDataStore)storageFactory.GetStorage(tenant.Id, module);
+                var store = (DiscDataStore)await storageFactory.GetStorageAsync(tenant.Id, module);
 
                 if (await store.IsFileAsync(string.Empty, ProgressFileName))
                 {
@@ -268,7 +263,7 @@ public class EncryptionOperation : DistributedTaskProgress
         }
     }
 
-    private void SaveNewSettings(EncryptionSettingsHelper encryptionSettingsHelper, ILogger log)
+    private async Task SaveNewSettingsAsync(EncryptionSettingsHelper encryptionSettingsHelper, ILogger log)
     {
         if (_isEncryption)
         {
@@ -280,12 +275,12 @@ public class EncryptionOperation : DistributedTaskProgress
             _encryptionSettings.Password = string.Empty;
         }
 
-        encryptionSettingsHelper.Save(_encryptionSettings);
+        await encryptionSettingsHelper.SaveAsync(_encryptionSettings);
 
         log.DebugSaveNewEncryptionSettings();
     }
 
-    private void ActivateTenants(TenantManager tenantManager, ILogger log, NotifyHelper notifyHelper)
+    private async Task ActivateTenantsAsync(TenantManager tenantManager, ILogger log, NotifyHelper notifyHelper)
     {
         foreach (var tenant in _tenants)
         {
@@ -294,7 +289,7 @@ public class EncryptionOperation : DistributedTaskProgress
                 tenantManager.SetCurrentTenant(tenant);
 
                 tenant.SetStatus(TenantStatus.Active);
-                tenantManager.SaveTenant(tenant);
+                await tenantManager.SaveTenantAsync(tenant);
                 log.DebugTenantSetStatusActive(tenant.Alias);
 
                 if (!_hasErrors)

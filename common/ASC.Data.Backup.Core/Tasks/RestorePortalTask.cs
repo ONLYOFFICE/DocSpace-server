@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -70,7 +70,7 @@ public class RestorePortalTask : PortalTaskBase
 
     public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
-        ArgumentNullOrEmptyException.ThrowIfNullOrEmpty(fromFilePath);
+        ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
         if (!File.Exists(fromFilePath))
         {
@@ -90,9 +90,9 @@ public class RestorePortalTask : PortalTaskBase
 
         _options.DebugBeginRestoreData();
 
-        using (var dataReader = new ZipReadOperator(BackupFilePath))
+        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath))
         {
-            using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
+            await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
                 Dump = entry != null && _coreBaseSettings.Standalone;
             }
@@ -109,7 +109,7 @@ public class RestorePortalTask : PortalTaskBase
                 foreach (var module in modulesToProcess)
                 {
                     var restoreTask = new RestoreDbModuleTask(_logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider);
-                    restoreTask.ProgressChanged += (sender, args) => SetCurrentStepProgress(args.Progress);
+                    restoreTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
 
                     foreach (var tableName in _ignoredTables)
                     {
@@ -118,7 +118,7 @@ public class RestorePortalTask : PortalTaskBase
 
                     await restoreTask.RunJob();
                 }
-                _backupRepository.MigrationBackupRecords(TenantId, _columnMapper.GetTenantMapping(), _region);
+                await _backupRepository.MigrationBackupRecordsAsync(TenantId, _columnMapper.GetTenantMapping(), _region);
             }
 
             _options.DebugEndRestoreData();
@@ -145,7 +145,7 @@ public class RestorePortalTask : PortalTaskBase
             _options.DebugRefreshLicense();
             try
             {
-                _licenseReader.RejectLicense();
+                await _licenseReader.RejectLicenseAsync();
             }
             catch (Exception ex)
             {
@@ -187,13 +187,13 @@ public class RestorePortalTask : PortalTaskBase
         if (ProcessStorage)
         {
             var storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed);
-            var tenants = _tenantManager.GetTenants(false);
+            var tenants = await _tenantManager.GetTenantsAsync(false);
 
             stepscount += storageModules.Count() * tenants.Count;
 
             SetStepsCount(stepscount + 1);
 
-            await DoDeleteStorage(storageModules, tenants);
+            await DoDeleteStorageAsync(storageModules, tenants);
         }
         else
         {
@@ -215,16 +215,14 @@ public class RestorePortalTask : PortalTaskBase
         }
         try
         {
-            using (var connection = DbFactory.OpenConnection())
+            await using var connection = DbFactory.OpenConnection();
+            var command = connection.CreateCommand();
+            command.CommandText = "select id, connection_string from mail_server_server";
+            ExecuteList(command).ForEach(r =>
             {
-                var command = connection.CreateCommand();
-                command.CommandText = "select id, connection_string from mail_server_server";
-                ExecuteList(command).ForEach(r =>
-                {
-                    var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
-                    databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), databasesFromDirs[connectionString.Name]);
-                });
-            }
+                var connectionString = GetConnectionString((int)r[0], JsonConvert.DeserializeObject<Dictionary<string, object>>(Convert.ToString(r[1]))["DbConnection"].ToString());
+                databases.Add(new Tuple<string, string>(connectionString.Name, connectionString.ConnectionString), databasesFromDirs[connectionString.Name]);
+            });
         }
         catch (Exception e)
         {
@@ -259,7 +257,7 @@ public class RestorePortalTask : PortalTaskBase
     private async Task RestoreFromDumpFile(IDataReadOperator dataReader, string fileName1, string fileName2 = null, string db = null)
     {
         _options.DebugRestoreFrom(fileName1);
-        using (var stream = dataReader.GetEntry(fileName1))
+        await using (var stream = dataReader.GetEntry(fileName1))
         {
             await RunMysqlFile(stream, db);
         }
@@ -268,7 +266,7 @@ public class RestorePortalTask : PortalTaskBase
         _options.DebugRestoreFrom(fileName2);
         if (fileName2 != null)
         {
-            using (var stream = dataReader.GetEntry(fileName2))
+            await using (var stream = dataReader.GetEntry(fileName2))
             {
                 await RunMysqlFile(stream, db);
             }
@@ -280,14 +278,12 @@ public class RestorePortalTask : PortalTaskBase
     public List<object[]> ExecuteList(DbCommand command)
     {
         var list = new List<object[]>();
-        using (var result = command.ExecuteReader())
+        using var result = command.ExecuteReader();
+        while (result.Read())
         {
-            while (result.Read())
-            {
-                var objects = new object[result.FieldCount];
-                result.GetValues(objects);
-                list.Add(objects);
-            }
+            var objects = new object[result.FieldCount];
+            result.GetValues(objects);
+            list.Add(objects);
         }
 
         return list;
@@ -359,7 +355,7 @@ public class RestorePortalTask : PortalTaskBase
         {
             foreach (var file in group)
             {
-                var storage = StorageFactory.GetStorage(Dump ? file.Tenant : _columnMapper.GetTenantMapping(), group.Key);
+                var storage = await StorageFactory.GetStorageAsync(Dump ? file.Tenant : _columnMapper.GetTenantMapping(), group.Key);
                 var quotaController = storage.QuotaController;
                 storage.SetQuotaController(null);
 
@@ -374,7 +370,8 @@ public class RestorePortalTask : PortalTaskBase
                         {
                             key = CrossPlatform.PathCombine(KeyHelper.GetStorage(), key);
                         }
-                        using var stream = dataReader.GetEntry(key);
+
+                        await using var stream = dataReader.GetEntry(key);
                         try
                         {
                             await storage.SaveAsync(file.Domain, adjustedPath, module != null ? module.PrepareData(key, stream, _columnMapper) : stream);
@@ -405,7 +402,7 @@ public class RestorePortalTask : PortalTaskBase
         _options.DebugEndRestoreStorage();
     }
 
-    private async Task DoDeleteStorage(IEnumerable<string> storageModules, IEnumerable<Tenant> tenants)
+    private async Task DoDeleteStorageAsync(IEnumerable<string> storageModules, IEnumerable<Tenant> tenants)
     {
         _options.DebugBeginDeleteStorage();
 
@@ -413,14 +410,14 @@ public class RestorePortalTask : PortalTaskBase
         {
             foreach (var module in storageModules)
             {
-                var storage = StorageFactory.GetStorage(tenant.Id, module, _region);
+                var storage = await StorageFactory.GetStorageAsync(tenant.Id, module, _region);
                 var domains = StorageFactoryConfig.GetDomainList(module, _region).ToList();
 
                 domains.Add(string.Empty); //instead storage.DeleteFiles("\\", "*.*", true);
 
                 foreach (var domain in domains)
                 {
-                    await ActionInvoker.Try(
+                    await ActionInvoker.TryAsync(
                         async state =>
                         {
                             if (await storage.IsDirectoryAsync((string)state))
@@ -465,7 +462,7 @@ public class RestorePortalTask : PortalTaskBase
             "  statuschanged='{1}' " +
             "where id = '{2}'",
             (int)TenantStatus.Active,
-            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
             tenantId);
 
         var command = connection.CreateCommand().WithTimeout(120);

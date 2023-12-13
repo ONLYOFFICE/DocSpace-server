@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,7 +28,6 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.TFA;
 
-[Serializable]
 public class BackupCode
 {
     public bool IsUsed { get; set; }
@@ -57,7 +56,7 @@ public class BackupCode
 [Scope]
 public class TfaManager
 {
-    private static readonly TwoFactorAuthenticator _tfa = new TwoFactorAuthenticator();
+    private static readonly TwoFactorAuthenticator _tfa = new();
     private ICache Cache { get; set; }
 
     private readonly SettingsManager _settingsManager;
@@ -91,15 +90,15 @@ public class TfaManager
         _machinePseudoKeys = machinePseudoKeys;
     }
 
-    public SetupCode GenerateSetupCode(UserInfo user)
+    public async Task<SetupCode> GenerateSetupCodeAsync(UserInfo user)
     {
-        return _tfa.GenerateSetupCode(_setupInfo.TfaAppSender, user.Email, GenerateAccessToken(user), false, 4);
+        return _tfa.GenerateSetupCode(_setupInfo.TfaAppSender, user.Email, await GenerateAccessTokenAsync(user), false, 4);
     }
 
-    public bool ValidateAuthCode(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
+    public async Task<bool> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
     {
         if (!_tfaAppAuthSettingsHelper.IsVisibleSettings
-            || !_settingsManager.Load<TfaAppAuthSettings>().EnableSetting)
+            || !(await _settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting)
         {
             return false;
         }
@@ -118,7 +117,7 @@ public class TfaManager
 
         int.TryParse(Cache.Get<string>("tfa/" + user.Id), out var counter);
 
-        var loginSettings = _settingsManager.Load<LoginSettings>();
+        var loginSettings = await _settingsManager.LoadAsync<LoginSettings>();
         var attemptsCount = loginSettings.AttemptCount;
 
         if (++counter > attemptsCount)
@@ -127,11 +126,11 @@ public class TfaManager
         }
         Cache.Insert("tfa/" + user.Id, counter.ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
 
-        if (!_tfa.ValidateTwoFactorPIN(GenerateAccessToken(user), code))
+        if (!_tfa.ValidateTwoFactorPIN(await GenerateAccessTokenAsync(user), code))
         {
-            if (checkBackup && TfaAppUserSettings.BackupCodesForUser(_settingsManager, user.Id).Any(x => x.GetEncryptedCode(_instanceCrypto, _signature) == code && !x.IsUsed))
+            if (checkBackup && (await TfaAppUserSettings.BackupCodesForUserAsync(_settingsManager, user.Id)).Any(x => x.GetEncryptedCode(_instanceCrypto, _signature) == code && !x.IsUsed))
             {
-                TfaAppUserSettings.DisableCodeForUser(_settingsManager, _instanceCrypto, _signature, user.Id, code);
+                await TfaAppUserSettings.DisableCodeForUserAsync(_settingsManager, _instanceCrypto, _signature, user.Id, code);
             }
             else
             {
@@ -144,19 +143,19 @@ public class TfaManager
         if (!_securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;
-            _cookiesManager.AuthenticateMeAndSetCookies(user.Tenant, user.Id, action);
+            await _cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
-        if (!TfaAppUserSettings.EnableForUser(_settingsManager, user.Id))
+        if (!await TfaAppUserSettings.EnableForUserAsync(_settingsManager, user.Id))
         {
-            GenerateBackupCodes();
+            await GenerateBackupCodesAsync();
             return true;
         }
 
         return false;
     }
 
-    public IEnumerable<BackupCode> GenerateBackupCodes()
+    public async Task<IEnumerable<BackupCode>> GenerateBackupCodesAsync()
     {
         var count = _setupInfo.TfaAppBackupCodeCount;
         var length = _setupInfo.TfaAppBackupCodeLength;
@@ -181,16 +180,16 @@ public class TfaManager
             code.SetEncryptedCode(_instanceCrypto, result.ToString());
             list.Add(code);
         }
-        var settings = _settingsManager.LoadForCurrentUser<TfaAppUserSettings>();
+        var settings = await _settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>();
         settings.CodesSetting = list;
-        _settingsManager.SaveForCurrentUser(settings);
+        await _settingsManager.SaveForCurrentUserAsync(settings);
 
         return list;
     }
 
-    private string GenerateAccessToken(UserInfo user)
+    private async Task<string> GenerateAccessTokenAsync(UserInfo user)
     {
-        var userSalt = TfaAppUserSettings.GetSalt(_settingsManager, user.Id);
+        var userSalt = await TfaAppUserSettings.GetSaltAsync(_settingsManager, user.Id);
 
         //from Signature.Create
         var machineSalt = Encoding.UTF8.GetString(_machinePseudoKeys.GetMachineConstant());

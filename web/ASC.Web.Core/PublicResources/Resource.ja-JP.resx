@@ -590,7 +590,7 @@
     <value>Twilioの電話番号(SMS承認のために必要です)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>アプリをONLYOFFICEに接続すると、Twitterでポータルにサインインし、コンタクトを検索できます。</value>
+    <value>Twitterアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>このアプリを接続すると、Twitterを使用してONLYOFFICEにサインイン、またはCRMモジュールでお客様のTwitterアカウントをリンクできます。{0} Twitter開発者ポータルでONLYOFFICE統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -990,5 +990,23 @@
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>サードパーティの統合</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ZoomクライアントID</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoomクライアントのシクレット</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>ユーザーがZoomアカウントを使ってONLYOFFICEにサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリONLYOFFICE統合を作成します。以下に受け取ったデータを挿入してください：</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>ログイン試行回数が多すぎます。後で再試行してください</value>
   </data>
 </root>

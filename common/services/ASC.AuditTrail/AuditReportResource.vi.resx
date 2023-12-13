@@ -619,13 +619,13 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Đã xóa phòng</value>
   </data>
-  <data name="RoomLinkCreated" xml:space="preserve">
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
     <value>Đã tạo liên kết. Vai trò: {1}</value>
   </data>
-  <data name="RoomLinkDeleted" xml:space="preserve">
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
     <value>Đã xóa liên kết</value>
   </data>
-  <data name="RoomLinkUpdated" xml:space="preserve">
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
     <value>Đã cập nhật liên kết. Vai trò: {1}</value>
   </data>
   <data name="RoomLogoCreated" xml:space="preserve">
@@ -717,5 +717,20 @@
   </data>
   <data name="UserUpdatedEmail" xml:space="preserve">
     <value>Email được cập nhật</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Thành phố</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Quốc gia</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Đã tạo liên kết bên ngoài: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Đã xóa liên kết bên ngoài: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Đã cập nhật liên kết bên ngoài: {0}. Vai trò: {1}</value>
   </data>
 </root>

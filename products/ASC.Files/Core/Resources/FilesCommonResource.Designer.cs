@@ -331,6 +331,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Shared link.
+        /// </summary>
+        public static string DefaultExternalLinkTitle {
+            get {
+                return ResourceManager.GetString("DefaultExternalLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invitation link.
+        /// </summary>
+        public static string DefaultInvitationLinkTitle {
+            get {
+                return ResourceManager.GetString("DefaultInvitationLinkTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Declined.
         /// </summary>
         public static string DocuSignStatusDeclined {
@@ -385,7 +403,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can not select this user.
+        ///   Looks up a localized string similar to You cannot select this user.
         /// </summary>
         public static string ErrorMassage_ChangeOwner {
             get {
@@ -826,6 +844,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The maximum number of links may not exceed {0}.
+        /// </summary>
+        public static string ErrorMessage_MaxLinksCount {
+            get {
+                return ResourceManager.GetString("ErrorMessage_MaxLinksCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This provider is already connected to the room.
         /// </summary>
         public static string ErrorMessage_ProviderAlreadyConnect {
@@ -885,6 +912,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_SecurityException_UnarchiveRoom {
             get {
                 return ResourceManager.GetString("ErrorMessage_SecurityException_UnarchiveRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have tried too many times to enter your password. Please try again later.
+        /// </summary>
+        public static string ErrorMessage_SharePasswordManyAttempts {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SharePasswordManyAttempts", resourceCulture);
             }
         }
         

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -38,11 +38,6 @@ public class FileSizeComment
         _setupInfo = setupInfo;
     }
 
-    public string FileSizeExceptionString
-    {
-        get { return GetFileSizeExceptionString(_tenantExtra.MaxUploadSize); }
-    }
-
     public string FileImageSizeExceptionString
     {
         get { return GetFileSizeExceptionString(_setupInfo.MaxImageUploadSize); }
@@ -56,14 +51,6 @@ public class FileSizeComment
     public static string GetPersonalFreeSpaceExceptionString(long size)
     {
         return $"{Resource.PersonalFreeSpaceException} ({FilesSizeToString(size)}).";
-    }
-
-    /// <summary>
-    /// The maximum file size is exceeded (25 MB).
-    /// </summary>
-    public Exception FileSizeException
-    {
-        get { return new TenantQuotaException(FileSizeExceptionString); }
     }
 
     /// <summary>
@@ -85,12 +72,25 @@ public class FileSizeComment
     }
 
     /// <summary>
+    /// The maximum file size is exceeded (25 MB).
+    /// </summary>
+    public async Task<Exception> GetFileSizeExceptionAsync()
+    {
+        return new TenantQuotaException(await GetFileSizeExceptionStringAsync());
+    }
+
+    public async Task<string> GetFileSizeExceptionStringAsync()
+    {
+        return GetFileSizeExceptionString(await _tenantExtra.GetMaxUploadSizeAsync());
+    }
+
+    /// <summary>
     /// Get note about maximum file size
     /// </summary>
     /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public string GetFileSizeNote()
+    public async Task<string> GetFileSizeNoteAsync()
     {
-        return GetFileSizeNote(true);
+        return await GetFileSizeNoteAsync(true);
     }
 
     /// <summary>
@@ -98,9 +98,9 @@ public class FileSizeComment
     /// </summary>
     /// <param name="withHtmlStrong">Highlight a word about size</param>
     /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public string GetFileSizeNote(bool withHtmlStrong)
+    public async Task<string> GetFileSizeNoteAsync(bool withHtmlStrong)
     {
-        return GetFileSizeNote(Resource.FileSizeNote, withHtmlStrong);
+        return await GetFileSizeNoteAsync(Resource.FileSizeNote, withHtmlStrong);
     }
 
     /// <summary>
@@ -109,11 +109,11 @@ public class FileSizeComment
     /// <param name="note">Resource fromat of note</param>
     /// <param name="withHtmlStrong">Highlight a word about size</param>
     /// <returns>Note: the file size cannot exceed 25 MB</returns>
-    public string GetFileSizeNote(string note, bool withHtmlStrong)
+    public async Task<string> GetFileSizeNoteAsync(string note, bool withHtmlStrong)
     {
         return
             string.Format(note,
-                          FilesSizeToString(_tenantExtra.MaxUploadSize),
+                          FilesSizeToString(await _tenantExtra.GetMaxUploadSizeAsync()),
                           withHtmlStrong ? "<strong>" : string.Empty,
                           withHtmlStrong ? "</strong>" : string.Empty);
     }
@@ -140,7 +140,9 @@ public class FileSizeComment
     /// <returns>10 b, 100 Kb, 25 Mb, 1 Gb</returns>
     public static string FilesSizeToString(long size)
     {
-        var sizeNames = !string.IsNullOrEmpty(Resource.FileSizePostfix) ? Resource.FileSizePostfix.Split(',') : new[] { "bytes", "KB", "MB", "GB", "TB" };
+        var sizeNames = !string.IsNullOrEmpty(Resource.FileSizePostfix) ? 
+            Resource.FileSizePostfix.Split(',', '،') : 
+            new[] { "bytes", "KB", "MB", "GB", "TB" };
         var power = 0;
 
         double resultSize = size;

@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -38,17 +38,25 @@ public class BackupFileUploadHandler
         BackupAjaxHandler backupAjaxHandler,
         ICache cache,
         TenantManager tenantManager,
-        IConfiguration configuration)
+        SetupInfo setupInfo)
     {
-        BackupFileUploadResult result = null;
+        BackupFileUploadResult result;
         try
         {
-            if (!permissionContext.CheckPermissions(SecutiryConstants.EditPortalSettings))
+            if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
             {
                 throw new ArgumentException("Access denied.");
             }
-            var tenantId = tenantManager.GetCurrentTenant().Id;
-            var path = backupAjaxHandler.GetTmpFilePath();
+            var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
+            string path = "";
+            try
+            {
+                path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
+            }
+            catch
+            {
+                throw new Exception("backup_temp is not disc");
+            }
             if (context.Request.Query["Init"].ToString() == "true")
             {
                 long.TryParse(context.Request.Query["totalSize"], out var size);
@@ -57,7 +65,7 @@ public class BackupFileUploadHandler
                     throw new ArgumentException("Total size must be greater than 0.");
                 }
 
-                var maxSize = tenantManager.GetCurrentTenantQuota().MaxTotalSize;
+                var maxSize = (await tenantManager.GetCurrentTenantQuotaAsync()).MaxTotalSize;
                 if (size > maxSize)
                 {
                     throw new ArgumentException(BackupResource.LargeBackup);
@@ -65,16 +73,23 @@ public class BackupFileUploadHandler
 
                 try
                 {
-                    if (File.Exists(path))
+                    if (File.Exists(path + ".tar.gz"))
                     {
-                        File.Delete(path);
+                        File.Delete(path + ".tar.gz");
                     }
-                    cache.Insert($"{tenantId} backupTotalSize", size.ToString(), TimeSpan.FromMinutes(10));
+                    if (File.Exists(path + ".tar"))
+                    {
+                        File.Delete(path + ".tar");
+                    }
 
-                    int.TryParse(configuration["files:uploader:chunk-size"], out var chunkSize);
-                    chunkSize = chunkSize == 0 ? 10 * 1024 * 1024 : chunkSize;
+                    var info = new UploadInfo
+                    {
+                        Ext = context.Request.Query["extension"].ToString() == "tar" ? ".tar" : ".tar.gz",
+                        Size = size
+                    };
+                    cache.Insert($"{tenantId} backupTotalSize", info, TimeSpan.FromMinutes(20));
 
-                    result = Success(chunkSize);
+                    result = Success(setupInfo.ChunkUploadSize);
                 }
                 catch
                 {
@@ -83,26 +98,31 @@ public class BackupFileUploadHandler
             }
             else
             {
-                long.TryParse(cache.Get<string>($"{tenantId} backupTotalSize"), out var totalSize);
-                if (totalSize <= 0)
+                var info = cache.Get<UploadInfo>($"{tenantId} backupTotalSize");
+                if (info == null)
                 {
                     throw new ArgumentException("Need init upload.");
                 }
 
                 var file = context.Request.Form.Files[0];
-                using var stream = file.OpenReadStream();
+                await using var stream = file.OpenReadStream();
 
-                using var fs = File.Open(path, FileMode.Append);
+                if (stream.Length > setupInfo.ChunkUploadSize)
+                {
+                    throw new ArgumentException("chunkSize more then maxChunkUploadSize");
+                }
+
+                await using var fs = File.Open(path + info.Ext, FileMode.Append);
                 await stream.CopyToAsync(fs);
 
-                if (fs.Length >= totalSize)
+                if (fs.Length >= info.Size)
                 {
                     cache.Remove($"{tenantId} backupTotalSize");
-                    result = Success(endUpload: true);
+                    result = Success(setupInfo.ChunkUploadSize, endUpload: true);
                 }
                 else
                 {
-                    result = Success();
+                    result = Success(setupInfo.ChunkUploadSize);
                 }
             }
         }
@@ -117,12 +137,12 @@ public class BackupFileUploadHandler
         }));
     }
 
-    private BackupFileUploadResult Success(int chunk = 0, bool endUpload = false)
+    private BackupFileUploadResult Success(long chunkSize, bool endUpload = false)
     {
         return new BackupFileUploadResult
         {
             Success = true,
-            ChunkSize = chunk,
+            ChunkSize = chunkSize,
             EndUpload = endUpload
         };
     }
@@ -141,8 +161,14 @@ internal class BackupFileUploadResult
 {
     public bool Success { get; set; }
     public string Message { get; set; }
-    public int ChunkSize { get; set; }
+    public long ChunkSize { get; set; }
     public bool EndUpload { get; set; }
+}
+
+internal class UploadInfo
+{
+    public long Size { get; init; }
+    public string Ext { get; init; }
 }
 
 public static class BackupFileUploadHandlerExtensions

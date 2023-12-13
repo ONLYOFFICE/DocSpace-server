@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -35,7 +35,7 @@ public enum UpdateAction
     Remove
 }
 
-[Singletone]
+[Singleton]
 public class BaseIndexerHelper
 {
     public ConcurrentDictionary<string, bool> IsExist { get; set; }
@@ -48,7 +48,7 @@ public class BaseIndexerHelper
         _notify = cacheNotify;
         _notify.Subscribe((a) =>
         {
-            IsExist.AddOrUpdate(a.Id, false, (string q, bool w) => false);
+            IsExist.AddOrUpdate(a.Id, false, (_, _) => false);
         }, CacheNotifyAction.Any);
     }
 
@@ -74,7 +74,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     private readonly BaseIndexerHelper _baseIndexerHelper;
     private readonly Settings _settings;
     private readonly IServiceProvider _serviceProvider;
-    private static readonly object _locker = new object();
+    private static readonly object _locker = new();
 
     public BaseIndexer(
         Client client,
@@ -94,17 +94,14 @@ public class BaseIndexer<T> where T : class, ISearchItem
         _serviceProvider = serviceProvider;
     }
 
-    public IEnumerable<List<T>> IndexAll(
+    public async Task<IEnumerable<List<T>>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
     {
-        using var webstudioDbContext = _dbContextFactory.CreateDbContext();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
         var now = DateTime.UtcNow;
-        var lastIndexed = webstudioDbContext.WebstudioIndex
-            .Where(r => r.IndexName == Wrapper.IndexName)
-            .Select(r => r.LastModified)
-            .FirstOrDefault();
+        var lastIndexed = await Queries.LastIndexedAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (lastIndexed.Equals(DateTime.MinValue))
         {
@@ -118,28 +115,27 @@ public class BaseIndexer<T> where T : class, ISearchItem
         ids.AddRange(getIds(lastIndexed));
         ids.Add(max);
 
-        for (var i = 0; i < ids.Count - 1; i++)
-        {
-            yield return getData(ids[i], ids[i + 1], lastIndexed);
-        }
-
-        webstudioDbContext.AddOrUpdate(webstudioDbContext.WebstudioIndex, new DbWebstudioIndex()
+        await webstudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex()
         {
             IndexName = Wrapper.IndexName,
             LastModified = now
         });
 
-        webstudioDbContext.SaveChanges();
+        await webstudioDbContext.SaveChangesAsync();
 
         _logger.DebugIndexCompleted(Wrapper.IndexName);
+
+        var list = new List<List<T>>();
+        for (var i = 0; i < ids.Count - 1; i++)
+        {
+            list.Add(getData(ids[i], ids[i + 1], lastIndexed));
+        }
+        return list;
     }
 
-    public Task ReIndex()
+    public async Task ReIndrexAsync()
     {
-        Clear();
-
-        return Task.CompletedTask;
-        //((IIndexer) this).IndexAll();
+        await ClearAsync();
     }
 
     public void CreateIfNotExist(T data)
@@ -208,9 +204,9 @@ public class BaseIndexer<T> where T : class, ISearchItem
         _client.Instance.Indices.Refresh(new RefreshRequest(IndexName));
     }
 
-    internal async Task Index(T data, bool immediately = true)
+    internal async Task IndexAsync(T data, bool immediately = true)
     {
-        if (!(await BeforeIndex(data)))
+        if (!(await BeforeIndexAsync(data)))
         {
             return;
         }
@@ -218,7 +214,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
         await _client.Instance.IndexAsync(data, idx => GetMeta(idx, data, immediately));
     }
 
-    internal async Task Index(List<T> data, bool immediately = true)
+    internal async Task IndexAsync(List<T> data, bool immediately = true)
     {
         if (data.Count == 0)
         {
@@ -241,7 +237,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 var t = data[i];
                 var runBulk = i == data.Count - 1;
 
-                await BeforeIndex(t);
+                await BeforeIndexAsync(t);
 
                 if (t is not ISearchItemDocument wwd || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
                 {
@@ -254,7 +250,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                     {
                         try
                         {
-                            await Index(t, immediately);
+                            await IndexAsync(t, immediately);
                         }
                         catch (ElasticsearchClientException e)
                         {
@@ -262,108 +258,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                             {
                                 throw;
                             }
-                            _logger.ErrorIndex(e);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.ErrorIndex(e);
-                        }
-                        finally
-                        {
-                            wwd.Document.Data = null;
-                            wwd.Document = null;
-                            wwd = null;
-                            GC.Collect();
-                        }
-
-                        continue;
-                    }
-
-                    if (currentLength + dLength < _settings.MaxContentLength)
-                    {
-                        portion.Add(t);
-                        currentLength += dLength;
-                    }
-                    else
-                    {
-                        runBulk = true;
-                        i--;
-                    }
-                }
-
-                if (runBulk)
-                {
-                    var portion1 = portion.ToList();
-                    _client.Instance.Bulk(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
-                    for (var j = portionStart; j < i; j++)
-                    {
-                        if (data[j] is ISearchItemDocument doc && doc.Document != null)
-                        {
-                            doc.Document.Data = null;
-                            doc.Document = null;
-                        }
-                        doc = null;
-                    }
-
-                    portionStart = i;
-                    portion = new List<T>();
-                    currentLength = 0L;
-                    GC.Collect();
-                }
-            }
-        }
-        else
-        {
-            foreach (var item in data)
-            {
-                await BeforeIndex(item);
-            }
-
-            _client.Instance.Bulk(r => r.IndexMany(data, GetMeta));
-        }
-    }
-
-    internal async Task IndexAsync(List<T> data, bool immediately = true)
-    {
-        if (!CheckExist(data[0]))
-        {
-            return;
-        }
-
-        if (data is ISearchItemDocument)
-        {
-            var currentLength = 0L;
-            var portion = new List<T>();
-            var portionStart = 0;
-
-            for (var i = 0; i < data.Count; i++)
-            {
-                var t = data[i];
-                var runBulk = i == data.Count - 1;
-
-                await BeforeIndexAsync(t);
-
-                var wwd = t as ISearchItemDocument;
-
-                if (wwd == null || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
-                {
-                    portion.Add(t);
-                }
-                else
-                {
-                    var dLength = wwd.Document.Data.Length;
-                    if (dLength >= _settings.MaxContentLength)
-                    {
-                        try
-                        {
-                            await Index(t, immediately);
-                        }
-                        catch (ElasticsearchClientException e)
-                        {
-                            if (e.Response.HttpStatusCode == 429)
-                            {
-                                throw;
-                            }
+                            
                             _logger.ErrorIndex(e);
                         }
                         catch (Exception e)
@@ -376,6 +271,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
                             wwd.Document = null;
                             GC.Collect();
                         }
+
                         continue;
                     }
 
@@ -397,12 +293,12 @@ public class BaseIndexer<T> where T : class, ISearchItem
                     await _client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
                     for (var j = portionStart; j < i; j++)
                     {
-                        var doc = data[j] as ISearchItemDocument;
-                        if (doc != null && doc.Document != null)
+                        if (data[j] is ISearchItemDocument { Document: not null } doc)
                         {
                             doc.Document.Data = null;
                             doc.Document = null;
                         }
+                        doc = null;
                     }
 
                     portionStart = i;
@@ -503,29 +399,26 @@ public class BaseIndexer<T> where T : class, ISearchItem
         return false;
     }
 
-    internal IReadOnlyCollection<T> Select(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId = false)
+    internal async Task<IReadOnlyCollection<T>> SelectAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId = false)
     {
         var func = expression.Compile();
         var selector = new Selector<T>(_serviceProvider);
-        var descriptor = func(selector).Where(r => r.TenantId, _tenantManager.GetCurrentTenant().Id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
 
         return _client.Instance.Search(descriptor.GetDescriptor(this, onlyId)).Documents;
     }
 
-    internal IReadOnlyCollection<T> Select(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId, out long total)
+    internal async Task<(IReadOnlyCollection<T>, long)> SelectWithTotalAsync(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
     {
         var func = expression.Compile();
         var selector = new Selector<T>(_serviceProvider);
-        var descriptor = func(selector).Where(r => r.TenantId, _tenantManager.GetCurrentTenant().Id);
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
+        var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
         var result = _client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
-        total = result.Total;
+        var total = result.Total;
 
-        return result.Documents;
-    }
-
-    protected virtual Task<bool> BeforeIndex(T data)
-    {
-        return Task.FromResult(CheckExist(data));
+        return (result.Documents, total);
     }
 
     protected virtual Task<bool> BeforeIndexAsync(T data)
@@ -533,20 +426,19 @@ public class BaseIndexer<T> where T : class, ISearchItem
         return Task.FromResult(CheckExist(data));
     }
 
-    private void Clear()
+    private async Task ClearAsync()
     {
-        using var webstudioDbContext = _dbContextFactory.CreateDbContext();
-        var index = webstudioDbContext.WebstudioIndex.Where(r => r.IndexName == Wrapper.IndexName).FirstOrDefault();
+        await using var webstudioDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 
         if (index != null)
         {
             webstudioDbContext.WebstudioIndex.Remove(index);
+            await webstudioDbContext.SaveChangesAsync();
         }
 
-        webstudioDbContext.SaveChanges();
-
         _logger.DebugIndexDeleted(Wrapper.IndexName);
-        _client.Instance.Indices.Delete(Wrapper.IndexName);
+        await _client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
         _baseIndexerHelper.Clear(Wrapper);
         CreateIfNotExist(Wrapper);
     }
@@ -571,7 +463,7 @@ public class BaseIndexer<T> where T : class, ISearchItem
     {
         var result = desc.Index(IndexName).Id(data.Id);
 
-        if (data is ISearchItemDocument doc && doc.Document != null)
+        if (data is ISearchItemDocument { Document: not null })
         {
             result.Pipeline("attachments");
         }
@@ -709,19 +601,16 @@ public class BaseIndexer<T> where T : class, ISearchItem
                 }
                 break;
             default:
-                throw new ArgumentOutOfRangeException("action", action, null);
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
     }
 
     private string TryGetName(Expression expr, out MemberExpression member)
     {
         member = expr as MemberExpression;
-        if (member == null)
+        if (member == null && expr is UnaryExpression unary)
         {
-            if (expr is UnaryExpression unary)
-            {
-                member = unary.Operand as MemberExpression;
-            }
+            member = unary.Operand as MemberExpression;
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
@@ -772,4 +661,22 @@ static class CamelCaseExtension
     {
         return str.ToLowerInvariant()[0] + str.Substring(1);
     }
+}
+
+
+static file class Queries
+{
+    public static readonly Func<WebstudioDbContext, string, Task<DateTime>> LastIndexedAsync =
+        EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, string indexName) =>
+                ctx.WebstudioIndex
+                    .Where(r => r.IndexName == indexName)
+                    .Select(r => r.LastModified)
+                    .FirstOrDefault());
+
+    public static readonly Func<WebstudioDbContext, string, Task<DbWebstudioIndex>> IndexAsync =
+        EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, string indexName) =>
+                ctx.WebstudioIndex
+                    .FirstOrDefault(r => r.IndexName == indexName));
 }

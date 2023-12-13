@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -73,6 +73,7 @@ public class EmployeeDtoHelper
 {
     protected readonly UserPhotoManager _userPhotoManager;
     protected readonly UserManager _userManager;
+    protected readonly TenantManager _tenantManager;
     private readonly ILogger<EmployeeDtoHelper> _logger;
     private readonly ApiContext _httpContext;
     private readonly DisplayUserSettingsHelper _displayUserSettingsHelper;
@@ -85,10 +86,12 @@ public class EmployeeDtoHelper
         UserPhotoManager userPhotoManager,
         CommonLinkUtility commonLinkUtility,
         UserManager userManager,
+        TenantManager tenantManager,
         ILogger<EmployeeDtoHelper> logger)
     {
         _userPhotoManager = userPhotoManager;
         _userManager = userManager;
+        _tenantManager = tenantManager;
         _logger = logger;
         _httpContext = httpContext;
         _displayUserSettingsHelper = displayUserSettingsHelper;
@@ -96,33 +99,33 @@ public class EmployeeDtoHelper
         _dictionary = new ConcurrentDictionary<Guid, EmployeeDto>();
     }
 
-    public async Task<EmployeeDto> Get(UserInfo userInfo)
+    public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))
         {
-            employee = await Init(new EmployeeDto(), userInfo);
+            employee = await InitAsync(new EmployeeDto(), userInfo);
 
-            _dictionary.AddOrUpdate(userInfo.Id, i => employee, (i, v) => employee);
+            _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
 
         }
         
         return employee;
     }
 
-    public async Task<EmployeeDto> Get(Guid userId)
+    public async Task<EmployeeDto> GetAsync(Guid userId)
     {
         try
         {
-            return await Get(_userManager.GetUsers(userId));
+            return await GetAsync(await _userManager.GetUsersAsync(userId));
         }
         catch (Exception e)
         {
             _logger.ErrorWithException(e);
-            return await Get(ASC.Core.Users.Constants.LostUser);
+            return await GetAsync(Constants.LostUser);
         }
     }
 
-    protected async Task<EmployeeDto> Init(EmployeeDto result, UserInfo userInfo)
+    protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo)
     {
         result.Id = userInfo.Id;
         result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
@@ -142,7 +145,7 @@ public class EmployeeDtoHelper
 
         if (result.Id != Guid.Empty)
         {
-            var profileUrl = _commonLinkUtility.GetUserProfile(userInfo, false);
+            var profileUrl = await _commonLinkUtility.GetUserProfileAsync(userInfo.Id, false);
             result.ProfileUrl = _commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
 

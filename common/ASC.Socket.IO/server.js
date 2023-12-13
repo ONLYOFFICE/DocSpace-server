@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const RedisStore = require("connect-redis")(expressSession);
 const MemoryStore = require("memorystore")(expressSession);
 const sharedsession = require("express-socket.io-session");
+const process = require('process');
 
 const config = require("./config");
 const auth = require("./app/middleware/auth.js");
@@ -66,7 +67,8 @@ const options = {
     const token =
       req?.headers?.authorization ||
       req?.cookies?.authorization ||
-      req?.cookies?.asc_auth_key;
+      req?.cookies?.asc_auth_key ||
+      req?._query?.share;
 
     if (!token) {
       winston.info(`not allowed request: empty token`);
@@ -95,5 +97,13 @@ const filesHub = require("./app/hubs/files.js")(io);
 app.use("/controller", require("./app/controllers")(filesHub));
 
 httpServer.listen(port, () => winston.info(`Server started on port: ${port}`));
+
+process.on('unhandledRejection', (reason, p) => {
+  winston.error('Unhandled rejection at:', p, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  winston.error(`Unhandled exception: ${error}\n` + `Exception origin: ${error.stack}`);
+});
 
 module.exports = io;

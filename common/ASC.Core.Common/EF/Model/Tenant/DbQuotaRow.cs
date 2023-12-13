@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,15 +28,18 @@ namespace ASC.Core.Common.EF;
 
 public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
 {
-    public int Tenant { get; set; }
+    public int TenantId { get; set; }
     public string Path { get; set; }
     public long Counter { get; set; }
     public string Tag { get; set; }
     public DateTime LastModified { get; set; }
     public Guid UserId { get; set; }
+
+    public DbTenant Tenant { get; set; }
+
     public override object[] GetKeys()
     {
-        return new object[] { Tenant, UserId, Path };
+        return new object[] { TenantId, UserId, Path };
     }
 }
 
@@ -44,6 +47,8 @@ public static class DbQuotaRowExtension
 {
     public static ModelBuilderWrapper AddDbQuotaRow(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<DbQuotaRow>().Navigation(e => e.Tenant).AutoInclude(false);
+
         modelBuilder
             .Add(MySqlAddDbQuotaRow, Provider.MySql)
             .Add(PgSqlAddDbQuotaRow, Provider.PostgreSql);
@@ -55,7 +60,7 @@ public static class DbQuotaRowExtension
     {
         modelBuilder.Entity<DbQuotaRow>(entity =>
         {
-            entity.HasKey(e => new { e.Tenant, e.UserId, e.Path })
+            entity.HasKey(e => new { e.TenantId, e.UserId, e.Path })
                 .HasName("PRIMARY");
 
             entity.ToTable("tenants_quotarow")
@@ -64,7 +69,7 @@ public static class DbQuotaRowExtension
             entity.HasIndex(e => e.LastModified)
                 .HasDatabaseName("last_modified");
 
-            entity.Property(e => e.Tenant).HasColumnName("tenant");
+            entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Path)
                 .HasColumnName("path")
@@ -97,7 +102,7 @@ public static class DbQuotaRowExtension
     {
         modelBuilder.Entity<DbQuotaRow>(entity =>
         {
-            entity.HasKey(e => new { e.Tenant, e.Path })
+            entity.HasKey(e => new { e.TenantId, e.Path })
                 .HasName("tenants_quotarow_pkey");
 
             entity.ToTable("tenants_quotarow", "onlyoffice");
@@ -105,7 +110,7 @@ public static class DbQuotaRowExtension
             entity.HasIndex(e => e.LastModified)
                 .HasDatabaseName("last_modified_tenants_quotarow");
 
-            entity.Property(e => e.Tenant).HasColumnName("tenant");
+            entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Path)
                 .HasColumnName("path")

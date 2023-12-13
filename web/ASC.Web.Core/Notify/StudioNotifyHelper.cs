@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -32,6 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class StudioNotifyHelper
 {
     public readonly string Helplink;
+    public readonly string SiteLink;
     public readonly StudioNotifySource NotifySource;
     public readonly ISubscriptionProvider SubscriptionProvider;
     public readonly IRecipientProvider RecipientsProvider;
@@ -52,6 +53,7 @@ public class StudioNotifyHelper
         UserManager userManager,
         SettingsManager settingsManager,
         AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
+        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager,
         TenantExtra tenantExtra,
@@ -61,6 +63,7 @@ public class StudioNotifyHelper
         ILogger<StudioNotifyHelper> logger)
     {
         Helplink = commonLinkUtility.GetHelpLink(settingsManager, additionalWhiteLabelSettingsHelper, false);
+        SiteLink = commonLinkUtility.GetSiteLink(mailWhiteLabelSettingsHelper);
         NotifySource = studioNotifySource;
         _userManager = userManager;
         _settingsManager = settingsManager;
@@ -78,7 +81,7 @@ public class StudioNotifyHelper
     }
 
 
-    public IEnumerable<UserInfo> GetRecipients(bool toadmins, bool tousers, bool toguests)
+    public async Task<IEnumerable<UserInfo>> GetRecipientsAsync(bool toadmins, bool tousers, bool toguests)
     {
         if (toadmins)
         {
@@ -86,53 +89,52 @@ public class StudioNotifyHelper
             {
                 if (toguests)
                 {
-                    return _userManager.GetUsers();
+                    return (await _userManager.GetUsersAsync());
                 }
 
-                return _userManager.GetUsers(EmployeeStatus.Default, EmployeeType.RoomAdmin);
+                return await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin);
             }
 
             if (toguests)
             {
-                return
-                    _userManager.GetUsersByGroup(Constants.GroupAdmin.ID)
-                               .Concat(_userManager.GetUsers(EmployeeStatus.Default, EmployeeType.User));
+                return (await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+                               .Concat(await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User));
             }
 
-            return _userManager.GetUsersByGroup(Constants.GroupAdmin.ID);
+            return await _userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         }
 
         if (tousers)
         {
             if (toguests)
             {
-                return _userManager.GetUsers()
-                                  .Where(u => !_userManager.IsUserInGroup(u.Id, Constants.GroupAdmin.ID));
+                return await (await _userManager.GetUsersAsync()).ToAsyncEnumerable()
+                                  .WhereAwait(async u => !await _userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
             }
 
-            return _userManager.GetUsers(EmployeeStatus.Default, EmployeeType.RoomAdmin)
-                              .Where(u => !_userManager.IsUserInGroup(u.Id, Constants.GroupAdmin.ID));
+            return await (await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.RoomAdmin)).ToAsyncEnumerable()
+                              .WhereAwait(async u => !await _userManager.IsUserInGroupAsync(u.Id, Constants.GroupAdmin.ID)).ToListAsync();
         }
 
         if (toguests)
         {
-            return _userManager.GetUsers(EmployeeStatus.Default, EmployeeType.User);
+            return await _userManager.GetUsersAsync(EmployeeStatus.Default, EmployeeType.User);
         }
 
         return new List<UserInfo>();
     }
 
-    public IRecipient ToRecipient(Guid userId)
+    public async Task<IRecipient> ToRecipientAsync(Guid userId)
     {
-        return RecipientsProvider.GetRecipient(userId.ToString());
+        return await RecipientsProvider.GetRecipientAsync(userId.ToString());
     }
 
-    public IRecipient[] RecipientFromEmail(string email, bool checkActivation)
+    public async Task<IRecipient[]> RecipientFromEmailAsync(string email, bool checkActivation)
     {
-        return RecipientFromEmail(new List<string> { email }, checkActivation);
+        return await RecipientFromEmailAsync(new List<string> { email }, checkActivation);
     }
 
-    public IRecipient[] RecipientFromEmail(List<string> emails, bool checkActivation)
+    public async Task<IRecipient[]> RecipientFromEmailAsync(List<string> emails, bool checkActivation)
     {
         var res = new List<IRecipient>();
 
@@ -149,11 +151,11 @@ public class StudioNotifyHelper
             && _countMailsToNotActivated > 0
             && _tenantExtra.Saas && !_coreBaseSettings.Personal)
         {
-            var tenant = _tenantManager.GetCurrentTenant();
-            var tariff = _tenantManager.GetTenantQuota(tenant.Id);
+            var tenant = await _tenantManager.GetCurrentTenantAsync();
+            var tariff = await _tenantManager.GetTenantQuotaAsync(tenant.Id);
             if (tariff.Free || tariff.Trial)
             {
-                var spamEmailSettings = _settingsManager.Load<SpamEmailSettings>();
+                var spamEmailSettings = await _settingsManager.LoadAsync<SpamEmailSettings>();
                 var sended = spamEmailSettings.MailsSended;
 
                 var mayTake = Math.Max(0, _countMailsToNotActivated - sended);
@@ -165,7 +167,7 @@ public class StudioNotifyHelper
                     _logger.WarningFreeTenant(tenant.Id, tryCount, mayTake);
                 }
                 spamEmailSettings.MailsSended = sended + tryCount;
-                _settingsManager.Save(spamEmailSettings);
+                await _settingsManager.SaveAsync(spamEmailSettings);
             }
         }
 
@@ -185,22 +187,22 @@ public class StudioNotifyHelper
     }
 
 
-    public bool IsSubscribedToNotify(Guid userId, INotifyAction notifyAction)
+    public async Task<bool> IsSubscribedToNotifyAsync(Guid userId, INotifyAction notifyAction)
     {
-        return IsSubscribedToNotify(ToRecipient(userId), notifyAction);
+        return await IsSubscribedToNotifyAsync(await ToRecipientAsync(userId), notifyAction);
     }
 
-    public bool IsSubscribedToNotify(IRecipient recipient, INotifyAction notifyAction)
+    public async Task<bool> IsSubscribedToNotifyAsync(IRecipient recipient, INotifyAction notifyAction)
     {
-        return recipient != null && SubscriptionProvider.IsSubscribed(_logger, notifyAction, recipient, null);
+        return recipient != null && await SubscriptionProvider.IsSubscribedAsync(_logger, notifyAction, recipient, null);
     }
 
-    public void SubscribeToNotify(Guid userId, INotifyAction notifyAction, bool subscribe)
+    public async Task SubscribeToNotifyAsync(Guid userId, INotifyAction notifyAction, bool subscribe)
     {
-        SubscribeToNotify(ToRecipient(userId), notifyAction, subscribe);
+        await SubscribeToNotifyAsync(await ToRecipientAsync(userId), notifyAction, subscribe);
     }
 
-    public void SubscribeToNotify(IRecipient recipient, INotifyAction notifyAction, bool subscribe)
+    public async Task SubscribeToNotifyAsync(IRecipient recipient, INotifyAction notifyAction, bool subscribe)
     {
         if (recipient == null)
         {
@@ -209,11 +211,11 @@ public class StudioNotifyHelper
 
         if (subscribe)
         {
-            SubscriptionProvider.Subscribe(notifyAction, null, recipient);
+            await SubscriptionProvider.SubscribeAsync(notifyAction, null, recipient);
         }
         else
         {
-            SubscriptionProvider.UnSubscribe(notifyAction, null, recipient);
+            await SubscriptionProvider.UnSubscribeAsync(notifyAction, null, recipient);
         }
     }
 }

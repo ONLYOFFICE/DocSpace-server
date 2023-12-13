@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -44,10 +44,6 @@ public class ChunkedUploaderHandlerService
     private readonly TenantManager _tenantManager;
     private readonly FileUploader _fileUploader;
     private readonly FilesMessageService _filesMessageService;
-    private readonly AuthManager _authManager;
-    private readonly SecurityContext _securityContext;
-    private readonly SetupInfo _setupInfo;
-    private readonly InstanceCrypto _instanceCrypto;
     private readonly ChunkedUploadSessionHolder _chunkedUploadSessionHolder;
     private readonly ChunkedUploadSessionHelper _chunkedUploadSessionHelper;
     private readonly SocketManager _socketManager;
@@ -60,10 +56,6 @@ public class ChunkedUploaderHandlerService
         TenantManager tenantManager,
         FileUploader fileUploader,
         FilesMessageService filesMessageService,
-        AuthManager authManager,
-        SecurityContext securityContext,
-        SetupInfo setupInfo,
-        InstanceCrypto instanceCrypto,
         ChunkedUploadSessionHolder chunkedUploadSessionHolder,
         ChunkedUploadSessionHelper chunkedUploadSessionHelper,
         SocketManager socketManager,
@@ -73,10 +65,6 @@ public class ChunkedUploaderHandlerService
         _tenantManager = tenantManager;
         _fileUploader = fileUploader;
         _filesMessageService = filesMessageService;
-        _authManager = authManager;
-        _securityContext = securityContext;
-        _setupInfo = setupInfo;
-        _instanceCrypto = instanceCrypto;
         _chunkedUploadSessionHolder = chunkedUploadSessionHolder;
         _chunkedUploadSessionHelper = chunkedUploadSessionHelper;
         _socketManager = socketManager;
@@ -97,7 +85,7 @@ public class ChunkedUploaderHandlerService
         }
     }
 
-    public async Task Invoke<T>(HttpContext context)
+    private async Task Invoke<T>(HttpContext context)
     {
         try
         {
@@ -117,14 +105,14 @@ public class ChunkedUploaderHandlerService
                 return;
             }
 
-            if (_tenantManager.GetCurrentTenant().Status != TenantStatus.Active)
+            if ((await _tenantManager.GetCurrentTenantAsync()).Status != TenantStatus.Active)
             {
-                await WriteError(context, "Can't perform upload for deleted or transfering portals");
+                await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
                 return;
             }
 
-            switch (request.Type(_instanceCrypto))
+            switch (request.Type())
             {
                 case ChunkedRequestType.Abort:
                     await _fileUploader.AbortUploadAsync<T>(request.UploadId);
@@ -144,7 +132,7 @@ public class ChunkedUploaderHandlerService
                     if (resumedSession.BytesUploaded == resumedSession.BytesTotal)
                     {
                         await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
-                        _ = _filesMessageService.Send(resumedSession.File, MessageAction.FileUploaded, resumedSession.File.Title);
+                        await _filesMessageService.SendAsync(MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
                         await _socketManager.CreateFileAsync(resumedSession.File);
                     }
@@ -179,7 +167,7 @@ public class ChunkedUploaderHandlerService
             return false;
         }
 
-        if (request.Type(_instanceCrypto) == ChunkedRequestType.Initiate)
+        if (request.Type() == ChunkedRequestType.Initiate)
         {
             return true;
         }
@@ -211,7 +199,12 @@ public class ChunkedUploaderHandlerService
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, SocketManager.GetSerializerSettings()));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions()
+        {
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }));
     }
 
     private async Task<object> ToResponseObject<T>(File<T> file)
@@ -245,7 +238,7 @@ public class ChunkedRequestHelper<T>
     private int? _tenantId;
     private long? _fileContentLength;
 
-    public ChunkedRequestType Type(InstanceCrypto instanceCrypto)
+    public ChunkedRequestType Type()
     {
         if (_request.Query["initiate"] == "true" && IsFileDataSet())
         {
@@ -295,7 +288,7 @@ public class ChunkedRequestHelper<T>
                 return default(T);
             }
 
-            return (T)Convert.ChangeType(queryValue[0], typeof(T));
+            return IdConverter.Convert<T>(queryValue[0]);
         }
     }
 
@@ -310,7 +303,7 @@ public class ChunkedRequestHelper<T>
                 return default(T);
             }
 
-            return (T)Convert.ChangeType(queryValue[0], typeof(T));
+            return IdConverter.Convert<T>(queryValue[0]);
         }
     }
 

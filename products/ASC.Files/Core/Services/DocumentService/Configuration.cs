@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -32,7 +32,6 @@ public enum EditorType
     Desktop,
     Mobile,
     Embedded,
-    External,
 }
 
 /// <summary>
@@ -65,7 +64,7 @@ public class ActionLinkConfig
 public class CoEditingConfig
 {
     public bool Change { get; set; }
-    public bool Fast { get; set; }
+    public bool Fast { get; init; }
 
     public string Mode
     {
@@ -77,7 +76,7 @@ public class CoEditingConfig
 /// </summary>
 public class Configuration<T>
 {
-    internal static readonly Dictionary<FileType, string> DocType = new Dictionary<FileType, string>
+    internal static readonly Dictionary<FileType, string> DocType = new()
     {
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
@@ -119,7 +118,7 @@ public class Configuration<T>
     public string EditorUrl { get; }
 
     [JsonPropertyName("Error")]
-    public string ErrorMessage { get; set; }
+    public string ErrorMessage { get; init; }
 
     /// <summary>Token</summary>
     /// <type>System.String, System</type>
@@ -185,12 +184,13 @@ public class DocumentConfig<T>
     }
 
     public PermissionsConfig Permissions { get; set; }
+    public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
     public FileReferenceData<T> ReferenceData
     {
-        get
+        get 
         {
-            if (_referenceData == null)
+            if(_referenceData == null)
             {
                 _referenceData = new FileReferenceData<T>()
                 {
@@ -220,7 +220,7 @@ public class DocumentConfig<T>
             }
 
             var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-            _fileUri = _documentServiceConnector.ReplaceCommunityAdress(_pathProvider.GetFileStreamUrl(Info.GetFile(), SharedLinkKey, last));
+            _fileUri = _documentServiceConnector.ReplaceCommunityAdress(_pathProvider.GetFileStreamUrl(Info.GetFile(), SharedLinkKey, SharedLinkParam, last));
 
             return _fileUri;
         }
@@ -377,7 +377,7 @@ public class EditorConfiguration<T>
             }
 
             var folderDao = _daoFactory.GetFolderDao<int>();
-            var files = _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, false).Result.Cast<File<int>>();
+            var files = _entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, string.Empty, false).Result.Cast<File<int>>();
 
             var listRecent = from file in files
                              where !Equals(_configuration.Document.Info.GetFile().Id, file.Id)
@@ -439,7 +439,7 @@ public class EditorConfiguration<T>
 
             var folderDao = _daoFactory.GetFolderDao<int>();
             var fileDao = _daoFactory.GetFileDao<int>();
-            var files = _entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, false).ToListAsync().Result;
+            var files = _entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, string.Empty, false).ToListAsync().Result;
             var listTemplates = from file in files
                                 select
                                     new TemplatesConfig
@@ -575,7 +575,7 @@ public class InfoConfig<T>
     {
         get
         {
-            if (Type == EditorType.Embedded || Type == EditorType.External)
+            if (Type == EditorType.Embedded)
             {
                 return null;
             }
@@ -599,7 +599,6 @@ public class InfoConfig<T>
         get
         {
             if (Type == EditorType.Embedded
-                || Type == EditorType.External
                 || !_fileSharing.CanSetAccessAsync(_file).Result)
             {
                 return null;
@@ -676,6 +675,14 @@ public class FileReference<T>
     /// <type>System.String, System</type>
     public string FileType { get; set; }
 
+    /// <summary>Key</summary>
+    /// <type>System.String, System</type>
+    public string Key { get; set; }
+
+    /// <summary>Link</summary>
+    /// <type>System.String, System</type>
+    public string Link { get; set; }
+
     /// <summary>Token</summary>
     /// <type>System.String, System</type>
     public string Token { get; set; }
@@ -706,7 +713,7 @@ public class CustomerConfig<T>
 
     public string Address => _settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Address;
 
-    public string Logo => _baseCommonLinkUtility.GetFullAbsolutePath(_tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPath(WhiteLabelLogoTypeEnum.LoginPage, false).Result);
+    public string Logo => _baseCommonLinkUtility.GetFullAbsolutePath(_tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false).Result);
 
     public string Mail => _settingsManager.LoadForDefaultTenant<CompanyWhiteLabelSettings>().Email;
 
@@ -773,7 +780,7 @@ public class CustomizationConfig<T>
                 return null;
             }
 
-            var link = _commonLinkUtility.GetFeedbackAndSupportLink(_settingsManager, true);
+            var link = _commonLinkUtility.GetFeedbackAndSupportLink(_settingsManager);
 
             if (string.IsNullOrEmpty(link))
             {
@@ -802,7 +809,7 @@ public class CustomizationConfig<T>
     {
         get
         {
-            if (_configuration.EditorType == EditorType.Embedded || _configuration.EditorType == EditorType.External)
+            if (_configuration.EditorType == EditorType.Embedded)
             {
                 return null;
             }
@@ -824,7 +831,7 @@ public class CustomizationConfig<T>
             {
                 var parent = folderDao.GetFolderAsync(_configuration.Document.Info.GetFile().ParentId).Result;
                 if (_configuration.Document.Info.GetFile().RootFolderType == FolderType.USER
-                    && !Equals(_configuration.Document.Info.GetFile().RootId, _globalFolderHelper.FolderMy)
+                    && !Equals(_configuration.Document.Info.GetFile().RootId, _globalFolderHelper.FolderMyAsync.Result)
                     && !_fileSecurity.CanReadAsync(parent).Result)
                 {
                     if (_fileSecurity.CanReadAsync(_configuration.Document.Info.GetFile()).Result)
@@ -897,9 +904,7 @@ public class CustomizationConfig<T>
                         properties = _daoFactory.GetFileDao<string>().GetProperties(sourceId).Result;
                     }
 
-                    return properties != null
-                        && properties.FormFilling != null
-                        && properties.FormFilling.CollectFillForm;
+                    return properties is { FormFilling.CollectFillForm: true };
                 }
             }
             return false;
@@ -1020,15 +1025,15 @@ public class LogoConfig<T>
 
             return _configuration.EditorType == EditorType.Embedded
                 || fillingForm
-                    ? _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditorEmbed).Result)
-                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditor).Result);
+                    ? _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed).Result)
+                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor).Result);
         }
     }
 
     public string ImageDark
     {
         set { }
-        get => _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditor).Result);
+        get => _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor).Result);
     }
 
     public string ImageEmbedded
@@ -1037,7 +1042,7 @@ public class LogoConfig<T>
         {
             return _configuration.EditorType != EditorType.Embedded
                     ? null
-                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoTypeEnum.DocsEditorEmbed).Result);
+                    : _commonLinkUtility.GetFullAbsolutePath(_tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed).Result);
         }
     }
 
@@ -1148,7 +1153,6 @@ public static class ConfigurationExtention
         services.TryAdd<EditorConfiguration<string>>();
         services.TryAdd<EditorConfiguration<int>>();
 
-        services.TryAdd<PluginsConfig>();
         services.TryAdd<EmbeddedConfig>();
 
         services.TryAdd<CustomizationConfig<string>>();

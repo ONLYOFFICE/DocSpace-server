@@ -123,4 +123,7 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>Файл резервной копии недействителен. Пожалуйста, используйте файл, созданный в ONLYOFFICE v11.5 или в более поздней версии.</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Размер резервной копии превышает общий размер портала</value>
+  </data>
 </root>

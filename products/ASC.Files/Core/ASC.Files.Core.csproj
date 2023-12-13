@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Remove="proto\box_cache_item.proto" />
     <None Remove="proto\dropbox_cache_item.proto" />
+    <None Remove="proto\file_marker_cache_item.proto" />
     <None Remove="proto\google_drive_cache_item.proto" />
     <None Remove="proto\one_drive_cache_item.proto" />
     <None Remove="proto\provider_account_cache_item.proto" />
@@ -18,14 +19,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AppLimit.CloudComputing.SharpBox" Version="1.2.0.1" />
-    <PackageReference Include="Box.V2.Core" Version="4.6.0" />
-    <PackageReference Include="DocuSign.eSign.dll" Version="6.0.0" />
-    <PackageReference Include="Dropbox.Api" Version="6.33.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.59.0.2922" />
-    <PackageReference Include="Grpc.Tools" Version="2.51.0">
+    <PackageReference Include="Box.V2.Core" Version="5.2.2" />
+    <PackageReference Include="DocuSign.eSign.dll" Version="6.5.0" />
+    <PackageReference Include="Dropbox.Api" Version="6.37.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.61.0.3120" />
+    <PackageReference Include="Grpc.Tools" Version="2.57.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
     <PackageReference Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageReference Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
@@ -38,6 +40,7 @@
   <ItemGroup>
     <Protobuf Include="proto\box_cache_item.proto" />
     <Protobuf Include="proto\dropbox_cache_item.proto" />
+    <Protobuf Include="proto\file_marker_cache_item.proto" />
     <Protobuf Include="proto\google_drive_cache_item.proto" />
     <Protobuf Include="proto\one_drive_cache_item.proto" />
     <Protobuf Include="proto\provider_account_cache_item.proto" />
@@ -144,6 +147,34 @@
     <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.az.resx">
       <DependentUpon>FilesPatternResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ar-SA.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.hy-AM.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.el-GR.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.de.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.es.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.fr.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.it.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.resx">
+      <LastGenOutput>FilesPatternResource.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ru.resx">
+      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Services\NotifyService\patterns.xml" />
@@ -225,24 +256,14 @@
     <EmbeddedResource Update="Resources\FilesCommonResource.zh-CN.resx">
       <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.de.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    <EmbeddedResource Update="Resources\FilesCommonResource.ar-SA.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.es.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    <EmbeddedResource Update="Resources\FilesCommonResource.hy-AM.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.fr.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.it.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.resx">
-      <LastGenOutput>FilesPatternResource.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\NotifyService\FilesPatternResource.ru.resx">
-      <DependentUpon>FilesPatternResource.resx</DependentUpon>
+    <EmbeddedResource Update="Resources\FilesCommonResource.az.resx">
+      <DependentUpon>FilesCommonResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.de.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
@@ -315,6 +336,15 @@
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesJSResource.zh-CN.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.ar-SA.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.hy-AM.resx">
+      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\FilesJSResource.az.resx">
       <DependentUpon>FilesJSResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.de.resx">
@@ -390,11 +420,11 @@
     <EmbeddedResource Update="Resources\FilesUCResource.zh-CN.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\FilesCommonResource.az.resx">
-      <DependentUpon>FilesCommonResource.resx</DependentUpon>
+    <EmbeddedResource Update="Resources\FilesUCResource.ar-SA.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\FilesJSResource.az.resx">
-      <DependentUpon>FilesJSResource.resx</DependentUpon>
+    <EmbeddedResource Update="Resources\FilesUCResource.hy-AM.resx">
+      <DependentUpon>FilesUCResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\FilesUCResource.az.resx">
       <DependentUpon>FilesUCResource.resx</DependentUpon>

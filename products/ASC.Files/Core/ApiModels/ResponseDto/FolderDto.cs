@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -78,9 +78,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <type>System.Boolean, System</type>
     public bool Private { get; set; }
 
-    protected internal override FileEntryType EntryType { get => FileEntryType.Folder; }
-
-    public FolderDto() { }
+    public bool? InRoom { get; set; }
 
     public static FolderDto<int> GetSample()
     {
@@ -124,8 +122,10 @@ public class FolderDtoHelper : FileEntryDtoHelper
         FileSharingHelper fileSharingHelper,
         RoomLogoManager roomLogoManager,
         BadgesSettingsHelper badgesSettingsHelper,
-        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper)
-        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity)
+        RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
+        FilesSettingsHelper filesSettingsHelper,
+        FileDateTime fileDateTime)
+        : base(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
     {
         _authContext = authContext;
         _daoFactory = daoFactory;
@@ -155,42 +155,36 @@ public class FolderDtoHelper : FileEntryDtoHelper
             }
 
             result.Logo = await _roomLogoManager.GetLogoAsync(folder);
-            result.RoomType = folder.FolderType switch
+            result.RoomType = DocSpaceHelper.GetRoomType(folder.FolderType);
+
+            if (folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms)
             {
-                FolderType.FillingFormsRoom => RoomType.FillingFormsRoom,
-                FolderType.EditingRoom => RoomType.EditingRoom,
-                FolderType.ReviewRoom => RoomType.ReviewRoom,
-                FolderType.ReadOnlyRoom => RoomType.ReadOnlyRoom,
-                FolderType.CustomRoom => RoomType.CustomRoom,
-                _ => null,
-            };
+                result.ParentId = IdConverter.Convert<T>(await _globalFolderHelper.GetFolderVirtualRooms());
+            }
 
-            result.ParentId = folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms ? await _globalFolderHelper.GetFolderVirtualRooms<T>() :
-                folder.ProviderEntry && folder.RootFolderType is FolderType.VirtualRooms ? await _globalFolderHelper.GetFolderVirtualRooms<T>() : folder.ParentId;
-
-            var isMuted = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
-            result.Mute = isMuted;
+            if (DocSpaceHelper.IsRoom(folder.FolderType))
+            {
+                result.Mute = _roomsNotificationSettingsHelper.CheckMuteForRoom(result.Id.ToString());
+            }
         }
 
-        if (folder.RootFolderType == FolderType.USER
-            && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID))
+        if (folder.RootFolderType == FolderType.USER && !Equals(folder.RootCreateBy, _authContext.CurrentAccount.ID))
         {
             result.RootFolderType = FolderType.SHARE;
 
             var folderDao = _daoFactory.GetFolderDao<T>();
-            FileEntry<T> parentFolder;
 
             if (folders != null)
             {
-                var folderWithRight = folders.FirstOrDefault(f => f.Item1.Id.Equals(folder.ParentId));
-                if (folderWithRight == null || !folderWithRight.Item2)
+                var folderWithRight = folders.Find(f => f.Item1.Id.Equals(folder.ParentId));
+                if (folderWithRight is not { Item2: true })
                 {
                     result.ParentId = await _globalFolderHelper.GetFolderShareAsync<T>();
                 }
             }
             else
             {
-                parentFolder = await folderDao.GetFolderAsync(folder.ParentId);
+                FileEntry<T> parentFolder = await folderDao.GetFolderAsync(folder.ParentId);
                 var canRead = await _fileSecurity.CanReadAsync(parentFolder);
                 if (!canRead)
                 {
@@ -208,7 +202,7 @@ public class FolderDtoHelper : FileEntryDtoHelper
 
         if (folder.RootFolderType == FolderType.VirtualRooms)
         {
-            var isEnabledBadges = _badgesSettingsHelper.GetEnabledForCurrentUser();
+            var isEnabledBadges = await _badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
             if (!isEnabledBadges)
             {

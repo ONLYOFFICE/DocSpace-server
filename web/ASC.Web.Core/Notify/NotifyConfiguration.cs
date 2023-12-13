@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -28,13 +28,13 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
-[Singletone(Additional = typeof(WorkContextExtension))]
+[Singleton(Additional = typeof(WorkContextExtension))]
 public class NotifyConfiguration
 {
     private static bool _configured;
-    private static readonly object _locker = new object();
-    private static readonly Regex _urlReplacer = new Regex(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex _textileLinkReplacer = new Regex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly object _locker = new();
+    private static readonly Regex _urlReplacer = new(@"(<a [^>]*href=(('(?<url>[^>']*)')|(""(?<url>[^>""]*)""))[^>]*>)|(<img [^>]*src=(('(?<url>(?![data:|cid:])[^>']*)')|(""(?<url>(?![data:|cid:])[^>""]*)""))[^/>]*/?>)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex _textileLinkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
     private readonly NotifyEngine _notifyEngine;
     private readonly WorkContext _workContext;
 
@@ -52,7 +52,7 @@ public class NotifyConfiguration
             {
                 _configured = true;
                 _workContext.NotifyStartUp();
-                _workContext.NotifyContext.NotifyClientRegistration += NotifyClientRegisterCallback;
+                _workContext.NotifyClientRegistration += NotifyClientRegisterCallback;
                 _notifyEngine.AddAction<NotifyTransferRequest>();
             }
         }
@@ -66,9 +66,9 @@ public class NotifyConfiguration
             "Web.UrlAbsoluter",
             InterceptorPlace.MessageSend,
             InterceptorLifetime.Global,
-            (r, p, scope) =>
+            (r, _, scope) =>
             {
-                if (r != null && r.CurrentMessage != null && r.CurrentMessage.ContentType == Pattern.HtmlContentType)
+                if (r is { CurrentMessage.ContentType: Pattern.HtmlContentType })
                 {
                     var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
 
@@ -106,10 +106,10 @@ public class NotifyConfiguration
             "ProductSecurityInterceptor",
              InterceptorPlace.DirectSend,
              InterceptorLifetime.Global,
-             (r, p, scope) =>
+             async (r, p, scope) =>
              {
                  var scopeClass = scope.ServiceProvider.GetRequiredService<ProductSecurityInterceptor>();
-                 return scopeClass.Intercept(r, p);
+                 return await scopeClass.InterceptAsync(r, p);
              });
         client.AddInterceptor(securityAndCulture);
 
@@ -121,13 +121,13 @@ public class NotifyConfiguration
             "WhiteLabelInterceptor",
              InterceptorPlace.MessageSend,
              InterceptorLifetime.Global,
-             (r, p, scope) =>
+             (r, _, scope) =>
              {
                  try
                  {
                      var tags = r.Arguments;
 
-                     var logoTextTag = tags.FirstOrDefault(a => a.Tag == CommonTags.LetterLogoText);
+                     var logoTextTag = tags.Find(a => a.Tag == CommonTags.LetterLogoText);
                      var logoText = logoTextTag != null ? (string)logoTextTag.Value : string.Empty;
 
                      if (!string.IsNullOrEmpty(logoText))
@@ -172,73 +172,43 @@ public class ProductSecurityInterceptor
         _log = logger;
     }
 
-    public bool Intercept(NotifyRequest r, InterceptorPlace p)
+    public async Task<bool> InterceptAsync(NotifyRequest r, InterceptorPlace p)
     {
         try
         {
             // culture
-            var u = Constants.LostUser;
-            if (!(_coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID))
+            if (_coreBaseSettings.Personal && r.NotifyAction.ID == Actions.PersonalConfirmation.ID)
             {
-                var tenant = _tenantManager.GetCurrentTenant();
-
-                if (32 <= r.Recipient.ID.Length)
-                {
-                    var guid = default(Guid);
-                    try
-                    {
-                        guid = new Guid(r.Recipient.ID);
-                    }
-                    catch (FormatException) { }
-                    catch (OverflowException) { }
-
-                    if (guid != default)
-                    {
-                        u = _userManager.GetUsers(guid);
-                    }
-                }
-
-                if (Constants.LostUser.Equals(u))
-                {
-                    u = _userManager.GetUserByEmail(r.Recipient.ID);
-                }
-
-                if (Constants.LostUser.Equals(u))
-                {
-                    u = _userManager.GetUserByUserName(r.Recipient.ID);
-                }
-
-                if (!Constants.LostUser.Equals(u))
-                {
-                    var culture = !string.IsNullOrEmpty(u.CultureName) ? u.GetCulture() : tenant.GetCulture();
-                    Thread.CurrentThread.CurrentCulture = culture;
-                    Thread.CurrentThread.CurrentUICulture = culture;
-
-                    // security
-                    var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
-                    var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                    if (productId == Guid.Empty)
-                    {
-                        tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
-                        productId = tag != null ? (Guid)tag.Value : Guid.Empty;
-                    }
-                    if (productId == Guid.Empty)
-                    {
-                        productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
-                    }
-                    if (productId != Guid.Empty && productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
-                    {
-                        return !_webItemSecurity.IsAvailableForUser(productId, u.Id);
-                    }
-                }
+                return false;
             }
 
-            var tagCulture = r.Arguments.FirstOrDefault(a => a.Tag == CommonTags.Culture);
-            if (tagCulture != null)
+            await _tenantManager.GetCurrentTenantAsync();
+
+            var u = await _userManager.SearchUserAsync(r.Recipient.ID);
+
+            if (Constants.LostUser.Equals(u))
+            {                
+                return false;
+            }
+
+            // security
+            var tag = r.Arguments.Find(a => a.Tag == CommonTags.ModuleID);
+            var productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+            if (productId == Guid.Empty)
             {
-                var culture = CultureInfo.GetCultureInfo((string)tagCulture.Value);
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = culture;
+                tag = r.Arguments.Find(a => a.Tag == CommonTags.ProductID);
+                productId = tag != null ? (Guid)tag.Value : Guid.Empty;
+            }
+
+            if (productId == Guid.Empty)
+            {
+                productId = (Guid)(CallContext.GetData("asc.web.product_id") ?? Guid.Empty);
+            }
+
+            if (productId != Guid.Empty &&
+                productId != new Guid("f4d98afdd336433287783c6945c81ea0") /* ignore people product */)
+            {
+                return !await _webItemSecurity.IsAvailableForUserAsync(productId, u.Id);
             }
         }
         catch (Exception error)
@@ -273,6 +243,7 @@ public class NotifyTransferRequest : INotifyEngineAction
     private readonly WebItemManager _webItemManager;
     private readonly TenantLogoManager _tenantLogoManager;
     private readonly AdditionalWhiteLabelSettingsHelperInit _additionalWhiteLabelSettingsHelper;
+    private readonly MailWhiteLabelSettingsHelper _mailWhiteLabelSettingsHelper;
     private readonly TenantUtil _tenantUtil;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly CommonLinkUtility _commonLinkUtility;
@@ -290,6 +261,7 @@ public class NotifyTransferRequest : INotifyEngineAction
         WebItemManager webItemManager,
         TenantLogoManager tenantLogoManager,
         AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper,
+        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         TenantUtil tenantUtil,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
@@ -304,6 +276,7 @@ public class NotifyTransferRequest : INotifyEngineAction
         _webItemManager = webItemManager;
         _tenantLogoManager = tenantLogoManager;
         _additionalWhiteLabelSettingsHelper = additionalWhiteLabelSettingsHelper;
+        _mailWhiteLabelSettingsHelper = mailWhiteLabelSettingsHelper;
         _tenantUtil = tenantUtil;
         _coreBaseSettings = coreBaseSettings;
         _commonLinkUtility = commonLinkUtility;
@@ -312,16 +285,16 @@ public class NotifyTransferRequest : INotifyEngineAction
         _log = logger;
     }
 
-    public void BeforeTransferRequest(NotifyRequest request)
+    public async Task BeforeTransferRequestAsync(NotifyRequest request)
     {
         var aid = Guid.Empty;
         var aname = string.Empty;
-        var tenant = _tenantManager.GetCurrentTenant();
+        var tenant = await _tenantManager.GetCurrentTenantAsync();
 
         if (_authContext.IsAuthenticated)
         {
             aid = _authContext.CurrentAccount.ID;
-            var user = _userManager.GetUsers(aid);
+            var user = await _userManager.GetUsersAsync(aid);
             if (_userManager.UserExists(user))
             {
                 aname = user.DisplayUserName(false, _displayUserSettingsHelper)
@@ -337,40 +310,49 @@ public class NotifyTransferRequest : INotifyEngineAction
         }
 
         var logoText = TenantWhiteLabelSettings.DefaultLogoText;
-        if ((_tenantExtra.Enterprise || _coreBaseSettings.CustomMode) && !MailWhiteLabelSettings.IsDefault(_settingsManager))
+        if ((_tenantExtra.Enterprise || _coreBaseSettings.CustomMode) && !await MailWhiteLabelSettings.IsDefaultAsync(_settingsManager))
         {
-            logoText = _tenantLogoManager.GetLogoText();
+            logoText = await _tenantLogoManager.GetLogoTextAsync();
         }
 
         request.Arguments.Add(new TagValue(CommonTags.AuthorID, aid));
         request.Arguments.Add(new TagValue(CommonTags.AuthorName, aname));
-        request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetUserProfile(aid))));
+        request.Arguments.Add(new TagValue(CommonTags.AuthorUrl, _commonLinkUtility.GetFullAbsolutePath(await _commonLinkUtility.GetUserProfileAsync(aid))));
         request.Arguments.Add(new TagValue(CommonTags.VirtualRootPath, _commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
-        request.Arguments.Add(new TagValue(CommonTags.ProductID, product != null ? product.ID : Guid.Empty));
-        request.Arguments.Add(new TagValue(CommonTags.ModuleID, module != null ? module.ID : Guid.Empty));
+        request.Arguments.Add(new TagValue(CommonTags.ProductID, product?.ID ?? Guid.Empty));
+        request.Arguments.Add(new TagValue(CommonTags.ModuleID, module?.ID ?? Guid.Empty));
         request.Arguments.Add(new TagValue(CommonTags.ProductUrl, _commonLinkUtility.GetFullAbsolutePath(product != null ? product.StartURL : "~")));
         request.Arguments.Add(new TagValue(CommonTags.DateTime, _tenantUtil.DateTimeNow()));
         request.Arguments.Add(new TagValue(CommonTags.RecipientID, Context.SysRecipient));
         request.Arguments.Add(new TagValue(CommonTags.ProfileUrl, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())));
-        request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, _commonLinkUtility.GetUnsubscribe()));
-        request.Arguments.Add(new TagValue(CommonTags.HelpLink, _commonLinkUtility.GetHelpLink(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.RecipientSubscriptionConfigURL, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetUnsubscribe())));
+        request.Arguments.Add(new TagValue(CommonTags.HelpLink, await _commonLinkUtility.GetHelpLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.SalesEmail, _commonLinkUtility.GetSalesEmail(_additionalWhiteLabelSettingsHelper)));
+        request.Arguments.Add(new TagValue(CommonTags.SiteLink, _commonLinkUtility.GetSiteLink(_mailWhiteLabelSettingsHelper)));
+        request.Arguments.Add(new TagValue(CommonTags.SupportLink, await _commonLinkUtility.GetSupportLinkAsync(_settingsManager, _additionalWhiteLabelSettingsHelper, false)));
+        request.Arguments.Add(new TagValue(CommonTags.SupportEmail, _commonLinkUtility.GetSupportEmail(_mailWhiteLabelSettingsHelper)));
         request.Arguments.Add(new TagValue(CommonTags.LetterLogoText, logoText));
-        request.Arguments.Add(new TagValue(CommonTags.MailWhiteLabelSettings, MailWhiteLabelSettings.Instance(_settingsManager)));
+        request.Arguments.Add(new TagValue(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(_settingsManager)));
         request.Arguments.Add(new TagValue(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name));
         request.Arguments.Add(new TagValue(CommonTags.ImagePath, _studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/')));
 
-        AddLetterLogo(request);
+        var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
+        if (topGifTag == null || string.IsNullOrEmpty((string)topGifTag.Value))
+        {
+            await AddLetterLogoAsync(request);
+        }
     }
     public void AfterTransferRequest(NotifyRequest request)
     {
+
     }
 
-    private void AddLetterLogo(NotifyRequest request)
+    private async Task AddLetterLogoAsync(NotifyRequest request)
     {
 
         try
         {
-            var attachment = _tenantLogoManager.GetMailLogoAsAttacment().Result;
+            var attachment = await _tenantLogoManager.GetMailLogoAsAttachmentAsync();
 
             if (attachment != null)
             {

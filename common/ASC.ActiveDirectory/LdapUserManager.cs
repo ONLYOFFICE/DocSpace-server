@@ -1,30 +1,28 @@
-﻿
-// (c) Copyright Ascensio System SIA 2010-2022
-//
+﻿// (c) Copyright Ascensio System SIA 2010-2023
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 using Constants = ASC.Core.Users.Constants;
 using Mapping = ASC.ActiveDirectory.Base.Settings.LdapSettings.MappingFields;
@@ -78,31 +76,31 @@ public class LdapUserManager
         _resource = resource ?? new LdapLocalization();
     }
 
-    private bool TestUniqueUserName(string uniqueName)
+    private async Task<bool> TestUniqueUserNameAsync(string uniqueName)
     {
-        return !string.IsNullOrEmpty(uniqueName) && Equals(_userManager.GetUserByUserName(uniqueName), Constants.LostUser);
+        return !string.IsNullOrEmpty(uniqueName) && Equals(await _userManager.GetUserByUserNameAsync(uniqueName), Constants.LostUser);
     }
 
-    private string MakeUniqueName(UserInfo userInfo)
+    private async Task<string> MakeUniqueNameAsync(UserInfo userInfo)
     {
         if (string.IsNullOrEmpty(userInfo.Email))
         {
-            throw new ArgumentException(_resource.ErrorEmailEmpty, "userInfo");
+            throw new ArgumentException(_resource.ErrorEmailEmpty, nameof(userInfo));
         }
 
         var uniqueName = new MailAddress(userInfo.Email).User;
         var startUniqueName = uniqueName;
         var i = 0;
-        while (!TestUniqueUserName(uniqueName))
+        while (!await TestUniqueUserNameAsync(uniqueName))
         {
-            uniqueName = string.Format("{0}{1}", startUniqueName, (++i).ToString(CultureInfo.InvariantCulture));
+            uniqueName = $"{startUniqueName}{(++i).ToString(CultureInfo.InvariantCulture)}";
         }
         return uniqueName;
     }
 
-    private bool CheckUniqueEmail(Guid userId, string email)
+    private async Task<bool> CheckUniqueEmailAsync(Guid userId, string email)
     {
-        var foundUser = _userManager.GetUserByEmail(email);
+        var foundUser = await _userManager.GetUserByEmailAsync(email);
         return Equals(foundUser, Constants.LostUser) || foundUser.Id == userId;
     }
 
@@ -114,19 +112,19 @@ public class LdapUserManager
         {
             if (ldapUserInfo == null)
             {
-                throw new ArgumentNullException("ldapUserInfo");
+                throw new ArgumentNullException(nameof(ldapUserInfo));
             }
 
             _logger.DebugTryAddLdapUser(ldapUserInfo.Sid, ldapUserInfo.Email, ldapUserInfo.UserName);
 
-            if (!CheckUniqueEmail(ldapUserInfo.Id, ldapUserInfo.Email))
+            if (!await CheckUniqueEmailAsync(ldapUserInfo.Id, ldapUserInfo.Email))
             {
                 _logger.DebugUserAlredyExistsForEmail(ldapUserInfo.Sid, ldapUserInfo.Email);
 
                 return portalUserInfo;
             }
 
-            if (!await TryChangeExistingUserName(ldapUserInfo.UserName, onlyGetChanges))
+            if (!await TryChangeExistingUserNameAsync(ldapUserInfo.UserName, onlyGetChanges))
             {
                 _logger.DebugUserAlredyExistsForUserName(ldapUserInfo.Sid, ldapUserInfo.UserName);
 
@@ -148,10 +146,10 @@ public class LdapUserManager
 
             portalUserInfo = await _userManager.SaveUserInfo(ldapUserInfo);
 
-            var quotaSettings = _settingsManager.Load<TenantUserQuotaSettings>();
+            var quotaSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
             if (quotaSettings.EnableUserQuota)
             {
-                _settingsManager.Save(new UserQuotaSettings { UserQuota = ldapUserInfo.LdapQouta }, ldapUserInfo.Id);
+                await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = ldapUserInfo.LdapQouta }, ldapUserInfo.Id);
             }
 
 
@@ -159,12 +157,12 @@ public class LdapUserManager
 
             _logger.DebugSetUserPassword(portalUserInfo.Id);
 
-            _securityContext.SetUserPasswordHash(portalUserInfo.Id, passwordHash);
+            await _securityContext.SetUserPasswordHashAsync(portalUserInfo.Id, passwordHash);
         }
-        catch (TenantQuotaException ex)
+        catch (TenantQuotaException)
         {
             // rethrow if quota
-            throw ex;
+            throw;
         }
         catch (Exception ex)
         {
@@ -177,7 +175,7 @@ public class LdapUserManager
         return portalUserInfo;
     }
 
-    private async Task<bool> TryChangeExistingUserName(string ldapUserName, bool onlyGetChanges)
+    private async Task<bool> TryChangeExistingUserNameAsync(string ldapUserName, bool onlyGetChanges)
     {
         try
         {
@@ -186,7 +184,7 @@ public class LdapUserManager
                 return false;
             }
 
-            var otherUser = _userManager.GetUserByUserName(ldapUserName);
+            var otherUser = await _userManager.GetUserByUserNameAsync(ldapUserName);
 
             if (Equals(otherUser, Constants.LostUser))
             {
@@ -198,7 +196,7 @@ public class LdapUserManager
                 return false;
             }
 
-            otherUser.UserName = MakeUniqueName(otherUser);
+            otherUser.UserName = await MakeUniqueNameAsync(otherUser);
 
             if (onlyGetChanges)
             {
@@ -209,7 +207,7 @@ public class LdapUserManager
 
             _logger.DebugSaveUserInfo(otherUser.GetUserInfoString());
 
-            await _userManager.UpdateUserInfo(otherUser);
+            await _userManager.UpdateUserInfoAsync(otherUser);
 
             return true;
         }
@@ -221,17 +219,17 @@ public class LdapUserManager
         return false;
     }
 
-    public async Task<UserInfoAndLdapChangeCollectionWrapper> GetLDAPSyncUserChange(UserInfo ldapUserInfo, List<UserInfo> ldapUsers)
+    public async Task<UserInfoAndLdapChangeCollectionWrapper> GetLDAPSyncUserChangeAsync(UserInfo ldapUserInfo, List<UserInfo> ldapUsers)
     {
-        return await SyncLDAPUser(ldapUserInfo, ldapUsers, true);
+        return await SyncLDAPUserAsync(ldapUserInfo, ldapUsers, true);
     }
 
-    public async Task<UserInfo> SyncLDAPUser(UserInfo ldapUserInfo, List<UserInfo> ldapUsers = null)
+    public async Task<UserInfo> SyncLDAPUserAsync(UserInfo ldapUserInfo, List<UserInfo> ldapUsers = null)
     {
-        return (await SyncLDAPUser(ldapUserInfo, ldapUsers, false)).UserInfo;
+        return (await SyncLDAPUserAsync(ldapUserInfo, ldapUsers, false)).UserInfo;
     }
 
-    private async Task<UserInfoAndLdapChangeCollectionWrapper> SyncLDAPUser(UserInfo ldapUserInfo, List<UserInfo> ldapUsers, bool onlyGetChanges = false)
+    private async Task<UserInfoAndLdapChangeCollectionWrapper> SyncLDAPUserAsync(UserInfo ldapUserInfo, List<UserInfo> ldapUsers, bool onlyGetChanges = false)
     {
         UserInfo userToUpdate;
 
@@ -241,11 +239,11 @@ public class LdapUserManager
             UserInfo = Constants.LostUser
         };
 
-        var userBySid = _userManager.GetUserBySid(ldapUserInfo.Sid);
+        var userBySid = await _userManager.GetUserBySidAsync(ldapUserInfo.Sid);
 
         if (Equals(userBySid, Constants.LostUser))
         {
-            var userByEmail = _userManager.GetUserByEmail(ldapUserInfo.Email);
+            var userByEmail = await _userManager.GetUserByEmailAsync(ldapUserInfo.Email);
 
             if (Equals(userByEmail, Constants.LostUser))
             {
@@ -262,7 +260,7 @@ public class LdapUserManager
                     return wrapper;
                 }
                 wrapper.UserInfo = await TryAddLDAPUser(ldapUserInfo, onlyGetChanges);
-                if (wrapper.UserInfo == Constants.LostUser)
+                if (wrapper.UserInfo.Equals(Constants.LostUser))
                 {
                     if (onlyGetChanges)
                     {
@@ -277,21 +275,19 @@ public class LdapUserManager
                     wrapper.LdapChangeCollection.SetAddUserChange(wrapper.UserInfo, _logger);
                 }
 
-                if (!onlyGetChanges && _settingsManager.Load<LdapSettings>().SendWelcomeEmail &&
+                if (!onlyGetChanges && (await _settingsManager.LoadAsync<LdapSettings>()).SendWelcomeEmail &&
                     (ldapUserInfo.ActivationStatus != EmployeeActivationStatus.AutoGenerated))
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-                    var ldapNotifyHelper = scope.ServiceProvider.GetRequiredService<LdapNotifyService>();
                     var source = scope.ServiceProvider.GetRequiredService<LdapNotifySource>();
-                    source.Init(tenantManager.GetCurrentTenant());
+                    source.Init(await tenantManager.GetCurrentTenantAsync());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
-                    var notifuEngineQueue = scope.ServiceProvider.GetRequiredService<NotifyEngineQueue>();
-                    var client = workContext.NotifyContext.RegisterClient(notifuEngineQueue, source);
+                    var client = workContext.RegisterClient(scope.ServiceProvider, source);
 
-                    var confirmLink = _commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
+                    var confirmLink = await _commonLinkUtility.GetConfirmationEmailUrlAsync(ldapUserInfo.Email, ConfirmType.EmailActivation);
 
-                    client.SendNoticeToAsync(
+                    await client.SendNoticeToAsync(
                         NotifyConstants.ActionLdapActivation,
                         null,
                         new[] { new DirectRecipient(ldapUserInfo.Email, null, new[] { ldapUserInfo.Email }, false) },
@@ -300,7 +296,7 @@ public class LdapUserManager
                         new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(_displayUserSettingsHelper)),
                         new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
                         new TagValue(NotifyConstants.TagMyStaffLink, _commonLinkUtility.GetFullAbsolutePath(_commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagGreenButton(_resource.NotifyButtonJoin, confirmLink),
+                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, confirmLink),
                         new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
                 }
 
@@ -332,7 +328,7 @@ public class LdapUserManager
 
         UpdateLdapUserContacts(ldapUserInfo, userToUpdate.ContactsList);
 
-        if (!NeedUpdateUser(userToUpdate, ldapUserInfo))
+        if (!await NeedUpdateUserAsync(userToUpdate, ldapUserInfo))
         {
             _logger.DebugSyncUserLdapSkipping(ldapUserInfo.Sid, ldapUserInfo.UserName);
             if (onlyGetChanges)
@@ -345,7 +341,7 @@ public class LdapUserManager
 
         _logger.DebugSyncUserLdapUpdaiting(ldapUserInfo.Sid, ldapUserInfo.UserName);
 
-        var (updated, uf) = await TryUpdateUserWithLDAPInfo(userToUpdate, ldapUserInfo, onlyGetChanges);
+        var (updated, uf) = await TryUpdateUserWithLDAPInfoAsync(userToUpdate, ldapUserInfo, onlyGetChanges);
 
         if (!updated)
         {
@@ -377,8 +373,6 @@ public class LdapUserManager
             return;
         }
 
-        var ldapUserContacts = ldapUser.Contacts;
-
         var newContacts = new List<string>(ldapUser.ContactsList);
 
         for (var i = 0; i < portalUserContacts.Count; i += 2)
@@ -401,13 +395,13 @@ public class LdapUserManager
         ldapUser.ContactsList = newContacts;
     }
 
-    private bool NeedUpdateUser(UserInfo portalUser, UserInfo ldapUser)
+    private async Task<bool> NeedUpdateUserAsync(UserInfo portalUser, UserInfo ldapUser)
     {
         var needUpdate = false;
 
         try
         {
-            var settings = _settingsManager.Load<LdapSettings>();
+            var settings = await _settingsManager.LoadAsync<LdapSettings>();
 
             Func<string, string, bool> notEqual =
                 (f1, f2) =>
@@ -518,18 +512,17 @@ public class LdapUserManager
         return needUpdate;
     }
 
-    private async Task<(bool, UserInfo)> TryUpdateUserWithLDAPInfo(UserInfo userToUpdate, UserInfo updateInfo, bool onlyGetChanges)
+    private async Task<(bool, UserInfo)> TryUpdateUserWithLDAPInfoAsync(UserInfo userToUpdate, UserInfo updateInfo, bool onlyGetChanges)
     {
         var portlaUserInfo = Constants.LostUser;
-
         try
         {
             _logger.DebugTryUpdateUserWithLdapInfo();
 
-            var settings = _settingsManager.Load<LdapSettings>();
+            var settings = await _settingsManager.LoadAsync<LdapSettings>();
 
             if (!userToUpdate.UserName.Equals(updateInfo.UserName, StringComparison.InvariantCultureIgnoreCase)
-                && !await TryChangeExistingUserName(updateInfo.UserName, onlyGetChanges))
+                && !await TryChangeExistingUserNameAsync(updateInfo.UserName, onlyGetChanges))
             {
                 _logger.DebugUpdateUserUserNameAlredyExists(userToUpdate.Id, userToUpdate.UserName, updateInfo.UserName);
 
@@ -537,7 +530,7 @@ public class LdapUserManager
             }
 
             if (!userToUpdate.Email.Equals(updateInfo.Email, StringComparison.InvariantCultureIgnoreCase)
-                && !CheckUniqueEmail(userToUpdate.Id, updateInfo.Email))
+                && !await CheckUniqueEmailAsync(userToUpdate.Id, updateInfo.Email))
             {
                 _logger.DebugUpdateUserEmailAlreadyExists(userToUpdate.Id, userToUpdate.Email, updateInfo.Email);
 
@@ -582,7 +575,7 @@ public class LdapUserManager
                 userToUpdate.MobilePhone = updateInfo.MobilePhone;
             }
 
-            if (!userToUpdate.IsOwner(_tenantManager.GetCurrentTenant())) // Owner must never be terminated by LDAP!
+            if (!userToUpdate.IsOwner(await _tenantManager.GetCurrentTenantAsync())) // Owner must never be terminated by LDAP!
             {
                 userToUpdate.Status = updateInfo.Status;
             }
@@ -591,7 +584,7 @@ public class LdapUserManager
             {
                 _logger.DebugSaveUserInfo(userToUpdate.GetUserInfoString());
 
-                portlaUserInfo = await _userManager.UpdateUserInfo(userToUpdate);
+                portlaUserInfo = await _userManager.UpdateUserInfoAsync(userToUpdate);
             }
 
             return (true, portlaUserInfo);
@@ -609,10 +602,9 @@ public class LdapUserManager
     {
         var userInfo = Constants.LostUser;
 
-
         try
         {
-            var settings = _settingsManager.Load<LdapSettings>();
+            var settings = await _settingsManager.LoadAsync<LdapSettings>();
 
             if (!settings.EnableLdapAuthentication)
             {
@@ -623,7 +615,7 @@ public class LdapUserManager
 
             _novellLdapUserImporter.Init(settings, _resource);
 
-            var ldapUserInfo = _novellLdapUserImporter.Login(login, password);
+            var ldapUserInfo = await _novellLdapUserImporter.LoginAsync(login, password);
 
             if (ldapUserInfo == null || ldapUserInfo.Item1.Equals(Constants.LostUser))
             {
@@ -631,7 +623,7 @@ public class LdapUserManager
                 return userInfo;
             }
 
-            var portalUser = _userManager.GetUserBySid(ldapUserInfo.Item1.Sid);
+            var portalUser = await _userManager.GetUserBySidAsync(ldapUserInfo.Item1.Sid);
 
             if (portalUser.Status == EmployeeStatus.Terminated || portalUser.Equals(Constants.LostUser))
             {
@@ -654,7 +646,7 @@ public class LdapUserManager
             {
                 _logger.DebugTryCheckAndSyncToLdapUser(ldapUserInfo.Item1.UserName, ldapUserInfo.Item1.Email, ldapUserInfo.Item2.DistinguishedName);
 
-                var tenant = _tenantManager.GetCurrentTenant();
+                var tenant = await _tenantManager.GetCurrentTenantAsync();
 
                 new Task(async () =>
                 {
@@ -667,9 +659,9 @@ public class LdapUserManager
                     var log = scope.ServiceProvider.GetRequiredService<ILogger<LdapUserManager>>();
 
                     tenantManager.SetCurrentTenant(tenant);
-                    securityContext.AuthenticateMe(Core.Configuration.Constants.CoreSystem);
+                    await securityContext.AuthenticateMeAsync(Core.Configuration.Constants.CoreSystem);
 
-                    var uInfo = await SyncLDAPUser(ldapUserInfo.Item1);
+                    var uInfo = await SyncLDAPUserAsync(ldapUserInfo.Item1);
 
                     var newLdapUserInfo = new Tuple<UserInfo, LdapObject>(uInfo, ldapUserInfo.Item2);
 
@@ -680,8 +672,8 @@ public class LdapUserManager
                             log.DebugTryGetAndSyncLdapUserInfoDisablingUser(login, uInfo);
                             uInfo.Status = EmployeeStatus.Terminated;
                             uInfo.Sid = null;
-                            await userManager.UpdateUserInfo(uInfo);
-                            await cookiesManager.ResetUserCookie(uInfo.Id);
+                            await userManager.UpdateUserInfoAsync(uInfo);
+                            await cookiesManager.ResetUserCookieAsync(uInfo.Id);
                         }
                     }
                 }).Start();
@@ -712,9 +704,9 @@ public class LdapUserManager
         UserInfo userInfo;
         try
         {
-            _securityContext.AuthenticateMe(Core.Configuration.Constants.CoreSystem);
+            await _securityContext.AuthenticateMeAsync(Core.Configuration.Constants.CoreSystem);
 
-            userInfo = await SyncLDAPUser(ldapUserInfo.Item1);
+            userInfo = await SyncLDAPUserAsync(ldapUserInfo.Item1);
 
             if (userInfo == null || userInfo.Equals(Constants.LostUser))
             {
@@ -732,7 +724,7 @@ public class LdapUserManager
             {
                 userInfo.Sid = null;
                 userInfo.Status = EmployeeStatus.Terminated;
-                await _userManager.UpdateUserInfo(userInfo);
+                await _userManager.UpdateUserInfoAsync(userInfo);
                 throw new Exception("The user did not pass the configuration check by ldap group settings");
             }
 
