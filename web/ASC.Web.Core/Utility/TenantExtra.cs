@@ -128,4 +128,12 @@ public class TenantExtra(TenantManager tenantManager,
         }
         return setupInfo.ChunkUploadSize;
     }
+
+    public async Task DemandAccessSpacePermissionAsync()
+    {
+        if (!coreBaseSettings.Standalone || (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+    }
 }

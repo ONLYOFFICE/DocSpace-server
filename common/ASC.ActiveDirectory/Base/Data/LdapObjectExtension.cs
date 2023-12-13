@@ -103,7 +103,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
 
     private void PopulateContacts(ICollection<string> contacts, string type, List<string> values)
     {
-        if (values == null || !values.Any())
+        if (values == null || values.Count == 0)
         {
             return;
         }

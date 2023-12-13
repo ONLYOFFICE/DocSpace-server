@@ -75,7 +75,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <returns type="ASC.Web.Studio.Core.CustomNavigationItem, ASC.Web.Core">Custom navigation item</returns>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     /// <httpMethod>GET</httpMethod>
-    [HttpGet("get/{id}")]
+    [HttpGet("get/{id:guid}")]
     public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(Guid id)
     {
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == id);
@@ -152,7 +152,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     /// <httpMethod>DELETE</httpMethod>
     /// <returns></returns>
-    [HttpDelete("delete/{id}")]
+    [HttpDelete("delete/{id:guid}")]
     public async Task DeleteCustomNavigationItem(Guid id)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

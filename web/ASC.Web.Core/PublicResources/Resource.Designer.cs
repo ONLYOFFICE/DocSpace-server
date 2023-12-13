@@ -1647,6 +1647,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The last full access space cannot be deleted.
+        /// </summary>
+        public static string ErrorCannotDeleteLastSpace {
+            get {
+                return ResourceManager.GetString("ErrorCannotDeleteLastSpace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your profile is suspended.
         /// </summary>
         public static string ErrorDisabledProfile {

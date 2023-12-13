@@ -111,7 +111,7 @@ public abstract class NotifySource : INotifySource
         return new TopSubscriptionProvider(_recipientsProvider, subscriptionProvider, WorkContext.DefaultClientSenders);
     }
 
-    protected virtual IRecipientProvider CreateRecipientsProvider()
+    protected IRecipientProvider CreateRecipientsProvider()
     {
         return new RecipientProviderImpl(_userManager);
     }

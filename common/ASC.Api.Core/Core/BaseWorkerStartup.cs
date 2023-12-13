@@ -71,6 +71,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddDistributedTaskQueue();
         services.AddCacheNotify(Configuration);
         services.AddHttpClient();
+        services.AddDistributedLock(Configuration);
 
         DIHelper.Configure(services);
 

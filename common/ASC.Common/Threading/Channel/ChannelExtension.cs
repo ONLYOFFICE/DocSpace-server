@@ -71,7 +71,7 @@ public static class ChannelExtension
                     output.Writer.Complete();
                 }
             }
-        });
+        }, cancellationToken);
 
         return outputs.Select(output => output.Reader).ToArray();
     }
@@ -106,7 +106,7 @@ public static class ChannelExtension
             {
                 output.Writer.Complete();
             }
-        });
+        }, cancellationToken);
 
         return output;
     }

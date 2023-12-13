@@ -33,6 +33,8 @@
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AWS.Logger.NLog" Version="3.2.1" />
     <PackageReference Include="Confluent.Kafka" Version="2.2.0" />
+    <PackageReference Include="DistributedLock.Redis" Version="1.0.2" />
+    <PackageReference Include="DistributedLock.ZooKeeper" Version="1.0.0" />
     <PackageReference Include="JWT" Version="10.0.3" />
     <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="8.0.0" />

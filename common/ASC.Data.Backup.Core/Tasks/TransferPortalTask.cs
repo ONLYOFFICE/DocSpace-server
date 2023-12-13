@@ -79,7 +79,7 @@ public class TransferPortalTask(DbFactory dbFactory,
 
             //save db data to temporary file
             var backupTask = serviceProvider.GetService<BackupPortalTask>();
-            backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(tempStream, backupFilePath));
+            backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(tempStream, backupFilePath), false);
             backupTask.ProcessStorage = false;
             backupTask.ProgressChanged += (_, args) => SetCurrentStepProgress(args.Progress);
             foreach (var moduleName in _ignoredModules)

@@ -27,22 +27,20 @@
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Scope]
-internal class OneDriveDaoBase : ThirdPartyProviderDao<Item, Item, Item>, IDaoBase<Item, Item, Item>
+internal class OneDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<Item, Item, Item>(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory,
+        setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<Item, Item, Item>
 {
     private OneDriveProviderInfo _providerInfo;
-
-    public OneDriveDaoBase(IServiceProvider serviceProvider, 
-        UserManager userManager,
-        TenantManager tenantManager, 
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<Item, Item, Item> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<Item, Item, Item> providerInfo)
     {

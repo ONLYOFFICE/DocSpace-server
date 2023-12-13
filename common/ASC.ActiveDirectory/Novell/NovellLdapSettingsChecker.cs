@@ -120,7 +120,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
 
             if (!LdapImporter.TryLoadLDAPGroups())
             {
-                if (!LdapImporter.AllSkipedDomainGroups.Any())
+                if (LdapImporter.AllSkipedDomainGroups.Count == 0)
                 {
                     return LdapSettingsStatus.IncorrectGroupLDAPFilter;
                 }
@@ -141,7 +141,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
                 }
             }
 
-            if (!LdapImporter.AllDomainGroups.Any())
+            if (LdapImporter.AllDomainGroups.Count == 0)
             {
                 return LdapSettingsStatus.GroupsNotFound;
             }
@@ -158,7 +158,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
 
         if (!LdapImporter.TryLoadLDAPUsers())
         {
-            if (!LdapImporter.AllSkipedDomainUsers.Any())
+            if (LdapImporter.AllSkipedDomainUsers.Count == 0)
             {
                 return LdapSettingsStatus.IncorrectLDAPFilter;
             }
@@ -179,7 +179,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
             }
         }
 
-        if (!LdapImporter.AllDomainUsers.Any())
+        if (LdapImporter.AllDomainUsers.Count == 0)
         {
             return LdapSettingsStatus.UsersNotFound;
         }

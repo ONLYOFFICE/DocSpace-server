@@ -167,8 +167,7 @@ static file class Queries
                     .Where(r => r.ModifiedOn >= lastIndexed)
                     .Join(ctx.Tenants, r => r.TenantId, r => r.Id,
                         (f, t) => new FolderTenant { DbFolder = f, DbTenant = t })
-                    .Where(r => r.DbTenant.Status == TenantStatus.Active)
-                    .Count());
+                    .Count(r => r.DbTenant.Status == TenantStatus.Active));
 
     public static readonly Func<FilesDbContext, DateTime, long, int> FolderId =
         EF.CompileQuery(

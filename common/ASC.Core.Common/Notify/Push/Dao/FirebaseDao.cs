@@ -85,13 +85,7 @@ static file class Queries
     public static readonly Func<FirebaseDbContext, int, Guid, string, string, Task<FireBaseUser>> FireBaseUserAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FirebaseDbContext ctx, int tenantId, Guid userId, string application, string fbDeviceToken) =>
-                ctx.Users
-                    
-                    .Where(r => r.UserId == userId)
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Application == application)
-                    .Where(r => r.FirebaseDeviceToken == fbDeviceToken)
-                    .FirstOrDefault());
+                ctx.Users.FirstOrDefault(r =>  r.UserId == userId && r.TenantId == tenantId && r.Application == application && r.FirebaseDeviceToken == fbDeviceToken));
 
     public static readonly Func<FirebaseDbContext, int, Guid, string, IAsyncEnumerable<FireBaseUser>>
         FireBaseUsersAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

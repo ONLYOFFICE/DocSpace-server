@@ -576,9 +576,9 @@ public class S3Storage(TempStream tempStream,
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(s3Object.Key).StartsWith(QuotaController.ExcludePattern))
                 {
-            await QuotaUsedDeleteAsync(domain, s3Object.Size);
-        }
-    }
+                    await QuotaUsedDeleteAsync(domain, s3Object.Size);
+                }
+            }
         }
     }
 
@@ -1078,11 +1078,7 @@ public class S3Storage(TempStream tempStream,
             return S3CannedACL.Private;
         }
 
-        if (_domainsAcl.TryGetValue(domain, out var value))
-        {
-            return value;
-        }
-        return _moduleAcl;
+        return _domainsAcl.GetValueOrDefault(domain, _moduleAcl);
     }
 
     private S3CannedACL GetS3Acl(ACL acl)

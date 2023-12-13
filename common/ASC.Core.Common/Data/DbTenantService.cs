@@ -200,7 +200,7 @@ public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory
 
         return tenantDbContext.Tenants
             .OrderBy(a => a.Status)
-            .ThenByDescending(a => a.Id)
+            .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(mapper.ConfigurationProvider)
             .FirstOrDefault();
     }
@@ -211,7 +211,7 @@ public class DbTenantService(IDbContextFactory<TenantDbContext> dbContextFactory
 
         return await tenantDbContext.Tenants
             .OrderBy(a => a.Status)
-            .ThenByDescending(a => a.Id)
+            .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
@@ -468,9 +468,7 @@ static file class Queries
     public static readonly Func<TenantDbContext, int, Task<DbTenant>> TenantAsync =
         EF.CompileAsyncQuery(
             (TenantDbContext ctx, int tenantId) =>
-                ctx.Tenants
-                    .Where(r => r.Id == tenantId)
-                    .FirstOrDefault());
+                ctx.Tenants.FirstOrDefault(r => r.Id == tenantId));
 
     public static readonly Func<TenantDbContext, int, Task<string>> GetAliasAsync =
         EF.CompileAsyncQuery(
@@ -513,23 +511,16 @@ static file class Queries
     public static readonly Func<TenantDbContext, int, string, Task<DbCoreSettings>> CoreSettingsAsync =
         EF.CompileAsyncQuery(
             (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == id)
-                    .FirstOrDefault());
+                ctx.CoreSettings.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
 
     public static readonly Func<TenantDbContext, int, string, DbCoreSettings> CoreSettings =
         EF.CompileQuery(
             (TenantDbContext ctx, int tenantId, string id) =>
-                ctx.CoreSettings
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == id)
-                    .FirstOrDefault());
+                ctx.CoreSettings.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
 
     public static readonly Func<TenantDbContext, IAsyncEnumerable<string>> AddressAsync =
         EF.CompileAsyncQuery(
-            (TenantDbContext ctx) =>
-                ctx.TenantForbiden.Select(r => r.Address));
+            (TenantDbContext ctx) => ctx.TenantForbiden.Select(r => r.Address));
 
     public static readonly Func<TenantDbContext, int, string, Task<bool>> AnyTenantsAsync =
         EF.CompileAsyncQuery(

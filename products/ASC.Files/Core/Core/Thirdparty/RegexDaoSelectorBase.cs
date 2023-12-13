@@ -152,7 +152,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         provider.FolderId = id;
     }
 
-    protected virtual IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)
+    protected IProviderInfo<TFile, TFolder, TItem> GetProviderInfo(int linkId)
     {
         var dbDao = daoFactory.ProviderDao;
         try

@@ -29,21 +29,21 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 namespace ASC.Files.Thirdparty.GoogleDrive;
 
 [Scope]
-internal class GoogleDriveDaoBase : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>, IDaoBase<DriveFile, DriveFile, DriveFile>
+internal class GoogleDriveDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<DriveFile, DriveFile, DriveFile>(serviceProvider, userManager, tenantManager, tenantUtil,
+            dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase),
+        IDaoBase<DriveFile, DriveFile, DriveFile>
 {
     private GoogleDriveProviderInfo _providerInfo;
-    public GoogleDriveDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory, 
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath,
-        AuthContext authContext,
-        RegexDaoSelectorBase<DriveFile, DriveFile, DriveFile> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<DriveFile, DriveFile, DriveFile> providerInfo)
     {

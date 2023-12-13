@@ -43,10 +43,9 @@ internal class SharpBoxFileDao(IServiceProvider serviceProvider,
         SharpBoxDaoSelector sharpBoxDaoSelector,
         IFileDao<int> fileDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<ICloudFileSystemEntry, ICloudDirectoryEntry, ICloudFileSystemEntry> regexDaoSelectorBase)
     : SharpBoxDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo, monitor,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IFileDao<string>
+        fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
 {
     public async Task InvalidateCacheAsync(string fileId)
     {

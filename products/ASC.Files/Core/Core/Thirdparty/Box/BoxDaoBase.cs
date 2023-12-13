@@ -27,21 +27,20 @@
 namespace ASC.Files.Thirdparty.Box;
 
 [Scope]
-internal class BoxDaoBase : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>, IDaoBase<BoxFile, BoxFolder, BoxItem>
+internal class BoxDaoBase(
+    IServiceProvider serviceProvider,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    IDbContextFactory<FilesDbContext> dbContextFactory,
+    SetupInfo setupInfo,
+    FileUtility fileUtility,
+    TempPath tempPath,
+    RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase)
+    : ThirdPartyProviderDao<BoxFile, BoxFolder, BoxItem>(serviceProvider, userManager, tenantManager, tenantUtil,
+        dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase), IDaoBase<BoxFile, BoxFolder, BoxItem>
 {
     private BoxProviderInfo _providerInfo;
-    public BoxDaoBase(IServiceProvider serviceProvider,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantUtil tenantUtil, 
-        IDbContextFactory<FilesDbContext> dbContextFactory,
-        SetupInfo setupInfo,
-        FileUtility fileUtility,
-        TempPath tempPath, 
-        AuthContext authContext,
-        RegexDaoSelectorBase<BoxFile, BoxFolder, BoxItem> regexDaoSelectorBase) : base(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo, fileUtility, tempPath, regexDaoSelectorBase)
-    {
-    }
 
     public void Init(string pathPrefix, IProviderInfo<BoxFile, BoxFolder, BoxItem> providerInfo)
     {

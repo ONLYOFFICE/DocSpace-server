@@ -165,7 +165,7 @@ public class AbstractDao
         };
     }
 
-    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, string[] text, SearchType searchType) where T : IDbSearch
+    internal static IQueryable<T> BuildSearch<T>(IQueryable<T> query, IEnumerable<string> text, SearchType searchType) where T : IDbSearch
     {
         var lowerText = text.Select(GetSearchText);
 
@@ -270,7 +270,7 @@ public class AbstractDao
     internal async Task InitCustomOrder(IEnumerable<int> fileIds, int parentFolderId, FileEntryType entryType)
     {        
         var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        await using var filesDbContext = _dbContextFactory.CreateDbContext();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await Queries.ClearFileOrderAsync(filesDbContext, tenantId, parentFolderId, entryType);
         

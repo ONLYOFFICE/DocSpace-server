@@ -41,10 +41,9 @@ internal class SharePointFileDao(IServiceProvider serviceProvider,
         SharePointDaoSelector sharePointDaoSelector,
         IFileDao<int> fileDao,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, setupInfo,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IFileDao<string>
+        fileUtility, tempPath, regexDaoSelectorBase), IFileDao<string>
 {
     public async Task InvalidateCacheAsync(string fileId)
     {

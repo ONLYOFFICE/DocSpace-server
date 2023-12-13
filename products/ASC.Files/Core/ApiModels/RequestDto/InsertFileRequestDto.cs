@@ -57,7 +57,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
         set => _stream = value;
     }
 
-    protected virtual void Dispose(bool disposing)
+    public void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

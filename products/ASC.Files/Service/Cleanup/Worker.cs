@@ -42,7 +42,7 @@ public class Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFac
 
         await using (var scope = serviceScopeFactory.CreateAsyncScope())
         {
-            await using var dbContext = scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContext();
+            await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(cancellationToken);
             activeTenantsUsers = await GetTenantsUsersAsync(dbContext);
         }
 

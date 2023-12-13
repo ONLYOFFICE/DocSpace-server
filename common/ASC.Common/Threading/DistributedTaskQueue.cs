@@ -145,7 +145,7 @@ public class DistributedTaskQueue(IServiceProvider serviceProvider,
         foreach (var task in queueTasks)
         {
             task.Publication ??= GetPublication();
-            }
+        }
 
         return queueTasks;
     }

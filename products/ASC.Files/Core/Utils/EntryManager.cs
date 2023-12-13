@@ -222,9 +222,9 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         foreach (var folder in folders.Where(f => tagsFavorite.Exists(r => r.EntryId.Equals(f.Id))))
         {
                 folder.IsFavorite = true;
-            }
         }
     }
+}
 
 [Scope]
 public class EntryManager(IDaoFactory daoFactory,

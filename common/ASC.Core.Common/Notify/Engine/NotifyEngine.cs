@@ -142,7 +142,7 @@ public class NotifyEngine(Context context,
 
                     try
                     {
-                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? new IRecipient[0];
+                        var recipients = await recipientProvider.GetGroupEntriesAsync(request.Recipient as IRecipientsGroup) ?? Array.Empty<IRecipient>();
                         foreach (var recipient in recipients)
                         {
                             try

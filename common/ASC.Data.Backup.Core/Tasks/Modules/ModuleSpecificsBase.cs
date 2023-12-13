@@ -217,7 +217,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         return string.Format("where t.{0} = {1}", table.TenantColumn, tenantId);
     }
 
-    protected virtual string GetDeleteCommandConditionText(int tenantId, TableInfo table)
+    protected string GetDeleteCommandConditionText(int tenantId, TableInfo table)
     {
         return GetSelectCommandConditionText(tenantId, table);
     }

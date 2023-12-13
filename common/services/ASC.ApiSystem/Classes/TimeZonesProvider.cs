@@ -116,7 +116,7 @@ public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstant
             return commonConstants.DefaultCulture;
         }
 
-        var culture = _cultureUiMap.TryGetValue(languageKey, out var value) ? value : null;
+        var culture = _cultureUiMap.GetValueOrDefault(languageKey);
 
         return culture ?? commonConstants.DefaultCulture;
     }

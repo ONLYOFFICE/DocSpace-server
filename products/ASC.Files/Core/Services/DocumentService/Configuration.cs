@@ -935,17 +935,18 @@ public class LogoConfig<T>(CommonLinkUtility commonLinkUtility,
 }
 
 [Transient]
-public class PluginsConfig(ConsumerFactory consumerFactory,
-    BaseCommonLinkUtility baseCommonLinkUtility,
-    CoreBaseSettings coreBaseSettings,
-    TenantManager tenantManager)
+public class PluginsConfig()
+    // ConsumerFactory consumerFactory,
+    // BaseCommonLinkUtility baseCommonLinkUtility,
+    // CoreBaseSettings coreBaseSettings,
+    // TenantManager tenantManager)
 {
-    private readonly BaseCommonLinkUtility _baseCommonLinkUtility = baseCommonLinkUtility;
-
-    private readonly ConsumerFactory _consumerFactory = consumerFactory;
-
-    private readonly CoreBaseSettings _coreBaseSettings = coreBaseSettings;
-    private readonly TenantManager _tenantManager = tenantManager;
+    // private readonly BaseCommonLinkUtility _baseCommonLinkUtility = baseCommonLinkUtility;
+    //
+    // private readonly ConsumerFactory _consumerFactory = consumerFactory;
+    //
+    // private readonly CoreBaseSettings _coreBaseSettings = coreBaseSettings;
+    // private readonly TenantManager _tenantManager = tenantManager;
 
     public string[] PluginsData
     {

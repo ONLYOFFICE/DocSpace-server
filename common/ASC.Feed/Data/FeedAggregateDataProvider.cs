@@ -337,12 +337,6 @@ static file class Queries
                     .Where(r => r.AggregateDate <= fromTime)
                     .ExecuteDelete());
 
-    public static readonly Func<FeedDbContext, DateTime, IAsyncEnumerable<FeedUsers>> FeedsUsersByFromTimeAsync =
-        EF.CompileAsyncQuery(
-            (FeedDbContext ctx, DateTime fromTime) =>
-                ctx.FeedUsers
-                    .Where(r => ctx.FeedAggregates.Where(f => f.AggregateDate <= fromTime).Any(a => a.Id == r.FeedId)));
-
     public static readonly Func<FeedDbContext, int, Guid, DateTime, Task<int>> CountFeedAggregatesAsync =
         EF.CompileAsyncQuery(
             (FeedDbContext ctx, int tenantId, Guid id, DateTime lastReadedTime) =>
@@ -376,10 +370,4 @@ static file class Queries
                 ctx.FeedAggregates
                     .Where(r => r.Id == id)
                     .ExecuteDelete());
-
-    public static readonly Func<FeedDbContext, string, IAsyncEnumerable<FeedUsers>> FeedsUsersAsync =
-        EF.CompileAsyncQuery(
-            (FeedDbContext ctx, string id) =>
-                ctx.FeedUsers
-                    .Where(r => r.FeedId == id));
 }

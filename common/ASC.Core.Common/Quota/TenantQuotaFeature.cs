@@ -29,7 +29,7 @@ namespace ASC.Core.Common.Quota;
 public class TenantQuotaFeature
 {
     public int Order { get; init; }
-    public virtual bool Visible { get; init; } = true;
+    public bool Visible { get; init; } = true;
     public virtual string Name { get; init; }
     public virtual bool Paid { get; init; }
     public bool Standalone { get; init; }

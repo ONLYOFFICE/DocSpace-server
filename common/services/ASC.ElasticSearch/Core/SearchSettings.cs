@@ -71,13 +71,11 @@ public class SearchSettingsHelper(TenantManager tenantManager,
     SettingsManager settingsManager,
     CoreBaseSettings coreBaseSettings,
     ICacheNotify<ReIndexAction> cacheNotify,
-    IServiceProvider serviceProvider,
-    IConfiguration configuration)
+    IServiceProvider serviceProvider)
 {
     internal IEnumerable<IFactoryIndexer> AllItems =>
         _allItems ??= serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
 
-    private readonly IConfiguration _configuration = configuration;
     private IEnumerable<IFactoryIndexer> _allItems;
 
     public async Task<List<SearchSettingsItem>> GetAllItemsAsync()

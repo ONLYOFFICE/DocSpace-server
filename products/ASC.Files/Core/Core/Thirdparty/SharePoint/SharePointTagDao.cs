@@ -38,10 +38,9 @@ internal class SharePointTagDao(IServiceProvider serviceProvider,
         SetupInfo setupInfo,
         FileUtility fileUtility,
         TempPath tempPath,
-        AuthContext authContext,
         RegexDaoSelectorBase<File, Folder, ClientObject> regexDaoSelectorBase)
     : SharePointDaoBase(serviceProvider, userManager, tenantManager, tenantUtil, dbContextFactory, setupInfo,
-        fileUtility, tempPath, authContext, regexDaoSelectorBase), IThirdPartyTagDao
+        fileUtility, tempPath, regexDaoSelectorBase), IThirdPartyTagDao
 {
     public async IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

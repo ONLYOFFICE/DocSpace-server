@@ -112,13 +112,6 @@ public static class Hasher
         return Encoding.UTF8.GetBytes(str);
     }
 
-    private static string B2S(byte[] data)
-    {
-        ArgumentNullException.ThrowIfNull(data);
-
-        return Encoding.UTF8.GetString(data);
-    }
-
     private static byte[] S642B(string str)
     {
         ArgumentNullException.ThrowIfNull(str);

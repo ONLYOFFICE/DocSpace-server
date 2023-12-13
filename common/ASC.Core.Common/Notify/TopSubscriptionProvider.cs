@@ -69,7 +69,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
         ArgumentNullException.ThrowIfNull(action);
 
         var recipents = new List<IRecipient>(5);
-        var directRecipients = await _subscriptionProvider.GetRecipientsAsync(action, objectID) ?? new IRecipient[0];
+        var directRecipients = await _subscriptionProvider.GetRecipientsAsync(action, objectID) ?? Array.Empty<IRecipient>();
         recipents.AddRange(directRecipients);
 
         return recipents.ToArray();
@@ -194,7 +194,7 @@ public class TopSubscriptionProvider(IRecipientProvider recipientProvider,
     private async Task<List<IRecipient>> WalkUpAsync(IRecipient recipient)
     {
         var parents = new List<IRecipient>();
-        var groups = await _recipientProvider.GetGroupsAsync(recipient) ?? new IRecipientsGroup[0];
+        var groups = await _recipientProvider.GetGroupsAsync(recipient) ?? Array.Empty<IRecipientsGroup>();
         foreach (var group in groups)
         {
             parents.Add(group);

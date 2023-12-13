@@ -54,7 +54,7 @@ public class SettingsController(CommonMethods commonMethods,
     #region API methods
 
     [HttpGet("get")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -81,7 +81,7 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     [HttpPost("save")]
-    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
     {
         var (succ, tenantId, error) = await GetTenantAsync(model);
@@ -118,6 +118,50 @@ public class SettingsController(CommonMethods commonMethods,
         {
             settings
         });
+    }
+
+    [HttpPost("checkdomain")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal")]
+    public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)
+    {
+        if (model == null || string.IsNullOrEmpty(model.HostName))
+        {
+            return BadRequest(new
+            {
+                error = "hostNameEmpty",
+                message = "HostName is required"
+            });
+        }
+
+        if (Uri.CheckHostName(model.HostName) != UriHostNameType.Dns)
+        {
+            return BadRequest(new
+            {
+                error = "hostNameInvalid",
+                message = "HostName is not valid"
+            });
+        }
+
+        try
+        {
+            var currentHostIps = await CommonMethods.GetHostIpsAsync();
+
+            var hostIps = (await Dns.GetHostAddressesAsync(model.HostName)).Select(ip => ip.ToString());
+
+            return Ok(new
+            {
+                value = currentHostIps.Any(ip => hostIps.Contains(ip))
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "checkdomain " + model.HostName);
+
+            return Ok(new
+            {
+                value= false
+            });
+        }
     }
 
     #endregion

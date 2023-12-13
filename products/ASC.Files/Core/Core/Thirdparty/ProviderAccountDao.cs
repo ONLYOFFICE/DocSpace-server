@@ -56,7 +56,7 @@ internal class ProviderAccountDao(IServiceProvider serviceProvider,
         ILoggerProvider options)
     : IProviderDao
 {
-    protected int TenantID
+    private int TenantID
     {
         get
         {
@@ -756,9 +756,7 @@ static file class Queries
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
-                    .Where(r => r.Id == linkId)
-                    .Where(r => r.TenantId == tenantId)
-                    .FirstOrDefault());
+                    .FirstOrDefault(r =>  r.Id == linkId && r.TenantId == tenantId));
 
     public static readonly Func<FilesDbContext, int, int, string, string, string, string, Task<int>>
         UpdateThirdpartyAccountsAsync = EF.CompileAsyncQuery(
@@ -776,9 +774,7 @@ static file class Queries
         ThirdpartyAccountByLinkIdAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int linkId) =>
                 ctx.ThirdpartyAccount
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.Id == linkId)
-                    .Single());
+                    .Single(r => r.TenantId == tenantId &&r.Id == linkId));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesThirdpartyAccount>>
         ThirdpartyAccountsByLinkIdAsync = EF.CompileAsyncQuery(
@@ -798,12 +794,8 @@ static file class Queries
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, Task<DbFilesThirdpartyAccount>> ThirdpartyBackupAccountAsync =
-        EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId) =>
-                ctx.ThirdpartyAccount
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.FolderType == FolderType.ThirdpartyBackup)
-                    .Single());
+        EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
+                ctx.ThirdpartyAccount.Single(r => r.TenantId == tenantId && r.FolderType == FolderType.ThirdpartyBackup));
 
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> HashIdsAsync =
         EF.CompileAsyncQuery(

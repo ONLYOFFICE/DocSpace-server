@@ -83,7 +83,7 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = scope.ServiceProvider.GetService<File<T>>();
-            file = await documentBuilderTask.SaveFileFromUriAsync<T>(file, new Uri(fileUri), _userId, _outputFileName);
+            file = await documentBuilderTask.SaveFileFromUriAsync(file, new Uri(fileUri), _userId, _outputFileName);
             
             this["ResultFileId"] = file.Id;
             this["ResultFileName"] = file.Title;
