@@ -409,7 +409,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
             }
             if (failedUsers.Contains(user))
             {
-                //ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
+                ReportProgress(GetProgress() + progressStep, string.Format(MigrationResource.UserSkipped, user.DisplayName, i, usersCount));
                 continue;
             }
 
@@ -422,6 +422,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
                     var currentUser = _securityContext.CurrentAccount;
                     await _securityContext.AuthenticateMeAsync(user.Guid);
                     user.MigratingFiles.SetUsersDict(usersForImport.Except(failedUsers));
+                    user.MigratingFiles.SetGroupsDict(groupsForImport);
                     await user.MigratingFiles.MigrateAsync();
                     await _securityContext.AuthenticateMeAsync(currentUser.ID);
                 }
@@ -443,7 +444,7 @@ public class NextcloudWorkspaceMigration : AbstractMigration<NCMigrationInfo, NC
         }
 
         _migrationInfo.FailedUsers = failedUsers.Count;
-        _migrationInfo.SuccessedUsers = usersForImport.Count() - _migrationInfo.FailedUsers;
+        _migrationInfo.SuccessedUsers = usersForImport.Count - _migrationInfo.FailedUsers;
         ReportProgress(100, MigrationResource.MigrationCompleted);
     }
 
